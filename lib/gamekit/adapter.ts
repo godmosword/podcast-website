@@ -14,6 +14,7 @@
 import type { ReactNode } from "react";
 import type { GameKitGameId, GameAction } from "./types";
 import type { GameSessionResult } from "./progress/session";
+import type { SynthVoice } from "./runtime/audio";
 
 export type GameStatus = "ready" | "playing" | "paused" | "over" | "won";
 
@@ -25,6 +26,8 @@ export type GameAudioBus = {
     type?: OscillatorType,
     vol?: number,
   ): void;
+  /** 合成音色（噪音、滑音、濾波）；只用 tone 的遊戲不必理會。 */
+  voices?(voices: readonly SynthVoice[]): void;
 };
 
 export type GameCreateOptions = {

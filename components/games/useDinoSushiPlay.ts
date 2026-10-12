@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import type { GameAudioBus } from "@/lib/gamekit/adapter";
+import type { SynthVoice } from "@/lib/gamekit/runtime/audio";
 import { orderAnnouncement } from "@/lib/games/dino-sushi/orders";
 import type { Reaction } from "@/lib/games/dino-sushi/reactions";
 import {
@@ -12,6 +13,7 @@ import {
   type RoundAction,
   type RoundState,
 } from "@/lib/games/dino-sushi/round";
+import { addSfx, MOOD_SFX, plateSfx, SUSHI_SFX, varied } from "@/lib/games/dino-sushi/sfx";
 import { MAX_TOPPINGS } from "@/lib/games/dino-sushi/sushi";
 import type { BaseId, ToppingId } from "@/lib/games/dino-sushi/toppings";
 
@@ -41,22 +43,6 @@ const BRUSH_MS = 1400;
 /** 閒置這麼久才亮下一個要點的東西。 */
 export const IDLE_HINT_MS = 8000;
 
-type Note = readonly [freq: number, dur: number, type?: OscillatorType, vol?: number];
-
-const SFX: Record<string, readonly Note[]> = {
-  add: [[660, 0.06, "triangle", 0.05]],
-  base: [[523, 0.07, "triangle", 0.05]],
-  remove: [[440, 0.06, "triangle", 0.04]],
-  serve: [[523, 0.07, "triangle", 0.05], [659, 0.07, "triangle", 0.05]],
-  yum: [[523, 0.1, "triangle", 0.06], [659, 0.1, "triangle", 0.06], [784, 0.14, "triangle", 0.06]],
-  love: [[523, 0.09, "triangle", 0.06], [659, 0.09, "triangle", 0.06], [784, 0.09, "triangle", 0.06], [1047, 0.2, "triangle", 0.06]],
-  sweet: [[784, 0.08, "sine", 0.06], [880, 0.08, "sine", 0.06], [784, 0.12, "sine", 0.06]],
-  puff: [[180, 0.12, "square", 0.03], [330, 0.1, "triangle", 0.05], [392, 0.12, "triangle", 0.05]],
-  look: [[659, 0.1, "sine", 0.05], [587, 0.14, "sine", 0.05]],
-  brush: [[880, 0.05, "triangle", 0.04], [988, 0.05, "triangle", 0.04], [880, 0.05, "triangle", 0.04], [1175, 0.12, "triangle", 0.05]],
-};
-const NOTE_GAP_MS = 90;
-
 type PlayAction = { type: "init"; mode: Mode; seed: number } | { type: "clear" } | RoundAction;
 
 /** 排程中的一步；暫停時 due 改存「剩幾毫秒」。 */
@@ -66,6 +52,17 @@ function playReducer(state: RoundState | null, action: PlayAction): RoundState |
   if (action.type === "init") return createRound(action.mode, action.seed);
   if (action.type === "clear") return null;
   return state ? roundReducer(state, action) : state;
+}
+
+/** 播一組合成音；audio bus 沒有 voices（只有 tone）時退回只播第一個振盪器音。 */
+export function playVoices(audio: GameAudioBus | undefined, voices: readonly SynthVoice[]): void {
+  if (!audio) return;
+  if (audio.voices) {
+    audio.voices(voices);
+    return;
+  }
+  const first = voices.find((v) => v.wave !== "noise");
+  if (first && first.wave !== "noise") audio.tone(first.freq ?? 440, first.dur, first.wave, first.vol);
 }
 
 function nextSeed(): number {
@@ -147,17 +144,7 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
     if (idleTimer.current !== null) window.clearTimeout(idleTimer.current);
   }, [clearTimers]);
 
-  const sfx = useCallback(
-    (key: string) => {
-      const notes = SFX[key];
-      if (!audio || !notes) return;
-      notes.forEach(([freq, dur, type, vol], i) => {
-        if (i === 0) audio.tone(freq, dur, type, vol);
-        else schedule(i * NOTE_GAP_MS, () => audio.tone(freq, dur, type, vol));
-      });
-    },
-    [audio, schedule],
-  );
+  const sfx = useCallback((voices: readonly SynthVoice[]) => playVoices(audio, voices), [audio]);
 
   /** 任何操作都重算閒置提示。 */
   const touch = useCallback(() => {
@@ -194,7 +181,7 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
       audio?.ensureAudio();
       dispatch({ type: "pick-base", base });
       setChoosingBase(false);
-      sfx("base");
+      sfx(SUSHI_SFX.base);
       touch();
     },
     [audio, locked, sfx, touch],
@@ -206,7 +193,7 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
       const next = roundReducer(round, { type: "add", id });
       // 第 4 料：料位輕晃，不出錯音
       if (next === round) setShake((n) => n + 1);
-      else sfx("add");
+      else sfx(varied(addSfx(next.sushi.toppings.length)));
       dispatch({ type: "add", id });
       touch();
     },
@@ -217,7 +204,7 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
     (slot: number) => {
       if (locked) return;
       dispatch({ type: "remove", slot });
-      sfx("remove");
+      sfx(SUSHI_SFX.remove);
       touch();
     },
     [locked, sfx, touch],
@@ -241,7 +228,7 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
       setPhase("react");
       setCaption(reaction);
       setMessage(reaction.line);
-      sfx("look");
+      sfx(MOOD_SFX.look);
       later(reducedMotion ? LOOK_DONE_MS_REDUCED : LOOK_DONE_MS, () => {
         setPhase("idle");
         dispatch({ type: "reaction-done" });
@@ -251,15 +238,19 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
       return;
     }
     const t = reducedMotion ? EAT_TIMELINE_REDUCED : EAT_TIMELINE;
-    sfx("serve");
+    sfx(SUSHI_SFX.serve);
     setPhase("slide");
     later(t.open, () => setPhase("open"));
-    later(t.chew, () => setPhase("chew"));
+    later(t.chew, () => {
+      setPhase("chew");
+      // 減少動態時咀嚼只有 150ms，嚼嚼聲會跟反應音疊在一起，直接跳過
+      if (!reducedMotion) sfx(varied(SUSHI_SFX.chomp));
+    });
     later(t.react, () => {
       setPhase("react");
       setCaption(reaction);
       setMessage(reaction.line);
-      sfx(reaction.sfx);
+      sfx(MOOD_SFX[reaction.sfx]);
     });
     later(t.done, () => {
       setPhase("idle");
@@ -274,7 +265,7 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
     if (inputPaused || !round || round.brushUsed) return;
     dispatch({ type: "brush" });
     setBrushing(true);
-    sfx("brush");
+    sfx(SUSHI_SFX.brush);
     setMessage("刷刷牙，牙齒亮晶晶！");
     later(reducedMotion ? BRUSH_MS / 2 : BRUSH_MS, () => setBrushing(false));
   }, [inputPaused, later, reducedMotion, round, sfx]);
@@ -287,8 +278,9 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
   const reopenBase = useCallback(() => {
     if (locked) return;
     setChoosingBase(true);
+    sfx(SUSHI_SFX.tap);
     touch();
-  }, [locked, touch]);
+  }, [locked, sfx, touch]);
 
   // 狀態轉換的副作用：新訂單宣告、盤子落下回報、整輪結束
   const prev = useRef<RoundState | null>(null);
@@ -297,21 +289,27 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
     prev.current = round;
     if (!round) return;
     const isNewRound = !before || before.seed !== round.seed || before.mode !== round.mode;
+    const finished = round.done && !(before?.done && !isNewRound);
     if (round.plates.length > (isNewRound ? 0 : before.plates.length)) {
+      // 最後一盤疊上去時結算音接手，不疊兩個聲音
+      if (!finished) sfx(varied(plateSfx(round.plates.at(-1)?.gold === true)));
       onServed(round);
       if (round.mode === "order" && round.firstTries.length > 0) setTaught(true);
     }
-    if (round.done && !(before?.done && !isNewRound)) {
+    if (finished) {
+      sfx(SUSHI_SFX.fanfare);
       onDone(round);
       return;
     }
     const order = currentOrder(round);
     if (order && (isNewRound || before.index !== round.index)) {
+      // 第一單跟「歡迎光臨」同時出現，不疊兩個聲音
+      if (!isNewRound) sfx(SUSHI_SFX.order);
       setMessage(orderAnnouncement(order));
     } else if (isNewRound && round.mode === "free") {
       setMessage("自由做：想放什麼料都可以");
     }
-  }, [onDone, onServed, round]);
+  }, [onDone, onServed, round, sfx]);
 
   const hint = round && !round.done && (!taught || idle) ? hintTarget(round) : null;
 

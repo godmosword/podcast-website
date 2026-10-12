@@ -1,11 +1,14 @@
 /*
- * 多多壽司屋廚房。直向：上＝多多＋泡泡＋疊盤；中＝砧板＋「給多多吃」；下＝托盤 2×4。
+ * 多多壽司屋廚房。直向：上＝迴轉壽司店（多多＋泡泡＋疊盤）；中＝檜木砧板＋「給多多吃」；下＝食材托盤 2×4。
  * 320×568 必須一屏放下；橫向手機與寬螢幕三欄（多多｜砧板｜托盤 4×2），斷點同消消樂 WIDE_LAYOUT_QUERY。
- * 輸送帶平時靜止；動畫只在送盤、提示、晃動時出現，減少動態時全部收掉。
+ * 材質：店面是粉彩雨棚＋木牆＋不鏽鋼迴轉帶（DinoSushiShop）、砧板是檜木、料位與托盤是瓷碟。
+ * 常駐動態只有迴轉帶慢慢繞；其餘只在加料、送盤、提示、晃動時出現，減少動態時全部收掉。
  */
 .kitchen {
   --duo-h: clamp(150px, 30svh, 230px);
   --tray-art: 34px;
+  --wood-edge: #d6b07a;
+  --ink-warm: #4a3722;
   flex: 1 1 auto;
   display: grid;
   grid-template-areas:
@@ -19,15 +22,36 @@
   margin-inline: auto;
 }
 
-/* ── 多多區 ───────────────────────────────────────────── */
+/* ── 多多區（店面舞台） ───────────────────────────────── */
 .duoArea {
   grid-area: duo;
   position: relative;
-  min-height: var(--duo-h);
+  /* 舞台高度只由 grid 軌道決定（不要在這裡設 min-height：Chrome 會拿 min-height 前的 0 去算 cqh） */
+  container: duo-stage / size;
+  /* 舞台內的 z-index 關在這裡，不會蓋到結算畫面 */
+  isolation: isolate;
+  /* clip：迴轉帶的盤列比舞台寬，hidden 仍是捲動容器，點牙刷時瀏覽器會把整個店面捲歪 */
   overflow: hidden;
-  border-radius: 20px;
-  background: radial-gradient(120% 100% at 30% 10%, #eef8ff 0%, #d4ecf8 70%, #c3e2f2 100%);
-  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.8);
+  overflow: clip;
+  border-radius: 22px;
+  background: #f4dab4;
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.7),
+    0 6px 16px rgba(110, 75, 35, 0.14);
+  /* 店面尺寸：雨棚、櫃台跟著舞台大小走（cqh 在子元素解析，指向這個 container） */
+  --awning-h: clamp(18px, 9cqh, 34px);
+  --counter-h: clamp(28px, 16cqh, 64px);
+}
+
+/* 舞台內框的細白線疊在店面上，像一扇店窗 */
+.duoArea::after {
+  content: "";
+  position: absolute;
+  z-index: 7;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.55), inset 0 -10px 18px -12px rgba(90, 60, 30, 0.3);
+  pointer-events: none;
 }
 
 .duo {
@@ -35,13 +59,16 @@
   inset: 0;
 }
 
+/* 多多坐在迴轉帶後面：輪子下半被櫃台擋住，矮舞台時刺可以蓋到雨棚 */
+/* 寬由舞台寬、高兩邊取小：比例不變形，輪子永遠貼著迴轉帶（不會浮在半空） */
 .duoArt {
+  --duo-max-w: 64%;
   position: absolute;
-  left: 2%;
-  bottom: 10px;
-  height: calc(100% - 26px);
+  z-index: 1;
+  left: 3%;
+  bottom: calc(var(--counter-h) * 0.56);
+  width: min(var(--duo-max-w), calc((100cqh - var(--counter-h) * 0.56 - 4px) * 138 / 110));
   aspect-ratio: 138 / 110;
-  max-width: 62%;
 }
 
 .duoArt > svg {
@@ -49,21 +76,15 @@
   width: 100%;
   height: 100%;
   overflow: visible;
+  filter: drop-shadow(0 6px 6px rgba(90, 60, 30, 0.12));
 }
 
-.belt {
-  position: absolute;
-  inset: auto 0 0 0;
-  height: 12px;
-  background: repeating-linear-gradient(90deg, #c9b8a4 0 14px, #b5a28c 14px 16px), #c9b8a4;
-  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.45);
-}
-
+/* 送給多多的那盤：走迴轉帶前排，從右邊滑進來 */
 .servingPlate {
   position: absolute;
-  z-index: 2;
+  z-index: 3;
   left: 30%;
-  bottom: 6px;
+  bottom: calc(var(--counter-h) * 0.26);
   display: grid;
   width: min(30%, 110px);
 }
@@ -92,44 +113,104 @@
   }
 }
 
-/* 點餐泡泡：右上，尾巴指向多多 */
-.bubble {
+/* 右上一欄：自由做「多多吃飽了」→ 點餐泡泡 → 字卡，由上往下排，彼此不疊 */
+.talk {
   position: absolute;
-  z-index: 3;
-  top: 6px;
+  z-index: 4;
+  top: calc(var(--awning-h) + 4px);
   right: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  max-width: 64%;
+  pointer-events: none;
+}
+
+.talk > button {
+  pointer-events: auto;
+}
+
+/* 點餐泡泡：純白＋木色粗框，在奶油色牆上也最醒目；尾巴往左下指向多多 */
+.bubble {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  max-width: 100%;
+  margin: 0;
+  padding: 6px 9px 6px;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow:
+    0 0 0 3px #d9a86a,
+    0 10px 22px rgba(90, 60, 30, 0.26);
+  transform-origin: 18px 100%;
+  animation: bubbleIn 340ms cubic-bezier(0.3, 1.45, 0.5, 1) both;
+}
+
+.bubbleTail {
+  position: absolute;
+  left: 10px;
+  top: calc(100% - 2px);
+  width: 28px;
+  height: 20px;
+  overflow: visible;
+}
+
+.bubbleTailFill {
+  fill: #fff;
+}
+
+.bubbleTailLine {
+  fill: none;
+  stroke: #d9a86a;
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+
+@keyframes bubbleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.bubbleItems {
   display: flex;
   align-items: center;
   gap: 4px;
-  max-width: 60%;
-  margin: 0;
-  padding: 5px 8px;
-  border: 2px solid #d9cbb5;
-  border-radius: 18px;
-  background: #fff;
-  box-shadow: 0 4px 10px rgba(80, 70, 50, 0.14);
-}
-
-.bubble::after {
-  content: "";
-  position: absolute;
-  left: 10px;
-  bottom: -9px;
-  width: 14px;
-  height: 14px;
-  border-right: 2px solid #d9cbb5;
-  border-bottom: 2px solid #d9cbb5;
-  background: #fff;
-  transform: rotate(45deg) skew(10deg, 10deg);
 }
 
 .bubbleItem {
   position: relative;
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
+  /* 跟著舞台長大：桌面舞台很大時泡泡不再是一小顆 */
+  width: clamp(34px, min(12.5cqh, 13cqw), 60px);
+  height: clamp(34px, min(12.5cqh, 13cqw), 60px);
+  border-radius: 12px;
+  background: radial-gradient(closest-side, rgba(239, 220, 188, 0.55), rgba(239, 220, 188, 0));
+}
+
+/* 飯和料之間一條細分隔，看得出「先飯、再料」 */
+.bubbleItem:first-child {
+  margin-right: 3px;
+}
+
+.bubbleItem:first-child::after {
+  content: "";
+  position: absolute;
+  right: -5px;
+  top: 20%;
+  bottom: 20%;
+  width: 2px;
+  border-radius: 1px;
+  background: #efdcbc;
 }
 
 .bubbleItem > svg:first-child {
@@ -138,12 +219,13 @@
 }
 
 .bubbleItem[data-done="true"] > svg:first-child {
-  opacity: 0.55;
+  opacity: 0.5;
 }
 
+/* 缺的那樣：框畫在格子裡面，不溢出泡泡、不蓋到下面的小點 */
 .bubbleItem[data-flash="true"] {
   background: #fff1d6;
-  box-shadow: 0 0 0 3px #ff9a3d;
+  box-shadow: inset 0 0 0 3px #ff9a3d;
   animation: sushiFlash 400ms ease-in-out 3;
 }
 
@@ -159,43 +241,92 @@
   bottom: -5px;
   width: 20px;
   height: 20px;
+  animation: popIn 260ms cubic-bezier(0.3, 1.6, 0.5, 1) both;
 }
 
+.orderDots {
+  display: flex;
+  gap: 4px;
+  margin-top: 3px;
+}
+
+.orderDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ead9bd;
+}
+
+.orderDot[data-state="done"] {
+  background: #e0a93a;
+}
+
+.orderDot[data-state="now"] {
+  width: 14px;
+  border-radius: 3px;
+  background: #5fbf85;
+}
+
+/* 多多的字卡：吃的時候在雨棚下（泡泡收起）；缺料時泡泡還在，字卡排在泡泡下面 */
 .caption {
-  position: absolute;
-  z-index: 4;
-  top: 70px;
-  right: 8px;
-  max-width: 58%;
+  max-width: 100%;
   margin: 0;
-  padding: 6px 12px;
-  border: 2px solid #b7df9b;
-  border-radius: 14px;
-  background: #fff;
-  color: #3f3a2e;
+  padding: 7px 13px;
+  border-radius: 16px;
+  background: #fffdf8;
+  color: var(--ink-warm);
   font-size: 1rem;
   font-weight: 900;
   line-height: 1.3;
-  box-shadow: 0 4px 10px rgba(80, 70, 50, 0.14);
+  box-shadow:
+    0 0 0 2.5px #b7df9b,
+    0 8px 18px rgba(90, 60, 30, 0.18);
+  transform-origin: 0 100%;
+  animation: popIn 300ms cubic-bezier(0.3, 1.45, 0.5, 1) both;
 }
 
 .caption[data-mood="love"] {
-  border-color: #ffb4cf;
+  box-shadow:
+    0 0 0 2.5px #ffa9c4,
+    0 8px 18px rgba(90, 60, 30, 0.18);
 }
 
 .caption[data-mood="sweet"] {
-  border-color: #ffd34d;
+  box-shadow:
+    0 0 0 2.5px #ffd34d,
+    0 8px 18px rgba(90, 60, 30, 0.18);
 }
 
 .caption[data-mood="look"] {
-  border-color: #ff9a3d;
+  box-shadow:
+    0 0 0 2.5px #ff9a3d,
+    0 8px 18px rgba(90, 60, 30, 0.18);
 }
 
+/* 矮舞台（320×568）：缺料時泡泡上那一格閃＋「嗯？」就夠，字卡會蓋到多多的嘴，收起 */
+@container duo-stage (max-height: 190px) {
+  .caption[data-mood="look"] {
+    display: none;
+  }
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 吃完的盤子疊在櫃台右邊（前排，數字不被迴轉帶擋到） */
 .plates {
   position: absolute;
-  z-index: 1;
-  right: 10px;
-  bottom: 10px;
+  z-index: 3;
+  right: 14px;
+  bottom: 4px;
   display: flex;
   flex-direction: column-reverse;
   align-items: center;
@@ -207,6 +338,18 @@
   width: 54px;
   height: 18px;
   margin-top: -9px;
+  animation: plateDrop 360ms cubic-bezier(0.3, 1.3, 0.5, 1) both;
+}
+
+@keyframes plateDrop {
+  from {
+    opacity: 0;
+    transform: translateY(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .plate > svg {
@@ -217,15 +360,16 @@
 
 .plateCount {
   position: absolute;
-  right: -4px;
-  top: -14px;
-  min-width: 22px;
-  padding: 1px 6px;
+  right: -6px;
+  top: -16px;
+  min-width: 24px;
+  padding: 2px 7px;
   border-radius: 999px;
   background: #3f7f2a;
   color: #fff;
   font-size: 0.85rem;
   text-align: center;
+  box-shadow: 0 0 0 2px #fffdf8, 0 3px 6px rgba(40, 70, 30, 0.25);
 }
 
 .foam {
@@ -242,22 +386,26 @@
   pointer-events: none;
 }
 
-/* 左上角是空的天空：不擋多多的臉；只晃 3 次 */
+/* 左上角雨棚下：不擋多多的臉；只晃 3 次 */
+/* 牙刷是「下一步」：跟其他下一步一樣的黃光暈；出現時招牌與燈籠讓位（DinoSushiShop data-brush） */
 .brushButton {
   position: absolute;
-  z-index: 5;
+  z-index: 6;
   left: 8px;
-  top: 8px;
+  top: calc(var(--awning-h) + 4px);
   display: grid;
   place-items: center;
-  width: 56px;
-  height: 56px;
-  padding: 6px;
+  width: 64px;
+  height: 64px;
+  padding: 7px;
   border: 3px solid #8ddff0;
   border-radius: 50%;
   background: #fff;
   cursor: pointer;
-  box-shadow: 0 6px 0 rgba(61, 127, 214, 0.25);
+  box-shadow:
+    0 5px 0 rgba(61, 127, 214, 0.25),
+    0 0 0 4px #ffd34d,
+    0 0 16px 6px rgba(255, 211, 77, 0.6);
   animation: sushiWiggle 1.2s ease-in-out 3;
 }
 
@@ -278,22 +426,22 @@
 
 /* 自由做「多多吃飽了」：右上（自由做沒有泡泡），離「給多多吃」遠 */
 .fullButton {
-  position: absolute;
-  z-index: 3;
-  top: 6px;
-  right: 8px;
   min-height: 48px;
-  padding: 0 16px;
-  border: 2px solid color-mix(in srgb, #7fa86c 55%, #fff);
+  padding: 0 18px;
+  border: none;
   border-radius: 999px;
-  background: #fff;
+  background: #fffdf8;
   color: #3f7f2a;
   font: inherit;
-  font-weight: 800;
+  font-weight: 900;
   cursor: pointer;
+  box-shadow:
+    0 0 0 2px #b7df9b,
+    0 4px 0 #9cc982,
+    0 8px 14px rgba(60, 100, 40, 0.16);
 }
 
-/* ── 砧板 ─────────────────────────────────────────────── */
+/* ── 檜木砧板 ─────────────────────────────────────────── */
 .board {
   grid-area: board;
   display: grid;
@@ -301,9 +449,22 @@
   align-items: stretch;
   gap: 8px;
   padding: 8px;
-  border: 2px solid #e3c9a0;
   border-radius: 20px;
-  background: linear-gradient(180deg, #f8e6c8, #f1d9b2);
+  background:
+    repeating-linear-gradient(
+      93deg,
+      rgba(190, 140, 80, 0) 0 17px,
+      rgba(190, 140, 80, 0.12) 17px 18px,
+      rgba(190, 140, 80, 0) 18px 29px,
+      rgba(190, 140, 80, 0.08) 29px 30px
+    ),
+    radial-gradient(120% 90% at 30% 0%, #fdf2dc 0%, rgba(253, 242, 220, 0) 60%),
+    linear-gradient(180deg, #f9e7c6, #f0d5a8);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.8),
+    inset 0 0 0 1.5px rgba(190, 140, 80, 0.3),
+    0 4px 0 var(--wood-edge),
+    0 9px 16px rgba(110, 75, 35, 0.16);
 }
 
 .board[data-choosing="true"] {
@@ -318,11 +479,24 @@
   min-width: 0;
 }
 
-.boardMain[data-shaking="true"] {
-  animation: sushiShake 280ms ease-in-out;
+.boardMain[data-shake="a"] {
+  animation: sushiShakeA 280ms ease-in-out;
 }
 
-@keyframes sushiShake {
+.boardMain[data-shake="b"] {
+  animation: sushiShakeB 280ms ease-in-out;
+}
+
+@keyframes sushiShakeA {
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+@keyframes sushiShakeB {
   25% {
     transform: translateX(-4px);
   }
@@ -347,6 +521,38 @@
   display: block;
   width: 100%;
   height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 3px 2px rgba(110, 75, 35, 0.18));
+  animation: baseDrop 300ms cubic-bezier(0.3, 1.4, 0.5, 1) both;
+}
+
+@keyframes baseDrop {
+  from {
+    transform: translateY(-10px) scale(0.92);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+/* 新放上去的那層料：從上面「啵」一下落到飯上 */
+.layerPop {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: layerPop 320ms cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+
+@keyframes layerPop {
+  from {
+    transform: translateY(-30%) scale(0.5);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
 }
 
 .slots {
@@ -354,6 +560,7 @@
   gap: 6px;
 }
 
+/* 料位＝小瓷碟：白釉、藍色細邊、碟底陰影 */
 .slot,
 .slotEmpty {
   display: grid;
@@ -361,25 +568,32 @@
   box-sizing: border-box;
   width: 48px;
   height: 48px;
-  padding: 3px;
-  border-radius: 14px;
+  padding: 5px;
+  border-radius: 50%;
 }
 
 .slot {
   position: relative;
-  border: 2px solid #d9c29c;
-  background: #fff;
+  border: none;
+  background: radial-gradient(circle at 50% 45%, #fffefa 0 52%, #f3ece0 70%, #fffefa 72%);
   cursor: pointer;
+  box-shadow:
+    inset 0 0 0 2px #fffefa,
+    inset 0 0 0 3.5px #4fa9c9,
+    0 3px 0 rgba(160, 115, 60, 0.3),
+    0 5px 8px rgba(110, 75, 35, 0.14);
 }
 
+/* 只彈裡面的料，碟子（點擊範圍）大小不變 */
 .slot > svg {
   width: 100%;
   height: 100%;
+  animation: popIn 260ms cubic-bezier(0.3, 1.6, 0.5, 1) both;
 }
 
 .slotEmpty {
-  border: 2px dashed #c9ae84;
-  background: rgba(255, 255, 255, 0.4);
+  border: 2px dashed rgba(176, 128, 66, 0.5);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.2));
 }
 
 .basePicker {
@@ -391,6 +605,7 @@
   width: 100%;
 }
 
+/* 選飯：三張白瓷長皿 */
 .baseButton {
   position: relative;
   display: grid;
@@ -398,17 +613,30 @@
   place-items: center;
   min-height: 110px;
   padding: 6px 2px;
-  border: 2px solid #d9c29c;
-  border-radius: 16px;
-  background: #fffaf0;
-  color: #3f3a2e;
+  border: none;
+  border-radius: 18px;
+  background:
+    radial-gradient(60% 26% at 50% 66%, rgba(120, 80, 35, 0.14), rgba(120, 80, 35, 0)),
+    linear-gradient(180deg, #fffdf7, #fbf1e1);
+  color: var(--ink-warm);
   font: inherit;
   cursor: pointer;
+  box-shadow:
+    inset 0 0 0 2px #fffdf7,
+    inset 0 0 0 3.5px #ead7b6,
+    0 4px 0 #ddbf8f,
+    0 8px 14px rgba(110, 75, 35, 0.14);
+  transition:
+    transform 120ms ease-out,
+    box-shadow 120ms ease-out;
 }
 
 .baseButton[aria-pressed="true"] {
-  border-color: #7fa86c;
-  box-shadow: inset 0 0 0 2px #b7df9b;
+  box-shadow:
+    inset 0 0 0 2px #fffdf7,
+    inset 0 0 0 4px #7fb86a,
+    0 4px 0 #9cc982,
+    0 8px 14px rgba(60, 100, 40, 0.16);
 }
 
 .baseArt {
@@ -420,13 +648,15 @@
 .baseArt > svg {
   width: 100%;
   height: 100%;
+  filter: drop-shadow(0 3px 2px rgba(110, 75, 35, 0.16));
 }
 
 .baseLabel {
   font-size: 0.95rem;
-  font-weight: 800;
+  font-weight: 900;
 }
 
+/* 「給多多吃」：暖色大鈕，有厚度、按下會沉 */
 .serveButton {
   position: relative;
   display: grid;
@@ -437,15 +667,25 @@
   min-height: 96px;
   padding: 6px 8px;
   border: none;
-  border-radius: 22px;
-  background: linear-gradient(180deg, #ffe889, #ffbd6f);
-  color: #614018;
+  border-radius: 24px;
+  background:
+    radial-gradient(90% 60% at 50% 0%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 70%),
+    linear-gradient(180deg, #ffe58a, #ffb558);
+  color: #5a360d;
   font: inherit;
   font-size: 1.05rem;
   font-weight: 900;
   line-height: 1.2;
   cursor: pointer;
-  box-shadow: 0 6px 0 rgba(203, 128, 52, 0.42), inset 0 2px 0 rgba(255, 255, 255, 0.72);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.8),
+    inset 0 -3px 0 rgba(214, 120, 30, 0.22),
+    0 6px 0 #d98a34,
+    0 12px 18px rgba(164, 90, 30, 0.22);
+  transition:
+    transform 120ms ease-out,
+    box-shadow 120ms ease-out,
+    filter 200ms ease-out;
 }
 
 /* 點餐還沒做齊：仍可按（按了多多會看泡泡），但不搶托盤亮框的眼 */
@@ -456,11 +696,13 @@
 .serveButton:disabled {
   opacity: 0.55;
   cursor: default;
-  box-shadow: 0 3px 0 rgba(203, 128, 52, 0.25);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.8),
+    0 3px 0 rgba(217, 138, 52, 0.4);
 }
 
 .serveArt {
-  width: 56px;
+  width: 64px;
   aspect-ratio: 96 / 32;
 }
 
@@ -469,7 +711,7 @@
   height: 100%;
 }
 
-/* ── 托盤 ─────────────────────────────────────────────── */
+/* ── 食材托盤（竹簾上的小瓷碟） ───────────────────────── */
 .tray {
   grid-area: tray;
   display: grid;
@@ -477,7 +719,7 @@
   gap: 6px;
 }
 
-/* 中明度底：白色的飯、蟹肉棒才不會融進底色 */
+/* 中明度底：白色的飯、蟹肉棒才不會融進底色；碟心一圈淡影讓料「放在」碟上 */
 .trayButton {
   position: relative;
   display: grid;
@@ -486,23 +728,46 @@
   gap: 1px;
   min-height: 60px;
   padding: 4px 2px;
-  border: 2px solid #d9c29c;
-  border-radius: 14px;
-  background: #f2e2c6;
-  color: #3f3a2e;
+  border: none;
+  border-radius: 16px;
+  background:
+    radial-gradient(70% 55% at 50% 0%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 70%),
+    linear-gradient(180deg, #f5e3c3, #ecd3a8);
+  color: var(--ink-warm);
   font: inherit;
   cursor: pointer;
-  box-shadow: 0 3px 0 rgba(150, 120, 80, 0.22);
+  box-shadow:
+    inset 0 0 0 1.5px rgba(255, 255, 255, 0.65),
+    inset 0 -3px 0 rgba(176, 128, 66, 0.14),
+    0 3px 0 #d3b07c,
+    0 6px 10px rgba(110, 75, 35, 0.13);
+  transition:
+    transform 120ms ease-out,
+    box-shadow 120ms ease-out,
+    opacity 200ms ease-out,
+    filter 200ms ease-out;
 }
 
 .trayButton[data-kind="sweet"] {
-  background: #fbe0e6;
-  border-color: #efb3c2;
+  background:
+    radial-gradient(70% 55% at 50% 0%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 70%),
+    linear-gradient(180deg, #fde3ea, #f8cfda);
+  box-shadow:
+    inset 0 0 0 1.5px rgba(255, 255, 255, 0.65),
+    inset 0 -3px 0 rgba(214, 120, 150, 0.14),
+    0 3px 0 #e8adbd,
+    0 6px 10px rgba(150, 70, 90, 0.12);
 }
 
 .trayButton[data-kind="wasabi"] {
-  background: #e3f0d2;
-  border-color: #b9d79a;
+  background:
+    radial-gradient(70% 55% at 50% 0%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 70%),
+    linear-gradient(180deg, #e6f2d6, #d6e9bf);
+  box-shadow:
+    inset 0 0 0 1.5px rgba(255, 255, 255, 0.65),
+    inset 0 -3px 0 rgba(110, 160, 80, 0.14),
+    0 3px 0 #b3d394,
+    0 6px 10px rgba(70, 110, 50, 0.12);
 }
 
 .trayButton:disabled,
@@ -513,12 +778,30 @@
 }
 
 .trayButton:disabled {
-  opacity: 0.5;
+  opacity: 0.55;
+  filter: saturate(0.7);
+}
+
+/* 按下去會沉一下（有厚度的實體感） */
+.trayButton:active:not(:disabled),
+.baseButton:active:not(:disabled) {
+  transform: translateY(2px);
+}
+
+.serveButton:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.8),
+    inset 0 -3px 0 rgba(214, 120, 30, 0.22),
+    0 3px 0 #d98a34,
+    0 6px 10px rgba(164, 90, 30, 0.2);
 }
 
 .trayArt {
   width: var(--tray-art);
   height: var(--tray-art);
+  border-radius: 50%;
+  background: radial-gradient(50% 24% at 50% 82%, rgba(120, 80, 35, 0.18), rgba(120, 80, 35, 0));
 }
 
 .trayArt > svg {
@@ -528,7 +811,7 @@
 
 .trayLabel {
   font-size: 0.8rem;
-  font-weight: 800;
+  font-weight: 900;
   line-height: 1.1;
   white-space: nowrap;
 }
@@ -540,7 +823,11 @@
 }
 
 .serveButton[data-hint="true"] {
-  box-shadow: 0 6px 0 rgba(203, 128, 52, 0.42), 0 0 0 4px #ffd34d, 0 0 14px 4px rgba(255, 211, 77, 0.6);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.8),
+    0 6px 0 #d98a34,
+    0 0 0 4px #ffd34d,
+    0 0 14px 4px rgba(255, 211, 77, 0.6);
 }
 
 /* 只閃光暈、不縮放：按鈕本身不動，孩子點得準 */
@@ -619,14 +906,10 @@
     --duo-h: 0px;
     flex: 0 0 auto;
     grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 0.85fr);
-    grid-template-rows: auto;
+    grid-template-rows: minmax(var(--duo-min, 220px), auto);
     grid-template-areas: "duo board tray";
     align-items: stretch;
     width: min(100%, 1040px);
-  }
-
-  .duoArea {
-    min-height: 220px;
   }
 
   .board {
@@ -644,19 +927,30 @@
     gap: 8px;
   }
 
+  /* 托盤跟砧板、店面同高，三欄上下對齊 */
   .tray {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-content: center;
+    align-content: stretch;
   }
 }
 
 @media (orientation: landscape) and (max-height: 520px) {
-  .duoArea {
-    min-height: 0;
+  .kitchen {
+    --duo-min: 0px;
+  }
+
+  /* 三張長皿不要被拉成空白的高板子：置中、限高、圖放大 */
+  .basePicker {
+    align-self: center;
   }
 
   .baseButton {
     min-height: 84px;
+    max-height: 150px;
+  }
+
+  .baseArt {
+    max-width: 84px;
   }
 
   .trayButton {
@@ -692,16 +986,13 @@
     margin-top: -13px;
   }
 
-  .duoArea {
-    min-height: 360px;
+  .kitchen {
+    --duo-min: 360px;
   }
 
   .duoArt {
+    --duo-max-w: 88%;
     left: 4%;
-    bottom: 16px;
-    width: 88%;
-    height: auto;
-    max-width: none;
   }
 
   .trayButton {
@@ -723,7 +1014,6 @@
   }
 
   .caption {
-    top: 82px;
     font-size: 1.15rem;
   }
 
@@ -735,15 +1025,28 @@
 
 @media (prefers-reduced-motion: reduce) {
   .servingPlate[data-phase="slide"],
-  .boardMain[data-shaking="true"],
+  .boardMain[data-shake],
   .bubbleItem[data-flash="true"],
   .finger,
-  .brushButton {
+  .brushButton,
+  .bubble,
+  .check,
+  .caption,
+  .plate,
+  .slot > svg,
+  .sushiButton > svg,
+  .layerPop {
     animation: none;
   }
 
   .kitchen [data-hint="true"] {
     animation: none;
+  }
+
+  .trayButton,
+  .baseButton,
+  .serveButton {
+    transition: none;
   }
 }
 
@@ -752,8 +1055,21 @@
 .kitchen[data-reduced="true"] .bubbleItem,
 .kitchen[data-reduced="true"] [data-hint="true"],
 .kitchen[data-reduced="true"] .finger,
-.kitchen[data-reduced="true"] .brushButton {
+.kitchen[data-reduced="true"] .brushButton,
+.kitchen[data-reduced="true"] .bubble,
+.kitchen[data-reduced="true"] .check,
+.kitchen[data-reduced="true"] .caption,
+.kitchen[data-reduced="true"] .plate,
+.kitchen[data-reduced="true"] .slot > svg,
+.kitchen[data-reduced="true"] .sushiButton > svg,
+.kitchen[data-reduced="true"] .layerPop {
   animation: none;
+}
+
+.kitchen[data-reduced="true"] .trayButton,
+.kitchen[data-reduced="true"] .baseButton,
+.kitchen[data-reduced="true"] .serveButton {
+  transition: none;
 }
 
 /* iPhone 橫向扣掉 Safari 工具列只剩約 340px 高：收緊間距（托盤鈕仍 ≥56px），托盤四列才不被切掉 */

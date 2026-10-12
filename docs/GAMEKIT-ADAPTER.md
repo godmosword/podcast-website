@@ -34,7 +34,7 @@ interface GameInstance {
 
 - Instantiates the adapter once.
 - Owns `GameChrome`, toolbar, settings dialog, tutorial overlay.
-- Owns audio bus via `useGameAudio`.
+- Owns audio bus via `useGameAudio`，以 `options.audio` 交給 adapter：`tone()` 播單音；選用的 `voices()` 播一組宣告式合成音色（`SynthVoice`：振盪器或白噪音、滑音、濾波，以 AudioContext 時鐘排程、一次最多 16 個），用來做有材質的音效（多多壽司屋的「啵」「咚」「叮」）。兩者都走 sfx 分軌、跟著靜音與遊戲音量。
 - Owns best-score + `reportGameSession`（每次 `onSession` 都寫入；中關通關可多次，終局由 adapter 去重）。
 - Maps keyboard / touch / gamepad → `setAction`.
 - Runs the shared `GameLoop` when the instance exposes `fixedUpdate`.

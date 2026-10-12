@@ -1,9 +1,11 @@
 "use client";
 
+import Image from "next/image";
 import { IconPlay, IconStar } from "@/components/games/ClayIcons";
-import { PlateArt, SushiArt } from "@/lib/games/dino-sushi/art";
-import { DuoDuoArt } from "@/lib/games/dino-sushi/duoduo-art";
+import { gameBySlug } from "@/data/games";
 import styles from "./DinoSushiView.module.css";
+
+const TITLE_COVER_SRC = gameBySlug("dino-sushi").art.cover;
 
 type Props = {
   starsGot: number;
@@ -11,20 +13,21 @@ type Props = {
   onFree: () => void;
 };
 
-/** 標題：多多＋一盤壽司的舞台、星星 x/3、一顆大圓「開始」（＝點餐）；「自由做」是小膠囊。 */
+/** 標題：與遊樂園卡片同一張迴轉壽司店封面、星星 x/3、一顆大圓「開始」（＝點餐）；「自由做」是小膠囊。 */
 export function DinoSushiTitle({ starsGot, onStart, onFree }: Props) {
   return (
     <div className={styles.titleScreen}>
       {/* 舞台與「開始」重複，對讀屏與鍵盤隱藏；小朋友點最大的圖也能開始 */}
       <button type="button" className={styles.titleStage} onClick={onStart} tabIndex={-1} aria-hidden="true">
-        <span className={styles.titleDuo}>
-          <DuoDuoArt mouth="open" face="yum" />
-        </span>
-        <span className={styles.titleDish}>
-          <SushiArt sushi={{ base: "nigiri", toppings: ["salmon"] }} />
-          <PlateArt />
-        </span>
-        <span className={styles.titleBelt} />
+        <Image
+          src={TITLE_COVER_SRC}
+          alt=""
+          fill
+          loading="eager"
+          fetchPriority="high"
+          sizes="(max-width: 799px) calc(100vw - 64px), 55vw"
+          className={styles.titleCover}
+        />
       </button>
       <div className={styles.titlePanel}>
         {/* 頁面唯一 h1 屬 GamePageShell */}

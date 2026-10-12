@@ -4,7 +4,9 @@ import { GameEndStation } from "@/components/games/GameEndStation";
 import { IconChevronLeft } from "@/components/games/ClayIcons";
 import { ResultStars, type ResultStarHint } from "@/components/games/ResultStars";
 import { PlateArt } from "@/lib/games/dino-sushi/art";
+import { DuoDuoArt } from "@/lib/games/dino-sushi/duoduo-art";
 import type { RoundMedals } from "@/lib/games/dino-sushi/medals";
+import { ShopBelt, ShopWall } from "./DinoSushiShop";
 import type { DinoSushiOutcome } from "./DinoSushiView";
 import styles from "./DinoSushiView.module.css";
 
@@ -59,6 +61,14 @@ export function DinoSushiResult({ outcome, stars, reducedMotion, onReplay, onTit
     );
   return (
     <div className={styles.resultOverlay} data-testid="dino-sushi-result">
+      {/* 店裡吃飽飽的多多（裝飾）：同一間迴轉壽司店，結算不像跳到另一個畫面 */}
+      <div className={styles.resultHero} data-reduced={reducedMotion ? "true" : undefined} aria-hidden>
+        <ShopWall />
+        <span className={styles.resultDuo}>
+          <DuoDuoArt mouth="closed" face="love" />
+        </span>
+        <ShopBelt />
+      </div>
       <GameEndStation
         mood="win"
         title={outcome.mode === "order" ? "多多吃飽飽！" : "多多吃飽了！"}

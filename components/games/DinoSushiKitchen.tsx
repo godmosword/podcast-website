@@ -10,6 +10,7 @@ import { DinoSushiDuoDuo } from "./DinoSushiDuoDuo";
 import { DinoSushiOrderBubble } from "./DinoSushiOrderBubble";
 import { TapButton } from "./DinoSushiPiece";
 import { DinoSushiPlateStack } from "./DinoSushiPlateStack";
+import { ShopBelt, ShopWall } from "./DinoSushiShop";
 import { DinoSushiTray } from "./DinoSushiTray";
 import type { DinoSushiPlay } from "./useDinoSushiPlay";
 import styles from "./DinoSushiKitchen.module.css";
@@ -28,7 +29,7 @@ function Finger() {
   );
 }
 
-/** 廚房：多多＋泡泡＋疊盤｜砧板（3 料位）＋「給多多吃」｜托盤。 */
+/** 廚房：迴轉壽司店（多多＋泡泡＋疊盤）｜砧板（3 料位）＋「給多多吃」｜托盤。 */
 export function DinoSushiKitchen({ play, reducedMotion, inputPaused }: Props) {
   const {
     round,
@@ -49,44 +50,62 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused }: Props) {
   const flash = caption?.mood === "look" ? (caption.match ?? null) : null;
   const disabled = locked || inputPaused;
   const serveHint = hint?.kind === "serve";
+  /* 吃完才出牙刷，不擋嘴；出現時店面道具讓位，牙刷才看得出是下一步 */
+  const brushShown =
+    ((round.pending?.brush ?? false) || round.brushReady) && !brushing && (phase === "react" || phase === "idle");
 
   return (
     <div
       className={styles.kitchen}
       data-reduced={reducedMotion ? "true" : undefined}
+      data-paused={inputPaused ? "true" : undefined}
     >
-      <section className={styles.duoArea} aria-label="多多">
+      <section
+        className={styles.duoArea}
+        aria-label="多多"
+        data-mode={round.mode}
+        data-brush={brushShown ? "true" : undefined}
+      >
+        <ShopWall />
         <DinoSushiDuoDuo
           phase={phase}
           caption={caption}
           serving={eating ? sushi : null}
           brushing={brushing}
-          brushOffer={(round.pending?.brush ?? false) || round.brushReady}
+          brushShown={brushShown}
           disabled={inputPaused}
           onBrush={actions.brush}
         />
-        {/* 吃的時候收起泡泡，字卡接手；下一單泡泡等反應結束才出現 */}
-        {order && !eating ? (
-          <DinoSushiOrderBubble
-            order={order}
-            sushi={sushi}
-            flash={flash}
-            index={round.index}
-            total={round.orders.length}
-          />
-        ) : null}
+        <ShopBelt />
         <DinoSushiPlateStack plates={round.plates} />
-        {round.mode === "free" ? (
-          <button
-            type="button"
-            className={styles.fullButton}
-            onClick={actions.finish}
-            disabled={disabled}
-          >
-            多多吃飽了
-          </button>
-        ) : null}
-        <span className={styles.belt} aria-hidden />
+        {/* 右上一欄由上往下排：自由做的「多多吃飽了」→ 點餐泡泡 → 多多的字卡，彼此不會疊在一起 */}
+        <div className={styles.talk}>
+          {round.mode === "free" ? (
+            <button
+              type="button"
+              className={styles.fullButton}
+              onClick={actions.finish}
+              disabled={disabled}
+            >
+              多多吃飽了
+            </button>
+          ) : null}
+          {/* 吃的時候收起泡泡，字卡接手；下一單泡泡等反應結束才出現 */}
+          {order && !eating ? (
+            <DinoSushiOrderBubble
+              order={order}
+              sushi={sushi}
+              flash={flash}
+              index={round.index}
+              total={round.orders.length}
+            />
+          ) : null}
+          {caption ? (
+            <p className={styles.caption} data-mood={caption.mood} aria-hidden>
+              {caption.line}
+            </p>
+          ) : null}
+        </div>
       </section>
 
       <section
@@ -96,9 +115,8 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused }: Props) {
       >
         <div
           className={styles.boardMain}
-          data-shake={shake % 2 === 0 ? "a" : "b"}
-          data-shaking={shake > 0 ? "true" : undefined}
-          key={`shake-${shake}`}
+          /* a／b 兩個同樣的晃動動畫輪流換名字才會重播；不用 key 重掛，免得壽司和料位的進場動畫一起重跳 */
+          data-shake={shake === 0 ? undefined : shake % 2 === 0 ? "a" : "b"}
         >
           {choosingBase ? (
             <div className={styles.basePicker} role="group" aria-label="選飯">
@@ -141,7 +159,7 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused }: Props) {
                 disabled={disabled}
                 onTap={actions.reopenBase}
               >
-                {eating ? null : <SushiArt sushi={sushi} />}
+                {eating ? null : <SushiArt sushi={sushi} layerClassName={reducedMotion ? undefined : styles.layerPop} />}
                 {teaching && hint?.kind === "base" ? <Finger /> : null}
               </TapButton>
               <div

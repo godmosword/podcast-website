@@ -14,7 +14,8 @@ type Props = {
   /** 正在吃的那一盤（送出到反應結束）。 */
   serving: Sushi | null;
   brushing: boolean;
-  brushOffer: boolean;
+  /** 牙刷鈕現在要不要出現（廚房算好，店面道具同時讓位）。 */
+  brushShown: boolean;
   disabled: boolean;
   onBrush: () => void;
 };
@@ -27,8 +28,8 @@ function pose(phase: ServePhase, caption: Reaction | null, brushing: boolean): {
   return { mouth: "closed", face: "idle" };
 }
 
-/** 多多＋迴轉帶上滑過來的盤子＋字卡＋刷牙彩蛋。 */
-export function DinoSushiDuoDuo({ phase, caption, serving, brushing, brushOffer, disabled, onBrush }: Props) {
+/** 多多＋迴轉帶上滑過來的盤子＋刷牙彩蛋（字卡在廚房右上那一欄）。 */
+export function DinoSushiDuoDuo({ phase, caption, serving, brushing, brushShown, disabled, onBrush }: Props) {
   const { mouth, face } = pose(phase, caption, brushing);
   const plateOnBelt = serving && (phase === "slide" || phase === "open" || phase === "chew");
   return (
@@ -45,14 +46,7 @@ export function DinoSushiDuoDuo({ phase, caption, serving, brushing, brushOffer,
         </span>
       ) : null}
 
-      {caption ? (
-        <p className={styles.caption} data-mood={caption.mood} aria-hidden>
-          {caption.line}
-        </p>
-      ) : null}
-
-      {/* 吃完才出牙刷，不擋嘴 */}
-      {brushOffer && !brushing && (phase === "react" || phase === "idle") ? (
+      {brushShown ? (
         <TapButton className={styles.brushButton} aria-label="幫多多刷牙" disabled={disabled} onTap={onBrush}>
           <ToothbrushArt />
         </TapButton>

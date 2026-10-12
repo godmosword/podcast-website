@@ -1,6 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import { SUSHI_SFX } from "@/lib/games/dino-sushi/sfx";
 import { createRound, roundReducer, type RoundAction, type RoundState } from "@/lib/games/dino-sushi/round";
-import { hintTarget } from "./useDinoSushiPlay";
+import { hintTarget, playVoices } from "./useDinoSushiPlay";
 
 function run(state: RoundState, actions: RoundAction[]): RoundState {
   return actions.reduce(roundReducer, state);
@@ -49,5 +50,26 @@ describe("點餐提示指向下一步", () => {
     const order = createRound("order", 7);
     const pending = run(order, [{ type: "pick-base", base: "nigiri" }, { type: "serve" }]);
     expect(hintTarget(pending)).toBeNull();
+  });
+});
+
+describe("playVoices", () => {
+  it("有 voices 時整組交給 audio bus", () => {
+    const audio = { ensureAudio: vi.fn(), tone: vi.fn(), voices: vi.fn() };
+    playVoices(audio, SUSHI_SFX.serve);
+    expect(audio.voices).toHaveBeenCalledWith(SUSHI_SFX.serve);
+    expect(audio.tone).not.toHaveBeenCalled();
+  });
+
+  it("只有 tone 的 audio bus：只播第一個振盪器音，不播噪音", () => {
+    const audio = { ensureAudio: vi.fn(), tone: vi.fn() };
+    playVoices(audio, SUSHI_SFX.base);
+    expect(audio.tone).toHaveBeenCalledTimes(1);
+    const first = SUSHI_SFX.base[0]!;
+    expect(audio.tone).toHaveBeenCalledWith(first.freq, first.dur, first.wave, first.vol);
+  });
+
+  it("沒有 audio bus 時安靜不出錯", () => {
+    expect(() => playVoices(undefined, SUSHI_SFX.fanfare)).not.toThrow();
   });
 });

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { GameKitAudioBus } from "@/lib/gamekit/runtime/audio";
+import { GameKitAudioBus, type SynthVoice } from "@/lib/gamekit/runtime/audio";
 import { useGameKitSettings } from "@/hooks/useGameKitSettings";
 import type { GameKitGameId } from "@/lib/gamekit/types";
 import {
@@ -47,6 +47,14 @@ export function useGameAudio(gameId?: GameKitGameId) {
     ) => {
       if (!isSfxEnabled()) return;
       getBus().playTone(freq, dur, type, vol);
+    },
+    [getBus],
+  );
+
+  const voices = useCallback(
+    (list: readonly SynthVoice[]) => {
+      if (!isSfxEnabled()) return;
+      getBus().playVoices(list);
     },
     [getBus],
   );
@@ -115,6 +123,7 @@ export function useGameAudio(gameId?: GameKitGameId) {
   return {
     ensureAudio,
     tone,
+    voices,
     soundUi,
     toggleSound,
     playBgm,

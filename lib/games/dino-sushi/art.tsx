@@ -204,8 +204,11 @@ const LAYER_SPOTS: Record<number, readonly (readonly [number, number])[]> = {
 /** 層數越多，每顆料越小，才不會互相蓋掉一半。 */
 const LAYER_SIZES: Record<number, number> = { 1: 46, 2: 40, 3: 34 };
 
-/** 砧板上／盤子上的完整壽司。沒選飯時什麼都不畫。 */
-export function SushiArt({ sushi, size, style }: ArtProps & { sushi: Sushi }) {
+/**
+ * 砧板上／盤子上的完整壽司。沒選飯時什麼都不畫。
+ * layerClassName：每層料多包一層 <g>，新加的那層掛上 CSS 進場動畫（外層 transform 是定位，不能拿來動）。
+ */
+export function SushiArt({ sushi, size, style, layerClassName }: ArtProps & { sushi: Sushi; layerClassName?: string }) {
   if (!sushi.base) return null;
   const spots = LAYER_SPOTS[sushi.toppings.length] ?? [];
   return (
@@ -219,7 +222,13 @@ export function SushiArt({ sushi, size, style }: ArtProps & { sushi: Sushi }) {
           const size = LAYER_SIZES[sushi.toppings.length] ?? 34;
           return (
             <g key={`${id}-${i}`} transform={`translate(${cx - size / 2} ${cy - size / 2}) scale(${size / 48})`}>
-              <ToppingShape id={id} />
+              {layerClassName ? (
+                <g className={layerClassName}>
+                  <ToppingShape id={id} />
+                </g>
+              ) : (
+                <ToppingShape id={id} />
+              )}
             </g>
           );
         })}
@@ -227,13 +236,29 @@ export function SushiArt({ sushi, size, style }: ArtProps & { sushi: Sushi }) {
   );
 }
 
-/** 迴轉壽司盤；gold＝一次做對的金邊盤。 */
-export function PlateArt({ gold = false, size, style }: ArtProps & { gold?: boolean }) {
+/** 迴轉壽司盤的釉色：藍＝一般、金＝一次做對；粉／薄荷／薰衣草只出現在迴轉帶上的裝飾盤。 */
+export type PlateTone = "blue" | "gold" | "pink" | "mint" | "lavender";
+
+const PLATE_GLAZE: Record<PlateTone, { rim: string; edge: string; line: string }> = {
+  blue: { rim: "#8ddff0", edge: "#4fa9c9", line: "#c4ecf6" },
+  gold: { rim: "#ffd34d", edge: "#cf960f", line: "#f6d77a" },
+  pink: { rim: "#ffc4d2", edge: "#e08aa2", line: "#ffe0e8" },
+  mint: { rim: "#b6ead3", edge: "#62bb98", line: "#daf5e9" },
+  lavender: { rim: "#d8ccfa", edge: "#9a86de", line: "#ece6ff" },
+};
+
+/** 迴轉壽司盤（有盤足、內凹、釉面高光）；gold＝一次做對的金邊盤。 */
+export function PlateArt({ gold = false, tone, size, style }: ArtProps & { gold?: boolean; tone?: PlateTone }) {
+  const g = PLATE_GLAZE[tone ?? (gold ? "gold" : "blue")];
   return (
     <Svg size={size} style={style} viewBox="0 0 96 32">
-      <ellipse cx="48" cy="18" rx="44" ry="12" fill={gold ? "#ffd34d" : "#8ddff0"} stroke={gold ? "#d9a514" : "#5bb7d6"} strokeWidth="2.2" />
-      <ellipse cx="48" cy="16" rx="34" ry="8" fill="#fffdf6" stroke={gold ? "#e8b52a" : "#bfe9f5"} strokeWidth="1.6" />
-      <Shine cx={28} cy={13} rx={8} ry={1.8} />
+      <ellipse cx="48" cy="26" rx="30" ry="4.6" fill="#3d3028" opacity="0.14" />
+      <ellipse cx="48" cy="22.5" rx="25" ry="5.6" fill={g.edge} />
+      <ellipse cx="48" cy="17" rx="44" ry="11.5" fill={g.rim} stroke={g.edge} strokeWidth="2" />
+      <ellipse cx="48" cy="15.4" rx="33" ry="7.4" fill="#fffdf6" stroke={g.line} strokeWidth="1.6" />
+      <path d="M17 14.6c4-4.6 16-6.8 31-6.8s27 2.2 31 6.8c-6-2.8-17-4.2-31-4.2s-25 1.4-31 4.2Z" fill="#3d3028" opacity="0.07" />
+      <path d="M10 19.5c3 4 15 6.6 26 7.2" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" opacity="0.6" />
+      <Shine cx={30} cy={12.6} rx={8} ry={1.6} />
     </Svg>
   );
 }
