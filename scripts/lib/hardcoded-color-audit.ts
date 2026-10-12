@@ -49,6 +49,9 @@ const HARDCODED_COLOR_ALLOWLIST = [
   "components/games/ResultStars.module.css",
   // 著色畫布：底必須是純白，否則蠟筆顏色會被主題染色
   "components/coloring/ColoringPageShell.module.css",
+  // 著色色票上的小圖案：深墨／淺色記號畫在固定色票色上（各色對比寫在 ColoringPalette.tsx 的 LIGHT_MARK 註解），
+  // 色票本身日夜不換色，改吃主題 token 會在夜間變成深色塊上的深記號
+  "components/coloring/ColoringPalette.module.css",
   // 真實世界地圖：類型剪影 #34302b／「其他」淺沙 #cfcac2 為固定美術色
   // （DESIGN.md §48）；另有遮罩用的 #000 與圖釘白環。
   "components/for-parents/PlayMap.module.css",
