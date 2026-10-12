@@ -4,7 +4,8 @@
 .bar {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(48px, 1fr));
-  gap: 4px;
+  /* 五顆兒童工具鈕相鄰間距至少 8px；窄欄用 auto-fit 換行，不縮到 48px 以下。 */
+  gap: var(--space-2);
 }
 .toolBtn {
   display: flex;

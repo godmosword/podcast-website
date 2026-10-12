@@ -2,6 +2,12 @@
 
 2026-10-05。使用內建 image_gen，以既有角色圖作為 reference image。輸出經既有 postprocessAiLineArt 正規化為 1024×1024 不透明黑白 PNG，通過 character 線稿品質 gate。
 
+## 文字例外（2026-10-12）
+
+線稿固定規則是「圖內不得有文字、字母或數字」。唯一例外是小紅賽車車身的數字「2」（定裝照 `public/characters/小紅賽車.jpg` 的白圓底號碼）。角色在畫面中時只畫這一個描線「2」，不得再加別的文字或數字。沒有小紅賽車的線稿仍然完全沒有文字與數字。
+
+現行模板在 `scripts/lib/coloring-ai-prompts.ts`。下面小紅賽車那則歷史 prompt 寫了 number 2，符合這個例外，不是跟禁字規則打架。
+
 ## 恐龍車多多
 
 資產：`public/coloring/char-恐龍車多多-simple/line.png`

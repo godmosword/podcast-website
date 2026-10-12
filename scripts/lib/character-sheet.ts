@@ -22,6 +22,7 @@
  *
  * 版權區隔改由圓潤高車身剪影、白圓底號碼 2、單一尾翼、與眼睛分離的黃大燈，以及
  * `XIAO_HONG_DO_NOT` 承擔；眼位不再是區隔手段。見 `HERO-PARALLAX-SPEC.md` §2.5。
+ * 圖內禁文字的唯一例外就是這個「2」（見 coloring-ai-prompts.ts 與 CLAY_NEGATIVE）。
  */
 
 /**

@@ -176,7 +176,12 @@ details[open] > summary .icon-disclosure {
   --edge-ramp: 0px;
 
   /* Landing Hub（Storyline 式頂欄） */
-  /* 陽光橘 + 深咖字：對比 6.3:1（WCAG AA）。亮且不刺眼，同時供頂欄與 CTA 鈕共用。 */
+  /* 主色分工（日間；夜間同名 token 另有覆寫，角色不變）：
+     橘 --landing-brand #FF8C2B ＝品牌（頂欄／識別），不是頁面唯一主按鈕。
+     深墨 --landing-brand-ink #3A2410 ＝唯一主按鈕底（--cta-solid-bg 指向它），白字。
+     青綠 --landing-heading／--accent #2A9D8F ＝互動強調，只做邊框／底色／裝飾；
+     文字用 --accent-ink。三者不要混稱「主色」。 */
+  /* 陽光橘 + 深咖字：對比 6.3:1（WCAG AA）。亮且不刺眼，同時供頂欄與品牌色共用。 */
   --landing-brand: #ff8c2b;
   --landing-brand-ink: #3a2410;
   /* sticky 頂欄高度：按鈕 44 + 上下 padding 20 + 瀏海安全區 + iOS 主畫面 App 模糊帶 */
@@ -213,7 +218,9 @@ details[open] > summary .icon-disclosure {
   /* 白字對 --support-from 必須 ≥4.5:1（AA 內文）。原本的 #f0744a／#e4572e
      只有 2.88／3.68，頁尾「支持我們」與著色本主 CTA 都不合格；壓深到磚紅後
      為 4.69／6.36，白字在暖色 CTA 上的既有語彙不變。門檻由
-     app/globals.css.contrast.test.ts 釘住。夜間那組用深墨字，本來就有 4.69。 */
+     app/globals.css.contrast.test.ts 釘住。夜間那組用深墨字，本來就有 4.69。
+     例外（2026-10-12 登記，外觀不改）：著色頁主按鈕用這組磚紅 #C94A1E，
+     不改綁唯一主按鈕 --cta-solid-bg（深墨 #3A2410）。支持頁尾同一組色。 */
   --support-from: #c94a1e;
   --support-to: #a93a12;
   --support-fg: #ffffff;
@@ -221,7 +228,9 @@ details[open] > summary .icon-disclosure {
   --cta-warm-to: #ffbd6f;
   --cta-warm-fg: #614018;
   /* H1 CTA 三階。七處第一刀主鈕綁 --cta-solid-*（別名 Landing／留言牆色票）；
-     soft／quiet 給次要與備援。--cta-warm-* 仍給貼紙／夜色，不是這三階。不建共用 React Button。 */
+     soft／quiet 給次要與備援。--cta-warm-* 仍給貼紙／夜色，不是這三階。不建共用 React Button。
+     --cta-solid-bg 是全站唯一主按鈕底（深墨）。品牌橘與青綠強調不要拿來當這顆鈕。
+     著色頁主按鈕是磚紅例外，見 --support-from。 */
   --cta-solid-bg: var(--landing-brand-ink);
   --cta-solid-fg: var(--on-dark);
   --cta-soft-bg: var(--card);
