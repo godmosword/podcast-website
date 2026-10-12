@@ -2,6 +2,18 @@
 
 Bonbon & 馬米親子 Podcast「看圖聽故事」網站的視覺與互動規範。
 
+## 文件適用範圍
+
+| 文件 | 管什麼 |
+|------|--------|
+| **本檔 `DESIGN.md`** | 全站 UI：字級、圓角、間距、CTA 三階、互動、無障礙底線 |
+| [`docs/STYLE-BIBLE.md`](docs/STYLE-BIBLE.md) | 跨網站、著色、遊戲的視覺決策（主色角色、畫風、兒童觸控、圖內文字例外） |
+| [`docs/GAMEKIT-ART-BIBLE.md`](docs/GAMEKIT-ART-BIBLE.md) | 只描述還沒接到上線遊戲的像素 runtime。上線遊戲的畫風以風格聖經為準 |
+| [`docs/UNIVERSE-ART-BIBLE.md`](docs/UNIVERSE-ART-BIBLE.md) | 宇宙地圖的島嶼黏土資產 |
+| [`docs/VISUAL-ACCEPTANCE.md`](docs/VISUAL-ACCEPTANCE.md) | 視覺改動的勾選驗收 |
+
+主色角色、著色頁磚紅例外、兒童觸控與畫風確認見風格聖經，不在本檔重寫一整份。
+
 ## 視覺方針（v0.2：插畫主導＋克制 chrome）
 
 保留黏土插畫與粉嫩品牌色，chrome 依 **Apple Human Interface Guidelines** 升級為清晰、讓位、有深度的產品介面——童趣靠插畫與色彩，不靠麥克筆描邊或密集塗鴉堆可愛。
@@ -237,6 +249,7 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
 
 - 觸控目標 min-height ≥ 44px（48px）；調整密度時只加不減。
 - 相鄰互動元素 gap ≥ 8px（12px）；卡片 grid gap ≥ 12px。
+- **兒童主操作**（著色色票、著色工具、遊戲抬頭的預設尺寸）觸控 ≥48px、相鄰可點間距 ≥8px。著色色票與著色工具列的間距已是 8px，色塊維持 ≥48px，窄螢幕換行、不縮小。寬度 &lt;360px 的遊戲抬頭仍是 44px、間距 4px：再放大，日夜切換會被擠出約 320px 的畫面（見 `GamePageShell.module.css`）。這條窄螢幕例外本輪不改版面。細節見 [`docs/STYLE-BIBLE.md`](docs/STYLE-BIBLE.md)。
 - section 垂直間距 mobile ≥ 24px；內文 line-height ≥ 1.5（標籤型小字豁免）。
 - 純文字段落 max-width ≤ 640px。
 - 文案密度：兒童動線頁不放超過一行的家長散文（家長說明歸戶 `/for-parents` 與 footer）；標題 ≤ 8 字、CTA ≤ 6 字。Landing 四段分區 CTA 本輪改長句當可見段名（見首頁 IA），其餘兒童 CTA 仍 ≤6 字。`/legal` 精簡不得刪改具法律效力語句。
@@ -268,6 +281,16 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
 - `components/ui/line-icon-glyphs.test.ts` 守住已改的檔案不再用文字符號、不再自畫重複的圖。
 
 ### 色彩分層
+
+日間三個角色不要混叫「主色」（夜間 token 會覆寫色碼，角色不變）：
+
+| 角色 | Token | 日間色碼 | 用在哪 |
+|------|--------|----------|--------|
+| 品牌 | `--landing-brand` | `#FF8C2B` | 頂欄、品牌識別。不是頁面唯一主按鈕 |
+| 唯一主按鈕 | `--cta-solid-bg`（等於 `--landing-brand-ink`） | `#3A2410` | 每頁一顆主行動，白字 |
+| 互動強調 | `--accent`（日間等於 `--landing-heading`） | `#2A9D8F` | 邊框、底色、裝飾。文字改用 `--accent-ink` `#1F7268` |
+
+著色頁主按鈕用 `--support-from` `#C94A1E`（磚紅，白字）。這是**已登記的例外**，外觀維持現況，不改綁 `--cta-solid-bg`。
 
 - 全站語意色集中在 `app/globals.css`（文字、背景、互動、狀態、品牌色）。
 - 遊戲載入器、地圖木牌、播放器黑底等固定美術色可保留為 component-local／allowlist 色，不跨元件複製同一組 hex。

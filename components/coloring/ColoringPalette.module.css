@@ -1,17 +1,21 @@
 .wrap {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(48px, 1fr));
-  gap: 4px;
+  /* 兒童色票：間距至少 8px。排不下就換行（兩排或更多），不把色塊縮到 48px 以下。 */
+  display: flex;
+  flex-wrap: wrap;
   justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-width: 0;
   padding: 0;
 }
 
 .swatch {
-  width: 100%;
+  box-sizing: border-box;
+  flex: 0 0 48px;
+  width: 48px;
+  height: 48px;
   min-width: 48px;
   min-height: 48px;
-  aspect-ratio: 1;
-  height: auto;
   border-radius: var(--radius-circle);
   border: 3px solid color-mix(in srgb, var(--coloring-ink) 18%, transparent);
   cursor: pointer;

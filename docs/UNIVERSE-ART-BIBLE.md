@@ -1,5 +1,7 @@
 # 車車宇宙 · 樂園地圖 美術聖經（Art Bible）v5
 
+> 適用範圍：宇宙地圖的島、海、天與漫遊者黏土資產。全站 UI 見 [`DESIGN.md`](../DESIGN.md)；上線遊戲與著色的視覺決策見 [`STYLE-BIBLE.md`](STYLE-BIBLE.md)。像素 runtime 見 [`GAMEKIT-ART-BIBLE.md`](GAMEKIT-ART-BIBLE.md)，不要拿來畫島。
+
 > 唯一目的：**讓各自獨立產出的「島」（不論誰畫、AI 生、還是 Blender 算）看起來像同一個世界。**
 > 剪貼感幾乎都來自三件事不一致：**相機角度、光線、材質光澤**。把這份數值定死，再開始量產資產。
 >

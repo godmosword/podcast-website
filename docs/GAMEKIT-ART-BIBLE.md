@@ -2,6 +2,23 @@
 
 > 遊樂園 Game Kit 共用視覺規範。現行程式分為 `react/`、`runtime/`、`progress/`、`games/` 四層。
 
+## 適用範圍（2026-10-12 對過程式）
+
+本檔描述 `lib/gamekit/runtime/` 的**像素畫布規格**（整數倍放大、`image-rendering: pixelated`、32 色 `MASTER_PALETTE`、程序 sprite sheet）。它不是上線四款遊戲的畫風說明。
+
+上線遊戲都沒有實作 `fixedUpdate`，所以 `GameHost` 那段像素 `<canvas>` 不會出現：
+
+| 遊戲 | 畫面上實際怎麼畫 |
+|------|------------------|
+| 方塊轉轉 `block-drop` | CSS 格子＋圓角色塊（`components/games/blockDropTheme.ts` 的 `CLAY_BLOCK_COLORS`，`borderRadius: 7`）。不是像素風 |
+| 車車消消樂 `candy-match` | 黏土風 SVG（`components/games/CandyMatchPieceArt.tsx`） |
+| 多多壽司屋 `dino-sushi` | 黏土風 SVG（`lib/games/dino-sushi/art.tsx`） |
+| 繪本塗塗鴉 | 黑線稿，不走 Game Kit 畫布 |
+
+BGM 也不是本檔寫的 chiptune ogg：三款 Game Kit 遊戲在 `playing` 時播的是 WebAudio 程序方波（`lib/gamekit/runtime/chiptune-bgm.ts`）。
+
+上線遊戲的色票角色、觸控與畫風以 [`STYLE-BIBLE.md`](STYLE-BIBLE.md) 與 [`DESIGN.md`](../DESIGN.md) 為準。下面的像素規格只留給這套還沒被上線遊戲接上的 runtime，不要拿來改現有畫面。
+
 ## 渲染
 
 | 遊戲 id | 內部解析度 | 比例 |

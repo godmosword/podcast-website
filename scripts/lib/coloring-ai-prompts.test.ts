@@ -21,6 +21,14 @@ describe("coloring AI prompts", () => {
     expect(CHARACTER_LINE_ART_PROMPT).toMatch(/sun-and-cloud/i);
   });
 
+  test("禁文字，但小紅賽車的數字 2 是唯一例外", () => {
+    for (const prompt of [CHARACTER_LINE_ART_PROMPT, SCENE_LINE_ART_PROMPT]) {
+      expect(prompt).toMatch(/except the single outlined numeral 2/i);
+      expect(prompt).toMatch(/小紅賽車/);
+      expect(prompt).not.toMatch(/No text, letters, or numbers anywhere\./);
+    }
+  });
+
   test("lineArtPromptFor 依 kind 分流", () => {
     expect(lineArtPromptFor("scene")).toBe(SCENE_LINE_ART_PROMPT);
     expect(lineArtPromptFor("character")).toBe(CHARACTER_LINE_ART_PROMPT);

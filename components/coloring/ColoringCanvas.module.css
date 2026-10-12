@@ -86,7 +86,8 @@
   position: static;
   z-index: 2;
   display: grid;
-  gap: 0.35rem;
+  /* 完成鈕、色票、工具是相鄰可點區，至少 8px。0.35rem 在字級放大時仍可再變大。 */
+  gap: max(0.35rem, var(--space-2));
   align-content: end;
   min-width: 0;
   margin: 0;
