@@ -39,14 +39,14 @@
 |------|------|------|
 | 故事插畫、Landing、宇宙地圖 | 暖色粉彩黏土（霧面、柔光、低對比） | `DESIGN.md`、`UNIVERSE-ART-BIBLE.md` |
 | 著色頁 | 純黑粗線稿＋白底 | `scripts/lib/coloring-ai-prompts.ts` |
-| 消消樂、壽司屋 | 黏土語彙的向量 SVG | `CandyMatchPieceArt.tsx`、`lib/games/dino-sushi/art.tsx` |
+| 消消樂、壽司屋 | 黏土語彙的向量 SVG | `CandyMatchPieceArt.tsx`、`lib/games/dino-sushi/art.tsx`；壽司屋店面道具在 `shop-art.tsx`，雨棚、木牆、迴轉帶是 `DinoSushiShop.module.css` 的 CSS 漸層 |
 | 方塊轉轉 | **不是像素風。** CSS 格子＋圓角色塊，`borderRadius: 7`，色在 `CLAY_BLOCK_COLORS` | `components/games/BlockDropWell.tsx`、`blockDropTheme.ts` |
 
 方塊轉轉的 adapter 沒有 `fixedUpdate`。`GameHost` 的 `image-rendering: pixelated` 畫布只在有 `fixedUpdate` 時出現，所以上線畫面不會走那條路。`lib/gamekit/runtime/palette.ts` 與 `procedural-sheets.ts` 仍在程式裡，沒有上線遊戲在用。像素規格的適用範圍寫在 Game Kit 美術聖經開頭。
 
 遊戲內字：方塊轉轉 HUD 用 `var(--font-sans)`，這個變數沒有定義，所以落到 PingFang TC／微軟正黑體，不是 8px 點陣字。消消樂與壽司屋按鈕寫 `font-family: inherit`，跟著全站 `--font-stack-body`。
 
-音效：著色等短音在 `lib/sfx.ts`（WebAudio，需手勢）。三款 Game Kit 遊戲在 `playing` 時會播程序方波 BGM（`chiptune-bgm.ts`），不是 ogg 檔。真機音量【未確認】。
+音效：著色等短音在 `lib/sfx.ts`（WebAudio，需手勢）。三款 Game Kit 遊戲在 `playing` 時播程序合成 BGM（`chiptune-bgm.ts`），不是 ogg 檔：方塊轉轉是方波，消消樂與壽司屋是三角波旋律。壽司屋另有合成音效（`lib/games/dino-sushi/sfx.ts`，經 Game Kit `voices()`）與店內環境音（`lib/gamekit/runtime/ambience.ts`，走 music 分軌、只在廚房出現）。真機音量【未確認】。
 
 ## 3. 兒童觸控【已拍板，只調了著色區的間距】
 
@@ -85,7 +85,7 @@
 
 ## 6. 大幅修改的決定
 
-- 著色 12 色粉彩、圖案與色名：預覽已做，等看過再決定是否上線。見 [`proposals/2026-10-12-coloring-pastel-swatches.md`](proposals/2026-10-12-coloring-pastel-swatches.md)
+- 著色 12 色粉彩、圖案與色名：已上線（#206，2026-10-12）。見 [`proposals/2026-10-12-coloring-pastel-swatches.md`](proposals/2026-10-12-coloring-pastel-swatches.md)
 - 遊戲畫風：已決定：維持現狀。見 [`proposals/2026-10-12-game-art-style.md`](proposals/2026-10-12-game-art-style.md)
 - 按鈕陰影：已決定：維持現狀。上一節
 
