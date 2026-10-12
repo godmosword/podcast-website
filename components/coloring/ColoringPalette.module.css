@@ -37,7 +37,8 @@
   min-width: 48px;
   min-height: 48px;
   border-radius: var(--radius-circle);
-  border: 3px solid color-mix(in srgb, var(--coloring-ink) 18%, transparent);
+  /* 62% 墨色混底色：日間對白底約 4.0:1，夜間對深底約 6.4:1（都 ≥3:1）。填色不改。 */
+  border: 3px solid color-mix(in srgb, var(--coloring-ink) 62%, var(--bg));
   box-shadow: 0 2px 0 color-mix(in srgb, var(--coloring-ink) 12%, transparent);
 }
 
@@ -61,24 +62,27 @@
   fill: currentColor;
 }
 
+.name {
+  display: block;
+  width: 48px;
+  min-width: 0;
+  margin: 1px 0 0;
+  padding: 0;
+  font-size: var(--fs-meta);
+  line-height: 1.15;
+  text-align: center;
+  color: var(--ink);
+  pointer-events: none;
+  /* 預設字級三個字塞得進 48px。放大時換行，不 nowrap 切掉，圓形仍是 48px。 */
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
 /* 橫向矮視窗色票欄只剩約 36px。色名上移 2px 才塞得進同一屏，圓形仍是 48px、列距仍是 8px。 */
 @media (max-height: 639px) and (min-width: 700px) {
   .name {
     margin-top: -2px;
   }
-}
-
-.name {
-  display: block;
-  width: 48px;
-  margin: 1px 0 0;
-  padding: 0;
-  font-size: var(--fs-meta);
-  line-height: 1;
-  text-align: center;
-  color: var(--ink);
-  pointer-events: none;
-  white-space: nowrap;
 }
 
 .item:hover .swatch {

@@ -71,6 +71,7 @@
     "generate:story-blurs": "tsx scripts/generate-story-blurs.ts",
     "generate:coloring-lineart": "tsx scripts/generate-coloring-lineart.ts",
     "generate:coloring-reference": "tsx scripts/generate-coloring-reference.ts",
+    "recolor:coloring-reference": "tsx scripts/recolor-coloring-reference.ts",
     "generate:coloring-close-gaps": "tsx scripts/close-coloring-lineart-gaps.ts",
     "generate:coloring-ai-lineart": "tsx --env-file-if-exists=.env.local scripts/generate-coloring-ai-lineart.ts",
     "generate:coloring-cover": "tsx --env-file-if-exists=.env.local scripts/generate-coloring-cover.ts",

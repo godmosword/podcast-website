@@ -43,7 +43,7 @@ function fakeContext() {
     return node;
   };
   const ctx = {
-    state: "running",
+    state: "running" as AudioContextState,
     currentTime: 5,
     sampleRate: 8000,
     destination: make("destination"),
@@ -56,6 +56,7 @@ function fakeContext() {
       return { sampleRate, getChannelData: () => data };
     },
     resume: () => Promise.resolve(),
+    close: () => Promise.resolve(),
   };
   return { ctx, nodes };
 }
@@ -252,5 +253,76 @@ describe("GameKitAudioBus 背景音樂＋環境音", () => {
     expect(live(nodes, "noise").length).toBeGreaterThan(0);
     bus.stopBgm();
     expect(live(nodes, "noise")).toHaveLength(0);
+  });
+
+  it("interrupted 也會 resume，dispose 關掉 context", () => {
+    const { ctx } = fakeContext();
+    ctx.state = "interrupted";
+    const resume = vi.fn(() => Promise.resolve());
+    const close = vi.fn(() => Promise.resolve());
+    ctx.resume = resume;
+    ctx.close = close;
+    vi.stubGlobal("window", {
+      AudioContext: function FakeAudioContext() {
+        return ctx;
+      },
+    });
+    const bus = new GameKitAudioBus();
+    bus.ensureContext();
+    expect(resume).toHaveBeenCalled();
+    bus.dispose();
+    expect(close).toHaveBeenCalled();
+  });
+});
+
+describe("ChiptuneBgmPlayer", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  function setup(state: AudioContextState = "running") {
+    const { ctx, nodes } = fakeContext();
+    ctx.state = state;
+    const freqs: number[] = [];
+    const createOscillator = ctx.createOscillator;
+    ctx.createOscillator = () => {
+      const node = createOscillator();
+      const frequency = node.frequency as { setValueAtTime: (value: number, time: number) => void };
+      const setValueAtTime = frequency.setValueAtTime;
+      frequency.setValueAtTime = (value: number, time: number) => {
+        freqs.push(value);
+        setValueAtTime(value, time);
+      };
+      return node;
+    };
+    const music = ctx.createGain();
+    const player = new ChiptuneBgmPlayer(
+      ctx as unknown as AudioContext,
+      music as unknown as GainNode,
+    );
+    return { ctx, nodes, player, freqs };
+  }
+
+  it("同一個遊戲正在播時再 play 不會重開", () => {
+    const { nodes, player } = setup();
+    player.play("dino-sushi");
+    const osc = nodes.filter((node) => node.kind === "osc").length;
+    player.play("dino-sushi");
+    expect(nodes.filter((node) => node.kind === "osc").length).toBe(osc);
+    player.stop();
+  });
+
+  it("interrupted 期間不發聲，恢復後仍從同一個拍子開始", () => {
+    const { ctx, player, freqs } = setup("interrupted");
+    player.play("dino-sushi");
+    vi.advanceTimersByTime(150);
+    expect(freqs).toEqual([]);
+    ctx.state = "running";
+    vi.advanceTimersByTime(150);
+    expect(freqs).toContain(784);
+    player.stop();
   });
 });

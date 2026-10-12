@@ -14,6 +14,7 @@ import {
 import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
 import Icon from "@/components/ui/Icon";
+import { paletteHex } from "@/lib/coloring/tools";
 import styles from "./GamePageShell.module.css";
 
 const GamePlayChromeSlotContext = createContext<HTMLElement | null>(null);
@@ -93,7 +94,7 @@ function ParkGateIcon() {
         strokeWidth="1.6"
         strokeLinejoin="round"
       />
-      <circle cx="12" cy="8" r="1.35" fill="#e85d4c" />
+      <circle cx="12" cy="8" r="1.35" fill={paletteHex("red")} />
     </svg>
   );
 }

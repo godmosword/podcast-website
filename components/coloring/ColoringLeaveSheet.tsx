@@ -1,6 +1,7 @@
 "use client";
 
 import { IconStar } from "@/components/games/ClayIcons";
+import { paletteHex } from "@/lib/coloring/tools";
 import { PictureStackIcon } from "./ColoringToolbarIcons";
 import type { LeaveTarget } from "./useColoringLeave";
 import { ClearIcon, CrayonIcon } from "./ColoringToolbarIcons";
@@ -40,7 +41,7 @@ function ParkGateIcon() {
         strokeWidth="1.6"
         strokeLinejoin="round"
       />
-      <circle cx="12" cy="8" r="1.35" fill="#e85d4c" />
+      <circle cx="12" cy="8" r="1.35" fill={paletteHex("red")} />
     </svg>
   );
 }

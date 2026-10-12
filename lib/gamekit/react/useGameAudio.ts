@@ -4,11 +4,23 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { GameKitAudioBus, type SynthVoice } from "@/lib/gamekit/runtime/audio";
 import { useGameKitSettings } from "@/hooks/useGameKitSettings";
 import type { GameKitGameId } from "@/lib/gamekit/types";
+import { PROGRESS_STORAGE_KEY } from "@/lib/progress-keys";
 import {
   SFX_CHANGE_EVENT,
+  invalidateSfxCache,
   isSfxEnabled,
   setSfxEnabled,
 } from "@/lib/sfx";
+
+function sfxEnabledInRaw(raw: string | null): boolean | null {
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw) as { sfxEnabled?: unknown };
+    return typeof parsed.sfxEnabled === "boolean" ? parsed.sfxEnabled : null;
+  } catch {
+    return null;
+  }
+}
 
 export function useGameAudio(gameId?: GameKitGameId) {
   const busRef = useRef<GameKitAudioBus | null>(null);
@@ -111,17 +123,25 @@ export function useGameAudio(gameId?: GameKitGameId) {
         getBus().playBgm(gameId);
       }
     };
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== PROGRESS_STORAGE_KEY) return;
+      const previous = sfxEnabledInRaw(event.oldValue);
+      const next = sfxEnabledInRaw(event.newValue);
+      if (previous === next) return;
+      invalidateSfxCache();
+      onChange();
+    };
     window.addEventListener(SFX_CHANGE_EVENT, onChange);
-    window.addEventListener("storage", onChange);
+    window.addEventListener("storage", onStorage);
     return () => {
       window.removeEventListener(SFX_CHANGE_EVENT, onChange);
-      window.removeEventListener("storage", onChange);
+      window.removeEventListener("storage", onStorage);
     };
   }, [gameId, getBus, syncMuted]);
 
   useEffect(
     () => () => {
-      busRef.current?.stopBgm();
+      busRef.current?.dispose();
     },
     [],
   );

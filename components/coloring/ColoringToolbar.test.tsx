@@ -3,6 +3,7 @@ import type { ComponentProps } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { paletteHex } from "@/lib/coloring/tools";
 import { ColoringToolbar } from "./ColoringToolbar";
 import { BucketIcon, CrayonIcon, EraserIcon } from "./ColoringToolbarIcons";
 
@@ -111,9 +112,9 @@ describe("ColoringToolbar", () => {
   });
 
   it("畫具圖示用色盤色，不是單色剪影", () => {
-    expect(renderToStaticMarkup(<CrayonIcon />)).toContain("#f2c94c");
-    expect(renderToStaticMarkup(<BucketIcon />)).toContain("#2d9cdb");
-    expect(renderToStaticMarkup(<EraserIcon />)).toContain("#f781c6");
+    expect(renderToStaticMarkup(<CrayonIcon />)).toContain(paletteHex("yellow"));
+    expect(renderToStaticMarkup(<BucketIcon />)).toContain(paletteHex("blue"));
+    expect(renderToStaticMarkup(<EraserIcon />)).toContain(paletteHex("pink"));
   });
 
   it("清空要看圖確認，留下顏色不會清掉", () => {
