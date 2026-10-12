@@ -284,7 +284,7 @@ export function gameListJsonLd(
     "@id": `${siteUrl}/games#games`,
     name: "車車遊樂園小遊戲",
     description:
-      "車車遊樂園的親子小遊戲清單：繪本塗塗鴉、車車消消樂、多多壽司屋與方塊轉轉。",
+      "車車遊樂園的親子小遊戲清單：繪本塗塗鴉、車車消消樂與多多壽司屋。",
     url: `${siteUrl}/games`,
     numberOfItems: games.length,
     itemListElement: games.map((game, index) => ({

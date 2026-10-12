@@ -6,11 +6,11 @@ import { BRAND_COLORS } from "@/lib/brand-assets";
 // 這裡集中管理「整個節目」的收聽平台連結。
 // 頁尾、關於頁、每集故事頁的平台圖示都讀這份資料，改一次即全站同步。
 //
-// 要新增 / 換連結：改下方 url 即可；圖示由 lib/connect-icons.tsx 圓形 SVG 渲染。
+// 要新增 / 換連結：改下方 url 即可。官方標誌見 lib/official-marks.ts；KKBOX 仍是自繪圖示。
 // url 留空字串的項目會自動隱藏。
 // ============================================================
 
-/** 圖示識別字，對應 PlatformLinks 內的 SVG。 */
+/** 圖示識別字。apple／spotify／youtube 對官方檔，kkbox 對自繪圖。 */
 export type PlatformIcon = "apple" | "spotify" | "kkbox" | "youtube";
 
 export type Platform = {

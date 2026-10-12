@@ -8,6 +8,7 @@ export const RETIRED_GAME_SLUGS = [
   "car-adventure",
   "candy-kart",
   "snowboard",
+  "block-drop",
 ] as const;
 
 export function retiredGameRedirects(): {

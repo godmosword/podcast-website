@@ -4,7 +4,11 @@ import { localDateKey, readActivityLog, recordGameSession } from "@/lib/activity
 import { buildParentDashboardSnapshot } from "@/lib/for-parents/dashboard";
 import { DEFAULT_PROGRESS } from "@/lib/progress-store";
 import { stickerLabel } from "@/lib/gamekit/progress/stickers";
+import { RETIRED_GAME_SLUGS } from "@/lib/retired-game-redirects";
 import { GAMEKIT_GAME_IDS } from "@/lib/gamekit/types";
+
+const RETIRED = new Set<string>(RETIRED_GAME_SLUGS);
+const PUBLIC_GAME_IDS = GAMEKIT_GAME_IDS.filter((id) => !RETIRED.has(id));
 
 /**
  * 新增 Game Kit 遊戲時，TS 只會強制補 Record<GameKitGameId, …>；
@@ -28,10 +32,20 @@ describe("Game Kit 遊戲 id 名單", () => {
     vi.stubGlobal("localStorage", storage);
   });
 
-  it.each(GAMEKIT_GAME_IDS)("%s 在遊戲目錄、下一站環裡", (id) => {
+  it.each(PUBLIC_GAME_IDS)("%s 在遊戲目錄、下一站環裡", (id) => {
     expect(GAMES.some((g) => g.slug === id)).toBe(true);
     expect(GAME_NEXT[id]).toBeDefined();
     expect(Object.values(GAME_NEXT)).toContain(id);
+  });
+
+  it("已下架的 Game Kit 遊戲不在目錄、下一站或儀表板", () => {
+    const retiredKit = GAMEKIT_GAME_IDS.filter((id) => RETIRED.has(id));
+    expect(retiredKit).toContain("block-drop");
+    for (const id of retiredKit) {
+      expect(GAMES.some((g) => g.slug === id)).toBe(false);
+      expect(GAME_NEXT[id]).toBeUndefined();
+      expect(Object.values(GAME_NEXT)).not.toContain(id);
+    }
   });
 
   it.each(GAMEKIT_GAME_IDS)("%s 有「玩過」貼紙的中文名", (id) => {
@@ -49,6 +63,6 @@ describe("Game Kit 遊戲 id 名單", () => {
 
   it("家長儀表板每款遊戲各一列", () => {
     const ids = buildParentDashboardSnapshot(DEFAULT_PROGRESS).games.map((g) => g.gameId);
-    expect([...ids].sort()).toEqual([...GAMEKIT_GAME_IDS].sort());
+    expect([...ids].sort()).toEqual([...PUBLIC_GAME_IDS].sort());
   });
 });

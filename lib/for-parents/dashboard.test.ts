@@ -42,9 +42,9 @@ describe("buildParentDashboardSnapshot", () => {
       gameProfile: {
         ...DEFAULT_PROGRESS.gameProfile,
         stars: 4,
-        gamesPlayed: { "block-drop": true },
-        bests: { "block-drop": 1200 },
-        medals: { "block-drop": [7, 3] },
+        gamesPlayed: { "candy-match": true },
+        bests: { "candy-match": 1200 },
+        medals: { "candy-match": [7, 3] },
         stickers: ["played-block-drop"],
       },
       engagement: {
@@ -60,9 +60,10 @@ describe("buildParentDashboardSnapshot", () => {
     expect(snap.totalMedalStars).toBe(5);
     expect(snap.profileStars).toBe(4);
     expect(snap.stickerLabels).toContain("玩過方塊轉轉");
-    expect(snap.games.find((g) => g.gameId === "block-drop")?.played).toBe(
+    expect(snap.games.find((g) => g.gameId === "candy-match")?.played).toBe(
       true,
     );
+    expect(snap.games.find((g) => g.gameId === "block-drop")).toBeUndefined();
     expect(snap.recentStories[0]?.slug).toBe("ep-15");
     expect(snap.recommendedStories.length).toBeGreaterThan(0);
     expect(snap.reflectionSlugs).toContain("ep-9");

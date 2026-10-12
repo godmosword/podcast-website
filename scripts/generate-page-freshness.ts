@@ -35,10 +35,6 @@ const ROUTE_SOURCES: Record<string, string[]> = {
     "app/games/layout.tsx",
     "app/games/page.module.css",
   ],
-  "/games/block-drop": [
-    "app/games/block-drop/page.tsx",
-    "app/games/block-drop/page.module.css",
-  ],
   "/games/candy-match": ["app/games/candy-match/page.tsx"],
   "/games/dino-sushi": ["app/games/dino-sushi/page.tsx"],
   "/games/coloring-book": [

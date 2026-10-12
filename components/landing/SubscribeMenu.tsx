@@ -7,9 +7,9 @@ import {
   useId,
   useRef,
   useState,
-  type CSSProperties,
   type ReactNode,
 } from "react";
+import { ConnectMark } from "@/components/brand/OfficialMark";
 import { BrandSvg, PLATFORM_ICON_PATHS, SOCIAL_ICON_PATHS } from "@/lib/connect-icons";
 import { trackPlatformClick } from "@/lib/analytics";
 import { appendPlatformUtm } from "@/lib/platform-utm";
@@ -36,7 +36,6 @@ type ConnectItem = {
   label: string;
   href: string;
   ariaLabel: string;
-  badgeStyle?: CSSProperties;
   icon: ReactNode;
   onSelect?: () => void;
 };
@@ -48,11 +47,17 @@ function connectItemsFor(kind: "channels" | "socials"): ConnectItem[] {
       label: platform.label,
       href: appendPlatformUtm(platform.url, { source: "nav-dropdown" }),
       ariaLabel: `在 ${platform.label} 收聽`,
-      badgeStyle: { background: platform.color },
       icon: (
-        <BrandSvg className={styles.icon}>
-          {PLATFORM_ICON_PATHS[platform.icon]}
-        </BrandSvg>
+        <ConnectMark
+          icon={platform.icon}
+          fallback={
+            <span className={styles.badge} style={{ background: platform.color }}>
+              <BrandSvg className={styles.icon}>
+                {PLATFORM_ICON_PATHS[platform.icon]}
+              </BrandSvg>
+            </span>
+          }
+        />
       ),
       onSelect: () => trackPlatformClick(platform.label, "nav-dropdown"),
     }));
@@ -62,9 +67,17 @@ function connectItemsFor(kind: "channels" | "socials"): ConnectItem[] {
     label: social.label,
     href: social.url,
     ariaLabel: `前往 ${social.label}`,
-    badgeStyle: { background: social.background },
     icon: (
-      <BrandSvg className={styles.icon}>{SOCIAL_ICON_PATHS[social.icon]}</BrandSvg>
+      <ConnectMark
+        icon={social.icon}
+        fallback={
+          <span className={styles.badge} style={{ background: social.background }}>
+            <BrandSvg className={styles.icon}>
+              {SOCIAL_ICON_PATHS[social.icon]}
+            </BrandSvg>
+          </span>
+        }
+      />
     ),
   }));
 }
@@ -153,9 +166,7 @@ export default function ConnectMenu({
                     setOpen(false);
                   }}
                 >
-                  <span className={styles.badge} style={item.badgeStyle}>
-                    {item.icon}
-                  </span>
+                  {item.icon}
                   <span className={styles.label}>{item.label}</span>
                 </a>
               </li>

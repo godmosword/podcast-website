@@ -556,7 +556,7 @@ describe("videoGameJsonLd", () => {
     const organizationId = graph.find((n) => n["@type"] === "Organization")?.[
       "@id"
     ];
-    const data = videoGameJsonLd(gameBySlug("block-drop"));
+    const data = videoGameJsonLd(gameBySlug("dino-sushi"));
     expect(data.publisher).toEqual({ "@id": organizationId });
   });
 

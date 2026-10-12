@@ -18,8 +18,7 @@
 |------|------|------|------|
 ## 商標（指示性使用）
 
-頁面上的 Apple Podcasts、Spotify、KKBOX、YouTube、LINE、Instagram、Threads、Facebook
-等圖示與名稱，僅用於連結至各平台官方頁面，商標權屬各權利人。收聽平台與社群圖示見 `lib/connect-icons.tsx`；`public/brand/` 為歷史備存。
+Apple Podcasts、Spotify、YouTube、Instagram、Threads、Facebook 的畫面上標誌，使用各權利人公開品牌資源的官方檔（見 `public/brand/SOURCES.md`），僅作指示性連結，商標權屬各權利人。KKBOX 圖示為本站自繪，不是官方徽章。LINE 只出現在「以 LINE 分享」的名稱，沒有使用 LINE 官方標誌。電子郵件圖示是本站通用符號。
 
 ## npm 依賴
 
@@ -32,7 +31,9 @@
 | `@sentry/nextjs` | 10.70.0 | MIT |
 | `@vercel/analytics` | 2.0.1 | MIT |
 | `@vercel/functions` | 3.9.5 | Apache-2.0 |
+| `@maplibre/maplibre-gl-leaflet` | 0.1.4 | ISC |
 | `leaflet` | 1.9.4 | BSD-2-Clause |
+| `maplibre-gl` | 6.14.0 | BSD-3-Clause |
 | `next` | 16.3.2 | MIT |
 | `openai` | 6.42.0 | Apache-2.0 |
 | `react`、`react-dom` | 19.2.7 | MIT |

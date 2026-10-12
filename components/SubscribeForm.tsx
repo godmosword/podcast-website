@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useId, useState, type FormEvent } from "react";
 import { trackPlatformClick, trackSubscribeSubmit } from "@/lib/analytics";
+import { ConnectMark } from "@/components/brand/OfficialMark";
 import { BrandSvg, PLATFORM_ICON_PATHS } from "@/lib/connect-icons";
 import { appendPlatformUtm } from "@/lib/platform-utm";
 import { visiblePlatforms } from "@/lib/platforms";
@@ -121,11 +122,16 @@ export default function SubscribeForm({ source = "subscribe_page" }: Props) {
               aria-label={`在 ${p.label} 收聽`}
               onClick={() => trackPlatformClick(p.label, "subscribe-closed")}
             >
-              <span className={styles.platformBadge} style={{ background: p.color }}>
-                <BrandSvg className={styles.platformIcon}>
-                  {PLATFORM_ICON_PATHS[p.icon]}
-                </BrandSvg>
-              </span>
+              <ConnectMark
+                icon={p.icon}
+                fallback={
+                  <span className={styles.platformBadge} style={{ background: p.color }}>
+                    <BrandSvg className={styles.platformIcon}>
+                      {PLATFORM_ICON_PATHS[p.icon]}
+                    </BrandSvg>
+                  </span>
+                }
+              />
               <span className={styles.platformLabel}>{p.label}</span>
             </a>
           ))}

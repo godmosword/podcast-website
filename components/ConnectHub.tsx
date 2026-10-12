@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ConnectMark } from "@/components/brand/OfficialMark";
 import {
   BrandSvg,
   PLATFORM_ICON_PATHS,
@@ -26,7 +27,6 @@ function IconLink({
   href,
   label,
   ariaLabel,
-  badgeStyle,
   children,
   external = true,
   onClick,
@@ -34,16 +34,13 @@ function IconLink({
   href: string;
   label: string;
   ariaLabel: string;
-  badgeStyle?: React.CSSProperties;
   children: React.ReactNode;
   external?: boolean;
   onClick?: () => void;
 }) {
   const content = (
     <>
-      <span className={styles.badge} style={badgeStyle}>
-        {children}
-      </span>
+      {children}
       <span className={styles.label}>{label}</span>
     </>
   );
@@ -106,12 +103,18 @@ export default function ConnectHub({
                 })}
                 label={p.label}
                 ariaLabel={`在 ${p.label} 收聽`}
-                badgeStyle={{ background: p.color }}
                 onClick={() => trackPlatformClick(p.label, "footer-connect")}
               >
-                <BrandSvg className={styles.icon}>
-                  {PLATFORM_ICON_PATHS[p.icon]}
-                </BrandSvg>
+                <ConnectMark
+                  icon={p.icon}
+                  fallback={
+                    <span className={styles.badge} style={{ background: p.color }}>
+                      <BrandSvg className={styles.icon}>
+                        {PLATFORM_ICON_PATHS[p.icon]}
+                      </BrandSvg>
+                    </span>
+                  }
+                />
               </IconLink>
             ))}
           </nav>
@@ -135,11 +138,20 @@ export default function ConnectHub({
                     ? `寄信到 ${s.url.replace(/^mailto:/, "")}`
                     : `前往 ${s.label}`
                 }
-                badgeStyle={{ background: s.background }}
               >
-                <BrandSvg className={styles.icon}>
-                  {SOCIAL_ICON_PATHS[s.icon]}
-                </BrandSvg>
+                <ConnectMark
+                  icon={s.icon}
+                  fallback={
+                    <span
+                      className={styles.badge}
+                      style={{ background: s.background }}
+                    >
+                      <BrandSvg className={styles.icon}>
+                        {SOCIAL_ICON_PATHS[s.icon]}
+                      </BrandSvg>
+                    </span>
+                  }
+                />
               </IconLink>
             ))}
           </nav>

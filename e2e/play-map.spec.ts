@@ -226,7 +226,7 @@ test.describe("親子遊樂地圖", () => {
     const leafletRequests: string[] = [];
     page.on("request", (req) => {
       const url = req.url();
-      if (/leaflet\.css|react-leaflet|tile\.openstreetmap/i.test(url)) {
+      if (/leaflet\.css|react-leaflet|tile\.openstreetmap|openfreemap|maplibre/i.test(url)) {
         leafletRequests.push(url);
       }
     });
@@ -241,6 +241,7 @@ test.describe("親子遊樂地圖", () => {
       timeout: 15_000,
     });
     expect(leafletRequests.length).toBeGreaterThan(0);
+    expect(leafletRequests.some((url) => url.includes("tile.openstreetmap.org"))).toBe(false);
   });
 
   test("行動切換分頁不重建 Leaflet 容器", async ({ page }) => {
@@ -332,7 +333,7 @@ test.describe("親子遊樂地圖", () => {
     // 桌面 view=cards 也不該碰 Leaflet 或 OSM tile——這是本次改版的效能承諾。
     const mapRequests: string[] = [];
     page.on("request", (request) => {
-      if (/leaflet|tile\.openstreetmap/i.test(request.url())) {
+      if (/leaflet|tile\.openstreetmap|openfreemap|maplibre/i.test(request.url())) {
         mapRequests.push(request.url());
       }
     });
@@ -353,6 +354,10 @@ test.describe("親子遊樂地圖", () => {
     await expect(
       page.getByRole("button", { name: "搜尋此區域" }),
     ).toHaveCount(0);
+    expect(mapRequests.some((url) => url.includes("tile.openstreetmap.org"))).toBe(false);
+    await expect
+      .poll(() => mapRequests.some((url) => url.includes("tiles.openfreemap.org")))
+      .toBe(true);
   });
 
   test("搜尋此區域 commit 後約束結果，清除後恢復", async ({ page }) => {

@@ -7,7 +7,7 @@ import { BRAND_COLORS } from "@/lib/connect-icons";
 // url 留空字串會自動隱藏，避免失效連結。
 // ============================================================
 
-/** 圖示識別字，對應 lib/connect-icons.tsx 內的 SVG。 */
+/** 圖示識別字。instagram／threads／facebook 對官方檔，email 對自繪信封。 */
 export type SocialIcon = "instagram" | "threads" | "facebook" | "email";
 
 export type Social = {

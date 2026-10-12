@@ -19,9 +19,6 @@ const D3 = 147;
 const E3 = 165;
 const G3 = 196;
 const A3 = 220;
-const B3 = 247;
-const A4 = 440;
-const B4 = 494;
 const C5 = 523;
 const D5 = 587;
 const E5 = 659;
@@ -29,24 +26,8 @@ const G5 = 784;
 const A5 = 880;
 const R = 0;
 
-/** Game Kit 遊戲的程序生成 chiptune 主題（Phase 3 佔位，日後可換 BeepBox 匯出）。 */
-const BGM_THEMES: Record<GameKitGameId, BgmTheme> = {
-  "block-drop": {
-    bpm: 120,
-    stepsPerBeat: 4,
-    melodyWave: "square",
-    bassWave: "square",
-    melodyVol: 0.075,
-    bassVol: 0.055,
-    melody: [
-      [E5, B4, C5, D5, C5, B4, A4, A4, C5, E5, D5, C5, B4, B4, C5, D5],
-      [E5, C5, E5, G5, E5, C5, D5, E5, G5, E5, D5, C5, B4, A4, B4, C5],
-    ],
-    bass: [
-      [E3, E3, C3, C3, G3, G3, A3, A3, E3, E3, C3, C3, G3, G3, A3, A3],
-      [C3, C3, G3, G3, E3, E3, A3, A3, D3, D3, A3, A3, E3, E3, B3, B3],
-    ],
-  },
+/** 仍在公開遊玩的 Game Kit 遊戲主題。方塊轉轉已下架，旋律不在這個模組。 */
+const BGM_THEMES: Partial<Record<GameKitGameId, BgmTheme>> = {
   // 繽紛消消樂：放慢、輕柔（3–7 歲療癒節奏）
   "candy-match": {
     bpm: 92,
@@ -119,7 +100,7 @@ export class ChiptuneBgmPlayer {
 
   play(gameId: GameKitGameId): void {
     const theme = BGM_THEMES[gameId];
-    if (!validateBgmTheme(theme)) return;
+    if (!theme || !validateBgmTheme(theme)) return;
     this.stop();
     this.theme = theme;
     this.step = 0;

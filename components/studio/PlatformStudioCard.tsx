@@ -1,3 +1,4 @@
+import { ConnectMark } from "@/components/brand/OfficialMark";
 import { BrandSvg, PLATFORM_ICON_PATHS } from "@/lib/connect-icons";
 import type { PlatformIcon } from "@/lib/platforms";
 import {
@@ -8,7 +9,7 @@ import {
 import styles from "./PlatformStudioCard.module.css";
 
 function isPodcastIcon(icon: StudioIcon): icon is PlatformIcon {
-  return icon in PLATFORM_ICON_PATHS;
+  return icon === "apple" || icon === "spotify" || icon === "kkbox" || icon === "youtube";
 }
 
 function PlatformBadge({ icon, color }: { icon: StudioIcon; color: string }) {
@@ -30,11 +31,16 @@ function PlatformBadge({ icon, color }: { icon: StudioIcon; color: string }) {
   }
   if (isPodcastIcon(icon)) {
     return (
-      <span className={styles.badge} style={{ backgroundColor: color }}>
-        <BrandSvg className={styles.badgeIcon}>
-          {PLATFORM_ICON_PATHS[icon]}
-        </BrandSvg>
-      </span>
+      <ConnectMark
+        icon={icon}
+        fallback={
+          <span className={styles.badge} style={{ backgroundColor: color }}>
+            <BrandSvg className={styles.badgeIcon}>
+              {PLATFORM_ICON_PATHS[icon]}
+            </BrandSvg>
+          </span>
+        }
+      />
     );
   }
   return (

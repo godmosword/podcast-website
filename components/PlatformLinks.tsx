@@ -1,6 +1,7 @@
 "use client";
 
 import type { PlatformClickSource } from "@/lib/analytics";
+import { ConnectMark } from "@/components/brand/OfficialMark";
 import { BrandSvg, PLATFORM_ICON_PATHS } from "@/lib/connect-icons";
 import { visiblePlatforms } from "@/lib/platforms";
 import TrackedPlatformLink from "./TrackedPlatformLink";
@@ -44,15 +45,20 @@ export default function PlatformLinks({
             campaign={campaign}
             className={styles.item}
           >
-            <span
-              className={styles.badge}
-              style={{ background: p.color }}
-              aria-hidden
-            >
-              <BrandSvg className={styles.icon}>
-                {PLATFORM_ICON_PATHS[p.icon]}
-              </BrandSvg>
-            </span>
+            <ConnectMark
+              icon={p.icon}
+              fallback={
+                <span
+                  className={styles.badge}
+                  style={{ background: p.color }}
+                  aria-hidden
+                >
+                  <BrandSvg className={styles.icon}>
+                    {PLATFORM_ICON_PATHS[p.icon]}
+                  </BrandSvg>
+                </span>
+              }
+            />
             <span className={styles.label}>{p.label}</span>
           </TrackedPlatformLink>
         ))}

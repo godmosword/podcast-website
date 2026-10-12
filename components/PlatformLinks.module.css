@@ -39,7 +39,8 @@
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  width: 4.5rem;
+  width: auto;
+  max-width: 100%;
   text-decoration: none;
   transition: transform var(--motion-press);
 }

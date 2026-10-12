@@ -1,0 +1,29 @@
+.slot {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  box-sizing: content-box;
+  line-height: 0;
+}
+
+.solo,
+.day,
+.night {
+  display: block;
+  height: var(--mark-h);
+  width: auto;
+  max-width: none;
+}
+
+.night {
+  display: none;
+}
+
+:global(html[data-theme="night"]) .day {
+  display: none;
+}
+
+:global(html[data-theme="night"]) .night {
+  display: block;
+}
