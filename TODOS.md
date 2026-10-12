@@ -27,6 +27,15 @@
 - **後續：拿掉 CTA `nowrap`**：把 `LandingSegment.tsx` 的 `" →"` 半形空白改不斷行空白，箭頭才不會孤行；同時避開 <348px Dudu 遮箭頭、文字級 200% 被 `.panel` 裁尾。
 - **後續：勿靜默啟用 `playCta`**：`LandingSegment.tsx` 三元式會讓主 CTA 從 56px／`--fs-h2`／不透明墨板退回 44px／`.subscribeCta`，契約測不會紅。`.subscribeCta` 已脫離玻璃；啟用前仍須處理字級／高度落差，且不得把分區主 CTA 換成橘 `.playCta`。
 
+### 品牌標誌合規後續（2026-10-12）
+
+主體已落地（官方檔＋同一顆章，見 `lib/BRAND-ASSETS-HARD-RULES.md`），剩下要使用者本人處理或決定的：
+
+- **Meta 官方檔**：在 [Meta Brand Resource Center](https://www.meta.com/brand/resources/) 接受條款後下載 Instagram glyph（漸層＋白）、Facebook logo、Threads logo 包，放進 `public/brand/`，改 `lib/brand-marks.tsx` 的 `art` 並拿掉 `interim`，更新 `SOURCES.md`。`ops · S · 使用者`
+- **KKBOX 正式檔**：官網沒有下載連結、有機器人驗證；向 KKBOX 索取正式字標，並確認數位最小尺寸、淺底用標準青還是黑。`ops · S · 使用者`
+- **YouTube 連結**：規範寫只有連到頻道時才能把標誌做成連結，`lib/platforms.ts` 現在連播放清單（也影響 JSON-LD `sameAs`）。要改連頻道首頁請提供網址。`product · S · 使用者決定`
+- **/studio 卡片左緣色條**：與 DESIGN「容器不做左緣色條」衝突（既有問題，noindex 頁）。`design · S · 無`
+
 ### 遊樂園美術／可玩性審（2026-09-19）待做
 
 > **審法：** 對照 main `b8a7960d`，在 Vercel prod（`podcast-website-mu.vercel.app`）用 Playwright 實玩三款：390×844、390×664（Safari 有工具列的真實高度）、360×740、1280×800，日夜兩色；消消樂打完第 1 關進第 2 關、方塊「標準」堆到頂、著色本實際落筆。全部可載入、無 console error。

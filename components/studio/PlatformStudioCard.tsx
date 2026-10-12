@@ -1,4 +1,4 @@
-import { BrandSvg, PLATFORM_ICON_PATHS } from "@/lib/connect-icons";
+import BrandMark from "@/components/BrandMark";
 import type { PlatformIcon } from "@/lib/platforms";
 import {
   listenUrlForStudioPlatform,
@@ -8,38 +8,27 @@ import {
 import styles from "./PlatformStudioCard.module.css";
 
 function isPodcastIcon(icon: StudioIcon): icon is PlatformIcon {
-  return icon in PLATFORM_ICON_PATHS;
+  return icon !== "soundon" && icon !== "vercel";
 }
 
-function PlatformBadge({ icon, color }: { icon: StudioIcon; color: string }) {
-  if (icon === "soundon") {
-    return (
-      <span className={styles.badge} style={{ backgroundColor: color }}>
-        <span className={styles.badgeText}>SO</span>
-      </span>
-    );
-  }
-  if (icon === "vercel") {
-    return (
-      <span className={styles.badge} style={{ backgroundColor: color }}>
-        <svg viewBox="0 0 24 24" aria-hidden>
-          <path d="M12 2L2 19.5h20L12 2z" fill="currentColor" />
-        </svg>
-      </span>
-    );
-  }
+/** 收聽平台用官方標誌（不加章、不用品牌色底）；後台工具用中性文字章。 */
+function PlatformBadge({ icon }: { icon: StudioIcon }) {
   if (isPodcastIcon(icon)) {
     return (
-      <span className={styles.badge} style={{ backgroundColor: color }}>
-        <BrandSvg className={styles.badgeIcon}>
-          {PLATFORM_ICON_PATHS[icon]}
-        </BrandSvg>
+      <span className={styles.badge}>
+        <BrandMark id={icon} surface="row" />
       </span>
     );
   }
   return (
-    <span className={styles.badge} style={{ backgroundColor: color }}>
-      <span className={styles.badgeText}>?</span>
+    <span className={`${styles.badge} ${styles.badgeNeutral}`}>
+      {icon === "soundon" ? (
+        <span className={styles.badgeText}>SO</span>
+      ) : (
+        <svg viewBox="0 0 24 24" aria-hidden className={styles.badgeIcon}>
+          <path d="M12 2L2 19.5h20L12 2z" fill="currentColor" />
+        </svg>
+      )}
     </span>
   );
 }
@@ -57,7 +46,7 @@ export default function PlatformStudioCard({ platform }: Props) {
       style={{ borderLeftColor: platform.color }}
     >
       <div className={styles.head}>
-        <PlatformBadge icon={platform.icon} color={platform.color} />
+        <PlatformBadge icon={platform.icon} />
         <div className={styles.meta}>
           <h3 className={styles.title}>{platform.label}</h3>
           <p className={styles.hint}>{platform.hint}</p>
