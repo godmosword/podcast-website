@@ -1,7 +1,7 @@
 /** 參考彩圖取色：彩圖只用色盤 12 色，點哪裡就換成那塊的顏色。 */
 import { COLORING_PALETTE } from "./tools";
 
-/** 線條與反鋸齒邊緣（比色盤黑色 #2f2f2f 還暗）不算顏色。 */
+/** 線條與反鋸齒邊緣（比色盤黑色 #3a342e 還暗）不算顏色。 */
 const LINE_INK_LUMA = 36;
 const SAMPLE_RADIUS = 3;
 

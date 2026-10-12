@@ -13,5 +13,8 @@ describe("ColoringPalette.module.css", () => {
     expect(css).toMatch(/\.swatch\s*\{[\s\S]*?min-height:\s*48px/);
     expect(css).toMatch(/\.swatch\s*\{[\s\S]*?width:\s*48px/);
     expect(css).toMatch(/\.swatch\s*\{[\s\S]*?height:\s*48px/);
+    expect(css).toMatch(/\.name\s*\{[\s\S]*?font-size:\s*var\(--fs-meta\)/);
+    expect(css).toMatch(/\.name\s*\{[\s\S]*?color:\s*var\(--ink\)/);
+    expect(css).toMatch(/box-shadow:\s*0 2px 0/);
   });
 });

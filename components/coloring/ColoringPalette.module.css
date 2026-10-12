@@ -9,8 +9,28 @@
   padding: 0;
 }
 
+.item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 0 0 48px;
+  width: 48px;
+  min-width: 48px;
+  max-width: 48px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  touch-action: manipulation;
+  font: inherit;
+}
+
 .swatch {
   box-sizing: border-box;
+  display: grid;
+  place-items: center;
   flex: 0 0 48px;
   width: 48px;
   height: 48px;
@@ -18,12 +38,50 @@
   min-height: 48px;
   border-radius: var(--radius-circle);
   border: 3px solid color-mix(in srgb, var(--coloring-ink) 18%, transparent);
-  cursor: pointer;
   box-shadow: 0 2px 0 color-mix(in srgb, var(--coloring-ink) 12%, transparent);
-  touch-action: manipulation;
 }
 
-.swatch:hover {
+.mark {
+  width: 22px;
+  height: 22px;
+  display: block;
+  pointer-events: none;
+}
+
+.markInk {
+  color: #3a2410;
+}
+
+.markLight {
+  color: #f7f1e8;
+}
+
+.markInk,
+.markLight {
+  fill: currentColor;
+}
+
+/* 橫向矮視窗色票欄只剩約 36px。色名上移 2px 才塞得進同一屏，圓形仍是 48px、列距仍是 8px。 */
+@media (max-height: 639px) and (min-width: 700px) {
+  .name {
+    margin-top: -2px;
+  }
+}
+
+.name {
+  display: block;
+  width: 48px;
+  margin: 1px 0 0;
+  padding: 0;
+  font-size: var(--fs-meta);
+  line-height: 1;
+  text-align: center;
+  color: var(--ink);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.item:hover .swatch {
   transform: scale(1.06);
 }
 
@@ -43,7 +101,7 @@
   }
 }
 
-.swatch:focus-visible {
+.item:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
@@ -54,7 +112,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .swatch:hover,
+  .item:hover .swatch,
   .pop {
     animation: none;
     transform: none;

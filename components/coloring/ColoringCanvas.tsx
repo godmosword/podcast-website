@@ -16,6 +16,7 @@ import { COLORING_DONE_CTA } from "@/lib/coloring/flow";
 import { playSfx } from "@/lib/sfx";
 import {
   BRUSH_SIZES,
+  COLORING_PALETTE,
   ERASER_RADIUS_BONUS,
   cropImageDataRect,
   floodFillPaint,
@@ -112,7 +113,7 @@ export function ColoringCanvas({
 
   const [ready, setReady] = useState(false);
   const [tool, setTool] = useState<ColoringTool>("crayon");
-  const [colorHex, setColorHex] = useState("#e85d4c");
+  const [colorHex, setColorHex] = useState(COLORING_PALETTE[0]!.hex);
   const [brushSize, setBrushSize] = useState<BrushSizeId>("medium");
   const [peek, setPeek] = useState(false);
   const [pickStatus, setPickStatus] = useState("");

@@ -53,6 +53,26 @@ describe("coloring tools", () => {
     expect(COLORING_PALETTE[0]?.rgba[3]).toBe(255);
   });
 
+  test("粉彩色票的 hex 與 rgba 成對", () => {
+    expect(COLORING_PALETTE.map((swatch) => [swatch.id, swatch.hex, [...swatch.rgba]])).toEqual([
+      ["red", "#e7a8a0", [231, 168, 160, 255]],
+      ["orange", "#f4c7a4", [244, 199, 164, 255]],
+      ["yellow", "#f7e6ae", [247, 230, 174, 255]],
+      ["lime", "#5e9e72", [94, 158, 114, 255]],
+      ["green", "#2c6b4e", [44, 107, 78, 255]],
+      ["sky", "#b7d9ea", [183, 217, 234, 255]],
+      ["blue", "#5c86b0", [92, 134, 176, 255]],
+      ["pink", "#e08aad", [224, 138, 173, 255]],
+      ["brown", "#b08968", [176, 137, 104, 255]],
+      ["gray", "#a39e98", [163, 158, 152, 255]],
+      ["black", "#3a342e", [58, 52, 46, 255]],
+      ["white", "#ffffff", [255, 255, 255, 255]],
+    ]);
+    for (const swatch of COLORING_PALETTE) {
+      expect(hexToRgba(swatch.hex)).toEqual([...swatch.rgba]);
+    }
+  });
+
   test("筆刷三檔由細到粗", () => {
     expect(BRUSH_SIZES.length).toBe(3);
     const radii = BRUSH_SIZES.map((s) => s.displayRadius);

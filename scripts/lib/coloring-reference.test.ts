@@ -21,11 +21,11 @@ function splitLine(): Uint8Array {
   return rgb;
 }
 
-/** 左半紅、右半藍的「原圖」。 */
+/** 左半粉彩紅、右半粉彩藍的「原圖」。 */
 function splitSource(): Uint8Array {
   const rgb = new Uint8Array(SIZE * SIZE * 3);
   for (let p = 0; p < SIZE * SIZE; p++)
-    rgb.set(p % SIZE < 8 ? [230, 60, 50] : [40, 150, 220], p * 3);
+    rgb.set(p % SIZE < 8 ? [231, 168, 160] : [92, 134, 176], p * 3);
   return rgb;
 }
 
@@ -65,8 +65,8 @@ describe("snapToPalette", () => {
     [[150, 150, 150], "gray"],
     [[170, 120, 80], "brown"],
     [[220, 180, 40], "yellow"],
-    [[80, 170, 60], "green"],
-    [[240, 170, 170], "pink"],
+    [[80, 170, 60], "lime"],
+    [[240, 170, 170], "red"],
   ] as const)("%j → %s", (rgb, expected) => {
     expect(snapToPalette(rgb)).toBe(expected);
   });
