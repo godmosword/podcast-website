@@ -1515,6 +1515,7 @@ D0 → D2-A(smoke) → D1 → D13-剩餘 → D3 → D14 → D6 ∥ D12
 - [x] 遊樂園卡片封面：2026-10-11 付費生 1 張（images.edit＋多多定裝照，`npm run generate:dino-sushi-cover`），使用者審圖通過後換上。
 - [x] 視覺 baseline：四卡 hub（`52cddaed`）；`e2e/visual.spec.ts` 新增壽司屋標題（390 日／1280 夜）、廚房（390×844、844×390、1280 夜）、結算三星共 6 張（2026-10-11）。
 - [x] 美術與音效改版（2026-10-12）：迴轉壽司店場景、檜木砧板與瓷碟、標題用封面、結算小店面、WebAudio 合成音效（Game Kit `voices()`）。
+- [x] 店內背景環境音（2026-10-12）：Game Kit `AmbiencePlayer`（music 分軌，跟 BGM 開關／暫停）；順手修掉每次點擊 BGM 從頭重播。
 - [ ] 改版後壽司屋 6 張視覺 baseline 需在 Mac 重錄並目檢（`npm run test:visual:trusted -- --update-snapshots -g 多多壽司屋`）；雲端 Linux 無法產 `-chromium-darwin` 基準。
 - [ ] 實機 QA：`GAME_PHYSICAL_DEVICE_QA.md` 已加壽司屋 5 項；Playwright WebKit iPhone 15 模擬 12 項 e2e 全過，並修掉 iPhone 橫向（扣掉 Safari 工具列約 343px 高）托盤第四列被切的問題。真機（iOS Safari、主畫面 App safe area）待使用者勾，之後再評估拖曳放料。
 - [ ] 語音（請 Bonbon／馬米錄 5–6 句短語音）另案。

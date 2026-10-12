@@ -15,6 +15,7 @@
 - [ ] **iPhone Safari — 多多壽司屋旋轉**：廚房中 portrait ↔ landscape，確認直向三段、橫向三欄（多多｜砧板｜托盤）都一屏放得下、不水平溢出。
 - [ ] **iPhone Safari — 多多壽司屋 sound**：首次互動後有開始「叮咚」、加料「啵」（一層比一層高）、送出鈴＋滑過去、多多嚼嚼與反應音、疊盤「叮」；音量不刺耳；靜音後全部安靜。
 - [ ] **iPhone Safari — 多多壽司屋迴轉帶**：裝飾盤慢慢繞、不卡頓；按暫停時迴轉帶停住；系統「減少動態」開啟時迴轉帶靜止。
+- [ ] **iPhone Safari — 多多壽司屋店內環境音**：進廚房後聽得到很小聲的店內聲（低鳴、偶爾喀喀、遠處叮）、不蓋過背景音樂與多多的反應音；選飯時背景音樂不會從頭重播；暫停、結算、回標題、切 App 都會停；靜音後全部安靜。
 - [ ] **iPhone Safari — Coloring 長時間畫線**：連續畫線約 30 秒，確認線條不中斷、頁面不捲動、不白屏。
 - [ ] **iPhone Safari — Coloring toolbar**：左右滑動工具列，切換蠟筆／油漆桶／橡皮擦，確認 active tool 與 touch target。
 - [ ] **iPhone Safari — Coloring 旋轉**：畫布中 portrait ↔ landscape，確認畫面、工具列與完成 CTA 仍可見。
