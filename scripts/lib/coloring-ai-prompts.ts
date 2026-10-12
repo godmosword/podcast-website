@@ -1,11 +1,23 @@
 /** AI 著色線稿 prompt 與人工審核清單（免 API，供腳本／契約測共用）。 */
 import type { ColoringPageKind } from "@/data/coloring-pages";
 
+/**
+ * 線稿圖內禁止文字、字母、數字。
+ * 唯一例外：小紅賽車車身的數字「2」（定裝照 `public/characters/小紅賽車.jpg`）。
+ * 該角色在畫面中時只畫這一個描線「2」，不得再加別的文字、字母或數字。
+ * 同一例外也寫在 `plans/2026-10-05-coloring-lineart-prompts.md`、
+ * `docs/art-prompts/games-hub-hero-*.txt`，以及 `illustrate-core.ts` 的 CLAY_NEGATIVE。
+ */
+const NO_TEXT_EXCEPT_XIAO_HONG_2 =
+  "No text, letters, or numbers anywhere, except the single outlined numeral 2 on 小紅賽車 " +
+  "(the red race car) when that character is in the picture. " +
+  "No other text, letters, numbers, captions, logos, or watermarks. ";
+
 const SHARED_LINE_RULES =
   "Clean black line art only. Thick, uniform black outlines; pure opaque white background; " +
   "no transparency, no shading, no clay texture, no gray tones, no color fills. " +
   "Every contour must be fully closed so each region can be flood-filled. " +
-  "No text, letters, or numbers anywhere. " +
+  NO_TEXT_EXCEPT_XIAO_HONG_2 +
   "Keep characters exactly on-model with the reference image(s): same proportions, face, and distinctive features.";
 
 /** 角色定裝頁：保大型道具，只刪紋理與微人群。 */
