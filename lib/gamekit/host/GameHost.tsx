@@ -90,6 +90,13 @@ export default function GameHost({
     voices,
   } = useGameAudio(adapter.id);
 
+  /**
+   * adapter 只在建立時拿一次 audio；經 ref 轉呼叫最新的函式，
+   * 否則家長在設定改了遊戲音量，下一次點擊又會被建立當下的舊音量蓋回去。
+   */
+  const audioRef = useRef({ ensureAudio, tone, voices });
+  audioRef.current = { ensureAudio, tone, voices };
+
   const syncHost = useCallback(() => {
     const g = instanceRef.current;
     if (!g) return;
@@ -102,7 +109,11 @@ export default function GameHost({
     const inst = adapter.create({
       kidsMode,
       reducedMotion: reduced,
-      audio: { ensureAudio, tone, voices },
+      audio: {
+        ensureAudio: () => audioRef.current.ensureAudio(),
+        tone: (freq, dur, type, vol) => audioRef.current.tone(freq, dur, type, vol),
+        voices: (list) => audioRef.current.voices(list),
+      },
       onSession: (result) => {
         // 每次 onSession 都寫入（中關／多賽道）；去重由各 adapter 負責。
         if (hasScore && (best == null || result.score > best)) {

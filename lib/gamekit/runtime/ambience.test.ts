@@ -28,6 +28,9 @@ function fakeContext() {
         node.connected.push(target);
         return target;
       },
+      disconnect() {
+        node.connected = [];
+      },
       start(this: FakeNode, t: number) {
         this.started = t;
       },
@@ -129,6 +132,38 @@ describe("AmbiencePlayer（店內環境音）", () => {
     expect(live(nodes, "noise")).toHaveLength(theme.beds.length);
   });
 
+  it("停止後不再冒出任何事件", () => {
+    const { nodes, player } = setup();
+    player.play("dino-sushi");
+    player.stop();
+    const count = nodes.length;
+    vi.advanceTimersByTime(120_000);
+    expect(nodes.length).toBe(count);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it("暫停／繼續很多次也不會重複排程", () => {
+    const { player } = setup();
+    player.play("dino-sushi");
+    for (let i = 0; i < 5; i++) {
+      player.pause();
+      player.resume();
+    }
+    // 先讓淡出後拔線的計時器跑完（事件最早 0.8 秒後才出現）
+    vi.advanceTimersByTime(500);
+    expect(vi.getTimerCount()).toBe(theme.events.length);
+  });
+
+  it("AudioContext 被系統暫停（來電、Siri）時跳過事件，不會恢復時一次全部響", () => {
+    const { ctx, nodes, player } = setup();
+    player.play("dino-sushi");
+    ctx.state = "suspended";
+    const count = nodes.length;
+    vi.advanceTimersByTime(60_000);
+    expect(nodes.length).toBe(count);
+    expect(vi.getTimerCount()).toBe(theme.events.length);
+  });
+
   it("停止後 resume 不會自己開回來", () => {
     const { nodes, player } = setup();
     player.play("dino-sushi");
@@ -153,7 +188,11 @@ describe("AmbiencePlayer（店內環境音）", () => {
 });
 
 describe("GameKitAudioBus 背景音樂＋環境音", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
   afterEach(() => {
+    vi.useRealTimers();
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
   });
@@ -177,6 +216,22 @@ describe("GameKitAudioBus 背景音樂＋環境音", () => {
     bus.setMuted(true);
     bus.setMuted(false);
     expect(play).toHaveBeenCalledTimes(2);
+    bus.stopBgm();
+  });
+
+  it("暫停中關掉再打開聲音：不會在暫停畫面底下開回音樂與環境音", () => {
+    const { bus, nodes, play } = setup();
+    bus.playBgm("dino-sushi");
+    bus.pauseBgm();
+    bus.setMuted(true);
+    bus.setMuted(false);
+    expect(play).toHaveBeenCalledTimes(1);
+    expect(live(nodes, "noise")).toHaveLength(0);
+    // 按繼續（Host 在 playing 時呼叫 playBgm）才回來
+    bus.playBgm("dino-sushi");
+    expect(play).toHaveBeenCalledTimes(2);
+    expect(live(nodes, "noise").length).toBeGreaterThan(0);
+    bus.stopBgm();
   });
 
   it("壽司屋開 BGM 時環境音一起開，靜音一起停", () => {
@@ -185,6 +240,7 @@ describe("GameKitAudioBus 背景音樂＋環境音", () => {
     expect(live(nodes, "noise").length).toBeGreaterThan(0);
     bus.setMuted(true);
     expect(live(nodes, "noise")).toHaveLength(0);
+    bus.stopBgm();
   });
 
   it("暫停／繼續／停止跟著 BGM", () => {

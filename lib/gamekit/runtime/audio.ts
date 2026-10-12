@@ -53,6 +53,8 @@ export class GameKitAudioBus {
   private nodes: AudioBusNodes | null = null;
   private bgm: ChiptuneBgmPlayer | null = null;
   private ambience: AmbiencePlayer | null = null;
+  /** 遊戲暫停中：重新開聲音時不要在暫停畫面底下把音樂與環境音開回來。 */
+  private bgmPaused = false;
   private activeGame: GameKitGameId | null = null;
 
   private config: AudioBusConfig = {
@@ -121,7 +123,7 @@ export class GameKitAudioBus {
     if (muted) {
       this.bgm?.stop();
       this.ambience?.stop();
-    } else if (this.activeGame) {
+    } else if (this.activeGame && !this.bgmPaused) {
       this.playBgm(this.activeGame);
     }
   }
@@ -172,6 +174,7 @@ export class GameKitAudioBus {
     const music = this.nodes?.music;
     if (!ctx || !music || this.config.muted) return;
     this.activeGame = gameId;
+    this.bgmPaused = false;
     if (!this.bgm) this.bgm = new ChiptuneBgmPlayer(ctx, music);
     this.bgm.play(gameId);
     // 有店內環境音的遊戲（壽司屋）跟 BGM 一起開；沒有的遊戲 play 只會確保停掉
@@ -180,18 +183,21 @@ export class GameKitAudioBus {
   }
 
   pauseBgm(): void {
+    this.bgmPaused = true;
     this.bgm?.pause();
     this.ambience?.pause();
   }
 
   resumeBgm(): void {
     if (this.config.muted) return;
+    this.bgmPaused = false;
     this.bgm?.resume();
     this.ambience?.resume();
   }
 
   stopBgm(): void {
     this.activeGame = null;
+    this.bgmPaused = false;
     this.bgm?.stop();
     this.ambience?.stop();
   }

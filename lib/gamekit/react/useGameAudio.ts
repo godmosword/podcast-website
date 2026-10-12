@@ -14,6 +14,8 @@ export function useGameAudio(gameId?: GameKitGameId) {
   const busRef = useRef<GameKitAudioBus | null>(null);
   const { gameVolume } = useGameKitSettings();
   const bgmWanted = useRef(false);
+  /** 遊戲暫停中：開關聲音時不要在暫停畫面底下把音樂開回來（繼續時 Host 會再 playBgm）。 */
+  const bgmPaused = useRef(false);
   const [soundUi, setSoundUi] = useState(true);
 
   const syncMuted = useCallback(() => {
@@ -62,6 +64,7 @@ export function useGameAudio(gameId?: GameKitGameId) {
   const playBgm = useCallback(() => {
     if (!gameId) return;
     bgmWanted.current = true;
+    bgmPaused.current = false;
     if (!isSfxEnabled()) return;
     const bus = getBus();
     bus.ensureContext();
@@ -71,15 +74,18 @@ export function useGameAudio(gameId?: GameKitGameId) {
 
   const stopBgm = useCallback(() => {
     bgmWanted.current = false;
+    bgmPaused.current = false;
     getBus().stopBgm();
   }, [getBus]);
 
   const pauseBgm = useCallback(() => {
+    bgmPaused.current = true;
     getBus().pauseBgm();
   }, [getBus]);
 
   const resumeBgm = useCallback(() => {
     if (!isSfxEnabled() || !bgmWanted.current) return;
+    bgmPaused.current = false;
     getBus().resumeBgm();
   }, [getBus]);
 
@@ -87,7 +93,7 @@ export function useGameAudio(gameId?: GameKitGameId) {
     const next = !isSfxEnabled();
     setSfxEnabled(next);
     syncMuted();
-    if (next && bgmWanted.current && gameId) {
+    if (next && bgmWanted.current && !bgmPaused.current && gameId) {
       const bus = getBus();
       bus.ensureContext();
       bus.playBgm(gameId);
@@ -100,7 +106,7 @@ export function useGameAudio(gameId?: GameKitGameId) {
       const on = syncMuted();
       if (!on) {
         getBus().pauseBgm();
-      } else if (bgmWanted.current && gameId) {
+      } else if (bgmWanted.current && !bgmPaused.current && gameId) {
         getBus().ensureContext();
         getBus().playBgm(gameId);
       }

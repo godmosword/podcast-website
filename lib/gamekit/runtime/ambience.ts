@@ -203,6 +203,11 @@ export class AmbiencePlayer {
       const out = this.out;
       if (!this.isPlaying || !theme || !out) return;
       const ev = theme.events[i]!;
+      // iOS 來電、Siri 等讓 AudioContext 暫停時時間不走：先跳過這次，免得恢復時一次全部響出來
+      if (this.ctx.state !== "running") {
+        this.arm(i, ev.every);
+        return;
+      }
       const variant = ev.variants[Math.min(ev.variants.length - 1, Math.floor(this.rand() * ev.variants.length))]!;
       const start = this.ctx.currentTime + 0.02;
       for (const v of variant) {
@@ -228,9 +233,15 @@ export class AmbiencePlayer {
     if (!out) return;
     const now = this.ctx.currentTime;
     try {
-      out.gain.cancelScheduledValues(now);
-      out.gain.setValueAtTime(Math.max(0.0001, out.gain.value), now);
-      out.gain.exponentialRampToValueAtTime(0.0001, now + 0.25);
+      const gain = out.gain as AudioParam & { cancelAndHoldAtTime?: (t: number) => AudioParam };
+      if (typeof gain.cancelAndHoldAtTime === "function") {
+        // 淡入途中被停：從當下的音量往下淡，不會先跳回滿音量
+        gain.cancelAndHoldAtTime(now);
+      } else {
+        gain.cancelScheduledValues(now);
+        gain.setValueAtTime(Math.max(0.0001, gain.value), now);
+      }
+      gain.exponentialRampToValueAtTime(0.0001, now + 0.25);
     } catch {
       // 淡出失敗就直接停
     }
@@ -241,5 +252,13 @@ export class AmbiencePlayer {
         // 已停止的節點再 stop 會丟錯，略過
       }
     }
+    // 淡出完把這一輪的節點從 music 分軌拔掉，暫停／繼續很多次也不會越積越多
+    setTimeout(() => {
+      try {
+        out.disconnect();
+      } catch {
+        // 已拔掉
+      }
+    }, 400);
   }
 }
