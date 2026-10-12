@@ -1,36 +1,16 @@
+import { AmbiencePlayer } from "./ambience";
 import { ChiptuneBgmPlayer } from "./chiptune-bgm";
+import { scheduleVoice, type SynthVoice } from "./synth";
 import type { GameKitGameId } from "../types";
 
 /**
  * 音訊模組（Phase 3）。
  *
- * 遊戲元件使用 `hooks/useGameAudio.ts`（WebAudio SFX + chiptune BGM）。
+ * 遊戲元件使用 `hooks/useGameAudio.ts`（WebAudio SFX + chiptune BGM＋店內環境音）。
  * 場景／外框可用 `GameKitAudioBus` 共用同一混音拓撲。
  */
 
-/**
- * 一個合成音色（宣告式）：振盪器或白噪音 → 可選濾波 → 快起慢落包絡 → sfx 分軌。
- * 用來做 tone() 做不到的質感音：啵（滑音）、咚（低通噪音）、沙沙（帶通噪音）、叮（高頻正弦疊泛音）。
- * 時間都以 AudioContext 時鐘排程，比 setTimeout 準，整組聲音不會被主執行緒卡頓拆散。
- */
-export type SynthVoice = {
-  wave: OscillatorType | "noise";
-  /** 起始頻率（Hz）；noise 不用。 */
-  freq?: number;
-  /** 結束頻率：在 glide 秒內指數滑到這裡（啵、咻、問號音）。 */
-  freqEnd?: number;
-  /** 滑音秒數，預設整段 dur。 */
-  glide?: number;
-  /** 相對這組聲音起點的延遲（秒）。 */
-  at?: number;
-  /** 長度（秒），含收尾。 */
-  dur: number;
-  /** 峰值音量（0–1，會再乘 sfx 分軌音量）。 */
-  vol: number;
-  /** 起音秒數，預設 5ms；拉長就是柔和的淡入。 */
-  attack?: number;
-  filter?: { type: BiquadFilterType; freq: number; freqEnd?: number; q?: number };
-};
+export type { SynthVoice } from "./synth";
 
 /** 一次最多排這麼多個音色，避免連點時堆出上百個節點。 */
 export const MAX_VOICES_PER_CALL = 16;
@@ -72,7 +52,7 @@ export class GameKitAudioBus {
   private ctx: AudioContext | null = null;
   private nodes: AudioBusNodes | null = null;
   private bgm: ChiptuneBgmPlayer | null = null;
-  private noise: AudioBuffer | null = null;
+  private ambience: AmbiencePlayer | null = null;
   private activeGame: GameKitGameId | null = null;
 
   private config: AudioBusConfig = {
@@ -129,11 +109,18 @@ export class GameKitAudioBus {
     this.applyVolumes();
   }
 
+  /**
+   * 只有靜音狀態真的改變時才停／重開背景音樂與環境音。
+   * ensureAudio() 每次點擊都會帶目前狀態呼叫這裡；以前沒判斷，遊戲中每選一次飯 BGM 就從頭重播。
+   */
   setMuted(muted: boolean): void {
+    const changed = muted !== this.config.muted;
     this.config.muted = muted;
     this.applyVolumes();
+    if (!changed) return;
     if (muted) {
       this.bgm?.stop();
+      this.ambience?.stop();
     } else if (this.activeGame) {
       this.playBgm(this.activeGame);
     }
@@ -173,61 +160,11 @@ export class GameKitAudioBus {
     const start = ctx.currentTime + 0.005;
     for (const v of voices.slice(0, MAX_VOICES_PER_CALL)) {
       try {
-        this.playVoice(ctx, bus, v, start + Math.max(0, v.at ?? 0));
+        scheduleVoice(ctx, bus, v, start + Math.max(0, v.at ?? 0));
       } catch {
         // 單一音色失敗不影響其他
       }
     }
-  }
-
-  /** 1 秒白噪音，建一次重複用（每次從隨機位置開始播，聽起來不會一樣）。 */
-  private noiseBuffer(ctx: AudioContext): AudioBuffer {
-    if (this.noise && this.noise.sampleRate === ctx.sampleRate) return this.noise;
-    const buf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
-    const data = buf.getChannelData(0);
-    for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
-    this.noise = buf;
-    return buf;
-  }
-
-  private playVoice(ctx: AudioContext, bus: GainNode, v: SynthVoice, start: number): void {
-    const dur = Math.max(0.02, v.dur);
-    const attack = Math.min(Math.max(0.002, v.attack ?? 0.005), dur / 2);
-    let src: AudioScheduledSourceNode;
-    let begin: () => void;
-    if (v.wave === "noise") {
-      const n = ctx.createBufferSource();
-      n.buffer = this.noiseBuffer(ctx);
-      n.loop = true;
-      begin = () => n.start(start, Math.random() * 0.5);
-      src = n;
-    } else {
-      const osc = ctx.createOscillator();
-      osc.type = v.wave;
-      const f0 = Math.max(20, v.freq ?? 440);
-      osc.frequency.setValueAtTime(f0, start);
-      if (v.freqEnd) osc.frequency.exponentialRampToValueAtTime(Math.max(20, v.freqEnd), start + Math.min(dur, v.glide ?? dur));
-      begin = () => osc.start(start);
-      src = osc;
-    }
-    let out: AudioNode = src;
-    if (v.filter) {
-      const f = ctx.createBiquadFilter();
-      f.type = v.filter.type;
-      f.frequency.setValueAtTime(v.filter.freq, start);
-      if (v.filter.freqEnd) f.frequency.exponentialRampToValueAtTime(v.filter.freqEnd, start + dur);
-      f.Q.value = v.filter.q ?? 1;
-      out.connect(f);
-      out = f;
-    }
-    const gain = ctx.createGain();
-    gain.gain.setValueAtTime(0.0001, start);
-    gain.gain.exponentialRampToValueAtTime(Math.max(0.0002, Math.min(1, v.vol)), start + attack);
-    gain.gain.exponentialRampToValueAtTime(0.0001, start + dur);
-    out.connect(gain);
-    gain.connect(bus);
-    begin();
-    src.stop(start + dur + 0.03);
   }
 
   playBgm(gameId: GameKitGameId): void {
@@ -237,19 +174,25 @@ export class GameKitAudioBus {
     this.activeGame = gameId;
     if (!this.bgm) this.bgm = new ChiptuneBgmPlayer(ctx, music);
     this.bgm.play(gameId);
+    // 有店內環境音的遊戲（壽司屋）跟 BGM 一起開；沒有的遊戲 play 只會確保停掉
+    if (!this.ambience) this.ambience = new AmbiencePlayer(ctx, music);
+    this.ambience.play(gameId);
   }
 
   pauseBgm(): void {
     this.bgm?.pause();
+    this.ambience?.pause();
   }
 
   resumeBgm(): void {
     if (this.config.muted) return;
     this.bgm?.resume();
+    this.ambience?.resume();
   }
 
   stopBgm(): void {
     this.activeGame = null;
     this.bgm?.stop();
+    this.ambience?.stop();
   }
 }
