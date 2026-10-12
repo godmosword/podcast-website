@@ -1,0 +1,299 @@
+/*
+ * 多多的迴轉壽司店（舞台背景）。全部 CSS 漸層＋小 SVG，跟著舞台任意寬高伸縮；
+ * 尺寸都吃舞台 container（DinoSushiKitchen .duoArea 的 duo-stage）的 cqw／cqh。
+ * 色票與卡面一樣日夜不反轉（固定美術色，見 hardcoded-color-audit allowlist）。
+ * 唯一的常駐動態是迴轉帶慢慢繞；減少動態、暫停時停住。
+ */
+
+/* ── 牆面 ─────────────────────────────────────────────── */
+.wall {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(80% 60% at 50% 38%, rgba(255, 251, 240, 0.95), rgba(255, 251, 240, 0) 72%),
+    linear-gradient(180deg, #fbe8cb 0%, #f4dab4 100%);
+}
+
+/* 木腰板：直條木紋＋上緣一條扶手 */
+.wainscot {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--counter-h) * 0.5);
+  height: 26%;
+  background:
+    linear-gradient(180deg, #c48f52 0 4px, #e3b779 4px 6px, rgba(0, 0, 0, 0) 6px),
+    linear-gradient(180deg, rgba(120, 80, 40, 0.16), rgba(120, 80, 40, 0) 30%),
+    repeating-linear-gradient(90deg, #ecc896 0 calc(var(--plank) - 2px), #d6ad74 calc(var(--plank) - 2px) var(--plank));
+  --plank: clamp(18px, 7cqw, 30px);
+}
+
+/* 粉彩雨棚：條紋＋圓弧垂邊（遮罩），陰影掛在外層才不會被遮罩切掉 */
+.awningWrap {
+  position: absolute;
+  z-index: 1;
+  inset: 0 0 auto 0;
+  height: var(--awning-h);
+  filter: drop-shadow(0 3px 2px rgba(110, 70, 40, 0.22));
+}
+
+.awning {
+  --st: clamp(20px, 7.5cqw, 34px);
+  display: block;
+  height: 100%;
+  background:
+    linear-gradient(180deg, rgba(150, 90, 60, 0.28) 0 3px, rgba(255, 255, 255, 0.5) 3px, rgba(255, 255, 255, 0) 55%, rgba(120, 60, 40, 0.1)),
+    repeating-linear-gradient(
+      90deg,
+      #ffb5c7 0 var(--st),
+      #fff7ea var(--st) calc(var(--st) * 2),
+      #9fdecd calc(var(--st) * 2) calc(var(--st) * 3),
+      #fff7ea calc(var(--st) * 3) calc(var(--st) * 4),
+      #ffdc80 calc(var(--st) * 4) calc(var(--st) * 5),
+      #fff7ea calc(var(--st) * 5) calc(var(--st) * 6),
+      #cbbbf6 calc(var(--st) * 6) calc(var(--st) * 7),
+      #fff7ea calc(var(--st) * 7) calc(var(--st) * 8)
+    );
+  mask:
+    linear-gradient(#000 0 0) top / 100% calc(100% - var(--st) / 2) no-repeat,
+    radial-gradient(circle at 50% 0, #000 calc(var(--st) / 2 - 0.6px), transparent calc(var(--st) / 2)) bottom / var(--st) calc(var(--st) / 2) repeat-x;
+}
+
+/* 直式木招牌「多多壽司」：兩條繩掛在雨棚下 */
+.kanban {
+  position: absolute;
+  z-index: 1;
+  top: calc(var(--awning-h) + clamp(8px, 3cqh, 18px));
+  left: calc(4% + clamp(26px, 9cqw, 44px) + clamp(8px, 3cqw, 16px));
+  display: grid;
+  place-items: center;
+  padding: 0.45em 0.32em;
+  border: 2px solid #a8743c;
+  border-radius: 7px;
+  background:
+    repeating-linear-gradient(176deg, rgba(160, 110, 50, 0) 0 7px, rgba(160, 110, 50, 0.12) 7px 8px),
+    linear-gradient(180deg, #f8e4bb, #ebc78c);
+  box-shadow:
+    0 3px 0 #a8743c,
+    0 7px 12px rgba(90, 60, 30, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  color: #5a3518;
+  font-family: var(--font-stack-display);
+  font-size: clamp(12px, 4.2cqw, 21px);
+  font-weight: 900;
+  line-height: 1;
+}
+
+.kanban::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  width: 2px;
+  height: clamp(8px, 3cqh, 18px);
+  background: #8a5a2c;
+  transform: translateX(-50%);
+}
+
+.kanbanText {
+  writing-mode: vertical-rl;
+  letter-spacing: 0.14em;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+/* 紅燈籠：掛在雨棚垂邊下，暖光暈 */
+.lantern {
+  position: absolute;
+  z-index: 1;
+  top: calc(var(--awning-h) - 4px);
+  width: clamp(26px, 9cqw, 44px);
+  aspect-ratio: 40 / 66;
+  filter: drop-shadow(0 0 10px rgba(255, 168, 96, 0.55)) drop-shadow(0 4px 3px rgba(110, 50, 30, 0.2));
+}
+
+.lanternLeft {
+  left: 4%;
+}
+
+/* 第二盞只在寬舞台出現，掛在招牌另一側 */
+.lanternRight {
+  display: none;
+  left: calc(4% + clamp(26px, 9cqw, 44px) + clamp(8px, 3cqw, 16px) + 2.4em + clamp(8px, 3cqw, 16px));
+  font-size: clamp(12px, 4.2cqw, 21px);
+}
+
+/* 圓窗：直向高舞台右側的空牆（泡泡下、疊盤上）；寬版多多很大會擋住，收起 */
+.window {
+  display: none;
+  position: absolute;
+  z-index: 0;
+  right: 6%;
+  top: 40%;
+  width: clamp(64px, 25%, 120px);
+  aspect-ratio: 1;
+  filter: drop-shadow(0 4px 6px rgba(110, 70, 40, 0.16));
+}
+
+/* ── 迴轉帶＋櫃台（在多多前面） ───────────────────────── */
+.counter {
+  --bp: clamp(40px, 15cqw, 74px);
+  --bp-gap: calc(var(--bp) * 1.55);
+  --copy: calc((var(--bp) + var(--bp-gap)) * 6);
+  --seg: calc((var(--bp) + var(--bp-gap)) / 4);
+  position: absolute;
+  z-index: 2;
+  inset: auto 0 0 0;
+  height: var(--counter-h);
+  pointer-events: none;
+}
+
+/* 不鏽鋼迴轉帶：上緣亮邊、彎月形接縫、前緣暗邊 */
+.belt {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 52%;
+  overflow: hidden;
+  background: linear-gradient(180deg, #f7fafc 0 9%, #c9d2da 9% 16%, #e6ecf0 16% 74%, #cfd8df 74% 84%, #9eabb6 84% 100%);
+  box-shadow: 0 -3px 6px rgba(90, 70, 50, 0.16);
+}
+
+.beltSeams {
+  position: absolute;
+  top: 16%;
+  bottom: 26%;
+  left: 0;
+  width: calc(100% + var(--copy));
+  background: radial-gradient(140% 130% at -40% 50%, transparent 76%, rgba(112, 128, 142, 0.42) 77% 81%, transparent 82%) 0 0 / var(--seg) 100% repeat-x;
+  animation: beltSeams var(--belt-dur, 34s) linear infinite;
+}
+
+@keyframes beltSeams {
+  to {
+    transform: translateX(calc(var(--copy) * -1));
+  }
+}
+
+/* 裝飾盤走後排，送給多多的那盤走前排（DinoSushiDuoDuo），重疊時那盤在上面 */
+.beltLane {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 62%;
+  height: 0;
+}
+
+.beltTrack {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  display: flex;
+  align-items: flex-end;
+  animation: beltRun var(--belt-dur, 34s) linear infinite;
+}
+
+@keyframes beltRun {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.beltPlate {
+  position: relative;
+  flex: none;
+  width: var(--bp);
+  margin-right: var(--bp-gap);
+  aspect-ratio: 96 / 32;
+}
+
+.beltPlate > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.beltSushi {
+  position: absolute;
+  left: 16%;
+  right: 16%;
+  bottom: 42%;
+  aspect-ratio: 96 / 72;
+}
+
+.beltSushi > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* 透明圓蓋：讓帶上的壽司退到背景，不會被當成點餐 */
+.dome {
+  position: absolute;
+  left: 9%;
+  right: 9%;
+  bottom: 34%;
+  aspect-ratio: 1 / 0.62;
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
+  border-bottom-color: rgba(255, 255, 255, 0.35);
+  border-radius: 50% 50% 44% 44% / 70% 70% 30% 30%;
+  background:
+    radial-gradient(40% 30% at 30% 26%, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0) 70%),
+    linear-gradient(180deg, rgba(235, 248, 255, 0.42), rgba(235, 248, 255, 0.2));
+  box-shadow: inset 0 -2px 4px rgba(120, 160, 190, 0.18);
+}
+
+/* 木櫃台前板：檜木色、橫向木紋、下緣陰影 */
+.counterFront {
+  position: absolute;
+  inset: 52% 0 0 0;
+  background:
+    linear-gradient(180deg, rgba(90, 55, 25, 0.28) 0 2px, rgba(255, 255, 255, 0.35) 2px 4px, rgba(0, 0, 0, 0) 4px),
+    repeating-linear-gradient(178deg, rgba(150, 100, 45, 0) 0 9px, rgba(150, 100, 45, 0.14) 9px 10px, rgba(150, 100, 45, 0) 10px 17px),
+    linear-gradient(180deg, #e9c48a, #d9ab6c);
+}
+
+/* ── 依舞台大小加減道具 ───────────────────────────────── */
+@container duo-stage (max-height: 190px) {
+  .kanban,
+  .lantern {
+    display: none;
+  }
+}
+
+@container duo-stage (min-width: 380px) and (min-height: 300px) {
+  .lanternRight {
+    display: block;
+  }
+}
+
+@container duo-stage (min-height: 290px) {
+  .window {
+    display: block;
+  }
+}
+
+@media (min-width: 900px), (min-width: 640px) and (orientation: landscape) and (max-height: 520px) {
+  .window {
+    display: none;
+  }
+}
+
+/* ── 減少動態、暫停 ──────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .beltSeams,
+  .beltTrack {
+    animation: none;
+  }
+}
+
+:global([data-reduced="true"]) .beltSeams,
+:global([data-reduced="true"]) .beltTrack {
+  animation: none;
+}
+
+:global([data-paused="true"]) .beltSeams,
+:global([data-paused="true"]) .beltTrack {
+  animation-play-state: paused;
+}

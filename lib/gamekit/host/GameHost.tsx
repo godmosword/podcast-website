@@ -87,6 +87,7 @@ export default function GameHost({
     stopBgm,
     pauseBgm,
     tone,
+    voices,
   } = useGameAudio(adapter.id);
 
   const syncHost = useCallback(() => {
@@ -101,7 +102,7 @@ export default function GameHost({
     const inst = adapter.create({
       kidsMode,
       reducedMotion: reduced,
-      audio: { ensureAudio, tone },
+      audio: { ensureAudio, tone, voices },
       onSession: (result) => {
         // 每次 onSession 都寫入（中關／多賽道）；去重由各 adapter 負責。
         if (hasScore && (best == null || result.score > best)) {

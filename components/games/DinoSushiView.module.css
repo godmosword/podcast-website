@@ -1,18 +1,19 @@
 /*
  * 多多壽司屋外層：標題、結算、卡面。
  * 卡面日夜不反轉：底是固定淺色，墨色、CTA、陰影、焦點環都釘在日間值（同消消樂）。
+ * 卡面底紋是很淡的青海波（壽司店的和風底紋），只有在區塊之間的縫看得到。
  */
 .surface {
-  --sushi-ink: #3f3a2e;
-  --sushi-ink-soft: #6f6758;
+  --sushi-ink: #4a3722;
+  --sushi-ink-soft: #7a6550;
   --sushi-accent: #3f7f2a;
   --sushi-cream: #fff8ea;
   --ink: #34302b;
   --ink-soft: #7a7268;
   --card: #ffffff;
-  --cta-warm-from: #ffe889;
-  --cta-warm-to: #ffbd6f;
-  --cta-warm-fg: #614018;
+  --cta-warm-from: #ffe58a;
+  --cta-warm-to: #ffb558;
+  --cta-warm-fg: #5a360d;
   --cta-solid-bg: #3a2410;
   --cta-solid-fg: #fff;
   --cta-soft-bg: #fff;
@@ -20,16 +21,20 @@
   --cta-soft-line: rgba(63, 58, 46, 0.16);
   --elev-1: 0 1px 2px rgba(52, 48, 43, 0.04), 0 8px 24px rgba(52, 48, 43, 0.08);
   --focus-ring: #34302b;
+  --seigaiha: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='20'><circle cx='0' cy='-10' r='19.3' fill='%23fdf3e2' stroke='%23f1dfc0' stroke-width='1.3'/><circle cx='0' cy='-10' r='13.6' fill='none' stroke='%23f1dfc0' stroke-width='1.3'/><circle cx='0' cy='-10' r='8' fill='none' stroke='%23f1dfc0' stroke-width='1.3'/><circle cx='40' cy='-10' r='19.3' fill='%23fdf3e2' stroke='%23f1dfc0' stroke-width='1.3'/><circle cx='40' cy='-10' r='13.6' fill='none' stroke='%23f1dfc0' stroke-width='1.3'/><circle cx='40' cy='-10' r='8' fill='none' stroke='%23f1dfc0' stroke-width='1.3'/><circle cx='20' cy='0' r='19.3' fill='%23fdf3e2' stroke='%23f1dfc0' stroke-width='1.3'/><circle cx='20' cy='0' r='13.6' fill='none' stroke='%23f1dfc0' stroke-width='1.3'/><circle cx='20' cy='0' r='8' fill='none' stroke='%23f1dfc0' stroke-width='1.3'/><circle cx='0' cy='10' r='19.3' fill='%23fdf3e2' stroke='%23f1dfc0' stroke-width='1.3'/><circle cx='0' cy='10' r='13.6' fill='none' stroke='%23f1dfc0' stroke-width='1.3'/><circle cx='0' cy='10' r='8' fill='none' stroke='%23f1dfc0' stroke-width='1.3'/><circle cx='40' cy='10' r='19.3' fill='%23fdf3e2' stroke='%23f1dfc0' stroke-width='1.3'/><circle cx='40' cy='10' r='13.6' fill='none' stroke='%23f1dfc0' stroke-width='1.3'/><circle cx='40' cy='10' r='8' fill='none' stroke='%23f1dfc0' stroke-width='1.3'/><circle cx='20' cy='20' r='19.3' fill='%23fdf3e2' stroke='%23f1dfc0' stroke-width='1.3'/><circle cx='20' cy='20' r='13.6' fill='none' stroke='%23f1dfc0' stroke-width='1.3'/><circle cx='20' cy='20' r='8' fill='none' stroke='%23f1dfc0' stroke-width='1.3'/><circle cx='0' cy='30' r='19.3' fill='%23fdf3e2' stroke='%23f1dfc0' stroke-width='1.3'/><circle cx='0' cy='30' r='13.6' fill='none' stroke='%23f1dfc0' stroke-width='1.3'/><circle cx='0' cy='30' r='8' fill='none' stroke='%23f1dfc0' stroke-width='1.3'/><circle cx='40' cy='30' r='19.3' fill='%23fdf3e2' stroke='%23f1dfc0' stroke-width='1.3'/><circle cx='40' cy='30' r='13.6' fill='none' stroke='%23f1dfc0' stroke-width='1.3'/><circle cx='40' cy='30' r='8' fill='none' stroke='%23f1dfc0' stroke-width='1.3'/></svg>");
   position: relative;
   box-sizing: border-box;
   width: 100%;
   min-height: 100%;
   margin: 0;
   padding: 12px;
-  border: 2px solid color-mix(in srgb, #b7df9b 60%, #fff);
+  border: 2px solid #efd8b0;
   border-radius: 28px;
-  background: linear-gradient(170deg, #fffaf0 0%, #fdeed6 100%);
-  box-shadow: 0 22px 46px rgba(120, 110, 80, 0.2), inset 0 2px 0 rgba(255, 255, 255, 0.96);
+  background:
+    linear-gradient(170deg, rgba(255, 250, 240, 0.9) 0%, rgba(253, 238, 214, 0.55) 100%),
+    var(--seigaiha) 0 0 / 40px 20px,
+    #fdf3e2;
+  box-shadow: 0 22px 46px rgba(120, 90, 50, 0.2), inset 0 2px 0 rgba(255, 255, 255, 0.96);
   overflow: hidden;
   color: var(--sushi-ink);
   user-select: none;
@@ -73,6 +78,7 @@
   text-align: center;
 }
 
+/* 封面舞台：與遊樂園卡片同一張迴轉壽司店封面（同消消樂、方塊轉轉），點進來看到的是同一個畫面 */
 .titleStage {
   position: relative;
   flex: none;
@@ -84,44 +90,24 @@
   overflow: hidden;
   border: none;
   border-radius: var(--radius-md, 20px);
-  background: radial-gradient(120% 90% at 50% 20%, #e8f6ff 0%, #cdeaf7 60%, #b7dcef 100%);
-  box-shadow: 0 10px 24px rgba(80, 120, 140, 0.16);
+  background: #fbe3c4;
+  box-shadow: 0 12px 26px rgba(120, 80, 40, 0.2);
   cursor: pointer;
 }
 
-.titleDuo {
+/* 細白內框，像一張裱好的照片 */
+.titleStage::after {
+  content: "";
   position: absolute;
-  left: 6%;
-  bottom: 14%;
-  width: 58%;
-  aspect-ratio: 138 / 110;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.6);
+  pointer-events: none;
 }
 
-.titleDish {
-  position: absolute;
-  right: 6%;
-  bottom: 13%;
-  display: grid;
-  width: 32%;
-}
-
-.titleDish > svg {
-  grid-area: 1 / 1;
-}
-
-.titleDish > svg:first-child {
-  z-index: 1;
-  transform: translateY(-34%);
-}
-
-.titleBelt {
-  position: absolute;
-  inset: auto 0 6% 0;
-  height: 10%;
-  background:
-    repeating-linear-gradient(90deg, #c9b8a4 0 14px, #b5a28c 14px 16px),
-    #c9b8a4;
-  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.45), 0 3px 0 rgba(120, 100, 80, 0.3);
+.titleCover {
+  object-fit: cover;
+  object-position: 40% 55%;
 }
 
 .titlePanel {
@@ -137,10 +123,14 @@
 
 .titleHeading {
   margin: 0;
+  padding: 0 0.2em;
   color: var(--sushi-accent);
   font-size: clamp(1.75rem, 5.2cqi, 3rem);
   font-weight: 900;
   line-height: 1.2;
+  /* 鮭魚色的筆刷底線 */
+  background: linear-gradient(180deg, transparent 68%, rgba(255, 143, 90, 0.32) 68% 92%, transparent 92%);
+  text-shadow: 0 2px 0 #fff;
 }
 
 .titleStars {
@@ -150,8 +140,8 @@
   margin: 0;
   padding: 6px 14px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 3px 10px rgba(120, 110, 80, 0.14);
+  background: #fffdf8;
+  box-shadow: 0 0 0 2px #f1dfc0, 0 4px 10px rgba(120, 90, 50, 0.14);
   color: var(--sushi-ink);
   font-size: 18px;
   line-height: 1;
@@ -181,10 +171,26 @@
   padding: 0 0 0 6px;
   border: none;
   border-radius: 50%;
-  background: linear-gradient(180deg, #ffe889, #ffbd6f);
-  color: #614018;
+  background:
+    radial-gradient(80% 55% at 50% 8%, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0) 70%),
+    linear-gradient(180deg, #ffe58a, #ffb558);
+  color: #5a360d;
   cursor: pointer;
-  box-shadow: 0 8px 0 rgba(203, 128, 52, 0.42), 0 16px 24px rgba(164, 103, 61, 0.18), inset 0 2px 0 rgba(255, 255, 255, 0.72);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.8),
+    inset 0 -4px 0 rgba(214, 120, 30, 0.2),
+    0 8px 0 #d98a34,
+    0 16px 24px rgba(164, 90, 30, 0.22);
+  transition: transform 120ms ease-out, box-shadow 120ms ease-out;
+}
+
+.startButton:active {
+  transform: translateY(4px);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.8),
+    inset 0 -4px 0 rgba(214, 120, 30, 0.2),
+    0 4px 0 #d98a34,
+    0 8px 14px rgba(164, 90, 30, 0.2);
 }
 
 .startButton:focus-visible,
@@ -202,16 +208,39 @@
 /* 自由做：小膠囊，離主鈕有距離 */
 .freeButton {
   min-height: 48px;
-  padding: 0 22px;
-  border: 2px solid color-mix(in srgb, #7fa86c 55%, #fff);
+  padding: 0 24px;
+  border: none;
   border-radius: 999px;
-  background: #fff;
+  background: #fffdf8;
   color: var(--sushi-accent);
   font: inherit;
   font-size: 1rem;
-  font-weight: 800;
+  font-weight: 900;
   cursor: pointer;
-  box-shadow: 0 3px 0 rgba(63, 127, 42, 0.18);
+  box-shadow:
+    0 0 0 2px #b7df9b,
+    0 4px 0 #9cc982,
+    0 8px 14px rgba(60, 100, 40, 0.14);
+  transition: transform 120ms ease-out, box-shadow 120ms ease-out;
+}
+
+.freeButton:active {
+  transform: translateY(2px);
+  box-shadow:
+    0 0 0 2px #b7df9b,
+    0 2px 0 #9cc982;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .startButton,
+  .freeButton {
+    transition: none;
+  }
+}
+
+.surface[data-reduced="true"] .startButton,
+.surface[data-reduced="true"] .freeButton {
+  transition: none;
 }
 
 @container sushi-title (min-width: 720px) {
@@ -289,12 +318,50 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: safe center;
   padding: 16px;
   border-radius: 26px;
-  background: rgba(255, 250, 240, 0.95);
+  background:
+    linear-gradient(180deg, rgba(255, 250, 240, 0.9), rgba(253, 240, 218, 0.7)),
+    var(--seigaiha) 0 0 / 40px 20px,
+    #fdf3e2;
   text-align: center;
   overflow-y: auto;
+}
+
+/* 結算上方的小店面：雨棚、木牆、多多、迴轉帶（尺寸變數同廚房舞台） */
+.resultHero {
+  position: relative;
+  flex: none;
+  container: duo-stage / size;
+  isolation: isolate;
+  width: min(100%, 420px);
+  height: clamp(110px, 24svh, 190px);
+  margin-bottom: 4px;
+  overflow: hidden;
+  border-radius: 22px;
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.7),
+    0 8px 18px rgba(110, 75, 35, 0.16);
+  --awning-h: clamp(16px, 13cqh, 28px);
+  --counter-h: clamp(24px, 20cqh, 44px);
+}
+
+.resultDuo {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  bottom: calc(var(--counter-h) * 0.56);
+  height: calc(100% - var(--counter-h) * 0.56 - 6px);
+  aspect-ratio: 138 / 110;
+  transform: translateX(-50%);
+}
+
+.resultDuo > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
 
 .resultPlates {
@@ -327,6 +394,20 @@
 .hintPlate > svg {
   width: 100%;
   height: 100%;
+}
+
+/* 矮直向手機（320×568）：放不下店面，收起才不會把「回遊樂園」擠出畫面 */
+@media (max-height: 640px) and (orientation: portrait) {
+  .resultHero {
+    display: none;
+  }
+}
+
+/* 橫向手機高度不夠同時放店面與結算鈕：店面收起，焦點移到主鈕時不會把畫面捲掉一半 */
+@media (orientation: landscape) and (max-height: 520px) {
+  .resultHero {
+    display: none;
+  }
 }
 
 @media (orientation: landscape) and (max-height: 400px) {

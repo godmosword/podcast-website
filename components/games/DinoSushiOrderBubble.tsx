@@ -24,26 +24,34 @@ function Check() {
   );
 }
 
-/** 多多頭上的點餐泡泡：圖案說想吃什麼，放對一樣就打勾。 */
+/** 多多頭上的點餐泡泡：圖案說想吃什麼，放對一樣就打勾；下面一排小點是這輪第幾單。 */
 export function DinoSushiOrderBubble({ order, sushi, flash, index, total }: Props) {
   const checks = orderChecks(sushi, order);
   return (
     <div className={styles.bubble} role="img" aria-label={`第 ${index + 1} 單，共 ${total} 單。${orderAnnouncement(order)}`}>
-      <span className={styles.bubbleItem} data-done={checks.base ? "true" : undefined} data-flash={flash && !flash.baseOk ? "true" : undefined}>
-        <BaseArt id={order.base} />
-        {checks.base ? <Check /> : null}
-      </span>
-      {checks.toppings.map(({ id, done }) => (
-        <span
-          key={id}
-          className={styles.bubbleItem}
-          data-done={done ? "true" : undefined}
-          data-flash={flash?.missing.includes(id) ? "true" : undefined}
-        >
-          <ToppingArt id={id} />
-          {done ? <Check /> : null}
+      <span className={styles.bubbleItems}>
+        <span className={styles.bubbleItem} data-done={checks.base ? "true" : undefined} data-flash={flash && !flash.baseOk ? "true" : undefined}>
+          <BaseArt id={order.base} />
+          {checks.base ? <Check /> : null}
         </span>
-      ))}
+        {checks.toppings.map(({ id, done }) => (
+          <span
+            key={id}
+            className={styles.bubbleItem}
+            data-done={done ? "true" : undefined}
+            data-flash={flash?.missing.includes(id) ? "true" : undefined}
+          >
+            <ToppingArt id={id} />
+            {done ? <Check /> : null}
+          </span>
+        ))}
+      </span>
+      {/* 這輪第幾單：做完的金點、現在這單是紅色長條、還沒輪到的淡點 */}
+      <span className={styles.orderDots} aria-hidden>
+        {Array.from({ length: total }, (_, i) => (
+          <span key={i} className={styles.orderDot} data-state={i < index ? "done" : i === index ? "now" : undefined} />
+        ))}
+      </span>
     </div>
   );
 }

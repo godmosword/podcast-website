@@ -7,11 +7,12 @@ import { medalCount, medalFlags } from "@/lib/gamekit/progress/meta";
 import { loadPlayerProfile } from "@/lib/gamekit/progress/save";
 import { GAMEKIT_PROGRESS_EVENT } from "@/lib/gamekit/progress/session";
 import { DINO_SUSHI_LEVEL_INDEX, roundMedals, type RoundMedals } from "@/lib/games/dino-sushi/medals";
+import { SUSHI_SFX } from "@/lib/games/dino-sushi/sfx";
 import type { Mode, RoundState } from "@/lib/games/dino-sushi/round";
 import { DinoSushiKitchen } from "./DinoSushiKitchen";
 import { DinoSushiResult } from "./DinoSushiResult";
 import { DinoSushiTitle } from "./DinoSushiTitle";
-import { useDinoSushiPlay } from "./useDinoSushiPlay";
+import { playVoices, useDinoSushiPlay } from "./useDinoSushiPlay";
 import styles from "./DinoSushiView.module.css";
 
 type Screen = "title" | "kitchen" | "result";
@@ -70,6 +71,7 @@ export function DinoSushiView({ reducedMotion, status, syncHost, audio, instance
   const begin = useCallback(
     (next: Mode) => {
       audio?.ensureAudio();
+      playVoices(audio, SUSHI_SFX.welcome);
       setMode(next);
       setOutcome(null);
       actions.start(next);
@@ -111,6 +113,7 @@ export function DinoSushiView({ reducedMotion, status, syncHost, audio, instance
       data-screen={screen}
       data-mode={screen === "kitchen" ? mode : undefined}
       data-testid="dino-sushi"
+      data-reduced={reducedMotion ? "true" : undefined}
       /* 外框的操作提示只在廚房顯示；標題與結算沒有可操作的砧板 */
       data-play-hints={screen === "kitchen" ? undefined : "off"}
     >
