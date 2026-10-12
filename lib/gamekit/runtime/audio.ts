@@ -88,10 +88,24 @@ export class GameKitAudioBus {
         return null;
       }
     }
-    if (this.ctx.state === "suspended") {
+    // iOS 來電／Siri 會進 interrupted，不只 suspended。closed 不能 resume。
+    if (this.ctx.state !== "running" && this.ctx.state !== "closed") {
       void this.ctx.resume();
     }
     return this.ctx;
+  }
+
+  /** 關掉這個 bus 自己的 AudioContext。每個 useGameAudio 各有一個 bus，不共用。 */
+  dispose(): void {
+    this.stopBgm();
+    const ctx = this.ctx;
+    this.ctx = null;
+    this.nodes = null;
+    this.bgm = null;
+    this.ambience = null;
+    if (ctx && ctx.state !== "closed") {
+      void ctx.close();
+    }
   }
 
   private applyVolumes(): void {

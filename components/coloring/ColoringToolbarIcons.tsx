@@ -1,6 +1,7 @@
 /** 著色工具列圖示：小孩認得出的實物畫具，家長操作列用線性圖。 */
 
 import { ICON_LINE } from "@/components/ui/Icon";
+import { paletteHex } from "@/lib/coloring/tools";
 
 type IconProps = {
   className?: string;
@@ -17,15 +18,15 @@ const BOX = {
 /** 家長操作列的線條：同全站共用圖示（components/ui/Icon 的 ICON_LINE）。 */
 const STROKE = ICON_LINE;
 
-/** 與著色色盤同色，選中時靠 currentColor 描邊維持輪廓。 */
-const CRAYON_TIP = "#f4a261";
-const CRAYON_BODY = "#f2c94c";
-const CRAYON_BAND = "#e85d4c";
-const BUCKET_BODY = "#2d9cdb";
-const BUCKET_LIP = "#56ccf2";
-const PAINT_DRIP = "#e85d4c";
-const ERASER_RUBBER = "#f781c6";
-const ERASER_SLEEVE = "#9b9b9b";
+/** 與粉彩色票同色，選中時靠 currentColor 描邊維持輪廓。 */
+const CRAYON_TIP = paletteHex("orange");
+const CRAYON_BODY = paletteHex("yellow");
+const CRAYON_BAND = paletteHex("red");
+const BUCKET_BODY = paletteHex("blue");
+const BUCKET_LIP = paletteHex("sky");
+const PAINT_DRIP = paletteHex("red");
+const ERASER_RUBBER = paletteHex("pink");
+const ERASER_SLEEVE = paletteHex("gray");
 
 const GLYPH_STROKE = {
   stroke: "currentColor",

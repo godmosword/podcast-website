@@ -50,11 +50,11 @@
 
 ## 3. 兒童觸控【已拍板，只調了著色區的間距】
 
-兒童主操作：可點至少 48px，相鄰可點至少 8px。本輪只調間距與尺寸，沒有改配色，也沒有改版面結構。
+兒童主操作：可點至少 48px，相鄰可點至少 8px。本輪只調間距與尺寸，沒有改配色，也沒有改版面結構。粉彩色票是之後的 PR #206，不在這一節。
 
 已落地：
 
-- 著色色票 `ColoringPalette.module.css`：間距由 4px 改為 `--space-2`（8px）。色塊 `min-width`／`min-height` 維持 48px。欄數用 `auto-fit`，排不下就換行（可以兩排或更多），不把色塊縮到 48px 以下。
+- 著色色票 `ColoringPalette.module.css`：間距由 4px 改為 `--space-2`（8px）。色塊 `min-width`／`min-height` 維持 48px。用 flex 換行，排不下就多一排，不把色塊縮到 48px 以下。色名在圓形下面，字級放大時可以換行。
 - 著色工具列 `ColoringToolbar.module.css` 的 `.bar` 間距同樣改為 8px，工具鈕維持至少 48px。
 - 著色畫布階段的抬頭間距由 6px 改為 8px；完成鈕、色票、工具之間的間距至少 8px（字級放大時仍可跟著長大）。
 
@@ -85,7 +85,7 @@
 
 ## 6. 大幅修改的決定
 
-- 著色 12 色粉彩、圖案與色名：預覽已做，等看過再決定是否上線。見 [`proposals/2026-10-12-coloring-pastel-swatches.md`](proposals/2026-10-12-coloring-pastel-swatches.md)
+- 著色 12 色粉彩、圖案與色名：已上線（2026-10-12，PR #206）。見 [`proposals/2026-10-12-coloring-pastel-swatches.md`](proposals/2026-10-12-coloring-pastel-swatches.md)
 - 遊戲畫風：已決定：維持現狀。見 [`proposals/2026-10-12-game-art-style.md`](proposals/2026-10-12-game-art-style.md)
 - 按鈕陰影：已決定：維持現狀。上一節
 

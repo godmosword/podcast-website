@@ -120,6 +120,8 @@ export class ChiptuneBgmPlayer {
   play(gameId: GameKitGameId): void {
     const theme = BGM_THEMES[gameId];
     if (!validateBgmTheme(theme)) return;
+    // 已經在播同一首就不要停掉重來。其他分頁寫 localStorage 時，上層若再呼叫 play 也不會從頭響。
+    if (this.running && !this.paused && this.theme === theme) return;
     this.stop();
     this.theme = theme;
     this.step = 0;
@@ -159,6 +161,18 @@ export class ChiptuneBgmPlayer {
     if (!this.running || this.paused || !this.theme) return;
 
     const theme = this.theme;
+    const stepSec = 60 / theme.bpm / theme.stepsPerBeat;
+
+    // 與環境音相同：AudioContext 凍結時不發聲、也不把步進往前推，恢復後從同一個拍子接著。
+    if (this.ctx.state !== "running") {
+      if (this.ctx.state === "closed") {
+        this.stop();
+        return;
+      }
+      this.timer = setTimeout(() => this.scheduleStep(), stepSec * 1000);
+      return;
+    }
+
     const rowLen = theme.melody[0].length;
     const melRow = theme.melody[Math.floor(this.step / rowLen) % theme.melody.length];
     const bassRow = theme.bass[Math.floor(this.step / rowLen) % theme.bass.length];
@@ -166,7 +180,6 @@ export class ChiptuneBgmPlayer {
 
     const mel = melRow[col];
     const bass = bassRow[col];
-    const stepSec = 60 / theme.bpm / theme.stepsPerBeat;
 
     if (mel > 0) {
       this.playTone(mel, stepSec * 0.88, theme.melodyWave, theme.melodyVol);

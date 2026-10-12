@@ -6,13 +6,20 @@ import StarBurst from "@/components/celebration/StarBurst";
 import { GameEndStation } from "@/components/games/GameEndStation";
 import type { ColoringPage } from "@/data/coloring-pages";
 import { createRadialBurstParticles } from "@/lib/celebration-dom";
+import { paletteHex } from "@/lib/coloring/tools";
 import styles from "./ColoringCanvas.module.css";
 
 const DONE_BURST = createRadialBurstParticles({
   count: 8,
   radius: 72,
   seed: 3,
-  colors: ["#f2c94c", "#e85d4c", "#56ccf2", "#6fcf97", "#f781c6"],
+  colors: [
+    paletteHex("yellow"),
+    paletteHex("red"),
+    paletteHex("sky"),
+    paletteHex("lime"),
+    paletteHex("pink"),
+  ],
 });
 
 type ColoringDoneSheetProps = {

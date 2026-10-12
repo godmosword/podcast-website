@@ -249,7 +249,7 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
 
 - 觸控目標 min-height ≥ 44px（48px）；調整密度時只加不減。
 - 相鄰互動元素 gap ≥ 8px（12px）；卡片 grid gap ≥ 12px。
-- **兒童主操作**（著色色票、著色工具、遊戲抬頭的預設尺寸）觸控 ≥48px、相鄰可點間距 ≥8px。著色色票與著色工具列的間距已是 8px，色塊維持 ≥48px，窄螢幕換行、不縮小。寬度 &lt;360px 的遊戲抬頭仍是 44px、間距 4px：再放大，日夜切換會被擠出約 320px 的畫面（見 `GamePageShell.module.css`）。這條窄螢幕例外本輪不改版面。細節見 [`docs/STYLE-BIBLE.md`](docs/STYLE-BIBLE.md)。
+- **兒童主操作**（著色色票、著色工具、遊戲抬頭的預設尺寸）觸控 ≥48px、相鄰可點間距 ≥8px。著色色票與著色工具列的間距已是 8px，色塊維持 ≥48px，窄螢幕換行、不縮小。著色 12 色是粉彩色票（圖案＋色名），已上線（2026-10-12，PR #206）；色塊填色不變，外框加強到日間對白底、夜間對深底至少 3:1。寬度 &lt;360px 的遊戲抬頭仍是 44px、間距 4px：再放大，日夜切換會被擠出約 320px 的畫面（見 `GamePageShell.module.css`）。這條窄螢幕例外本輪不改版面。細節見 [`docs/STYLE-BIBLE.md`](docs/STYLE-BIBLE.md)。
 - section 垂直間距 mobile ≥ 24px；內文 line-height ≥ 1.5（標籤型小字豁免）。
 - 純文字段落 max-width ≤ 640px。
 - 文案密度：兒童動線頁不放超過一行的家長散文（家長說明歸戶 `/for-parents` 與 footer）；標題 ≤ 8 字、CTA ≤ 6 字。Landing 四段分區 CTA 本輪改長句當可見段名（見首頁 IA），其餘兒童 CTA 仍 ≤6 字。`/legal` 精簡不得刪改具法律效力語句。

@@ -1,6 +1,6 @@
 # 提案：著色 12 色改粉彩，並加上色名與圖案
 
-狀態：預覽已實作（新色、圖案、色名一起上）。等看過預覽再決定是否上線，尚未視為正式上線。
+狀態：已上線（2026-10-12，PR #206）。新色、圖案、色名一起在著色頁。
 
 ## 建議
 
@@ -72,7 +72,7 @@
 - `components/coloring/ColoringPalette.tsx`／`.module.css`：圓形下方加色名，高度會增加。畫布階段現在鎖在一屏裡，色盤變高會壓縮畫布
 - `components/coloring/ColoringParentTools.tsx` 的小色點預覽
 - 寫死舊色碼的測試與圖示：`ColoringPalette.test.tsx`、`reference-pick.test.ts`、`ColoringDoneSheet.tsx`、`ColoringToolbarIcons.tsx`、`e2e/coloring-enhancements.spec.ts`
-- 已存在 IndexedDB 草稿：存的是像素，舊畫不會改色。選取比對的是 hex，舊的選取色可能對不上下一個新色塊，直到孩子再點一次
+- 已存在 IndexedDB 草稿：存的是像素，舊畫不會改色。選取色在載入時依「舊色→新色」對照表遷移（對不到就退回預設），不再留著舊 hex 對不上下一個色塊
 
 不會改：線稿、遊戲玩法、全站品牌橘。
 

@@ -32,6 +32,13 @@ export const COLORING_PALETTE: readonly {
   { id: "white", name: "白色", hex: "#ffffff", rgba: [255, 255, 255, 255] },
 ] as const;
 
+/** 依 id 取粉彩色碼。圖示與完成彩帶跟色票同一套，不要再寫死飽和色。 */
+export function paletteHex(id: (typeof COLORING_PALETTE)[number]["id"]): string {
+  const hex = COLORING_PALETTE.find((swatch) => swatch.id === id)?.hex;
+  if (!hex) throw new Error(`未知色票 ${id}`);
+  return hex;
+}
+
 export type ColorGroupId = "all" | "rainbow" | "forest";
 
 /** 家長面板的色盤選項：少一點顏色，小小孩比較好挑。 */
