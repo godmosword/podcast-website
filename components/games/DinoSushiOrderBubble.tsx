@@ -46,7 +46,12 @@ export function DinoSushiOrderBubble({ order, sushi, flash, index, total }: Prop
           </span>
         ))}
       </span>
-      {/* 這輪第幾單：做完的金點、現在這單是紅色長條、還沒輪到的淡點 */}
+      {/* 尾巴往左下指向多多 */}
+      <svg className={styles.bubbleTail} viewBox="0 0 28 20" aria-hidden focusable="false">
+        <path d="M6 0H26L3 18Z" className={styles.bubbleTailFill} />
+        <path d="M26 0L3 18L6 0" className={styles.bubbleTailLine} />
+      </svg>
+      {/* 這輪第幾單：做完的金點、現在這單是綠色長條、還沒輪到的淡點 */}
       <span className={styles.orderDots} aria-hidden>
         {Array.from({ length: total }, (_, i) => (
           <span key={i} className={styles.orderDot} data-state={i < index ? "done" : i === index ? "now" : undefined} />

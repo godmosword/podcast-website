@@ -6,14 +6,17 @@
  */
 
 /* ── 牆面 ─────────────────────────────────────────────── */
+/* 牆：上方帶一點封面的粉色天光，多多身後一圈暖色聚光 */
 .wall {
   position: absolute;
   z-index: 0;
   inset: 0;
   overflow: hidden;
+  overflow: clip;
   background:
-    radial-gradient(80% 60% at 50% 38%, rgba(255, 251, 240, 0.95), rgba(255, 251, 240, 0) 72%),
-    linear-gradient(180deg, #fbe8cb 0%, #f4dab4 100%);
+    radial-gradient(46% 42% at 30% 66%, rgba(255, 236, 196, 0.95), rgba(255, 236, 196, 0) 100%),
+    radial-gradient(80% 60% at 50% 38%, rgba(255, 251, 240, 0.85), rgba(255, 251, 240, 0) 72%),
+    linear-gradient(180deg, #fde2dc 0%, #fbe8cb 52%, #f4dab4 100%);
 }
 
 /* 木腰板：直條木紋＋上緣一條扶手 */
@@ -44,7 +47,9 @@
   display: block;
   height: 100%;
   background:
-    linear-gradient(180deg, rgba(150, 90, 60, 0.28) 0 3px, rgba(255, 255, 255, 0.5) 3px, rgba(255, 255, 255, 0) 55%, rgba(120, 60, 40, 0.1)),
+    linear-gradient(180deg, rgba(150, 90, 60, 0.28) 0 3px, rgba(255, 255, 255, 0) 3px, rgba(255, 255, 255, 0) 70%, rgba(120, 60, 40, 0.1)),
+    /* 每條一圈高光：像封面那樣鼓鼓的黏土雨棚 */
+    radial-gradient(58% 70% at 50% 30%, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0) 72%) 0 0 / var(--st) 100% repeat-x,
     repeating-linear-gradient(
       90deg,
       #ffb5c7 0 var(--st),
@@ -155,7 +160,8 @@
   inset: 0 0 auto 0;
   height: 52%;
   overflow: hidden;
-  background: linear-gradient(180deg, #f7fafc 0 9%, #c9d2da 9% 16%, #e6ecf0 16% 74%, #cfd8df 74% 84%, #9eabb6 84% 100%);
+  /* 封面那種暖灰磚色帶面＋奶油色護欄 */
+  background: linear-gradient(180deg, #fff6e6 0 9%, #e6d3b8 9% 16%, #c9beb4 16% 74%, #b6aa9f 74% 84%, #f1dfc3 84% 100%);
   box-shadow: 0 -3px 6px rgba(90, 70, 50, 0.16);
 }
 
@@ -165,7 +171,8 @@
   bottom: 26%;
   left: 0;
   width: calc(100% + var(--copy));
-  background: radial-gradient(140% 130% at -40% 50%, transparent 76%, rgba(112, 128, 142, 0.42) 77% 81%, transparent 82%) 0 0 / var(--seg) 100% repeat-x;
+  /* 彎月接縫凸向前進方向（往左） */
+  background: radial-gradient(140% 130% at 140% 50%, transparent 76%, rgba(120, 104, 92, 0.45) 77% 81%, transparent 82%) 0 0 / var(--seg) 100% repeat-x;
   animation: beltSeams var(--belt-dur, 34s) linear infinite;
 }
 
@@ -176,12 +183,14 @@
 }
 
 /* 裝飾盤走後排，送給多多的那盤走前排（DinoSushiDuoDuo），重疊時那盤在上面 */
+/* 盤列在右邊疊盤前淡出，像是繞到疊盤後面去 */
 .beltLane {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 62%;
-  height: 0;
+  height: var(--bp);
+  mask-image: linear-gradient(90deg, #000 calc(100% - 96px), transparent calc(100% - 58px));
 }
 
 .beltTrack {
@@ -252,6 +261,12 @@
     linear-gradient(180deg, rgba(90, 55, 25, 0.28) 0 2px, rgba(255, 255, 255, 0.35) 2px 4px, rgba(0, 0, 0, 0) 4px),
     repeating-linear-gradient(178deg, rgba(150, 100, 45, 0) 0 9px, rgba(150, 100, 45, 0.14) 9px 10px, rgba(150, 100, 45, 0) 10px 17px),
     linear-gradient(180deg, #e9c48a, #d9ab6c);
+}
+
+/* 牙刷出現時，左上的招牌與燈籠讓位 */
+:global([data-brush="true"]) .kanban,
+:global([data-brush="true"]) .lantern {
+  visibility: hidden;
 }
 
 /* ── 依舞台大小加減道具 ───────────────────────────────── */

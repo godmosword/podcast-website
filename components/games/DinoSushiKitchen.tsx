@@ -50,6 +50,9 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused }: Props) {
   const flash = caption?.mood === "look" ? (caption.match ?? null) : null;
   const disabled = locked || inputPaused;
   const serveHint = hint?.kind === "serve";
+  /* 吃完才出牙刷，不擋嘴；出現時店面道具讓位，牙刷才看得出是下一步 */
+  const brushShown =
+    ((round.pending?.brush ?? false) || round.brushReady) && !brushing && (phase === "react" || phase === "idle");
 
   return (
     <div
@@ -57,39 +60,52 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused }: Props) {
       data-reduced={reducedMotion ? "true" : undefined}
       data-paused={inputPaused ? "true" : undefined}
     >
-      <section className={styles.duoArea} aria-label="多多" data-mode={round.mode}>
+      <section
+        className={styles.duoArea}
+        aria-label="多多"
+        data-mode={round.mode}
+        data-brush={brushShown ? "true" : undefined}
+      >
         <ShopWall />
         <DinoSushiDuoDuo
           phase={phase}
           caption={caption}
           serving={eating ? sushi : null}
           brushing={brushing}
-          brushOffer={(round.pending?.brush ?? false) || round.brushReady}
+          brushShown={brushShown}
           disabled={inputPaused}
           onBrush={actions.brush}
         />
         <ShopBelt />
-        {/* 吃的時候收起泡泡，字卡接手；下一單泡泡等反應結束才出現 */}
-        {order && !eating ? (
-          <DinoSushiOrderBubble
-            order={order}
-            sushi={sushi}
-            flash={flash}
-            index={round.index}
-            total={round.orders.length}
-          />
-        ) : null}
         <DinoSushiPlateStack plates={round.plates} />
-        {round.mode === "free" ? (
-          <button
-            type="button"
-            className={styles.fullButton}
-            onClick={actions.finish}
-            disabled={disabled}
-          >
-            多多吃飽了
-          </button>
-        ) : null}
+        {/* 右上一欄由上往下排：自由做的「多多吃飽了」→ 點餐泡泡 → 多多的字卡，彼此不會疊在一起 */}
+        <div className={styles.talk}>
+          {round.mode === "free" ? (
+            <button
+              type="button"
+              className={styles.fullButton}
+              onClick={actions.finish}
+              disabled={disabled}
+            >
+              多多吃飽了
+            </button>
+          ) : null}
+          {/* 吃的時候收起泡泡，字卡接手；下一單泡泡等反應結束才出現 */}
+          {order && !eating ? (
+            <DinoSushiOrderBubble
+              order={order}
+              sushi={sushi}
+              flash={flash}
+              index={round.index}
+              total={round.orders.length}
+            />
+          ) : null}
+          {caption ? (
+            <p className={styles.caption} data-mood={caption.mood} aria-hidden>
+              {caption.line}
+            </p>
+          ) : null}
+        </div>
       </section>
 
       <section

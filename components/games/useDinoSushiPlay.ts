@@ -13,7 +13,7 @@ import {
   type RoundAction,
   type RoundState,
 } from "@/lib/games/dino-sushi/round";
-import { addSfx, MOOD_SFX, plateSfx, SUSHI_SFX } from "@/lib/games/dino-sushi/sfx";
+import { addSfx, MOOD_SFX, plateSfx, SUSHI_SFX, varied } from "@/lib/games/dino-sushi/sfx";
 import { MAX_TOPPINGS } from "@/lib/games/dino-sushi/sushi";
 import type { BaseId, ToppingId } from "@/lib/games/dino-sushi/toppings";
 
@@ -193,7 +193,7 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
       const next = roundReducer(round, { type: "add", id });
       // 第 4 料：料位輕晃，不出錯音
       if (next === round) setShake((n) => n + 1);
-      else sfx(addSfx(next.sushi.toppings.length));
+      else sfx(varied(addSfx(next.sushi.toppings.length)));
       dispatch({ type: "add", id });
       touch();
     },
@@ -244,7 +244,7 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
     later(t.chew, () => {
       setPhase("chew");
       // 減少動態時咀嚼只有 150ms，嚼嚼聲會跟反應音疊在一起，直接跳過
-      if (!reducedMotion) sfx(SUSHI_SFX.chomp);
+      if (!reducedMotion) sfx(varied(SUSHI_SFX.chomp));
     });
     later(t.react, () => {
       setPhase("react");
@@ -292,7 +292,7 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
     const finished = round.done && !(before?.done && !isNewRound);
     if (round.plates.length > (isNewRound ? 0 : before.plates.length)) {
       // 最後一盤疊上去時結算音接手，不疊兩個聲音
-      if (!finished) sfx(plateSfx(round.plates.at(-1)?.gold === true));
+      if (!finished) sfx(varied(plateSfx(round.plates.at(-1)?.gold === true)));
       onServed(round);
       if (round.mode === "order" && round.firstTries.length > 0) setTaught(true);
     }

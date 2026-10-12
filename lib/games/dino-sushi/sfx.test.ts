@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { MAX_VOICES_PER_CALL, type SynthVoice } from "@/lib/gamekit/runtime/audio";
 import { MOOD_RANK } from "./reactions";
-import { addSfx, allSushiSfx, MOOD_SFX, plateSfx, SUSHI_SFX } from "./sfx";
+import { addSfx, allSushiSfx, MOOD_SFX, plateSfx, SUSHI_SFX, varied } from "./sfx";
 
 /** 一組聲音從起點到最後一個音收尾的秒數。 */
 function length(voices: readonly SynthVoice[]): number {
@@ -48,5 +48,21 @@ describe("多多壽司屋音效", () => {
 
   it("金邊盤比一般盤多一串亮晶晶", () => {
     expect(plateSfx(true).length).toBeGreaterThan(plateSfx(false).length);
+  });
+
+  it("varied 只把音高整組挪 ±3%，噪音、長度、音量不變", () => {
+    const base = SUSHI_SFX.chomp;
+    const up = varied(base, () => 1);
+    const down = varied(base, () => 0);
+    base.forEach((v, i) => {
+      expect(up[i]!.dur).toBe(v.dur);
+      expect(up[i]!.vol).toBe(v.vol);
+      if (v.wave === "noise") {
+        expect(up[i]).toBe(v);
+      } else {
+        expect(up[i]!.freq).toBeCloseTo(v.freq! * 1.03);
+        expect(down[i]!.freq).toBeCloseTo(v.freq! * 0.97);
+      }
+    });
   });
 });

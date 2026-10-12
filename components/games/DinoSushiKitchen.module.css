@@ -30,7 +30,9 @@
   container: duo-stage / size;
   /* 舞台內的 z-index 關在這裡，不會蓋到結算畫面 */
   isolation: isolate;
+  /* clip：迴轉帶的盤列比舞台寬，hidden 仍是捲動容器，點牙刷時瀏覽器會把整個店面捲歪 */
   overflow: hidden;
+  overflow: clip;
   border-radius: 22px;
   background: #f4dab4;
   box-shadow:
@@ -111,38 +113,60 @@
   }
 }
 
-/* 點餐泡泡：雨棚下右側，尾巴指向多多；下面一排小點是這輪第幾單 */
-.bubble {
+/* 右上一欄：自由做「多多吃飽了」→ 點餐泡泡 → 字卡，由上往下排，彼此不疊 */
+.talk {
   position: absolute;
   z-index: 4;
   top: calc(var(--awning-h) + 4px);
   right: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  max-width: 64%;
+  pointer-events: none;
+}
+
+.talk > button {
+  pointer-events: auto;
+}
+
+/* 點餐泡泡：純白＋木色粗框，在奶油色牆上也最醒目；尾巴往左下指向多多 */
+.bubble {
+  position: relative;
   display: grid;
   justify-items: center;
-  gap: 3px;
-  max-width: 62%;
+  gap: 5px;
+  max-width: 100%;
   margin: 0;
-  padding: 6px 9px 5px;
+  padding: 6px 9px 6px;
   border-radius: 20px;
-  background: #fffdf8;
+  background: #fff;
   box-shadow:
-    0 0 0 2px #efdcbc,
-    0 8px 18px rgba(90, 60, 30, 0.18);
+    0 0 0 3px #d9a86a,
+    0 10px 22px rgba(90, 60, 30, 0.26);
   transform-origin: 18px 100%;
   animation: bubbleIn 340ms cubic-bezier(0.3, 1.45, 0.5, 1) both;
 }
 
-.bubble::after {
-  content: "";
+.bubbleTail {
   position: absolute;
-  left: 14px;
-  bottom: -8px;
-  width: 14px;
-  height: 14px;
-  border-radius: 0 0 4px;
-  background: #fffdf8;
-  box-shadow: 2px 2px 0 #efdcbc;
-  transform: rotate(45deg) skew(10deg, 10deg);
+  left: 10px;
+  top: calc(100% - 2px);
+  width: 28px;
+  height: 20px;
+  overflow: visible;
+}
+
+.bubbleTailFill {
+  fill: #fff;
+}
+
+.bubbleTailLine {
+  fill: none;
+  stroke: #d9a86a;
+  stroke-width: 3;
+  stroke-linejoin: round;
 }
 
 @keyframes bubbleIn {
@@ -166,8 +190,9 @@
   position: relative;
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
+  /* 跟著舞台長大：桌面舞台很大時泡泡不再是一小顆 */
+  width: clamp(34px, min(12.5cqh, 13cqw), 60px);
+  height: clamp(34px, min(12.5cqh, 13cqw), 60px);
   border-radius: 12px;
   background: radial-gradient(closest-side, rgba(239, 220, 188, 0.55), rgba(239, 220, 188, 0));
 }
@@ -197,9 +222,10 @@
   opacity: 0.5;
 }
 
+/* 缺的那樣：框畫在格子裡面，不溢出泡泡、不蓋到下面的小點 */
 .bubbleItem[data-flash="true"] {
   background: #fff1d6;
-  box-shadow: 0 0 0 3px #ff9a3d;
+  box-shadow: inset 0 0 0 3px #ff9a3d;
   animation: sushiFlash 400ms ease-in-out 3;
 }
 
@@ -221,6 +247,7 @@
 .orderDots {
   display: flex;
   gap: 4px;
+  margin-top: 3px;
 }
 
 .orderDot {
@@ -237,16 +264,12 @@
 .orderDot[data-state="now"] {
   width: 14px;
   border-radius: 3px;
-  background: #e9573f;
+  background: #5fbf85;
 }
 
 /* 多多的字卡：吃的時候在雨棚下（泡泡收起）；缺料時泡泡還在，字卡排在泡泡下面 */
 .caption {
-  position: absolute;
-  z-index: 5;
-  top: calc(var(--awning-h) + 6px);
-  right: 8px;
-  max-width: 58%;
+  max-width: 100%;
   margin: 0;
   padding: 7px 13px;
   border-radius: 16px;
@@ -275,15 +298,16 @@
 }
 
 .caption[data-mood="look"] {
-  top: calc(var(--awning-h) + 70px);
   box-shadow:
     0 0 0 2.5px #ff9a3d,
     0 8px 18px rgba(90, 60, 30, 0.18);
 }
 
-/* 自由做：右上是「多多吃飽了」，字卡排到它下面 */
-.duoArea[data-mode="free"] .caption {
-  top: calc(var(--awning-h) + 62px);
+/* 矮舞台（320×568）：缺料時泡泡上那一格閃＋「嗯？」就夠，字卡會蓋到多多的嘴，收起 */
+@container duo-stage (max-height: 190px) {
+  .caption[data-mood="look"] {
+    display: none;
+  }
 }
 
 @keyframes popIn {
@@ -301,8 +325,8 @@
 .plates {
   position: absolute;
   z-index: 3;
-  right: 10px;
-  bottom: calc(var(--counter-h) * 0.18);
+  right: 14px;
+  bottom: 4px;
   display: flex;
   flex-direction: column-reverse;
   align-items: center;
@@ -363,6 +387,7 @@
 }
 
 /* 左上角雨棚下：不擋多多的臉；只晃 3 次 */
+/* 牙刷是「下一步」：跟其他下一步一樣的黃光暈；出現時招牌與燈籠讓位（DinoSushiShop data-brush） */
 .brushButton {
   position: absolute;
   z-index: 6;
@@ -370,14 +395,17 @@
   top: calc(var(--awning-h) + 4px);
   display: grid;
   place-items: center;
-  width: 56px;
-  height: 56px;
-  padding: 6px;
+  width: 64px;
+  height: 64px;
+  padding: 7px;
   border: 3px solid #8ddff0;
   border-radius: 50%;
   background: #fff;
   cursor: pointer;
-  box-shadow: 0 5px 0 rgba(61, 127, 214, 0.25), 0 8px 14px rgba(40, 80, 120, 0.16);
+  box-shadow:
+    0 5px 0 rgba(61, 127, 214, 0.25),
+    0 0 0 4px #ffd34d,
+    0 0 16px 6px rgba(255, 211, 77, 0.6);
   animation: sushiWiggle 1.2s ease-in-out 3;
 }
 
@@ -398,10 +426,6 @@
 
 /* 自由做「多多吃飽了」：右上（自由做沒有泡泡），離「給多多吃」遠 */
 .fullButton {
-  position: absolute;
-  z-index: 4;
-  top: calc(var(--awning-h) + 4px);
-  right: 8px;
   min-height: 48px;
   padding: 0 18px;
   border: none;
@@ -555,7 +579,7 @@
   cursor: pointer;
   box-shadow:
     inset 0 0 0 2px #fffefa,
-    inset 0 0 0 3.5px #8aa6d6,
+    inset 0 0 0 3.5px #4fa9c9,
     0 3px 0 rgba(160, 115, 60, 0.3),
     0 5px 8px rgba(110, 75, 35, 0.14);
 }
@@ -903,9 +927,10 @@
     gap: 8px;
   }
 
+  /* 托盤跟砧板、店面同高，三欄上下對齊 */
   .tray {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-content: center;
+    align-content: stretch;
   }
 }
 
@@ -914,8 +939,18 @@
     --duo-min: 0px;
   }
 
+  /* 三張長皿不要被拉成空白的高板子：置中、限高、圖放大 */
+  .basePicker {
+    align-self: center;
+  }
+
   .baseButton {
     min-height: 84px;
+    max-height: 150px;
+  }
+
+  .baseArt {
+    max-width: 84px;
   }
 
   .trayButton {
@@ -980,10 +1015,6 @@
 
   .caption {
     font-size: 1.15rem;
-  }
-
-  .caption[data-mood="look"] {
-    top: calc(var(--awning-h) + 82px);
   }
 
   .bubbleItem {

@@ -156,6 +156,17 @@ export function plateSfx(gold: boolean): Voices {
   return gold ? [...SUSHI_SFX.plate, ...sparkle(0.08, 0.028)] : SUSHI_SFX.plate;
 }
 
+/**
+ * 同一個聲音每次音高差一點點（±3%），連做 5 單也不會像錄音機重播。
+ * 只動頻率，長度與音量不變；rand 可注入，測試才能固定。
+ */
+export function varied(voices: Voices, rand: () => number = Math.random): Voices {
+  const k = 1 + (rand() * 2 - 1) * 0.03;
+  return voices.map((v) =>
+    v.wave === "noise" ? v : { ...v, freq: (v.freq ?? 440) * k, ...(v.freqEnd ? { freqEnd: v.freqEnd * k } : {}) },
+  );
+}
+
 /** 測試與音量預檢用：所有音效的清單。 */
 export function allSushiSfx(): Record<string, Voices> {
   return {
