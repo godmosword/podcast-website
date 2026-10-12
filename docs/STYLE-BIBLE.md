@@ -81,13 +81,13 @@
 
 一般頁面用 `--elev-*` 柔影。遊戲抬頭與著色區有一道短的硬底邊（色票是 `0 2px 0`，遊戲方鈕是 `0 4px 0`，著色主鈕約 3–8px，各檔不盡相同）。
 
-要不要把遊戲／著色的底邊保留為兒童專用語彙、其餘改柔影，見 [`proposals/2026-10-12-button-shadows.md`](proposals/2026-10-12-button-shadows.md)。本輪不改。
+遊戲／著色的底邊保留為兒童專用語彙、其餘維持柔影。已決定：維持現狀。見 [`proposals/2026-10-12-button-shadows.md`](proposals/2026-10-12-button-shadows.md)。
 
-## 6. 尚未實作的大幅修改【提案】
+## 6. 大幅修改的決定
 
-- 著色 12 色改粉彩並加圖案／色名：[`proposals/2026-10-12-coloring-pastel-swatches.md`](proposals/2026-10-12-coloring-pastel-swatches.md)
-- 遊戲畫風是否再統一：[`proposals/2026-10-12-game-art-style.md`](proposals/2026-10-12-game-art-style.md)（上線沒有像素風遊戲，建議不要重畫）
-- 按鈕陰影：上一節
+- 著色 12 色粉彩、圖案與色名：預覽已做，等看過再決定是否上線。見 [`proposals/2026-10-12-coloring-pastel-swatches.md`](proposals/2026-10-12-coloring-pastel-swatches.md)
+- 遊戲畫風：已決定：維持現狀。見 [`proposals/2026-10-12-game-art-style.md`](proposals/2026-10-12-game-art-style.md)
+- 按鈕陰影：已決定：維持現狀。上一節
 
 ## 7. 仍【未確認】
 

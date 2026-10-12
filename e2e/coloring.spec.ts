@@ -48,7 +48,11 @@ async function countRedOnRow(page: Page, fx0: number, fx1: number, fy: number) {
       const row = ctx.getImageData(x0, y, x1 - x0, 1).data;
       let red = 0;
       for (let i = 0; i < row.length; i += 4) {
-        if (row[i]! > 180 && row[i + 1]! < 140 && row[i + 2]! < 140) red += 1;
+        const r = row[i]!;
+        const g = row[i + 1]!;
+        const b = row[i + 2]!;
+        // 粉彩紅 #e7a8a0（231,168,160）
+        if (r >= 210 && r <= 245 && g >= 150 && g <= 190 && b >= 140 && b <= 180) red += 1;
       }
       return red;
     },
@@ -183,8 +187,11 @@ test.describe("coloring book", () => {
       const data = ctx.getImageData(0, 0, w, h).data;
       let red = 0;
       for (let i = 0; i < data.length; i += 4) {
-        if (data[i]! > 180 && data[i + 1]! < 140 && data[i + 2]! < 140)
-          red += 1;
+        const r = data[i]!;
+        const g = data[i + 1]!;
+        const b = data[i + 2]!;
+        // 粉彩紅 #e7a8a0（231,168,160）
+        if (r >= 210 && r <= 245 && g >= 150 && g <= 190 && b >= 140 && b <= 180) red += 1;
       }
       return red;
     });

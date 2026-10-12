@@ -23,8 +23,13 @@ async function redPixels(page: Page) {
     const el = c as HTMLCanvasElement,
       p = el.getContext("2d")!.getImageData(0, 0, el.width, el.height).data;
     let n = 0;
-    for (let i = 0; i < p.length; i += 4)
-      if (p[i]! > 180 && p[i + 1]! < 140 && p[i + 2]! < 140) n++;
+    for (let i = 0; i < p.length; i += 4) {
+      const r = p[i]!;
+      const g = p[i + 1]!;
+      const b = p[i + 2]!;
+      // 粉彩紅 #e7a8a0（231,168,160）
+      if (r >= 210 && r <= 245 && g >= 150 && g <= 190 && b >= 140 && b <= 180) n++;
+    }
     return n;
   });
 }

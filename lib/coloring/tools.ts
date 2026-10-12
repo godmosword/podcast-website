@@ -7,23 +7,28 @@ export type ColoringTool = "crayon" | "bucket" | "eraser";
 /** 實際觸及的像素範圍（canvas 座標，含端點）。 */
 export type DirtyRect = { x: number; y: number; width: number; height: number };
 
+/**
+ * 粉彩色票。色碼、rgba 與圖案一起換，見
+ * docs/proposals/2026-10-12-coloring-pastel-swatches.md。
+ * 白維持紙白，不改成米色。
+ */
 export const COLORING_PALETTE: readonly {
   id: string;
   name: string;
   hex: string;
   rgba: Rgba;
 }[] = [
-  { id: "red", name: "紅色", hex: "#e85d4c", rgba: [232, 93, 76, 255] },
-  { id: "orange", name: "橘色", hex: "#f4a261", rgba: [244, 162, 97, 255] },
-  { id: "yellow", name: "黃色", hex: "#f2c94c", rgba: [242, 201, 76, 255] },
-  { id: "lime", name: "草綠", hex: "#6fcf97", rgba: [111, 207, 151, 255] },
-  { id: "green", name: "綠色", hex: "#27ae60", rgba: [39, 174, 96, 255] },
-  { id: "sky", name: "天空藍", hex: "#56ccf2", rgba: [86, 204, 242, 255] },
-  { id: "blue", name: "藍色", hex: "#2d9cdb", rgba: [45, 156, 219, 255] },
-  { id: "pink", name: "粉色", hex: "#f781c6", rgba: [247, 129, 198, 255] },
-  { id: "brown", name: "咖啡色", hex: "#a06c4c", rgba: [160, 108, 76, 255] },
-  { id: "gray", name: "灰色", hex: "#9b9b9b", rgba: [155, 155, 155, 255] },
-  { id: "black", name: "黑色", hex: "#2f2f2f", rgba: [47, 47, 47, 255] },
+  { id: "red", name: "紅色", hex: "#e7a8a0", rgba: [231, 168, 160, 255] },
+  { id: "orange", name: "橘色", hex: "#f4c7a4", rgba: [244, 199, 164, 255] },
+  { id: "yellow", name: "黃色", hex: "#f7e6ae", rgba: [247, 230, 174, 255] },
+  { id: "lime", name: "草綠", hex: "#5e9e72", rgba: [94, 158, 114, 255] },
+  { id: "green", name: "綠色", hex: "#2c6b4e", rgba: [44, 107, 78, 255] },
+  { id: "sky", name: "天空藍", hex: "#b7d9ea", rgba: [183, 217, 234, 255] },
+  { id: "blue", name: "藍色", hex: "#5c86b0", rgba: [92, 134, 176, 255] },
+  { id: "pink", name: "粉色", hex: "#e08aad", rgba: [224, 138, 173, 255] },
+  { id: "brown", name: "咖啡色", hex: "#b08968", rgba: [176, 137, 104, 255] },
+  { id: "gray", name: "灰色", hex: "#a39e98", rgba: [163, 158, 152, 255] },
+  { id: "black", name: "黑色", hex: "#3a342e", rgba: [58, 52, 46, 255] },
   { id: "white", name: "白色", hex: "#ffffff", rgba: [255, 255, 255, 255] },
 ] as const;
 

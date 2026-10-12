@@ -1,4 +1,4 @@
-import type { BrushSizeId, ColoringTool } from "./tools";
+import { COLORING_PALETTE, type BrushSizeId, type ColoringTool } from "./tools";
 export type ColoringPreferences = {
   tool: ColoringTool;
   colorHex: string;
@@ -9,7 +9,7 @@ export type ColoringPreferences = {
 const COLORING_PREFERENCES_KEY = "coloring:preferences:v2";
 export const DEFAULT_COLORING_PREFERENCES: ColoringPreferences = {
   tool: "crayon",
-  colorHex: "#e85d4c",
+  colorHex: COLORING_PALETTE[0]!.hex,
   brushSize: "medium",
   guided: true,
   usedBucket: false,
