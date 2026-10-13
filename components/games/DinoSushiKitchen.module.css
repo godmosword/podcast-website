@@ -244,27 +244,32 @@
   animation: popIn 260ms cubic-bezier(0.3, 1.6, 0.5, 1) both;
 }
 
+/* 這輪第幾單：一排小盤剪影。做完＝木色（不用金：金在疊盤裡是「一次做對」）、現在＝綠、還沒輪到＝淡 */
 .orderDots {
   display: flex;
-  gap: 4px;
-  margin-top: 3px;
+  align-items: center;
+  gap: 3px;
+  margin-top: 4px;
 }
 
 .orderDot {
-  width: 6px;
-  height: 6px;
+  width: 14px;
+  height: 7px;
   border-radius: 50%;
-  background: #ead9bd;
+  background: #f1e4cc;
+  box-shadow: inset 0 0 0 1.5px #dcc59c;
 }
 
 .orderDot[data-state="done"] {
-  background: #e0a93a;
+  background: #d9a86a;
+  box-shadow: inset 0 0 0 1.5px #b07f43;
 }
 
 .orderDot[data-state="now"] {
-  width: 14px;
-  border-radius: 3px;
+  width: 16px;
+  height: 8px;
   background: #5fbf85;
+  box-shadow: inset 0 0 0 1.5px #3f7f2a;
 }
 
 /* 多多的字卡：吃的時候在雨棚下（泡泡收起）；缺料時泡泡還在，字卡排在泡泡下面 */
@@ -445,9 +450,6 @@
 .board {
   grid-area: board;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: stretch;
-  gap: 8px;
   padding: 8px;
   border-radius: 20px;
   background:
@@ -467,8 +469,22 @@
     0 9px 16px rgba(110, 75, 35, 0.16);
 }
 
-.board[data-choosing="true"] {
-  grid-template-columns: minmax(0, 1fr);
+/* 加料層（壽司＋料位｜給多多吃）一直在，選飯層疊在同一格：兩階段砧板一樣高，上方店面不伸縮 */
+.boardLayer,
+.basePicker {
+  grid-area: 1 / 1;
+}
+
+.boardLayer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+  gap: 8px;
+  min-width: 0;
+}
+
+.boardLayer[aria-hidden="true"] {
+  visibility: hidden;
 }
 
 .boardMain {
@@ -596,8 +612,8 @@
   background: radial-gradient(circle, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.2));
 }
 
+/* 直向：三張皿拉滿砧板（不留上下木條）；橫向與桌面在下方媒體查詢改成置中限高 */
 .basePicker {
-  grid-row: 1 / -1;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   align-self: stretch;
@@ -722,6 +738,7 @@
 /* 中明度底：白色的飯、蟹肉棒才不會融進底色；碟心一圈淡影讓料「放在」碟上 */
 .trayButton {
   position: relative;
+  container-type: inline-size;
   display: grid;
   grid-template-rows: auto auto;
   place-items: center;
@@ -777,9 +794,11 @@
   cursor: default;
 }
 
-.trayButton:disabled {
-  opacity: 0.55;
-  filter: saturate(0.7);
+/* 只有「還沒選飯」才變淡＋變扁（拿掉厚邊，讀得出按不下去）。吃東西、看泡泡的短暫鎖定不變淡，免得每送一盤托盤閃一次 */
+.tray[data-wait="base"] .trayButton {
+  opacity: 0.72;
+  filter: saturate(0.5);
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.55);
 }
 
 /* 按下去會沉一下（有厚度的實體感） */
@@ -797,9 +816,10 @@
     0 6px 10px rgba(164, 90, 30, 0.2);
 }
 
+/* 圖跟著格子寬（約一半），矮直向與矮橫向固定 --tray-art 保一屏 */
 .trayArt {
-  width: var(--tray-art);
-  height: var(--tray-art);
+  width: clamp(var(--tray-art), 46cqw, 72px);
+  height: clamp(var(--tray-art), 46cqw, 72px);
   border-radius: 50%;
   background: radial-gradient(50% 24% at 50% 82%, rgba(120, 80, 35, 0.18), rgba(120, 80, 35, 0));
 }
@@ -838,24 +858,49 @@
   }
 }
 
+/* 首單教學的手指：指尖（TapHand 的 53% 17%）落在目標裡、手身留在目標右下，不壓到別顆可點的鈕。
+   用 left／top 算位置，不用 translate 置中（點按動畫的 transform 會把置中蓋掉）。白暈讓膚色在米色、黃框上看得到。 */
 .finger {
+  --hand: 36px;
+  --tip-x: 60%;
+  --tip-y: 45%;
   position: absolute;
   z-index: 6;
-  top: -12px;
-  right: -10px;
-  color: #3f3a2e;
-  filter: drop-shadow(0 2px 2px rgba(255, 255, 255, 0.9));
+  left: calc(var(--tip-x) - 0.53 * var(--hand));
+  top: calc(var(--tip-y) - 0.17 * var(--hand));
+  width: var(--hand);
+  height: var(--hand);
+  transform-origin: 53% 17%;
+  filter: drop-shadow(0 0 1.5px #fff) drop-shadow(0 2px 2px rgba(60, 40, 20, 0.35));
   pointer-events: none;
-  animation: sushiFinger 1.1s ease-in-out infinite;
+  animation: sushiTap 1.6s ease-in-out infinite;
 }
 
-@keyframes sushiFinger {
+.finger > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.baseButton .finger,
+.serveButton .finger {
+  --hand: 40px;
+  --tip-x: 50%;
+  --tip-y: 58%;
+}
+
+/* 和著色本同一種「點一下」：以指尖為原點縮一下再放開 */
+@keyframes sushiTap {
   0%,
+  40%,
   100% {
-    transform: translate(0, 0);
+    transform: scale(1);
   }
-  50% {
-    transform: translate(-6px, -8px);
+  55% {
+    transform: scale(0.88);
+  }
+  70% {
+    transform: scale(1);
   }
 }
 
@@ -898,6 +943,18 @@
   .trayButton {
     min-height: 56px;
   }
+
+  .trayArt {
+    width: var(--tray-art);
+    height: var(--tray-art);
+  }
+}
+
+/* 一般直向手機：皿拉滿後多出的高度給圖 */
+@media (orientation: portrait) and (min-width: 360px) and (min-height: 641px) and (max-width: 899px) {
+  .baseArt {
+    max-width: 84px;
+  }
 }
 
 /* 寬螢幕與橫向手機：三欄 多多｜砧板｜托盤 4×2 */
@@ -912,9 +969,14 @@
     width: min(100%, 1040px);
   }
 
-  .board {
+  .boardLayer {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: 1fr auto;
+    align-content: center;
+  }
+
+  /* 壽司和料位一起置中，不要壽司在上、料位在中、下面一大片空木頭 */
+  .boardMain {
     align-content: center;
   }
 
@@ -955,6 +1017,11 @@
 
   .trayButton {
     min-height: 56px;
+  }
+
+  .trayArt {
+    width: var(--tray-art);
+    height: var(--tray-art);
   }
 }
 
@@ -1004,7 +1071,24 @@
   }
 
   .sushiButton {
-    width: min(100%, 220px);
+    width: min(100%, 260px);
+  }
+
+  .boardMain {
+    gap: 12px;
+  }
+
+  .trayButton {
+    gap: 4px;
+  }
+
+  .finger {
+    --hand: 48px;
+  }
+
+  .baseButton .finger,
+  .serveButton .finger {
+    --hand: 40px;
   }
 
   .slot,

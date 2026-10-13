@@ -1,23 +1,30 @@
 "use client";
 
-import { IconTap } from "@/components/games/ClayIcons";
 import { ToppingArt } from "@/lib/games/dino-sushi/art";
 import { toppingById, type ToppingId } from "@/lib/games/dino-sushi/toppings";
-import { TapButton } from "./DinoSushiPiece";
+import { TapButton, TapFinger } from "./DinoSushiPiece";
 import styles from "./DinoSushiKitchen.module.css";
 
 type Props = {
   tray: readonly ToppingId[];
   disabled: boolean;
+  /** 還沒選飯：托盤變淡、看得出現在不能點。吃東西或看泡泡的短暫鎖定只擋點擊、不變淡。 */
+  waitingForBase: boolean;
   hint: ToppingId | null;
   teaching: boolean;
   onAdd: (id: ToppingId) => void;
 };
 
 /** 托盤 2×4（橫向 4×2）：每格圖＋字，不分頁不捲動。 */
-export function DinoSushiTray({ tray, disabled, hint, teaching, onAdd }: Props) {
+export function DinoSushiTray({ tray, disabled, waitingForBase, hint, teaching, onAdd }: Props) {
   return (
-    <div className={styles.tray} role="group" aria-label="壽司料">
+    <div
+      className={styles.tray}
+      role="group"
+      aria-label="壽司料"
+      data-role="tray"
+      data-wait={waitingForBase ? "base" : undefined}
+    >
       {tray.map((id) => {
         const meta = toppingById(id);
         const hinted = hint === id;
@@ -37,11 +44,7 @@ export function DinoSushiTray({ tray, disabled, hint, teaching, onAdd }: Props) 
             <span className={styles.trayLabel} aria-hidden>
               {meta.label}
             </span>
-            {hinted && teaching ? (
-              <span className={styles.finger} aria-hidden>
-                <IconTap size={30} />
-              </span>
-            ) : null}
+            {hinted && teaching ? <TapFinger /> : null}
           </TapButton>
         );
       })}

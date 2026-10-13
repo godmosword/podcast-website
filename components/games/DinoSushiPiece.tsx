@@ -1,9 +1,24 @@
 "use client";
 
 import { useRef, type ButtonHTMLAttributes, type PointerEvent, type MouseEvent } from "react";
+import TapHand from "@/components/ui/TapHand";
+import styles from "./DinoSushiKitchen.module.css";
+
+/** 首單教學的手指：指尖落在被提示的那顆裡面、手身不壓到別顆（位置與尺寸見 .finger）。 */
+export function TapFinger() {
+  return (
+    <span className={styles.finger} aria-hidden data-tap-hand>
+      <TapHand />
+    </span>
+  );
+}
+
+/** 放開的位置，以及被點的那顆鈕當下的框。 */
+export type TapPoint = { x: number; y: number; rect: DOMRect };
 
 type TapButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onClick" | "type"> & {
-  onTap: () => void;
+  /** point：觸控／滑鼠放開的位置；鍵盤觸發時沒有。 */
+  onTap: (point?: TapPoint) => void;
 };
 
 /**
@@ -25,7 +40,7 @@ export function TapButton({ onTap, onPointerDown, onPointerUp, onPointerCancel, 
     if (!pressed || rest.disabled) return;
     const r = e.currentTarget.getBoundingClientRect();
     const inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
-    if (inside) onTap();
+    if (inside) onTap({ x: e.clientX, y: e.clientY, rect: r });
   };
 
   const handleCancel = (e: PointerEvent<HTMLButtonElement>) => {

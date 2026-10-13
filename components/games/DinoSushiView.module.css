@@ -366,18 +366,20 @@
   overflow: visible;
 }
 
+/* 局內同一張盤子圖，一排 5 個（自由做最多 10 個排兩排）；寬度跟著結算卡縮，320 也不折成 4＋1 */
 .resultPlates {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 56px));
   justify-content: center;
-  gap: 2px;
-  margin: 0 0 8px;
+  gap: 6px;
+  margin: 0 0 12px;
 }
 
 .resultPlate {
   display: block;
-  width: 44px;
-  height: 15px;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 1;
 }
 
 .resultPlate > svg {

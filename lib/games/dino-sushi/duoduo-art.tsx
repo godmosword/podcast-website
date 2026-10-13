@@ -54,7 +54,8 @@ function Eyes({ face }: { face: DuoDuoFace }) {
       </g>
     );
   }
-  const pupil = face === "look" ? { dx: -2.6, dy: -3.4 } : { dx: 0.8, dy: 0.6 };
+  // 看泡泡：泡泡在右上（多多車頭朝右），瞳孔往右上看；往左上看會像在不理人
+  const pupil = face === "look" ? { dx: 2.6, dy: -3.4 } : { dx: 0.8, dy: 0.6 };
   return (
     <g>
       {[61, 85].map((cx) => (
@@ -74,10 +75,12 @@ function Eyes({ face }: { face: DuoDuoFace }) {
 function Brows({ face }: { face: DuoDuoFace }) {
   const raised = face === "look" || face === "puff";
   const y = raised ? 15 : 18;
+  // 看泡泡時拱頂再抬 1 讀成期待；內側端點不動（再往上會壓到頭頂的刺、跑出頭的輪廓）
+  const arch = face === "look" ? 1 : 0;
   return (
     <g fill="none" stroke={INK} strokeWidth="4.2" strokeLinecap="round">
-      <path d={`M52 ${y + 2}q8-${raised ? 6 : 4} 16-1`} />
-      <path d={`M78 ${y + 1}q8-${raised ? 5 : 3} 16 1`} />
+      <path d={`M52 ${y + 2}q8-${raised ? 6 + arch : 4} 16-1`} />
+      <path d={`M78 ${y + 1}q8-${raised ? 5 + arch : 3} 16 1`} />
     </g>
   );
 }
