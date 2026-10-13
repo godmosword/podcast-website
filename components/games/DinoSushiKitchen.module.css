@@ -60,17 +60,16 @@
   inset: 0;
 }
 
-/* 多多整台（含四輪、背刺）都在櫃台上方，390 寬也不被櫃台或雨棚裁到。
-   視圖比例對齊 DUODUO_VIEWBOX（168 / 132）。輪子底下留一點空白，
-   那一截可以沒入帶面，輪子本身仍看得到。 */
+/* 貼紙是正方形。整張（含四輪）都在櫃台上方，390 與 320 寬也不被櫃台或雨棚裁到。
+   輪子在畫布底線附近，底端可以有一點空白沒入帶面。 */
 .duoArt {
-  --duo-max-w: 56%;
+  --duo-max-w: 58%;
   position: absolute;
   z-index: 1;
-  left: 4%;
+  left: 2%;
   bottom: calc(var(--counter-h) - 2px);
-  width: min(var(--duo-max-w), calc((100cqh - var(--counter-h) - var(--awning-h) - 8px) * 168 / 132));
-  aspect-ratio: 168 / 132;
+  width: min(var(--duo-max-w), calc(100cqh - var(--counter-h) - var(--awning-h) - 8px));
+  aspect-ratio: 1;
 }
 
 /* 兩層接地影：緊的接觸影偏左下，外圍再一層淡的。影不跟著身體浮動。 */
@@ -86,15 +85,6 @@
     radial-gradient(closest-side at 40% 55%, rgba(74, 60, 46, 0.28), transparent 72%),
     radial-gradient(closest-side at 52% 70%, rgba(74, 60, 46, 0.14), transparent 78%);
   pointer-events: none;
-}
-
-.duoArt > svg {
-  position: relative;
-  z-index: 1;
-  display: block;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
 }
 
 /* 送給多多的那盤：走迴轉帶前排，從右邊滑進來 */
@@ -392,6 +382,7 @@
 
 .foam {
   position: absolute;
+  z-index: 2;
   left: 38%;
   top: 48%;
   width: 40%;
@@ -427,10 +418,15 @@
   animation: sushiWiggle 1.2s ease-in-out 3;
 }
 
-.brushButton > svg {
+.brushButton > img {
   width: 100%;
   height: 100%;
+  object-fit: contain;
+  /* 牙刷在 1024 畫布裡偏下、畫得比較小，放大並上移，讓刷頭落在圓鈕裡。 */
+  transform: translateY(-14%) scale(1.85);
+  pointer-events: none;
 }
+
 
 @keyframes sushiWiggle {
   0%,

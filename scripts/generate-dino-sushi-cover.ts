@@ -8,6 +8,7 @@
  *
  * 成品：約 2048×1536、WebP q90（API 橫式上限 1536×1024，再放大）。
  * 紅線：付費生圖，每次執行最多 1 次 API 呼叫、不自動重抽；未經人工審稿不得上線；CI 不放 OPENAI_API_KEY。
+ * 目前上線封面是主人 2026-10-13 核准的原檔（1536×1024）。不要用本腳本覆蓋，除非再次核准。
  */
 import { createHash } from "node:crypto";
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";

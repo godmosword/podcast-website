@@ -1,552 +1,228 @@
 import type { CSSProperties } from "react";
-import { useId } from "react";
 import type { Mood } from "./reactions";
-import {
-  DUODUO_DETAIL,
-  DUODUO_INK,
-  DUODUO_LIGHT,
-  DUODUO_PALETTE,
-  DUODUO_STICKER,
-  DUODUO_STROKE,
-  DUODUO_VIEWBOX,
-} from "./duoduo-palette";
-import {
-  spikePath,
-  DUODUO_GEOMETRY,
-  type DuoDuoGeometry,
-  type DuoDuoView,
-  type EyeSpec,
-} from "./duoduo-geometry";
-import styles from "./duoduo-art.module.css";
 
 /**
- * 恐龍車多多。綠車身、淺綠吻部、橘色背刺、暖棕粗眉、頭頂圓眼、藍色側窗、四顆黑輪。
- * 沒有手、沒有腳。預設 3/4、車頭朝右，和封面同一個角度。
- * 嘴只微張，幾顆小圓白牙，不畫牙齦。
+ * 恐龍車多多（canon：綠車身＋淺綠吻部、橘色背刺、粗黑眉、頭頂大圓眼、藍色側窗、四顆黑輪、無手腳）。
+ * 3/4 正面，車頭朝右。消消樂的淡紫多多是糖果色，不是角色 canon。
  */
 
 export type DuoDuoMouth = "closed" | "open" | "chew" | "laugh";
-export type DuoDuoFace = Mood | "idle" | "sleepy";
-export type DuoDuoPose = "idle" | "eat" | "rest";
-export type { DuoDuoView };
+export type DuoDuoFace = Mood | "idle";
 
 type Props = {
   mouth: DuoDuoMouth;
   face: DuoDuoFace;
-  /** 刷過牙：牙齒閃一下。 */
+  /** 刷過牙：牙齒變白並閃一下。 */
   shinyTeeth?: boolean;
   size?: number | string;
   style?: CSSProperties;
-  /** 預設四分之三，局內用這個。角色表才換正面／側面。 */
-  view?: DuoDuoView;
-  /** 角色表的靜態姿勢。局內的浮動與咀嚼走 CSS。 */
-  pose?: DuoDuoPose;
-  /** 關掉待機浮動與眨眼（角色表、減少動態的靜態稿）。 */
-  animate?: boolean;
 };
 
-const P = DUODUO_PALETTE;
+const GREEN = "#5cb83a";
+const GREEN_DARK = "#3f8f2a";
+const MUZZLE = "#8fd14f";
+const SPIKE = "#f28a2e";
+const SPIKE_DARK = "#cf6a1a";
+const INK = "#2c2a28";
 
-function uidOf(raw: string): string {
-  return raw.replace(/:/g, "");
-}
-
-function poseTransform(pose: DuoDuoPose, anchorX: number): string | undefined {
-  if (pose === "idle") return undefined;
-  const spin = pose === "eat" ? 6 : -5;
-  const sx = pose === "eat" ? 1.04 : 1.02;
-  const sy = pose === "eat" ? 0.93 : 0.96;
-  return `translate(${anchorX} 118) rotate(${spin}) scale(${sx} ${sy}) translate(${-anchorX} -118)`;
-}
-
-function VolumeDefs({ id }: { id: string }) {
-  const shade = DUODUO_LIGHT.shade;
-  const materials = [P.green, P.muzzle, P.spike, P.window, P.wheel, P.hub, P.metal] as const;
-  const names = ["green", "muzzle", "spike", "window", "wheel", "hub", "metal"] as const;
-  return (
-    <defs>
-      {materials.map((tone, i) => (
-        <radialGradient
-          key={names[i]}
-          id={`${id}-${names[i]}`}
-          cx={DUODUO_LIGHT.highlight.cx}
-          cy={DUODUO_LIGHT.highlight.cy}
-          r="78%"
-          fx="22%"
-          fy="18%"
-        >
-          <stop offset="0%" stopColor={tone.light} />
-          <stop offset="48%" stopColor={tone.base} />
-          <stop offset="100%" stopColor={tone.shadow} />
-        </radialGradient>
-      ))}
-      {/* 暗面：左下。每一塊形狀用自己的 bounding box，所以車身、刺、輪子各有一塊。 */}
-      <linearGradient id={`${id}-shade`} x1="100%" y1="0%" x2="0%" y2="100%">
-        <stop offset="40%" stopColor={shade} stopOpacity="0" />
-        <stop offset="100%" stopColor={shade} stopOpacity={DUODUO_LIGHT.shadeOpacity} />
-      </linearGradient>
-      <linearGradient id={`${id}-rim`} x1="0%" y1="100%" x2="100%" y2="0%">
-        <stop offset="62%" stopColor={DUODUO_LIGHT.rim} stopOpacity="0" />
-        <stop offset="100%" stopColor={DUODUO_LIGHT.rim} stopOpacity="0.9" />
-      </linearGradient>
-    </defs>
-  );
-}
-
-function ClayPath({ d, fill, shade, rim }: { d: string; fill: string; shade: string; rim: string }) {
+function Wheel({ cx, cy, r = 9 }: { cx: number; cy: number; r?: number }) {
   return (
     <g>
-      <path d={d} fill={fill} />
-      <path d={d} fill={shade} />
-      <path d={d} fill="none" stroke={DUODUO_INK} strokeWidth={DUODUO_STROKE} strokeLinejoin="round" strokeLinecap="round" />
-      <path d={d} fill="none" stroke={rim} strokeWidth={1.35} strokeLinejoin="round" />
+      <circle cx={cx} cy={cy} r={r} fill={INK} />
+      <circle cx={cx} cy={cy} r={r * 0.45} fill="#9a958f" />
+      <circle cx={cx - r * 0.2} cy={cy - r * 0.25} r={r * 0.16} fill="#fff" opacity="0.5" />
     </g>
   );
 }
 
-function ClayCircle({
-  cx,
-  cy,
-  r,
-  fill,
-  shade,
-  rim,
-}: {
-  cx: number;
-  cy: number;
-  r: number;
-  fill: string;
-  shade: string;
-  rim: string;
-}) {
-  return (
-    <g>
-      <circle cx={cx} cy={cy} r={r} fill={fill} />
-      <circle cx={cx} cy={cy} r={r} fill={shade} />
-      <circle cx={cx} cy={cy} r={r} fill="none" stroke={DUODUO_INK} strokeWidth={DUODUO_STROKE} />
-      <circle cx={cx} cy={cy} r={r} fill="none" stroke={rim} strokeWidth={1.2} />
-    </g>
-  );
+function Spike({ d }: { d: string }) {
+  return <path d={d} fill={SPIKE} stroke={SPIKE_DARK} strokeWidth="1.8" strokeLinejoin="round" />;
 }
 
-function Wheel({
-  cx,
-  cy,
-  r,
-  wheel,
-  hub,
-  shade,
-  rim,
-}: {
-  cx: number;
-  cy: number;
-  r: number;
-  wheel: string;
-  hub: string;
-  shade: string;
-  rim: string;
-}) {
-  return (
-    <g>
-      <ClayCircle cx={cx} cy={cy} r={r} fill={wheel} shade={shade} rim={rim} />
-      <circle cx={cx} cy={cy} r={r * 0.46} fill={hub} />
-      <circle cx={cx} cy={cy} r={r * 0.46} fill={shade} />
-      <circle cx={cx} cy={cy} r={r * 0.46} fill="none" stroke={DUODUO_INK} strokeWidth={DUODUO_DETAIL} />
-      <circle cx={cx - r * 0.16} cy={cy - r * 0.18} r={r * 0.14} fill="#fff" opacity="0.85" />
-    </g>
-  );
-}
-
-function Tooth({ cx, cy, shiny }: { cx: number; cy: number; shiny: boolean }) {
-  return (
-    <g>
-      <ellipse cx={cx} cy={cy + 0.6} rx="2.5" ry="2.7" fill={P.tooth.shadow} />
-      <ellipse cx={cx} cy={cy} rx="2.35" ry="2.45" fill={shiny ? "#fff" : P.tooth.base} />
-      <ellipse cx={cx - 0.5} cy={cy - 0.7} rx="0.7" ry="0.45" fill="#fff" opacity="0.9" />
-    </g>
-  );
-}
-
-function Mouth({
-  mouth,
-  face,
-  shiny,
-  cx,
-  cy,
-  s,
-}: {
-  mouth: DuoDuoMouth;
-  face: DuoDuoFace;
-  shiny: boolean;
-  cx: number;
-  cy: number;
-  s: number;
-}) {
-  const surprised = face === "look" && mouth === "open";
-  if (surprised) {
-    return (
-      <g transform={`translate(${cx} ${cy}) scale(${s})`}>
-        <ellipse cx="0" cy="2" rx="5.2" ry="6" fill={P.mouth} stroke={DUODUO_INK} strokeWidth={DUODUO_STROKE} />
-      </g>
-    );
-  }
-  if (mouth === "chew") {
-    return (
-      <g transform={`translate(${cx} ${cy}) scale(${s})`}>
-        <path
-          d="M -8 2 Q 0 8 8 2"
-          fill="none"
-          stroke={DUODUO_INK}
-          strokeWidth={DUODUO_STROKE}
-          strokeLinecap="round"
-        />
-        <Tooth cx={-3.2} cy={4.2} shiny={shiny} />
-        <Tooth cx={3.2} cy={4.2} shiny={shiny} />
-        {face === "yum" ? <ellipse cx="0" cy="6.2" rx="2.2" ry="1.5" fill="#F6C6B4" /> : null}
-      </g>
-    );
-  }
-  if (mouth === "open" || mouth === "laugh") {
-    const wide = mouth === "laugh" ? 1.08 : 1;
-    const teeth = mouth === "laugh" ? [-6.5, -2.2, 2.2, 6.5] : [-4.2, 0, 4.2];
-    return (
-      <g transform={`translate(${cx} ${cy}) scale(${s * wide} ${s})`}>
-        <path
-          d="M -9 1 C -9 -3 9 -3 9 1 C 10 7 0 9 -9 7 C -10 4 -9 2 -9 1 Z"
-          fill={P.mouth}
-          stroke={DUODUO_INK}
-          strokeWidth={DUODUO_STROKE}
-          strokeLinejoin="round"
-        />
-        {teeth.map((x) => (
-          <Tooth key={x} cx={x} cy={1.4} shiny={shiny} />
-        ))}
-        {shiny ? (
-          <path d="M -14 -6 l 1.1 2.3 2.3 1.1 -2.3 1.1 -1.1 2.3 -1.1 -2.3 -2.3 -1.1 2.3 -1.1 Z" fill="#fff" />
-        ) : null}
-      </g>
-    );
-  }
-  return (
-    <g transform={`translate(${cx} ${cy}) scale(${s})`}>
-      <path
-        d="M -12 1 Q 0 6 12 1"
-        fill="none"
-        stroke={DUODUO_INK}
-        strokeWidth={DUODUO_STROKE}
-        strokeLinecap="round"
-      />
-      <Tooth cx={-6} cy={4.2} shiny={shiny} />
-      <Tooth cx={0} cy={7.2} shiny={shiny} />
-      <Tooth cx={6} cy={4.2} shiny={shiny} />
-    </g>
-  );
-}
-
-function Eye({ eye, face, shade, blink }: { eye: EyeSpec; face: DuoDuoFace; shade: string; blink: boolean }) {
-  const { cx, cy, r } = eye;
+function Eyes({ face }: { face: DuoDuoFace }) {
   if (face === "love") {
     return (
-      <g className={blink ? styles.eye : undefined} transform={`translate(${cx} ${cy})`}>
-        <path
-          d={`M 0 ${r * 0.35} C ${-r * 0.15} ${-r * 0.55} ${-r} ${-r * 0.15} ${-r * 0.55} ${r * 0.15} C ${-r * 0.2} ${r * 0.55} 0 ${r * 0.95} 0 ${r * 0.95} C 0 ${r * 0.95} ${r * 0.2} ${r * 0.55} ${r * 0.55} ${r * 0.15} C ${r} ${-r * 0.15} ${r * 0.15} ${-r * 0.55} 0 ${r * 0.35} Z`}
-          fill={P.blush}
-          stroke={DUODUO_INK}
-          strokeWidth={DUODUO_DETAIL}
-          strokeLinejoin="round"
-        />
+      <g fill="none" stroke={INK} strokeWidth="3.4" strokeLinecap="round">
+        <path d="M54 33q7-8 14 0M78 33q7-8 14 0" />
       </g>
     );
   }
   if (face === "puff") {
     return (
-      <g className={blink ? styles.eye : undefined}>
-        <path
-          d={`M ${cx - r} ${cy - r * 0.35} l ${r * 0.85} ${r * 0.45} l ${-r * 0.85} ${r * 0.45}`}
-          fill="none"
-          stroke={DUODUO_INK}
-          strokeWidth={DUODUO_STROKE}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
+      <g fill="none" stroke={INK} strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M55 27l10 5-10 5M91 27l-10 5 10 5" />
       </g>
     );
   }
-  const look = face === "look";
-  const pupilR = r * (look ? 0.58 : 0.48);
-  const dx = look ? 0.2 : r * 0.12;
-  const dy = look ? -r * 0.16 : r * 0.06;
+  const pupil = face === "look" ? { dx: -2.6, dy: -3.4 } : { dx: 0.8, dy: 0.6 };
   return (
-    <g className={blink ? styles.eye : undefined}>
-      <circle cx={cx} cy={cy} r={r} fill="#fff" stroke={DUODUO_INK} strokeWidth={DUODUO_STROKE} />
-      <circle cx={cx + dx} cy={cy + dy} r={pupilR} fill={DUODUO_INK} />
-      <circle cx={cx + dx + pupilR * 0.35} cy={cy + dy - pupilR * 0.38} r={pupilR * 0.28} fill="#fff" />
-      {face === "yum" ? (
-        <path
-          d={`M ${cx - r - 1} ${cy + r * 0.15} Q ${cx} ${cy - r * 0.55} ${cx + r + 1} ${cy + r * 0.15} Q ${cx} ${cy + r * 0.85} ${cx - r - 1} ${cy + r * 0.15} Z`}
-          fill={P.green.base}
-        />
-      ) : null}
-      {face === "yum" ? <path d={`M ${cx - r} ${cy + 1} Q ${cx} ${cy - r * 0.2} ${cx + r} ${cy + 1}`} fill={shade} /> : null}
-      {face === "sleepy" ? (
-        <path
-          d={`M ${cx - r - 1} ${cy + 1} Q ${cx} ${cy - r - 1} ${cx + r + 1} ${cy + 1} Q ${cx} ${cy - r * 0.05} ${cx - r - 1} ${cy + 1} Z`}
-          fill={P.green.base}
-        />
-      ) : null}
-      {face === "sleepy" ? (
-        <path
-          d={`M ${cx - r * 0.7} ${cy - 0.4} Q ${cx} ${cy + r * 0.15} ${cx + r * 0.7} ${cy - 0.4}`}
-          fill="none"
-          stroke={DUODUO_INK}
-          strokeWidth={DUODUO_DETAIL}
-          strokeLinecap="round"
-        />
-      ) : null}
+    <g>
+      {[61, 85].map((cx) => (
+        <g key={cx}>
+          <circle cx={cx} cy={32} r="10" fill="#fff" stroke={INK} strokeWidth="2" />
+          <circle cx={cx + pupil.dx} cy={32 + pupil.dy} r="5" fill={INK} />
+          <circle cx={cx + pupil.dx + 1.8} cy={32 + pupil.dy - 1.8} r="1.7" fill="#fff" />
+          {/* 好吃：臉頰往上推、眼睛下半被蓋住（瞇眼笑），不是畫一條線（大尺寸會像黑眼圈） */}
+          {face === "yum" ? <path d={`M${cx - 11.5} 45Q${cx} 32 ${cx + 11.5} 45Z`} fill={GREEN} /> : null}
+          {face === "yum" ? <path d={`M${cx - 9.5} 42.6Q${cx} 34.4 ${cx + 9.5} 42.6`} fill="none" stroke={INK} strokeWidth="2" strokeLinecap="round" /> : null}
+        </g>
+      ))}
     </g>
   );
 }
 
-function Brows({ face, eyes }: { face: DuoDuoFace; eyes: EyeSpec[] }) {
+function Brows({ face }: { face: DuoDuoFace }) {
   const raised = face === "look" || face === "puff";
-  const sleepy = face === "sleepy";
+  const y = raised ? 15 : 18;
   return (
-    <g fill={DUODUO_INK}>
-      {eyes.map((e) => {
-        const y = e.cy - e.r - (raised ? 5.5 : sleepy ? 1.6 : 3.4);
-        const lift = raised ? 5 : sleepy ? 1.2 : 3.2;
-        const w = e.r * 0.95;
-        return (
-          <path
-            key={`${e.cx}-${e.cy}`}
-            d={`M ${e.cx - w} ${y + 1.4} Q ${e.cx} ${y - lift} ${e.cx + w} ${y} Q ${e.cx} ${y - lift + 4.6} ${e.cx - w} ${y + 1.4} Z`}
-          />
-        );
-      })}
+    <g fill="none" stroke={INK} strokeWidth="4.2" strokeLinecap="round">
+      <path d={`M52 ${y + 2}q8-${raised ? 6 : 4} 16-1`} />
+      <path d={`M78 ${y + 1}q8-${raised ? 5 : 3} 16 1`} />
     </g>
   );
 }
 
-function Hearts({ spots }: { spots: DuoDuoGeometry["hearts"] }) {
-  return (
-    <g fill={P.blush} stroke={DUODUO_INK} strokeWidth={DUODUO_DETAIL} strokeLinejoin="round">
-      {spots.map((h) => (
-        <path
-          key={`${h.x}-${h.y}`}
-          transform={`translate(${h.x} ${h.y}) scale(${h.s})`}
-          d="M 0 3.2 C -1.2 -1.6 -7 -0.4 -4.6 3.4 L 0 8 L 4.6 3.4 C 7 -0.4 1.2 -1.6 0 3.2 Z"
-        />
-      ))}
-    </g>
-  );
-}
-
-function Stars({ spots }: { spots: DuoDuoGeometry["stars"] }) {
-  return (
-    <g fill="#FFD56A" stroke={DUODUO_INK} strokeWidth={DUODUO_DETAIL} strokeLinejoin="round">
-      {spots.map((s) => (
-        <path
-          key={`${s.x}-${s.y}`}
-          transform={`translate(${s.x} ${s.y}) scale(${s.s})`}
-          d="M 0 -7 L 1.6 -2.2 L 6.6 -2.2 L 2.6 1 L 4.2 6 L 0 3.2 L -4.2 6 L -2.6 1 L -6.6 -2.2 L -1.6 -2.2 Z"
-        />
-      ))}
-    </g>
-  );
-}
-
-function Puff({ cx, cy }: { cx: number; cy: number }) {
-  return (
-    <g fill="#fff" stroke={DUODUO_INK} strokeWidth={DUODUO_DETAIL}>
-      <circle cx={cx} cy={cy + 6} r="7" />
-      <circle cx={cx - 7} cy={cy - 2} r="8" />
-      <circle cx={cx + 5} cy={cy - 4} r="6" />
-    </g>
-  );
-}
-
-function Mark({
-  geo,
-  face,
-  mouth,
-  shiny,
-  pose,
-  id,
-  animate,
-}: {
-  geo: DuoDuoGeometry;
-  face: DuoDuoFace;
-  mouth: DuoDuoMouth;
-  shiny: boolean;
-  pose: DuoDuoPose;
-  id: string;
-  animate: boolean;
-}) {
-  const shade = `url(#${id}-shade)`;
-  const rim = `url(#${id}-rim)`;
-  const green = `url(#${id}-green)`;
-  const muzzle = `url(#${id}-muzzle)`;
-  const spike = `url(#${id}-spike)`;
-  const windowFill = `url(#${id}-window)`;
-  const wheel = `url(#${id}-wheel)`;
-  const hub = `url(#${id}-hub)`;
-  const metal = `url(#${id}-metal)`;
-  const blushOn = face === "love" || face === "sweet" || face === "yum" || face === "puff" || face === "idle";
-  const far = geo.wheels.filter((w) => w.far);
-  const near = geo.wheels.filter((w) => !w.far);
-  const blink = animate && face !== "sleepy" && face !== "puff";
-  return (
-    <g transform={poseTransform(pose, geo.anchorX)}>
-      <g fill="#fff" stroke="#fff" strokeWidth={DUODUO_STICKER} strokeLinejoin="round" strokeLinecap="round">
-        {geo.spikes.map((s) => (
-          <path key={`s-${s.x}-${s.y}`} d={spikePath(s)} />
+function Mouth({ mouth, shinyTeeth }: { mouth: DuoDuoMouth; shinyTeeth: boolean }) {
+  const tooth = shinyTeeth ? "#ffffff" : "#ffeeb5";
+  if (mouth === "open") {
+    return (
+      <g>
+        <path d="M50 60c8-4 46-4 56 0 2 14-8 28-28 28s-30-14-28-28Z" fill="#8a2a2a" stroke={GREEN_DARK} strokeWidth="2.4" />
+        <path d="M60 80c6-7 30-7 36 0-5 5-12 7-18 7s-13-2-18-7Z" fill="#ff6b6b" />
+        {[56, 64, 72, 80, 88, 96].map((x) => (
+          <rect key={`t${x}`} x={x - 3.4} y="59.5" width="6.8" height="7.5" rx="2.4" fill={tooth} stroke="#d9c58f" strokeWidth="1" />
         ))}
-        <path d={geo.body} />
-        {geo.wheels.map((w) => (
-          <circle key={`w-${w.cx}`} cx={w.cx} cy={w.cy} r={w.r} />
+        {[66, 74, 82, 90].map((x) => (
+          <rect key={`b${x}`} x={x - 3.2} y="80" width="6.4" height="6" rx="2.2" fill={tooth} stroke="#d9c58f" strokeWidth="1" />
+        ))}
+        {shinyTeeth ? (
+          <g fill="#fff" stroke="#8ddff0" strokeWidth="1.2">
+            <path d="M58 52l1.6 3.4 3.4 1.6-3.4 1.6-1.6 3.4-1.6-3.4-3.4-1.6 3.4-1.6Z" />
+            <path d="M101 54l1.2 2.6 2.6 1.2-2.6 1.2-1.2 2.6-1.2-2.6-2.6-1.2 2.6-1.2Z" />
+          </g>
+        ) : null}
+      </g>
+    );
+  }
+  if (mouth === "chew") {
+    return <path d="M66 70q6 7 12 0q6 7 12 0" fill="none" stroke={INK} strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />;
+  }
+  if (mouth === "laugh") {
+    return (
+      <g>
+        <path d="M56 64h44q0 20-22 20t-22-20Z" fill="#8a2a2a" stroke={INK} strokeWidth="2.6" strokeLinejoin="round" />
+        <path d="M66 78q12-7 24 0-5 5-12 5t-12-5Z" fill="#ff6b6b" />
+        {[64, 72, 84, 92].map((x) => (
+          <rect key={x} x={x - 3} y="64.5" width="6" height="5" rx="2" fill={tooth} stroke="#d9c58f" strokeWidth="1" />
         ))}
       </g>
-      <rect
-        x={geo.exhaust.x}
-        y={geo.exhaust.y}
-        width={geo.exhaust.w}
-        height={geo.exhaust.h}
-        rx="4"
-        fill={metal}
-        stroke={DUODUO_INK}
-        strokeWidth={DUODUO_DETAIL}
-      />
-      {face === "puff" ? <Puff cx={geo.puff.cx} cy={geo.puff.cy} /> : null}
-      {geo.spikes.map((s) => (
-        <ClayPath key={`c-${s.x}-${s.y}`} d={spikePath(s)} fill={spike} shade={shade} rim={rim} />
+    );
+  }
+  return (
+    <g>
+      <path d="M50 68q28 18 56 0" fill="none" stroke={INK} strokeWidth="3.2" strokeLinecap="round" />
+      {[
+        [64, 74.2],
+        [72, 76.1],
+        [84, 76.1],
+        [92, 74.2],
+      ].map(([x, y]) => (
+        <rect key={x} x={x - 3} y={y} width="6" height="5" rx="2" fill={tooth} stroke="#d9c58f" strokeWidth="1" />
       ))}
-      {far.map((w) => (
-        <Wheel key={`f-${w.cx}`} cx={w.cx} cy={w.cy} r={w.r} wheel={wheel} hub={hub} shade={shade} rim={rim} />
-      ))}
-      <ClayPath d={geo.body} fill={green} shade={shade} rim={rim} />
-      <ellipse
-        cx={geo.gloss.cx}
-        cy={geo.gloss.cy}
-        rx={geo.gloss.rx}
-        ry={geo.gloss.ry}
-        fill="#fff"
-        opacity="0.42"
-        transform={`rotate(-28 ${geo.gloss.cx} ${geo.gloss.cy})`}
-      />
-      {geo.window ? (
-        <g>
-          <rect
-            x={geo.window.x}
-            y={geo.window.y}
-            width={geo.window.w}
-            height={geo.window.h}
-            rx={geo.window.rx}
-            fill={windowFill}
-            stroke={DUODUO_INK}
-            strokeWidth={DUODUO_STROKE}
-          />
-          <rect
-            x={geo.window.x}
-            y={geo.window.y}
-            width={geo.window.w}
-            height={geo.window.h}
-            rx={geo.window.rx}
-            fill={shade}
-          />
-          <ellipse
-            cx={geo.window.x + geo.window.w * 0.32}
-            cy={geo.window.y + geo.window.h * 0.28}
-            rx={geo.window.w * 0.18}
-            ry={geo.window.h * 0.1}
-            fill="#fff"
-            opacity="0.75"
-          />
-        </g>
-      ) : null}
-      <path d={geo.muzzle} fill={muzzle} />
-      <path d={geo.muzzle} fill={shade} />
-      <path d={geo.muzzleEdge} fill="none" stroke={DUODUO_INK} strokeWidth={DUODUO_STROKE} strokeLinecap="round" />
-      <path d={geo.muzzleEdge} fill="none" stroke={rim} strokeWidth={1.2} strokeLinecap="round" />
-      {geo.nostrils.map((n) => (
-        <ellipse key={`${n.cx}-${n.cy}`} cx={n.cx} cy={n.cy} rx="2.3" ry="1.7" fill={P.muzzle.shadow} />
-      ))}
-      {blushOn
-        ? geo.blush.map((b) => (
-            <ellipse key={`${b.cx}-${b.cy}`} cx={b.cx} cy={b.cy} rx="5" ry="3" fill={P.blush} opacity={face === "idle" ? 0.38 : 0.62} />
-          ))
-        : null}
-      <Mouth mouth={mouth} face={face} shiny={shiny} cx={geo.mouth.cx} cy={geo.mouth.cy} s={geo.mouth.s} />
-      {geo.eyes.map((e) => (
-        <Eye key={`${e.cx}-${e.cy}`} eye={e} face={face} shade={shade} blink={blink} />
-      ))}
-      <Brows face={face} eyes={geo.eyes} />
-      {near.map((w) => (
-        <Wheel key={`n-${w.cx}`} cx={w.cx} cy={w.cy} r={w.r} wheel={wheel} hub={hub} shade={shade} rim={rim} />
-      ))}
-      {near.map((w) => (
-        <ClayPath key={`d-${w.cx}`} d={fenderPath(w.cx, w.cy, w.r)} fill={green} shade={shade} rim={rim} />
-      ))}
-      {face === "love" ? <Hearts spots={geo.hearts} /> : null}
-      {face === "sweet" ? <Stars spots={geo.stars} /> : null}
     </g>
   );
 }
 
-/** 輪子上緣的擋泥板，讓輪子嵌進車身。 */
-function fenderPath(cx: number, cy: number, r: number): string {
-  return `M ${cx - r - 1} ${cy - 1} Q ${cx} ${cy - r - 4} ${cx + r + 1} ${cy - 1} L ${cx + r - 1} ${cy + 3} Q ${cx} ${cy - r + 4} ${cx - r + 1} ${cy + 3} Z`;
+/** 芥末：排氣管噗一朵白雲。 */
+function PuffCloud() {
+  return (
+    <g fill="#fff" stroke="#9aa6b2" strokeWidth="2">
+      <circle cx="-3" cy="80" r="9" />
+      <circle cx="-11" cy="67" r="10.5" />
+      <circle cx="2" cy="62" r="8" />
+    </g>
+  );
 }
 
-export function DuoDuoArt({
-  mouth,
-  face,
-  shinyTeeth = false,
-  size = "100%",
-  style,
-  view = "three-quarter",
-  pose = "idle",
-  animate = true,
-}: Props) {
-  const id = uidOf(useId());
-  const eating = mouth === "open" || mouth === "chew" || mouth === "laugh";
-  const figureClass = animate ? (eating ? `${styles.figure} ${styles.munch}` : styles.figure) : undefined;
+function SweetStars() {
   return (
-    <svg
-      className={figureClass}
-      viewBox={`0 0 ${DUODUO_VIEWBOX.width} ${DUODUO_VIEWBOX.height}`}
-      width={size}
-      height={size}
-      style={style}
-      aria-hidden
-      focusable="false"
-      data-view={view}
-      data-face={face}
-      data-mouth={mouth}
-    >
-      <VolumeDefs id={id} />
-      <Mark
-        geo={DUODUO_GEOMETRY[view]}
-        face={face}
-        mouth={mouth}
-        shiny={shinyTeeth}
-        pose={pose}
-        id={id}
-        animate={animate}
-      />
+    <g fill="#ffd34d" stroke="#d9a514" strokeWidth="1.6" strokeLinejoin="round">
+      <path d="M38 8l2.4 5 5.4.8-3.9 3.8.9 5.4-4.8-2.6-4.8 2.6.9-5.4-3.9-3.8 5.4-.8Z" />
+      <path d="M114 26l1.9 3.9 4.3.6-3.1 3 .7 4.3-3.8-2-3.8 2 .7-4.3-3.1-3 4.3-.6Z" />
+    </g>
+  );
+}
+
+function Hearts() {
+  return (
+    <g fill="#ff7a9c" stroke="#e04568" strokeWidth="1.2">
+      <path d="M104 14c-2-3-7-1-5 3l5 5 5-5c2-4-3-6-5-3Z" />
+      <path d="M45 10c-1.6-2.4-5.6-.8-4 2.4l4 4 4-4c1.6-3.2-2.4-4.8-4-2.4Z" />
+    </g>
+  );
+}
+
+export function DuoDuoArt({ mouth, face, shinyTeeth = false, size = "100%", style }: Props) {
+  const blush = face === "love" || face === "sweet" || face === "yum" || face === "puff";
+  return (
+    <svg viewBox="-18 0 138 110" width={size} height={size} style={style} aria-hidden focusable="false">
+      <ellipse cx="62" cy="104" rx="52" ry="5" fill="#3d3028" opacity="0.16" />
+      {/* 排氣管 */}
+      <rect x="6" y="80" width="12" height="7" rx="3" fill="#9a958f" stroke="#6b6560" strokeWidth="1.6" />
+      {face === "puff" ? <PuffCloud /> : null}
+      {/* 背刺 */}
+      <Spike d="M14 60l2-14 11 8Z" />
+      <Spike d="M20 46l6-13 9 10Z" />
+      <Spike d="M31 35l9-11 6 12Z" />
+      {/* 車身（側面） */}
+      <path d="M12 86c-4-20 4-40 26-46h20v52H18c-3 0-5-2-6-6Z" fill={GREEN} stroke={GREEN_DARK} strokeWidth="2.4" strokeLinejoin="round" />
+      <rect x="20" y="54" width="15" height="21" rx="6" fill="#4a90d9" stroke="#2f6fb0" strokeWidth="2" />
+      <ellipse cx="25" cy="59" rx="3" ry="1.6" fill="#fff" opacity="0.6" />
+      <circle cx="42" cy="66" r="3.4" fill="#7ccf4a" stroke={GREEN_DARK} strokeWidth="1.2" />
+      <circle cx="44" cy="76" r="2.4" fill="#7ccf4a" stroke={GREEN_DARK} strokeWidth="1.2" />
+      {/* 頭頂刺 */}
+      <Spike d="M50 22l4-14 10 9Z" />
+      <Spike d="M64 16l9-12 6 13Z" />
+      <Spike d="M80 17l11-8 1 14Z" />
+      {/* 頭（車頭） */}
+      <path d="M44 40c0-18 14-26 34-26s34 8 34 26v40c0 12-10 16-34 16s-34-4-34-16Z" fill={GREEN} stroke={GREEN_DARK} strokeWidth="2.4" />
+      <ellipse cx="60" cy="22" rx="8" ry="3" fill="#fff" opacity="0.32" />
+      {/* 吻部 */}
+      <path d="M40 54c4-9 20-12 38-12s34 3 38 12v24c0 11-14 15-38 15s-38-4-38-15Z" fill={MUZZLE} stroke={GREEN_DARK} strokeWidth="2" />
+      <ellipse cx="68" cy="50" rx="2.6" ry="2" fill={GREEN_DARK} />
+      <ellipse cx="88" cy="50" rx="2.6" ry="2" fill={GREEN_DARK} />
+      {blush ? (
+        <g fill="#ff9fb7" opacity="0.6">
+          <ellipse cx="48" cy="62" rx="4" ry="2.6" />
+          <ellipse cx="108" cy="62" rx="4" ry="2.6" />
+        </g>
+      ) : null}
+      <Mouth mouth={mouth} shinyTeeth={shinyTeeth} />
+      {face === "yum" && mouth === "closed" ? <ellipse cx="101" cy="74" rx="4" ry="3.2" fill="#ff6b6b" stroke="#c94a4a" strokeWidth="1.2" transform="rotate(-25 101 74)" /> : null}
+      <Eyes face={face} />
+      <Brows face={face} />
+      {face === "love" ? <Hearts /> : null}
+      {face === "sweet" ? <SweetStars /> : null}
+      {/* 前擋泥板＋輪子 */}
+      <Wheel cx={24} cy={93} r={8} />
+      <path d="M44 92c0-8 6-13 13-13s13 5 13 13" fill={GREEN} stroke={GREEN_DARK} strokeWidth="2.2" />
+      <Wheel cx={57} cy={95} r={9} />
+      <path d="M88 92c0-8 6-13 13-13s11 5 11 13" fill={GREEN} stroke={GREEN_DARK} strokeWidth="2.2" />
+      <Wheel cx={100} cy={95} r={9} />
     </svg>
   );
 }
 
-/** 刷牙小動作的牙刷（藍白）。線色、線寬跟著多多。 */
+/** 刷牙小動作的牙刷（canon 道具：藍白牙刷）。 */
 export function ToothbrushArt({ size = "100%", style }: { size?: number | string; style?: CSSProperties }) {
   return (
     <svg viewBox="0 0 48 48" width={size} height={size} style={style} aria-hidden focusable="false">
-      <rect x="21" y="16" width="8" height="30" rx="4" fill="#4A90D9" stroke={DUODUO_INK} strokeWidth={DUODUO_STROKE} transform="rotate(-30 25 31)" />
-      <rect x="22" y="31" width="5" height="9" rx="2.5" fill="#fff" opacity="0.9" transform="rotate(-30 25 31)" />
-      <rect x="9" y="4" width="13" height="14" rx="3" fill="#fff" stroke={DUODUO_INK} strokeWidth={DUODUO_DETAIL} transform="rotate(-30 15 11)" />
-      <path d="M10 8h11M10 12h11" stroke="#8DDFF0" strokeWidth={DUODUO_DETAIL} transform="rotate(-30 15 11)" />
-      <path d="M6 5c2-3 5-1 7-3s5 0 7-2" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" />
-      <path d="M6 5c2-3 5-1 7-3s5 0 7-2" fill="none" stroke="#5FB7E8" strokeWidth={DUODUO_DETAIL} strokeLinecap="round" strokeDasharray="2 3" />
+      <rect x="21" y="16" width="8" height="30" rx="4" fill="#3d7fd6" stroke="#2a5fa8" strokeWidth="1.8" transform="rotate(-30 25 31)" />
+      <rect x="22" y="31" width="5" height="9" rx="2.5" fill="#fff" opacity="0.85" transform="rotate(-30 25 31)" />
+      <rect x="9" y="4" width="13" height="14" rx="3" fill="#fff" stroke="#9fb6cc" strokeWidth="1.6" transform="rotate(-30 15 11)" />
+      <path d="M10 8h11M10 12h11" stroke="#8ddff0" strokeWidth="1.6" transform="rotate(-30 15 11)" />
+      <path d="M6 5c2-3 5-1 7-3s5 0 7-2" fill="none" stroke="#fff" strokeWidth="3.4" strokeLinecap="round" />
+      <path d="M6 5c2-3 5-1 7-3s5 0 7-2" fill="none" stroke="#5fb7e8" strokeWidth="1.4" strokeLinecap="round" strokeDasharray="2 3" />
     </svg>
   );
 }

@@ -353,9 +353,9 @@
   z-index: 1;
   left: 50%;
   bottom: calc(var(--counter-h) - 2px);
-  /* 刺和愛心不頂到雨棚；比例同 DUODUO_VIEWBOX */
+  /* 正方形貼紙，刺和愛心不頂到雨棚 */
   height: calc(100% - var(--counter-h) - var(--awning-h) - 2px);
-  aspect-ratio: 168 / 132;
+  aspect-ratio: 1;
   transform: translateX(-50%);
 }
 
@@ -373,14 +373,6 @@
   pointer-events: none;
 }
 
-.resultDuo > svg {
-  position: relative;
-  z-index: 1;
-  display: block;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-}
 
 .resultPlates {
   display: flex;
