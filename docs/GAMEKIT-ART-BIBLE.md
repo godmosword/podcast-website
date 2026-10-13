@@ -12,7 +12,7 @@
 |------|------------------|
 | 方塊轉轉 `block-drop` | CSS 格子＋圓角色塊（`components/games/blockDropTheme.ts` 的 `CLAY_BLOCK_COLORS`，`borderRadius: 7`）。不是像素風 |
 | 車車消消樂 `candy-match` | 黏土風 SVG（`components/games/CandyMatchPieceArt.tsx`） |
-| 多多壽司屋 `dino-sushi` | 黏土風 SVG（`lib/games/dino-sushi/art.tsx`、店面道具 `shop-art.tsx`），雨棚、木牆、迴轉帶是 CSS 漸層（`DinoSushiShop.module.css`） |
+| 多多壽司屋 `dino-sushi` | 黏土語彙的向量 SVG。角色多多的線寬、三階色、光向在 [`STYLE-BIBLE.md`](STYLE-BIBLE.md)「多多角色規格」，畫在 `lib/games/dino-sushi/duoduo-art.tsx`；食材在 `art.tsx`，店面道具在 `shop-art.tsx`。雨棚、木牆、迴轉帶是 CSS 漸層（`DinoSushiShop.module.css`） |
 | 繪本塗塗鴉 | 黑線稿，不走 Game Kit 畫布 |
 
 BGM 也不是本檔寫的 chiptune ogg：三款 Game Kit 遊戲在 `playing` 時播的是 WebAudio 程序合成（`lib/gamekit/runtime/chiptune-bgm.ts`；方塊轉轉方波，消消樂與壽司屋三角波）。壽司屋另有宣告式合成音效（`runtime/synth.ts`，經 `voices()`）與店內環境音（`runtime/ambience.ts`）。

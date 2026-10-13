@@ -2,7 +2,8 @@
  * 多多壽司屋廚房。直向：上＝迴轉壽司店（多多＋泡泡＋疊盤）；中＝檜木砧板＋「給多多吃」；下＝食材托盤 2×4。
  * 320×568 必須一屏放下；橫向手機與寬螢幕三欄（多多｜砧板｜托盤 4×2），斷點同消消樂 WIDE_LAYOUT_QUERY。
  * 材質：店面是粉彩雨棚＋木牆＋不鏽鋼迴轉帶（DinoSushiShop）、砧板是檜木、料位與托盤是瓷碟。
- * 常駐動態只有迴轉帶慢慢繞；其餘只在加料、送盤、提示、晃動時出現，減少動態時全部收掉。
+ * 常駐動態是迴轉帶慢慢繞，加上多多輕微浮動與偶爾眨眼；吃的時候改成擠壓。
+ * 其餘只在加料、送盤、提示、晃動時出現。減少動態時全部收掉。
  */
 .kitchen {
   --duo-h: clamp(150px, 30svh, 230px);
@@ -59,24 +60,41 @@
   inset: 0;
 }
 
-/* 多多坐在迴轉帶後面：輪子下半被櫃台擋住，矮舞台時刺可以蓋到雨棚 */
-/* 寬由舞台寬、高兩邊取小：比例不變形，輪子永遠貼著迴轉帶（不會浮在半空） */
+/* 多多整台（含四輪、背刺）都在櫃台上方，390 寬也不被櫃台或雨棚裁到。
+   視圖比例對齊 DUODUO_VIEWBOX（168 / 132）。輪子底下留一點空白，
+   那一截可以沒入帶面，輪子本身仍看得到。 */
 .duoArt {
-  --duo-max-w: 64%;
+  --duo-max-w: 56%;
   position: absolute;
   z-index: 1;
-  left: 3%;
-  bottom: calc(var(--counter-h) * 0.56);
-  width: min(var(--duo-max-w), calc((100cqh - var(--counter-h) * 0.56 - 4px) * 138 / 110));
-  aspect-ratio: 138 / 110;
+  left: 4%;
+  bottom: calc(var(--counter-h) - 2px);
+  width: min(var(--duo-max-w), calc((100cqh - var(--counter-h) - var(--awning-h) - 8px) * 168 / 132));
+  aspect-ratio: 168 / 132;
+}
+
+/* 兩層接地影：緊的接觸影偏左下，外圍再一層淡的。影不跟著身體浮動。 */
+.duoArt::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  left: 10%;
+  right: 12%;
+  bottom: 1%;
+  height: 12%;
+  background:
+    radial-gradient(closest-side at 40% 55%, rgba(74, 60, 46, 0.28), transparent 72%),
+    radial-gradient(closest-side at 52% 70%, rgba(74, 60, 46, 0.14), transparent 78%);
+  pointer-events: none;
 }
 
 .duoArt > svg {
+  position: relative;
+  z-index: 1;
   display: block;
   width: 100%;
   height: 100%;
   overflow: visible;
-  filter: drop-shadow(0 6px 6px rgba(90, 60, 30, 0.12));
 }
 
 /* 送給多多的那盤：走迴轉帶前排，從右邊滑進來 */
@@ -991,8 +1009,8 @@
   }
 
   .duoArt {
-    --duo-max-w: 88%;
-    left: 4%;
+    --duo-max-w: 72%;
+    left: 6%;
   }
 
   .trayButton {

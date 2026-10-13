@@ -352,14 +352,30 @@
   position: absolute;
   z-index: 1;
   left: 50%;
-  bottom: calc(var(--counter-h) * 0.56);
-  /* 刺和愛心不頂到雨棚 */
-  height: calc(100% - var(--counter-h) * 0.56 - var(--awning-h));
-  aspect-ratio: 138 / 110;
+  bottom: calc(var(--counter-h) - 2px);
+  /* 刺和愛心不頂到雨棚；比例同 DUODUO_VIEWBOX */
+  height: calc(100% - var(--counter-h) - var(--awning-h) - 2px);
+  aspect-ratio: 168 / 132;
   transform: translateX(-50%);
 }
 
+.resultDuo::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  left: 12%;
+  right: 14%;
+  bottom: 1%;
+  height: 14%;
+  background:
+    radial-gradient(closest-side at 40% 55%, rgba(74, 60, 46, 0.28), transparent 72%),
+    radial-gradient(closest-side at 52% 70%, rgba(74, 60, 46, 0.14), transparent 78%);
+  pointer-events: none;
+}
+
 .resultDuo > svg {
+  position: relative;
+  z-index: 1;
   display: block;
   width: 100%;
   height: 100%;

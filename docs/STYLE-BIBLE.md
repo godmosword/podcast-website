@@ -39,7 +39,7 @@
 |------|------|------|
 | 故事插畫、Landing、宇宙地圖 | 暖色粉彩黏土（霧面、柔光、低對比） | `DESIGN.md`、`UNIVERSE-ART-BIBLE.md` |
 | 著色頁 | 純黑粗線稿＋白底 | `scripts/lib/coloring-ai-prompts.ts` |
-| 消消樂、壽司屋 | 黏土語彙的向量 SVG | `CandyMatchPieceArt.tsx`、`lib/games/dino-sushi/art.tsx`；壽司屋店面道具在 `shop-art.tsx`，雨棚、木牆、迴轉帶是 `DinoSushiShop.module.css` 的 CSS 漸層 |
+| 消消樂、壽司屋 | 黏土語彙的向量 SVG | `CandyMatchPieceArt.tsx`、`lib/games/dino-sushi/art.tsx`；壽司屋店面道具在 `shop-art.tsx`，雨棚、木牆、迴轉帶是 `DinoSushiShop.module.css` 的 CSS 漸層。角色多多的線寬、三階色與光向見下方「多多角色規格」 |
 | 方塊轉轉 | **不是像素風。** CSS 格子＋圓角色塊，`borderRadius: 7`，色在 `CLAY_BLOCK_COLORS` | `components/games/BlockDropWell.tsx`、`blockDropTheme.ts` |
 
 方塊轉轉的 adapter 沒有 `fixedUpdate`。`GameHost` 的 `image-rendering: pixelated` 畫布只在有 `fixedUpdate` 時出現，所以上線畫面不會走那條路。`lib/gamekit/runtime/palette.ts` 與 `procedural-sheets.ts` 仍在程式裡，沒有上線遊戲在用。像素規格的適用範圍寫在 Game Kit 美術聖經開頭。
@@ -47,6 +47,59 @@
 遊戲內字：方塊轉轉 HUD 用 `var(--font-sans)`，這個變數沒有定義，所以落到 PingFang TC／微軟正黑體，不是 8px 點陣字。消消樂與壽司屋按鈕寫 `font-family: inherit`，跟著全站 `--font-stack-body`。
 
 音效：著色等短音在 `lib/sfx.ts`（WebAudio，需手勢）。三款 Game Kit 遊戲在 `playing` 時播程序合成 BGM（`chiptune-bgm.ts`），不是 ogg 檔：方塊轉轉是方波，消消樂與壽司屋是三角波旋律。壽司屋另有合成音效（`lib/games/dino-sushi/sfx.ts`，經 Game Kit `voices()`）與店內環境音（`lib/gamekit/runtime/ambience.ts`，走 music 分軌、只在廚房出現）。真機音量【未確認】。
+
+## 2.1 多多角色規格【已拍板，2026-10-13】
+
+對象約 5 歲。局內向量與封面要認得出是同一台車：綠車身、淺綠吻部、橘刺、暖棕粗眉、圓眼、藍側窗、四顆黑輪，沒有手腳。角度預設四分之三、車頭朝右。
+
+實作：`lib/games/dino-sushi/duoduo-palette.ts`、`duoduo-geometry.ts`、`duoduo-art.tsx`。角色表元件：`duoduo-sheet.tsx`（正面、四分之三、側面；開心、好吃、驚訝、辣辣、喜歡、想睡；站好、吃東西、休息）。
+
+### 線
+
+全角色只用一種描邊色，不再混深綠、近黑、橘線。
+
+| 用途 | 值 |
+|------|----|
+| 描邊色 | `#4A3C2E` |
+| 主輪廓 | `2.75`（viewBox 單位） |
+| 細節（輪毂、鼻孔以外的小件、愛心邊） | `1.5` |
+| 白貼紙邊 | 填色底下的白描邊 `9`，只露出外圈 |
+| 眉毛 | 同一描邊色的填色塊，不用更粗的線 |
+
+牙齒是無描邊的小圓白塊。1.5 的線畫在這麼小的牙上會變粗框，所以牙齒只靠白與 `#E4DDD2` 的底影。
+
+### 三階色
+
+每種顏色都是 light（左上）／base（固有色）／shadow（外緣）。
+
+| 部位 | light | base | shadow |
+|------|-------|------|--------|
+| 車身 | `#B6E878` | `#5CB83A` | `#3A7A28` |
+| 吻部 | `#DFF6AE` | `#8FD14F` | `#6AAA34` |
+| 背刺 | `#FFC56A` | `#F28A2E` | `#C86A16` |
+| 側窗 | `#D7EEFF` | `#4A90D9` | `#2C6AAD` |
+| 輪子 | `#6E6862` | `#2C2A28` | `#161412` |
+| 輪毂 | `#F7F4EF` | `#C8C2BA` | `#8A847C` |
+| 牙齒 | `#FFFFFF` | `#FFFEFB` | `#E4DDD2` |
+
+嘴裡是 `#F0C2B4`（淡陶土粉）。不畫紅色牙齦、不畫大片舌頭。好吃的表情只在咀嚼時露一點 `#F6C6B4` 舌尖。臉頰 `#FF9FB7`。
+
+### 光
+
+- 主光：左上 45°。體積用 `radialGradient`，中心約在形狀的 28% 寬、26% 高。
+- 暗面：左下，`#3A2A1C`、不透明度 0.26，疊在同一塊形狀上。
+- 邊緣光：右上，白、不透明度約 0.9，只留在輪廓的右上段。
+- 接地影兩層，不跟著身體一起浮動：緊的一層偏左下（`rgba(74, 60, 46, 0.28)`），外圍再一層更淡（`0.14`）。
+
+### 嘴與站位
+
+微笑或微張。張嘴大約是臉寬的三分之一，上排最多四顆小圓白牙（笑的時候可以四顆，平常三顆）。驚訝是小圓嘴，沒有牙。
+
+390px 寬的廚房裡，多多的視圖框（168×132）要完整落在雨棚下緣與櫃台上緣之間，四輪看得到，不被櫃台裁掉。視圖底端可以有一點空白沒入迴轉帶，輪子本身留在帶面上方。
+
+### 動作
+
+只動 transform。待機上下約 2px、2.6 秒一循環；大約每 5.4 秒眨一次眼（中間再補一個小眨）。吃東西（張嘴、咀嚼、笑）改成擠壓：先橫向撐開再縱向拉高。`prefers-reduced-motion: reduce`，以及遊戲的 `data-reduced`／`data-paused`，這些動作都停。
 
 ## 3. 兒童觸控【已拍板，只調了著色區的間距】
 
@@ -87,12 +140,12 @@
 ## 6. 大幅修改的決定
 
 - 著色 12 色粉彩、圖案與色名：已上線（#206，2026-10-12）。見 [`proposals/2026-10-12-coloring-pastel-swatches.md`](proposals/2026-10-12-coloring-pastel-swatches.md)
-- 遊戲畫風：已決定：維持現狀。見 [`proposals/2026-10-12-game-art-style.md`](proposals/2026-10-12-game-art-style.md)
+- 遊戲畫風：其他遊戲維持現狀。多多壽司屋的角色多多於 2026-10-13 改畫（主人明確同意覆寫「維持現狀」）。見 [`proposals/2026-10-12-game-art-style.md`](proposals/2026-10-12-game-art-style.md) 與上方「多多角色規格」
 - 按鈕陰影：已決定：維持現狀。上一節
 
 ## 7. 仍【未確認】
 
-- 角色頭身比的數值（沒有量定裝照）
+- 除了多多以外，其他角色的頭身比（沒有量定裝照）。多多的比例以角色表的視圖 `168×132` 為準，頭大約佔車身長邊的一半
 - 全站 disabled／loading／hover 的完整清單（著色色票 hover 是 `scale(1.06)`；故事載入是封面 skeleton。其餘沒有逐頁點過）
 - BGM 在真機的音量
 - `e2e/coloring-visual` 基線圖的畫面內容（本輪沒有打開那些快照來描述）
