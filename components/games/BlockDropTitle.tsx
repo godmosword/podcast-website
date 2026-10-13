@@ -5,11 +5,10 @@ import type { CSSProperties } from "react";
 import { IconChevronLeft, IconChevronRight, IconPlay, IconRotate, IconSparkle, IconStar } from "@/components/games/ClayIcons";
 import { IconFreeStack } from "@/components/games/BlockDropIcons";
 import { CLAY_BLOCK_COLORS } from "@/components/games/blockDropTheme";
-import { gameBySlug } from "@/data/games";
 import type { PieceType } from "@/lib/games/block-drop/pieces";
 import styles from "./BlockDropTitle.module.css";
 
-const COVER_SRC = gameBySlug("block-drop").art.cover;
+const COVER_SRC = "/games/v2/block-drop/cover.webp";
 
 function Block({ type, col, row }: { type: PieceType; col?: number; row?: number }) {
   return (

@@ -1,5 +1,7 @@
 // @vitest-environment jsdom
 import React from "react";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { listPlaygrounds } from "@/data/playgrounds";
@@ -14,6 +16,16 @@ import { NEAR_ME_FIT_COUNT } from "./PlayMapContract";
 vi.stubGlobal("React", React);
 
 vi.mock("leaflet/dist/leaflet.css", () => ({}));
+vi.mock("maplibre-gl/dist/maplibre-gl.css", () => ({}));
+vi.mock("maplibre-gl", () => ({
+  setWorkerUrl: vi.fn(),
+  default: { setWorkerUrl: vi.fn() },
+}));
+vi.mock("@maplibre/maplibre-gl-leaflet", () => ({
+  maplibreGL: () => ({
+    addTo: () => ({ remove: vi.fn() }),
+  }),
+}));
 
 /*
  * divIcon 原本是 `() => ({})` 的黑洞，等於針的 HTML（aria-label、aria-pressed、
@@ -113,6 +125,18 @@ function leafletProps(
     ...overrides,
   };
 }
+
+describe("地圖圖磚", () => {
+  it("不向 tile.openstreetmap.org 要圖，並標明 OpenFreeMap 署名", () => {
+    const leaflet = readFileSync(join(import.meta.dirname, "PlayMapLeaflet.tsx"), "utf8");
+    const layer = readFileSync(join(import.meta.dirname, "OpenFreeMapLayer.tsx"), "utf8");
+    expect(leaflet).not.toContain("tile.openstreetmap.org");
+    expect(layer).not.toContain("tile.openstreetmap.org");
+    expect(layer).toContain("https://tiles.openfreemap.org/styles/liberty");
+    expect(layer).toContain("OpenMapTiles");
+    expect(layer).toContain("https://www.openstreetmap.org/copyright");
+  });
+});
 
 describe("playMapFitKey", () => {
   it("縣市範圍去重排序，不因傳入順序改變", () => {

@@ -7,6 +7,12 @@ const nextConfig: NextConfig = {
   // 全站靜態預渲染 (SSG)，零後端、零外部依賴。
   // Vercel 會自動辨識 Next.js，無需額外設定。
   reactStrictMode: true,
+  turbopack: {
+    resolveAlias: {
+      // 官方套件含動態 worker URL，Turbopack 無法打包。執行期改載 public/vendor。
+      "maplibre-gl": "./lib/maplibre-gl-shim.ts",
+    },
+  },
   poweredByHeader: false,
   images: {
     // D1：Next Image 管線補 AVIF（WebP 為預設）；故事封面 blur 見 StoryImage。

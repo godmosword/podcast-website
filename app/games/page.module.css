@@ -64,9 +64,9 @@
 }
 
 /*
- * 四張卡：<980 排 2×2、≥980 一排四欄。固定欄數而非 auto-fit：auto-fit 會摺疊空軌道，
+ * 三張卡：<980 排兩欄、≥980 一排三欄。固定欄數而非 auto-fit：auto-fit 會摺疊空軌道，
  * 單卡分類時那張卡會撐成整條寬，跟同頁其他卡差好幾倍。
- * 不再做手機置頂全寬大卡：四張時第 4 張會落單。
+ * 不再做手機置頂全寬大卡。
  */
 .cardGrid {
   display: grid;
@@ -79,7 +79,7 @@
 
 @media (min-width: 980px) {
   .cardGrid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 

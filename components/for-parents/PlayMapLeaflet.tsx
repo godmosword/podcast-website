@@ -11,10 +11,10 @@ import L from "leaflet";
 import {
   MapContainer,
   Marker,
-  TileLayer,
   useMap,
   ZoomControl,
 } from "react-leaflet";
+import OpenFreeMapLayer from "./OpenFreeMapLayer";
 import "leaflet/dist/leaflet.css";
 import type { Playground } from "@/data/playgrounds";
 import {
@@ -581,10 +581,7 @@ export default function PlayMapLeaflet({
         aria-label="親子遊樂地點地圖"
       >
         <ZoomControl position="topright" />
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
+        <OpenFreeMapLayer />
         <InvalidateSizeOnActive
           active={active}
           markProgrammaticCamera={markProgrammaticCamera}

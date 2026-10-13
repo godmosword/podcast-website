@@ -34,7 +34,7 @@ describe("games catalog", () => {
 
   test("does not expose removed game routes", () => {
     const urls = sitemap().map((entry) => entry.url);
-    for (const slug of ["car-adventure", "candy-kart", "snowboard"]) {
+    for (const slug of ["car-adventure", "candy-kart", "snowboard", "block-drop"]) {
       expect(GAMES.some((game) => game.slug === slug)).toBe(false);
       expect(urls.some((url) => url.endsWith(`/games/${slug}`))).toBe(false);
     }

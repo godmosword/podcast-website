@@ -1,11 +1,9 @@
 import { test, expect } from "@playwright/test";
-import { PROGRESS_STORAGE_KEY } from "../lib/progress-keys";
 
-/** 走 GamePageShell 的三款；coloring-book 用 ColoringPageShell，另行驗收。 */
+/** 走 GamePageShell 的兩款；coloring-book 用 ColoringPageShell，另行驗收。方塊轉轉已下架。 */
 const SHELL_ROUTES = [
   "candy-match",
   "dino-sushi",
-  "block-drop",
 ] as const;
 
 const PHONE = { width: 390, height: 844 };
@@ -47,27 +45,6 @@ test.describe("遊戲頁：兒童主路徑優先", () => {
     });
   }
 
-  test("操作提示只在有棋盤時出現，帶文字、留在遊戲正下方", async ({ page }) => {
-    await page.setViewportSize(PHONE);
-    await page.goto("/games/block-drop");
-
-    // 開始畫面還沒有方塊：提示沒有對象，收起
-    const hints = page.getByLabel("操作提示");
-    await expect(hints).toBeHidden();
-
-    await page.getByRole("button", { name: "自由堆疊" }).click();
-    await expect(page.locator('[data-status="playing"]')).toBeVisible();
-
-    await expect(hints).toBeVisible();
-    // 圖示必須搭配可見文字；只靠 title 提示，觸控裝置看不到
-    await expect(hints).toContainText("左右移動");
-    await expect(hints).toContainText("旋轉與落下");
-
-    const playBox = await page.locator("#game-play").boundingBox();
-    const hintsBox = await hints.boundingBox();
-    expect(hintsBox!.y).toBeGreaterThanOrEqual(playBox!.y + playBox!.height - 1);
-  });
-
   test("消消樂不放外框提示：第 1 站只靠棋盤上的手指示範", async ({ page }) => {
     await page.setViewportSize(PHONE);
     await page.goto("/games/candy-match");
@@ -91,10 +68,10 @@ test.describe("遊戲頁：兒童主路徑優先", () => {
 });
 
 test.describe("遊樂園 hub", () => {
-  test("390×844 完整首圖後可捲動到四個遊戲入口", async ({ page }) => {
+  test("390×844 完整首圖後可捲動到三個遊戲入口", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/games");
-    for (const name of ["繪本塗塗鴉", "車車消消樂", "多多壽司屋", "方塊轉轉"]) {
+    for (const name of ["繪本塗塗鴉", "車車消消樂", "多多壽司屋"]) {
       const title = page.getByText(name, { exact: true });
       await title.scrollIntoViewIfNeeded();
       await expect(title).toBeInViewport();
@@ -134,7 +111,7 @@ test.describe("遊樂園 hub", () => {
     for (const width of [320, 375, 390, 430]) {
       await page.setViewportSize({ width, height: 844 });
       await page.goto("/games");
-      for (const name of ["繪本塗塗鴉", "車車消消樂", "多多壽司屋", "方塊轉轉"]) {
+      for (const name of ["繪本塗塗鴉", "車車消消樂", "多多壽司屋"]) {
         const title = page.getByText(name, { exact: true });
         await expect(title, `${width} ${name}`).toBeVisible();
         const clipped = await title.evaluate((el) => el.scrollWidth > el.clientWidth + 1);
@@ -188,7 +165,7 @@ test.describe("遊樂園 hub", () => {
   test("卡片只留遊戲名稱，不顯示動作詞、年齡、時長與時間壓力", async ({ page }) => {
     await page.goto("/games");
     const cards = page.locator('main a[href^="/games/"]');
-    await expect(cards).toHaveCount(4);
+    await expect(cards).toHaveCount(3);
     for (const card of await cards.all()) {
       await expect(card).not.toContainText(/塗一塗|找一樣|做壽司|排一排/);
       await expect(card).not.toContainText(/\d+–\d+ 歲/);
@@ -201,27 +178,27 @@ test.describe("遊樂園 hub", () => {
     expect(box!.width).toBeGreaterThanOrEqual(52);
   });
 
-  test("hub 只留四張遊戲卡，不顯示車庫進度", async ({ page }) => {
+  test("hub 只留三張遊戲卡，不顯示車庫進度", async ({ page }) => {
     await page.goto("/games");
     await expect(page.getByRole("heading", { name: "園裡的站" })).toHaveCount(0);
     await expect(page.getByText(/收集了 \d+ 顆星星/)).toHaveCount(0);
     await expect(page.getByRole("list", { name: "車庫" })).toHaveCount(0);
     await expect(page.getByRole("list", { name: "小遊戲" })).toBeVisible();
-    await expect(page.locator('main a[href^="/games/"]')).toHaveCount(4);
+    await expect(page.locator('main a[href^="/games/"]')).toHaveCount(3);
   });
 
-  test("手機 2×2、桌面一排四欄，站序著色 → 消消樂 → 壽司 → 方塊", async ({ page }) => {
-    const order = ["/games/coloring-book", "/games/candy-match", "/games/dino-sushi", "/games/block-drop"];
+  test("手機兩欄、桌面一排三欄，站序著色 → 消消樂 → 壽司", async ({ page }) => {
+    const order = ["/games/coloring-book", "/games/candy-match", "/games/dino-sushi"];
     for (const [viewport, cols] of [
       [{ width: 390, height: 844 }, 2],
-      [{ width: 1280, height: 800 }, 4],
+      [{ width: 1280, height: 800 }, 3],
     ] as const) {
       await page.setViewportSize(viewport);
       await page.goto("/games");
       const cards = page.locator('main a[href^="/games/"]');
       expect(await cards.evaluateAll((nodes) => nodes.map((n) => n.getAttribute("href")))).toEqual(order);
       const tops = await cards.evaluateAll((nodes) => nodes.map((n) => Math.round(n.getBoundingClientRect().top)));
-      expect(new Set(tops).size, `${viewport.width}`).toBe(4 / cols);
+      expect(new Set(tops).size, `${viewport.width}`).toBe(Math.ceil(order.length / cols));
     }
   });
 });
@@ -311,124 +288,6 @@ test.describe("繪本塗塗鴉：與遊戲頁同款抬頭", () => {
   });
 });
 
-/** G-H1／G-H2：真實手機高度（Safari 有工具列）方塊井要玩得了，井底＋觸控鍵同屏。 */
-test.describe("方塊轉轉：手機井尺寸", () => {
-  test.use({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 664 } });
-
-  test("390×664：格子 ≥ 25px、井底與觸控鍵同屏、觸控鍵 ≥ 44px", async ({ page }) => {
-    await page.goto("/games/block-drop");
-    await page.getByRole("button", { name: "自由堆疊" }).click();
-    await expect(page.locator('[data-status="playing"]')).toBeVisible();
-    await page.waitForTimeout(400);
-
-    const m = await page.evaluate(() => {
-      const well = document.querySelector<HTMLElement>(
-        '[data-status="playing"] [style*="grid-template-columns: repeat(10"]',
-      )!.getBoundingClientRect();
-      const pad = [...document.querySelectorAll('[data-testid="touch-control-pad"] button')].map(
-        (b) => b.getBoundingClientRect(),
-      );
-      return {
-        cellPx: well.width / 10,
-        wellBottom: well.bottom,
-        padBottom: Math.max(...pad.map((r) => r.bottom)),
-        minSide: Math.min(...pad.flatMap((r) => [r.width, r.height])),
-      };
-    });
-    expect(m.cellPx).toBeGreaterThanOrEqual(25);
-    expect(m.wellBottom).toBeLessThanOrEqual(664);
-    expect(m.padBottom).toBeLessThanOrEqual(664);
-    expect(m.minSide).toBeGreaterThanOrEqual(44);
-  });
-});
-
-/** 冒險任務列：兩個目標的站在直向手機要並排（不疊兩排吃掉井），16 排的井格子仍 ≥ 25px。 */
-test.describe("方塊轉轉：冒險任務列不吃掉井", () => {
-  test.use({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 664 } });
-
-  test("390×664 挑戰第 6 站（兩個目標）：目標並排、格子 ≥ 25px", async ({ page }) => {
-    await page.addInitScript((storageKey: string) => {
-      const raw = localStorage.getItem(storageKey);
-      const parsed = raw ? JSON.parse(raw) : {};
-      parsed.gameProfile = { version: 5, ...(parsed.gameProfile ?? {}), medals: { "block-drop": [1, 1, 1, 1, 1] } };
-      localStorage.setItem(storageKey, JSON.stringify(parsed));
-    }, PROGRESS_STORAGE_KEY);
-    await page.goto("/games/block-drop");
-    await page.getByRole("button", { name: "開始冒險" }).click();
-    await page.getByRole("radio", { name: /挑戰冒險/ }).click();
-    await page.locator('button[data-next="true"]').click();
-    await expect(page.locator('[data-status="playing"]')).toBeVisible();
-    await page.waitForTimeout(400);
-
-    const m = await page.evaluate(() => {
-      const wells = [...document.querySelectorAll<HTMLElement>('[data-status="playing"] [style*="grid-template-columns: repeat(8"]')]
-        .map((el) => el.getBoundingClientRect())
-        .sort((a, b) => b.width - a.width);
-      const goals = [...document.querySelectorAll('[aria-label="本站任務進度"] li')].map((li) => li.getBoundingClientRect().top);
-      return { cellPx: wells[0]!.width / 8, goalTops: goals };
-    });
-    expect(m.goalTops).toHaveLength(2);
-    expect(Math.abs(m.goalTops[0]! - m.goalTops[1]!)).toBeLessThan(1);
-    expect(m.cellPx).toBeGreaterThanOrEqual(25);
-  });
-});
-
-/**
- * 矮手機自由堆疊：分數／下一個／教學改放井旁窄欄，井才放得下 25px 格子；
- * 窄欄（含教學卡）不得比井高、不得把鍵列擠出畫面。冒險模式（8 欄）維持上方任務列。
- */
-test.describe("方塊轉轉：矮手機窄欄 HUD", () => {
-  test.use({ hasTouch: true, isMobile: true });
-
-  const measure = (page: import("@playwright/test").Page) =>
-    page.evaluate(() => {
-      const well = document.querySelector<HTMLElement>(
-        '[data-status="playing"] [style*="grid-template-columns: repeat(10"]',
-      )!.getBoundingClientRect();
-      const score = document.querySelector('[aria-label^="分數 "]');
-      const column = score?.closest<HTMLElement>('[style*="width: 64px"]');
-      const pad = [...document.querySelectorAll('[data-testid="touch-control-pad"] button')].map(
-        (b) => b.getBoundingClientRect(),
-      );
-      return {
-        cellPx: well.width / 10,
-        side: !!column,
-        columnBottom: column?.getBoundingClientRect().bottom ?? 0,
-        wellBottom: well.bottom,
-        padBottom: Math.max(...pad.map((r) => r.bottom)),
-        tutorial: !!document.querySelector('[data-testid="block-drop-tutorial"]'),
-      };
-    });
-
-  for (const viewport of [
-    { width: 390, height: 664 },
-    { width: 320, height: 568 },
-  ]) {
-    test(`${viewport.width}×${viewport.height}：窄欄 HUD、教學卡不超出井、鍵列同屏`, async ({ page }) => {
-      await page.setViewportSize(viewport);
-      await page.goto("/games/block-drop");
-      await page.getByRole("button", { name: "自由堆疊" }).click();
-      await expect(page.locator('[data-status="playing"]')).toBeVisible();
-      await page.waitForTimeout(400);
-      const m = await measure(page);
-      expect(m.side).toBe(true);
-      expect(m.tutorial).toBe(true);
-      expect(m.columnBottom).toBeLessThanOrEqual(m.wellBottom + 1);
-      expect(m.padBottom).toBeLessThanOrEqual(viewport.height);
-      if (viewport.height >= 664) expect(m.cellPx).toBeGreaterThanOrEqual(25);
-    });
-  }
-
-  test("390×844 高手機維持上方 HUD 列", async ({ page }) => {
-    await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("/games/block-drop");
-    await page.getByRole("button", { name: "自由堆疊" }).click();
-    await expect(page.locator('[data-status="playing"]')).toBeVisible();
-    await page.waitForTimeout(400);
-    expect((await measure(page)).side).toBe(false);
-  });
-});
-
 /** 320 寬局內：返回＋三顆工具＋日夜切換都在畫面裡，觸控 ≥44px（<360 才收到 44）。 */
 test.describe("遊戲抬頭：320 寬局內", () => {
   test.use({ hasTouch: true, isMobile: true, viewport: { width: 320, height: 640 } });
@@ -446,48 +305,14 @@ test.describe("遊戲抬頭：320 寬局內", () => {
       };
     });
 
-  test("方塊轉轉自由堆疊", async ({ page }) => {
-    await page.goto("/games/block-drop");
-    await page.getByRole("button", { name: "自由堆疊" }).click();
-    await expect(page.locator('[data-status="playing"]')).toBeVisible();
+  test("多多壽司屋局內", async ({ page }) => {
+    await page.goto("/games/dino-sushi");
+    await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+    await expect(page.getByTestId("dino-sushi")).toBeVisible();
     const m = await headerFits(page);
     expect(m.count).toBeGreaterThanOrEqual(5);
     expect(m.right).toBeLessThanOrEqual(320);
     expect(m.minSide).toBeGreaterThanOrEqual(44);
     await expect(page.getByRole("link", { name: /回遊樂園/ })).toContainText("回遊樂園");
   });
-});
-
-/** 窄手機（320／360）：五顆觸控鍵都在鍵列裡，不被切掉；鍵 ≥44px、間距 ≥8px（DESIGN §觸控）。 */
-test.describe("方塊轉轉：窄手機觸控鍵", () => {
-  for (const width of [320, 360]) {
-    test(`${width}px：五顆鍵都在鍵列內`, async ({ browser }) => {
-      const ctx = await browser.newContext({
-        hasTouch: true,
-        isMobile: true,
-        viewport: { width, height: 640 },
-      });
-      const page = await ctx.newPage();
-      await page.goto("/games/block-drop");
-      await page.getByRole("button", { name: "自由堆疊" }).click();
-      await expect(page.locator('[data-status="playing"]')).toBeVisible();
-      const m = await page.evaluate(() => {
-        const bar = document.querySelector('[data-testid="touch-control-pad"]')!.getBoundingClientRect();
-        const keys = [...document.querySelectorAll('[data-testid="touch-control-pad"] button')]
-          .map((b) => b.getBoundingClientRect())
-          .sort((a, b) => a.left - b.left);
-        return {
-          count: keys.length,
-          overflow: Math.max(...keys.map((k) => k.right)) - bar.right,
-          minW: Math.min(...keys.map((k) => k.width)),
-          minGap: Math.min(...keys.slice(1).map((k, i) => k.left - keys[i]!.right)),
-        };
-      });
-      expect(m.count).toBe(5);
-      expect(m.overflow).toBeLessThanOrEqual(0.5);
-      expect(m.minW).toBeGreaterThanOrEqual(44);
-      expect(m.minGap).toBeGreaterThanOrEqual(8);
-      await ctx.close();
-    });
-  }
 });
