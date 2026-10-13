@@ -1,6 +1,6 @@
 "use client";
 
-import { IconTap } from "@/components/games/ClayIcons";
+import { useLayoutEffect, useRef } from "react";
 import { BaseArt, PlateArt, SushiArt, ToppingArt } from "@/lib/games/dino-sushi/art";
 import { matchOrder } from "@/lib/games/dino-sushi/orders";
 import { currentOrder } from "@/lib/games/dino-sushi/round";
@@ -8,7 +8,7 @@ import { MAX_TOPPINGS } from "@/lib/games/dino-sushi/sushi";
 import { BASES, baseById, toppingById } from "@/lib/games/dino-sushi/toppings";
 import { DinoSushiDuoDuo } from "./DinoSushiDuoDuo";
 import { DinoSushiOrderBubble } from "./DinoSushiOrderBubble";
-import { TapButton } from "./DinoSushiPiece";
+import { TapButton, TapFinger as Finger, type TapPoint } from "./DinoSushiPiece";
 import { DinoSushiPlateStack } from "./DinoSushiPlateStack";
 import { ShopBelt, ShopWall } from "./DinoSushiShop";
 import { DinoSushiTray } from "./DinoSushiTray";
@@ -21,12 +21,45 @@ type Props = {
   inputPaused: boolean;
 };
 
-function Finger() {
-  return (
-    <span className={styles.finger} aria-hidden>
-      <IconTap size={30} />
-    </span>
-  );
+/**
+ * 連點防呆：第三張皿和「給多多吃」位置重疊，連點兩下會送出只有飯的壽司。
+ * 只擋「選完飯這段時間內、又點在剛才那張皿上」的那一下；點在別處、用鍵盤、或中間加過料都照常處理。
+ */
+const PICK_GUARD_MS = 400;
+
+/**
+ * 選飯⇄加料切換時，原本有焦點的鈕被拿掉或變成 inert，焦點會掉到 body。
+ * 只有焦點原本在廚房裡才接手：選完飯→第一個能加的料；回到選飯→第一張皿。
+ */
+function useFocusAcrossPhases(choosingBase: boolean) {
+  const rootRef = useRef<HTMLDivElement>(null);
+  const focusInside = useRef(false);
+  const wasChoosing = useRef(choosingBase);
+
+  useLayoutEffect(() => {
+    if (wasChoosing.current === choosingBase) return;
+    wasChoosing.current = choosingBase;
+    const root = rootRef.current;
+    if (!root || !focusInside.current) return;
+    const active = document.activeElement;
+    const lost = !active || active === document.body || active.closest("[inert]") !== null;
+    if (!lost) return;
+    const target = root.querySelector<HTMLButtonElement>(
+      choosingBase ? '[data-role="base-picker"] button:not(:disabled)' : '[data-role="tray"] button:not(:disabled)',
+    );
+    target?.focus({ preventScroll: true });
+  }, [choosingBase]);
+
+  const focusProps = {
+    onFocusCapture: () => {
+      focusInside.current = true;
+    },
+    onBlurCapture: (e: React.FocusEvent<HTMLDivElement>) => {
+      // 焦點元素被拿掉時不會觸發 blur；只有真的移到廚房外才算離開
+      if (e.relatedTarget && !e.currentTarget.contains(e.relatedTarget as Node)) focusInside.current = false;
+    },
+  };
+  return { rootRef, focusProps };
 }
 
 /** 廚房：迴轉壽司店（多多＋泡泡＋疊盤）｜砧板（3 料位）＋「給多多吃」｜托盤。 */
@@ -43,19 +76,42 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused }: Props) {
     locked,
     actions,
   } = play;
+  const { rootRef, focusProps } = useFocusAcrossPhases(choosingBase);
+  const picked = useRef<{ at: number; rect: DOMRect } | null>(null);
   if (!round) return null;
   const order = currentOrder(round);
   const eating = round.pending?.eats === true;
   const sushi = round.sushi;
   const flash = caption?.mood === "look" ? (caption.match ?? null) : null;
   const disabled = locked || inputPaused;
-  const serveHint = hint?.kind === "serve";
+  /* 選飯時加料層整層隱藏，裡面不出現亮框和手指 */
+  const layerHint = choosingBase ? null : hint;
+  const serveHint = layerHint?.kind === "serve";
+  const afterPick = (fn: () => void) => (point?: TapPoint) => {
+    const last = picked.current;
+    picked.current = null;
+    const doubleTap =
+      last !== null &&
+      point !== undefined &&
+      performance.now() - last.at < PICK_GUARD_MS &&
+      point.x >= last.rect.left &&
+      point.x <= last.rect.right &&
+      point.y >= last.rect.top &&
+      point.y <= last.rect.bottom;
+    if (doubleTap) return;
+    fn();
+  };
+  const clearPickGuard = () => {
+    picked.current = null;
+  };
   /* 吃完才出牙刷，不擋嘴；出現時店面道具讓位，牙刷才看得出是下一步 */
   const brushShown =
     ((round.pending?.brush ?? false) || round.brushReady) && !brushing && (phase === "react" || phase === "idle");
 
   return (
     <div
+      ref={rootRef}
+      {...focusProps}
       className={styles.kitchen}
       data-reduced={reducedMotion ? "true" : undefined}
       data-paused={inputPaused ? "true" : undefined}
@@ -113,90 +169,69 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused }: Props) {
         aria-label="砧板"
         data-choosing={choosingBase ? "true" : undefined}
       >
-        <div
-          className={styles.boardMain}
-          /* a／b 兩個同樣的晃動動畫輪流換名字才會重播；不用 key 重掛，免得壽司和料位的進場動畫一起重跳 */
-          data-shake={shake === 0 ? undefined : shake % 2 === 0 ? "a" : "b"}
-        >
-          {choosingBase ? (
-            <div className={styles.basePicker} role="group" aria-label="選飯">
-              {BASES.map((b) => (
-                <TapButton
-                  key={b.id}
-                  className={styles.baseButton}
-                  aria-label={`選${b.label}`}
-                  aria-pressed={sushi.base === b.id}
-                  data-hint={
-                    hint?.kind === "base" && hint.id === b.id
-                      ? "true"
-                      : undefined
-                  }
-                  disabled={disabled}
-                  onTap={() => actions.pickBase(b.id)}
-                >
-                  <span className={styles.baseArt} aria-hidden>
-                    <BaseArt id={b.id} />
-                  </span>
-                  <span className={styles.baseLabel} aria-hidden>
-                    {b.label}
-                  </span>
-                  {teaching && hint?.kind === "base" && hint.id === b.id ? (
-                    <Finger />
-                  ) : null}
-                </TapButton>
-              ))}
+        {/* 加料層一直在：砧板高度兩階段一樣，上方店面不會伸縮跳動。選飯時整層 inert＋aria-hidden */}
+        <div className={styles.boardLayer} inert={choosingBase} aria-hidden={choosingBase ? true : undefined}>
+          <div
+            className={styles.boardMain}
+            /* a／b 兩個同樣的晃動動畫輪流換名字才會重播；不用 key 重掛，免得壽司和料位的進場動畫一起重跳 */
+            data-shake={shake === 0 ? undefined : shake % 2 === 0 ? "a" : "b"}
+          >
+            <TapButton
+              className={styles.sushiButton}
+              aria-label={
+                sushi.base
+                  ? `換飯：現在是${baseById(sushi.base).label}`
+                  : "選飯"
+              }
+              data-hint={layerHint?.kind === "base" ? "true" : undefined}
+              disabled={disabled}
+              onTap={afterPick(actions.reopenBase)}
+            >
+              {/* 換一種飯才重掛：落下動畫照舊在選完飯時播一次 */}
+              {eating ? null : (
+                <SushiArt
+                  key={sushi.base ?? "none"}
+                  sushi={sushi}
+                  layerClassName={reducedMotion ? undefined : styles.layerPop}
+                />
+              )}
+              {teaching && layerHint?.kind === "base" ? <Finger /> : null}
+            </TapButton>
+            <div
+              className={styles.slots}
+              role="group"
+              aria-label={`料位，最多 ${MAX_TOPPINGS} 個`}
+            >
+              {Array.from({ length: MAX_TOPPINGS }, (_, i) => {
+                const id = eating ? undefined : sushi.toppings[i];
+                const removeHint = layerHint?.kind === "remove" && layerHint.slot === i;
+                return id ? (
+                  <TapButton
+                    key={i}
+                    className={styles.slot}
+                    aria-label={`拿掉${toppingById(id).label}`}
+                    data-hint={removeHint ? "true" : undefined}
+                    disabled={disabled}
+                    onTap={() => {
+                      clearPickGuard();
+                      actions.remove(i);
+                    }}
+                  >
+                    <ToppingArt id={id} />
+                    {teaching && removeHint ? <Finger /> : null}
+                  </TapButton>
+                ) : (
+                  <span key={i} className={styles.slotEmpty} aria-hidden />
+                );
+              })}
             </div>
-          ) : (
-            <>
-              <TapButton
-                className={styles.sushiButton}
-                aria-label={
-                  sushi.base
-                    ? `換飯：現在是${baseById(sushi.base).label}`
-                    : "選飯"
-                }
-                data-hint={hint?.kind === "base" ? "true" : undefined}
-                disabled={disabled}
-                onTap={actions.reopenBase}
-              >
-                {eating ? null : <SushiArt sushi={sushi} layerClassName={reducedMotion ? undefined : styles.layerPop} />}
-                {teaching && hint?.kind === "base" ? <Finger /> : null}
-              </TapButton>
-              <div
-                className={styles.slots}
-                role="group"
-                aria-label={`料位，最多 ${MAX_TOPPINGS} 個`}
-              >
-                {Array.from({ length: MAX_TOPPINGS }, (_, i) => {
-                  const id = eating ? undefined : sushi.toppings[i];
-                  return id ? (
-                    <TapButton
-                      key={i}
-                      className={styles.slot}
-                      aria-label={`拿掉${toppingById(id).label}`}
-                      data-hint={hint?.kind === "remove" && hint.slot === i ? "true" : undefined}
-                      disabled={disabled}
-                      onTap={() => actions.remove(i)}
-                    >
-                      <ToppingArt id={id} />
-                      {teaching && hint?.kind === "remove" && hint.slot === i ? <Finger /> : null}
-                    </TapButton>
-                  ) : (
-                    <span key={i} className={styles.slotEmpty} aria-hidden />
-                  );
-                })}
-              </div>
-            </>
-          )}
-        </div>
-        {/* 選飯時只做選飯這一步：先收起「給多多吃」 */}
-        {choosingBase ? null : (
+          </div>
           <TapButton
             className={styles.serveButton}
             data-hint={serveHint ? "true" : undefined}
             data-muted={order && !matchOrder(sushi, order).ok ? "true" : undefined}
             disabled={disabled || !sushi.base}
-            onTap={actions.serve}
+            onTap={afterPick(actions.serve)}
           >
             <span className={styles.serveArt} aria-hidden>
               <PlateArt />
@@ -204,15 +239,52 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused }: Props) {
             給多多吃
             {teaching && serveHint ? <Finger /> : null}
           </TapButton>
-        )}
+        </div>
+        {/* 選飯時只做選飯這一步：三張皿疊在加料層上面 */}
+        {choosingBase ? (
+          <div className={styles.basePicker} role="group" aria-label="選飯" data-role="base-picker">
+            {BASES.map((b) => (
+              <TapButton
+                key={b.id}
+                className={styles.baseButton}
+                aria-label={`選${b.label}`}
+                aria-pressed={sushi.base === b.id}
+                data-hint={
+                  hint?.kind === "base" && hint.id === b.id
+                    ? "true"
+                    : undefined
+                }
+                disabled={disabled}
+                onTap={(point) => {
+                  picked.current = point ? { at: performance.now(), rect: point.rect } : null;
+                  actions.pickBase(b.id);
+                }}
+              >
+                <span className={styles.baseArt} aria-hidden>
+                  <BaseArt id={b.id} />
+                </span>
+                <span className={styles.baseLabel} aria-hidden>
+                  {b.label}
+                </span>
+                {teaching && hint?.kind === "base" && hint.id === b.id ? (
+                  <Finger />
+                ) : null}
+              </TapButton>
+            ))}
+          </div>
+        ) : null}
       </section>
 
       <DinoSushiTray
         tray={round.tray}
         disabled={disabled || !sushi.base || choosingBase}
+        waitingForBase={!sushi.base || choosingBase}
         hint={hint?.kind === "topping" ? hint.id : null}
         teaching={teaching}
-        onAdd={actions.add}
+        onAdd={(id) => {
+          clearPickGuard();
+          actions.add(id);
+        }}
       />
     </div>
   );

@@ -24,7 +24,7 @@ function Check() {
   );
 }
 
-/** 多多頭上的點餐泡泡：圖案說想吃什麼，放對一樣就打勾；下面一排小點是這輪第幾單。 */
+/** 多多頭上的點餐泡泡：圖案說想吃什麼，放對一樣就打勾；下面一排小盤是這輪第幾單。 */
 export function DinoSushiOrderBubble({ order, sushi, flash, index, total }: Props) {
   const checks = orderChecks(sushi, order);
   return (
@@ -51,7 +51,7 @@ export function DinoSushiOrderBubble({ order, sushi, flash, index, total }: Prop
         <path d="M6 0H26L3 18Z" className={styles.bubbleTailFill} />
         <path d="M26 0L3 18L6 0" className={styles.bubbleTailLine} />
       </svg>
-      {/* 這輪第幾單：做完的金點、現在這單是綠色長條、還沒輪到的淡點 */}
+      {/* 這輪第幾單：做完的木色小盤、現在這單是綠色小盤、還沒輪到的淡色小盤 */}
       <span className={styles.orderDots} aria-hidden>
         {Array.from({ length: total }, (_, i) => (
           <span key={i} className={styles.orderDot} data-state={i < index ? "done" : i === index ? "now" : undefined} />

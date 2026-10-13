@@ -47,7 +47,7 @@ export function ShopBelt() {
           {plates.map((p, i) => (
             <span key={i} className={styles.beltPlate}>
               <span className={styles.beltSushi}>
-                <SushiArt sushi={p.sushi} />
+                <SushiArt sushi={p.sushi} flat />
               </span>
               <PlateArt tone={p.tone} />
               <span className={styles.dome} />

@@ -35,12 +35,23 @@ function missedRules(medals: RoundMedals): ResultStarHint[] {
   return missed;
 }
 
-/** 疊好的盤子：做了幾個一眼看得出來。 */
-function PlateRow({ outcome }: { outcome: DinoSushiOutcome }) {
+/** 疊好的盤子：做了幾個一眼看得出來；一個接一個彈出來（減少動態時直接出現）。 */
+function PlateRow({ outcome, reducedMotion }: { outcome: DinoSushiOutcome; reducedMotion: boolean }) {
   return (
-    <p className={styles.resultPlates} role="img" aria-label={`吃了 ${outcome.plates.length} 盤`}>
+    <p
+      className={styles.resultPlates}
+      role="img"
+      aria-label={`吃了 ${outcome.plates.length} 盤`}
+      data-reduced={reducedMotion ? "true" : undefined}
+    >
       {outcome.plates.slice(-10).map((p, i) => (
-        <span key={i} className={styles.resultPlate} data-gold={p.gold ? "true" : undefined} aria-hidden>
+        <span
+          key={i}
+          className={styles.resultPlate}
+          data-gold={p.gold ? "true" : undefined}
+          style={{ ["--i" as string]: i }}
+          aria-hidden
+        >
           <PlateArt gold={p.gold} />
         </span>
       ))}
@@ -53,11 +64,11 @@ export function DinoSushiResult({ outcome, stars, reducedMotion, onReplay, onTit
   const details =
     outcome.medals && stars !== null ? (
       <>
-        <PlateRow outcome={outcome} />
+        <PlateRow outcome={outcome} reducedMotion={reducedMotion} />
         <ResultStars stars={stars} hints={missedRules(outcome.medals)} animate={!reducedMotion} />
       </>
     ) : (
-      <PlateRow outcome={outcome} />
+      <PlateRow outcome={outcome} reducedMotion={reducedMotion} />
     );
   return (
     <div className={styles.resultOverlay} data-testid="dino-sushi-result">
