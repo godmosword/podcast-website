@@ -11,7 +11,13 @@ const MAX_VISIBLE = 8;
 export function DinoSushiPlateStack({ plates }: { plates: readonly Plate[] }) {
   const visible = plates.slice(-MAX_VISIBLE);
   return (
-    <div className={styles.plates} role="img" aria-label={`吃完 ${plates.length} 盤`}>
+    <div
+      className={styles.plates}
+      role="img"
+      aria-label={`吃完 ${plates.length} 盤`}
+      /* 新盤落地時整疊壓一下：a／b 輪流換名字動畫才會重播 */
+      data-land={plates.length === 0 ? undefined : plates.length % 2 === 1 ? "a" : "b"}
+    >
       {visible.map((p, i) => (
         <span key={plates.length - visible.length + i} className={styles.plate} style={{ ["--i" as string]: i }}>
           <PlateArt gold={p.gold} />

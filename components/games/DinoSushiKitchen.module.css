@@ -61,43 +61,143 @@
 
 /* 多多坐在迴轉帶後面：輪子下半被櫃台擋住，矮舞台時刺可以蓋到雨棚 */
 /* 寬由舞台寬、高兩邊取小：比例不變形，輪子永遠貼著迴轉帶（不會浮在半空） */
+.duoArea {
+  /* 多多與送餐盤的位置用同一組變數：吃的時候壽司要飛到嘴裡（嘴心在多多 viewBox 寬 0.696、高 0.67） */
+  --duo-max-w: 64cqw;
+  --duo-left: 3cqw;
+  --duo-w: min(var(--duo-max-w), calc((100cqh - var(--counter-h) * 0.56 - 4px) * 138 / 110));
+  --serve-left: 30cqw;
+  --serve-w: min(30cqw, 110px);
+}
+
 .duoArt {
-  --duo-max-w: 64%;
   position: absolute;
   z-index: 1;
-  left: 3%;
+  left: var(--duo-left);
   bottom: calc(var(--counter-h) * 0.56);
-  width: min(var(--duo-max-w), calc((100cqh - var(--counter-h) * 0.56 - 4px) * 138 / 110));
+  width: var(--duo-w);
   aspect-ratio: 138 / 110;
 }
 
+/* 不掛 CSS drop-shadow：表情動畫時整張濾鏡要每格重算（SVG 裡已有地面陰影） */
 .duoArt > svg {
   display: block;
   width: 100%;
   height: 100%;
   overflow: visible;
-  filter: drop-shadow(0 6px 6px rgba(90, 60, 30, 0.12));
+}
+
+/* 嚼嚼時兩頰鼓兩下 */
+.duoArt [data-part="cheeks"] > g {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: cheekPuff 450ms ease-in-out both;
+}
+
+@keyframes cheekPuff {
+  0%,
+  50%,
+  100% {
+    transform: scale(1);
+  }
+  25%,
+  75% {
+    transform: scale(1.1);
+  }
+}
+
+/* 芥末白雲由排氣管那側長出來 */
+.duoArt [data-part="puff-cloud"] {
+  transform-box: fill-box;
+  transform-origin: 90% 70%;
+  animation: cloudPuff 340ms cubic-bezier(0.3, 1.4, 0.5, 1) both;
+}
+
+@keyframes cloudPuff {
+  0% {
+    transform: scale(0.2);
+    opacity: 0.4;
+  }
+  60% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* 甜甜的星星從下方彈出、錯開，播完停住 */
+.duoArt [data-part="sweet-stars"] > path {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: starPop 480ms cubic-bezier(0.3, 1.4, 0.5, 1) both;
+  animation-delay: var(--d, 0ms);
+}
+
+@keyframes starPop {
+  from {
+    transform: translate(var(--sx, 0px), 16px) scale(0.3);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
 }
 
 /* 送給多多的那盤：走迴轉帶前排，從右邊滑進來 */
 .servingPlate {
   position: absolute;
   z-index: 3;
-  left: 30%;
+  left: var(--serve-left);
   bottom: calc(var(--counter-h) * 0.26);
   display: grid;
-  width: min(30%, 110px);
+  width: var(--serve-w);
 }
 
-.servingPlate > svg {
+.servingPlate > svg,
+.servingSushi {
   grid-area: 1 / 1;
   width: 100%;
   height: auto;
 }
 
-.servingPlate > svg:first-child:not(:last-child) {
+/* 盤上的壽司（在櫃台前面那層）。張嘴那 250ms 內往嘴裡飛、越飛越小，最後一段才淡掉 */
+.servingSushi {
   z-index: 1;
+  display: block;
   transform: translateY(-36%);
+  --bite-dx: calc(var(--duo-left) + var(--duo-w) * 0.696 - var(--serve-left) - var(--serve-w) * 0.5);
+  --bite-dy: calc(var(--counter-h) * -0.3 - var(--duo-w) * 0.263 + var(--serve-w) * 0.645);
+}
+
+.servingSushi > svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.servingSushi[data-phase="open"] {
+  animation: sushiBite 220ms cubic-bezier(0.5, 0, 0.75, 0) both;
+}
+
+@keyframes sushiBite {
+  0% {
+    transform: translateY(-36%);
+    opacity: 1;
+  }
+  45% {
+    transform: translateY(-36%) translate(calc(var(--bite-dx) * 0.35), calc(var(--bite-dy) * 0.5 - 6px)) scale(0.85);
+    opacity: 1;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-36%) translate(var(--bite-dx), var(--bite-dy)) scale(0.3);
+    opacity: 0;
+  }
 }
 
 .servingPlate[data-phase="slide"] {
@@ -326,8 +426,9 @@
   }
 }
 
-/* 吃完的盤子疊在櫃台右邊（前排，數字不被迴轉帶擋到） */
+/* 吃完的盤子疊在櫃台右邊（前排，數字不被迴轉帶擋到）。盤寬跟著舞台寬，每層露出 58% 的盤緣 */
 .plates {
+  --pw: clamp(54px, 18cqw, 88px);
   position: absolute;
   z-index: 3;
   right: 14px;
@@ -335,14 +436,36 @@
   display: flex;
   flex-direction: column-reverse;
   align-items: center;
-  width: 54px;
+  width: var(--pw);
+}
+
+/* 新盤落地（plateDrop 約 220ms 時）整疊壓一下再彈回 */
+.plates[data-land] {
+  transform-origin: 50% 100%;
+  animation: platesLandA 200ms ease-out 220ms both;
+}
+
+.plates[data-land="b"] {
+  animation-name: platesLandB;
+}
+
+@keyframes platesLandA {
+  50% {
+    transform: scale(1.03, 0.94);
+  }
+}
+
+@keyframes platesLandB {
+  50% {
+    transform: scale(1.03, 0.94);
+  }
 }
 
 .plate {
   display: block;
-  width: 54px;
-  height: 18px;
-  margin-top: -9px;
+  width: var(--pw);
+  height: calc(var(--pw) / 3);
+  margin-top: calc(var(--pw) / -3 * 0.42);
   animation: plateDrop 360ms cubic-bezier(0.3, 1.3, 0.5, 1) both;
 }
 
@@ -366,15 +489,30 @@
 .plateCount {
   position: absolute;
   right: -6px;
-  top: -16px;
-  min-width: 24px;
-  padding: 2px 7px;
+  top: -14px;
+  min-width: 20px;
+  padding: 1px 6px;
   border-radius: 999px;
   background: #3f7f2a;
   color: #fff;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   text-align: center;
   box-shadow: 0 0 0 2px #fffdf8, 0 3px 6px rgba(40, 70, 30, 0.25);
+}
+
+/* 矮舞台（320×568 直向）：維持小盤、每層露一半，最多看得到 5 盤（自由做疊到 8 盤會頂到「多多吃飽了」），數字照實 */
+@container duo-stage (max-height: 190px) {
+  .plates {
+    --pw: 54px;
+  }
+
+  .plate {
+    margin-top: -9px;
+  }
+
+  .plate:nth-last-child(n + 7) {
+    display: none;
+  }
 }
 
 .foam {
@@ -1043,23 +1181,13 @@
     max-width: 112px;
   }
 
-  .plates {
-    width: 80px;
-  }
-
-  .plate {
-    width: 80px;
-    height: 27px;
-    margin-top: -13px;
-  }
-
   .kitchen {
     --duo-min: 360px;
   }
 
-  .duoArt {
-    --duo-max-w: 88%;
-    left: 4%;
+  .duoArea {
+    --duo-max-w: 88cqw;
+    --duo-left: 4cqw;
   }
 
   .trayButton {
@@ -1119,7 +1247,12 @@
   .plate,
   .slot > svg,
   .sushiButton > svg,
-  .layerPop {
+  .layerPop,
+  .servingSushi[data-phase="open"],
+  .duoArt [data-part="cheeks"] > g,
+  .duoArt [data-part="puff-cloud"],
+  .duoArt [data-part="sweet-stars"] > path,
+  .plates[data-land] {
     animation: none;
   }
 
@@ -1146,8 +1279,22 @@
 .kitchen[data-reduced="true"] .plate,
 .kitchen[data-reduced="true"] .slot > svg,
 .kitchen[data-reduced="true"] .sushiButton > svg,
-.kitchen[data-reduced="true"] .layerPop {
+.kitchen[data-reduced="true"] .layerPop,
+.kitchen[data-reduced="true"] .servingSushi[data-phase="open"],
+.kitchen[data-reduced="true"] .duoArt [data-part="cheeks"] > g,
+.kitchen[data-reduced="true"] .duoArt [data-part="puff-cloud"],
+.kitchen[data-reduced="true"] .duoArt [data-part="sweet-stars"] > path,
+.kitchen[data-reduced="true"] .plates[data-land] {
   animation: none;
+}
+
+/* 暫停時新的表情與疊盤動畫停在原地（時間軸由 useDinoSushiPlay 一起暫停） */
+.kitchen[data-paused="true"] .servingSushi[data-phase="open"],
+.kitchen[data-paused="true"] .duoArt [data-part="cheeks"] > g,
+.kitchen[data-paused="true"] .duoArt [data-part="puff-cloud"],
+.kitchen[data-paused="true"] .duoArt [data-part="sweet-stars"] > path,
+.kitchen[data-paused="true"] .plates[data-land] {
+  animation-play-state: paused;
 }
 
 .kitchen[data-reduced="true"] .trayButton,

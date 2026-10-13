@@ -152,16 +152,41 @@ export function ToppingArt({ id, size, style }: ArtProps & { id: ToppingId }) {
   );
 }
 
-/** 飯型本體（座標系 96×72，底部中央 48,62 接盤子）。 */
-function BaseShape({ id }: { id: BaseId }) {
+/** 飯面上的米粒（有一點陰影，看得出顆粒）。 */
+function RiceGrains({ spots }: { spots: readonly (readonly [number, number])[] }) {
+  return (
+    <g>
+      {spots.map(([cx, cy]) => (
+        <g key={`${cx}-${cy}`}>
+          <ellipse cx={cx} cy={cy + 0.8} rx="2.4" ry="1.3" fill="#d8ccb9" opacity="0.7" />
+          <ellipse cx={cx} cy={cy} rx="2.2" ry="1.25" fill="#f4eee4" />
+        </g>
+      ))}
+    </g>
+  );
+}
+
+/**
+ * 飯型本體（座標系 96×72，底部中央 48,62 接盤子）。
+ * textured：飯底緣暗面＋米粒陰影、海苔紋理＋一道反光（只用疊色，不用漸層 id）。
+ * 迴轉帶上的裝飾壽司用平塗（textured=false）：質感太好會像可以點的東西。
+ */
+function BaseShape({ id, textured = true }: { id: BaseId; textured?: boolean }) {
   switch (id) {
     case "nigiri":
       return (
         <g>
           <path d="M14 56c-4-12 6-20 34-20s38 8 34 20c-2 5-14 7-34 7s-32-2-34-7Z" fill="#fffdf6" stroke="#b8ab9a" strokeWidth="2.2" />
-          {[[26, 48], [38, 44], [52, 46], [64, 49], [34, 54], [58, 55], [46, 52]].map(([cx, cy]) => (
-            <ellipse key={`${cx}-${cy}`} cx={cx} cy={cy} rx="2.2" ry="1.3" fill="#ece5da" />
-          ))}
+          {textured ? (
+            <>
+              <path d="M15.6 55.4c3 4.2 14 6.4 32.4 6.4s29.4-2.2 32.4-6.4c-.6 4.4-13 7.4-32.4 7.4s-31.8-3-32.4-7.4Z" fill="#cdbfa9" opacity="0.5" />
+              <RiceGrains spots={[[26, 48], [38, 44], [52, 46], [64, 49], [34, 54], [58, 55], [46, 52], [72, 52], [20, 52]]} />
+            </>
+          ) : (
+            [[26, 48], [38, 44], [52, 46], [64, 49], [34, 54], [58, 55], [46, 52]].map(([cx, cy]) => (
+              <ellipse key={`${cx}-${cy}`} cx={cx} cy={cy} rx="2.2" ry="1.3" fill="#ece5da" />
+            ))
+          )}
           <Shine cx={30} cy={41} rx={7} ry={2.2} />
         </g>
       );
@@ -170,7 +195,15 @@ function BaseShape({ id }: { id: BaseId }) {
         <g>
           <rect x="18" y="30" width="60" height="32" rx="9" fill="#2f4a3a" stroke="#1f3328" strokeWidth="2.2" />
           <path d="M22 38h52M22 50h52" stroke="#3f5f4a" strokeWidth="1.6" opacity="0.8" />
+          {textured ? (
+            <>
+              <path d="M22 44h52M22 56h52" stroke="#3a5646" strokeWidth="1" opacity="0.7" />
+              <rect x="25" y="34" width="5" height="25" rx="2.5" fill="#fff" opacity="0.12" />
+              <path d="M19.6 54c2 5.4 5.4 7 11 7h34.8c5.6 0 9-1.6 11-7v1.4c0 5-4 7.6-10 7.6H29.6c-6 0-10-2.6-10-7.6Z" fill="#14231b" opacity="0.4" />
+            </>
+          ) : null}
           <ellipse cx="48" cy="31" rx="29" ry="7" fill="#fffdf6" stroke="#b8ab9a" strokeWidth="2" />
+          {textured ? <RiceGrains spots={[[34, 30], [46, 28], [58, 30], [40, 33], [54, 33]]} /> : null}
           <Shine cx={30} cy={36} rx={5} ry={1.6} />
         </g>
       );
@@ -179,7 +212,14 @@ function BaseShape({ id }: { id: BaseId }) {
         <g>
           <path d="M18 30l30 34 30-34Z" fill="#2f4a3a" stroke="#1f3328" strokeWidth="2.2" strokeLinejoin="round" />
           <path d="M30 44l18 20 18-20" stroke="#3f5f4a" strokeWidth="1.6" fill="none" opacity="0.8" />
+          {textured ? (
+            <>
+              <path d="M38 50l10 11 10-11" stroke="#3a5646" strokeWidth="1" fill="none" opacity="0.7" />
+              <path d="M25 36l17 20" stroke="#fff" strokeWidth="3" strokeLinecap="round" opacity="0.13" />
+            </>
+          ) : null}
           <ellipse cx="48" cy="30" rx="31" ry="8" fill="#fffdf6" stroke="#b8ab9a" strokeWidth="2" />
+          {textured ? <RiceGrains spots={[[32, 29], [44, 27], [56, 28], [66, 30], [40, 32], [52, 33]]} /> : null}
           <Shine cx={30} cy={34} rx={5} ry={1.6} />
         </g>
       );
@@ -207,13 +247,20 @@ const LAYER_SIZES: Record<number, number> = { 1: 46, 2: 40, 3: 34 };
 /**
  * 砧板上／盤子上的完整壽司。沒選飯時什麼都不畫。
  * layerClassName：每層料多包一層 <g>，新加的那層掛上 CSS 進場動畫（外層 transform 是定位，不能拿來動）。
+ * flat：迴轉帶上的裝飾壽司用平塗，退到背景、不像可以點。
  */
-export function SushiArt({ sushi, size, style, layerClassName }: ArtProps & { sushi: Sushi; layerClassName?: string }) {
+export function SushiArt({
+  sushi,
+  size,
+  style,
+  layerClassName,
+  flat = false,
+}: ArtProps & { sushi: Sushi; layerClassName?: string; flat?: boolean }) {
   if (!sushi.base) return null;
   const spots = LAYER_SPOTS[sushi.toppings.length] ?? [];
   return (
     <Svg size={size} style={style} viewBox="0 0 96 72">
-      <BaseShape id={sushi.base} />
+      <BaseShape id={sushi.base} textured={!flat} />
       {sushi.toppings
         .map((id, i) => ({ id, i, spot: spots[i]! }))
         // 後排（y 小）先畫，前排蓋在上面

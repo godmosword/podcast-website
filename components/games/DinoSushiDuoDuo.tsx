@@ -41,7 +41,12 @@ export function DinoSushiDuoDuo({ phase, caption, serving, brushing, brushShown,
 
       {plateOnBelt ? (
         <span className={styles.servingPlate} data-phase={phase} aria-hidden>
-          {phase === "chew" ? null : <SushiArt sushi={serving} />}
+          {/* 張嘴時這一口從盤上飛進嘴裡（CSS sushiBite）；嚼的時候盤上已經空了 */}
+          {phase === "chew" ? null : (
+            <span className={styles.servingSushi} data-phase={phase}>
+              <SushiArt sushi={serving} />
+            </span>
+          )}
           <PlateArt />
         </span>
       ) : null}
