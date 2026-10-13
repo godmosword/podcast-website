@@ -1,3 +1,4 @@
+import { migratePaletteHex } from "./palette-migration";
 import { COLORING_PALETTE, type BrushSizeId, type ColoringTool } from "./tools";
 export type ColoringPreferences = {
   tool: ColoringTool;
@@ -21,9 +22,9 @@ export function loadColoringPreferences(): ColoringPreferences {
     );
     return {
       tool: ["crayon", "bucket", "eraser"].includes(p.tool) ? p.tool : "crayon",
-      colorHex: /^#[0-9a-f]{6}$/i.test(p.colorHex)
-        ? p.colorHex
-        : DEFAULT_COLORING_PREFERENCES.colorHex,
+      colorHex:
+        (typeof p.colorHex === "string" ? migratePaletteHex(p.colorHex) : null) ??
+        DEFAULT_COLORING_PREFERENCES.colorHex,
       brushSize: ["small", "medium", "large"].includes(p.brushSize)
         ? p.brushSize
         : "medium",

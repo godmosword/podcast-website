@@ -21,6 +21,10 @@
 頁面上的 Apple Podcasts、Spotify、KKBOX、YouTube、LINE、Instagram、Threads、Facebook
 等圖示與名稱，僅用於連結至各平台官方頁面，商標權屬各權利人。平台標誌使用 `public/brand/` 內的官方檔（來源見 `public/brand/SOURCES.md`，規則見 `lib/BRAND-ASSETS-HARD-RULES.md`）；Instagram、Threads、Facebook 在取得 Meta 官方檔前暫用同形狀圖形（`lib/brand-marks.tsx`）。
 
+## 地圖圖磚
+
+親子遊樂地圖使用 [OpenFreeMap](https://openfreemap.org/) Liberty 樣式（免註冊、可商業使用）。畫面署名為 OpenFreeMap、OpenMapTiles 與 OpenStreetMap。不再向 `tile.openstreetmap.org` 要圖。
+
 ## npm 依賴
 
 以下為目前直接執行時依賴及其套件宣告的授權；完整版本與相依套件樹見 `package-lock.json`。
@@ -32,7 +36,9 @@
 | `@sentry/nextjs` | 10.70.0 | MIT |
 | `@vercel/analytics` | 2.0.1 | MIT |
 | `@vercel/functions` | 3.9.5 | Apache-2.0 |
+| `@maplibre/maplibre-gl-leaflet` | 0.1.4 | ISC |
 | `leaflet` | 1.9.4 | BSD-2-Clause |
+| `maplibre-gl` | 6.14.0 | BSD-3-Clause |
 | `next` | 16.3.2 | MIT |
 | `openai` | 6.42.0 | Apache-2.0 |
 | `react`、`react-dom` | 19.2.7 | MIT |

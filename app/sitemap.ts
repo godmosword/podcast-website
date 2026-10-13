@@ -115,12 +115,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.6,
     },
     {
-      url: `${baseUrl}/games/block-drop`,
-      lastModified: STATIC_PAGE_MODIFIED_DATES["/games/block-drop"],
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
       url: `${baseUrl}/games/candy-match`,
       lastModified: STATIC_PAGE_MODIFIED_DATES["/games/candy-match"],
       changeFrequency: "monthly",

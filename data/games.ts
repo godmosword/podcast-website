@@ -97,33 +97,6 @@ export const GAMES: GameMeta[] = [
     ],
   },
   {
-    slug: "block-drop",
-    title: "方塊轉轉",
-    desc: "黏土糖果風落下方塊，排滿整行就消除。",
-    teaser: "排一排",
-    href: "/games/block-drop",
-    emoji: "🧩",
-    // 三款三色（著色天空藍／消消樂粉紅／方塊黃）：顏色就是不識字孩子的分類標籤
-    accent: "var(--c-yellow)",
-    ageBand: "challenge",
-    ageRange: "6–12 歲",
-    estMinutes: 10,
-    hasScore: true,
-    hasTimer: false,
-    gameType: "blocks",
-    controls: ["左右移動", "旋轉與落下"],
-    art: {
-      cover: "/games/v2/block-drop/cover.webp",
-      thumbnail: "/games/v2/block-drop/cover.webp",
-      alt: "黏土遊樂園裡的繽紛方塊正在堆疊",
-    },
-    tutorial: [
-      { text: "左右滑動移動方塊", gesture: "swipe" },
-      { text: "點一下旋轉方塊", gesture: "tap" },
-      { text: "往下滑快快落下", gesture: "swipe" },
-    ],
-  },
-  {
     slug: "coloring-book",
     title: "繪本塗塗鴉",
     desc: "選一臺車車或一個故事畫面，先用蠟筆塗塗看，再用填滿把整塊塗上顏色！",
@@ -157,8 +130,7 @@ export const GAMES: GameMeta[] = [
 export const GAME_NEXT: Record<string, string> = {
   "candy-match": "dino-sushi",
   "dino-sushi": "coloring-book",
-  "coloring-book": "block-drop",
-  "block-drop": "candy-match",
+  "coloring-book": "candy-match",
 };
 
 /**

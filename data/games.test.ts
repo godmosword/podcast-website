@@ -8,13 +8,9 @@ import {
 } from "@/data/games";
 
 describe("games parent tip (UX-P0-4)", () => {
-  test("challenge 遊戲回傳家長陪同提示", () => {
-    const challengeGames = GAMES.filter((game) => game.ageBand === "challenge");
-    expect(challengeGames.length).toBeGreaterThan(0);
-
-    for (const game of challengeGames) {
-      expect(gameParentTip(game)).toBe(CHALLENGE_PARENT_TIP);
-    }
+  test("challenge 年齡帶回傳家長陪同提示", () => {
+    const sample = { ...GAMES[0]!, ageBand: "challenge" as const };
+    expect(gameParentTip(sample)).toBe(CHALLENGE_PARENT_TIP);
   });
 
   test("explore 遊戲不回傳家長提示", () => {
@@ -81,8 +77,7 @@ describe("games next-station flow", () => {
   test("getNextGame 回傳正確下一站", () => {
     expect(getNextGame("candy-match")?.slug).toBe("dino-sushi");
     expect(getNextGame("dino-sushi")?.slug).toBe("coloring-book");
-    expect(getNextGame("coloring-book")?.slug).toBe("block-drop");
-    expect(getNextGame("block-drop")?.slug).toBe("candy-match");
+    expect(getNextGame("coloring-book")?.slug).toBe("candy-match");
     expect(getNextGame("nope")).toBeNull();
   });
 });

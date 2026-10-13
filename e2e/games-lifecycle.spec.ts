@@ -69,17 +69,6 @@ async function finishCandyLevel(page: Page) {
   await expect(page.getByRole("dialog", { name: /任務完成/ })).toBeVisible();
 }
 
-async function topOutBlock(page: Page) {
-  for (let i = 0; i < 120; i += 1) {
-    if ((await page.locator('[data-status="over"]').count()) > 0) return;
-    await page.keyboard.press("Space");
-    await page.evaluate(
-      () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())),
-    );
-  }
-  await expect(page.locator('[data-status="over"]')).toBeVisible();
-}
-
 /** 照泡泡做第 n 單並送出（n 從 1 起）。 */
 async function serveSushiOrder(page: Page, n: number, opts: { skipLast?: boolean } = {}) {
   const label = await page.getByRole("img", { name: new RegExp(`^第 ${n} 單`) }).getAttribute("aria-label");
@@ -358,30 +347,6 @@ test.describe("遊戲完整 lifecycle", () => {
     await expect(page.getByRole("button", { name: /^掃把/ })).toHaveAttribute("aria-label", /還有 1 個/);
   });
 
-  test("Block Drop：開始 → gameplay → game over → replay → 再次 gameplay → 離開", async ({ page }) => {
-    await page.goto("/games/block-drop");
-    await page.getByRole("button", { name: "自由堆疊" }).click();
-    await expect(page.locator('[data-status="playing"]')).toBeVisible();
-    const tutorial = page.getByTestId("block-drop-tutorial");
-    await expect(tutorial).toHaveAttribute("data-step", "move");
-    await page.keyboard.press("ArrowLeft");
-    await expect(tutorial).toHaveAttribute("data-step", "rotate");
-    await page.keyboard.press("ArrowUp");
-    await expect(tutorial).toHaveCount(0);
-    await topOutBlock(page);
-    await expect(page.getByRole("dialog")).toBeVisible();
-
-    await page.getByRole("button", { name: "再玩一次" }).click();
-    await expect(page.locator('[data-status="playing"]')).toBeVisible();
-    await expect(page.getByTestId("block-drop-tutorial")).toHaveCount(0);
-    await topOutBlock(page);
-    await expect(page.getByRole("dialog")).toBeVisible();
-
-    await page.getByRole("dialog").getByRole("link", { name: "回遊樂園" }).click();
-    await expect(page).toHaveURL(/\/games$/);
-    await expect(page.getByRole("dialog")).toHaveCount(0);
-  });
-
   test("Coloring：選頁 → 畫布 → 完成 → 再塗 → 再完成 → 換一張並離開", async ({ page }) => {
     await page.setViewportSize(MOBILE);
     await openColoringCanvas(page);
@@ -422,17 +387,6 @@ test.describe("遊戲第二輪 P2 mobile regression", () => {
       await expect(title).toContainText("車車消消樂");
       await expect(title).toHaveCSS("white-space", "normal");
     }
-  });
-
-  test("Block ready 只呈現開始，難度與模式只在齒輪設定裡", async ({ page }) => {
-    await page.setViewportSize(MOBILE);
-    await page.goto("/games/block-drop");
-    await expect(page.getByRole("button", { name: /開始/ })).toBeVisible();
-    // ready 面不再有難度／模式 radio（兒童減法審：孩子讀不懂，家長走齒輪）
-    await expect(page.getByRole("radio")).toHaveCount(0);
-    await page.getByRole("button", { name: "遊戲設定" }).click();
-    await expect(page.getByRole("radiogroup", { name: "方塊轉轉難度" })).toBeVisible();
-    await expect(page.getByRole("radiogroup", { name: "方塊轉轉特殊模式" })).toBeVisible();
   });
 
   test("Coloring mobile toolbar 五顆工具都在畫面內、保留 active tool 與 44px touch target", async ({ page }) => {

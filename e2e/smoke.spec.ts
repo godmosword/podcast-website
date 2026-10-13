@@ -353,7 +353,7 @@ test("遊樂園 v2 入口與遊戲卡片", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "車車遊樂園" })).toBeAttached();
   await expect(page.getByRole("heading", { name: "園裡的站" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: /車車消消樂.*開始玩/ })).toBeVisible();
-  await expect(page.getByRole("link", { name: /方塊轉轉.*開始玩/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /方塊轉轉/ })).toHaveCount(0);
   await expect(page.getByRole("link", { name: /繪本塗塗鴉.*開始玩/ })).toBeVisible();
 });
 
@@ -422,27 +422,11 @@ test("首頁 Hero 不含節目數據入口", async ({ page }) => {
   await expect(header.getByRole("link", { name: "節目數據" })).toHaveCount(0);
 });
 
-test("方塊轉轉（Block Drop）頁面可載入", async ({ page }) => {
-  await page.goto("/games/block-drop");
-  await expect(page.getByRole("link", { name: "回遊樂園" })).toBeVisible();
-  // 432bf019 起先停在標題頁（開始冒險／自由堆疊），按下去才有分數列。
-  const freePlay = page.getByRole("button", { name: "自由堆疊" });
-  await expect(freePlay).toBeVisible({ timeout: 15_000 });
-  await expect(page.getByRole("button", { name: "開始冒險" })).toBeVisible();
-  await freePlay.click();
-  await expect(page.getByLabel(/^分數 /)).toBeVisible({ timeout: 15_000 });
-  await expect(page.getByRole("progressbar")).toBeVisible();
-});
-
-test("方塊轉轉：標題 → 地圖 → 第 1 站任務列", async ({ page }) => {
-  await page.goto("/games/block-drop");
-  await expect(page.getByRole("heading", { name: "準備疊方塊！" })).toBeVisible();
-  await page.getByRole("button", { name: "開始冒險" }).click();
-  await expect(page.getByTestId("block-drop-map")).toBeVisible();
-  await expect(page.getByRole("radio", { name: /輕鬆冒險/ })).toBeVisible();
-  await page.locator('button[data-next="true"]').click();
-  await expect(page.locator('[data-status="playing"]')).toBeVisible();
-  await expect(page.getByRole("region", { name: "本站任務進度" })).toContainText("第 1 站");
+test("方塊轉轉路由導回遊樂園", async ({ page }) => {
+  const response = await page.goto("/games/block-drop");
+  expect(response?.status()).toBeLessThan(400);
+  await expect(page).toHaveURL(/\/games$/);
+  await expect(page.getByRole("link", { name: /方塊轉轉/ })).toHaveCount(0);
 });
 
 test("角色圖鑑與親子指南不含內頁 hero", async ({ page, request }) => {
