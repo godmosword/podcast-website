@@ -39,7 +39,7 @@
 |------|------|------|
 | 故事插畫、Landing、宇宙地圖 | 暖色粉彩黏土（霧面、柔光、低對比） | `DESIGN.md`、`UNIVERSE-ART-BIBLE.md` |
 | 著色頁 | 純黑粗線稿＋白底 | `scripts/lib/coloring-ai-prompts.ts` |
-| 消消樂、壽司屋 | 黏土語彙的向量 SVG | `CandyMatchPieceArt.tsx`、`lib/games/dino-sushi/art.tsx`；壽司屋店面道具在 `shop-art.tsx`，雨棚、木牆、迴轉帶是 `DinoSushiShop.module.css` 的 CSS 漸層 |
+| 消消樂、壽司屋的食物與店面 | 黏土語彙的向量 SVG | `CandyMatchPieceArt.tsx`、`lib/games/dino-sushi/art.tsx`；壽司屋店面道具在 `shop-art.tsx`，雨棚、木牆、迴轉帶是 `DinoSushiShop.module.css` 的 CSS 漸層。角色多多是和封面同一套的黏土貼紙，見下方「多多」 |
 | 方塊轉轉 | **不是像素風。** CSS 格子＋圓角色塊，`borderRadius: 7`，色在 `CLAY_BLOCK_COLORS` | `components/games/BlockDropWell.tsx`、`blockDropTheme.ts` |
 
 方塊轉轉的 adapter 沒有 `fixedUpdate`。`GameHost` 的 `image-rendering: pixelated` 畫布只在有 `fixedUpdate` 時出現，所以上線畫面不會走那條路。`lib/gamekit/runtime/palette.ts` 與 `procedural-sheets.ts` 仍在程式裡，沒有上線遊戲在用。像素規格的適用範圍寫在 Game Kit 美術聖經開頭。
@@ -47,6 +47,23 @@
 遊戲內字：方塊轉轉 HUD 用 `var(--font-sans)`，這個變數沒有定義，所以落到 PingFang TC／微軟正黑體，不是 8px 點陣字。消消樂與壽司屋按鈕寫 `font-family: inherit`，跟著全站 `--font-stack-body`。
 
 音效：著色等短音在 `lib/sfx.ts`（WebAudio，需手勢）。三款 Game Kit 遊戲在 `playing` 時播程序合成 BGM（`chiptune-bgm.ts`），不是 ogg 檔：方塊轉轉是方波，消消樂與壽司屋是三角波旋律。壽司屋另有合成音效（`lib/games/dino-sushi/sfx.ts`，經 Game Kit `voices()`）與店內環境音（`lib/gamekit/runtime/ambience.ts`，走 music 分軌、只在廚房出現）。真機音量【未確認】。
+
+## 2.1 多多【已拍板，2026-10-13】
+
+對象約 5 歲。主人否決了手繪 SVG 改版。局內多多改用和封面同一套的黏土貼紙：綠車身、淺綠吻部、橘刺、暖棕粗眉、圓眼、藍側窗、四顆黑輪，沒有手腳。角度是四分之三、車頭朝右。
+
+檔案在 `public/games/v2/dino-sushi/duoduo/`，畫布 1024、透明底，角色站在同一條底線。不要改這些圖，也不要重畫。
+
+| 檔案 | 什麼時候用 |
+|------|------------|
+| `sticker-closed.webp` | 待機（閉著的嘴） |
+| `sticker-open.webp`、`sticker-chew.webp`、`sticker-laugh.webp` | 張嘴、咀嚼、笑 |
+| `sticker-love.webp`、`sticker-yum.webp`、`sticker-sweet.webp`、`sticker-puff.webp`、`sticker-look.webp` | 反應表情 |
+| `sticker-toothbrush.webp` | 刷牙按鈕 |
+
+對應寫在 `lib/games/dino-sushi/duoduo-sticker.tsx`。張嘴、咀嚼比表情優先。芥末的嘴是 laugh，貼紙用有白煙的 `puff`。封面是 `public/games/v2/dino-sushi/cover.webp`（主人核准的原檔）。`duoduo-art.tsx` 仍是 main 的黏土向量（漸層、不用 filter），局內畫面用貼紙。
+
+390 與 320 寬的廚房裡，整張貼紙（含輪子）落在雨棚下緣與櫃台上緣之間。接地影兩層，不跟著身體浮動。待機上下約 2px、2.6 秒一循環。吃東西（張嘴、咀嚼、笑）改成擠壓。貼紙沒有眨眼。`prefers-reduced-motion: reduce`，以及遊戲的 `data-reduced`／`data-paused`，這些動作都停。牙刷在畫布裡畫得比較小，按鈕裡用 CSS 放大。
 
 ## 3. 兒童觸控【已拍板，只調了著色區的間距】
 
@@ -88,12 +105,12 @@
 ## 6. 大幅修改的決定
 
 - 著色 12 色粉彩、圖案與色名：已上線（#206，2026-10-12）。見 [`proposals/2026-10-12-coloring-pastel-swatches.md`](proposals/2026-10-12-coloring-pastel-swatches.md)
-- 遊戲畫風：已決定：維持現狀。見 [`proposals/2026-10-12-game-art-style.md`](proposals/2026-10-12-game-art-style.md)
+- 遊戲畫風：其他遊戲維持現狀。多多壽司屋的角色多多於 2026-10-13 改用和封面同一套的黏土貼紙（主人否決手繪 SVG 改版）。見 [`proposals/2026-10-12-game-art-style.md`](proposals/2026-10-12-game-art-style.md) 與上方「多多」
 - 按鈕陰影：已決定：維持現狀。上一節
 
 ## 7. 仍【未確認】
 
-- 角色頭身比的數值（沒有量定裝照）
+- 角色頭身比（沒有量定裝照）
 - 全站 disabled／loading／hover 的完整清單（著色色票 hover 是 `scale(1.06)`；故事載入是封面 skeleton。其餘沒有逐頁點過）
 - BGM 在真機的音量
 - `e2e/coloring-visual` 基線圖的畫面內容（本輪沒有打開那些快照來描述）

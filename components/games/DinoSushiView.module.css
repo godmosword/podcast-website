@@ -352,18 +352,25 @@
   position: absolute;
   z-index: 1;
   left: 50%;
-  bottom: calc(var(--counter-h) * 0.56);
-  /* 刺和愛心不頂到雨棚 */
-  height: calc(100% - var(--counter-h) * 0.56 - var(--awning-h));
-  aspect-ratio: 138 / 110;
+  bottom: calc(var(--counter-h) - 2px);
+  /* 正方形貼紙，刺和愛心不頂到雨棚 */
+  height: calc(100% - var(--counter-h) - var(--awning-h) - 2px);
+  aspect-ratio: 1;
   transform: translateX(-50%);
 }
 
-.resultDuo > svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
+.resultDuo::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  left: 12%;
+  right: 14%;
+  bottom: 1%;
+  height: 14%;
+  background:
+    radial-gradient(closest-side at 40% 55%, rgba(74, 60, 46, 0.28), transparent 72%),
+    radial-gradient(closest-side at 52% 70%, rgba(74, 60, 46, 0.14), transparent 78%);
+  pointer-events: none;
 }
 
 /* 局內同一張盤子圖，一排 5 個（自由做最多 10 個排兩排）；寬度跟著結算卡縮，320 也不折成 4＋1 */

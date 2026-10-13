@@ -1,7 +1,8 @@
 "use client";
 
 import { PlateArt, SushiArt } from "@/lib/games/dino-sushi/art";
-import { DuoDuoArt, ToothbrushArt, type DuoDuoFace, type DuoDuoMouth } from "@/lib/games/dino-sushi/duoduo-art";
+import type { DuoDuoFace, DuoDuoMouth } from "@/lib/games/dino-sushi/duoduo-art";
+import { DuoDuoSticker, ToothbrushSticker } from "@/lib/games/dino-sushi/duoduo-sticker";
 import type { Reaction } from "@/lib/games/dino-sushi/reactions";
 import type { Sushi } from "@/lib/games/dino-sushi/sushi";
 import { TapButton } from "./DinoSushiPiece";
@@ -35,7 +36,7 @@ export function DinoSushiDuoDuo({ phase, caption, serving, brushing, brushShown,
   return (
     <div className={styles.duo}>
       <span className={styles.duoArt} data-face={face} data-mouth={mouth}>
-        <DuoDuoArt mouth={mouth} face={face} shinyTeeth={brushing} />
+        <DuoDuoSticker mouth={mouth} face={face} />
         {brushing ? <span className={styles.foam} aria-hidden /> : null}
       </span>
 
@@ -53,7 +54,7 @@ export function DinoSushiDuoDuo({ phase, caption, serving, brushing, brushShown,
 
       {brushShown ? (
         <TapButton className={styles.brushButton} aria-label="幫多多刷牙" disabled={disabled} onTap={onBrush}>
-          <ToothbrushArt />
+          <ToothbrushSticker />
         </TapButton>
       ) : null}
     </div>

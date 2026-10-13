@@ -4,7 +4,7 @@ import { GameEndStation } from "@/components/games/GameEndStation";
 import { IconChevronLeft } from "@/components/games/ClayIcons";
 import { ResultStars, type ResultStarHint } from "@/components/games/ResultStars";
 import { PlateArt } from "@/lib/games/dino-sushi/art";
-import { DuoDuoArt } from "@/lib/games/dino-sushi/duoduo-art";
+import { DuoDuoSticker } from "@/lib/games/dino-sushi/duoduo-sticker";
 import type { RoundMedals } from "@/lib/games/dino-sushi/medals";
 import { ShopBelt, ShopWall } from "./DinoSushiShop";
 import type { DinoSushiOutcome } from "./DinoSushiView";
@@ -76,7 +76,7 @@ export function DinoSushiResult({ outcome, stars, reducedMotion, onReplay, onTit
       <div className={styles.resultHero} data-reduced={reducedMotion ? "true" : undefined} aria-hidden>
         <ShopWall />
         <span className={styles.resultDuo}>
-          <DuoDuoArt mouth="closed" face="love" />
+          <DuoDuoSticker mouth="closed" face="love" />
         </span>
         <ShopBelt />
       </div>

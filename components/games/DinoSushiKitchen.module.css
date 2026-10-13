@@ -2,7 +2,8 @@
  * 多多壽司屋廚房。直向：上＝迴轉壽司店（多多＋泡泡＋疊盤）；中＝檜木砧板＋「給多多吃」；下＝食材托盤 2×4。
  * 320×568 必須一屏放下；橫向手機與寬螢幕三欄（多多｜砧板｜托盤 4×2），斷點同消消樂 WIDE_LAYOUT_QUERY。
  * 材質：店面是粉彩雨棚＋木牆＋不鏽鋼迴轉帶（DinoSushiShop）、砧板是檜木、料位與托盤是瓷碟。
- * 常駐動態只有迴轉帶慢慢繞；其餘只在加料、送盤、提示、晃動時出現，減少動態時全部收掉。
+ * 常駐動態是迴轉帶慢慢繞，加上貼紙多多輕微浮動（圖上沒有眨眼）；吃的時候改成擠壓。
+ * 其餘只在加料、送盤、提示、晃動時出現。減少動態時全部收掉。
  */
 .kitchen {
   --duo-h: clamp(150px, 30svh, 230px);
@@ -59,13 +60,13 @@
   inset: 0;
 }
 
-/* 多多坐在迴轉帶後面：輪子下半被櫃台擋住，矮舞台時刺可以蓋到雨棚 */
-/* 寬由舞台寬、高兩邊取小：比例不變形，輪子永遠貼著迴轉帶（不會浮在半空） */
+/* 多多與送餐盤共用這組變數，壽司才飛得到嘴裡。
+   貼紙是正方形，整張（含四輪）落在雨棚與櫃台之間。
+   嘴心約在畫布寬 0.713、高 0.586（量過 sticker-open）。 */
 .duoArea {
-  /* 多多與送餐盤的位置用同一組變數：吃的時候壽司要飛到嘴裡（嘴心在多多 viewBox 寬 0.696、高 0.67） */
-  --duo-max-w: 64cqw;
-  --duo-left: 3cqw;
-  --duo-w: min(var(--duo-max-w), calc((100cqh - var(--counter-h) * 0.56 - 4px) * 138 / 110));
+  --duo-max-w: 58cqw;
+  --duo-left: 2cqw;
+  --duo-w: min(var(--duo-max-w), calc(100cqh - var(--counter-h) - var(--awning-h) - 8px));
   --serve-left: 30cqw;
   --serve-w: min(30cqw, 110px);
 }
@@ -74,12 +75,27 @@
   position: absolute;
   z-index: 1;
   left: var(--duo-left);
-  bottom: calc(var(--counter-h) * 0.56);
+  bottom: calc(var(--counter-h) - 2px);
   width: var(--duo-w);
-  aspect-ratio: 138 / 110;
+  aspect-ratio: 1;
 }
 
-/* 不掛 CSS drop-shadow：表情動畫時整張濾鏡要每格重算（SVG 裡已有地面陰影） */
+/* 兩層接地影：緊的接觸影偏左下，外圍再一層淡的。影不跟著身體浮動。 */
+.duoArt::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  left: 10%;
+  right: 12%;
+  bottom: 1%;
+  height: 12%;
+  background:
+    radial-gradient(closest-side at 40% 55%, rgba(74, 60, 46, 0.28), transparent 72%),
+    radial-gradient(closest-side at 52% 70%, rgba(74, 60, 46, 0.14), transparent 78%);
+  pointer-events: none;
+}
+
+/* 不掛 CSS drop-shadow：表情動畫時整張濾鏡要每格重算（向量檔用；局內貼紙沒有 svg） */
 .duoArt > svg {
   display: block;
   width: 100%;
@@ -87,7 +103,7 @@
   overflow: visible;
 }
 
-/* 嚼嚼時兩頰鼓兩下 */
+/* 向量檔的兩頰、白雲、星星。局內貼紙把表情畫在圖裡，這些選擇器留著給動畫守門。 */
 .duoArt [data-part="cheeks"] > g {
   transform-box: fill-box;
   transform-origin: 50% 50%;
@@ -106,7 +122,6 @@
   }
 }
 
-/* 芥末白雲由排氣管那側長出來 */
 .duoArt [data-part="puff-cloud"] {
   transform-box: fill-box;
   transform-origin: 90% 70%;
@@ -127,7 +142,6 @@
   }
 }
 
-/* 甜甜的星星從下方彈出、錯開，播完停住 */
 .duoArt [data-part="sweet-stars"] > path {
   transform-box: fill-box;
   transform-origin: 50% 50%;
@@ -168,8 +182,9 @@
   z-index: 1;
   display: block;
   transform: translateY(-36%);
-  --bite-dx: calc(var(--duo-left) + var(--duo-w) * 0.696 - var(--serve-left) - var(--serve-w) * 0.5);
-  --bite-dy: calc(var(--counter-h) * -0.3 - var(--duo-w) * 0.263 + var(--serve-w) * 0.645);
+  --bite-dx: calc(var(--duo-left) + var(--duo-w) * 0.713 - var(--serve-left) - var(--serve-w) * 0.5);
+  /* 貼紙底在櫃台上方 2px，嘴在畫布底往上 0.414 個寬。盤子底在櫃台的 0.26。 */
+  --bite-dy: calc(var(--counter-h) * -0.74 + 2px - var(--duo-w) * 0.414 + var(--serve-w) * 0.645);
 }
 
 .servingSushi > svg {
@@ -517,6 +532,7 @@
 
 .foam {
   position: absolute;
+  z-index: 2;
   left: 38%;
   top: 48%;
   width: 40%;
@@ -552,10 +568,15 @@
   animation: sushiWiggle 1.2s ease-in-out 3;
 }
 
-.brushButton > svg {
+.brushButton > img {
   width: 100%;
   height: 100%;
+  object-fit: contain;
+  /* 牙刷在 1024 畫布裡偏下、畫得比較小，放大並上移，讓刷頭落在圓鈕裡。 */
+  transform: translateY(-14%) scale(1.85);
+  pointer-events: none;
 }
+
 
 @keyframes sushiWiggle {
   0%,

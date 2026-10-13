@@ -6,6 +6,7 @@ import type { DinoSushiInstance } from "@/lib/gamekit/games/dino-sushi/adapter";
 import { medalCount, medalFlags } from "@/lib/gamekit/progress/meta";
 import { loadPlayerProfile } from "@/lib/gamekit/progress/save";
 import { GAMEKIT_PROGRESS_EVENT } from "@/lib/gamekit/progress/session";
+import { useDuoDuoStickerPreload } from "@/lib/games/dino-sushi/duoduo-sticker";
 import { DINO_SUSHI_LEVEL_INDEX, roundMedals, type RoundMedals } from "@/lib/games/dino-sushi/medals";
 import { SUSHI_SFX } from "@/lib/games/dino-sushi/sfx";
 import type { Mode, RoundState } from "@/lib/games/dino-sushi/round";
@@ -29,6 +30,7 @@ export type DinoSushiOutcome = {
 };
 
 export function DinoSushiView({ reducedMotion, status, syncHost, audio, instance }: DinoSushiViewProps) {
+  useDuoDuoStickerPreload();
   const [screen, setScreen] = useState<Screen>("title");
   const [mode, setMode] = useState<Mode>("order");
   const [starsGot, setStarsGot] = useState(0);

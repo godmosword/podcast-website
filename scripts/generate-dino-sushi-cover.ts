@@ -6,7 +6,9 @@
  *   npm run generate:dino-sushi-cover                   # 生 1 張到 public/.games-staging/dino-sushi/<run-id>/
  *   npm run generate:dino-sushi-cover -- --approve [--run <run-id>]   # 人工審圖後才覆蓋正式封面
  *
+ * 成品：約 2048×1536、WebP q90（API 橫式上限 1536×1024，再放大）。
  * 紅線：付費生圖，每次執行最多 1 次 API 呼叫、不自動重抽；未經人工審稿不得上線；CI 不放 OPENAI_API_KEY。
+ * 目前上線封面是主人 2026-10-13 核准的原檔（1536×1024）。不要用本腳本覆蓋，除非再次核准。
  */
 import { createHash } from "node:crypto";
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -21,7 +23,12 @@ const TARGET_COVER = join(PUBLIC_DIR, "games/v2/dino-sushi/cover.webp");
 const API_SIZE = "1536x1024";
 /** 使用者確認的張數：1 張。 */
 const MAX_API_CALLS = 1;
-const COVER_SIZE = { width: 1448, height: 1086 } as const;
+/**
+ * 成品約 2048 寬、4:3、WebP q90。
+ * 圖像 API 的橫式上限是 1536×1024，這裡用 sharp 放大到 2048×1536（同一 4:3，置中裁切）。
+ */
+const COVER_SIZE = { width: 2048, height: 1536 } as const;
+const COVER_WEBP_QUALITY = 90;
 
 /** 第 1 張定角色（on-model），第 2 張只參考黏土質感與粉彩色盤。 */
 const REFERENCE_PATHS = [
@@ -36,10 +43,13 @@ const SIBLING_COVERS = ["coloring-book", "candy-match", "block-drop"].map((slug)
 
 const COVER_PROMPT = [
   CLAY_STYLE_PREFIX,
-  "Image 1 is the character reference: keep the green dinosaur car 恐龍車多多 exactly on-model — small green car body with a lighter green belly and a T-rex head, orange spikes along the head and back, thick black eyebrows, big round eyes on the head, a blue side window with no face on the glass, four black wheels only. No arms, no hands, no limbs. Do not copy its background.",
+  "Image 1 is the character reference for colors and parts only: green dinosaur car 恐龍車多多 — green body #5CB83A, lighter green muzzle #8FD14F, orange spikes #F28A2E along the head and back, thick warm-brown eyebrows (not harsh black), big round eyes on the head, a blue side window with no face on the glass, four black wheels only. No arms, no hands, no limbs. Do not copy its background or its open mouth.",
   "Image 2 is a style reference only: match its claymation material, pastel candy amusement-park palette and soft lighting; do not copy its objects or layout.",
-  "Scene: a cheerful pastel clay conveyor-belt sushi stand inside the amusement park. 恐龍車多多 sits beside the counter with his mouth open in a happy smile, eagerly looking at the plates. A gently curving conveyor belt carries round pastel plates with chunky, kid-friendly clay sushi: tamago egg nigiri with a seaweed band, a curled pink-and-white shrimp nigiri, a gunkan topped with corn kernels, a cucumber hand roll, a salmon nigiri, and one small pudding cup. Two plates stacked beside him, one with a gold rim.",
-  "Subjects fully inside a central 16:9 safe frame (leave soft margins top/bottom for a 16:9 crop of 4:3 art).",
+  "Camera: the same three-quarter view as a toy facing screen-right (head on the right, rear of the car on the left). The WHOLE vehicle is inside the frame — all four wheels, every spike, the exhaust — not cropped by the counter, the awning, or the edges.",
+  "Face, preschool-safe for about age 5: a gentle happy smile, mouth only slightly open. Four to six small rounded white teeth. No red gums, no tongue, no yellow teeth, no huge grin, no rows of fangs. The mouth must not cover half the face.",
+  "Lighting matches the in-game vector: soft key light from the top-left at 45 degrees, a translucent shadow on the lower-left of each clay form, a faint rim light on the top-right edge. Matte clay, low contrast, no hard studio speculars.",
+  "Scene: a cheerful pastel clay conveyor-belt sushi stand inside the amusement park. 恐龍車多多 sits beside the counter, looking at the plates. A gently curving conveyor belt carries round pastel plates with chunky, kid-friendly clay sushi: tamago egg nigiri with a seaweed band, a curled pink-and-white shrimp nigiri, a gunkan topped with corn kernels, a cucumber hand roll, a salmon nigiri, and one small pudding cup. Two plates stacked beside him, one with a gold rim.",
+  "Subjects fully inside a central 4:3 safe frame (the export is a 4:3 cover). Leave a little air around the car so a mild crop still keeps the wheels.",
   "Soft pink/peach/mint pastel glow, cream counter, a striped awning, cotton candy clouds; NO royal-blue flat wall, NO high-saturation photo look.",
   "NO toothbrush, NO chopsticks held by anyone, NO raw-meat close-ups, NO knives. Hosts Bonbon/Mami NOT in frame. No text/letters/numbers/logos/watermarks.",
   CLAY_NEGATIVE,
@@ -123,7 +133,10 @@ async function runGenerate(): Promise<void> {
   mkdirSync(runDir, { recursive: true });
   console.log(`→ images.edit（${API_SIZE}，API 呼叫 1/${MAX_API_CALLS}）…`);
   const raw = await generateRawCover();
-  const cover = await sharp(raw).resize(COVER_SIZE.width, COVER_SIZE.height, { fit: "cover" }).webp({ quality: 82 }).toBuffer();
+  const cover = await sharp(raw)
+    .resize(COVER_SIZE.width, COVER_SIZE.height, { fit: "cover" })
+    .webp({ quality: COVER_WEBP_QUALITY })
+    .toBuffer();
   writeFileSync(join(runDir, "cover.raw.png"), raw);
   writeFileSync(join(runDir, "cover.webp"), cover);
   const contact = await writeContactSheet(runDir, cover);
