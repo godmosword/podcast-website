@@ -44,6 +44,7 @@ const STORY_ZONES: Record<string, ZoneId> = {
   "ep-31": "car-park", // 快樂烤肉的中秋節
   "ep-32": "dino", // 換牙故事
   "ep-33": "car-park", // 神奇的油漆車
+  "ep-34": "car-park", // 小紅賽車好想生氣怎麼辦？
 };
 
 export function getStoryZoneId(slug: string): ZoneId | undefined {
