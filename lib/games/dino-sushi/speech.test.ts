@@ -150,8 +150,66 @@ describe("壽司屋朗讀（有 Web Speech）", () => {
     expect(synth.speak).toHaveBeenCalledTimes(1);
     now.mockReturnValue(1_000_000 + 2000 + "我想要鮭魚手捲".length * 400 + 1);
     expect(isSpeaking("我想要鮭魚手捲")).toBe(false);
+    synth.cancel.mockClear();
     speakText("我想要玉米軍艦", { interrupt: false });
+    // 瀏覽器還卡在上一句：要先停掉，新句子才不會排在卡住的那句後面
+    expect(synth.cancel).toHaveBeenCalledTimes(1);
     expect(synth.spoken.map((u) => u.text)).toEqual(["我想要鮭魚手捲", "我想要玉米軍艦"]);
+  });
+
+  describe("卡住的句子到時限自動收掉", () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("onend 遺失、排隊的那句沒人叫：時限一到就停掉卡住的句子，接著念排隊的", () => {
+      vi.useFakeTimers();
+      const synth = fakeSynth();
+      speakText("蟹肉棒，好好吃！", { interrupt: false });
+      speakText("我想要鮭魚手捲", { interrupt: false });
+      expect(synth.speak).toHaveBeenCalledTimes(1);
+      vi.advanceTimersByTime(2000 + "蟹肉棒，好好吃！".length * 400 - 1);
+      expect(synth.speak).toHaveBeenCalledTimes(1);
+      vi.advanceTimersByTime(1);
+      expect(synth.cancel).toHaveBeenCalledTimes(1);
+      expect(synth.spoken.map((u) => u.text)).toEqual(["蟹肉棒，好好吃！", "我想要鮭魚手捲"]);
+      // 被停掉的那句晚到的 onerror 不會再接一次
+      synth.spoken[0]!.onerror?.();
+      expect(synth.speak).toHaveBeenCalledTimes(2);
+    });
+
+    it("正常念完就不會被收掉", () => {
+      vi.useFakeTimers();
+      const synth = fakeSynth();
+      speakText("我想要鮭魚手捲", { interrupt: false });
+      synth.finish();
+      vi.advanceTimersByTime(60_000);
+      expect(synth.cancel).not.toHaveBeenCalled();
+      expect(synth.speak).toHaveBeenCalledTimes(1);
+    });
+
+    it("接著念的下一句有自己的時限，念完不會被上一句的計時器收掉", () => {
+      vi.useFakeTimers();
+      const synth = fakeSynth();
+      speakText("好好吃！", { interrupt: false });
+      speakText("我想要玉米和小黃瓜軍艦", { interrupt: false });
+      vi.advanceTimersByTime(1000);
+      synth.finish();
+      expect(synth.spoken.at(-1)!.text).toBe("我想要玉米和小黃瓜軍艦");
+      vi.advanceTimersByTime(2000 + "好好吃！".length * 400);
+      expect(synth.cancel).not.toHaveBeenCalled();
+    });
+
+    it("取消朗讀（暫停、關音效、卸載）也清掉計時器", () => {
+      vi.useFakeTimers();
+      const synth = fakeSynth();
+      speakText("我想要鮭魚手捲", { interrupt: false });
+      cancelSpeech();
+      synth.cancel.mockClear();
+      vi.advanceTimersByTime(60_000);
+      expect(synth.cancel).not.toHaveBeenCalled();
+      expect(synth.speak).toHaveBeenCalledTimes(1);
+    });
   });
 
   it("isSpeaking 只在那一句還在念時為真", () => {
