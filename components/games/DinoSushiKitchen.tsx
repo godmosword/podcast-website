@@ -1,7 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useRef } from "react";
-import { BaseArt, PlateArt, SushiArt, ToppingArt } from "@/lib/games/dino-sushi/art";
+import { BaseArt, PlateArt, SHOP_SRC, SushiArt, ToppingArt } from "@/lib/games/dino-sushi/art";
 import { matchOrder } from "@/lib/games/dino-sushi/orders";
 import { currentOrder } from "@/lib/games/dino-sushi/round";
 import { MAX_TOPPINGS } from "@/lib/games/dino-sushi/sushi";
@@ -176,27 +176,31 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused }: Props) {
             /* a／b 兩個同樣的晃動動畫輪流換名字才會重播；不用 key 重掛，免得壽司和料位的進場動畫一起重跳 */
             data-shake={shake === 0 ? undefined : shake % 2 === 0 ? "a" : "b"}
           >
-            <TapButton
-              className={styles.sushiButton}
-              aria-label={
-                sushi.base
-                  ? `換飯：現在是${baseById(sushi.base).label}`
-                  : "選飯"
-              }
-              data-hint={layerHint?.kind === "base" ? "true" : undefined}
-              disabled={disabled}
-              onTap={afterPick(actions.reopenBase)}
-            >
-              {/* 換一種飯才重掛：落下動畫照舊在選完飯時播一次 */}
-              {eating ? null : (
-                <SushiArt
-                  key={sushi.base ?? "none"}
-                  sushi={sushi}
-                  layerClassName={reducedMotion ? undefined : styles.layerPop}
-                />
-              )}
-              {teaching && layerHint?.kind === "base" ? <Finger /> : null}
-            </TapButton>
+            <div className={styles.prep}>
+              {/* eslint-disable-next-line @next/next/no-img-element -- 原檔備料盤 */}
+              <img className={styles.prepPlate} src={SHOP_SRC.prepplate} alt="" draggable={false} decoding="sync" />
+              <TapButton
+                className={styles.sushiButton}
+                aria-label={
+                  sushi.base
+                    ? `換飯：現在是${baseById(sushi.base).label}`
+                    : "選飯"
+                }
+                data-hint={layerHint?.kind === "base" ? "true" : undefined}
+                disabled={disabled}
+                onTap={afterPick(actions.reopenBase)}
+              >
+                {/* 換一種飯才重掛：落下動畫照舊在選完飯時播一次 */}
+                {eating ? null : (
+                  <SushiArt
+                    key={sushi.base ?? "none"}
+                    sushi={sushi}
+                    layerClassName={reducedMotion ? undefined : styles.layerPop}
+                  />
+                )}
+                {teaching && layerHint?.kind === "base" ? <Finger /> : null}
+              </TapButton>
+            </div>
             <div
               className={styles.slots}
               role="group"

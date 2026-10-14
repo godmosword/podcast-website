@@ -170,7 +170,7 @@
   width: var(--serve-w);
 }
 
-.servingPlate > svg,
+.servingPlate > img,
 .servingSushi {
   grid-area: 1 / 1;
   width: 100%;
@@ -187,10 +187,11 @@
   --bite-dy: calc(var(--counter-h) * -0.74 + 2px - var(--duo-w) * 0.414 + var(--serve-w) * 0.645);
 }
 
-.servingSushi > svg {
+.servingSushi > [data-sushi] {
   display: block;
-  width: 100%;
+  width: 78%;
   height: auto;
+  margin-inline: auto;
 }
 
 .servingSushi[data-phase="open"] {
@@ -328,12 +329,13 @@
   background: #efdcbc;
 }
 
-.bubbleItem > svg:first-child {
-  width: 100%;
-  height: 100%;
+.bubbleItem > img {
+  width: 88%;
+  height: 88%;
+  object-fit: contain;
 }
 
-.bubbleItem[data-done="true"] > svg:first-child {
+.bubbleItem[data-done="true"] > img {
   opacity: 0.5;
 }
 
@@ -479,8 +481,8 @@
 .plate {
   display: block;
   width: var(--pw);
-  height: calc(var(--pw) / 3);
-  margin-top: calc(var(--pw) / -3 * 0.42);
+  height: calc(var(--pw) * 403 / 695);
+  margin-top: calc(var(--pw) * 403 / 695 * -0.48);
   animation: plateDrop 360ms cubic-bezier(0.3, 1.3, 0.5, 1) both;
 }
 
@@ -495,10 +497,11 @@
   }
 }
 
-.plate > svg {
+.plate > img {
   display: block;
   width: 100%;
   height: 100%;
+  object-fit: contain;
 }
 
 .plateCount {
@@ -522,7 +525,7 @@
   }
 
   .plate {
-    margin-top: -9px;
+    margin-top: calc(var(--pw) * 403 / 695 * -0.55);
   }
 
   .plate:nth-last-child(n + 7) {
@@ -636,9 +639,10 @@
 
 .boardLayer {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: stretch;
-  gap: 8px;
+  /* 左：備料盤＋料位；右：給多多吃。兩邊重量接近，鈕不要被拉成空的黃塊 */
+  grid-template-columns: minmax(0, 1.4fr) minmax(108px, 0.86fr);
+  align-items: center;
+  gap: 10px;
   min-width: 0;
 }
 
@@ -650,8 +654,26 @@
   display: grid;
   grid-template-rows: auto auto;
   justify-items: center;
-  gap: 6px;
+  align-content: center;
+  /* 料位在盤子下方，留出空隙，不要壓在盤緣上 */
+  gap: 14px;
   min-width: 0;
+}
+
+/* 備料盤：壽司置中，寬約盤寬的 70% */
+.prep {
+  position: relative;
+  width: min(100%, 220px);
+  aspect-ratio: 761 / 502;
+}
+
+.prepPlate {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
 }
 
 .boardMain[data-shake="a"] {
@@ -681,22 +703,22 @@
 }
 
 .sushiButton {
-  position: relative;
-  width: min(100%, 132px);
-  aspect-ratio: 96 / 72;
-  min-height: 64px;
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  display: grid;
+  place-items: center;
   padding: 0;
   border: 2px dashed transparent;
-  border-radius: 16px;
+  border-radius: 18px;
   background: transparent;
   cursor: pointer;
 }
 
-.sushiButton > svg {
+.sushiButton > [data-sushi] {
   display: block;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
+  width: 70%;
+  height: auto;
   filter: drop-shadow(0 3px 2px rgba(110, 75, 35, 0.18));
   animation: baseDrop 300ms cubic-bezier(0.3, 1.4, 0.5, 1) both;
 }
@@ -714,7 +736,7 @@
 
 /* 新放上去的那層料：從上面「啵」一下落到飯上 */
 .layerPop {
-  transform-box: fill-box;
+  display: block;
   transform-origin: 50% 100%;
   animation: layerPop 320ms cubic-bezier(0.3, 1.6, 0.5, 1) both;
 }
@@ -760,9 +782,10 @@
 }
 
 /* 只彈裡面的料，碟子（點擊範圍）大小不變 */
-.slot > svg {
-  width: 100%;
-  height: 100%;
+.slot > img {
+  width: 78%;
+  height: 78%;
+  object-fit: contain;
   animation: popIn 260ms cubic-bezier(0.3, 1.6, 0.5, 1) both;
 }
 
@@ -820,9 +843,10 @@
   aspect-ratio: 96 / 72;
 }
 
-.baseArt > svg {
+.baseArt > img {
   width: 100%;
   height: 100%;
+  object-fit: contain;
   filter: drop-shadow(0 3px 2px rgba(110, 75, 35, 0.16));
 }
 
@@ -837,10 +861,14 @@
   display: grid;
   place-items: center;
   align-content: center;
-  gap: 2px;
-  width: 104px;
-  min-height: 96px;
-  padding: 6px 8px;
+  justify-self: center;
+  align-self: center;
+  gap: 4px;
+  width: 100%;
+  max-width: 136px;
+  min-height: 112px;
+  aspect-ratio: 0.96;
+  padding: 8px 8px 10px;
   border: none;
   border-radius: 24px;
   background:
@@ -877,13 +905,14 @@
 }
 
 .serveArt {
-  width: 64px;
-  aspect-ratio: 96 / 32;
+  width: min(78%, 86px);
+  aspect-ratio: 695 / 403;
 }
 
-.serveArt > svg {
+.serveArt > img {
   width: 100%;
   height: 100%;
+  object-fit: contain;
 }
 
 /* ── 食材托盤（竹簾上的小瓷碟） ───────────────────────── */
@@ -903,47 +932,18 @@
   place-items: center;
   gap: 1px;
   min-height: 60px;
-  padding: 4px 2px;
+  padding: 2px 2px 4px;
   border: none;
   border-radius: 16px;
-  background:
-    radial-gradient(70% 55% at 50% 0%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 70%),
-    linear-gradient(180deg, #f5e3c3, #ecd3a8);
+  background: transparent;
   color: var(--ink-warm);
   font: inherit;
   cursor: pointer;
-  box-shadow:
-    inset 0 0 0 1.5px rgba(255, 255, 255, 0.65),
-    inset 0 -3px 0 rgba(176, 128, 66, 0.14),
-    0 3px 0 #d3b07c,
-    0 6px 10px rgba(110, 75, 35, 0.13);
   transition:
     transform 120ms ease-out,
     box-shadow 120ms ease-out,
     opacity 200ms ease-out,
     filter 200ms ease-out;
-}
-
-.trayButton[data-kind="sweet"] {
-  background:
-    radial-gradient(70% 55% at 50% 0%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 70%),
-    linear-gradient(180deg, #fde3ea, #f8cfda);
-  box-shadow:
-    inset 0 0 0 1.5px rgba(255, 255, 255, 0.65),
-    inset 0 -3px 0 rgba(214, 120, 150, 0.14),
-    0 3px 0 #e8adbd,
-    0 6px 10px rgba(150, 70, 90, 0.12);
-}
-
-.trayButton[data-kind="wasabi"] {
-  background:
-    radial-gradient(70% 55% at 50% 0%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 70%),
-    linear-gradient(180deg, #e6f2d6, #d6e9bf);
-  box-shadow:
-    inset 0 0 0 1.5px rgba(255, 255, 255, 0.65),
-    inset 0 -3px 0 rgba(110, 160, 80, 0.14),
-    0 3px 0 #b3d394,
-    0 6px 10px rgba(70, 110, 50, 0.12);
 }
 
 .trayButton:disabled,
@@ -957,7 +957,6 @@
 .tray[data-wait="base"] .trayButton {
   opacity: 0.72;
   filter: saturate(0.5);
-  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.55);
 }
 
 /* 按下去會沉一下（有厚度的實體感） */
@@ -977,15 +976,24 @@
 
 /* 圖跟著格子寬（約一半），矮直向與矮橫向固定 --tray-art 保一屏 */
 .trayArt {
-  width: clamp(var(--tray-art), 46cqw, 72px);
-  height: clamp(var(--tray-art), 46cqw, 72px);
-  border-radius: 50%;
-  background: radial-gradient(50% 24% at 50% 82%, rgba(120, 80, 35, 0.18), rgba(120, 80, 35, 0));
+  position: relative;
+  width: 100%;
+  aspect-ratio: 858 / 480;
+  overflow: hidden;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
 }
 
-.trayArt > svg {
-  width: 100%;
-  height: 100%;
+/* 料圖絕對定位，才不會被高的圖（小黃瓜、布丁）把整列托盤撐高 */
+.trayArt > img {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  width: 62%;
+  height: 68%;
+  transform: translate(-50%, -50%);
+  object-fit: contain;
 }
 
 .trayLabel {
@@ -1086,13 +1094,19 @@
     padding: 6px;
   }
 
-  .sushiButton {
-    width: min(100%, 104px);
+  .prep {
+    width: min(100%, 136px);
+  }
+
+  .boardMain {
+    gap: 10px;
   }
 
   .serveButton {
-    width: 92px;
-    min-height: 88px;
+    max-width: 100px;
+    min-height: 84px;
+    aspect-ratio: auto;
+    font-size: 0.92rem;
   }
 
   .baseButton {
@@ -1103,9 +1117,10 @@
     min-height: 56px;
   }
 
-  .trayArt {
-    width: var(--tray-art);
-    height: var(--tray-art);
+  .slot,
+  .slotEmpty {
+    width: 42px;
+    height: 42px;
   }
 }
 
@@ -1130,8 +1145,9 @@
 
   .boardLayer {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: 1fr auto;
+    grid-template-rows: auto auto;
     align-content: center;
+    justify-items: center;
   }
 
   /* 壽司和料位一起置中，不要壽司在上、料位在中、下面一大片空木頭 */
@@ -1139,13 +1155,23 @@
     align-content: center;
   }
 
+  .prep {
+    width: min(100%, 240px);
+  }
+
   .serveButton {
     justify-self: center;
     justify-content: center;
-    width: min(100%, 180px);
+    width: min(100%, 220px);
+    max-width: 220px;
     min-height: 64px;
+    aspect-ratio: auto;
     grid-auto-flow: column;
     gap: 8px;
+  }
+
+  .serveArt {
+    width: 72px;
   }
 
   /* 托盤跟砧板、店面同高，三欄上下對齊 */
@@ -1176,11 +1202,6 @@
 
   .trayButton {
     min-height: 56px;
-  }
-
-  .trayArt {
-    width: var(--tray-art);
-    height: var(--tray-art);
   }
 }
 
@@ -1219,8 +1240,8 @@
     font-size: 0.95rem;
   }
 
-  .sushiButton {
-    width: min(100%, 260px);
+  .prep {
+    width: min(100%, 280px);
   }
 
   .boardMain {
@@ -1266,8 +1287,8 @@
   .check,
   .caption,
   .plate,
-  .slot > svg,
-  .sushiButton > svg,
+  .slot > img,
+  .sushiButton > [data-sushi],
   .layerPop,
   .servingSushi[data-phase="open"],
   .duoArt [data-part="cheeks"] > g,
@@ -1298,8 +1319,8 @@
 .kitchen[data-reduced="true"] .check,
 .kitchen[data-reduced="true"] .caption,
 .kitchen[data-reduced="true"] .plate,
-.kitchen[data-reduced="true"] .slot > svg,
-.kitchen[data-reduced="true"] .sushiButton > svg,
+.kitchen[data-reduced="true"] .slot > img,
+.kitchen[data-reduced="true"] .sushiButton > [data-sushi],
 .kitchen[data-reduced="true"] .layerPop,
 .kitchen[data-reduced="true"] .servingSushi[data-phase="open"],
 .kitchen[data-reduced="true"] .duoArt [data-part="cheeks"] > g,
