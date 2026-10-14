@@ -56,6 +56,8 @@ describe("壽司黏土圖", () => {
       ]),
     );
     expect(new Set(DINO_SUSHI_CLAY_SRCS).size).toBe(DINO_SUSHI_CLAY_SRCS.length);
-    expect(DINO_SUSHI_CLAY_SRCS).toHaveLength(13 + 3 + 1 + 12);
+    expect(DINO_SUSHI_CLAY_SRCS).toHaveLength(12 + 3 + 1 + 12);
+    // 直式招牌已改成刻在櫃台前板的文字，不再預載
+    expect(DINO_SUSHI_CLAY_SRCS).not.toContain("/games/v2/dino-sushi/shop/sign.webp");
   });
 });
