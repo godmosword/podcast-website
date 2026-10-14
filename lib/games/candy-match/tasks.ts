@@ -182,6 +182,16 @@ export function goalsSummary(goals: readonly CandyGoal[]): string {
   return parts.join("＋");
 }
 
+/**
+ * 開局念給孩子聽的一句目標。「＋」改成「還要」，厚污漬再補一句。
+ * 例如「收集計程車 30 個，還要啟動特殊糖 2 次。」
+ */
+export function levelGoalSpeech(goals: readonly CandyGoal[], thick = false): string {
+  const spoken = goalsSummary(goals).split("＋").join("，還要");
+  const line = spoken.endsWith("。") ? spoken : `${spoken}。`;
+  return thick ? `${line}有的污漬比較厚，要再掃一次！` : line;
+}
+
 /** 背景主題用的任務類別。 */
 export function goalTheme(goals: readonly CandyGoal[]): string {
   if (goals.some((goal) => goal.kind === "drop-item")) return "drop-item";

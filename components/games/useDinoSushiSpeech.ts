@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef } from "react";
 import type { Reaction } from "@/lib/games/dino-sushi/reactions";
-import { cancelSpeech, clearLegacyVoiceSetting, isSpeaking, speakText } from "@/lib/games/dino-sushi/speech";
+import { cancelSpeech, clearLegacyVoiceSetting, isSpeaking, speakText } from "@/lib/games/shared/speech";
 
 type Options = {
   /** 換單才變（種子＋第幾單）。空的表示現在沒有訂單。 */

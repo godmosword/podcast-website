@@ -81,6 +81,41 @@ describe("buildRound", () => {
   });
 });
 
+describe("輕鬆後期時長", () => {
+  function perColor(index: number): number {
+    const goals = CANDY_STAGES.easy[index]!.main.goals.filter((goal) => goal.kind === "collect");
+    expect(goals.length).toBeGreaterThan(0);
+    const count = goals[0]!.count;
+    expect(goals.every((goal) => goal.count === count)).toBe(true);
+    return count;
+  }
+
+  it("第 7、9、10 關每色落在 25–35，後面不會比前面少，特殊糖還在", () => {
+    const level7 = perColor(6);
+    const level9 = perColor(8);
+    const level10 = perColor(9);
+    for (const count of [level7, level9, level10]) {
+      expect(count).toBeGreaterThanOrEqual(25);
+      expect(count).toBeLessThanOrEqual(35);
+    }
+    expect(level9).toBeGreaterThanOrEqual(level7);
+    expect(level10).toBeGreaterThanOrEqual(level9);
+    expect(level7).toBe(30);
+    expect(level9).toBe(33);
+    expect(level10).toBe(35);
+    expect(CANDY_STAGES.easy[6]!.main.goals).toContainEqual({ kind: "detonate", count: 2 });
+    expect(CANDY_STAGES.easy[9]!.main.goals).toContainEqual({ kind: "detonate", count: 3 });
+    expect(CANDY_STAGES.easy[7]!.main.goals).toEqual([{ kind: "drop-item", count: 2 }]);
+  });
+
+  it("挑戰模式後期收集數維持原樣", () => {
+    expect(CANDY_STAGES.challenge[6]!.main.id).toBe("c7-taxi-40-sp3");
+    expect(CANDY_STAGES.challenge[7]!.main.id).toBe("c8-gift-3-red-30");
+    expect(CANDY_STAGES.challenge[8]!.main.id).toBe("c9-red-bus-bell-38");
+    expect(CANDY_STAGES.challenge[9]!.main.id).toBe("c10-three-40-sp4");
+  });
+});
+
 describe("道具與效率星", () => {
   it("輕鬆第 1 關沒有彩虹、第 2 關起 1 次；挑戰泡泡 1 次、第 4 關起才有彩虹", () => {
     expect(candyProps("easy", 0)).toEqual({ bubble: 2, broom: 1, rainbow: 0 });

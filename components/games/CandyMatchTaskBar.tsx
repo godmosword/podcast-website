@@ -3,6 +3,7 @@
 import { DirtOverlay, PieceArt, PieceGift } from "@/components/games/CandyMatchPieceArt";
 import { IconBroom, IconRainbow } from "@/components/games/ClayIcons";
 import { IconCheck, IconFootprints } from "@/components/games/CandyMatchIcons";
+import Icon from "@/components/ui/Icon";
 import type { CandyMatchRound } from "@/lib/games/candy-match/stages";
 import {
   goalCompletion,
@@ -17,6 +18,10 @@ type CandyMatchTaskBarProps = {
   round: CandyMatchRound;
   progress: CandyProgress;
   movesLeft: number;
+  /** 朗讀關著時再聽一次不出聲，按鈕還在。 */
+  voiceMuted: boolean;
+  onReplay: () => void;
+  onToggleVoice: () => void;
 };
 
 const UNIT: Record<CandyGoal["kind"], string> = {
@@ -59,7 +64,14 @@ export function CandyGoalIcon({ goal, size = 32 }: { goal: CandyGoal; size?: num
  * 挑戰模式的步數（腳印）、整體進度。目標名稱與「還差幾個」整句留給讀屏。
  * 第三顆星的交換次數不在局內倒數，結算時才用腳印那顆星說明。
  */
-export function CandyMatchTaskBar({ round, progress, movesLeft }: CandyMatchTaskBarProps) {
+export function CandyMatchTaskBar({
+  round,
+  progress,
+  movesLeft,
+  voiceMuted,
+  onReplay,
+  onToggleVoice,
+}: CandyMatchTaskBarProps) {
   const goals = round.stage.goals;
   const completion = goalCompletion(goals, progress);
   const nearComplete = completion >= 0.75 && completion < 1;
@@ -91,6 +103,27 @@ export function CandyMatchTaskBar({ round, progress, movesLeft }: CandyMatchTask
             {movesLeft}
           </span>
         ) : null}
+        <span className={styles.voiceRow}>
+          <button
+            type="button"
+            className={styles.replayButton}
+            aria-label="再聽一次"
+            data-muted={voiceMuted ? "true" : undefined}
+            onClick={onReplay}
+          >
+            <Icon name={voiceMuted ? "volume-off" : "volume-on"} size={20} />
+            <span>再聽一次</span>
+          </button>
+          <button
+            type="button"
+            className={styles.muteButton}
+            aria-pressed={!voiceMuted}
+            aria-label={voiceMuted ? "打開朗讀" : "關閉朗讀"}
+            onClick={onToggleVoice}
+          >
+            <Icon name={voiceMuted ? "volume-off" : "volume-on"} size={22} />
+          </button>
+        </span>
       </div>
       <ul className={styles.goalList} data-count={goals.length}>
         {goals.map((goal, i) => {

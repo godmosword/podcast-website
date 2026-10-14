@@ -10,6 +10,7 @@ import {
   goalStatus,
   goalsSummary,
   goalTheme,
+  levelGoalSpeech,
   type CandyGoal,
 } from "./tasks";
 
@@ -67,6 +68,15 @@ describe("Candy 任務判定", () => {
     expect(goalTheme([{ kind: "drop-item", count: 2 }, { kind: "collect", piece: 0, count: 3 }])).toBe("drop-item");
     expect(goalTheme([{ kind: "collect", piece: 0, count: 3 }, { kind: "collect", piece: 1, count: 3 }])).toBe(
       "collect-multi",
+    );
+  });
+
+  it("開局朗讀把目標念成一句，厚污漬再補一句", () => {
+    expect(levelGoalSpeech([{ kind: "collect", piece: 1, count: 30 }, { kind: "detonate", count: 2 }])).toBe(
+      "收集計程車 30 個，還要啟動特殊糖 2 次。",
+    );
+    expect(levelGoalSpeech([{ kind: "clean-dirt", count: 8 }], true)).toBe(
+      "清理 8 格髒格。有的污漬比較厚，要再掃一次！",
     );
   });
 });
