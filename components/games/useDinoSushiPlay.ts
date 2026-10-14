@@ -15,7 +15,7 @@ import {
 } from "@/lib/games/dino-sushi/round";
 import { addSfx, MOOD_SFX, plateSfx, SUSHI_SFX, varied } from "@/lib/games/dino-sushi/sfx";
 import { MAX_TOPPINGS } from "@/lib/games/dino-sushi/sushi";
-import type { BaseId, ToppingId } from "@/lib/games/dino-sushi/toppings";
+import { toppingById, type BaseId, type ToppingId } from "@/lib/games/dino-sushi/toppings";
 
 /** 送出後的動畫段：盤子滑過去 → 張嘴 → 咀嚼 → 表情＋字卡。 */
 export type ServePhase = "idle" | "slide" | "open" | "chew" | "react";
@@ -40,7 +40,7 @@ const LOOK_DONE_MS_REDUCED = 600;
 /** 字卡在反應結束後再留一下，孩子才看得到。 */
 const CAPTION_LINGER_MS = 1800;
 const BRUSH_MS = 1400;
-/** 閒置這麼久才亮下一個要點的東西（約 4.5 秒）。 */
+/** 閒置這麼久才亮下一個要點的東西（約 4.5 秒）。新訂單出現時重新起算，不是從按「給多多吃」那一刻算。 */
 export const IDLE_HINT_MS = 4_500;
 
 type PlayAction = { type: "init"; mode: Mode; seed: number } | { type: "clear" } | RoundAction;
@@ -73,7 +73,7 @@ function nextSeed(): number {
 /**
  * 這一點是不是偏離了訂單的下一步。
  * 偏了也不算錯：料還是放得上去，只是立刻亮出正確的下一格，不另出「錯了」字卡。
- * 訂單裡還沒放的另一樣料仍算往前。
+ * 訂單裡還沒放的另一樣料仍算往前。芥末、甜點是彩蛋（多放也不算錯），放了不算偏。
  */
 export function isOffStep(
   round: RoundState,
@@ -82,9 +82,15 @@ export function isOffStep(
   const order = currentOrder(round);
   if (!order || round.pending || round.done) return false;
   if (action.type === "pick-base") return action.base !== order.base;
+  if (isTreat(action.id)) return false;
   if (round.sushi.base !== order.base) return true;
   const placed = round.sushi.toppings;
   return !order.toppings.includes(action.id) || placed.includes(action.id);
+}
+
+/** 芥末、甜點：多多的彩蛋反應，不在訂單裡。 */
+function isTreat(id: ToppingId): boolean {
+  return toppingById(id).kind !== "savory";
 }
 
 /** 點餐模式下一個該點的東西：飯型 → 缺的料（料位滿了先拿掉多的那層）→ 送出。 */
@@ -124,6 +130,16 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
   const timers = useRef<Map<number, Scheduled>>(new Map());
   const parked = useRef<Scheduled[]>([]);
   const idleTimer = useRef<number | null>(null);
+  /** 暫停時閒置計時正在跑：繼續時重新起算（不然暫停過的那一單再也不會亮提示）。 */
+  const idleParked = useRef(false);
+
+  const armIdle = useCallback(() => {
+    if (idleTimer.current !== null) window.clearTimeout(idleTimer.current);
+    idleTimer.current = window.setTimeout(() => {
+      idleTimer.current = null;
+      setIdle(true);
+    }, IDLE_HINT_MS);
+  }, []);
 
   const schedule = useCallback((ms: number, fn: () => void) => {
     const entry: Scheduled = { due: Date.now() + ms, fn };
@@ -150,13 +166,21 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
         parked.current.push({ due: entry.due - now, fn: entry.fn });
       }
       timers.current.clear();
-      if (idleTimer.current !== null) window.clearTimeout(idleTimer.current);
+      if (idleTimer.current !== null) {
+        window.clearTimeout(idleTimer.current);
+        idleTimer.current = null;
+        idleParked.current = true;
+      }
       return;
     }
     const resume = parked.current;
     parked.current = [];
     for (const entry of resume) schedule(Math.max(0, entry.due), entry.fn);
-  }, [inputPaused, schedule]);
+    if (idleParked.current) {
+      idleParked.current = false;
+      armIdle();
+    }
+  }, [armIdle, inputPaused, schedule]);
 
   useEffect(() => () => {
     clearTimers();
@@ -164,11 +188,6 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
   }, [clearTimers]);
 
   const sfx = useCallback((voices: readonly SynthVoice[]) => playVoices(audio, voices), [audio]);
-
-  const armIdle = useCallback(() => {
-    if (idleTimer.current !== null) window.clearTimeout(idleTimer.current);
-    idleTimer.current = window.setTimeout(() => setIdle(true), IDLE_HINT_MS);
-  }, []);
 
   /** 做對一步：先把提示收起來，閒置後再亮下一步。 */
   const touch = useCallback(() => {
@@ -200,6 +219,7 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
     clearTimers();
     if (idleTimer.current !== null) window.clearTimeout(idleTimer.current);
     idleTimer.current = null;
+    idleParked.current = false;
     setPhase("idle");
     setCaption(null);
     setGuide(false);
@@ -231,10 +251,16 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
       if (next === round) setShake((n) => n + 1);
       else sfx(varied(addSfx(next.sushi.toppings.length)));
       dispatch({ type: "add", id });
-      if (isOffStep(round, { type: "add", id })) showHint();
-      else touch();
+      // 料位滿了放不上去：孩子卡住了，不管點的是什麼都亮下一步（通常是拿掉多的那層），不能把亮著的提示收掉
+      if (next === round && currentOrder(round)) showHint();
+      else if (isOffStep(round, { type: "add", id })) showHint();
+      else if (currentOrder(round) && isTreat(id)) {
+        // 彩蛋：孩子在玩，閒置重新起算；點偏留下的光暈照留（該補的還沒補）
+        setIdle(false);
+        armIdle();
+      } else touch();
     },
-    [locked, round, sfx, showHint, touch],
+    [armIdle, locked, round, sfx, showHint, touch],
   );
 
   const remove = useCallback(
@@ -344,10 +370,13 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
       // 第一單跟「歡迎光臨」同時出現，不疊兩個聲音
       if (!isNewRound) sfx(SUSHI_SFX.order);
       setMessage(orderAnnouncement(order));
+      // 閒置提示從新訂單出現才起算：孩子要先看泡泡、聽完訂單
+      setIdle(false);
+      armIdle();
     } else if (isNewRound && round.mode === "free") {
       setMessage("自由做：想放什麼料都可以");
     }
-  }, [onDone, onServed, round, sfx]);
+  }, [armIdle, onDone, onServed, round, sfx]);
 
   const hint = round && !round.done && (!taught || idle || guide) ? hintTarget(round) : null;
 
