@@ -114,3 +114,21 @@ export function orderAnnouncement(order: Order): string {
   const parts = [baseById(order.base).label, ...order.toppings.map((t) => toppingById(t).label)];
   return `多多想吃：${parts.join("、")}`;
 }
+
+/** 兩樣用「和」，三樣以上用頓號、最後一個前面才用「和」。 */
+function joinSpoken(labels: readonly string[]): string {
+  if (labels.length <= 1) return labels[0] ?? "";
+  if (labels.length === 2) return `${labels[0]}和${labels[1]}`;
+  return `${labels.slice(0, -1).join("、")}和${labels.at(-1)}`;
+}
+
+/**
+ * 朗讀新訂單。飯型用畫面上的名字接在料後面，孩子才對得上那一盤：
+ * 「我想要鮭魚和玉子握壽司」、「我想要蟹肉棒手捲」。
+ */
+export function orderSpeechLine(order: Order): string {
+  const toppings = order.toppings.map((id) => toppingById(id).label);
+  const base = baseById(order.base).label;
+  const food = joinSpoken(toppings);
+  return food ? `我想要${food}${base}` : `我想要${base}`;
+}
