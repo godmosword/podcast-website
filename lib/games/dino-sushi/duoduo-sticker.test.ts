@@ -12,12 +12,13 @@ describe("多多貼紙對應", () => {
     expect(stickerFor("chew", "yum")).toBe("chew");
   });
 
-  it("反應用表情貼紙；芥末用有白煙的 puff", () => {
+  it("反應用表情貼紙；芥末改成噴火，不再用白煙 puff", () => {
     expect(stickerFor("closed", "love")).toBe("love");
     expect(stickerFor("closed", "yum")).toBe("yum");
     expect(stickerFor("closed", "sweet")).toBe("sweet");
     expect(stickerFor("closed", "look")).toBe("look");
-    expect(stickerFor("laugh", "puff")).toBe("puff");
+    expect(stickerFor("laugh", "puff")).toBe("fire");
+    expect(stickerFor("closed", "puff")).toBe("fire");
   });
 
   it("只有笑嘴、沒有別的表情時用 laugh", () => {
@@ -33,7 +34,7 @@ describe("多多貼紙對應", () => {
       "love",
       "yum",
       "sweet",
-      "puff",
+      "fire",
       "look",
     ]);
   });

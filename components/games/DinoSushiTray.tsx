@@ -1,6 +1,6 @@
 "use client";
 
-import { ToppingArt } from "@/lib/games/dino-sushi/art";
+import { ToppingArt, traySrc } from "@/lib/games/dino-sushi/art";
 import { toppingById, type ToppingId } from "@/lib/games/dino-sushi/toppings";
 import { TapButton, TapFinger } from "./DinoSushiPiece";
 import styles from "./DinoSushiKitchen.module.css";
@@ -38,7 +38,11 @@ export function DinoSushiTray({ tray, disabled, waitingForBase, hint, teaching, 
             disabled={disabled}
             onTap={() => onAdd(id)}
           >
-            <span className={styles.trayArt} aria-hidden>
+            <span
+              className={styles.trayArt}
+              style={{ backgroundImage: `url("${traySrc(meta.kind)}")` }}
+              aria-hidden
+            >
               <ToppingArt id={id} />
             </span>
             <span className={styles.trayLabel} aria-hidden>

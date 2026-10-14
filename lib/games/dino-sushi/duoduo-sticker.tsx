@@ -7,7 +7,7 @@ import styles from "./duoduo-sticker.module.css";
 /**
  * 局內多多是和封面同一套的黏土貼紙（1024 透明底，角色站在同一條底線）。
  * 不要改這些圖。張嘴、咀嚼用嘴的貼紙；反應用表情貼紙。
- * 芥末的嘴是 laugh，但貼紙用有白煙的 puff。
+ * 芥末的心情仍是 puff，貼紙改成噴火的 fire（取代白煙 puff）。
  */
 
 export const DUODUO_STICKER_STATES = [
@@ -18,7 +18,7 @@ export const DUODUO_STICKER_STATES = [
   "love",
   "yum",
   "sweet",
-  "puff",
+  "fire",
   "look",
 ] as const;
 
@@ -32,11 +32,18 @@ export function duoduoStickerSrc(state: DuoDuoStickerState): string {
 
 export const DUODUO_TOOTHBRUSH_SRC = `${STICKER_BASE}/sticker-toothbrush.webp`;
 
-const MOOD_STICKERS = new Set<DuoDuoStickerState>(["love", "yum", "sweet", "puff", "look"]);
+const FACE_STICKER: Partial<Record<DuoDuoFace, DuoDuoStickerState>> = {
+  love: "love",
+  yum: "yum",
+  sweet: "sweet",
+  look: "look",
+  puff: "fire",
+};
 
 export function stickerFor(mouth: DuoDuoMouth, face: DuoDuoFace): DuoDuoStickerState {
   if (mouth === "open" || mouth === "chew") return mouth;
-  if (MOOD_STICKERS.has(face as DuoDuoStickerState)) return face as DuoDuoStickerState;
+  const mood = FACE_STICKER[face];
+  if (mood) return mood;
   if (mouth === "laugh") return "laugh";
   return "closed";
 }
@@ -61,7 +68,7 @@ export function useDuoDuoStickerPreload() {
 export function DuoDuoSticker({ mouth, face }: { mouth: DuoDuoMouth; face: DuoDuoFace }) {
   const active = stickerFor(mouth, face);
   return (
-    <span className={styles.figure} data-mouth={mouth}>
+    <span className={styles.figure} data-mouth={mouth} data-face={face}>
       {DUODUO_STICKER_STATES.map((state) => (
         // 原檔貼紙，不走 next/image 轉檔。
         // eslint-disable-next-line @next/next/no-img-element
