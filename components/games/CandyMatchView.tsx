@@ -109,6 +109,7 @@ export function CandyMatchView({
     syncHost,
     tipsSeen: prefs.tipsSeen,
     onTipSeen,
+    soundOn,
   });
   const { play, actions } = game;
   const speech = useCandyMatchSpeech({
@@ -383,6 +384,13 @@ export function CandyMatchView({
                 sweep: game.motion.sweep,
                 reduced: reducedMotion,
                 cheer: game.cheer,
+                fx: game.motion.fx,
+                praise: game.praise,
+                particles: game.motion.particles,
+                particleBurst: game.motion.particleBurst,
+                shake: game.motion.shake,
+                still: game.motion.still,
+                sweepMs: game.motion.sweepMs,
               }}
             />
           </div>

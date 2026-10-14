@@ -3,6 +3,8 @@
  * 提示與重排。無 DOM 依賴，全部回傳新物件（不可變），可單元測試。
  */
 
+import { planClearFx, type ClearFx } from "@/lib/games/candy-match/effects";
+
 export const EMPTY = -1;
 /** 掉落物（禮物盒）：不可消除，會隨重力下落，到底排即送達。 */
 export const DROP_ITEM = -2;
@@ -721,6 +723,8 @@ export type WaveStep = {
   collected: number[];
   cleaned: number;
   dropped: number;
+  /** 這一波要播的消除特效（不影響消除結果） */
+  fx: ClearFx[];
 };
 
 export type WaveOptions = {
@@ -751,6 +755,16 @@ export function stepWave(
     Boolean(options.extraOnly),
   );
   if (planned.clear.size === 0 && planned.spawns.length === 0) return null;
+  const clearedList = [...planned.clear];
+  const fx = planClearFx({
+    pieces: state.pieces,
+    specials,
+    cols,
+    rows,
+    cleared: clearedList,
+    combo: planned.combo?.kind ?? null,
+    becomeRow: planned.combo?.becomeRow ?? [],
+  });
   const cleared = clearCells(state.pieces, state.dirt, planned.clear, kinds, specials);
   const afterClear: BoardState = {
     cols,
@@ -761,7 +775,7 @@ export function stepWave(
   };
   const settled = settleBoard(afterClear, kinds, rng);
   return {
-    cleared: [...planned.clear],
+    cleared: clearedList,
     detonated: planned.detonated,
     spawns: planned.spawns,
     combo: planned.combo,
@@ -771,6 +785,7 @@ export function stepWave(
     collected: cleared.collected,
     cleaned: cleared.cleaned,
     dropped: settled.dropped,
+    fx,
   };
 }
 

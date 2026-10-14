@@ -10,7 +10,6 @@ import {
   areAdjacent,
   CANDY_COMBO_MS,
   CANDY_FALL_MS,
-  CANDY_POP_MS,
   CANDY_SWAP_MS,
   emptyEvents,
   findHintMove,
@@ -31,6 +30,15 @@ import {
   type WaveOptions,
 } from "@/lib/games/candy-match/engine";
 import { efficiencyMet, type CandyMatchRound, type CandyProps } from "@/lib/games/candy-match/stages";
+import {
+  CONFETTI_MS,
+  HORN_NOTES,
+  PRAISE_MS,
+  presentWave,
+  type CandyFxPraise,
+  type ClearFx,
+  type ParticleSeed,
+} from "@/lib/games/candy-match/effects";
 import { seededRng } from "@/lib/games/candy-match/rng";
 import { findGoalHint, type CandyMove } from "@/lib/games/candy-match/strategy";
 import {
@@ -72,6 +80,12 @@ export type CandyMotion = {
   swap: CandyMove | null;
   falls: readonly CandyFallMotion[] | null;
   sweep: CandySweepKind | null;
+  fx: readonly ClearFx[];
+  particles: readonly ParticleSeed[];
+  particleBurst: number;
+  shake: boolean;
+  still: boolean;
+  sweepMs: number;
 };
 
 type Options = {
@@ -83,6 +97,8 @@ type Options = {
   syncHost: () => void;
   tipsSeen: readonly CandyMatchTipId[];
   onTipSeen: (id: CandyMatchTipId) => void;
+  /** 跟抬頭音效同一個開關。沒傳＝開，喇叭與輕晃才出得來。 */
+  soundOn?: boolean;
 };
 
 /** 輕鬆模式閒置：5 秒先念文字提示，9 秒再亮出建議的交換；挑戰模式只在主動按提示時亮。 */
@@ -94,7 +110,17 @@ const SETTLE_PAUSE_MS = 120;
 /** 一次交換最多解算的波數；超過仍沒穩定（極罕見）就在收尾重排，不留三連在盤上。 */
 const MAX_WAVES = 100;
 const EMPTY_SET: ReadonlySet<number> = new Set();
-const NO_MOTION: CandyMotion = { swap: null, falls: null, sweep: null };
+const NO_MOTION: CandyMotion = {
+  swap: null,
+  falls: null,
+  sweep: null,
+  fx: [],
+  particles: [],
+  particleBurst: 0,
+  shake: false,
+  still: false,
+  sweepMs: 0,
+};
 
 const CHEER_SUCCESS = ["找到了！", "好棒喔！", "太厲害了！", "好多顏色！"];
 const CHEER_INVALID = ["再找找看！", "要三個一樣喔", "換別的試試"];
@@ -167,9 +193,13 @@ export function useCandyMatchPlay(options: Options) {
   const tipRef = useRef<CandyMatchTipId | null>(null);
   const [motion, setMotion] = useState<CandyMotion>(NO_MOTION);
   const [cheer, setCheer] = useState(false);
+  const [praise, setPraise] = useState<CandyFxPraise | null>(null);
 
   const tokenRef = useRef(0);
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const praiseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hornTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const praiseIdRef = useRef(0);
   const lastBoardsRef = useRef<Record<number, BoardState | undefined>>({});
   const rngRef = useRef<Rng>(Math.random);
   const pausedRef = useRef(inputPaused);
@@ -188,6 +218,23 @@ export function useCandyMatchPlay(options: Options) {
     if (!text) return;
     speechSeqRef.current += 1;
     setSpeechCue({ seq: speechSeqRef.current, text, interrupt });
+  }, []);
+
+  const clearJuice = useCallback(() => {
+    if (praiseTimerRef.current) clearTimeout(praiseTimerRef.current);
+    praiseTimerRef.current = null;
+    for (const timer of hornTimersRef.current) clearTimeout(timer);
+    hornTimersRef.current = [];
+  }, []);
+
+  const playHorn = useCallback(() => {
+    if (optsRef.current.soundOn === false) return;
+    const { tone } = optsRef.current;
+    for (const note of HORN_NOTES) {
+      const fire = () => tone(note.freq, note.dur, note.type, note.vol);
+      if (note.at <= 0) fire();
+      else hornTimersRef.current.push(setTimeout(fire, note.at));
+    }
   }, []);
 
   const commit = useCallback((patch: Partial<CandyPlaySnapshot>) => {
@@ -281,8 +328,9 @@ export function useCandyMatchPlay(options: Options) {
     () => () => {
       tokenRef.current += 1;
       clearTimers();
+      clearJuice();
     },
-    [clearTimers],
+    [clearJuice, clearTimers],
   );
 
   /** 播一串重力段落；局已換掉時回傳 false 讓呼叫端停手。 */
@@ -383,6 +431,7 @@ export function useCandyMatchPlay(options: Options) {
       setBusyState(true);
       setHint(null);
       let events = emptyEvents(kinds);
+      let praiseStep = 0;
       const pre = settleBoard(startBoard, kinds, rngRef.current);
       commit({ board: startBoard });
       if (!(await animatePhases(pre.phases, token))) return;
@@ -406,6 +455,17 @@ export function useCandyMatchPlay(options: Options) {
           }
         }
         const n = events.waves + 1;
+        const present = presentWave({
+          waveIndex: n,
+          previousPraiseStep: praiseStep,
+          combo: wave.combo?.kind ?? null,
+          reduced: reducedRef.current,
+          soundOn: optsRef.current.soundOn !== false,
+          fx: wave.fx,
+          pieces: state.pieces,
+          cleared: wave.cleared,
+        });
+        praiseStep = present.praiseStep;
         const sweep: CandySweepKind | null = wave.combo
           ? wave.combo.kind === "cross"
             ? "cross"
@@ -413,14 +473,40 @@ export function useCandyMatchPlay(options: Options) {
               ? "board"
               : "row"
           : (wave.detonated[0] ?? null);
+        if (present.praise) {
+          praiseIdRef.current += 1;
+          setPraise({
+            id: praiseIdRef.current,
+            text: present.praise,
+            step: present.praiseStep,
+            confetti: present.confetti,
+          });
+          cueSpeech(present.praise, false);
+          if (present.horn) playHorn();
+          if (!wave.combo) setMessage(present.praise);
+          if (praiseTimerRef.current) clearTimeout(praiseTimerRef.current);
+          praiseTimerRef.current = setTimeout(() => {
+            praiseTimerRef.current = null;
+            setPraise(null);
+          }, present.confetti ? CONFETTI_MS : PRAISE_MS);
+        }
         setPopping(new Set(wave.cleared));
-        setMotion((m) => ({ ...m, sweep: reducedRef.current ? null : sweep }));
+        setMotion((m) => ({
+          ...m,
+          sweep: reducedRef.current ? null : sweep,
+          fx: wave.fx,
+          particles: present.particles,
+          particleBurst: present.particles.length > 0 ? m.particleBurst + 1 : m.particleBurst,
+          shake: present.shake,
+          still: present.still,
+          sweepMs: present.holdMs,
+        }));
         if (wave.detonated.length > 0 || n >= 2) setCheer(true);
         optsRef.current.tone(523 + n * 110, 0.12, "triangle", 0.06);
-        await motionSleep(CANDY_POP_MS);
+        await sleep(present.holdMs);
         if (token !== tokenRef.current) return;
         setPopping(EMPTY_SET);
-        setMotion((m) => ({ ...m, sweep: null }));
+        setMotion((m) => ({ ...m, sweep: null, fx: [], particles: [], shake: false, still: false }));
         commit({ board: wave.afterClear });
         if (wave.cleaned > 0) optsRef.current.tone(1046, 0.14, "triangle", 0.05);
         if (!(await animatePhases(wave.phases, token))) return;
@@ -430,7 +516,7 @@ export function useCandyMatchPlay(options: Options) {
       }
       await finishResolve(state, events, token);
     },
-    [animatePhases, commit, finishResolve, motionSleep, setBusyState, showTip],
+    [animatePhases, commit, cueSpeech, finishResolve, playHorn, setBusyState, showTip],
   );
 
   const blockedInput = useCallback(
@@ -589,6 +675,8 @@ export function useCandyMatchPlay(options: Options) {
     (round: CandyMatchRound) => {
       tokenRef.current += 1;
       clearTimers();
+      clearJuice();
+      setPraise(null);
       rngRef.current = roundRng(round.index);
       const board = createBoard(round.cols, round.rows, round.stage.pieceKinds, rngRef.current, {
         dirtCells: round.stage.dirtCells,
@@ -632,7 +720,7 @@ export function useCandyMatchPlay(options: Options) {
           : null,
       );
     },
-    [clearTimers, cueSpeech, setBusyState, setOutcomeState, setTipState, showTip],
+    [clearJuice, clearTimers, cueSpeech, setBusyState, setOutcomeState, setTipState, showTip],
   );
 
   /** 關前介紹收起之後才開始計時提示、才接受交換。 */
@@ -647,9 +735,11 @@ export function useCandyMatchPlay(options: Options) {
   const leave = useCallback(() => {
     tokenRef.current += 1;
     clearTimers();
+    clearJuice();
+    setPraise(null);
     setBusyState(false);
     setOutcomeState(null);
-  }, [clearTimers, setBusyState, setOutcomeState]);
+  }, [clearJuice, clearTimers, setBusyState, setOutcomeState]);
 
   const propPreview = useMemo<ReadonlySet<number>>(() => {
     if (!play || !propMode || propTarget == null) return EMPTY_SET;
@@ -688,6 +778,7 @@ export function useCandyMatchPlay(options: Options) {
     speechCue,
     tip,
     motion,
+    praise,
     cheer,
     actions,
   };
