@@ -59,6 +59,7 @@
     "generate:page-freshness": "tsx scripts/generate-page-freshness.ts",
     "optimize:roamer-assets": "tsx scripts/optimize-roamer-assets.ts",
     "optimize:adventures": "tsx scripts/optimize-adventure-assets.ts",
+    "optimize:dino-sushi-assets": "tsx scripts/optimize-dino-sushi-assets.ts",
     "optimize:hero-world": "node scripts/optimize-hero-world.mjs",
     "render:hero-posters": "node scripts/render-hero-posters.mjs",
     "release:hero-world": "npm run optimize:hero-world && npm run render:hero-posters && npm run validate:hero-world",

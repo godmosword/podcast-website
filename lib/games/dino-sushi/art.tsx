@@ -1,57 +1,55 @@
 "use client";
 
 import { useEffect, type CSSProperties, type ReactNode } from "react";
+import { dinoSushiSrc } from "./asset-src";
 import type { Sushi } from "./sushi";
 import type { BaseId, ToppingId, ToppingKind } from "./toppings";
 
 /**
- * 《多多壽司屋》食材與店面用主人核准的黏土 WebP（不重畫、不改檔）。
+ * 《多多壽司屋》食材與店面用主人核准的黏土 WebP（不重畫、不改檔），畫面讀縮小副本（見 asset-src）。
  * 壽司仍是程式分層：飯底一張、料依層數疊上去。
  * 手捲多一張前層：飯底、配料、再蓋上海苔前片，料才像塞在飯口裡。
  */
 
 /* eslint-disable @next/next/no-img-element -- 原檔 WebP，不走 next/image 轉檔 */
 
-const SHOP = "/games/v2/dino-sushi/shop";
-const FOOD = "/games/v2/dino-sushi/food";
-
 export const SHOP_SRC = {
-  wall: `${SHOP}/wall.webp`,
-  awning: `${SHOP}/awning.webp`,
-  lantern: `${SHOP}/lantern.webp`,
-  window: `${SHOP}/window.webp`,
-  counter: `${SHOP}/counter.webp`,
-  belt: `${SHOP}/belt.webp`,
-  plate: `${SHOP}/plate.webp`,
-  dome: `${SHOP}/dome.webp`,
-  prepplate: `${SHOP}/prepplate.webp`,
-  trayNeutral: `${SHOP}/tray-neutral.webp`,
-  traySweet: `${SHOP}/tray-sweet.webp`,
-  trayWasabi: `${SHOP}/tray-wasabi.webp`,
+  wall: dinoSushiSrc("shop/wall.webp"),
+  awning: dinoSushiSrc("shop/awning.webp"),
+  lantern: dinoSushiSrc("shop/lantern.webp"),
+  window: dinoSushiSrc("shop/window.webp"),
+  counter: dinoSushiSrc("shop/counter.webp"),
+  belt: dinoSushiSrc("shop/belt.webp"),
+  plate: dinoSushiSrc("shop/plate.webp"),
+  dome: dinoSushiSrc("shop/dome.webp"),
+  prepplate: dinoSushiSrc("shop/prepplate.webp"),
+  trayNeutral: dinoSushiSrc("shop/tray-neutral.webp"),
+  traySweet: dinoSushiSrc("shop/tray-sweet.webp"),
+  trayWasabi: dinoSushiSrc("shop/tray-wasabi.webp"),
 } as const;
 
 const BASE_SRC: Record<BaseId, string> = {
-  nigiri: `${FOOD}/nigiri.webp`,
-  gunkan: `${FOOD}/gunkan.webp`,
-  temaki: `${FOOD}/temaki.webp`,
+  nigiri: dinoSushiSrc("food/nigiri.webp"),
+  gunkan: dinoSushiSrc("food/gunkan.webp"),
+  temaki: dinoSushiSrc("food/temaki.webp"),
 };
 
 /** 手捲海苔前片，跟飯底同尺寸；畫布高 34.5% 以上是透明的。 */
-const TEMAKI_FRONT_SRC = `${FOOD}/temaki-front.webp`;
+const TEMAKI_FRONT_SRC = dinoSushiSrc("food/temaki-front.webp");
 
 const TOPPING_SRC: Record<ToppingId, string> = {
-  tamago: `${FOOD}/tamago.webp`,
-  shrimp: `${FOOD}/shrimp.webp`,
-  crab: `${FOOD}/crab.webp`,
-  corn: `${FOOD}/corn.webp`,
-  cucumber: `${FOOD}/cucumber.webp`,
-  tuna: `${FOOD}/tuna.webp`,
-  floss: `${FOOD}/floss.webp`,
-  salmon: `${FOOD}/salmon.webp`,
-  avocado: `${FOOD}/avocado.webp`,
-  strawberry: `${FOOD}/strawberry.webp`,
-  pudding: `${FOOD}/pudding.webp`,
-  wasabi: `${FOOD}/wasabi.webp`,
+  tamago: dinoSushiSrc("food/tamago.webp"),
+  shrimp: dinoSushiSrc("food/shrimp.webp"),
+  crab: dinoSushiSrc("food/crab.webp"),
+  corn: dinoSushiSrc("food/corn.webp"),
+  cucumber: dinoSushiSrc("food/cucumber.webp"),
+  tuna: dinoSushiSrc("food/tuna.webp"),
+  floss: dinoSushiSrc("food/floss.webp"),
+  salmon: dinoSushiSrc("food/salmon.webp"),
+  avocado: dinoSushiSrc("food/avocado.webp"),
+  strawberry: dinoSushiSrc("food/strawberry.webp"),
+  pudding: dinoSushiSrc("food/pudding.webp"),
+  wasabi: dinoSushiSrc("food/wasabi.webp"),
 };
 
 /** 飯圖原生寬高比，組裝舞台跟這張圖同比例，料的百分比才對得準。 */

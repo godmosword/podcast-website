@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DUODUO_STICKER_STATES, stickerFor } from "./duoduo-sticker";
+import { DUODUO_STICKER_STATES, DUODUO_TOOTHBRUSH_SRC, duoduoStickerSrc, stickerFor } from "./duoduo-sticker";
 
 describe("多多貼紙對應", () => {
   it("待機是閉著的嘴", () => {
@@ -37,5 +37,10 @@ describe("多多貼紙對應", () => {
       "fire",
       "look",
     ]);
+  });
+
+  it("貼紙與牙刷都讀縮小副本", () => {
+    expect(duoduoStickerSrc("open")).toBe("/games/v2/dino-sushi/duoduo/sm/sticker-open.webp");
+    expect(DUODUO_TOOTHBRUSH_SRC).toBe("/games/v2/dino-sushi/duoduo/sm/sticker-toothbrush.webp");
   });
 });
