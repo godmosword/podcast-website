@@ -36,8 +36,11 @@ import { findGoalHint, type CandyMove } from "@/lib/games/candy-match/strategy";
 import {
   allGoalsDone,
   applyEvents,
+  challengeMissSpeech,
   countSwap,
   freshCandyProgress,
+  goalDoneSpeech,
+  goalStatus,
   levelGoalSpeech,
   type CandyGoal,
   type CandyProgress,
@@ -95,7 +98,7 @@ const NO_MOTION: CandyMotion = { swap: null, falls: null, sweep: null };
 
 const CHEER_SUCCESS = ["找到了！", "好棒喔！", "太厲害了！", "好多顏色！"];
 const CHEER_INVALID = ["再找找看！", "要三個一樣喔", "換別的試試"];
-const CHEER_WIN = ["任務完成！", "耶！做到了！"];
+const CHEER_WIN = "過關！";
 const CHEER_SOFT = "找找三個一樣的圖案！";
 const CHEER_HINT = "看看發光的地方！";
 const COMBO_LINE: Record<CandyComboKind, string> = {
@@ -158,6 +161,8 @@ export function useCandyMatchPlay(options: Options) {
   const [message, setMessage] = useState("");
   const [speechCue, setSpeechCue] = useState<CandySpeechCue | null>(null);
   const speechSeqRef = useRef(0);
+  const [briefing, setBriefing] = useState(false);
+  const briefingRef = useRef(false);
   const [tip, setTip] = useState<CandyMatchTipId | null>(null);
   const tipRef = useRef<CandyMatchTipId | null>(null);
   const [motion, setMotion] = useState<CandyMotion>(NO_MOTION);
@@ -238,7 +243,8 @@ export function useCandyMatchPlay(options: Options) {
     setHint(null);
     const snap = playRef.current;
     if (!snap || snap.round.mode !== "easy") return;
-    const blocked = () => busyRef.current || pausedRef.current || outcomeRef.current != null;
+    const blocked = () =>
+      busyRef.current || pausedRef.current || outcomeRef.current != null || briefingRef.current;
     timersRef.current = [
       setTimeout(() => {
         if (!blocked()) {
@@ -312,7 +318,10 @@ export function useCandyMatchPlay(options: Options) {
       const score = computeScore(progress, snap.movesLeft);
       instance.notifyScore(score);
       syncHost();
-      if (events.waves > 0) {
+      const newlyDone = snap.round.stage.goals.filter(
+        (goal) => !goalStatus(goal, snap.progress).done && goalStatus(goal, progress).done,
+      );
+      if (newlyDone.length === 0 && events.waves > 0) {
         const cheer = pick(CHEER_SUCCESS);
         setMessage(cheer);
         cueSpeech(cheer, false);
@@ -325,9 +334,8 @@ export function useCandyMatchPlay(options: Options) {
         const efficient = efficiencyMet(snap.round, progress, snap.movesLeft);
         const stars = 1 + (flawless ? 1 : 0) + (efficient ? 1 : 0);
         setOutcomeState({ kind: "win", stars, flawless, efficient });
-        const won = pick(CHEER_WIN);
-        setMessage(won);
-        cueSpeech(won, true);
+        setMessage(CHEER_WIN);
+        cueSpeech(CHEER_WIN, true);
         [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => tone(f, 0.18, "triangle", 0.07), i * 120));
         instance.notifyWon({ score, levelIndex: snap.round.index, cleared: true, flawless, collectedAll: efficient });
         syncHost();
@@ -338,12 +346,19 @@ export function useCandyMatchPlay(options: Options) {
         await sleep(350);
         if (token !== tokenRef.current) return;
         setOutcomeState({ kind: "retry" });
-        setMessage("步數用完了，再試一次！");
-        cueSpeech("步數用完了，再試一次！", true);
+        const missed = `${challengeMissSpeech(snap.round.stage.goals, progress)}再試一次！`;
+        setMessage(missed);
+        cueSpeech(missed, true);
         instance.notifyRetry();
         syncHost();
         setBusyState(false);
         return;
+      }
+      if (newlyDone.length > 0) {
+        const doneLine = newlyDone.map((goal) => goalDoneSpeech(goal)).join("");
+        setMessage(doneLine);
+        cueSpeech(doneLine, false);
+        tone(988, 0.1, "sine", 0.06);
       }
       const unstable = findMatches(state.pieces, state.cols, state.rows).size > 0;
       if (unstable || !findHintMove(state.pieces, state.cols, state.rows, state.specials)) {
@@ -419,7 +434,7 @@ export function useCandyMatchPlay(options: Options) {
   );
 
   const blockedInput = useCallback(
-    () => busyRef.current || pausedRef.current || outcomeRef.current != null,
+    () => busyRef.current || pausedRef.current || outcomeRef.current != null || briefingRef.current,
     [],
   );
 
@@ -602,6 +617,8 @@ export function useCandyMatchPlay(options: Options) {
       setOutcomeState(null);
       setMotion(NO_MOTION);
       setCheer(false);
+      briefingRef.current = true;
+      setBriefing(true);
       const hasThick = board.dirt.some((layer) => layer >= 2);
       setMessage(hasThick ? "有的污漬比較厚，要再掃一次！" : introMessage(round.stage.goals));
       cueSpeech(levelGoalSpeech(round.stage.goals, hasThick), true);
@@ -614,10 +631,17 @@ export function useCandyMatchPlay(options: Options) {
             findHintMove(board.pieces, board.cols, board.rows, board.specials)
           : null,
       );
-      armIdle();
     },
-    [armIdle, clearTimers, cueSpeech, setBusyState, setOutcomeState, setTipState, showTip],
+    [clearTimers, cueSpeech, setBusyState, setOutcomeState, setTipState, showTip],
   );
+
+  /** 關前介紹收起之後才開始計時提示、才接受交換。 */
+  const beginPlay = useCallback(() => {
+    if (!briefingRef.current) return;
+    briefingRef.current = false;
+    setBriefing(false);
+    armIdle();
+  }, [armIdle]);
 
   /** 離開局內（回地圖／標題）：停掉進行中的動畫與提示計時。 */
   const leave = useCallback(() => {
@@ -635,6 +659,7 @@ export function useCandyMatchPlay(options: Options) {
   const actions = useMemo(
     () => ({
       start,
+      beginPlay,
       leave,
       tapCell,
       attemptSwap,
@@ -644,7 +669,7 @@ export function useCandyMatchPlay(options: Options) {
       manualHint,
       dismissTip,
     }),
-    [start, leave, tapCell, attemptSwap, hoverCell, selectProp, cancel, manualHint, dismissTip],
+    [start, beginPlay, leave, tapCell, attemptSwap, hoverCell, selectProp, cancel, manualHint, dismissTip],
   );
 
   return {
@@ -658,6 +683,7 @@ export function useCandyMatchPlay(options: Options) {
     propMode,
     propPreview,
     outcome,
+    briefing,
     message,
     speechCue,
     tip,

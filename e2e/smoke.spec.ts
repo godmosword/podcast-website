@@ -4,6 +4,7 @@ import { PROGRESS_STORAGE_KEY } from "../lib/progress-store";
 import sharp from "sharp";
 import { skipIntroOverlay } from "./intro-gate";
 import { expectHitTestable, expectNoOverlap } from "./overlay-geometry";
+import { dismissCandyIntro } from "./candy-helpers";
 import { pinTheme } from "./visual-helpers";
 
 test.describe.configure({ mode: "serial" });
@@ -474,7 +475,10 @@ test("車車消消樂：標題 → 地圖 → 第 1 關棋盤", async ({ page })
   await expect(page.getByText("遊樂園地圖")).toBeVisible();
   await page.locator('button[data-next="true"]').click();
   await expect(page.getByTestId("candy-match-board")).toBeVisible();
-  await expect(page.getByRole("progressbar", { name: "任務完成度" })).toBeVisible();
+  await expect(page.getByTestId("candy-match-intro")).toBeVisible();
+  await expect(page.getByRole("button", { name: "開始！" })).toBeVisible();
+  await dismissCandyIntro(page);
+  await expect(page.getByRole("progressbar", { name: /收集任意圖案，還差 50 台/ })).toBeVisible();
   // 任務列與道具列存在
   await expect(page.getByRole("button", { name: /泡泡/ })).toBeVisible();
   await expect(page.getByRole("button", { name: /提示/ })).toBeVisible();

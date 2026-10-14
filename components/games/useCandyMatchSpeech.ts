@@ -67,5 +67,14 @@ export function useCandyMatchSpeech({ active, cue, inputPaused, soundOn, volume 
     if (!nextOn) cancelSpeech();
   }, []);
 
-  return { voiceOn, muted: !voiceOn, replay, toggleMuted };
+  /** 念指定的一句（點目標卡）。音效關著時不出聲。 */
+  const speak = useCallback(
+    (text: string) => {
+      lastText.current = text;
+      say(text, true);
+    },
+    [say],
+  );
+
+  return { voiceOn, muted: !voiceOn, replay, speak, toggleMuted };
 }
