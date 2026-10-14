@@ -268,5 +268,143 @@ describe("CandyMatchBoard pointer capture", () => {
     expect(
       screen.getByRole("button", { name: /掃把糖/ }).getAttribute("data-sweep"),
     ).toBeNull();
+    expect(screen.getByRole("button", { name: /掃把糖/ }).getAttribute("data-fx-still")).toBe("true");
+  });
+});
+
+describe("消除特效", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  const base = {
+    cellPx: 48,
+    selected: null,
+    hint: null,
+    shaking: new Set<number>(),
+    disabled: false,
+    onTapCell: vi.fn(),
+    onSwipeCell: vi.fn(),
+  };
+
+  it("掃把讓車車開過橫排，並留下尾巴", () => {
+    const board = makeBoard(4, 3);
+    render(
+      <CandyMatchBoard
+        {...base}
+        board={board}
+        popping={new Set([0, 1, 2, 3])}
+        motion={{
+          fx: [{ kind: "line", axis: "row", index: 0 }],
+          praise: null,
+          particles: [],
+          particleBurst: 0,
+          shake: false,
+          still: false,
+        }}
+      />,
+    );
+    const car = screen.getByTestId("candy-fx-line");
+    expect(car.getAttribute("data-axis")).toBe("row");
+    expect(car.querySelector("svg")).not.toBeNull();
+    expect(screen.queryByTestId("candy-fx-confetti")).toBeNull();
+  });
+
+  it("直欄也有車車", () => {
+    render(
+      <CandyMatchBoard
+        {...base}
+        board={makeBoard(3, 4)}
+        popping={new Set([0, 3, 6, 9])}
+        motion={{ fx: [{ kind: "line", axis: "col", index: 1 }] }}
+      />,
+    );
+    expect(screen.getByTestId("candy-fx-line").getAttribute("data-axis")).toBe("col");
+  });
+
+  it("爆炸糖冒出三角錐與衝擊波", () => {
+    render(
+      <CandyMatchBoard
+        {...base}
+        board={makeBoard()}
+        popping={new Set([4])}
+        motion={{ fx: [{ kind: "burst", origin: 4 }] }}
+      />,
+    );
+    const burst = screen.getByTestId("candy-fx-burst");
+    expect(burst.querySelector("svg")).not.toBeNull();
+    expect(burst.querySelectorAll("i").length).toBe(8);
+  });
+
+  it("彩虹從起點掃出去", () => {
+    render(
+      <CandyMatchBoard
+        {...base}
+        board={makeBoard()}
+        popping={new Set([0, 4, 8])}
+        motion={{ fx: [{ kind: "color", origin: 0, cells: [0, 4, 8] }] }}
+      />,
+    );
+    const rainbow = screen.getByTestId("candy-fx-color");
+    expect(rainbow.querySelectorAll("line").length).toBe(2);
+  });
+
+  it("稱讚升級會念出字、撒彩紙；減少動態改成高亮、不撒彩紙、不晃", () => {
+    const board = makeBoard();
+    const { rerender } = render(
+      <CandyMatchBoard
+        {...base}
+        board={board}
+        popping={new Set([0, 1, 2])}
+        motion={{
+          fx: [],
+          particles: [{ cell: 0, color: "#ff7a9c" }, { cell: 1, color: "#ffd34d" }],
+          particleBurst: 1,
+          praise: { id: 1, text: "好棒", step: 1, confetti: true },
+          shake: false,
+        }}
+      />,
+    );
+    expect(screen.getByTestId("candy-fx-praise").textContent).toBe("好棒");
+    expect(screen.getAllByTestId("candy-fx-confetti").length).toBeGreaterThan(0);
+    expect(screen.getByTestId("candy-match-particles")).toBeTruthy();
+
+    rerender(
+      <CandyMatchBoard
+        {...base}
+        board={board}
+        popping={new Set([0, 1, 2])}
+        motion={{
+          reduced: true,
+          fx: [{ kind: "line", axis: "row", index: 0 }],
+          praise: { id: 2, text: "太厲害了", step: 3, confetti: false },
+          shake: true,
+          still: true,
+          particles: [{ cell: 0, color: "#ff7a9c" }],
+          particleBurst: 2,
+        }}
+      />,
+    );
+    expect(screen.getByTestId("candy-fx-praise").textContent).toBe("太厲害了");
+    expect(screen.queryByTestId("candy-fx-line")).toBeNull();
+    expect(screen.queryByTestId("candy-fx-confetti")).toBeNull();
+    expect(screen.queryByTestId("candy-match-particles")).toBeNull();
+    expect(screen.getAllByTestId("candy-fx-still").length).toBeGreaterThan(0);
+    expect(screen.getByRole("button", { name: /第 1 列第 1 格/ }).getAttribute("data-fx-still")).toBe("true");
+    const wrap = screen.getByTestId("candy-match-board").parentElement;
+    expect(wrap?.getAttribute("data-shake")).toBeNull();
+    expect(wrap?.getAttribute("data-still")).toBe("true");
+  });
+
+  it("大組合才把棋盤標成輕晃", () => {
+    render(
+      <CandyMatchBoard
+        {...base}
+        board={makeBoard()}
+        popping={new Set()}
+        motion={{ shake: true }}
+      />,
+    );
+    expect(screen.getByTestId("candy-match-board").parentElement?.getAttribute("data-shake")).toBe("true");
   });
 });

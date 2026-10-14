@@ -1,0 +1,311 @@
+.layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 4;
+}
+
+.layer[data-paused="true"] *,
+.layer[data-reduced="true"] * {
+  animation: none !important;
+}
+
+.car,
+.trail,
+.cone,
+.ring,
+.shard,
+.praise,
+.confetti {
+  position: absolute;
+  pointer-events: none;
+}
+
+.car {
+  z-index: 2;
+  left: 0;
+  top: var(--fx-top);
+  width: var(--fx-size);
+  height: var(--fx-size);
+  animation: candyCarDrive var(--fx-ms) linear both;
+}
+
+.car[data-axis="col"] {
+  left: var(--fx-left);
+  top: 0;
+  animation-name: candyCarDriveCol;
+}
+
+.trail {
+  z-index: 1;
+  left: 0;
+  top: calc(var(--fx-top) + var(--fx-size) * 0.38);
+  width: var(--fx-travel);
+  height: 8px;
+  border-radius: 99px;
+  transform-origin: left center;
+  background: linear-gradient(90deg, transparent, #ff7a9c 18%, #ffd34d 42%, #6fc3f0 68%, #7fd4a8);
+  opacity: 0.85;
+  animation: candyTrail var(--fx-ms) linear both;
+}
+
+.trail[data-axis="col"] {
+  left: calc(var(--fx-left) + var(--fx-size) * 0.38);
+  top: 0;
+  width: 8px;
+  height: var(--fx-travel);
+  transform-origin: center top;
+  background: linear-gradient(180deg, transparent, #ff7a9c 18%, #ffd34d 42%, #6fc3f0 68%, #7fd4a8);
+  animation-name: candyTrailCol;
+}
+
+.cone {
+  z-index: 3;
+  left: var(--fx-left);
+  top: var(--fx-top);
+  width: var(--fx-size);
+  height: var(--fx-size);
+  transform-origin: center center;
+  animation: candyCone var(--fx-ms) ease-out both;
+}
+
+.ring {
+  z-index: 2;
+  left: calc(var(--fx-left) + var(--fx-size) * 0.5);
+  top: calc(var(--fx-top) + var(--fx-size) * 0.5);
+  width: calc(var(--fx-size) * 3);
+  height: calc(var(--fx-size) * 3);
+  margin-left: calc(var(--fx-size) * -1.5);
+  margin-top: calc(var(--fx-size) * -1.5);
+  border-radius: 50%;
+  border: 4px solid #ff8a3d;
+  animation: candyRing var(--fx-ms) ease-out both;
+}
+
+.shard {
+  z-index: 3;
+  left: calc(var(--fx-left) + var(--fx-size) * 0.5 - 5px);
+  top: calc(var(--fx-top) + var(--fx-size) * 0.5 - 5px);
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: #ffd34d;
+  animation: candyShard var(--fx-ms) ease-out both;
+}
+
+.shard:nth-child(odd) {
+  background: #ff8a3d;
+}
+
+.rainbow {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+}
+
+.beam {
+  stroke-dasharray: 1;
+  animation: candyBeam var(--fx-ms) ease-out both;
+}
+
+.praise {
+  z-index: 5;
+  left: 50%;
+  top: 42%;
+  transform: translate(-50%, -50%);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-shadow: 0 3px 0 #fff, 0 6px 12px rgb(201 74 30 / 0.25);
+  white-space: nowrap;
+  animation: candyPraise 900ms ease both;
+}
+
+.praise[data-step="1"] {
+  font-size: 28px;
+  color: #c94a1e;
+}
+
+.praise[data-step="2"] {
+  font-size: 36px;
+  color: #d98a34;
+}
+
+.praise[data-step="3"] {
+  font-size: 42px;
+  color: #1f7268;
+}
+
+.praise[data-still="true"] {
+  animation: none;
+  opacity: 1;
+}
+
+.confetti {
+  top: 0;
+  width: 8px;
+  height: 12px;
+  border-radius: 2px;
+  animation: candyConfetti 1200ms ease-in both;
+}
+
+.particles {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.stillBar {
+  position: absolute;
+  background: rgb(255 211 77 / 0.55);
+  border-radius: 12px;
+  box-shadow: inset 0 0 0 3px #fff;
+}
+
+@keyframes candyCarDrive {
+  from {
+    transform: translate3d(calc(var(--fx-size) * -1), 0, 0);
+  }
+  to {
+    transform: translate3d(var(--fx-travel), 0, 0);
+  }
+}
+
+@keyframes candyCarDriveCol {
+  from {
+    transform: translate3d(0, calc(var(--fx-size) * -1), 0);
+  }
+  to {
+    transform: translate3d(0, var(--fx-travel), 0);
+  }
+}
+
+@keyframes candyTrail {
+  from {
+    transform: scaleX(0.08);
+    opacity: 0.15;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 0.8;
+  }
+}
+
+@keyframes candyTrailCol {
+  from {
+    transform: scaleY(0.08);
+    opacity: 0.15;
+  }
+  to {
+    transform: scaleY(1);
+    opacity: 0.8;
+  }
+}
+
+@keyframes candyCone {
+  0% {
+    transform: scale(0.2);
+    opacity: 0;
+  }
+  28% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+}
+
+@keyframes candyRing {
+  from {
+    transform: scale(0.15);
+    opacity: 0.95;
+  }
+  to {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes candyShard {
+  from {
+    transform: rotate(var(--a)) translate3d(0, 0, 0);
+    opacity: 1;
+  }
+  to {
+    transform: rotate(var(--a)) translate3d(46px, 0, 0);
+    opacity: 0;
+  }
+}
+
+@keyframes candyBeam {
+  from {
+    stroke-dashoffset: 1;
+    opacity: 0.15;
+  }
+  to {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+@keyframes candyPraise {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.4);
+  }
+  16% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.12);
+  }
+  28% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  78% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes candyConfetti {
+  from {
+    transform: translate3d(0, -16px, 0) rotate(0deg);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  to {
+    transform: translate3d(0, var(--fall, 160px), 0) rotate(160deg);
+    opacity: 0.85;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .car,
+  .trail,
+  .cone,
+  .ring,
+  .shard,
+  .beam,
+  .praise,
+  .confetti {
+    animation: none !important;
+  }
+
+  .praise {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}

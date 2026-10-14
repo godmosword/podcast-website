@@ -238,6 +238,7 @@ describe("stepWave 與事件", () => {
     const wave = stepWave({ ...state, specials }, 3, rng);
     expect(wave).not.toBeNull();
     expect(wave!.detonated).toEqual(["row"]);
+    expect(wave!.fx).toEqual([{ kind: "line", axis: "row", index: 0 }]);
     expect(wave!.state.pieces.every((v) => v >= 0)).toBe(true);
     const { events } = resolveBoard({ ...state, specials }, 3, seededRng(21));
     expect(events.detonated).toBeGreaterThanOrEqual(1);
