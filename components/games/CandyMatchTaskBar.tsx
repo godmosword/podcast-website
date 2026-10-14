@@ -19,6 +19,8 @@ type CandyMatchTaskBarProps = {
   round: CandyMatchRound;
   progress: CandyProgress;
   movesLeft: number;
+  /** 遊戲設定的「念出來」；關掉時再聽一次與朗讀開關都收起來。 */
+  voiceEnabled: boolean;
   /** 朗讀關著時再聽一次不出聲，按鈕還在。 */
   voiceMuted: boolean;
   reducedMotion: boolean;
@@ -146,6 +148,7 @@ export function CandyMatchTaskBar({
   round,
   progress,
   movesLeft,
+  voiceEnabled,
   voiceMuted,
   reducedMotion,
   onReplay,
@@ -184,27 +187,29 @@ export function CandyMatchTaskBar({
             {movesLeft}
           </span>
         ) : null}
-        <span className={styles.voiceRow}>
-          <button
-            type="button"
-            className={styles.replayButton}
-            aria-label="再聽一次"
-            data-muted={voiceMuted ? "true" : undefined}
-            onClick={onReplay}
-          >
-            <Icon name={voiceMuted ? "volume-off" : "volume-on"} size={20} />
-            <span>再聽一次</span>
-          </button>
-          <button
-            type="button"
-            className={styles.muteButton}
-            aria-pressed={!voiceMuted}
-            aria-label={voiceMuted ? "打開朗讀" : "關閉朗讀"}
-            onClick={onToggleVoice}
-          >
-            <Icon name={voiceMuted ? "volume-off" : "volume-on"} size={22} />
-          </button>
-        </span>
+        {voiceEnabled ? (
+          <span className={styles.voiceRow}>
+            <button
+              type="button"
+              className={styles.replayButton}
+              aria-label="再聽一次"
+              data-muted={voiceMuted ? "true" : undefined}
+              onClick={onReplay}
+            >
+              <Icon name={voiceMuted ? "volume-off" : "volume-on"} size={20} />
+              <span>再聽一次</span>
+            </button>
+            <button
+              type="button"
+              className={styles.muteButton}
+              aria-pressed={!voiceMuted}
+              aria-label={voiceMuted ? "打開朗讀" : "關閉朗讀"}
+              onClick={onToggleVoice}
+            >
+              <Icon name={voiceMuted ? "volume-off" : "volume-on"} size={22} />
+            </button>
+          </span>
+        ) : null}
       </div>
       <ul className={styles.goalList} data-count={goals.length}>
         {goals.map((goal, i) => (

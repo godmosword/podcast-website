@@ -9,6 +9,7 @@ afterEach(cleanup);
 
 const fixedRng = () => 0.5;
 const voice = {
+  voiceEnabled: true,
   voiceMuted: false,
   reducedMotion: true,
   onReplay: () => {},
@@ -106,5 +107,14 @@ describe("CandyMatchTaskBar", () => {
     screen.getByRole("button", { name: "打開朗讀" }).click();
     expect(onReplay).toHaveBeenCalledTimes(1);
     expect(onToggleVoice).toHaveBeenCalledTimes(1);
+  });
+
+  it("家長在設定裡關掉念出來：再聽一次與朗讀開關都收起來", () => {
+    const round = buildRound(0, "easy", { replay: false, rng: fixedRng });
+    render(
+      <CandyMatchTaskBar round={round} progress={freshCandyProgress()} movesLeft={0} {...voice} voiceEnabled={false} />,
+    );
+    expect(screen.queryByRole("button", { name: "再聽一次" })).toBeNull();
+    expect(screen.queryByRole("button", { name: /朗讀/ })).toBeNull();
   });
 });

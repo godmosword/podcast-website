@@ -65,7 +65,7 @@ export default function GameHost({
   const loopRef = useRef<GameLoop | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  const { kidsMode, gameVolume, motionPreference } = useGameKitSettings();
+  const { kidsMode, gameVolume, voiceEnabled, motionPreference } = useGameKitSettings();
   const reduced = useReducedMotion(motionPreference);
   const { best, saveBest } = useBestScore(adapter.id);
   /** G-M6：`hasScore: false` 的遊戲（消消樂）不顯示也不存最佳分，抬頭不再冒出「最佳 ⭐ 500」。 */
@@ -283,6 +283,7 @@ export default function GameHost({
     reducedMotion: reduced,
     gameVolume,
     soundOn: soundUi,
+    voiceEnabled,
     onStart: handleStart,
     onResume: handleResume,
     onRestart: handleRestart,

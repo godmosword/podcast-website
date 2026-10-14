@@ -506,11 +506,8 @@ test.describe("多多壽司屋", () => {
     }
   });
 
-  /**
-   * 朗讀跟抬頭「音效」同一個開關；多多的字卡念完才接著念下一單。
-   * 假的 speechSynthesis 要用 defineProperty 換掉（直接指定在 Chromium 會被忽略，測試會白過）。
-   */
-  test("朗讀：字卡不被換單切掉、關掉抬頭音效就不念", async ({ page }) => {
+  /** 假的 speechSynthesis 要用 defineProperty 換掉（直接指定在 Chromium 會被忽略，測試會白過）。 */
+  async function installFakeSpeech(page: import("@playwright/test").Page) {
     await page.addInitScript(() => {
       type Entry = { op: "speak" | "cancel"; text?: string };
       const log: Entry[] = [];
@@ -551,24 +548,31 @@ test.describe("多多壽司屋", () => {
     });
     const log = () => page.evaluate(() => (window as unknown as { __speech: { op: string; text?: string }[] }).__speech);
     const spoken = async () => (await log()).filter((e) => e.op === "speak").map((e) => e.text);
+    const finish = () => page.evaluate(() => (window as unknown as { __finishSpeech: () => void }).__finishSpeech());
+    return { log, spoken, finish };
+  }
+
+  /** 朗讀跟抬頭「音效」同一個開關；多多的字卡念完才接著念下一單。 */
+  test("朗讀：字卡不被換單切掉、關掉抬頭音效就不念", async ({ page }) => {
+    const { log, spoken, finish } = await installFakeSpeech(page);
 
     await page.goto("/games/dino-sushi");
     await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
     await expect.poll(spoken).toEqual([expect.stringMatching(/^我想要/)]);
     const firstOrder = (await spoken())[0];
-    await page.evaluate(() => (window as unknown as { __finishSpeech: () => void }).__finishSpeech());
+    await finish();
 
     // 點泡泡再聽一次（音效開著時有念：正向對照）
     await page.getByRole("button", { name: "再聽一次" }).click();
     await expect.poll(async () => (await spoken()).at(-1)).toBe(firstOrder);
-    await page.evaluate(() => (window as unknown as { __finishSpeech: () => void }).__finishSpeech());
+    await finish();
 
     // 做完第 1 單：字卡開始念，下一單出現時不能 cancel 掉它，要等它念完才念下一單
     const mark = (await log()).length;
     await serveOrder(page, 1);
     await expect(page.getByRole("img", { name: /^第 2 單/ })).toBeVisible();
     expect((await log()).slice(mark)).toEqual([{ op: "speak", text: expect.stringMatching(/！$/) }]);
-    await page.evaluate(() => (window as unknown as { __finishSpeech: () => void }).__finishSpeech());
+    await finish();
     await expect.poll(async () => (await spoken()).at(-1)).toMatch(/^我想要/);
 
     // 關掉抬頭音效：之後不念、泡泡上的「再聽一次」也收起來
@@ -578,6 +582,53 @@ test.describe("多多壽司屋", () => {
     await serveOrder(page, 2);
     await expect(page.getByRole("img", { name: /^第 3 單/ })).toBeVisible();
     expect((await spoken()).length).toBe(before);
+  });
+
+  /** 設定裡的「念出來」只關人聲：音效開關不動，泡泡上的「再聽一次」收起來。 */
+  test("朗讀：在遊戲設定關掉「念出來」就不念，音效照常開著", async ({ page }) => {
+    const { spoken, finish } = await installFakeSpeech(page);
+
+    await page.goto("/games/dino-sushi");
+    await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+    // 正向對照：預設開著，第 1 單有念
+    await expect.poll(spoken).toEqual([expect.stringMatching(/^我想要/)]);
+    await finish();
+    await expect(page.getByRole("button", { name: "再聽一次" })).toBeVisible();
+
+    await page.getByRole("button", { name: "遊戲設定" }).click();
+    const voice = page.getByRole("checkbox", { name: /念出來/ });
+    await expect(voice).toBeChecked();
+    await voice.uncheck();
+    await page.getByRole("button", { name: "完成" }).click();
+
+    await expect(page.getByRole("button", { name: "再聽一次" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "關閉音效" })).toBeVisible();
+    const before = (await spoken()).length;
+    await serveOrder(page, 1);
+    await expect(page.getByRole("img", { name: /^第 2 單/ })).toBeVisible();
+    expect((await spoken()).length).toBe(before);
+
+    // 重新整理後仍是關著（存在進度裡）
+    await page.reload();
+    await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+    await expect(page.getByRole("img", { name: /^第 1 單/ })).toBeVisible();
+    expect(await spoken()).toEqual([]);
+  });
+
+  test("320×568：遊戲設定放得下，「念出來」整列可點且至少 44px 高", async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 568 });
+    await page.goto("/games/dino-sushi");
+    await page.getByRole("button", { name: "遊戲設定" }).click();
+    const dialog = page.getByRole("dialog", { name: "遊戲設定" });
+    const box = (await dialog.boundingBox())!;
+    expect(box.x).toBeGreaterThanOrEqual(0);
+    expect(box.x + box.width).toBeLessThanOrEqual(320);
+    const row = dialog.locator("label").filter({ has: page.getByRole("checkbox", { name: /念出來/ }) });
+    await row.scrollIntoViewIfNeeded();
+    expect((await row.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    await dialog.getByRole("button", { name: "完成" }).scrollIntoViewIfNeeded();
+    await expect(dialog.getByRole("button", { name: "完成" })).toBeInViewport();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   });
 
   /** 泡泡每一格的圖都要縮在格子裡：瘦長的手捲曾經把格子撐高、凸出泡泡、蓋住進度小盤。 */

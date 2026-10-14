@@ -24,6 +24,8 @@ type Props = {
   soundOn: boolean;
   /** 設定裡的遊戲音量 0–1。 */
   gameVolume: number;
+  /** 設定裡的「念出來」；關掉時泡泡不念、小喇叭收起來。 */
+  voiceEnabled: boolean;
 };
 
 /**
@@ -68,7 +70,7 @@ function useFocusAcrossPhases(choosingBase: boolean) {
 }
 
 /** 廚房：迴轉壽司店（多多＋泡泡＋疊盤）｜砧板（3 料位）＋「給多多吃」｜托盤。 */
-export function DinoSushiKitchen({ play, reducedMotion, inputPaused, soundOn, gameVolume }: Props) {
+export function DinoSushiKitchen({ play, reducedMotion, inputPaused, soundOn, gameVolume, voiceEnabled }: Props) {
   const {
     round,
     phase,
@@ -92,6 +94,7 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused, soundOn, ga
     inputPaused,
     soundOn,
     volume: gameVolume,
+    voiceEnabled,
   });
   if (!round) return null;
   const order = currentOrder(round);

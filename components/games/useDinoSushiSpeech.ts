@@ -17,14 +17,25 @@ type Options = {
   soundOn: boolean;
   /** 遊戲音量 0–1；0 等於關掉。 */
   volume: number;
+  /** 遊戲設定的「念出來」；關掉只停朗讀，音效照常。 */
+  voiceEnabled: boolean;
 };
 
 /**
  * 新訂單、多多的字卡出現時念出來。字卡念完才接著念下一單，不會被換單切掉。
- * 音效或音量改了只影響之後的句子，不會重念。暫停、關音效、卸載都會取消。
+ * 音效或音量改了只影響之後的句子，不會重念。暫停、關音效、關「念出來」、卸載都會取消。
  */
-export function useDinoSushiSpeech({ orderToken, orderLine, firstOrder, caption, inputPaused, soundOn, volume }: Options) {
-  const voiceOn = soundOn && volume > 0;
+export function useDinoSushiSpeech({
+  orderToken,
+  orderLine,
+  firstOrder,
+  caption,
+  inputPaused,
+  soundOn,
+  volume,
+  voiceEnabled,
+}: Options) {
+  const voiceOn = soundOn && volume > 0 && voiceEnabled;
   const live = useRef({ voiceOn, paused: inputPaused, volume });
   live.current = { voiceOn, paused: inputPaused, volume };
 

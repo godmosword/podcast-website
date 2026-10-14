@@ -37,6 +37,8 @@ export type GameKitPreferenceStore = {
   blockDropDifficulty: BlockDropDifficultyPreference;
   blockDropSpecialMode: BlockDropSpecialModePreference;
   gameVolume: number;
+  /** 朗讀訂單、提示與台詞（消消樂、壽司屋）；關掉只停人聲，音效照常。舊存檔沒有＝開著。 */
+  voiceEnabled: boolean;
   motionPreference: MotionPreference;
   candyMatchMode: CandyMatchModePreference;
   candyMatchTips: CandyMatchTipId[];
@@ -125,6 +127,7 @@ export const DEFAULT_PROGRESS: ProgressStore = {
       blockDropDifficulty: "relaxed",
       blockDropSpecialMode: "classic",
       gameVolume: 1,
+      voiceEnabled: true,
       motionPreference: "system",
       candyMatchMode: null,
       candyMatchTips: [],
@@ -246,6 +249,10 @@ function normalizeGameKitPreferences(
     blockDropDifficulty: normalizeBlockDropDifficulty(value?.blockDropDifficulty),
     blockDropSpecialMode: normalizeBlockDropSpecialMode(value?.blockDropSpecialMode),
     gameVolume: normalizeGameVolume(value?.gameVolume),
+    voiceEnabled:
+      typeof value?.voiceEnabled === "boolean"
+        ? value.voiceEnabled
+        : DEFAULT_PROGRESS.preferences.gameKit.voiceEnabled,
     motionPreference: normalizeMotionPreference(value?.motionPreference),
     candyMatchMode: normalizeCandyMatchMode(value?.candyMatchMode),
     candyMatchTips: normalizeCandyMatchTips(value?.candyMatchTips),

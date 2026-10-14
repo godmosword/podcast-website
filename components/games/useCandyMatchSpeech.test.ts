@@ -45,6 +45,7 @@ const base: Props = {
   inputPaused: false,
   soundOn: true,
   volume: 1,
+  voiceEnabled: true,
 };
 
 function render(initial: Partial<Props> = {}) {
@@ -125,6 +126,23 @@ describe("useCandyMatchSpeech", () => {
     act(() => result.current.toggleMuted());
     expect(synth.cancel).toHaveBeenCalled();
     expect(window.localStorage.getItem("cheche:progress")).toContain('"sfxEnabled":false');
+  });
+
+  it("設定裡關掉念出來：音效開著也不念，再聽一次、點目標卡都不出聲", () => {
+    const { result } = render({ voiceEnabled: false });
+    expect(synth.speak).not.toHaveBeenCalled();
+    expect(result.current.voiceOn).toBe(false);
+    act(() => result.current.replay());
+    act(() => result.current.speak("收集計程車"));
+    expect(synth.speak).not.toHaveBeenCalled();
+  });
+
+  it("念到一半在設定裡關掉念出來：馬上停，音效開關不動", () => {
+    const { rerender } = render();
+    synth.cancel.mockClear();
+    rerender({ ...base, voiceEnabled: false });
+    expect(synth.cancel).toHaveBeenCalled();
+    expect(window.localStorage.getItem("cheche:progress") ?? "").not.toContain('"sfxEnabled":false');
   });
 
   it("遊戲音量 0 等於關", () => {

@@ -20,15 +20,17 @@ type Options = {
   soundOn: boolean;
   /** 遊戲音量 0–1；0 等於關掉。 */
   volume: number;
+  /** 遊戲設定的「念出來」；關掉只停朗讀，音效照常。 */
+  voiceEnabled: boolean;
 };
 
 /**
  * 開局念目標，之後念鼓勵、提示、過關與步數用完。
- * 換關（新的 cue）、暫停、關音效、離開局內、卸載都會取消還沒念完的。
- * 靜音跟抬頭音效同一個開關，不另記一把鑰匙。
+ * 換關（新的 cue）、暫停、關音效、關「念出來」、離開局內、卸載都會取消還沒念完的。
+ * 局內的靜音鈕跟抬頭音效同一個開關；家長要只關人聲，用遊戲設定的「念出來」。
  */
-export function useCandyMatchSpeech({ active, cue, inputPaused, soundOn, volume }: Options) {
-  const voiceOn = soundOn && volume > 0;
+export function useCandyMatchSpeech({ active, cue, inputPaused, soundOn, volume, voiceEnabled }: Options) {
+  const voiceOn = soundOn && volume > 0 && voiceEnabled;
   const live = useRef({ voiceOn, paused: inputPaused, active, volume });
   live.current = { voiceOn, paused: inputPaused, active, volume };
   const lastText = useRef<string | null>(null);

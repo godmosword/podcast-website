@@ -76,6 +76,7 @@ export function CandyMatchView({
   instance,
   soundOn,
   gameVolume,
+  voiceEnabled,
 }: CandyMatchViewProps) {
   // fallback 取模組層 noop：寫成 `?? (() => {})` 會每次 render 產生新函式，
   // 讓所有以此為依賴的 useCallback 每幀失效（lint exhaustive-deps 亦會警告）。
@@ -118,6 +119,7 @@ export function CandyMatchView({
     inputPaused,
     soundOn,
     volume: gameVolume,
+    voiceEnabled,
   });
 
   const refreshMedals = useCallback(() => {
@@ -351,6 +353,7 @@ export function CandyMatchView({
               round={play.round}
               progress={play.progress}
               movesLeft={play.movesLeft}
+              voiceEnabled={voiceEnabled}
               voiceMuted={speech.muted}
               reducedMotion={reducedMotion}
               onReplay={speech.replay}

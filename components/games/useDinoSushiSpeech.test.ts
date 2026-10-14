@@ -49,6 +49,7 @@ const base: Props = {
   inputPaused: false,
   soundOn: true,
   volume: 1,
+  voiceEnabled: true,
 };
 
 function render(initial: Partial<Props> = {}) {
@@ -122,6 +123,21 @@ describe("useDinoSushiSpeech", () => {
     expect(result.current.voiceOn).toBe(false);
     act(() => result.current.replay());
     expect(synth.speak).not.toHaveBeenCalled();
+  });
+
+  it("設定裡關掉念出來：音效開著也不念、點泡泡不念，voiceOn 為 false", () => {
+    const { result } = render({ voiceEnabled: false });
+    expect(synth.speak).not.toHaveBeenCalled();
+    expect(result.current.voiceOn).toBe(false);
+    act(() => result.current.replay());
+    expect(synth.speak).not.toHaveBeenCalled();
+  });
+
+  it("念到一半在設定裡關掉念出來：馬上停", () => {
+    const { rerender } = render();
+    synth.cancel.mockClear();
+    rerender({ ...base, voiceEnabled: false });
+    expect(synth.cancel).toHaveBeenCalled();
   });
 
   it("念到一半關掉抬頭音效：馬上停", () => {

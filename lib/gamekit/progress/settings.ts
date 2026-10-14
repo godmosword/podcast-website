@@ -40,6 +40,8 @@ export type GameKitSettings = {
   blockDropDifficulty: BlockDropDifficulty;
   blockDropSpecialMode: BlockDropSpecialMode;
   gameVolume: number;
+  /** 「念出來」：關掉只停朗讀，音效照常。 */
+  voiceEnabled: boolean;
   motionPreference: MotionPreference;
 };
 
@@ -53,6 +55,7 @@ const DEFAULT_SETTINGS: GameKitSettings = {
   blockDropDifficulty: "relaxed",
   blockDropSpecialMode: "classic",
   gameVolume: 1,
+  voiceEnabled: true,
   motionPreference: "system",
 };
 
@@ -66,6 +69,7 @@ export function loadGameKitSettings(): GameKitSettings {
       blockDropDifficulty: stored.blockDropDifficulty,
       blockDropSpecialMode: stored.blockDropSpecialMode,
       gameVolume: stored.gameVolume,
+      voiceEnabled: stored.voiceEnabled,
       motionPreference: stored.motionPreference,
     };
   } catch {
@@ -80,6 +84,7 @@ export function saveGameKitSettings(settings: GameKitSettings): void {
     blockDropDifficulty: settings.blockDropDifficulty,
     blockDropSpecialMode: settings.blockDropSpecialMode,
     gameVolume: settings.gameVolume,
+    voiceEnabled: settings.voiceEnabled,
     motionPreference: settings.motionPreference,
   });
   window.dispatchEvent(new CustomEvent(GAMEKIT_SETTINGS_EVENT, { detail: settings }));

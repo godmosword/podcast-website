@@ -118,11 +118,13 @@ function SettingsDialog({
     blockDropDifficulty,
     blockDropSpecialMode,
     gameVolume,
+    voiceEnabled,
     motionPreference,
     setKidsMode,
     setBlockDropDifficulty,
     setBlockDropSpecialMode,
     setGameVolume,
+    setVoiceEnabled,
     setMotionPreference,
   } = useGameKitSettings();
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -164,6 +166,7 @@ function SettingsDialog({
   if (!open) return null;
 
   const showBlockDrop = gameId === "block-drop";
+  const showVoice = gameId === "candy-match" || gameId === "dino-sushi";
 
   return (
     <div className={styles.overlay} role="presentation" onClick={onClose}>
@@ -230,6 +233,20 @@ function SettingsDialog({
             aria-label="遊戲音量"
           />
         </label>
+        {showVoice ? (
+          <label className={styles.settingRow}>
+            <span>
+              <strong>念出來</strong>
+              <small>訂單、提示和多多的話用聲音念出來；關掉後音效照常。</small>
+            </span>
+            <input
+              type="checkbox"
+              checked={voiceEnabled}
+              onChange={(e) => setVoiceEnabled(e.target.checked)}
+              className={styles.checkbox}
+            />
+          </label>
+        ) : null}
         <div className={styles.settingBlock}>
           <div className={styles.settingHeading}>
             <strong>動態效果</strong>
