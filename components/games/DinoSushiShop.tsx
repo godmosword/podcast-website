@@ -5,8 +5,9 @@ import { BELT_PLATES } from "@/lib/games/dino-sushi/shop-art";
 import styles from "./DinoSushiShop.module.css";
 
 /**
- * 迴轉壽司店的牆面：黏土牆、雨棚、木招牌、燈籠、圓窗（全是背景，對讀屏隱藏）。
- * 招牌上的「多多壽司」仍是文字。舞台太矮時招牌與燈籠收起，只留雨棚與迴轉帶。
+ * 迴轉壽司店的牆面：黏土牆、雨棚、燈籠、圓窗（全是背景，對讀屏隱藏）。
+ * 店名「多多壽司」刻在櫃台前板上（ShopBelt），不再用掛在多多後面、會被擋住的直式招牌。
+ * 舞台太矮時燈籠收起，只留雨棚與迴轉帶。
  */
 export function ShopWall() {
   return (
@@ -20,11 +21,6 @@ export function ShopWall() {
       <span className={styles.awningWrap}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className={styles.awning} src={SHOP_SRC.awning} alt="" draggable={false} decoding="sync" />
-      </span>
-      <span className={styles.kanban}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className={styles.kanbanBoard} src={SHOP_SRC.sign} alt="" draggable={false} decoding="sync" />
-        <span className={styles.kanbanText}>多多壽司</span>
       </span>
       <span className={`${styles.lantern} ${styles.lanternLeft}`}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -41,6 +37,7 @@ export function ShopWall() {
 /**
  * 迴轉帶＋木櫃台，在多多前面。帶面是無縫磚，依磚寬平移；上面的裝飾盤跟著同一段時間繞。
  * 減少動態、暫停時停住。送給多多的那盤在前排，由 DinoSushiDuoDuo 畫。
+ * 店名刻在櫃台前板左半：多多站在櫃台上面，右半留給疊盤，什麼都擋不到。
  */
 export function ShopBelt() {
   const plates = [...BELT_PLATES, ...BELT_PLATES];
@@ -67,6 +64,7 @@ export function ShopBelt() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={SHOP_SRC.counter} alt="" draggable={false} decoding="sync" />
       </span>
+      <span className={styles.shopName}>多多壽司</span>
     </div>
   );
 }

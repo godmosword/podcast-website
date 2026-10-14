@@ -1,9 +1,9 @@
 /*
- * 多多的迴轉壽司店（舞台背景）。牆、雨棚、燈籠、招牌、圓窗、迴轉帶、櫃台、玻璃蓋都是黏土 WebP。
+ * 多多的迴轉壽司店（舞台背景）。牆、雨棚、燈籠、圓窗、迴轉帶、櫃台、玻璃蓋都是黏土 WebP。
  * 尺寸吃舞台 container（DinoSushiKitchen .duoArea 的 duo-stage）的 cqw／cqh。
  * 色票與卡面一樣日夜不反轉（固定美術色，見 hardcoded-color-audit allowlist）。
  * 唯一的常駐動態是迴轉帶慢慢繞；減少動態、暫停時停住。
- * 招牌上的「多多壽司」是文字，圖本身是空白木牌。
+ * 店名「多多壽司」是文字，刻在櫃台前板左半（.shopName）。
  */
 
 /* ── 牆面 ─────────────────────────────────────────────── */
@@ -44,42 +44,6 @@
   pointer-events: none;
 }
 
-/* 直式木招牌「多多壽司」：圖自帶掛繩，文字疊在牌面 */
-.kanban {
-  position: absolute;
-  z-index: 1;
-  top: calc(var(--awning-h) - 2px);
-  left: calc(4% + clamp(26px, 9cqw, 44px) + clamp(8px, 3cqw, 16px));
-  display: grid;
-  place-items: center;
-  width: clamp(30px, 10cqw, 48px);
-  aspect-ratio: 404 / 1000;
-  padding: 22% 12% 10%;
-  color: #5a3518;
-  font-family: var(--font-stack-display);
-  font-size: clamp(11px, 3.2cqw, 16px);
-  font-weight: 900;
-  line-height: 1;
-  filter: drop-shadow(0 4px 3px rgba(90, 60, 30, 0.22));
-}
-
-.kanbanBoard {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  pointer-events: none;
-}
-
-.kanbanText {
-  position: relative;
-  z-index: 1;
-  writing-mode: vertical-rl;
-  letter-spacing: 0.12em;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
-}
-
 /* 紅燈籠：掛在雨棚下，暖光暈。圖自帶掛繩。 */
 .lantern {
   position: absolute;
@@ -101,11 +65,10 @@
   left: 4%;
 }
 
-/* 第二盞只在寬舞台出現，掛在招牌另一側 */
+/* 第二盞只在寬舞台出現，跟第一盞成一對 */
 .lanternRight {
   display: none;
-  left: calc(4% + clamp(26px, 9cqw, 44px) + clamp(8px, 3cqw, 16px) + 2.2em + clamp(8px, 3cqw, 16px));
-  font-size: clamp(12px, 4.2cqw, 21px);
+  left: calc(4% + clamp(26px, 9cqw, 44px) + clamp(12px, 4cqw, 24px));
 }
 
 /* 圓窗：直向高舞台右側的空牆；寬版多多很大會擋住，收起 */
@@ -271,16 +234,43 @@
   object-fit: fill;
 }
 
-/* 牙刷出現時，左上的招牌與燈籠讓位 */
-:global([data-brush="true"]) .kanban,
+/*
+ * 店名刻在櫃台前板左半（深木色字，下緣一道淺光、上緣一道暗線，像刻進木頭）。
+ * 送餐盤停在舞台 30% 起、疊盤在右下，店名放在 4% 起、寬度不到 26%，兩者都碰不到。
+ * 字級同時受櫃台高度與舞台寬度限制：四個字加字距約 4.7em，5cqw 時約 24% 舞台寬，窄而高的舞台也伸不進送餐盤。
+ */
+.shopName {
+  position: absolute;
+  z-index: 1;
+  left: 4%;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  max-width: 26%;
+  height: 46%;
+  color: #5a3518;
+  font-family: var(--font-stack-display);
+  font-size: clamp(11px, min(calc(var(--counter-h) * 0.3), 5cqw), 18px);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.18em;
+  white-space: nowrap;
+  text-shadow:
+    0 1px 0 rgba(255, 236, 205, 0.7),
+    0 -1px 0 rgba(70, 40, 15, 0.25);
+  pointer-events: none;
+}
+
+/* 牙刷出現時，左上的燈籠讓位 */
 :global([data-brush="true"]) .lantern {
   visibility: hidden;
 }
 
 /* ── 依舞台大小加減道具 ───────────────────────────────── */
+/* 矮舞台（320×568）：燈籠收起；櫃台前板只剩約 13px，店名也收起 */
 @container duo-stage (max-height: 190px) {
-  .kanban,
-  .lantern {
+  .lantern,
+  .shopName {
     display: none;
   }
 }

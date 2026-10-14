@@ -579,6 +579,87 @@ test.describe("多多壽司屋", () => {
     await expect(page.getByRole("img", { name: /^第 3 單/ })).toBeVisible();
     expect((await spoken()).length).toBe(before);
   });
+
+  /** 泡泡每一格的圖都要縮在格子裡：瘦長的手捲曾經把格子撐高、凸出泡泡、蓋住進度小盤。 */
+  const bubbleOverflow = (page: import("@playwright/test").Page) =>
+    page.getByRole("img", { name: /^第 \d 單/ }).evaluate((bubble) =>
+      [...bubble.firstElementChild!.children].flatMap((cell) => {
+        const c = cell.getBoundingClientRect();
+        const i = cell.querySelector("img")!.getBoundingClientRect();
+        const out = i.top < c.top - 1 || i.bottom > c.bottom + 1 || i.left < c.left - 1 || i.right > c.right + 1;
+        return out ? [`${Math.round(i.width)}×${Math.round(i.height)} 超出 ${Math.round(c.width)}×${Math.round(c.height)}`] : [];
+      }),
+    );
+
+  for (const vp of [
+    { width: 320, height: 568 },
+    { width: 390, height: 844 },
+    { width: 667, height: 375 },
+    { width: 1280, height: 800 },
+  ]) {
+    test(`${vp.width}×${vp.height}：泡泡裡的飯和料（含手捲）都縮在格子裡`, async ({ page }) => {
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await page.setViewportSize(vp);
+      await page.goto("/games/dino-sushi");
+      await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+      const bases = new Set<string>();
+      for (let n = 1; n <= 5; n++) {
+        const label = (await page.getByRole("img", { name: new RegExp(`^第 ${n} 單`) }).getAttribute("aria-label"))!;
+        bases.add(label.split("多多想吃：")[1]!.split("、")[0]!);
+        expect(await bubbleOverflow(page), `第 ${n} 單`).toEqual([]);
+        if (n < 5) await serveOrder(page, n);
+      }
+      // 固定 seed 7：五單裡至少有手捲（最瘦長、最容易凸出）
+      expect(bases).toContain("手捲");
+    });
+  }
+
+  /** 店名刻在櫃台前板：多多、疊盤（含數字）、泡泡都不能疊在字上（以前掛在多多後面的直式招牌整個被擋住）。送餐盤停在舞台 30% 起，店名寬度不到 26%，由 CSS 保證。 */
+  for (const vp of [
+    { width: 390, height: 844 },
+    { width: 667, height: 375 },
+    { width: 844, height: 390 },
+    { width: 932, height: 430 },
+    { width: 1280, height: 800 },
+  ]) {
+    test(`${vp.width}×${vp.height}：「多多壽司」店名看得到，疊到 4 盤也不被擋`, async ({ page }) => {
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await page.setViewportSize(vp);
+      await page.goto("/games/dino-sushi");
+      await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+      for (let n = 1; n <= 4; n++) await serveOrder(page, n);
+      const result = await page.getByRole("region", { name: "多多" }).evaluate((stage) => {
+        const name = [...stage.querySelectorAll("span")].find((s) => s.textContent === "多多壽司")!;
+        const n = name.getBoundingClientRect();
+        const box = (el: Element | null) => el?.getBoundingClientRect() ?? null;
+        const overlaps = (r: DOMRect | null) =>
+          r !== null && r.width > 0 && !(r.right <= n.left || n.right <= r.left || r.bottom <= n.top || n.bottom <= r.top);
+        const stack = stage.querySelector('[role="img"][aria-label^="吃完"]')!;
+        const blockers = {
+          多多: box(stage.querySelector('[data-mouth] img[data-active="true"]')),
+          疊盤: box(stack),
+          疊盤數字: box(stack.querySelector("b")),
+          泡泡: box(stage.querySelector('[role="img"][aria-label^="第"]')),
+        };
+        const s = stage.getBoundingClientRect();
+        return {
+          size: parseFloat(getComputedStyle(name).fontSize),
+          inside: n.left >= s.left && n.right <= s.right && n.bottom <= s.bottom + 0.5 && n.width > 0,
+          // 選擇器沒抓到會讓檢查白過：每一樣都要真的在畫面上
+          missing: Object.entries(blockers)
+            .filter(([, r]) => r === null || r.width === 0)
+            .map(([k]) => k),
+          blocked: Object.entries(blockers)
+            .filter(([, r]) => overlaps(r))
+            .map(([k]) => k),
+        };
+      });
+      expect(result.missing).toEqual([]);
+      expect(result.inside).toBe(true);
+      expect(result.size).toBeGreaterThanOrEqual(11);
+      expect(result.blocked).toEqual([]);
+    });
+  }
 });
 
 /** G-M7（翻 D5-A）：著色本改走同款 sticky 抬頭——隱藏全站導覽、恰好一個 h1、三個階段都只有「回遊樂園」一個出口。 */

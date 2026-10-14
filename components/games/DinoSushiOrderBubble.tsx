@@ -37,7 +37,12 @@ export function DinoSushiOrderBubble({ order, sushi, flash, index, total, onRepl
     <div className={styles.bubbleWrap}>
       <div className={styles.bubble} role="img" aria-label={`第 ${index + 1} 單，共 ${total} 單。${orderAnnouncement(order)}`}>
         <span className={styles.bubbleItems}>
-          <span className={styles.bubbleItem} data-done={checks.base ? "true" : undefined} data-flash={flash && !flash.baseOk ? "true" : undefined}>
+          <span
+            className={styles.bubbleItem}
+            data-base={order.base}
+            data-done={checks.base ? "true" : undefined}
+            data-flash={flash && !flash.baseOk ? "true" : undefined}
+          >
             <BaseArt id={order.base} />
             {checks.base ? <Check /> : null}
           </span>

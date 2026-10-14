@@ -19,7 +19,6 @@ export const SHOP_SRC = {
   wall: `${SHOP}/wall.webp`,
   awning: `${SHOP}/awning.webp`,
   lantern: `${SHOP}/lantern.webp`,
-  sign: `${SHOP}/sign.webp`,
   window: `${SHOP}/window.webp`,
   counter: `${SHOP}/counter.webp`,
   belt: `${SHOP}/belt.webp`,

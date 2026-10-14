@@ -281,7 +281,7 @@
   outline-offset: 5px;
 }
 
-/* 牙刷出現時是下一步：小喇叭跟招牌、燈籠一樣讓位（窄舞台會疊到牙刷一角）。泡泡照樣可以點 */
+/* 牙刷出現時是下一步：小喇叭跟燈籠一樣讓位（窄舞台會疊到牙刷一角）。泡泡照樣可以點 */
 .duoArea[data-brush="true"] .replayBadge {
   visibility: hidden;
 }
@@ -356,12 +356,18 @@
 }
 
 .bubbleItem {
+  /* 跟著舞台長大：桌面舞台很大時泡泡不再是一小顆 */
+  --cell: clamp(34px, min(12.5cqh, 13cqw), 60px);
   position: relative;
   display: grid;
+  /* 格線鎖在格子大小：圖的 height: 100% 才算得出來，瘦長的手捲會縮進格子，不會把格子撐高、凸出泡泡 */
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
   place-items: center;
-  /* 跟著舞台長大：桌面舞台很大時泡泡不再是一小顆 */
-  width: clamp(34px, min(12.5cqh, 13cqw), 60px);
-  height: clamp(34px, min(12.5cqh, 13cqw), 60px);
+  box-sizing: border-box;
+  width: var(--cell);
+  height: var(--cell);
+  /* 圖佔格子約 88%，四周留一點 */
+  padding: calc(var(--cell) * 0.06);
   border-radius: 12px;
   background: radial-gradient(closest-side, rgba(239, 220, 188, 0.55), rgba(239, 220, 188, 0));
 }
@@ -373,8 +379,7 @@
   }
 
   .bubbleItem {
-    width: 30px;
-    height: 30px;
+    --cell: 30px;
   }
 }
 
@@ -394,9 +399,14 @@
   background: #efdcbc;
 }
 
+/* 手捲又高又瘦：上下不留邊，才不會比握壽司、軍艦小一號 */
+.bubbleItem[data-base="temaki"] {
+  padding-block: 0;
+}
+
 .bubbleItem > img {
-  width: 88%;
-  height: 88%;
+  min-width: 0;
+  min-height: 0;
   object-fit: contain;
 }
 
@@ -623,7 +633,7 @@
 }
 
 /* 左上角雨棚下：不擋多多的臉；只晃 3 次 */
-/* 牙刷是「下一步」：跟其他下一步一樣的黃光暈；出現時招牌與燈籠讓位（DinoSushiShop data-brush） */
+/* 牙刷是「下一步」：跟其他下一步一樣的黃光暈；出現時燈籠讓位（DinoSushiShop data-brush） */
 .brushButton {
   position: absolute;
   z-index: 6;
@@ -1362,8 +1372,7 @@
   }
 
   .bubbleItem {
-    width: 44px;
-    height: 44px;
+    --cell: 44px;
   }
 
   .replayBadge {
