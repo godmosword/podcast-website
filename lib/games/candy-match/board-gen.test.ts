@@ -6,12 +6,12 @@ import {
   reshuffle,
   type BoardGenOptions,
 } from "./board-gen";
-import { DROP_ITEM, emptySpecials, findHintMove, findMatches, type BoardState } from "./engine";
+import { DROP_ITEM, emptySpecials, findHintMove, findMatches, type BoardState, type CandySpawnPool } from "./engine";
 import { CANDY_MATCH_LEVELS } from "./levels";
 import { seededRng } from "./rng";
-import { CANDY_STAGES, type CandyStage } from "./stages";
+import { CANDY_STAGES, stagePalette, type CandyStage } from "./stages";
 
-type Config = { label: string; cols: number; rows: number; kinds: number; options: BoardGenOptions };
+type Config = { label: string; cols: number; rows: number; pool: CandySpawnPool; options: BoardGenOptions };
 
 function stageConfigs(): Config[] {
   const out: Config[] = [];
@@ -23,7 +23,7 @@ function stageConfigs(): Config[] {
           label: `${mode}/${stage.id}`,
           cols: level.cols,
           rows: level.rows,
-          kinds: stage.pieceKinds,
+          pool: stagePalette(stage),
           options: {
             dirtCells: stage.dirtCells,
             thickDirtCells: stage.thickDirtCells,
@@ -43,7 +43,7 @@ describe("createBoard：所有關卡 × 玩法 × 變體", () => {
   it("每個配置 200 個固定 seed 都符合開局不變量", () => {
     for (const config of CONFIGS) {
       for (let seed = 1; seed <= 200; seed++) {
-        const board = createBoard(config.cols, config.rows, config.kinds, seededRng(seed), config.options);
+        const board = createBoard(config.cols, config.rows, config.pool, seededRng(seed), config.options);
         if (!isValidStartBoard(board, config.options)) {
           throw new Error(`${config.label} seed=${seed} 開局不合格`);
         }
@@ -55,18 +55,25 @@ describe("createBoard：所有關卡 × 玩法 × 變體", () => {
     const skewed = [() => 0, () => 0.999999, () => 0.5];
     for (const config of CONFIGS) {
       for (const rng of skewed) {
-        const board = createBoard(config.cols, config.rows, config.kinds, rng, config.options);
+        const board = createBoard(config.cols, config.rows, config.pool, rng, config.options);
         expect(isValidStartBoard(board, config.options), config.label).toBe(true);
         expect(board.pieces.filter((v) => v === DROP_ITEM).length).toBe(config.options.dropCount ?? 0);
         expect(board.dirt.filter(Boolean).length).toBe(config.options.dirtCells?.length ?? 0);
+        const allowed = new Set(typeof config.pool === "number" ? [] : config.pool);
+        if (allowed.size > 0) {
+          expect(
+            board.pieces.every((v) => v < 0 || allowed.has(v)),
+            config.label,
+          ).toBe(true);
+        }
       }
     }
   });
 
   it("保底盤依配置決定性產生", () => {
     for (const config of CONFIGS) {
-      const a = fallbackBoard(config.cols, config.rows, config.kinds, config.options);
-      const b = fallbackBoard(config.cols, config.rows, config.kinds, config.options);
+      const a = fallbackBoard(config.cols, config.rows, config.pool, config.options);
+      const b = fallbackBoard(config.cols, config.rows, config.pool, config.options);
       expect(a.pieces).toEqual(b.pieces);
       expect(isValidStartBoard(a, config.options)).toBe(true);
     }
@@ -149,5 +156,20 @@ describe("reshuffle", () => {
     expect(next.pieces[0]).toBe(DROP_ITEM);
     expect(findMatches(next.pieces, 6, 8).size).toBe(0);
     expect(findHintMove(next.pieces, 6, 8, next.specials)).not.toBeNull();
+  });
+
+  it("重新配色與構造式保底都留在這一關的車上", () => {
+    const palette = [6, 1, 2, 7];
+    const state: BoardState = {
+      cols: 6,
+      rows: 6,
+      pieces: Array(36).fill(1),
+      dirt: Array(36).fill(0),
+      specials: emptySpecials(36),
+    };
+    const next = reshuffle(state, () => 0, palette);
+    expect(next.pieces.every((v) => palette.includes(v))).toBe(true);
+    expect(findMatches(next.pieces, 6, 6).size).toBe(0);
+    expect(findHintMove(next.pieces, 6, 6, next.specials)).not.toBeNull();
   });
 });

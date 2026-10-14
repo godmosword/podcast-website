@@ -5,6 +5,7 @@ import Image from "next/image";
 import { CandyMatchBoard } from "@/components/games/CandyMatchBoard";
 import { CandyMatchMap, type CandyStationPreview } from "@/components/games/CandyMatchMap";
 import { CandyMatchPropBar } from "@/components/games/CandyMatchPropBar";
+import { CandyMatchGoalIntro } from "@/components/games/CandyMatchGoalIntro";
 import { CandyMatchResult } from "@/components/games/CandyMatchResult";
 import { CandyMatchTaskBar } from "@/components/games/CandyMatchTaskBar";
 import { CandyMatchTip } from "@/components/games/CandyMatchTip";
@@ -26,9 +27,10 @@ import { GAMEKIT_PROGRESS_EVENT } from "@/lib/gamekit/progress/session";
 import { candyMatchCellPx } from "@/lib/games/candy-match/cell-size";
 import { CANDY_MATCH_LEVELS } from "@/lib/games/candy-match/levels";
 import { buildRound, type CandyMatchRound, type CandyMode } from "@/lib/games/candy-match/stages";
-import { goalsSummary, goalTheme } from "@/lib/games/candy-match/tasks";
+import { goalHearLine, goalsSummary, goalTheme } from "@/lib/games/candy-match/tasks";
 import { gameBySlug } from "@/data/games";
 import { useCandyMatchPlay } from "./useCandyMatchPlay";
+import { useCandyMatchSpeech } from "./useCandyMatchSpeech";
 import styles from "./CandyMatchView.module.css";
 
 type Screen = "title" | "map" | "play";
@@ -72,6 +74,8 @@ export function CandyMatchView({
   syncHost,
   audio,
   instance,
+  soundOn,
+  gameVolume,
 }: CandyMatchViewProps) {
   // fallback 取模組層 noop：寫成 `?? (() => {})` 會每次 render 產生新函式，
   // 讓所有以此為依賴的 useCallback 每幀失效（lint exhaustive-deps 亦會警告）。
@@ -105,8 +109,16 @@ export function CandyMatchView({
     syncHost,
     tipsSeen: prefs.tipsSeen,
     onTipSeen,
+    soundOn,
   });
   const { play, actions } = game;
+  const speech = useCandyMatchSpeech({
+    active: screen === "play",
+    cue: game.speechCue,
+    inputPaused,
+    soundOn,
+    volume: gameVolume,
+  });
 
   const refreshMedals = useCallback(() => {
     setMedals(loadPlayerProfile().medals["candy-match"]?.slice() ?? []);
@@ -334,8 +346,17 @@ export function CandyMatchView({
 
       {screen === "play" && play && (
         <div className={styles.playLayout}>
-          <div className={styles.playTask}>
-            <CandyMatchTaskBar round={play.round} progress={play.progress} movesLeft={play.movesLeft} />
+          <div className={styles.playTask} data-above={game.briefing ? "true" : undefined}>
+            <CandyMatchTaskBar
+              round={play.round}
+              progress={play.progress}
+              movesLeft={play.movesLeft}
+              voiceMuted={speech.muted}
+              reducedMotion={reducedMotion}
+              onReplay={speech.replay}
+              onToggleVoice={speech.toggleMuted}
+              onHearGoal={(goal) => speech.speak(goalHearLine(goal, play.progress))}
+            />
           </div>
 
           <div ref={boardWrapRef} className={styles.boardWrap}>
@@ -350,8 +371,8 @@ export function CandyMatchView({
               hint={game.hint}
               popping={game.popping}
               shaking={game.shaking}
-              disabled={game.busy || game.outcome !== null || inputPaused}
               teach={game.teachMove}
+              disabled={game.busy || game.outcome !== null || inputPaused || game.briefing}
               onTapCell={actions.tapCell}
               onSwipeCell={actions.attemptSwap}
               preview={game.propPreview}
@@ -363,6 +384,13 @@ export function CandyMatchView({
                 sweep: game.motion.sweep,
                 reduced: reducedMotion,
                 cheer: game.cheer,
+                fx: game.motion.fx,
+                praise: game.praise,
+                particles: game.motion.particles,
+                particleBurst: game.motion.particleBurst,
+                shake: game.motion.shake,
+                still: game.motion.still,
+                sweepMs: game.motion.sweepMs,
               }}
             />
           </div>
@@ -374,7 +402,7 @@ export function CandyMatchView({
                 left={play.propsLeft}
                 active={game.propMode}
                 hasPreview={game.propPreview.size > 0}
-                disabled={game.busy || game.outcome !== null || inputPaused}
+                disabled={game.busy || game.outcome !== null || inputPaused || game.briefing}
                 onSelect={actions.selectProp}
                 onCancel={actions.cancel}
                 onHint={actions.manualHint}
@@ -386,9 +414,19 @@ export function CandyMatchView({
             </p>
           </div>
 
+          {game.briefing ? (
+            <CandyMatchGoalIntro
+              round={play.round}
+              thick={play.board.dirt.some((layer) => layer >= 2)}
+              reducedMotion={reducedMotion}
+              onStart={actions.beginPlay}
+            />
+          ) : null}
+
           {game.outcome ? (
             <CandyMatchResult
               round={play.round}
+              progress={play.progress}
               outcome={game.outcome}
               isLastLevel={isLastLevel}
               reducedMotion={reducedMotion}

@@ -93,6 +93,11 @@
   box-shadow: var(--elev-1);
 }
 
+.station[data-side="56"] .sideBtn {
+  width: 56px;
+  height: 56px;
+}
+
 .leadingBtn {
   order: -1;
 }

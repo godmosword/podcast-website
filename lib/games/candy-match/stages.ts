@@ -4,7 +4,7 @@
  * 數值是第一輪起點，依 scripts/candy-match-sim.ts 的固定 seed 模擬與試玩再調。
  */
 
-import { CANDY_MATCH_LEVELS, type CandyMatchLevel } from "./levels";
+import { CANDY_MATCH_LEVELS, CANDY_MATCH_PIECES, CANDY_PIECE, type CandyMatchLevel } from "./levels";
 import { pickIndex } from "./rng";
 import type { Rng } from "./engine";
 import type { CandyGoal, CandyProgress } from "./tasks";
@@ -19,6 +19,12 @@ export type CandyStage = {
   /** 0 = 不限步數 */
   moves: number;
   pieceKinds: number;
+  /**
+   * 這一關上場的車（CANDY_MATCH_PIECES 索引）。
+   * 長度等於 pieceKinds。沒寫時用前 pieceKinds 台。
+   * 陣列下標對應舊的 0..n-1 槽位，所以換車不改同場種類、也不改模擬難度。
+   */
+  palette?: readonly number[];
   /** 髒格區域模板（格子索引） */
   dirtCells?: readonly number[];
   /** 厚污漬：dirtCells 裡要掃兩次的格子 */
@@ -84,38 +90,46 @@ function stage(init: StageInit): CandyStage {
   return { ...init, label: init.label ?? "主線" };
 }
 
+const { red: RED, taxi: TAXI, bus: BUS, bell: BELL, duo: DUO, ambulance: AMB, fire: FIRE, train: TRAIN } =
+  CANDY_PIECE;
+
+/** 同一關的主線與變體共用一份上場名單，種類數跟名單長度走。 */
+function pack(palette: readonly number[], main: StageInit, variants: StageInit[]): CandyStageSet {
+  const apply = (init: StageInit): CandyStage => stage({ ...init, palette, pieceKinds: palette.length });
+  return { main: apply(main), variants: variants.map(apply) };
+}
+
+/** 這一關實際會出現的車。 */
+export function stagePalette(stage: Pick<CandyStage, "pieceKinds" | "palette">): readonly number[] {
+  if (stage.palette && stage.palette.length > 0) return stage.palette;
+  return Array.from({ length: stage.pieceKinds }, (_, i) => i);
+}
+
+const CLASSIC4 = [RED, TAXI, BUS, BELL] as const;
+/** 輕鬆第 1 關維持原本四台，後面各關輪進新車，同場仍是 4 種。 */
 const EASY: readonly CandyStageSet[] = [
-  {
-    main: stage({ id: "e1-any-50", goals: [{ kind: "collect-any", count: 50 }], moves: 0, pieceKinds: 4, efficiency: 6 }),
-    variants: [
-      stage({ id: "e1-red-13", label: "小紅收藏家", goals: [collect(0, 13)], moves: 0, pieceKinds: 4, efficiency: 6 }),
-      stage({ id: "e1-taxi-13", label: "計程車收藏家", goals: [collect(1, 13)], moves: 0, pieceKinds: 4, efficiency: 6 }),
-      stage({ id: "e1-bus-13", label: "小巴士收藏家", goals: [collect(2, 13)], moves: 0, pieceKinds: 4, efficiency: 6 }),
-    ],
-  },
-  {
-    main: stage({ id: "e2-red-23", goals: [collect(0, 23)], moves: 0, pieceKinds: 4, efficiency: 9 }),
-    variants: [
-      stage({ id: "e2-taxi-23", label: "計程車任務", goals: [collect(1, 23)], moves: 0, pieceKinds: 4, efficiency: 9 }),
-      stage({ id: "e2-bell-23", label: "鈴鈴任務", goals: [collect(3, 23)], moves: 0, pieceKinds: 4, efficiency: 9 }),
-    ],
-  },
-  {
-    main: stage({ id: "e3-red-taxi-25", goals: collectEach([0, 1], 25), moves: 0, pieceKinds: 4, efficiency: 11 }),
-    variants: [
-      stage({ id: "e3-bus-bell-25", label: "藍綠雙色", goals: collectEach([2, 3], 25), moves: 0, pieceKinds: 4, efficiency: 11 }),
-      stage({ id: "e3-red-bus-25", label: "粉藍雙色", goals: collectEach([0, 2], 25), moves: 0, pieceKinds: 4, efficiency: 11 }),
-    ],
-  },
-  {
-    main: stage({ id: "e4-bus-33-sp1", goals: [collect(2, 33), detonate(1)], moves: 0, pieceKinds: 4, requireSpecialMove: true, efficiency: 12 }),
-    variants: [
-      stage({ id: "e4-red-33-sp1", label: "小紅特殊糖", goals: [collect(0, 33), detonate(1)], moves: 0, pieceKinds: 4, requireSpecialMove: true, efficiency: 12 }),
-      stage({ id: "e4-bell-33-sp1", label: "鈴鈴特殊糖", goals: [collect(3, 33), detonate(1)], moves: 0, pieceKinds: 4, requireSpecialMove: true, efficiency: 12 }),
-    ],
-  },
-  {
-    main: stage({
+  pack(CLASSIC4, { id: "e1-any-50", goals: [{ kind: "collect-any", count: 50 }], moves: 0, pieceKinds: 4, efficiency: 6 }, [
+    { id: "e1-red-13", label: "小紅收藏家", goals: [collect(RED, 13)], moves: 0, pieceKinds: 4, efficiency: 6 },
+    { id: "e1-taxi-13", label: "計程車收藏家", goals: [collect(TAXI, 13)], moves: 0, pieceKinds: 4, efficiency: 6 },
+    { id: "e1-bus-13", label: "小巴士收藏家", goals: [collect(BUS, 13)], moves: 0, pieceKinds: 4, efficiency: 6 },
+  ]),
+  // 第 2 關：救護車取代小紅當收集目標。
+  pack([AMB, TAXI, BUS, BELL], { id: "e2-ambulance-23", goals: [collect(AMB, 23)], moves: 0, pieceKinds: 4, efficiency: 9 }, [
+    { id: "e2-taxi-23", label: "計程車任務", goals: [collect(TAXI, 23)], moves: 0, pieceKinds: 4, efficiency: 9 },
+    { id: "e2-bell-23", label: "鈴鈴任務", goals: [collect(BELL, 23)], moves: 0, pieceKinds: 4, efficiency: 9 },
+  ]),
+  // 第 3 關：小火車進場，主線仍收小紅與計程車。
+  pack([RED, TAXI, BUS, TRAIN], { id: "e3-red-taxi-25", goals: collectEach([RED, TAXI], 25), moves: 0, pieceKinds: 4, efficiency: 11 }, [
+    { id: "e3-bus-train-25", label: "藍火車雙色", goals: collectEach([BUS, TRAIN], 25), moves: 0, pieceKinds: 4, efficiency: 11 },
+    { id: "e3-red-bus-25", label: "粉藍雙色", goals: collectEach([RED, BUS], 25), moves: 0, pieceKinds: 4, efficiency: 11 },
+  ]),
+  pack([RED, TAXI, BUS, AMB], { id: "e4-bus-33-sp1", goals: [collect(BUS, 33), detonate(1)], moves: 0, pieceKinds: 4, requireSpecialMove: true, efficiency: 12 }, [
+    { id: "e4-red-33-sp1", label: "小紅特殊糖", goals: [collect(RED, 33), detonate(1)], moves: 0, pieceKinds: 4, requireSpecialMove: true, efficiency: 12 },
+    { id: "e4-ambulance-33-sp1", label: "救護車特殊糖", goals: [collect(AMB, 33), detonate(1)], moves: 0, pieceKinds: 4, requireSpecialMove: true, efficiency: 12 },
+  ]),
+  pack(
+    [TAXI, BUS, BELL, FIRE],
+    {
       id: "e5-clean-bottom-8",
       goals: [{ kind: "clean-dirt", count: 8 }],
       moves: 0,
@@ -124,121 +138,79 @@ const EASY: readonly CandyStageSet[] = [
       // 底部兩格是厚污漬，各要多清一次，效率星比單層髒格多留兩步。
       thickDirtCells: [32, 33],
       efficiency: 11,
-    }),
-    variants: [
-      stage({ id: "e5-clean-sides-8", label: "打掃兩邊", goals: [{ kind: "clean-dirt", count: 8 }], moves: 0, pieceKinds: 4, dirtCells: T.sides8, efficiency: 10 }),
-      stage({ id: "e5-clean-middle-18", label: "打掃中間", goals: [{ kind: "clean-dirt", count: 18 }], moves: 0, pieceKinds: 4, dirtCells: T.middle18, efficiency: 10 }),
-      stage({ id: "e5-clean-corners-8", label: "打掃四個角", goals: [{ kind: "clean-dirt", count: 8 }], moves: 0, pieceKinds: 4, dirtCells: T.corners8, efficiency: 12 }),
+    },
+    [
+      { id: "e5-clean-sides-8", label: "打掃兩邊", goals: [{ kind: "clean-dirt", count: 8 }], moves: 0, pieceKinds: 4, dirtCells: T.sides8, efficiency: 10 },
+      { id: "e5-clean-middle-18", label: "打掃中間", goals: [{ kind: "clean-dirt", count: 18 }], moves: 0, pieceKinds: 4, dirtCells: T.middle18, efficiency: 10 },
+      { id: "e5-clean-corners-8", label: "打掃四個角", goals: [{ kind: "clean-dirt", count: 8 }], moves: 0, pieceKinds: 4, dirtCells: T.corners8, efficiency: 12 },
     ],
-  },
-  {
-    main: stage({ id: "e6-red-bell-39", goals: collectEach([0, 3], 39), moves: 0, pieceKinds: 4, efficiency: 14 }),
-    variants: [
-      stage({ id: "e6-taxi-bus-39", label: "黃藍雙色", goals: collectEach([1, 2], 39), moves: 0, pieceKinds: 4, efficiency: 14 }),
-      stage({ id: "e6-red-bus-39", label: "粉藍雙色", goals: collectEach([0, 2], 39), moves: 0, pieceKinds: 4, efficiency: 14 }),
-    ],
-  },
-  {
-    main: stage({ id: "e7-taxi-48-sp2", goals: [collect(1, 48), detonate(2)], moves: 0, pieceKinds: 4, requireSpecialMove: true, efficiency: 16 }),
-    variants: [
-      stage({ id: "e7-red-48-sp2", label: "小紅亮起來", goals: [collect(0, 48), detonate(2)], moves: 0, pieceKinds: 4, requireSpecialMove: true, efficiency: 16 }),
-      stage({ id: "e7-bell-48-sp2", label: "鈴鈴亮起來", goals: [collect(3, 48), detonate(2)], moves: 0, pieceKinds: 4, requireSpecialMove: true, efficiency: 16 }),
-    ],
-  },
-  {
-    main: stage({ id: "e8-gift-2", goals: [{ kind: "drop-item", count: 2 }], moves: 0, pieceKinds: 4, dropCount: 2, efficiency: 17 }),
-    variants: [
-      stage({ id: "e8-gift-2-red-6", label: "禮物加小紅", goals: [{ kind: "drop-item", count: 2 }, collect(0, 6)], moves: 0, pieceKinds: 4, dropCount: 2, efficiency: 17 }),
-      stage({ id: "e8-gift-2-sp1", label: "禮物加特殊糖", goals: [{ kind: "drop-item", count: 2 }, detonate(1)], moves: 0, pieceKinds: 4, dropCount: 2, efficiency: 17 }),
-    ],
-  },
-  {
-    main: stage({ id: "e9-red-bus-bell-51", goals: collectEach([0, 2, 3], 51), moves: 0, pieceKinds: 4, efficiency: 19 }),
-    variants: [
-      stage({ id: "e9-taxi-bus-bell-51", label: "換隊大遊行", goals: collectEach([1, 2, 3], 51), moves: 0, pieceKinds: 4, efficiency: 19 }),
-      stage({ id: "e9-red-taxi-bell-51", label: "彩虹大遊行", goals: collectEach([0, 1, 3], 51), moves: 0, pieceKinds: 4, efficiency: 19 }),
-    ],
-  },
-  {
-    main: stage({ id: "e10-three-58-sp3", goals: [...collectEach([0, 1, 2], 58), detonate(3)], moves: 0, pieceKinds: 4, requireSpecialMove: true, efficiency: 21 }),
-    variants: [
-      stage({ id: "e10-three-58-sp3-b", label: "煙火換色", goals: [...collectEach([1, 2, 3], 58), detonate(3)], moves: 0, pieceKinds: 4, requireSpecialMove: true, efficiency: 21 }),
-      stage({ id: "e10-three-58-sp3-c", label: "煙火大合唱", goals: [...collectEach([0, 2, 3], 58), detonate(3)], moves: 0, pieceKinds: 4, requireSpecialMove: true, efficiency: 21 }),
-    ],
-  },
+  ),
+  // 第 6 關：小紅、計程車、小巴士、救護車。
+  pack([RED, TAXI, BUS, AMB], { id: "e6-red-ambulance-39", goals: collectEach([RED, AMB], 39), moves: 0, pieceKinds: 4, efficiency: 14 }, [
+    { id: "e6-taxi-bus-39", label: "黃藍雙色", goals: collectEach([TAXI, BUS], 39), moves: 0, pieceKinds: 4, efficiency: 14 },
+    { id: "e6-red-bus-39", label: "粉藍雙色", goals: collectEach([RED, BUS], 39), moves: 0, pieceKinds: 4, efficiency: 14 },
+  ]),
+  // 第 7–10 關收集收在每色約 25–35。消防車取代小紅，不跟小紅同場。
+  pack([FIRE, TAXI, BUS, BELL], { id: "e7-taxi-30-sp2", goals: [collect(TAXI, 30), detonate(2)], moves: 0, pieceKinds: 4, requireSpecialMove: true, efficiency: 11 }, [
+    { id: "e7-fire-30-sp2", label: "消防車亮起來", goals: [collect(FIRE, 30), detonate(2)], moves: 0, pieceKinds: 4, requireSpecialMove: true, efficiency: 11 },
+    { id: "e7-bell-30-sp2", label: "鈴鈴亮起來", goals: [collect(BELL, 30), detonate(2)], moves: 0, pieceKinds: 4, requireSpecialMove: true, efficiency: 11 },
+  ]),
+  pack([FIRE, TAXI, BUS, BELL], { id: "e8-gift-2", goals: [{ kind: "drop-item", count: 2 }], moves: 0, pieceKinds: 4, dropCount: 2, efficiency: 17 }, [
+    { id: "e8-gift-2-fire-6", label: "禮物加消防車", goals: [{ kind: "drop-item", count: 2 }, collect(FIRE, 6)], moves: 0, pieceKinds: 4, dropCount: 2, efficiency: 17 },
+    { id: "e8-gift-2-sp1", label: "禮物加特殊糖", goals: [{ kind: "drop-item", count: 2 }, detonate(1)], moves: 0, pieceKinds: 4, dropCount: 2, efficiency: 17 },
+  ]),
+  pack([RED, TAXI, BUS, TRAIN], { id: "e9-red-bus-train-33", goals: collectEach([RED, BUS, TRAIN], 33), moves: 0, pieceKinds: 4, efficiency: 13 }, [
+    { id: "e9-taxi-bus-train-33", label: "換隊大遊行", goals: collectEach([TAXI, BUS, TRAIN], 33), moves: 0, pieceKinds: 4, efficiency: 13 },
+    { id: "e9-red-taxi-train-33", label: "彩虹大遊行", goals: collectEach([RED, TAXI, TRAIN], 33), moves: 0, pieceKinds: 4, efficiency: 13 },
+  ]),
+  pack([FIRE, TAXI, BUS, TRAIN], { id: "e10-fire-taxi-bus-35-sp3", goals: [...collectEach([FIRE, TAXI, BUS], 35), detonate(3)], moves: 0, pieceKinds: 4, requireSpecialMove: true, efficiency: 15 }, [
+    { id: "e10-taxi-bus-train-35-sp3", label: "煙火換色", goals: [...collectEach([TAXI, BUS, TRAIN], 35), detonate(3)], moves: 0, pieceKinds: 4, requireSpecialMove: true, efficiency: 15 },
+    { id: "e10-fire-bus-train-35-sp3", label: "煙火大合唱", goals: [...collectEach([FIRE, BUS, TRAIN], 35), detonate(3)], moves: 0, pieceKinds: 4, requireSpecialMove: true, efficiency: 15 },
+  ]),
 ];
 
+/** 挑戰第 1–5 關 4 種、第 6 關起 5 種；新車輪進，多多仍在後期出場。 */
 const CHALLENGE: readonly CandyStageSet[] = [
-  {
-    main: stage({ id: "c1-any-92", goals: [{ kind: "collect-any", count: 92 }], moves: 12, efficiency: 4, pieceKinds: 4 }),
-    variants: [
-      stage({ id: "c1-red-24", label: "小紅收藏家", goals: [collect(0, 24)], moves: 12, efficiency: 4, pieceKinds: 4 }),
-      stage({ id: "c1-taxi-24", label: "計程車收藏家", goals: [collect(1, 24)], moves: 12, efficiency: 4, pieceKinds: 4 }),
-    ],
-  },
-  {
-    main: stage({ id: "c2-red-32", goals: [collect(0, 32)], moves: 14, efficiency: 4, pieceKinds: 4 }),
-    variants: [
-      stage({ id: "c2-taxi-30", label: "計程車任務", goals: [collect(1, 30)], moves: 14, efficiency: 4, pieceKinds: 4 }),
-      stage({ id: "c2-bell-30", label: "鈴鈴任務", goals: [collect(3, 30)], moves: 14, efficiency: 4, pieceKinds: 4 }),
-    ],
-  },
-  {
-    main: stage({ id: "c3-red-taxi-36", goals: collectEach([0, 1], 36), moves: 16, efficiency: 4, pieceKinds: 4 }),
-    variants: [
-      stage({ id: "c3-bus-bell-36", label: "藍綠雙色", goals: collectEach([2, 3], 36), moves: 16, efficiency: 4, pieceKinds: 4 }),
-      stage({ id: "c3-red-bus-36", label: "粉藍雙色", goals: collectEach([0, 2], 36), moves: 16, efficiency: 4, pieceKinds: 4 }),
-    ],
-  },
-  {
-    main: stage({ id: "c4-bus-50-sp2", goals: [collect(2, 50), detonate(2)], moves: 18, efficiency: 4, pieceKinds: 4, requireSpecialMove: true }),
-    variants: [
-      stage({ id: "c4-red-53-sp2", label: "小紅特殊糖", goals: [collect(0, 53), detonate(2)], moves: 18, efficiency: 4, pieceKinds: 4, requireSpecialMove: true }),
-      stage({ id: "c4-bell-47-sp2", label: "鈴鈴特殊糖", goals: [collect(3, 47), detonate(2)], moves: 18, efficiency: 4, pieceKinds: 4, requireSpecialMove: true }),
-    ],
-  },
-  {
-    main: stage({ id: "c5-clean-bottom-12-red-50", goals: [{ kind: "clean-dirt", count: 12 }, collect(0, 50)], moves: 18, efficiency: 3, pieceKinds: 4, dirtCells: T.bottom12 }),
-    variants: [
-      stage({ id: "c5-clean-corners-12-taxi-43", label: "打掃四個角", goals: [{ kind: "clean-dirt", count: 12 }, collect(1, 43)], moves: 18, efficiency: 3, pieceKinds: 4, dirtCells: T.corners12 }),
-      stage({ id: "c5-clean-sides-12-bus-44", label: "打掃兩邊", goals: [{ kind: "clean-dirt", count: 12 }, collect(2, 44)], moves: 18, efficiency: 3, pieceKinds: 4, dirtCells: T.sides12 }),
-    ],
-  },
-  {
-    main: stage({ id: "c6-red-bell-31", goals: collectEach([0, 3], 31), moves: 24, efficiency: 4, pieceKinds: 5 }),
-    variants: [
-      stage({ id: "c6-taxi-bus-32", label: "黃藍雙色", goals: collectEach([1, 2], 32), moves: 24, efficiency: 4, pieceKinds: 5 }),
-      stage({ id: "c6-red-bus-32", label: "粉藍雙色", goals: collectEach([0, 2], 32), moves: 24, efficiency: 4, pieceKinds: 5 }),
-    ],
-  },
-  {
-    main: stage({ id: "c7-taxi-40-sp3", goals: [collect(1, 40), detonate(3)], moves: 26, efficiency: 4, pieceKinds: 5, requireSpecialMove: true }),
-    variants: [
-      stage({ id: "c7-red-40-sp3", label: "小紅亮起來", goals: [collect(0, 40), detonate(3)], moves: 26, efficiency: 4, pieceKinds: 5, requireSpecialMove: true }),
-      stage({ id: "c7-bell-40-sp3", label: "鈴鈴亮起來", goals: [collect(3, 40), detonate(3)], moves: 26, efficiency: 4, pieceKinds: 5, requireSpecialMove: true }),
-    ],
-  },
-  {
-    main: stage({ id: "c8-gift-3-red-30", goals: [{ kind: "drop-item", count: 3 }, collect(0, 30)], moves: 26, efficiency: 4, pieceKinds: 5, dropCount: 3 }),
-    variants: [
-      stage({ id: "c8-gift-3-taxi-33", label: "禮物加計程車", goals: [{ kind: "drop-item", count: 3 }, collect(1, 33)], moves: 26, efficiency: 4, pieceKinds: 5, dropCount: 3 }),
-      stage({ id: "c8-gift-3-bell-31", label: "禮物加鈴鈴", goals: [{ kind: "drop-item", count: 3 }, collect(3, 31)], moves: 26, efficiency: 4, pieceKinds: 5, dropCount: 3 }),
-    ],
-  },
-  {
-    main: stage({ id: "c9-red-bus-bell-38", goals: collectEach([0, 2, 3], 38), moves: 28, efficiency: 3, pieceKinds: 5 }),
-    variants: [
-      stage({ id: "c9-taxi-bus-bell-38", label: "換隊大遊行", goals: collectEach([1, 2, 3], 38), moves: 28, efficiency: 3, pieceKinds: 5 }),
-      stage({ id: "c9-red-taxi-bell-38", label: "彩虹大遊行", goals: collectEach([0, 1, 3], 38), moves: 28, efficiency: 3, pieceKinds: 5 }),
-    ],
-  },
-  {
-    main: stage({ id: "c10-three-40-sp4", goals: [...collectEach([0, 1, 2], 40), detonate(4)], moves: 30, efficiency: 3, pieceKinds: 5, requireSpecialMove: true }),
-    variants: [
-      stage({ id: "c10-three-42-sp4-b", label: "煙火換色", goals: [...collectEach([1, 2, 3], 42), detonate(4)], moves: 30, efficiency: 3, pieceKinds: 5, requireSpecialMove: true }),
-      stage({ id: "c10-three-42-sp4-c", label: "煙火大合唱", goals: [...collectEach([0, 2, 3], 42), detonate(4)], moves: 30, efficiency: 3, pieceKinds: 5, requireSpecialMove: true }),
-    ],
-  },
+  pack([RED, TAXI, BUS, AMB], { id: "c1-any-92", goals: [{ kind: "collect-any", count: 92 }], moves: 12, efficiency: 4, pieceKinds: 4 }, [
+    { id: "c1-red-24", label: "小紅收藏家", goals: [collect(RED, 24)], moves: 12, efficiency: 4, pieceKinds: 4 },
+    { id: "c1-taxi-24", label: "計程車收藏家", goals: [collect(TAXI, 24)], moves: 12, efficiency: 4, pieceKinds: 4 },
+  ]),
+  pack([AMB, TAXI, BUS, BELL], { id: "c2-ambulance-32", goals: [collect(AMB, 32)], moves: 14, efficiency: 4, pieceKinds: 4 }, [
+    { id: "c2-taxi-30", label: "計程車任務", goals: [collect(TAXI, 30)], moves: 14, efficiency: 4, pieceKinds: 4 },
+    { id: "c2-bell-30", label: "鈴鈴任務", goals: [collect(BELL, 30)], moves: 14, efficiency: 4, pieceKinds: 4 },
+  ]),
+  pack([RED, TAXI, BUS, TRAIN], { id: "c3-red-taxi-36", goals: collectEach([RED, TAXI], 36), moves: 16, efficiency: 4, pieceKinds: 4 }, [
+    { id: "c3-bus-train-36", label: "藍火車雙色", goals: collectEach([BUS, TRAIN], 36), moves: 16, efficiency: 4, pieceKinds: 4 },
+    { id: "c3-red-bus-36", label: "粉藍雙色", goals: collectEach([RED, BUS], 36), moves: 16, efficiency: 4, pieceKinds: 4 },
+  ]),
+  pack([FIRE, TAXI, BUS, BELL], { id: "c4-bus-50-sp2", goals: [collect(BUS, 50), detonate(2)], moves: 18, efficiency: 4, pieceKinds: 4, requireSpecialMove: true }, [
+    { id: "c4-fire-53-sp2", label: "消防車特殊糖", goals: [collect(FIRE, 53), detonate(2)], moves: 18, efficiency: 4, pieceKinds: 4, requireSpecialMove: true },
+    { id: "c4-bell-47-sp2", label: "鈴鈴特殊糖", goals: [collect(BELL, 47), detonate(2)], moves: 18, efficiency: 4, pieceKinds: 4, requireSpecialMove: true },
+  ]),
+  pack([FIRE, TAXI, BUS, BELL], { id: "c5-clean-bottom-12-fire-50", goals: [{ kind: "clean-dirt", count: 12 }, collect(FIRE, 50)], moves: 18, efficiency: 3, pieceKinds: 4, dirtCells: T.bottom12 }, [
+    { id: "c5-clean-corners-12-taxi-43", label: "打掃四個角", goals: [{ kind: "clean-dirt", count: 12 }, collect(TAXI, 43)], moves: 18, efficiency: 3, pieceKinds: 4, dirtCells: T.corners12 },
+    { id: "c5-clean-sides-12-bus-44", label: "打掃兩邊", goals: [{ kind: "clean-dirt", count: 12 }, collect(BUS, 44)], moves: 18, efficiency: 3, pieceKinds: 4, dirtCells: T.sides12 },
+  ]),
+  pack([RED, TAXI, BUS, AMB, DUO], { id: "c6-red-ambulance-31", goals: collectEach([RED, AMB], 31), moves: 24, efficiency: 4, pieceKinds: 5 }, [
+    { id: "c6-taxi-bus-32", label: "黃藍雙色", goals: collectEach([TAXI, BUS], 32), moves: 24, efficiency: 4, pieceKinds: 5 },
+    { id: "c6-red-bus-32", label: "粉藍雙色", goals: collectEach([RED, BUS], 32), moves: 24, efficiency: 4, pieceKinds: 5 },
+  ]),
+  pack([FIRE, TAXI, BUS, BELL, DUO], { id: "c7-taxi-40-sp3", goals: [collect(TAXI, 40), detonate(3)], moves: 26, efficiency: 4, pieceKinds: 5, requireSpecialMove: true }, [
+    { id: "c7-fire-40-sp3", label: "消防車亮起來", goals: [collect(FIRE, 40), detonate(3)], moves: 26, efficiency: 4, pieceKinds: 5, requireSpecialMove: true },
+    { id: "c7-bell-40-sp3", label: "鈴鈴亮起來", goals: [collect(BELL, 40), detonate(3)], moves: 26, efficiency: 4, pieceKinds: 5, requireSpecialMove: true },
+  ]),
+  pack([FIRE, TAXI, BUS, BELL, TRAIN], { id: "c8-gift-3-fire-30", goals: [{ kind: "drop-item", count: 3 }, collect(FIRE, 30)], moves: 26, efficiency: 4, pieceKinds: 5, dropCount: 3 }, [
+    { id: "c8-gift-3-taxi-33", label: "禮物加計程車", goals: [{ kind: "drop-item", count: 3 }, collect(TAXI, 33)], moves: 26, efficiency: 4, pieceKinds: 5, dropCount: 3 },
+    { id: "c8-gift-3-bell-31", label: "禮物加鈴鈴", goals: [{ kind: "drop-item", count: 3 }, collect(BELL, 31)], moves: 26, efficiency: 4, pieceKinds: 5, dropCount: 3 },
+  ]),
+  pack([RED, TAXI, BUS, TRAIN, DUO], { id: "c9-red-bus-train-38", goals: collectEach([RED, BUS, TRAIN], 38), moves: 28, efficiency: 3, pieceKinds: 5 }, [
+    { id: "c9-taxi-bus-train-38", label: "換隊大遊行", goals: collectEach([TAXI, BUS, TRAIN], 38), moves: 28, efficiency: 3, pieceKinds: 5 },
+    { id: "c9-red-taxi-train-38", label: "彩虹大遊行", goals: collectEach([RED, TAXI, TRAIN], 38), moves: 28, efficiency: 3, pieceKinds: 5 },
+  ]),
+  pack([FIRE, TAXI, BUS, TRAIN, DUO], { id: "c10-fire-taxi-bus-40-sp4", goals: [...collectEach([FIRE, TAXI, BUS], 40), detonate(4)], moves: 30, efficiency: 3, pieceKinds: 5, requireSpecialMove: true }, [
+    { id: "c10-taxi-bus-train-42-sp4", label: "煙火換色", goals: [...collectEach([TAXI, BUS, TRAIN], 42), detonate(4)], moves: 30, efficiency: 3, pieceKinds: 5, requireSpecialMove: true },
+    { id: "c10-fire-bus-train-42-sp4", label: "煙火大合唱", goals: [...collectEach([FIRE, BUS, TRAIN], 42), detonate(4)], moves: 30, efficiency: 3, pieceKinds: 5, requireSpecialMove: true },
+  ]),
 ];
 
 export const CANDY_STAGES: Readonly<Record<CandyMode, readonly CandyStageSet[]>> = {
@@ -308,16 +280,22 @@ export function efficiencyMet(
   return progress.swaps <= round.stage.efficiency;
 }
 
-/** 靜態檢查：任務合理、物件數足夠、圖案在本關範圍內。 */
+/** 靜態檢查：任務合理、物件數足夠、圖案在本關上場名單裡。 */
 export function isStageFeasible(level: CandyMatchLevel, s: CandyStage): boolean {
   if (s.moves < 0 || s.goals.length === 0) return false;
   if (s.pieceKinds < 3 || s.pieceKinds > 5) return false;
+  const palette = stagePalette(s);
+  if (palette.length !== s.pieceKinds) return false;
+  if (new Set(palette).size !== palette.length) return false;
+  if (palette.some((id) => !Number.isInteger(id) || id < 0 || id >= CANDY_MATCH_PIECES.length)) return false;
+  // 橘紅消防車與莓紅小紅色盲下太近，不排同一關。
+  if (palette.includes(CANDY_PIECE.red) && palette.includes(CANDY_PIECE.fire)) return false;
   const total = level.cols * level.rows;
   return s.goals.every((goal) => {
     if (goal.count <= 0) return false;
     switch (goal.kind) {
       case "collect":
-        return goal.piece >= 0 && goal.piece < s.pieceKinds;
+        return palette.includes(goal.piece);
       case "clean-dirt": {
         const dirt = s.dirtCells ?? [];
         const thick = s.thickDirtCells ?? [];

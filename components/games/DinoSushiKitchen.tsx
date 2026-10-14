@@ -1,8 +1,8 @@
 "use client";
 
 import { useLayoutEffect, useRef } from "react";
-import { BaseArt, PlateArt, SushiArt, ToppingArt } from "@/lib/games/dino-sushi/art";
-import { matchOrder } from "@/lib/games/dino-sushi/orders";
+import { BaseArt, PlateArt, SHOP_SRC, SushiArt, ToppingArt } from "@/lib/games/dino-sushi/art";
+import { matchOrder, orderSpeechLine } from "@/lib/games/dino-sushi/orders";
 import { currentOrder } from "@/lib/games/dino-sushi/round";
 import { MAX_TOPPINGS } from "@/lib/games/dino-sushi/sushi";
 import { BASES, baseById, toppingById } from "@/lib/games/dino-sushi/toppings";
@@ -13,12 +13,17 @@ import { DinoSushiPlateStack } from "./DinoSushiPlateStack";
 import { ShopBelt, ShopWall } from "./DinoSushiShop";
 import { DinoSushiTray } from "./DinoSushiTray";
 import type { DinoSushiPlay } from "./useDinoSushiPlay";
+import { useDinoSushiSpeech } from "./useDinoSushiSpeech";
 import styles from "./DinoSushiKitchen.module.css";
 
 type Props = {
   play: DinoSushiPlay;
   reducedMotion: boolean;
   inputPaused: boolean;
+  /** 抬頭的「音效」開關；多多說話也跟著它。 */
+  soundOn: boolean;
+  /** 設定裡的遊戲音量 0–1。 */
+  gameVolume: number;
 };
 
 /**
@@ -63,7 +68,7 @@ function useFocusAcrossPhases(choosingBase: boolean) {
 }
 
 /** 廚房：迴轉壽司店（多多＋泡泡＋疊盤）｜砧板（3 料位）＋「給多多吃」｜托盤。 */
-export function DinoSushiKitchen({ play, reducedMotion, inputPaused }: Props) {
+export function DinoSushiKitchen({ play, reducedMotion, inputPaused, soundOn, gameVolume }: Props) {
   const {
     round,
     phase,
@@ -78,6 +83,16 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused }: Props) {
   } = play;
   const { rootRef, focusProps } = useFocusAcrossPhases(choosingBase);
   const picked = useRef<{ at: number; rect: DOMRect } | null>(null);
+  const orderForSpeech = round ? currentOrder(round) : null;
+  const speech = useDinoSushiSpeech({
+    orderToken: round && orderForSpeech ? `${round.mode}:${round.seed}:${round.index}` : null,
+    orderLine: orderForSpeech ? orderSpeechLine(orderForSpeech) : null,
+    firstOrder: round?.index === 0,
+    caption,
+    inputPaused,
+    soundOn,
+    volume: gameVolume,
+  });
   if (!round) return null;
   const order = currentOrder(round);
   const eating = round.pending?.eats === true;
@@ -154,6 +169,7 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused }: Props) {
               flash={flash}
               index={round.index}
               total={round.orders.length}
+              onReplay={speech.voiceOn ? speech.replay : undefined}
             />
           ) : null}
           {caption ? (
@@ -176,27 +192,31 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused }: Props) {
             /* a／b 兩個同樣的晃動動畫輪流換名字才會重播；不用 key 重掛，免得壽司和料位的進場動畫一起重跳 */
             data-shake={shake === 0 ? undefined : shake % 2 === 0 ? "a" : "b"}
           >
-            <TapButton
-              className={styles.sushiButton}
-              aria-label={
-                sushi.base
-                  ? `換飯：現在是${baseById(sushi.base).label}`
-                  : "選飯"
-              }
-              data-hint={layerHint?.kind === "base" ? "true" : undefined}
-              disabled={disabled}
-              onTap={afterPick(actions.reopenBase)}
-            >
-              {/* 換一種飯才重掛：落下動畫照舊在選完飯時播一次 */}
-              {eating ? null : (
-                <SushiArt
-                  key={sushi.base ?? "none"}
-                  sushi={sushi}
-                  layerClassName={reducedMotion ? undefined : styles.layerPop}
-                />
-              )}
-              {teaching && layerHint?.kind === "base" ? <Finger /> : null}
-            </TapButton>
+            <div className={styles.prep}>
+              {/* eslint-disable-next-line @next/next/no-img-element -- 原檔備料盤 */}
+              <img className={styles.prepPlate} src={SHOP_SRC.prepplate} alt="" draggable={false} decoding="sync" />
+              <TapButton
+                className={styles.sushiButton}
+                aria-label={
+                  sushi.base
+                    ? `換飯：現在是${baseById(sushi.base).label}`
+                    : "選飯"
+                }
+                data-hint={layerHint?.kind === "base" ? "true" : undefined}
+                disabled={disabled}
+                onTap={afterPick(actions.reopenBase)}
+              >
+                {/* 換一種飯才重掛：落下動畫照舊在選完飯時播一次 */}
+                {eating ? null : (
+                  <SushiArt
+                    key={sushi.base ?? "none"}
+                    sushi={sushi}
+                    layerClassName={reducedMotion ? undefined : styles.layerPop}
+                  />
+                )}
+                {teaching && layerHint?.kind === "base" ? <Finger /> : null}
+              </TapButton>
+            </div>
             <div
               className={styles.slots}
               role="group"

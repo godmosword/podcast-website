@@ -14,6 +14,7 @@ import {
   matchable,
   randomPiece,
   type BoardState,
+  type CandySpawnPool,
   type CandySpecial,
   type Rng,
 } from "./engine";
@@ -74,7 +75,7 @@ function expectedDirt(cols: number, rows: number, options: BoardGenOptions): num
 function generateCandidate(
   cols: number,
   rows: number,
-  kinds: number,
+  kinds: CandySpawnPool,
   rng: Rng,
   options: BoardGenOptions,
 ): BoardState {
@@ -144,7 +145,20 @@ function sameBoard(a: Pick<BoardState, "pieces" | "dirt">, b: Pick<BoardState, "
   );
 }
 
-function configSeed(cols: number, rows: number, kinds: number, options: BoardGenOptions): number {
+/** 0..n-1 的身份池沿用舊 seed，換過車的關才換保底盤。 */
+function poolSeed(kinds: CandySpawnPool): number {
+  if (typeof kinds === "number") return kinds * 83492791;
+  if (kinds.every((id, i) => id === i)) return kinds.length * 83492791;
+  let h = kinds.length * 83492791;
+  for (const id of kinds) h = Math.imul(h ^ (id + 1), 16777619) >>> 0;
+  return h;
+}
+
+function asPalette(kinds: CandySpawnPool): readonly number[] {
+  return typeof kinds === "number" ? Array.from({ length: Math.max(0, kinds) }, (_, i) => i) : kinds;
+}
+
+function configSeed(cols: number, rows: number, kinds: CandySpawnPool, options: BoardGenOptions): number {
   const dirt = options.dirtCells ? options.dirtCells.reduce((h, i) => (h * 31 + i) >>> 0, 7) : options.dirtCount ?? 0;
   const thick = options.thickDirtCells?.length
     ? options.thickDirtCells.reduce((h, i) => (h * 31 + i + 2) >>> 0, 11)
@@ -152,7 +166,7 @@ function configSeed(cols: number, rows: number, kinds: number, options: BoardGen
   return (
     (cols * 73856093) ^
     (rows * 19349663) ^
-    (kinds * 83492791) ^
+    poolSeed(kinds) ^
     ((options.dropCount ?? 0) * 2654435761) ^
     (dirt * 40503) ^
     (thick * 2246822519) ^
@@ -167,7 +181,7 @@ function configSeed(cols: number, rows: number, kinds: number, options: BoardGen
 export function fallbackBoard(
   cols: number,
   rows: number,
-  kinds: number,
+  kinds: CandySpawnPool,
   options: BoardGenOptions = {},
 ): BoardState {
   const base = configSeed(cols, rows, kinds, options);
@@ -175,8 +189,9 @@ export function fallbackBoard(
     const candidate = generateCandidate(cols, rows, kinds, seededRng(base + seed * 977), options);
     if (isValidStartBoard(candidate, options)) return candidate;
   }
+  const label = typeof kinds === "number" ? String(kinds) : kinds.join(",");
   throw new Error(
-    `Candy fallback board unavailable for ${cols}x${rows} kinds=${kinds} drops=${options.dropCount ?? 0}`,
+    `Candy fallback board unavailable for ${cols}x${rows} kinds=${label} drops=${options.dropCount ?? 0}`,
   );
 }
 
@@ -184,7 +199,7 @@ export function fallbackBoard(
 export function createBoard(
   cols: number,
   rows: number,
-  kinds: number,
+  kinds: CandySpawnPool,
   rng: Rng,
   options: BoardGenOptions = {},
 ): BoardState {
@@ -216,7 +231,7 @@ function shuffleMovable(state: BoardState, specials: CandySpecial[], rng: Rng): 
   return { ...state, pieces, specials: nextSpecials, dirt: state.dirt.slice() };
 }
 
-function recolorMovable(state: BoardState, specials: CandySpecial[], kinds: number, rng: Rng): BoardState {
+function recolorMovable(state: BoardState, specials: CandySpecial[], kinds: CandySpawnPool, rng: Rng): BoardState {
   const { cols, rows } = state;
   const pieces = state.pieces.slice();
   for (let r = 0; r < rows; r++) {
@@ -238,20 +253,23 @@ function recolorMovable(state: BoardState, specials: CandySpecial[], kinds: numb
  * 構造式保底：可消除格依 (欄 + 2×列) mod 種類 上色（橫、直都不會三連），
  * 再在某一列連續四格種下「A A B A」，換最後兩格就是一步三連。逐列嘗試並驗證。
  */
-function constructedPlayable(state: BoardState, specials: CandySpecial[], kinds: number): BoardState | null {
+function constructedPlayable(state: BoardState, specials: CandySpecial[], kinds: CandySpawnPool): BoardState | null {
   const { cols, rows } = state;
+  const palette = asPalette(kinds);
+  const n = palette.length;
+  if (n < 2) return null;
   const base = state.pieces.map((v, i) =>
-    matchable(v) ? ((i % cols) + 2 * Math.floor(i / cols)) % kinds : v,
+    matchable(v) ? palette[((i % cols) + 2 * Math.floor(i / cols)) % n]! : v,
   );
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c + 3 < cols; c++) {
       const cells = [0, 1, 2, 3].map((k) => idx(c + k, r, cols));
       if (!cells.every((i) => matchable(base[i]!))) continue;
-      for (let a = 0; a < kinds; a++) {
-        const b = (a + 1) % kinds;
+      for (let a = 0; a < n; a++) {
+        const b = (a + 1) % n;
         const pieces = base.slice();
-        [a, a, b, a].forEach((color, k) => {
-          pieces[cells[k]!] = color;
+        [palette[a], palette[a], palette[b], palette[a]].forEach((color, k) => {
+          pieces[cells[k]!] = color!;
         });
         const next = { ...state, pieces, specials: specials.slice(), dirt: state.dirt.slice() };
         if (isPlayable(next)) return next;
@@ -272,13 +290,13 @@ function isPlayable(state: BoardState): boolean {
  * 無解時重排：保留髒格、禮物位置與特殊糖數量，重洗一般圖案直到無三連且有解。
  * 洗牌湊不出解時改為重新配色（特殊糖留在原格），不回傳仍無合法步的盤面。
  */
-export function reshuffle(state: BoardState, rng: Rng, kinds?: number): BoardState {
+export function reshuffle(state: BoardState, rng: Rng, kinds?: CandySpawnPool): BoardState {
   const specials = state.specials ?? emptySpecials(state.pieces.length);
   for (let attempt = 0; attempt < RANDOM_ATTEMPTS; attempt++) {
     const next = shuffleMovable(state, specials, rng);
     if (isPlayable(next)) return next;
   }
-  const palette = Math.max(3, kinds ?? Math.max(0, ...state.pieces) + 1);
+  const palette: CandySpawnPool = kinds ?? Math.max(3, Math.max(0, ...state.pieces) + 1);
   for (let attempt = 0; attempt < RANDOM_ATTEMPTS; attempt++) {
     const next = recolorMovable(state, specials, palette, rng);
     if (isPlayable(next)) return next;
