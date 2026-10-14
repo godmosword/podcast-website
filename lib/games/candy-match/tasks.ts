@@ -115,8 +115,26 @@ function unit(goal: CandyGoal): string {
       return "格";
     case "detonate":
       return "次";
+    case "collect":
+    case "collect-any":
+      return "台";
     default:
       return "個";
+  }
+}
+
+function goalObject(goal: CandyGoal): string {
+  switch (goal.kind) {
+    case "collect":
+      return pieceName(goal.piece);
+    case "collect-any":
+      return "車車";
+    case "clean-dirt":
+      return "髒髒";
+    case "drop-item":
+      return "禮物";
+    case "detonate":
+      return "特殊糖";
   }
 }
 
@@ -183,11 +201,84 @@ export function goalsSummary(goals: readonly CandyGoal[]): string {
 }
 
 /**
- * 開局念給孩子聽的一句目標。「＋」改成「還要」，厚污漬再補一句。
- * 例如「收集計程車 30 個，還要啟動特殊糖 2 次。」
+ * 關前大字，圖旁邊念給孩子聽。例如「收集 5 台小紅」。
+ * 車車用「台」，髒格用「格」，禮物用「個」，特殊糖用「次」。
+ */
+export function goalIntroLine(goal: CandyGoal): string {
+  switch (goal.kind) {
+    case "collect":
+      return `收集 ${goal.count} 台${pieceName(goal.piece)}`;
+    case "collect-any":
+      return `收集 ${goal.count} 台車車`;
+    case "clean-dirt":
+      return `打掃 ${goal.count} 格髒髒`;
+    case "drop-item":
+      return `送 ${goal.count} 個禮物`;
+    case "detonate":
+      return `啟動特殊糖 ${goal.count} 次`;
+  }
+}
+
+/** 單一目標剛達成時念的一句，例如「小紅完成了！」。 */
+export function goalDoneSpeech(goal: CandyGoal): string {
+  switch (goal.kind) {
+    case "collect":
+      return `${pieceName(goal.piece)}完成了！`;
+    case "collect-any":
+      return "車車收集完成了！";
+    case "clean-dirt":
+      return "打掃完成了！";
+    case "drop-item":
+      return "禮物送到了！";
+    case "detonate":
+      return "特殊糖完成了！";
+  }
+}
+
+/** 畫面上的差額，例如「再差 2 台！」。圖已經說明是哪一種。 */
+export function goalShortfallLabel(goal: CandyGoal, remaining: number): string {
+  return `再差 ${remaining} ${unit(goal)}！`;
+}
+
+/** 念出來的差額，帶上是什麼，例如「再差 2 台小紅！」。 */
+export function goalShortfallSpeech(goal: CandyGoal, remaining: number): string {
+  const name = goalObject(goal);
+  switch (goal.kind) {
+    case "collect":
+    case "collect-any":
+      return `再差 ${remaining} 台${name}！`;
+    case "clean-dirt":
+      return `再差 ${remaining} 格${name}！`;
+    case "drop-item":
+      return `再差 ${remaining} 個${name}！`;
+    case "detonate":
+      return `再差 ${remaining} 次${name}！`;
+  }
+}
+
+/** 點目標卡再聽一次：完成念印章，沒完成念還差幾台。 */
+export function goalHearLine(goal: CandyGoal, progress: CandyProgress): string {
+  const status = goalStatus(goal, progress);
+  if (status.done) return goalDoneSpeech(goal);
+  return goalShortfallSpeech(goal, status.remaining).replace(/^再差/, "還差");
+}
+
+/** 挑戰沒過：把每一項沒達標的差額接成一句。 */
+export function challengeMissSpeech(goals: readonly CandyGoal[], progress: CandyProgress): string {
+  return goals
+    .flatMap((goal) => {
+      const status = goalStatus(goal, progress);
+      return status.done ? [] : [goalShortfallSpeech(goal, status.remaining)];
+    })
+    .join("");
+}
+
+/**
+ * 開局念給孩子聽的一句目標。多個目標用「還要」接起來，厚污漬再補一句。
+ * 例如「收集 30 台計程車，還要啟動特殊糖 2 次。」
  */
 export function levelGoalSpeech(goals: readonly CandyGoal[], thick = false): string {
-  const spoken = goalsSummary(goals).split("＋").join("，還要");
+  const spoken = goals.map((goal) => goalIntroLine(goal)).join("，還要");
   const line = spoken.endsWith("。") ? spoken : `${spoken}。`;
   return thick ? `${line}有的污漬比較厚，要再掃一次！` : line;
 }

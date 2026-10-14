@@ -307,6 +307,7 @@
 
 /* 局內閱讀順序：本關要做什麼 → 棋盤 → 我能用什麼 */
 .playLayout {
+  position: relative;
   display: grid;
   grid-template-areas:
     "task"
@@ -320,6 +321,12 @@
   justify-self: center;
   width: min(100%, 600px);
   min-width: 0;
+}
+
+/* 關前介紹蓋住棋盤時，朗讀開關仍要點得到 */
+.playTask[data-above="true"] {
+  position: relative;
+  z-index: 6;
 }
 
 .boardWrap {

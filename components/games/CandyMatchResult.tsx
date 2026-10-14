@@ -3,13 +3,16 @@
 import { GameEndStation } from "@/components/games/GameEndStation";
 import { IconBubble, IconSwap } from "@/components/games/ClayIcons";
 import { IconFootprints, IconMapFold } from "@/components/games/CandyMatchIcons";
+import { CandyGoalCard } from "@/components/games/CandyMatchTaskBar";
 import { ResultStars, type ResultStarHint } from "@/components/games/ResultStars";
 import type { CandyMatchRound } from "@/lib/games/candy-match/stages";
+import { goalStatus, type CandyGoal, type CandyProgress } from "@/lib/games/candy-match/tasks";
 import type { CandyRoundOutcome } from "./useCandyMatchPlay";
 import styles from "./CandyMatchPlay.module.css";
 
 type CandyMatchResultProps = {
   round: CandyMatchRound;
+  progress: CandyProgress;
   outcome: CandyRoundOutcome;
   isLastLevel: boolean;
   reducedMotion: boolean;
@@ -51,9 +54,32 @@ function missedRules(round: CandyMatchRound, outcome: CandyWin): ResultStarHint[
   return missed;
 }
 
-/** 結算：標題＋三顆星（沒拿滿才多一行提示）；按鈕一排「回地圖｜下一站｜再挑戰」，主鈕在中線。 */
+function GoalRecap({
+  goals,
+  progress,
+  emphasis,
+}: {
+  goals: readonly CandyGoal[];
+  progress: CandyProgress;
+  emphasis: "play" | "short";
+}) {
+  const items = goals.filter((goal) => emphasis !== "short" || !goalStatus(goal, progress).done);
+  if (items.length === 0) return null;
+  return (
+    <ul className={styles.goalList} data-count={items.length} aria-label={emphasis === "short" ? "還差這些" : "本關目標"}>
+      {items.map((goal, i) => (
+        <li key={i}>
+          <CandyGoalCard goal={goal} progress={progress} emphasis={emphasis} />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** 結算：過關蓋章，或挑戰沒過時標出還差幾台。按鈕一排「回地圖｜下一站｜再挑戰」，主鈕在中線。 */
 export function CandyMatchResult({
   round,
+  progress,
   outcome,
   isLastLevel,
   reducedMotion,
@@ -62,8 +88,13 @@ export function CandyMatchResult({
   onMap,
 }: CandyMatchResultProps) {
   const mapAction = { label: "回地圖", icon: <IconMapFold size={22} />, onClick: onMap };
+  const goals = round.stage.goals;
   return (
-    <div className={styles.resultOverlay} data-testid="candy-match-result">
+    <div
+      className={styles.resultOverlay}
+      data-testid="candy-match-result"
+      data-reduced={reducedMotion ? "true" : undefined}
+    >
       {outcome.kind === "win" && !reducedMotion ? (
         <div className={styles.confetti} aria-hidden>
           {CONFETTI.flatMap((color, i) =>
@@ -84,24 +115,33 @@ export function CandyMatchResult({
       {outcome.kind === "win" ? (
         <GameEndStation
           mood="win"
-          title={isLastLevel ? "全部完成！" : "任務完成！"}
+          title="過關！"
           gameSlug="candy-match"
           onReplay={onReplay}
           replayLabel="再挑戰"
           mainAction={isLastLevel ? undefined : { label: "下一站", icon: "next", onClick: onNext }}
-          details={<ResultStars stars={outcome.stars} hints={missedRules(round, outcome)} animate={!reducedMotion} />}
+          details={
+            <>
+              {isLastLevel ? <p className={styles.introLine}>全部完成！</p> : null}
+              <GoalRecap goals={goals} progress={progress} emphasis="play" />
+              <ResultStars stars={outcome.stars} hints={missedRules(round, outcome)} animate={!reducedMotion} />
+            </>
+          }
           leadingAction={mapAction}
           hideHubLink
+          sideSize={56}
         />
       ) : (
         <GameEndStation
           mood="retry"
-          title="步數用完了！"
+          title="再試一次！"
           gameSlug="candy-match"
           onReplay={onReplay}
           replayLabel="再來一次"
+          details={<GoalRecap goals={goals} progress={progress} emphasis="short" />}
           leadingAction={mapAction}
           hideHubLink
+          sideSize={56}
         />
       )}
     </div>

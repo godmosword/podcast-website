@@ -4,6 +4,7 @@ import {
   type VisualTheme,
   type VisualViewportId,
 } from "./visual-helpers";
+import { dismissCandyIntro } from "./candy-helpers";
 import { INTRO_PORTAL_ENABLED, skipIntroOverlay } from "./intro-gate";
 import { PROGRESS_STORAGE_KEY } from "../lib/progress-store";
 
@@ -432,6 +433,7 @@ async function openCandyLevel(page: Page) {
   await page.getByRole("button", { name: /開始冒險/ }).click();
   await page.locator('button[data-next="true"]').click();
   await expect(page.getByTestId("candy-match-board")).toBeVisible();
+  await dismissCandyIntro(page);
 }
 
 test("visual：消消樂第 1 關 390 light（固定棋盤）", async ({ page }) => {

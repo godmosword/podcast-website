@@ -44,8 +44,13 @@ describe("消消樂輕鬆提示", () => {
     act(() => {
       result.current.actions.start(buildRound(0, "easy", { replay: false, rng: () => 0.2 }));
     });
-    expect(result.current.speechCue?.text).toBe("收集任意圖案 50 個。");
+    expect(result.current.speechCue?.text).toBe("收集 50 台車車。");
+    expect(result.current.briefing).toBe(true);
     expect(result.current.hint).toBeNull();
+    act(() => {
+      result.current.actions.beginPlay();
+    });
+    expect(result.current.briefing).toBe(false);
 
     act(() => {
       vi.advanceTimersByTime(HINT_SOFT_MS);
@@ -72,6 +77,6 @@ describe("消消樂輕鬆提示", () => {
       vi.advanceTimersByTime(HINT_SHOW_MS + 1_000);
     });
     expect(result.current.hint).toBeNull();
-    expect(result.current.speechCue?.text).toBe("收集任意圖案 92 個。");
+    expect(result.current.speechCue?.text).toBe("收集 92 台車車。");
   });
 });

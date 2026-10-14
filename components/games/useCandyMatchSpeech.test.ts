@@ -133,6 +133,13 @@ describe("useCandyMatchSpeech", () => {
     expect(result.current.voiceOn).toBe(false);
   });
 
+  it("點目標卡會念指定的那一句", () => {
+    const { result } = render();
+    synth.finish();
+    act(() => result.current.speak("還差 2 台小紅！"));
+    expect(texts().at(-1)).toBe("還差 2 台小紅！");
+  });
+
   it("再聽一次會插隊重念；同一句正在念時連點不從頭念", () => {
     const { result } = render();
     act(() => result.current.replay());
