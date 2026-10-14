@@ -1,8 +1,9 @@
 "use client";
 
 import { useLayoutEffect, useRef } from "react";
+import Icon from "@/components/ui/Icon";
 import { BaseArt, PlateArt, SushiArt, ToppingArt } from "@/lib/games/dino-sushi/art";
-import { matchOrder } from "@/lib/games/dino-sushi/orders";
+import { matchOrder, orderSpeechLine } from "@/lib/games/dino-sushi/orders";
 import { currentOrder } from "@/lib/games/dino-sushi/round";
 import { MAX_TOPPINGS } from "@/lib/games/dino-sushi/sushi";
 import { BASES, baseById, toppingById } from "@/lib/games/dino-sushi/toppings";
@@ -13,6 +14,7 @@ import { DinoSushiPlateStack } from "./DinoSushiPlateStack";
 import { ShopBelt, ShopWall } from "./DinoSushiShop";
 import { DinoSushiTray } from "./DinoSushiTray";
 import type { DinoSushiPlay } from "./useDinoSushiPlay";
+import { useDinoSushiSpeech } from "./useDinoSushiSpeech";
 import styles from "./DinoSushiKitchen.module.css";
 
 type Props = {
@@ -78,6 +80,13 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused }: Props) {
   } = play;
   const { rootRef, focusProps } = useFocusAcrossPhases(choosingBase);
   const picked = useRef<{ at: number; rect: DOMRect } | null>(null);
+  const orderForSpeech = round ? currentOrder(round) : null;
+  const speech = useDinoSushiSpeech({
+    orderToken: round && orderForSpeech ? `${round.mode}:${round.seed}:${round.index}` : null,
+    orderLine: orderForSpeech ? orderSpeechLine(orderForSpeech) : null,
+    caption,
+    inputPaused,
+  });
   if (!round) return null;
   const order = currentOrder(round);
   const eating = round.pending?.eats === true;
@@ -122,6 +131,15 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused }: Props) {
         data-mode={round.mode}
         data-brush={brushShown ? "true" : undefined}
       >
+        <button
+          type="button"
+          className={styles.voiceToggle}
+          aria-pressed={!speech.muted}
+          aria-label={speech.muted ? "打開朗讀" : "關閉朗讀"}
+          onClick={speech.toggleMuted}
+        >
+          <Icon name={speech.muted ? "volume-off" : "volume-on"} size={22} />
+        </button>
         <ShopWall />
         <DinoSushiDuoDuo
           phase={phase}
@@ -154,6 +172,8 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused }: Props) {
               flash={flash}
               index={round.index}
               total={round.orders.length}
+              voiceMuted={speech.muted}
+              onReplay={speech.replay}
             />
           ) : null}
           {caption ? (

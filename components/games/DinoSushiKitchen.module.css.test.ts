@@ -35,4 +35,16 @@ describe("DinoSushiKitchen.module.css 動畫", () => {
   it("多多外層不掛 CSS drop-shadow（表情動畫時整張濾鏡重算）", () => {
     expect(block(".duoArt > svg {")).not.toMatch(/filter:/);
   });
+
+  it("提示光暈在減少動態與 data-reduced 時停住，靜止亮框還在", () => {
+    expect(block(".kitchen [data-hint=\"true\"] {")).toMatch(/animation:\s*sushiGlow/);
+    expect(block(".kitchen [data-hint=\"true\"] {")).toMatch(/box-shadow:/);
+    const media = css.slice(
+      css.indexOf("@media (prefers-reduced-motion: reduce)"),
+      css.indexOf('.kitchen[data-reduced="true"]'),
+    );
+    expect(media).toMatch(/\.kitchen \[data-hint="true"\]\s*\{[^}]*animation:\s*none/);
+    expect(css).toContain('.kitchen[data-reduced="true"] [data-hint="true"]');
+    expect(block('.kitchen[data-reduced="true"] [data-hint="true"],')).toMatch(/animation:\s*none/);
+  });
 });

@@ -7,6 +7,7 @@ import {
   matchOrder,
   orderAnnouncement,
   orderChecks,
+  orderSpeechLine,
   ORDER_SIZES,
   ORDERS_PER_ROUND,
   TRAY_SIZE,
@@ -117,5 +118,16 @@ describe("比對訂單", () => {
 
   it("讀屏宣告用飯型＋料名", () => {
     expect(orderAnnouncement(order)).toBe("多多想吃：手捲、玉子、小黃瓜");
+  });
+
+  it("朗讀把料名和飯型編成一句", () => {
+    expect(orderSpeechLine({ base: "nigiri", toppings: ["salmon", "tamago"] })).toBe(
+      "我想要鮭魚和玉子握壽司",
+    );
+    expect(orderSpeechLine({ base: "temaki", toppings: ["crab"] })).toBe("我想要蟹肉棒手捲");
+    expect(orderSpeechLine({ base: "gunkan", toppings: ["salmon", "tamago", "cucumber"] })).toBe(
+      "我想要鮭魚、玉子和小黃瓜軍艦",
+    );
+    expect(orderSpeechLine(order)).toBe("我想要玉子和小黃瓜手捲");
   });
 });

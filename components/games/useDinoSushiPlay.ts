@@ -40,8 +40,8 @@ const LOOK_DONE_MS_REDUCED = 600;
 /** 字卡在反應結束後再留一下，孩子才看得到。 */
 const CAPTION_LINGER_MS = 1800;
 const BRUSH_MS = 1400;
-/** 閒置這麼久才亮下一個要點的東西。 */
-export const IDLE_HINT_MS = 8000;
+/** 閒置這麼久才亮下一個要點的東西（約 4.5 秒）。 */
+export const IDLE_HINT_MS = 4_500;
 
 type PlayAction = { type: "init"; mode: Mode; seed: number } | { type: "clear" } | RoundAction;
 
@@ -68,6 +68,23 @@ export function playVoices(audio: GameAudioBus | undefined, voices: readonly Syn
 function nextSeed(): number {
   const fixed = typeof window !== "undefined" ? (window as Window & { __dinoSushiSeed?: number }).__dinoSushiSeed : undefined;
   return typeof fixed === "number" && Number.isFinite(fixed) ? fixed : Math.floor(Math.random() * 0x7fffffff);
+}
+
+/**
+ * 這一點是不是偏離了訂單的下一步。
+ * 偏了也不算錯：料還是放得上去，只是立刻亮出正確的下一格，不另出「錯了」字卡。
+ * 訂單裡還沒放的另一樣料仍算往前。
+ */
+export function isOffStep(
+  round: RoundState,
+  action: { type: "pick-base"; base: BaseId } | { type: "add"; id: ToppingId },
+): boolean {
+  const order = currentOrder(round);
+  if (!order || round.pending || round.done) return false;
+  if (action.type === "pick-base") return action.base !== order.base;
+  if (round.sushi.base !== order.base) return true;
+  const placed = round.sushi.toppings;
+  return !order.toppings.includes(action.id) || placed.includes(action.id);
 }
 
 /** 點餐模式下一個該點的東西：飯型 → 缺的料（料位滿了先拿掉多的那層）→ 送出。 */
@@ -99,6 +116,8 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
   const [shake, setShake] = useState(0);
   const [brushing, setBrushing] = useState(false);
   const [idle, setIdle] = useState(false);
+  /** 點偏了：不用等閒置，馬上亮下一步。 */
+  const [guide, setGuide] = useState(false);
   const [taught, setTaught] = useState(false);
   const [message, setMessage] = useState("");
   /** 可暫停的排程：暫停時記下剩餘時間、停掉計時器，繼續時再補排（暫停中不會結算或回報）。 */
@@ -146,12 +165,23 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
 
   const sfx = useCallback((voices: readonly SynthVoice[]) => playVoices(audio, voices), [audio]);
 
-  /** 任何操作都重算閒置提示。 */
-  const touch = useCallback(() => {
-    setIdle(false);
+  const armIdle = useCallback(() => {
     if (idleTimer.current !== null) window.clearTimeout(idleTimer.current);
     idleTimer.current = window.setTimeout(() => setIdle(true), IDLE_HINT_MS);
   }, []);
+
+  /** 做對一步：先把提示收起來，閒置後再亮下一步。 */
+  const touch = useCallback(() => {
+    setIdle(false);
+    setGuide(false);
+    armIdle();
+  }, [armIdle]);
+
+  /** 點到不是訂單要的飯或料：立刻只亮正確的下一格。 */
+  const showHint = useCallback(() => {
+    setGuide(true);
+    armIdle();
+  }, [armIdle]);
 
   const start = useCallback(
     (mode: Mode) => {
@@ -168,8 +198,12 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
 
   const leave = useCallback(() => {
     clearTimers();
+    if (idleTimer.current !== null) window.clearTimeout(idleTimer.current);
+    idleTimer.current = null;
     setPhase("idle");
     setCaption(null);
+    setGuide(false);
+    setIdle(false);
     dispatch({ type: "clear" });
   }, [clearTimers]);
 
@@ -177,14 +211,16 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
 
   const pickBase = useCallback(
     (base: BaseId) => {
-      if (locked) return;
+      if (locked || !round) return;
       audio?.ensureAudio();
+      const off = isOffStep(round, { type: "pick-base", base });
       dispatch({ type: "pick-base", base });
       setChoosingBase(false);
       sfx(SUSHI_SFX.base);
-      touch();
+      if (off) showHint();
+      else touch();
     },
-    [audio, locked, sfx, touch],
+    [audio, locked, round, sfx, showHint, touch],
   );
 
   const add = useCallback(
@@ -195,9 +231,10 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
       if (next === round) setShake((n) => n + 1);
       else sfx(varied(addSfx(next.sushi.toppings.length)));
       dispatch({ type: "add", id });
-      touch();
+      if (isOffStep(round, { type: "add", id })) showHint();
+      else touch();
     },
-    [locked, round, sfx, touch],
+    [locked, round, sfx, showHint, touch],
   );
 
   const remove = useCallback(
@@ -232,7 +269,8 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
       later(reducedMotion ? LOOK_DONE_MS_REDUCED : LOOK_DONE_MS, () => {
         setPhase("idle");
         dispatch({ type: "reaction-done" });
-        // 看完泡泡：馬上亮缺的那一格，不用等閒置 8 秒
+        // 看完泡泡：馬上亮缺的那一格，不用等閒置
+        setGuide(true);
         setIdle(true);
       });
       return;
@@ -311,7 +349,7 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
     }
   }, [onDone, onServed, round, sfx]);
 
-  const hint = round && !round.done && (!taught || idle) ? hintTarget(round) : null;
+  const hint = round && !round.done && (!taught || idle || guide) ? hintTarget(round) : null;
 
   return {
     round,

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { SUSHI_SFX } from "@/lib/games/dino-sushi/sfx";
 import { createRound, roundReducer, type RoundAction, type RoundState } from "@/lib/games/dino-sushi/round";
-import { hintTarget, playVoices } from "./useDinoSushiPlay";
+import { hintTarget, IDLE_HINT_MS, isOffStep, playVoices } from "./useDinoSushiPlay";
 
 function run(state: RoundState, actions: RoundAction[]): RoundState {
   return actions.reduce(roundReducer, state);
@@ -50,6 +50,46 @@ describe("點餐提示指向下一步", () => {
     const order = createRound("order", 7);
     const pending = run(order, [{ type: "pick-base", base: "nigiri" }, { type: "serve" }]);
     expect(hintTarget(pending)).toBeNull();
+  });
+});
+
+describe("無錯誤提示", () => {
+  it("閒置亮提示的等待是 4.5 秒", () => {
+    expect(IDLE_HINT_MS).toBe(4500);
+  });
+
+  it("點錯飯型、點到訂單沒有的料，算偏離；訂單裡還沒放的另一樣不算", () => {
+    const start = createRound("order", 7);
+    const order = start.orders[0]!;
+    const wrongBase = order.base === "nigiri" ? "temaki" : "nigiri";
+    expect(isOffStep(start, { type: "pick-base", base: wrongBase })).toBe(true);
+    expect(isOffStep(start, { type: "pick-base", base: order.base })).toBe(false);
+
+    const based = roundReducer(start, { type: "pick-base", base: order.base });
+    expect(isOffStep(based, { type: "add", id: "wasabi" })).toBe(true);
+    expect(isOffStep(based, { type: "add", id: order.toppings[0]! })).toBe(false);
+    if (order.toppings.length > 1) {
+      expect(isOffStep(based, { type: "add", id: order.toppings[1]! })).toBe(false);
+    }
+
+    const withExtra = roundReducer(based, { type: "add", id: "wasabi" });
+    expect(hintTarget(withExtra)).toEqual({ kind: "topping", id: order.toppings[0] });
+  });
+
+  it("飯型還沒對的時候加料，下一步仍是換對的飯", () => {
+    const start = createRound("order", 7);
+    const order = start.orders[0]!;
+    const wrongBase = order.base === "nigiri" ? "temaki" : "nigiri";
+    const picked = roundReducer(start, { type: "pick-base", base: wrongBase });
+    expect(isOffStep(picked, { type: "add", id: order.toppings[0]! })).toBe(true);
+    expect(hintTarget(picked)).toEqual({ kind: "base", id: order.base });
+  });
+
+  it("自由做沒有偏離", () => {
+    const free = createRound("free", 7);
+    const picked = roundReducer(free, { type: "pick-base", base: "nigiri" });
+    expect(isOffStep(picked, { type: "add", id: "wasabi" })).toBe(false);
+    expect(hintTarget(picked)).toBeNull();
   });
 });
 

@@ -242,8 +242,48 @@
   pointer-events: none;
 }
 
-.talk > button {
+.talk button {
   pointer-events: auto;
+}
+
+/* 點餐泡泡左邊的小喇叭：再聽一次這單，不把泡泡往下推 */
+.bubbleWrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  pointer-events: auto;
+}
+
+.replay,
+.voiceToggle {
+  display: grid;
+  place-items: center;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #fffdf8;
+  color: var(--ink-warm);
+  box-shadow:
+    0 0 0 2.5px #d9a86a,
+    0 4px 8px rgba(90, 60, 30, 0.18);
+  cursor: pointer;
+}
+
+.replay[data-muted="true"] {
+  opacity: 0.55;
+}
+
+/* 舞台左上：關掉／打開朗讀，記在這台裝置 */
+.voiceToggle {
+  position: absolute;
+  z-index: 8;
+  top: calc(var(--awning-h) + 4px);
+  left: 6px;
 }
 
 /* 點餐泡泡：純白＋木色粗框，在奶油色牆上也最醒目；尾巴往左下指向多多 */
@@ -995,10 +1035,10 @@
   white-space: nowrap;
 }
 
-/* 下一個該點的：亮框；首單再加手指 */
+/* 下一步該點的那一格：柔和光暈。減少動態時停在亮框、不脈衝。首單再加手指。 */
 .kitchen [data-hint="true"] {
   box-shadow: 0 0 0 4px #ffd34d, 0 0 14px 4px rgba(255, 211, 77, 0.6);
-  animation: sushiGlow 1.2s ease-in-out infinite;
+  animation: sushiGlow 1.4s ease-in-out infinite;
 }
 
 .serveButton[data-hint="true"] {
@@ -1011,9 +1051,14 @@
 
 /* 只閃光暈、不縮放：按鈕本身不動，孩子點得準 */
 @keyframes sushiGlow {
+  0%,
+  100% {
+    outline: 3px solid rgba(255, 211, 77, 0.25);
+    outline-offset: 1px;
+  }
   50% {
-    outline: 4px solid rgba(255, 211, 77, 0.55);
-    outline-offset: 4px;
+    outline: 4px solid rgba(255, 211, 77, 0.8);
+    outline-offset: 5px;
   }
 }
 
@@ -1069,7 +1114,9 @@
 .baseButton:focus-visible,
 .serveButton:focus-visible,
 .brushButton:focus-visible,
-.fullButton:focus-visible {
+.fullButton:focus-visible,
+.replay:focus-visible,
+.voiceToggle:focus-visible {
   outline: 3px solid var(--focus-ring, #34302b);
   outline-offset: 3px;
 }
@@ -1310,6 +1357,10 @@
 }
 
 /* 暫停時新的表情與疊盤動畫停在原地（時間軸由 useDinoSushiPlay 一起暫停） */
+.kitchen[data-paused="true"] [data-hint="true"] {
+  animation-play-state: paused;
+}
+
 .kitchen[data-paused="true"] .servingSushi[data-phase="open"],
 .kitchen[data-paused="true"] .duoArt [data-part="cheeks"] > g,
 .kitchen[data-paused="true"] .duoArt [data-part="puff-cloud"],
