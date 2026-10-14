@@ -12,6 +12,7 @@ import {
   CANDY_FALL_MS,
   CANDY_SWAP_MS,
   emptyEvents,
+  spawnTally,
   findHintMove,
   findMatches,
   propAffectedCells,
@@ -29,7 +30,7 @@ import {
   type SettlePhase,
   type WaveOptions,
 } from "@/lib/games/candy-match/engine";
-import { efficiencyMet, type CandyMatchRound, type CandyProps } from "@/lib/games/candy-match/stages";
+import { efficiencyMet, stagePalette, type CandyMatchRound, type CandyProps } from "@/lib/games/candy-match/stages";
 import {
   CONFETTI_MS,
   HORN_NOTES,
@@ -412,7 +413,7 @@ export function useCandyMatchPlay(options: Options) {
       if (unstable || !findHintMove(state.pieces, state.cols, state.rows, state.specials)) {
         await sleep(250);
         if (token !== tokenRef.current) return;
-        commit({ board: reshuffle(state, rngRef.current, snap.round.stage.pieceKinds) });
+        commit({ board: reshuffle(state, rngRef.current, stagePalette(snap.round.stage)) });
         setMessage("圖案重新排隊囉！");
       }
       setBusyState(false);
@@ -427,7 +428,7 @@ export function useCandyMatchPlay(options: Options) {
       const snap0 = playRef.current;
       if (!snap0) return;
       const token = tokenRef.current;
-      const kinds = snap0.round.stage.pieceKinds;
+      const kinds = stagePalette(snap0.round.stage);
       setBusyState(true);
       setHint(null);
       let events = emptyEvents(kinds);
@@ -678,7 +679,8 @@ export function useCandyMatchPlay(options: Options) {
       clearJuice();
       setPraise(null);
       rngRef.current = roundRng(round.index);
-      const board = createBoard(round.cols, round.rows, round.stage.pieceKinds, rngRef.current, {
+      const pool = stagePalette(round.stage);
+      const board = createBoard(round.cols, round.rows, pool, rngRef.current, {
         dirtCells: round.stage.dirtCells,
         thickDirtCells: round.stage.thickDirtCells,
         dropCount: round.stage.dropCount,
@@ -690,7 +692,7 @@ export function useCandyMatchPlay(options: Options) {
         round,
         board,
         movesLeft: round.stage.moves,
-        progress: freshCandyProgress(round.stage.pieceKinds),
+        progress: freshCandyProgress(spawnTally(pool)),
         propsLeft: { ...round.props },
         usedProp: false,
       };

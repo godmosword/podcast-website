@@ -9,15 +9,17 @@ import {
   findHintMove,
   listLegalMoves,
   resolveBoard,
+  spawnTally,
   swapped,
   swappedSpecials,
   type BoardState,
+  type CandySpawnPool,
   type Rng,
 } from "./engine";
 import { seededRng, pickIndex } from "./rng";
 import { findGoalHint, type CandyMove } from "./strategy";
 import { allGoalsDone, applyEvents, countSwap, freshCandyProgress, type CandyProgress } from "./tasks";
-import type { CandyMatchRound } from "./stages";
+import { stagePalette, type CandyMatchRound } from "./stages";
 
 export type CandyPolicy = "greedy" | "random";
 
@@ -35,8 +37,12 @@ export type CandySimResult = {
 /** 輕鬆模式沒有步數上限；模擬以此截斷避免無限局。 */
 const SIM_MAX_SWAPS = 150;
 
+function poolOf(round: CandyMatchRound): CandySpawnPool {
+  return stagePalette(round.stage);
+}
+
 function startBoardFor(round: CandyMatchRound, rng: Rng): BoardState {
-  return createBoard(round.cols, round.rows, round.stage.pieceKinds, rng, {
+  return createBoard(round.cols, round.rows, poolOf(round), rng, {
     dirtCells: round.stage.dirtCells,
     thickDirtCells: round.stage.thickDirtCells,
     dropCount: round.stage.dropCount,
@@ -48,7 +54,7 @@ function startBoardFor(round: CandyMatchRound, rng: Rng): BoardState {
 function playSwap(
   state: BoardState,
   move: CandyMove,
-  kinds: number,
+  kinds: CandySpawnPool,
   rng: Rng,
 ): ReturnType<typeof resolveBoard> {
   const pieces = swapped(state.pieces, move.a, move.b);
@@ -81,10 +87,10 @@ export function simulateRound(
   maxSwaps = SIM_MAX_SWAPS,
 ): CandySimResult {
   const rng = seededRng(seed);
-  const kinds = round.stage.pieceKinds;
+  const kinds = poolOf(round);
   const limit = round.stage.moves > 0 ? round.stage.moves : maxSwaps;
   let board = startBoardFor(round, rng);
-  let progress = freshCandyProgress(kinds);
+  let progress = freshCandyProgress(spawnTally(kinds));
   let reshuffles = 0;
   while (!allGoalsDone(round.stage.goals, progress) && progress.swaps < limit) {
     const move = chooseMove(policy, board, round, progress, rng);

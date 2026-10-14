@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CANDY_MATCH_LEVELS } from "./levels";
+import { CANDY_MATCH_LEVELS, CANDY_PIECE } from "./levels";
 import { freshCandyProgress } from "./tasks";
 import {
   CANDY_STAGES,
@@ -8,6 +8,7 @@ import {
   efficiencyMet,
   isStageFeasible,
   selectVariant,
+  stagePalette,
 } from "./stages";
 
 describe("Candy 關卡尺寸", () => {
@@ -46,6 +47,37 @@ describe("Candy 十關 × 兩種玩法配置", () => {
     moves.slice(1).forEach((m, i) => expect(m).toBeGreaterThanOrEqual(moves[i]!));
     CANDY_STAGES.challenge.slice(5).forEach((set) => expect(set.main.pieceKinds).toBe(5));
     CANDY_STAGES.easy.forEach((set) => expect(set.main.pieceKinds).toBe(4));
+  });
+
+  it("新車輪替進十關，同場種類不變，消防車不與小紅同場", () => {
+    const seen = { easy: new Set<number>(), challenge: new Set<number>() };
+    const easyLevelsWithNew = CANDY_STAGES.easy.map((set) =>
+      stagePalette(set.main).some((id) => id >= CANDY_PIECE.ambulance),
+    );
+    for (const mode of ["easy", "challenge"] as const) {
+      CANDY_STAGES[mode].forEach((set, li) => {
+        for (const stage of [set.main, ...set.variants]) {
+          const palette = stagePalette(stage);
+          expect(palette, stage.id).toHaveLength(stage.pieceKinds);
+          expect(palette.includes(CANDY_PIECE.red) && palette.includes(CANDY_PIECE.fire), stage.id).toBe(false);
+          for (const id of palette) seen[mode].add(id);
+          for (const goal of stage.goals) {
+            if (goal.kind === "collect") expect(palette, stage.id).toContain(goal.piece);
+          }
+        }
+        if (mode === "challenge" && li >= 5) expect(set.main.pieceKinds).toBe(5);
+      });
+    }
+    for (const id of [CANDY_PIECE.ambulance, CANDY_PIECE.fire, CANDY_PIECE.train]) {
+      expect(seen.easy.has(id)).toBe(true);
+      expect(seen.challenge.has(id)).toBe(true);
+    }
+    for (const id of [CANDY_PIECE.red, CANDY_PIECE.taxi, CANDY_PIECE.bus, CANDY_PIECE.bell, CANDY_PIECE.duo]) {
+      expect(seen.challenge.has(id)).toBe(true);
+    }
+    expect(easyLevelsWithNew[0]).toBe(false);
+    expect(easyLevelsWithNew.filter(Boolean).length).toBeGreaterThanOrEqual(8);
+    expect(easyLevelsWithNew[9]).toBe(true);
   });
 
   it("特殊糖任務開局保證有做出特殊糖的路徑", () => {
@@ -110,9 +142,12 @@ describe("輕鬆後期時長", () => {
 
   it("挑戰模式後期收集數維持原樣", () => {
     expect(CANDY_STAGES.challenge[6]!.main.id).toBe("c7-taxi-40-sp3");
-    expect(CANDY_STAGES.challenge[7]!.main.id).toBe("c8-gift-3-red-30");
-    expect(CANDY_STAGES.challenge[8]!.main.id).toBe("c9-red-bus-bell-38");
-    expect(CANDY_STAGES.challenge[9]!.main.id).toBe("c10-three-40-sp4");
+    expect(CANDY_STAGES.challenge[7]!.main.id).toBe("c8-gift-3-fire-30");
+    expect(CANDY_STAGES.challenge[8]!.main.id).toBe("c9-red-bus-train-38");
+    expect(CANDY_STAGES.challenge[9]!.main.id).toBe("c10-fire-taxi-bus-40-sp4");
+    expect(CANDY_STAGES.challenge[6]!.main.goals).toContainEqual({ kind: "collect", piece: 1, count: 40 });
+    expect(CANDY_STAGES.challenge[8]!.main.goals).toContainEqual({ kind: "collect", piece: 0, count: 38 });
+    expect(CANDY_STAGES.challenge[9]!.main.goals).toContainEqual({ kind: "detonate", count: 4 });
   });
 });
 

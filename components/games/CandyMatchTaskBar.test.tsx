@@ -31,13 +31,13 @@ describe("CandyMatchTaskBar", () => {
 
   it("達成的目標蓋上完成印章，點卡片會再念一次", () => {
     const round = buildRound(1, "easy", { replay: false, rng: fixedRng });
-    const progress: CandyProgress = { ...freshCandyProgress(4), collected: [23, 0, 0, 0] };
+    const progress: CandyProgress = { ...freshCandyProgress(), collected: [0, 0, 0, 0, 0, 23] };
     const onHearGoal = vi.fn();
     render(
       <CandyMatchTaskBar round={round} progress={progress} movesLeft={0} {...voice} onHearGoal={onHearGoal} />,
     );
 
-    const done = screen.getByRole("button", { name: "收集小紅，完成" });
+    const done = screen.getByRole("button", { name: "收集救護車，完成" });
     expect(done.textContent).toContain("完成！");
     expect(screen.getByTestId("candy-goal-stamp").textContent).toBe("完成！");
     done.click();

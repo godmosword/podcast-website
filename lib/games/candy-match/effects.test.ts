@@ -144,7 +144,7 @@ describe("消除特效種類", () => {
     specials[1] = "row";
     expect(
       planClearFx({ pieces, specials, cols: 4, rows: 3, cleared: [0, 1, 2, 3] }),
-    ).toEqual([{ kind: "line", axis: "row", index: 0 }]);
+    ).toEqual([{ kind: "line", axis: "row", index: 0, piece: 0 }]);
 
     const plain = none(9);
     expect(
@@ -156,6 +156,18 @@ describe("消除特效種類", () => {
         cleared: [0, 1, 2],
       }),
     ).toEqual([]);
+
+    const ambulance = none(12);
+    ambulance[0] = "row";
+    expect(
+      planClearFx({
+        pieces: [5, 5, 5, 5, 1, 2, 1, 2, 1, 2, 1, 2],
+        specials: ambulance,
+        cols: 4,
+        rows: 3,
+        cleared: [0, 1, 2, 3],
+      }),
+    ).toEqual([{ kind: "line", axis: "row", index: 0, piece: 5 }]);
   });
 
   it("十字同時有橫排與直欄", () => {
@@ -173,9 +185,9 @@ describe("消除特效種類", () => {
         combo: "cross",
       }),
     ).toEqual([
-      { kind: "line", axis: "row", index: 0 },
-      { kind: "line", axis: "col", index: 0 },
-      { kind: "line", axis: "col", index: 1 },
+      { kind: "line", axis: "row", index: 0, piece: 0 },
+      { kind: "line", axis: "col", index: 0, piece: 0 },
+      { kind: "line", axis: "col", index: 1, piece: 1 },
     ]);
   });
 
@@ -219,7 +231,7 @@ describe("消除特效種類", () => {
     const row = [0, 1, 2, 3, 4, 5, 1, 2, 0, 1, 2, 0];
     expect(
       planClearFx({ pieces: row, specials: none(12), cols: 6, rows: 2, cleared: [0, 1, 2, 3, 4, 5] }),
-    ).toEqual([{ kind: "line", axis: "row", index: 0 }]);
+    ).toEqual([{ kind: "line", axis: "row", index: 0, piece: 0 }]);
 
     const same = [1, 1, 2, 1, 0, 2, 1, 2, 0];
     expect(

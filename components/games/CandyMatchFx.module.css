@@ -46,7 +46,18 @@
   height: 8px;
   border-radius: 99px;
   transform-origin: left center;
-  background: linear-gradient(90deg, transparent, #ff7a9c 18%, #ffd34d 42%, #6fc3f0 68%, #7fd4a8);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #ff7a9c 12%,
+    #ffd34d 26%,
+    #6fc3f0 40%,
+    #7fd4a8 52%,
+    #c9a8ff 64%,
+    #4da3ff 76%,
+    #ff8a3d 88%,
+    #3d5a98
+  );
   opacity: 0.85;
   animation: candyTrail var(--fx-ms) linear both;
 }
@@ -57,7 +68,18 @@
   width: 8px;
   height: var(--fx-travel);
   transform-origin: center top;
-  background: linear-gradient(180deg, transparent, #ff7a9c 18%, #ffd34d 42%, #6fc3f0 68%, #7fd4a8);
+  background: linear-gradient(
+    180deg,
+    transparent,
+    #ff7a9c 12%,
+    #ffd34d 26%,
+    #6fc3f0 40%,
+    #7fd4a8 52%,
+    #c9a8ff 64%,
+    #4da3ff 76%,
+    #ff8a3d 88%,
+    #3d5a98
+  );
   animation-name: candyTrailCol;
 }
 

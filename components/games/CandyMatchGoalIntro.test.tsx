@@ -19,12 +19,12 @@ function renderIntro(index: number, mode: "easy" | "challenge" = "easy", thick =
 describe("CandyMatchGoalIntro", () => {
   it("大圖和數量寫出收集幾台，點開始或點畫面都會收起", () => {
     const { onStart } = renderIntro(1);
-    expect(screen.getByText("收集 23 台小紅")).toBeTruthy();
+    expect(screen.getByText("收集 23 台救護車")).toBeTruthy();
     expect(screen.getByText("23")).toBeTruthy();
     expect(screen.getByRole("dialog", { name: "本關任務" }).querySelector("svg")).toBeTruthy();
     screen.getByRole("button", { name: "開始！" }).click();
     expect(onStart).toHaveBeenCalledTimes(1);
-    screen.getByText("收集 23 台小紅").click();
+    screen.getByText("收集 23 台救護車").click();
     expect(onStart).toHaveBeenCalledTimes(2);
   });
 

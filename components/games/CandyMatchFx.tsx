@@ -331,7 +331,7 @@ export function CandyMatchFx({
                 <span key={`line-${item.axis}-${item.index}-${index}`} data-testid="candy-fx-line" data-axis={item.axis}>
                   <span className={styles.trail} data-axis={item.axis} style={style} />
                   <span className={styles.car} data-axis={item.axis} style={style}>
-                    <PieceArt piece={0} size={cellPx} />
+                    <PieceArt piece={item.piece ?? 0} size={cellPx} />
                   </span>
                 </span>
               );
