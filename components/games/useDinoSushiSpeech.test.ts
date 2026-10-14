@@ -3,7 +3,7 @@ import { act, cleanup, renderHook } from "@testing-library/react";
 import { StrictMode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Reaction } from "@/lib/games/dino-sushi/reactions";
-import { cancelSpeech, LEGACY_VOICE_MUTE_STORAGE_KEY, SPEECH_LANG, SPEECH_PITCH, SPEECH_RATE } from "@/lib/games/dino-sushi/speech";
+import { cancelSpeech, LEGACY_VOICE_MUTE_STORAGE_KEY, SPEECH_LANG, SPEECH_PITCH, SPEECH_RATE } from "@/lib/games/shared/speech";
 import { useDinoSushiSpeech } from "./useDinoSushiSpeech";
 
 class FakeUtterance {

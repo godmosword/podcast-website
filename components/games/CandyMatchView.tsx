@@ -29,6 +29,7 @@ import { buildRound, type CandyMatchRound, type CandyMode } from "@/lib/games/ca
 import { goalsSummary, goalTheme } from "@/lib/games/candy-match/tasks";
 import { gameBySlug } from "@/data/games";
 import { useCandyMatchPlay } from "./useCandyMatchPlay";
+import { useCandyMatchSpeech } from "./useCandyMatchSpeech";
 import styles from "./CandyMatchView.module.css";
 
 type Screen = "title" | "map" | "play";
@@ -72,6 +73,8 @@ export function CandyMatchView({
   syncHost,
   audio,
   instance,
+  soundOn,
+  gameVolume,
 }: CandyMatchViewProps) {
   // fallback 取模組層 noop：寫成 `?? (() => {})` 會每次 render 產生新函式，
   // 讓所有以此為依賴的 useCallback 每幀失效（lint exhaustive-deps 亦會警告）。
@@ -107,6 +110,13 @@ export function CandyMatchView({
     onTipSeen,
   });
   const { play, actions } = game;
+  const speech = useCandyMatchSpeech({
+    active: screen === "play",
+    cue: game.speechCue,
+    inputPaused,
+    soundOn,
+    volume: gameVolume,
+  });
 
   const refreshMedals = useCallback(() => {
     setMedals(loadPlayerProfile().medals["candy-match"]?.slice() ?? []);
@@ -335,7 +345,14 @@ export function CandyMatchView({
       {screen === "play" && play && (
         <div className={styles.playLayout}>
           <div className={styles.playTask}>
-            <CandyMatchTaskBar round={play.round} progress={play.progress} movesLeft={play.movesLeft} />
+            <CandyMatchTaskBar
+              round={play.round}
+              progress={play.progress}
+              movesLeft={play.movesLeft}
+              voiceMuted={speech.muted}
+              onReplay={speech.replay}
+              onToggleVoice={speech.toggleMuted}
+            />
           </div>
 
           <div ref={boardWrapRef} className={styles.boardWrap}>

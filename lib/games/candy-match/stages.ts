@@ -139,10 +139,13 @@ const EASY: readonly CandyStageSet[] = [
     ],
   },
   {
-    main: stage({ id: "e7-taxi-48-sp2", goals: [collect(1, 48), detonate(2)], moves: 0, pieceKinds: 4, requireSpecialMove: true, efficiency: 16 }),
+    // 第 7–10 關收集收在每色約 25–35，一關大約兩三分鐘。第 7 關是單色，顆數低於第 6 關的 39；
+    // 第 7→9→10 仍往上（30、33、35）。第 8 關主線是送禮物，不改。特殊糖次數維持。
+    // 效率星跟著縮短，落在目標導向與隨機步數之間（11、13、15）。
+    main: stage({ id: "e7-taxi-30-sp2", goals: [collect(1, 30), detonate(2)], moves: 0, pieceKinds: 4, requireSpecialMove: true, efficiency: 11 }),
     variants: [
-      stage({ id: "e7-red-48-sp2", label: "小紅亮起來", goals: [collect(0, 48), detonate(2)], moves: 0, pieceKinds: 4, requireSpecialMove: true, efficiency: 16 }),
-      stage({ id: "e7-bell-48-sp2", label: "鈴鈴亮起來", goals: [collect(3, 48), detonate(2)], moves: 0, pieceKinds: 4, requireSpecialMove: true, efficiency: 16 }),
+      stage({ id: "e7-red-30-sp2", label: "小紅亮起來", goals: [collect(0, 30), detonate(2)], moves: 0, pieceKinds: 4, requireSpecialMove: true, efficiency: 11 }),
+      stage({ id: "e7-bell-30-sp2", label: "鈴鈴亮起來", goals: [collect(3, 30), detonate(2)], moves: 0, pieceKinds: 4, requireSpecialMove: true, efficiency: 11 }),
     ],
   },
   {
@@ -153,17 +156,17 @@ const EASY: readonly CandyStageSet[] = [
     ],
   },
   {
-    main: stage({ id: "e9-red-bus-bell-51", goals: collectEach([0, 2, 3], 51), moves: 0, pieceKinds: 4, efficiency: 19 }),
+    main: stage({ id: "e9-red-bus-bell-33", goals: collectEach([0, 2, 3], 33), moves: 0, pieceKinds: 4, efficiency: 13 }),
     variants: [
-      stage({ id: "e9-taxi-bus-bell-51", label: "換隊大遊行", goals: collectEach([1, 2, 3], 51), moves: 0, pieceKinds: 4, efficiency: 19 }),
-      stage({ id: "e9-red-taxi-bell-51", label: "彩虹大遊行", goals: collectEach([0, 1, 3], 51), moves: 0, pieceKinds: 4, efficiency: 19 }),
+      stage({ id: "e9-taxi-bus-bell-33", label: "換隊大遊行", goals: collectEach([1, 2, 3], 33), moves: 0, pieceKinds: 4, efficiency: 13 }),
+      stage({ id: "e9-red-taxi-bell-33", label: "彩虹大遊行", goals: collectEach([0, 1, 3], 33), moves: 0, pieceKinds: 4, efficiency: 13 }),
     ],
   },
   {
-    main: stage({ id: "e10-three-58-sp3", goals: [...collectEach([0, 1, 2], 58), detonate(3)], moves: 0, pieceKinds: 4, requireSpecialMove: true, efficiency: 21 }),
+    main: stage({ id: "e10-three-35-sp3", goals: [...collectEach([0, 1, 2], 35), detonate(3)], moves: 0, pieceKinds: 4, requireSpecialMove: true, efficiency: 15 }),
     variants: [
-      stage({ id: "e10-three-58-sp3-b", label: "煙火換色", goals: [...collectEach([1, 2, 3], 58), detonate(3)], moves: 0, pieceKinds: 4, requireSpecialMove: true, efficiency: 21 }),
-      stage({ id: "e10-three-58-sp3-c", label: "煙火大合唱", goals: [...collectEach([0, 2, 3], 58), detonate(3)], moves: 0, pieceKinds: 4, requireSpecialMove: true, efficiency: 21 }),
+      stage({ id: "e10-three-35-sp3-b", label: "煙火換色", goals: [...collectEach([1, 2, 3], 35), detonate(3)], moves: 0, pieceKinds: 4, requireSpecialMove: true, efficiency: 15 }),
+      stage({ id: "e10-three-35-sp3-c", label: "煙火大合唱", goals: [...collectEach([0, 2, 3], 35), detonate(3)], moves: 0, pieceKinds: 4, requireSpecialMove: true, efficiency: 15 }),
     ],
   },
 ];

@@ -20,7 +20,58 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 8px;
+}
+
+/* 再聽一次＋朗讀開關：跟壽司屋同一組意思，圓鈕至少 44px */
+.voiceRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  flex: none;
+}
+
+.replayButton,
+.muteButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 44px;
+  margin: 0;
+  padding: 0;
+  border: 2px solid rgba(93, 74, 103, 0.12);
+  border-radius: 999px;
+  background: #fff;
+  color: #5d4a67;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1;
+  box-shadow: 0 3px 0 rgba(93, 74, 103, 0.1);
+}
+
+.replayButton {
+  min-width: 44px;
+  padding: 0 12px 0 10px;
+}
+
+.muteButton {
+  width: 44px;
+  flex: none;
+}
+
+.replayButton[data-muted="true"] {
+  opacity: 0.55;
+}
+
+.replayButton:focus-visible,
+.muteButton:focus-visible {
+  outline: 3px solid var(--focus-ring, #ff9fb7);
+  outline-offset: 2px;
 }
 
 .taskPlace {
