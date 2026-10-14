@@ -281,6 +281,11 @@
   outline-offset: 5px;
 }
 
+/* 牙刷出現時是下一步：小喇叭跟招牌、燈籠一樣讓位（窄舞台會疊到牙刷一角）。泡泡照樣可以點 */
+.duoArea[data-brush="true"] .replayBadge {
+  visibility: hidden;
+}
+
 .replayBadge {
   position: absolute;
   top: -12px;
@@ -361,10 +366,10 @@
   background: radial-gradient(closest-side, rgba(239, 220, 188, 0.55), rgba(239, 220, 188, 0));
 }
 
-/* 窄舞台（iPhone SE 橫向約 234px 寬）：三料單有四格，格子收小、右欄放寬一點，泡泡才不被舞台裁掉 */
+/* 窄舞台（iPhone SE 橫向約 234px 寬）：三料單有四格，格子與左右內距收小，泡泡才不被舞台裁掉（右欄寬度不動，字卡不會變寬蓋到多多） */
 @container duo-stage (max-width: 250px) {
-  .talk {
-    max-width: 72%;
+  .bubble {
+    padding-inline: 6px;
   }
 
   .bubbleItem {

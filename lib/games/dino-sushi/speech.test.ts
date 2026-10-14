@@ -67,11 +67,13 @@ describe("壽司屋朗讀（沒有瀏覽器語音時）", () => {
 });
 
 describe("壽司屋朗讀（有 Web Speech）", () => {
-  it("用 zh-TW、稍慢、較高音調；預設插隊，先取消上一句", () => {
+  it("用 zh-TW、稍慢、較高音調；預設插隊，正在念的先取消，沒在念就不 cancel", () => {
     const synth = fakeSynth();
     speakText("我想要鮭魚和玉子握壽司");
+    expect(synth.cancel).not.toHaveBeenCalled();
+    speakText("我想要鮭魚和玉子握壽司");
     expect(synth.cancel).toHaveBeenCalledTimes(1);
-    expect(synth.speak).toHaveBeenCalledTimes(1);
+    expect(synth.speak).toHaveBeenCalledTimes(2);
     const utter = synth.spoken[0]!;
     expect(utter.text).toBe("我想要鮭魚和玉子握壽司");
     expect(utter.lang).toBe(SPEECH_LANG);
@@ -137,6 +139,19 @@ describe("壽司屋朗讀（有 Web Speech）", () => {
     synth.speaking = false;
     speakText("蟹肉棒，好好吃！", { interrupt: false });
     expect(synth.speak).toHaveBeenCalledTimes(2);
+  });
+
+  it("onend 遺失、瀏覽器一直說在念：過了時限就不再排隊，點泡泡也能插隊", () => {
+    const now = vi.spyOn(Date, "now").mockReturnValue(1_000_000);
+    const synth = fakeSynth();
+    speakText("我想要鮭魚手捲");
+    expect(isSpeaking("我想要鮭魚手捲")).toBe(true);
+    speakText("蟹肉棒，好好吃！", { interrupt: false });
+    expect(synth.speak).toHaveBeenCalledTimes(1);
+    now.mockReturnValue(1_000_000 + 2000 + "我想要鮭魚手捲".length * 400 + 1);
+    expect(isSpeaking("我想要鮭魚手捲")).toBe(false);
+    speakText("我想要玉米軍艦", { interrupt: false });
+    expect(synth.spoken.map((u) => u.text)).toEqual(["我想要鮭魚手捲", "我想要玉米軍艦"]);
   });
 
   it("isSpeaking 只在那一句還在念時為真", () => {

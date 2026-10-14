@@ -30,6 +30,8 @@ export type SpeakOptions = {
 
 /** 正在念的那一句：onend 對得上才接下一句，被 cancel 掉的舊句子不會誤觸發。 */
 let current: SpeechSynthesisUtterance | null = null;
+/** 這一句最晚該念完的時間（Date.now）。 */
+let currentDeadline = 0;
 /** 排在後面的一句。 */
 let waiting: { text: string; volume: number } | null = null;
 
@@ -46,9 +48,21 @@ function utteranceCtor(): typeof SpeechSynthesisUtterance | null {
   return window.SpeechSynthesisUtterance;
 }
 
-/** 真的還在念。iOS 沒有手勢時可能整句沒開始也不給 onend，所以同時看瀏覽器的狀態，不讓排隊卡住。 */
+/**
+ * 一句最多念多久：稍慢的童聲一個字約 0.3 秒，抓寬一點。
+ * 過了還沒 onend 就當它卡住了（iOS 被來電、Siri 搶走音訊時 speaking 可能一直是 true）。
+ */
+function speechBudgetMs(text: string): number {
+  return 2000 + text.length * 400;
+}
+
+/**
+ * 真的還在念。同時看瀏覽器狀態與時限，不讓排隊卡住：
+ * iOS 沒手勢時整句沒開始也不給 onend；被打斷時 onend 遺失但 speaking 一直是 true。
+ */
 function busy(synth: SpeechSynth): boolean {
-  return current !== null && (synth.speaking === true || synth.pending === true);
+  if (current === null || Date.now() > currentDeadline) return false;
+  return synth.speaking === true || synth.pending === true;
 }
 
 function speakNow(synth: SpeechSynth, Utterance: typeof SpeechSynthesisUtterance, text: string, volume: number) {
@@ -73,6 +87,7 @@ function speakNow(synth: SpeechSynth, Utterance: typeof SpeechSynthesisUtterance
   utter.onend = done;
   utter.onerror = done;
   current = utter;
+  currentDeadline = Date.now() + speechBudgetMs(text);
   synth.speak(utter);
 }
 
@@ -102,8 +117,8 @@ export function speakText(text: string, { interrupt = true, volume = 1 }: SpeakO
   try {
     waiting = null;
     current = null;
-    // 沒在念就不必 cancel：WebKit 在 cancel 後立刻 speak 偶爾會吃掉那一句
-    if (interrupt) synth.cancel();
+    // 瀏覽器沒在念就不必 cancel：WebKit 在 cancel 後立刻 speak 偶爾會吃掉那一句
+    if (interrupt && (synth.speaking === true || synth.pending === true)) synth.cancel();
     speakNow(synth, Utterance, text, volume);
   } catch {
     // 瀏覽器拒講，或測試裡的假物件不完整
