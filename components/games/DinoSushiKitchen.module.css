@@ -281,7 +281,7 @@
   outline-offset: 5px;
 }
 
-/* 牙刷出現時是下一步：小喇叭跟招牌、燈籠一樣讓位（窄舞台會疊到牙刷一角）。泡泡照樣可以點 */
+/* 牙刷出現時是下一步：小喇叭跟燈籠一樣讓位（窄舞台會疊到牙刷一角）。泡泡照樣可以點 */
 .duoArea[data-brush="true"] .replayBadge {
   visibility: hidden;
 }
@@ -397,6 +397,11 @@
   width: 2px;
   border-radius: 1px;
   background: #efdcbc;
+}
+
+/* 手捲又高又瘦：上下不留邊，才不會比握壽司、軍艦小一號 */
+.bubbleItem[data-base="temaki"] {
+  padding-block: 0;
 }
 
 .bubbleItem > img {
@@ -628,7 +633,7 @@
 }
 
 /* 左上角雨棚下：不擋多多的臉；只晃 3 次 */
-/* 牙刷是「下一步」：跟其他下一步一樣的黃光暈；出現時招牌與燈籠讓位（DinoSushiShop data-brush） */
+/* 牙刷是「下一步」：跟其他下一步一樣的黃光暈；出現時燈籠讓位（DinoSushiShop data-brush） */
 .brushButton {
   position: absolute;
   z-index: 6;

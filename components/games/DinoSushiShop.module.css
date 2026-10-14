@@ -235,8 +235,9 @@
 }
 
 /*
- * 店名刻在櫃台前板左半（深木色字、上緣一道淺光，像刻進木頭）。
+ * 店名刻在櫃台前板左半（深木色字，下緣一道淺光、上緣一道暗線，像刻進木頭）。
  * 送餐盤停在舞台 30% 起、疊盤在右下，店名放在 4% 起、寬度不到 26%，兩者都碰不到。
+ * 字級同時受櫃台高度與舞台寬度限制：四個字加字距約 4.7em，5cqw 時約 24% 舞台寬，窄而高的舞台也伸不進送餐盤。
  */
 .shopName {
   position: absolute;
@@ -249,7 +250,7 @@
   height: 46%;
   color: #5a3518;
   font-family: var(--font-stack-display);
-  font-size: clamp(11px, calc(var(--counter-h) * 0.3), 18px);
+  font-size: clamp(11px, min(calc(var(--counter-h) * 0.3), 5cqw), 18px);
   font-weight: 900;
   line-height: 1;
   letter-spacing: 0.18em;

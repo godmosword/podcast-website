@@ -614,7 +614,7 @@ test.describe("多多壽司屋", () => {
     });
   }
 
-  /** 店名刻在櫃台前板：多多、疊盤、送餐盤、泡泡都不能疊在字上（以前掛在多多後面的直式招牌整個被擋住）。 */
+  /** 店名刻在櫃台前板：多多、疊盤（含數字）、泡泡都不能疊在字上（以前掛在多多後面的直式招牌整個被擋住）。送餐盤停在舞台 30% 起，店名寬度不到 26%，由 CSS 保證。 */
   for (const vp of [
     { width: 390, height: 844 },
     { width: 667, height: 375 },
@@ -645,11 +645,16 @@ test.describe("多多壽司屋", () => {
         return {
           size: parseFloat(getComputedStyle(name).fontSize),
           inside: n.left >= s.left && n.right <= s.right && n.bottom <= s.bottom + 0.5 && n.width > 0,
+          // 選擇器沒抓到會讓檢查白過：每一樣都要真的在畫面上
+          missing: Object.entries(blockers)
+            .filter(([, r]) => r === null || r.width === 0)
+            .map(([k]) => k),
           blocked: Object.entries(blockers)
             .filter(([, r]) => overlaps(r))
             .map(([k]) => k),
         };
       });
+      expect(result.missing).toEqual([]);
       expect(result.inside).toBe(true);
       expect(result.size).toBeGreaterThanOrEqual(11);
       expect(result.blocked).toEqual([]);
