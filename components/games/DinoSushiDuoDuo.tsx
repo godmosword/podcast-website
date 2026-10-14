@@ -25,6 +25,7 @@ function pose(phase: ServePhase, caption: Reaction | null, brushing: boolean): {
   if (brushing) return { mouth: "open", face: "yum" };
   if (phase === "slide" || phase === "open") return { mouth: "open", face: "idle" };
   if (phase === "chew") return { mouth: "chew", face: "yum" };
+  /* puff 仍傳出去：貼紙層把芥末畫成噴火，並用 data-face 晃一下。 */
   if (caption) return { mouth: caption.mood === "puff" ? "laugh" : "closed", face: caption.mood };
   return { mouth: "closed", face: "idle" };
 }
