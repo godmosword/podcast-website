@@ -231,6 +231,11 @@
   height: auto;
 }
 
+.beltSushi > [data-sushi][data-base="temaki"] {
+  width: 42%;
+  margin-inline: auto;
+}
+
 /* 透明圓蓋：讓帶上的壽司退到背景，不會被當成點餐 */
 .dome {
   position: absolute;

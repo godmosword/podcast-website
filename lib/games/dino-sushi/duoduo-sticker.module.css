@@ -17,6 +17,11 @@
   animation: duoMunch 0.46s ease-in-out infinite;
 }
 
+/* 吃到芥末：噴火貼紙短短晃兩下，然後停住。不要無限晃。 */
+.figure[data-face="puff"] {
+  animation: duoFireShake 0.42s ease-in-out 2;
+}
+
 .figure > img {
   position: absolute;
   inset: 0;
@@ -55,11 +60,31 @@
   }
 }
 
+@keyframes duoFireShake {
+  0%,
+  100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  20% {
+    transform: translateX(-3px) rotate(-2.5deg);
+  }
+  40% {
+    transform: translateX(3px) rotate(2.5deg);
+  }
+  60% {
+    transform: translateX(-2px) rotate(-1.5deg);
+  }
+  80% {
+    transform: translateX(2px) rotate(1.5deg);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .figure,
   .figure[data-mouth="open"],
   .figure[data-mouth="chew"],
-  .figure[data-mouth="laugh"] {
+  .figure[data-mouth="laugh"],
+  .figure[data-face="puff"] {
     animation: none;
   }
 }
@@ -67,13 +92,15 @@
 :global([data-reduced="true"]) .figure,
 :global([data-reduced="true"]) .figure[data-mouth="open"],
 :global([data-reduced="true"]) .figure[data-mouth="chew"],
-:global([data-reduced="true"]) .figure[data-mouth="laugh"] {
+:global([data-reduced="true"]) .figure[data-mouth="laugh"],
+:global([data-reduced="true"]) .figure[data-face="puff"] {
   animation: none;
 }
 
 :global([data-paused="true"]) .figure,
 :global([data-paused="true"]) .figure[data-mouth="open"],
 :global([data-paused="true"]) .figure[data-mouth="chew"],
-:global([data-paused="true"]) .figure[data-mouth="laugh"] {
+:global([data-paused="true"]) .figure[data-mouth="laugh"],
+:global([data-paused="true"]) .figure[data-face="puff"] {
   animation-play-state: paused;
 }

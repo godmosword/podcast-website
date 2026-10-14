@@ -9,10 +9,13 @@ describe("壽司黏土圖", () => {
   it("組裝壽司仍是飯底加料，兩張都指向 food webp", () => {
     const html = renderToStaticMarkup(<SushiArt sushi={{ base: "temaki", toppings: ["salmon", "cucumber"] }} />);
     expect(html).toContain("/games/v2/dino-sushi/food/temaki.webp");
+    expect(html).toContain("/games/v2/dino-sushi/food/temaki-front.webp");
     expect(html).toContain("/games/v2/dino-sushi/food/salmon.webp");
     expect(html).toContain("/games/v2/dino-sushi/food/cucumber.webp");
+    expect(html.indexOf("temaki-front.webp")).toBeGreaterThan(html.indexOf("salmon.webp"));
+    expect(html).toContain("rotate(");
     expect(html).not.toContain("<svg");
-    expect(html.match(/<img /g)).toHaveLength(3);
+    expect(html.match(/<img /g)).toHaveLength(4);
   });
 
   it("沒選飯不畫", () => {
@@ -48,10 +51,11 @@ describe("壽司黏土圖", () => {
         "/games/v2/dino-sushi/shop/belt.webp",
         "/games/v2/dino-sushi/shop/prepplate.webp",
         "/games/v2/dino-sushi/food/gunkan.webp",
+        "/games/v2/dino-sushi/food/temaki-front.webp",
         "/games/v2/dino-sushi/food/pudding.webp",
       ]),
     );
     expect(new Set(DINO_SUSHI_CLAY_SRCS).size).toBe(DINO_SUSHI_CLAY_SRCS.length);
-    expect(DINO_SUSHI_CLAY_SRCS).toHaveLength(13 + 3 + 12);
+    expect(DINO_SUSHI_CLAY_SRCS).toHaveLength(13 + 3 + 1 + 12);
   });
 });

@@ -7,6 +7,7 @@ import type { BaseId, ToppingId, ToppingKind } from "./toppings";
 /**
  * 《多多壽司屋》食材與店面用主人核准的黏土 WebP（不重畫、不改檔）。
  * 壽司仍是程式分層：飯底一張、料依層數疊上去。
+ * 手捲多一張前層：飯底、配料、再蓋上海苔前片，料才像塞在飯口裡。
  */
 
 /* eslint-disable @next/next/no-img-element -- 原檔 WebP，不走 next/image 轉檔 */
@@ -36,6 +37,9 @@ const BASE_SRC: Record<BaseId, string> = {
   temaki: `${FOOD}/temaki.webp`,
 };
 
+/** 手捲海苔前片，跟飯底同尺寸；畫布高 34.5% 以上是透明的。 */
+const TEMAKI_FRONT_SRC = `${FOOD}/temaki-front.webp`;
+
 const TOPPING_SRC: Record<ToppingId, string> = {
   tamago: `${FOOD}/tamago.webp`,
   shrimp: `${FOOD}/shrimp.webp`,
@@ -55,14 +59,33 @@ const TOPPING_SRC: Record<ToppingId, string> = {
 const BASE_ASPECT: Record<BaseId, string> = {
   nigiri: "581 / 416",
   gunkan: "745 / 684",
-  temaki: "716 / 622",
+  temaki: "511 / 986",
 };
 
-/** 單層料落在飯上的中心（舞台百分比）與寬度。手捲開口在上、軍艦開口在上緣、握壽司料蓋在飯面。 */
-const ANCHOR: Record<BaseId, { x: number; y: number; w: number }> = {
+/** 單層料落在飯上的中心（舞台百分比）與寬度。手捲另見 TEMAKI_PLACE。 */
+const ANCHOR: Record<Exclude<BaseId, "temaki">, { x: number; y: number; w: number }> = {
   nigiri: { x: 50, y: 44, w: 86 },
   gunkan: { x: 50, y: 32, w: 68 },
-  temaki: { x: 50, y: 22, w: 58 },
+};
+
+/**
+ * 手捲：寬、高都是舞台百分比。海苔前層從高度 34.5% 蓋下來，
+ * 所以料的中心比開口再低一點，下半截才會埋進飯裡。
+ * 數字是十二種料各別量過：大約一半露在飯口、一半被前層蓋住，而且不伸出筒身。
+ */
+const TEMAKI_PLACE: Record<ToppingId, { w: number; y: number }> = {
+  tamago: { w: 76, y: 34 },
+  shrimp: { w: 76, y: 36 },
+  crab: { w: 76, y: 34 },
+  corn: { w: 76, y: 32 },
+  cucumber: { w: 64, y: 34 },
+  tuna: { w: 64, y: 32 },
+  floss: { w: 76, y: 32 },
+  salmon: { w: 52, y: 36 },
+  avocado: { w: 40, y: 34 },
+  strawberry: { w: 52, y: 36 },
+  pudding: { w: 70, y: 32 },
+  wasabi: { w: 70, y: 32 },
 };
 
 /** 每種料的圖形差很多：條狀蓋滿、方塊與高的甜點要縮小，才不會蓋過飯。 */
@@ -81,10 +104,37 @@ const TOPPING_FIT: Record<ToppingId, { scale: number; dy: number }> = {
   wasabi: { scale: 0.36, dy: 8 },
 };
 
-type Spot = { x: number; y: number; w: number };
+type Spot = { x: number; y: number; w: number; rot?: number };
 
-function layerSpots(base: BaseId, count: number): Spot[] {
+function layerSpots(base: BaseId, toppings: readonly ToppingId[]): Spot[] {
+  if (base === "temaki") {
+    const n = toppings.length;
+    const fan =
+      n <= 1
+        ? [{ x: 50, dy: 0, mul: 1, rot: -17 }]
+        : n === 2
+          ? [
+              { x: 38, dy: -1, mul: 0.7, rot: -20 },
+              { x: 62, dy: 2, mul: 0.7, rot: -14 },
+            ]
+          : [
+              { x: 50, dy: -2, mul: 0.7, rot: -18 },
+              { x: 38, dy: 2, mul: 0.7, rot: -22 },
+              { x: 62, dy: 1, mul: 0.7, rot: -12 },
+            ];
+    return toppings.map((id, i) => {
+      const place = TEMAKI_PLACE[id];
+      const fanSpot = fan[i] ?? fan[0]!;
+      return {
+        x: fanSpot.x,
+        y: place.y + fanSpot.dy,
+        w: place.w * fanSpot.mul,
+        rot: fanSpot.rot,
+      };
+    });
+  }
   const a = ANCHOR[base];
+  const count = toppings.length;
   if (count <= 1) return [{ x: a.x, y: a.y, w: a.w }];
   if (count === 2) {
     return [
@@ -102,6 +152,7 @@ function layerSpots(base: BaseId, count: number): Spot[] {
 export const DINO_SUSHI_CLAY_SRCS: readonly string[] = [
   ...Object.values(SHOP_SRC),
   ...Object.values(BASE_SRC),
+  TEMAKI_FRONT_SRC,
   ...Object.values(TOPPING_SRC),
 ];
 
@@ -171,12 +222,21 @@ export function SushiArt({
   flat = false,
 }: ArtProps & { sushi: Sushi; layerClassName?: string; flat?: boolean }) {
   if (!sushi.base) return null;
-  const spots = layerSpots(sushi.base, sushi.toppings.length);
+  const temaki = sushi.base === "temaki";
+  const spots = layerSpots(sushi.base, sushi.toppings);
   const layers = sushi.toppings
     .map((id, i) => {
       const fit = TOPPING_FIT[id];
       const spot = spots[i] ?? spots[0]!;
-      return { id, i, x: spot.x, y: spot.y + fit.dy, w: spot.w * fit.scale };
+      /* 手捲的下移已經寫在 TEMAKI_PLACE，不再加握壽司那組 dy。 */
+      return {
+        id,
+        i,
+        x: spot.x,
+        y: temaki ? spot.y : spot.y + fit.dy,
+        w: temaki ? spot.w : spot.w * fit.scale,
+        rot: spot.rot,
+      };
     })
     .sort((a, b) => a.y - b.y);
   return (
@@ -196,7 +256,7 @@ export function SushiArt({
         src={BASE_SRC[sushi.base]}
         style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain" }}
       />
-      {layers.map(({ id, i, x, y, w }) => (
+      {layers.map(({ id, i, x, y, w, rot }) => (
         <span
           key={`${id}-${i}`}
           style={{
@@ -204,7 +264,7 @@ export function SushiArt({
             left: `${x}%`,
             top: `${y}%`,
             width: `${w}%`,
-            transform: "translate(-50%, -50%)",
+            transform: rot ? `translate(-50%, -50%) rotate(${rot}deg)` : "translate(-50%, -50%)",
           }}
         >
           <Layer className={layerClassName}>
@@ -212,6 +272,19 @@ export function SushiArt({
           </Layer>
         </span>
       ))}
+      {temaki ? (
+        <ClayImg
+          src={TEMAKI_FRONT_SRC}
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "contain",
+            pointerEvents: "none",
+          }}
+        />
+      ) : null}
     </span>
   );
 }
