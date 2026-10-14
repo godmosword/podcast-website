@@ -34,6 +34,13 @@ let current: SpeechSynthesisUtterance | null = null;
 let currentDeadline = 0;
 /** 排在後面的一句。 */
 let waiting: { text: string; volume: number } | null = null;
+/** 到時限還沒念完就主動收掉的計時器。 */
+let watchdog: ReturnType<typeof setTimeout> | null = null;
+
+function clearWatchdog() {
+  if (watchdog !== null) clearTimeout(watchdog);
+  watchdog = null;
+}
 
 function speechSynth(): SpeechSynth | null {
   if (typeof window === "undefined") return null;
@@ -71,9 +78,10 @@ function speakNow(synth: SpeechSynth, Utterance: typeof SpeechSynthesisUtterance
   utter.rate = SPEECH_RATE;
   utter.pitch = SPEECH_PITCH;
   utter.volume = Math.min(1, volume);
-  const done = () => {
-    if (current !== utter) return;
+  /** 念完（或卡住被收掉）：接著念排隊的那一句。 */
+  const advance = () => {
     current = null;
+    clearWatchdog();
     const next = waiting;
     waiting = null;
     if (next) {
@@ -84,10 +92,27 @@ function speakNow(synth: SpeechSynth, Utterance: typeof SpeechSynthesisUtterance
       }
     }
   };
+  const done = () => {
+    if (current === utter) advance();
+  };
   utter.onend = done;
   utter.onerror = done;
   current = utter;
-  currentDeadline = Date.now() + speechBudgetMs(text);
+  const budget = speechBudgetMs(text);
+  currentDeadline = Date.now() + budget;
+  clearWatchdog();
+  // onend 遺失（iOS 被來電、Siri 打斷）時，排隊的那句只靠 onend 永遠等不到：時限一到就停掉卡住的句子、接著念
+  watchdog = setTimeout(() => {
+    watchdog = null;
+    if (current !== utter) return;
+    current = null;
+    try {
+      synth.cancel();
+    } catch {
+      // 沒得停也照樣往下念
+    }
+    advance();
+  }, budget);
   synth.speak(utter);
 }
 
@@ -95,6 +120,7 @@ function speakNow(synth: SpeechSynth, Utterance: typeof SpeechSynthesisUtterance
 export function cancelSpeech(): void {
   waiting = null;
   current = null;
+  clearWatchdog();
   const synth = speechSynth();
   if (!synth) return;
   try {
@@ -117,8 +143,9 @@ export function speakText(text: string, { interrupt = true, volume = 1 }: SpeakO
   try {
     waiting = null;
     current = null;
-    // 瀏覽器沒在念就不必 cancel：WebKit 在 cancel 後立刻 speak 偶爾會吃掉那一句
-    if (interrupt && (synth.speaking === true || synth.pending === true)) synth.cancel();
+    // 走到這裡表示要插隊、或我們這邊沒在念（含上一句過了時限）。瀏覽器若還說在念，那句是卡住的，
+    // 不停掉新句子只會排在它後面；真的沒在念就不 cancel（WebKit 在 cancel 後立刻 speak 偶爾會吃掉那一句）
+    if (synth.speaking === true || synth.pending === true) synth.cancel();
     speakNow(synth, Utterance, text, volume);
   } catch {
     // 瀏覽器拒講，或測試裡的假物件不完整
