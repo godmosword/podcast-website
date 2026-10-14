@@ -46,9 +46,9 @@ export const HORN_NOTES = [
   { freq: 622, dur: 0.09, type: "square" as const, vol: 0.028, at: 90 },
 ] as const;
 
-const CONFETTI_COLORS = ["#ff7a9c", "#ffd34d", "#6fc3f0", "#7fd4a8", "#c9a8ff", "#ff8a3d"] as const;
+const CONFETTI_COLORS = CANDY_MATCH_PIECES.map((piece) => piece.color);
 
-export type LineFx = { kind: "line"; axis: "row" | "col"; index: number };
+export type LineFx = { kind: "line"; axis: "row" | "col"; index: number; piece?: number };
 export type BurstFx = { kind: "burst"; origin: number };
 export type ColorFx = { kind: "color"; origin: number; cells: number[] };
 export type ClearFx = LineFx | BurstFx | ColorFx;
@@ -68,6 +68,25 @@ export function praiseLine(step: number): (typeof PRAISE_LINES)[number] | null {
   if (step < 1) return null;
   const index = Math.min(step, PRAISE_LINES.length) - 1;
   return PRAISE_LINES[index] ?? null;
+}
+
+/** 這一排（或這一欄）被清掉的第一台車負責開過去，新車也會自己開。 */
+function pieceOnLine(
+  pieces: readonly number[],
+  cols: number,
+  rows: number,
+  axis: "row" | "col",
+  index: number,
+  cleared: ReadonlySet<number>,
+): number {
+  const span = axis === "row" ? cols : rows;
+  for (let k = 0; k < span; k++) {
+    const i = axis === "row" ? index * cols + k : k * cols + index;
+    if (!cleared.has(i)) continue;
+    const piece = pieces[i] ?? -1;
+    if (piece >= 0) return piece;
+  }
+  return 0;
 }
 
 function dedupeLines(lines: readonly LineFx[]): LineFx[] {
@@ -199,7 +218,10 @@ export function planClearFx(input: {
   }
 
   return [
-    ...dedupeLines(lines),
+    ...dedupeLines(lines).map((line) => ({
+      ...line,
+      piece: pieceOnLine(pieces, cols, rows, line.axis, line.index, clearSet),
+    })),
     ...bursts.slice(0, MAX_BURST_FX),
     ...colors.slice(0, MAX_COLOR_FX),
   ];

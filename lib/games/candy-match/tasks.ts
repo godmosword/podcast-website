@@ -4,8 +4,7 @@
  */
 
 import type { ResolveEvents } from "./engine";
-
-const CANDY_PIECE_NAMES = ["小紅", "計程車", "小巴士", "鈴鈴", "多多"] as const;
+import { CANDY_MATCH_PIECES } from "./levels";
 
 export type CandyGoal =
   | { kind: "collect-any"; count: number }
@@ -33,7 +32,7 @@ export type CandyGoalStatus = {
   done: boolean;
 };
 
-export function freshCandyProgress(kinds: number = CANDY_PIECE_NAMES.length): CandyProgress {
+export function freshCandyProgress(kinds: number = CANDY_MATCH_PIECES.length): CandyProgress {
   return {
     collected: Array<number>(kinds).fill(0),
     cleaned: 0,
@@ -106,7 +105,7 @@ export function goalCompletion(goals: readonly CandyGoal[], p: CandyProgress): n
 }
 
 function pieceName(piece: number): string {
-  return CANDY_PIECE_NAMES[piece] ?? "圖案";
+  return CANDY_MATCH_PIECES[piece]?.name ?? "圖案";
 }
 
 function unit(goal: CandyGoal): string {

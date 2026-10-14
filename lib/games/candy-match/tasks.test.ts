@@ -81,6 +81,9 @@ describe("Candy 任務判定", () => {
     expect(levelGoalSpeech([{ kind: "collect", piece: 1, count: 30 }, { kind: "detonate", count: 2 }])).toBe(
       "收集 30 台計程車，還要啟動特殊糖 2 次。",
     );
+    expect(goalIntroLine({ kind: "collect", piece: 6, count: 5 })).toBe("收集 5 台消防車");
+    expect(goalDoneSpeech({ kind: "collect", piece: 5, count: 1 })).toBe("救護車完成了！");
+    expect(goalShortfallSpeech({ kind: "collect", piece: 7, count: 3 }, 2)).toBe("再差 2 台小火車！");
     expect(levelGoalSpeech([{ kind: "clean-dirt", count: 8 }], true)).toBe(
       "打掃 8 格髒髒。有的污漬比較厚，要再掃一次！",
     );

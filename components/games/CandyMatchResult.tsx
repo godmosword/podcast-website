@@ -21,7 +21,16 @@ type CandyMatchResultProps = {
   onMap: () => void;
 };
 
-const CONFETTI = ["var(--c-pink)", "var(--c-yellow)", "var(--c-mint)", "var(--c-sky)", "var(--c-lilac)"];
+const CONFETTI = [
+  "var(--c-pink)",
+  "var(--c-yellow)",
+  "var(--c-mint)",
+  "var(--c-sky)",
+  "var(--c-lilac)",
+  "#4da3ff",
+  "#ff8a3d",
+  "#3d5a98",
+];
 
 type CandyWin = Extract<CandyRoundOutcome, { kind: "win" }>;
 
