@@ -7,7 +7,6 @@
  */
 .kitchen {
   --duo-h: clamp(150px, 30svh, 230px);
-  --tray-art: 34px;
   --wood-edge: #d6b07a;
   --ink-warm: #4a3722;
   flex: 1 1 auto;
@@ -251,44 +250,56 @@
   pointer-events: auto;
 }
 
-/* 點餐泡泡左邊的小喇叭：再聽一次這單，不把泡泡往下推 */
+/*
+ * 點餐泡泡外層：整顆泡泡可以點，再聽一次這單。
+ * 透明鈕剛好蓋住泡泡，左上角外緣的小喇叭徽章只是提示，不佔泡泡寬度（三料單在窄舞台才放得下）。
+ * 彈出動畫掛在外層，徽章跟泡泡一起出來。
+ */
 .bubbleWrap {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  position: relative;
   max-width: 100%;
-  pointer-events: auto;
+  transform-origin: 18px 100%;
+  animation: bubbleIn 340ms cubic-bezier(0.3, 1.45, 0.5, 1) both;
 }
 
-.replay,
-.voiceToggle {
-  display: grid;
-  place-items: center;
-  flex: 0 0 44px;
-  width: 44px;
-  height: 44px;
+.replay {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
   margin: 0;
   padding: 0;
   border: 0;
+  border-radius: 20px;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 卡面日夜不反轉，焦點環固定深墨（夜間 --focus-ring 是黃色，會跟木框混在一起） */
+.replay:focus-visible {
+  outline: 3px solid #34302b;
+  outline-offset: 5px;
+}
+
+/* 牙刷出現時是下一步：小喇叭跟招牌、燈籠一樣讓位（窄舞台會疊到牙刷一角）。泡泡照樣可以點 */
+.duoArea[data-brush="true"] .replayBadge {
+  visibility: hidden;
+}
+
+.replayBadge {
+  position: absolute;
+  top: -12px;
+  left: -12px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: #fffdf8;
   color: var(--ink-warm);
   box-shadow:
-    0 0 0 2.5px #d9a86a,
-    0 4px 8px rgba(90, 60, 30, 0.18);
-  cursor: pointer;
-}
-
-.replay[data-muted="true"] {
-  opacity: 0.55;
-}
-
-/* 舞台左上：關掉／打開朗讀，記在這台裝置 */
-.voiceToggle {
-  position: absolute;
-  z-index: 8;
-  top: calc(var(--awning-h) + 4px);
-  left: 6px;
+    0 0 0 2px #d9a86a,
+    0 3px 6px rgba(90, 60, 30, 0.18);
 }
 
 /* 點餐泡泡：純白＋木色粗框，在奶油色牆上也最醒目；尾巴往左下指向多多 */
@@ -305,8 +316,6 @@
   box-shadow:
     0 0 0 3px #d9a86a,
     0 10px 22px rgba(90, 60, 30, 0.26);
-  transform-origin: 18px 100%;
-  animation: bubbleIn 340ms cubic-bezier(0.3, 1.45, 0.5, 1) both;
 }
 
 .bubbleTail {
@@ -355,6 +364,18 @@
   height: clamp(34px, min(12.5cqh, 13cqw), 60px);
   border-radius: 12px;
   background: radial-gradient(closest-side, rgba(239, 220, 188, 0.55), rgba(239, 220, 188, 0));
+}
+
+/* 窄舞台（iPhone SE 橫向約 234px 寬）：三料單有四格，格子與左右內距收小，泡泡才不被舞台裁掉（右欄寬度不動，字卡不會變寬蓋到多多） */
+@container duo-stage (max-width: 250px) {
+  .bubble {
+    padding-inline: 6px;
+  }
+
+  .bubbleItem {
+    width: 30px;
+    height: 30px;
+  }
 }
 
 /* 飯和料之間一條細分隔，看得出「先飯、再料」 */
@@ -548,10 +569,11 @@
   object-fit: contain;
 }
 
+/* 數字貼在疊盤左下：疊高了也不會頂到上面的泡泡或「多多吃飽了」 */
 .plateCount {
   position: absolute;
-  right: -6px;
-  top: -14px;
+  left: -18px;
+  bottom: 2px;
   min-width: 20px;
   padding: 1px 6px;
   border-radius: 999px;
@@ -562,18 +584,26 @@
   box-shadow: 0 0 0 2px #fffdf8, 0 3px 6px rgba(40, 70, 30, 0.25);
 }
 
-/* 矮舞台（320×568 直向）：維持小盤、每層露一半，最多看得到 5 盤（自由做疊到 8 盤會頂到「多多吃飽了」），數字照實 */
+/*
+ * 矮舞台（320×568 直向）：小盤、每層露 9px。泡泡底下只剩約 50px，
+ * 點餐最多看得到 3 盤（泡泡下還有進度小盤）、自由做 4 盤（上面只有「多多吃飽了」），數字照實。
+ * 最後一個子元素是數字，所以第 n 盤從後數是 nth-last-child(n + 1)。
+ */
 @container duo-stage (max-height: 190px) {
   .plates {
-    --pw: 54px;
+    --pw: 48px;
   }
 
   .plate {
-    margin-top: calc(var(--pw) * 403 / 695 * -0.55);
+    margin-top: calc(9px - var(--pw) * 403 / 695);
   }
 
-  .plate:nth-last-child(n + 7) {
+  .plate:nth-last-child(n + 5) {
     display: none;
+  }
+
+  .duoArea[data-mode="free"] .plate:nth-last-child(5) {
+    display: block;
   }
 }
 
@@ -805,7 +835,8 @@
 
 .slots {
   display: flex;
-  gap: 6px;
+  /* 兒童觸控：相鄰可點至少 8px（STYLE-BIBLE §3） */
+  gap: 8px;
 }
 
 /* 料位＝小瓷碟：白釉、藍色細邊、碟底陰影 */
@@ -1025,7 +1056,7 @@
     0 6px 10px rgba(164, 90, 30, 0.2);
 }
 
-/* 圖跟著格子寬（約一半），矮直向與矮橫向固定 --tray-art 保一屏 */
+/* 圖跟著格子寬；矮橫向用 --tray-art（圖高）設上限，四列托盤才放得進一屏 */
 .trayArt {
   position: relative;
   width: 100%;
@@ -1133,9 +1164,7 @@
 .baseButton:focus-visible,
 .serveButton:focus-visible,
 .brushButton:focus-visible,
-.fullButton:focus-visible,
-.replay:focus-visible,
-.voiceToggle:focus-visible {
+.fullButton:focus-visible {
   outline: 3px solid var(--focus-ring, #34302b);
   outline-offset: 3px;
 }
@@ -1144,7 +1173,6 @@
 @media (max-height: 640px) and (orientation: portrait) {
   .kitchen {
     --duo-h: 148px;
-    --tray-art: 30px;
     gap: 6px;
   }
 
@@ -1160,8 +1188,13 @@
     gap: 10px;
   }
 
+  /* 三個 48px 料位＋兩個 8px 間距要 160px；寬度從「給多多吃」那欄拿（320 寬約 92px，仍 ≥56px） */
+  .boardLayer {
+    grid-template-columns: minmax(160px, 1fr) minmax(0, 92px);
+  }
+
   .serveButton {
-    max-width: 100px;
+    max-width: 92px;
     min-height: 84px;
     aspect-ratio: auto;
     font-size: 0.92rem;
@@ -1173,12 +1206,6 @@
 
   .trayButton {
     min-height: 56px;
-  }
-
-  .slot,
-  .slotEmpty {
-    width: 42px;
-    height: 42px;
   }
 }
 
@@ -1242,6 +1269,12 @@
 @media (orientation: landscape) and (max-height: 520px) {
   .kitchen {
     --duo-min: 0px;
+    --tray-art: 48px;
+  }
+
+  /* 托盤圖是寬的盤子（858:480），用圖高定上限，寬跟著算 */
+  .trayArt {
+    width: min(100%, calc(var(--tray-art) * 858 / 480));
   }
 
   /* 三張長皿不要被拉成空白的高板子：置中、限高、圖放大 */
@@ -1265,7 +1298,6 @@
 
 @media (min-width: 900px) {
   .kitchen {
-    --tray-art: 48px;
     min-height: min(480px, calc(100svh - 160px));
   }
 
@@ -1333,6 +1365,31 @@
     width: 44px;
     height: 44px;
   }
+
+  .replayBadge {
+    top: -14px;
+    left: -14px;
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* 寬 ≥900 的橫向手機（如 932×430）同時中上面的桌面區塊：舞台下限、托盤鈕高度、料位要收回矮橫向的值才放得進一屏 */
+@media (min-width: 900px) and (orientation: landscape) and (max-height: 520px) {
+  .kitchen {
+    --duo-min: 0px;
+    min-height: 0;
+  }
+
+  .trayButton {
+    min-height: 56px;
+  }
+
+  .slot,
+  .slotEmpty {
+    width: 48px;
+    height: 48px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1341,7 +1398,7 @@
   .bubbleItem[data-flash="true"],
   .finger,
   .brushButton,
-  .bubble,
+  .bubbleWrap,
   .check,
   .caption,
   .plate,
@@ -1373,7 +1430,7 @@
 .kitchen[data-reduced="true"] [data-hint="true"],
 .kitchen[data-reduced="true"] .finger,
 .kitchen[data-reduced="true"] .brushButton,
-.kitchen[data-reduced="true"] .bubble,
+.kitchen[data-reduced="true"] .bubbleWrap,
 .kitchen[data-reduced="true"] .check,
 .kitchen[data-reduced="true"] .caption,
 .kitchen[data-reduced="true"] .plate,
@@ -1410,6 +1467,7 @@
 /* iPhone 橫向扣掉 Safari 工具列只剩約 340px 高：收緊間距（托盤鈕仍 ≥56px），托盤四列才不被切掉 */
 @media (orientation: landscape) and (max-height: 400px) {
   .kitchen {
+    --tray-art: 40px;
     gap: 6px;
   }
 

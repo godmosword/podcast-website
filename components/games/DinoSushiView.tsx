@@ -30,7 +30,7 @@ export type DinoSushiOutcome = {
   medals: RoundMedals | null;
 };
 
-export function DinoSushiView({ reducedMotion, status, syncHost, audio, instance }: DinoSushiViewProps) {
+export function DinoSushiView({ reducedMotion, status, syncHost, audio, instance, soundOn, gameVolume }: DinoSushiViewProps) {
   useDuoDuoStickerPreload();
   useDinoSushiClayPreload();
   const [screen, setScreen] = useState<Screen>("title");
@@ -126,7 +126,13 @@ export function DinoSushiView({ reducedMotion, status, syncHost, audio, instance
       ) : null}
 
       {screen !== "title" && play.round ? (
-        <DinoSushiKitchen play={play} reducedMotion={reducedMotion} inputPaused={inputPaused} />
+        <DinoSushiKitchen
+          play={play}
+          reducedMotion={reducedMotion}
+          inputPaused={inputPaused}
+          soundOn={soundOn}
+          gameVolume={gameVolume}
+        />
       ) : null}
 
       {screen === "result" && outcome ? (

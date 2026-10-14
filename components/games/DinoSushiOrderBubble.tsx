@@ -14,9 +14,8 @@ type Props = {
   /** 一輪第幾單（0 起）。 */
   index: number;
   total: number;
-  /** 再聽一次這單。靜音時按鈕還在，點了也不出聲。 */
-  voiceMuted: boolean;
-  onReplay: () => void;
+  /** 點泡泡再聽一次這單。音效關著時不給（不留點了沒聲音的按鈕）。 */
+  onReplay?: () => void;
 };
 
 function Check() {
@@ -28,20 +27,14 @@ function Check() {
   );
 }
 
-/** 多多頭上的點餐泡泡：圖案說想吃什麼，放對一樣就打勾；下面一排小盤是這輪第幾單。 */
-export function DinoSushiOrderBubble({ order, sushi, flash, index, total, voiceMuted, onReplay }: Props) {
+/**
+ * 多多頭上的點餐泡泡：圖案說想吃什麼，放對一樣就打勾；下面一排小盤是這輪第幾單。
+ * 整顆泡泡可以點，再聽一次；左上角的小喇叭是提示，不佔泡泡寬度。
+ */
+export function DinoSushiOrderBubble({ order, sushi, flash, index, total, onReplay }: Props) {
   const checks = orderChecks(sushi, order);
   return (
     <div className={styles.bubbleWrap}>
-      <button
-        type="button"
-        className={styles.replay}
-        aria-label="再聽一次"
-        data-muted={voiceMuted ? "true" : undefined}
-        onClick={onReplay}
-      >
-        <Icon name={voiceMuted ? "volume-off" : "volume-on"} size={22} />
-      </button>
       <div className={styles.bubble} role="img" aria-label={`第 ${index + 1} 單，共 ${total} 單。${orderAnnouncement(order)}`}>
         <span className={styles.bubbleItems}>
           <span className={styles.bubbleItem} data-done={checks.base ? "true" : undefined} data-flash={flash && !flash.baseOk ? "true" : undefined}>
@@ -72,6 +65,13 @@ export function DinoSushiOrderBubble({ order, sushi, flash, index, total, voiceM
           ))}
         </span>
       </div>
+      {onReplay ? (
+        <button type="button" className={styles.replay} aria-label="再聽一次" onClick={onReplay}>
+          <span className={styles.replayBadge} aria-hidden>
+            <Icon name="volume-on" size={15} />
+          </span>
+        </button>
+      ) : null}
     </div>
   );
 }
