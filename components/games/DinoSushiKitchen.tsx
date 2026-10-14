@@ -1,7 +1,6 @@
 "use client";
 
 import { useLayoutEffect, useRef } from "react";
-import Icon from "@/components/ui/Icon";
 import { BaseArt, PlateArt, SHOP_SRC, SushiArt, ToppingArt } from "@/lib/games/dino-sushi/art";
 import { matchOrder, orderSpeechLine } from "@/lib/games/dino-sushi/orders";
 import { currentOrder } from "@/lib/games/dino-sushi/round";
@@ -21,6 +20,10 @@ type Props = {
   play: DinoSushiPlay;
   reducedMotion: boolean;
   inputPaused: boolean;
+  /** 抬頭的「音效」開關；多多說話也跟著它。 */
+  soundOn: boolean;
+  /** 設定裡的遊戲音量 0–1。 */
+  gameVolume: number;
 };
 
 /**
@@ -65,7 +68,7 @@ function useFocusAcrossPhases(choosingBase: boolean) {
 }
 
 /** 廚房：迴轉壽司店（多多＋泡泡＋疊盤）｜砧板（3 料位）＋「給多多吃」｜托盤。 */
-export function DinoSushiKitchen({ play, reducedMotion, inputPaused }: Props) {
+export function DinoSushiKitchen({ play, reducedMotion, inputPaused, soundOn, gameVolume }: Props) {
   const {
     round,
     phase,
@@ -84,8 +87,11 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused }: Props) {
   const speech = useDinoSushiSpeech({
     orderToken: round && orderForSpeech ? `${round.mode}:${round.seed}:${round.index}` : null,
     orderLine: orderForSpeech ? orderSpeechLine(orderForSpeech) : null,
+    firstOrder: round?.index === 0,
     caption,
     inputPaused,
+    soundOn,
+    volume: gameVolume,
   });
   if (!round) return null;
   const order = currentOrder(round);
@@ -131,15 +137,6 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused }: Props) {
         data-mode={round.mode}
         data-brush={brushShown ? "true" : undefined}
       >
-        <button
-          type="button"
-          className={styles.voiceToggle}
-          aria-pressed={!speech.muted}
-          aria-label={speech.muted ? "打開朗讀" : "關閉朗讀"}
-          onClick={speech.toggleMuted}
-        >
-          <Icon name={speech.muted ? "volume-off" : "volume-on"} size={22} />
-        </button>
         <ShopWall />
         <DinoSushiDuoDuo
           phase={phase}
@@ -172,8 +169,7 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused }: Props) {
               flash={flash}
               index={round.index}
               total={round.orders.length}
-              voiceMuted={speech.muted}
-              onReplay={speech.replay}
+              onReplay={speech.voiceOn ? speech.replay : undefined}
             />
           ) : null}
           {caption ? (

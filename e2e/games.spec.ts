@@ -412,6 +412,173 @@ test.describe("多多壽司屋", () => {
     await expectHand("給多多吃");
   });
   }
+
+  /** 照第 n 單的泡泡選飯、放料、送出，等這一盤疊上去。 */
+  const serveOrder = async (page: import("@playwright/test").Page, n: number) => {
+    const label = await page.getByRole("img", { name: new RegExp(`^第 ${n} 單`) }).getAttribute("aria-label");
+    const [base, ...toppings] = label!.split("多多想吃：")[1]!.split("、");
+    await page.getByRole("button", { name: `選${base}` }).click();
+    for (const t of toppings) await page.getByRole("button", { name: `加${t}` }).click();
+    await page.getByRole("button", { name: "給多多吃" }).click();
+    await expect(page.getByRole("img", { name: `吃完 ${n} 盤` })).toBeVisible();
+  };
+
+  /** 點牙刷正中央要點到牙刷，不能點到別的鈕（#215 的朗讀開關曾蓋在上面）。 */
+  for (const vp of [
+    { width: 320, height: 568 },
+    { width: 390, height: 844 },
+    { width: 844, height: 390 },
+    { width: 1280, height: 800 },
+  ]) {
+    test(`${vp.width}×${vp.height}：牙刷正中央點得到牙刷`, async ({ page }) => {
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await page.setViewportSize(vp);
+      await page.goto("/games/dino-sushi");
+      await page.getByRole("button", { name: "自由做" }).click();
+      await page.getByRole("button", { name: "選軍艦" }).click();
+      await page.getByRole("button", { name: "加布丁" }).click();
+      await page.getByRole("button", { name: "給多多吃" }).click();
+      const brush = page.getByRole("button", { name: "幫多多刷牙" });
+      await expect(brush).toBeVisible();
+      const hit = await brush.evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        return document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)?.closest("button") === el;
+      });
+      expect(hit).toBe(true);
+    });
+  }
+
+  /** 第 5 單有飯＋三樣料：四格都要在店面舞台裡，不被裁掉；點泡泡的「再聽一次」也在舞台裡。 */
+  for (const vp of [
+    { width: 320, height: 568 },
+    { width: 360, height: 640 },
+    { width: 390, height: 844 },
+    { width: 667, height: 375 },
+    { width: 844, height: 390 },
+  ]) {
+    test(`${vp.width}×${vp.height}：三料單的泡泡整顆在舞台裡`, async ({ page }) => {
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await page.setViewportSize(vp);
+      await page.goto("/games/dino-sushi");
+      await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+      for (let n = 1; n <= 4; n++) await serveOrder(page, n);
+      const bubble = page.getByRole("img", { name: /^第 5 單/ });
+      await expect(bubble).toBeVisible();
+      const stage = (await page.getByRole("region", { name: "多多" }).boundingBox())!;
+      // 溢出的子元素不算在泡泡的框裡，要一格一格量
+      const items = await bubble.evaluate((el) =>
+        [...el.firstElementChild!.children].map((c) => {
+          const r = c.getBoundingClientRect();
+          return { left: r.left, right: r.right };
+        }),
+      );
+      expect(items).toHaveLength(4);
+      for (const item of items) {
+        expect(item.left).toBeGreaterThanOrEqual(stage.x);
+        expect(item.right).toBeLessThanOrEqual(stage.x + stage.width);
+      }
+      const replay = (await page.getByRole("button", { name: "再聽一次" }).boundingBox())!;
+      expect(replay.x + replay.width).toBeLessThanOrEqual(stage.x + stage.width);
+    });
+  }
+
+  test("320×568：料位和「給多多吃」各點各的，相鄰至少 8px", async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 568 });
+    await page.goto("/games/dino-sushi");
+    await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+    await page.getByRole("button", { name: "選軍艦" }).click();
+    const tray = page.getByRole("group", { name: "壽司料" }).getByRole("button");
+    for (let i = 0; i < 3; i++) await tray.nth(i).click();
+    const slots = page.getByRole("button", { name: /^拿掉/ });
+    await expect(slots).toHaveCount(3);
+    const serve = (await page.getByRole("button", { name: "給多多吃" }).boundingBox())!;
+    const boxes = await Promise.all((await slots.all()).map(async (s) => (await s.boundingBox())!));
+    for (const [i, box] of boxes.entries()) {
+      const hit = await slots.nth(i).evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        return document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)?.closest("button") === el;
+      });
+      expect(hit, `料位 ${i + 1}`).toBe(true);
+      expect(serve.x - (box.x + box.width), `料位 ${i + 1} 到給多多吃`).toBeGreaterThanOrEqual(8);
+    }
+    for (let i = 1; i < boxes.length; i++) {
+      expect(boxes[i]!.x - (boxes[i - 1]!.x + boxes[i - 1]!.width)).toBeGreaterThanOrEqual(8);
+    }
+  });
+
+  /**
+   * 朗讀跟抬頭「音效」同一個開關；多多的字卡念完才接著念下一單。
+   * 假的 speechSynthesis 要用 defineProperty 換掉（直接指定在 Chromium 會被忽略，測試會白過）。
+   */
+  test("朗讀：字卡不被換單切掉、關掉抬頭音效就不念", async ({ page }) => {
+    await page.addInitScript(() => {
+      type Entry = { op: "speak" | "cancel"; text?: string };
+      const log: Entry[] = [];
+      let current: { text: string; onend?: (() => void) | null } | null = null;
+      const synth = {
+        speaking: false,
+        pending: false,
+        speak(u: { text: string; onend?: (() => void) | null }) {
+          log.push({ op: "speak", text: u.text });
+          current = u;
+          synth.speaking = true;
+        },
+        cancel() {
+          log.push({ op: "cancel" });
+          current = null;
+          synth.speaking = false;
+        },
+      };
+      class FakeUtterance {
+        lang = "";
+        rate = 1;
+        pitch = 1;
+        volume = 1;
+        onend: (() => void) | null = null;
+        onerror: (() => void) | null = null;
+        constructor(public text: string) {}
+      }
+      Object.defineProperty(window, "speechSynthesis", { value: synth, configurable: true });
+      Object.defineProperty(window, "SpeechSynthesisUtterance", { value: FakeUtterance, configurable: true });
+      const w = window as unknown as { __speech: Entry[]; __finishSpeech: () => void };
+      w.__speech = log;
+      w.__finishSpeech = () => {
+        const u = current;
+        current = null;
+        synth.speaking = false;
+        u?.onend?.();
+      };
+    });
+    const log = () => page.evaluate(() => (window as unknown as { __speech: { op: string; text?: string }[] }).__speech);
+    const spoken = async () => (await log()).filter((e) => e.op === "speak").map((e) => e.text);
+
+    await page.goto("/games/dino-sushi");
+    await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+    await expect.poll(spoken).toEqual([expect.stringMatching(/^我想要/)]);
+    const firstOrder = (await spoken())[0];
+    await page.evaluate(() => (window as unknown as { __finishSpeech: () => void }).__finishSpeech());
+
+    // 點泡泡再聽一次（音效開著時有念：正向對照）
+    await page.getByRole("button", { name: "再聽一次" }).click();
+    await expect.poll(async () => (await spoken()).at(-1)).toBe(firstOrder);
+    await page.evaluate(() => (window as unknown as { __finishSpeech: () => void }).__finishSpeech());
+
+    // 做完第 1 單：字卡開始念，下一單出現時不能 cancel 掉它，要等它念完才念下一單
+    const mark = (await log()).length;
+    await serveOrder(page, 1);
+    await expect(page.getByRole("img", { name: /^第 2 單/ })).toBeVisible();
+    expect((await log()).slice(mark)).toEqual([{ op: "speak", text: expect.stringMatching(/！$/) }]);
+    await page.evaluate(() => (window as unknown as { __finishSpeech: () => void }).__finishSpeech());
+    await expect.poll(async () => (await spoken()).at(-1)).toMatch(/^我想要/);
+
+    // 關掉抬頭音效：之後不念、泡泡上的「再聽一次」也收起來
+    await page.getByRole("button", { name: "關閉音效" }).click();
+    await expect(page.getByRole("button", { name: "再聽一次" })).toHaveCount(0);
+    const before = (await spoken()).length;
+    await serveOrder(page, 2);
+    await expect(page.getByRole("img", { name: /^第 3 單/ })).toBeVisible();
+    expect((await spoken()).length).toBe(before);
+  });
 });
 
 /** G-M7（翻 D5-A）：著色本改走同款 sticky 抬頭——隱藏全站導覽、恰好一個 h1、三個階段都只有「回遊樂園」一個出口。 */
