@@ -39,7 +39,7 @@
   align-items: center;
   justify-content: center;
   gap: 4px;
-  min-height: 44px;
+  min-height: 56px;
   margin: 0;
   padding: 0;
   border: 2px solid rgba(93, 74, 103, 0.12);
@@ -55,12 +55,12 @@
 }
 
 .replayButton {
-  min-width: 44px;
+  min-width: 56px;
   padding: 0 12px 0 10px;
 }
 
 .muteButton {
-  width: 44px;
+  width: 56px;
   flex: none;
 }
 
@@ -120,32 +120,89 @@
 
 .goalList {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
-  gap: 6px;
+  grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
+  gap: 8px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.goal {
+.goalCardButton {
+  position: relative;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  min-height: 48px;
-  padding: 4px 10px;
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--c-yellow) 22%, white);
+  gap: 2px;
+  width: 100%;
+  min-width: 56px;
+  min-height: 84px;
+  padding: 6px 6px 8px;
+  border: 0;
+  border-radius: 18px;
+  background: #fff8ec;
+  color: #5d4a67;
+  font-family: inherit;
+  cursor: pointer;
 }
 
-.goal[data-done="true"] {
-  background: color-mix(in srgb, var(--c-mint) 30%, white);
+.goalCardButton[data-static="true"] {
+  cursor: default;
 }
 
-.goalIcon {
-  display: inline-flex;
-  width: 40px;
-  justify-content: center;
+.goalCardButton[data-done="true"] {
+  background: color-mix(in srgb, var(--c-mint) 28%, white);
+}
+
+.goalCardButton:focus-visible {
+  outline: 3px solid var(--focus-ring, #ff9fb7);
+  outline-offset: 2px;
+}
+
+.goalRingWrap {
+  position: relative;
+  width: 68px;
+  height: 68px;
+  flex: none;
+}
+
+.goalRing {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.goalRingTrack,
+.goalRingValue,
+.goalRingDone {
+  fill: none;
+  stroke-width: 5;
+}
+
+.goalRingTrack {
+  stroke: #f1dfc6;
+}
+
+.goalRingValue,
+.goalRingDone {
+  stroke-linecap: round;
+  transition: stroke-dashoffset 220ms ease;
+}
+
+.goalRingValue {
+  stroke: #ff8c2b;
+}
+
+.goalRingDone {
+  stroke: #2a9d8f;
+}
+
+.goalArt {
+  position: absolute;
+  inset: 12px;
+  display: grid;
+  place-items: center;
   line-height: 0;
 }
 
@@ -160,32 +217,61 @@
   margin-left: -6px;
 }
 
-/* 數字是孩子最常看的：獨立放大 */
-.goalNum {
-  font-size: 28px;
+/* 倒數是孩子最常看的：壓在卡片右下角 */
+.goalCount {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  display: grid;
+  place-items: center;
+  min-width: 40px;
+  height: 40px;
+  padding: 0 6px;
+  box-sizing: border-box;
+  border: 3px solid #fff;
+  border-radius: 20px;
+  background: #ff8c2b;
+  color: #fff;
+  font-size: 24px;
   font-weight: 900;
   line-height: 1;
 }
 
-.goalCheck {
-  display: inline-flex;
-  color: #3f8a5a;
-  line-height: 0;
+.goalShort {
+  color: #c94a1e;
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1.15;
+  text-align: center;
 }
 
-.progressTrack {
-  height: 6px;
-  overflow: hidden;
-  border-radius: var(--radius-pill, 999px);
-  background: color-mix(in srgb, var(--c-lilac) 28%, white);
+.goalStamp {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  z-index: 1;
+  padding: 2px 8px;
+  border: 3px solid #2a9d8f;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #2a9d8f;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.2;
+  white-space: nowrap;
+  transform: translate(-50%, -50%) rotate(-14deg);
+  animation: goalStampIn 280ms ease-out;
 }
 
-.progressFill {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, var(--c-mint), var(--c-sky), var(--c-pink));
-  transition: width 220ms ease;
+@keyframes goalStampIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(-14deg) scale(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(-14deg) scale(1);
+  }
 }
 
 .propArea {
@@ -256,8 +342,7 @@
 }
 
 @media (max-width: 480px) {
-  .taskPlaceName,
-  .progressTrack {
+  .taskPlaceName {
     display: none;
   }
 }
@@ -273,12 +358,15 @@
     grid-template-columns: 1fr;
   }
 
-  .goal {
-    min-height: 64px;
+  .goalRingWrap {
+    width: 88px;
+    height: 88px;
   }
 
-  .goalNum {
-    font-size: 34px;
+  .goalCount {
+    min-width: 48px;
+    height: 48px;
+    font-size: 30px;
   }
 
   .propRow {
@@ -465,39 +553,217 @@
     grid-template-columns: 1fr;
   }
 
-  .goal {
-    gap: 4px;
-    padding: 4px 6px;
+  .goalCardButton {
+    min-height: 76px;
+    padding: 4px;
   }
 
-  .goalIcon {
-    width: 32px;
+  .goalRingWrap {
+    width: 60px;
+    height: 60px;
   }
 
-  .goalNum {
-    font-size: 22px;
+  .goalCount {
+    min-width: 36px;
+    height: 36px;
+    font-size: 20px;
+  }
+
+  .goalStamp {
+    font-size: 16px;
   }
 }
 
-/* 很矮的螢幕：任務列收緊，進度條省略（每項目標已有剩餘數） */
-@media (max-height: 640px) {
+/* 矮螢幕（含 390×664）：環縮小，棋盤才留得下 56px 的格子 */
+@media (max-height: 760px) {
   .taskBar {
     gap: 4px;
-    padding: 6px 8px;
+    padding: 4px 8px;
   }
 
-  .progressTrack {
-    display: none;
+  .goalCardButton {
+    min-height: 64px;
+    padding: 4px;
+  }
+
+  .goalRingWrap {
+    width: 56px;
+    height: 56px;
+  }
+
+  .goalArt {
+    inset: 8px;
+  }
+
+  .goalCount {
+    min-width: 36px;
+    height: 36px;
+    font-size: 20px;
+  }
+}
+
+.introOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+}
+
+.introDismiss {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 12px;
+  overflow: auto;
+  border: 0;
+  background: rgba(255, 248, 238, 0.94);
+  color: inherit;
+  font-family: inherit;
+  cursor: pointer;
+  outline: none;
+}
+
+.introDismiss:focus-visible .introStart {
+  outline: 3px solid var(--focus-ring, #ff9fb7);
+  outline-offset: 3px;
+}
+
+.introCard {
+  width: min(100%, 360px);
+  padding: 16px 14px 18px;
+  border-radius: 24px;
+  background: linear-gradient(#fff3f9, #e8f7ff);
+  box-shadow: 0 4px 14px rgba(58, 36, 16, 0.08);
+  text-align: center;
+}
+
+.introBadge {
+  display: inline-block;
+  margin: 0 0 8px;
+  padding: 2px 14px;
+  border-radius: 999px;
+  background: #ff8c2b;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.introGoals {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.introGoal {
+  margin: 0;
+}
+
+.introPictures {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.introArt {
+  display: inline-flex;
+  line-height: 0;
+}
+
+.introTimes {
+  color: #7a5a3a;
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.introCount {
+  color: #c94a1e;
+  font-size: 56px;
+  font-weight: 800;
+  line-height: 0.9;
+}
+
+.introGoals[data-count="3"] .introCount,
+.introGoals[data-count="4"] .introCount {
+  font-size: 40px;
+}
+
+.introLine {
+  display: block;
+  margin: 2px 0 0;
+  color: #3a2410;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.introThick {
+  display: block;
+  margin: 8px 0 0;
+  color: #7a5a3a;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.introStart {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 160px;
+  min-height: 56px;
+  margin-top: 12px;
+  padding: 8px 36px;
+  border-radius: 999px;
+  background: #2a9d8f;
+  color: #fff;
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+@media (max-width: 360px) {
+  .introCount {
+    font-size: 44px;
+  }
+
+  .introLine {
+    font-size: 20px;
+  }
+
+  .introCard {
+    padding: 12px 10px 14px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .progressFill {
+  .goalRingValue,
+  .goalRingDone {
     transition: none;
+  }
+
+  .goalStamp {
+    animation: none;
   }
 
   .confettiPiece {
     animation: none;
     opacity: 0;
   }
+}
+
+.taskBar[data-reduced="true"] .goalRingValue,
+.taskBar[data-reduced="true"] .goalRingDone,
+.goalCardButton[data-static="true"] .goalRingValue,
+.goalCardButton[data-static="true"] .goalRingDone {
+  transition: none;
+}
+
+.taskBar[data-reduced="true"] .goalStamp,
+[data-reduced="true"] .goalStamp {
+  animation: none;
 }

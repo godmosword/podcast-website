@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { dismissCandyIntro } from "./candy-helpers";
 
 const MOBILE = { width: 390, height: 844 };
 const NARROW_WIDTHS = [320, 375, 390, 430];
@@ -62,11 +63,12 @@ async function playHintMove(page: Page) {
 
 // 新版關卡目標較大（首關收集 50 個），以目標導向提示逐步完成
 async function finishCandyLevel(page: Page) {
+  await dismissCandyIntro(page);
   for (let attempt = 0; attempt < 40; attempt += 1) {
     if ((await page.getByTestId("candy-match-result").count()) > 0) return;
     await playHintMove(page);
   }
-  await expect(page.getByRole("dialog", { name: /任務完成/ })).toBeVisible();
+  await expect(page.getByRole("dialog", { name: /過關/ })).toBeVisible();
 }
 
 /** 照泡泡做第 n 單並送出（n 從 1 起）。 */
@@ -169,6 +171,7 @@ test.describe("遊戲完整 lifecycle", () => {
 
     // 已通關後重玩：抽同等難度的變體，不再是第一次的教學主線
     await page.getByRole("button", { name: "再挑戰" }).click();
+    await dismissCandyIntro(page);
     await expect(page.getByRole("dialog")).toHaveCount(0);
     await expect(page.getByTestId("candy-match-board")).toBeVisible();
     const replayChallenge = await page.locator("[data-challenge]").getAttribute("data-challenge");
@@ -190,6 +193,7 @@ test.describe("遊戲完整 lifecycle", () => {
     await page.goto("/games/candy-match");
     await page.getByRole("button", { name: /開始冒險/ }).click();
     await page.locator("button[data-next='true']").click();
+    await dismissCandyIntro(page);
     const teach = page.locator("[data-teach='true']");
     await expect(teach).toHaveCount(2);
     const ids = await teach.evaluateAll((nodes) =>
@@ -336,6 +340,7 @@ test.describe("遊戲完整 lifecycle", () => {
     await page.getByRole("button", { name: /開始冒險/ }).click();
     await expect(page.getByRole("radio", { name: /挑戰冒險/ })).toHaveAttribute("aria-checked", "true");
     await page.locator('button[data-next="true"]').click();
+    await dismissCandyIntro(page);
     await expect(page.getByLabel(/還有 \d+ 步/)).toBeVisible();
 
     const board = page.getByTestId("candy-match-board");

@@ -6,7 +6,13 @@ import {
   countSwap,
   freshCandyProgress,
   goalCompletion,
+  challengeMissSpeech,
+  goalDoneSpeech,
+  goalHearLine,
+  goalIntroLine,
   goalLine,
+  goalShortfallLabel,
+  goalShortfallSpeech,
   goalStatus,
   goalsSummary,
   goalTheme,
@@ -51,7 +57,7 @@ describe("Candy 任務判定", () => {
     ];
     const p = applyEvents(freshCandyProgress(), events({ collected: [3, 15, 0, 0, 0] }));
     expect(goalCompletion(goals, p)).toBeCloseTo(18 / 30);
-    expect(goalLine(goals[0]!, p)).toBe("收集小紅，還差 12 個");
+    expect(goalLine(goals[0]!, p)).toBe("收集小紅，還差 12 台");
     expect(goalLine(goals[1]!, p)).toBe("收集計程車，完成");
     expect(goalLine({ kind: "clean-dirt", count: 8 }, p)).toBe("打掃髒髒格，還差 8 格");
     expect(goalLine({ kind: "detonate", count: 2 }, p)).toBe("啟動特殊糖，還差 2 次");
@@ -73,10 +79,45 @@ describe("Candy 任務判定", () => {
 
   it("開局朗讀把目標念成一句，厚污漬再補一句", () => {
     expect(levelGoalSpeech([{ kind: "collect", piece: 1, count: 30 }, { kind: "detonate", count: 2 }])).toBe(
-      "收集計程車 30 個，還要啟動特殊糖 2 次。",
+      "收集 30 台計程車，還要啟動特殊糖 2 次。",
     );
+    expect(goalIntroLine({ kind: "collect", piece: 6, count: 5 })).toBe("收集 5 台消防車");
+    expect(goalDoneSpeech({ kind: "collect", piece: 5, count: 1 })).toBe("救護車完成了！");
+    expect(goalShortfallSpeech({ kind: "collect", piece: 7, count: 3 }, 2)).toBe("再差 2 台小火車！");
     expect(levelGoalSpeech([{ kind: "clean-dirt", count: 8 }], true)).toBe(
-      "清理 8 格髒格。有的污漬比較厚，要再掃一次！",
+      "打掃 8 格髒髒。有的污漬比較厚，要再掃一次！",
     );
+  });
+
+  it("關前句子、完成與差額涵蓋五種目標", () => {
+    const goals: CandyGoal[] = [
+      { kind: "collect-any", count: 5 },
+      { kind: "collect", piece: 0, count: 5 },
+      { kind: "detonate", count: 1 },
+      { kind: "clean-dirt", count: 8 },
+      { kind: "drop-item", count: 2 },
+    ];
+    expect(goals.map(goalIntroLine)).toEqual([
+      "收集 5 台車車",
+      "收集 5 台小紅",
+      "啟動特殊糖 1 次",
+      "打掃 8 格髒髒",
+      "送 2 個禮物",
+    ]);
+    expect(goals.map(goalDoneSpeech)).toEqual([
+      "車車收集完成了！",
+      "小紅完成了！",
+      "特殊糖完成了！",
+      "打掃完成了！",
+      "禮物送到了！",
+    ]);
+    const progress = applyEvents(freshCandyProgress(), events({ collected: [3, 0, 0, 0, 0], cleaned: 6, dropped: 2 }));
+    expect(goalShortfallLabel(goals[1]!, 2)).toBe("再差 2 台！");
+    expect(goalShortfallSpeech(goals[1]!, 2)).toBe("再差 2 台小紅！");
+    expect(goalShortfallLabel(goals[3]!, 2)).toBe("再差 2 格！");
+    expect(goalShortfallSpeech(goals[2]!, 1)).toBe("再差 1 次特殊糖！");
+    expect(goalHearLine(goals[1]!, progress)).toBe("還差 2 台小紅！");
+    expect(goalHearLine(goals[4]!, progress)).toBe("禮物送到了！");
+    expect(challengeMissSpeech(goals, progress)).toBe("再差 2 台車車！再差 2 台小紅！再差 1 次特殊糖！再差 2 格髒髒！");
   });
 });

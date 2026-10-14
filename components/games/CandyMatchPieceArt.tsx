@@ -1,8 +1,9 @@
 import type { CSSProperties } from "react";
 
 /**
- * 《繽紛消消樂》圖案：5 隻車車角色的黏土風正面車臉 SVG。
- * 重點是 3 歲也能辨識——每隻顏色＋頭頂輪廓都不同（尾翼/車頂燈/高窗/掃把/恐龍角）。
+ * 《繽紛消消樂》圖案：8 隻車車角色的黏土風正面車臉 SVG（程式繪製，不用生圖）。
+ * 每隻顏色＋頭頂輪廓都不同（尾翼／車頂燈／高窗／掃把／恐龍角／紅十字／梯子／煙囪），
+ * 色盲靠輪廓分辨。消防車不與小紅排同一關。
  */
 
 type ArtProps = {
@@ -111,6 +112,47 @@ function PieceDuoDuo(props: ArtProps) {
   );
 }
 
+/** 救護車（白身，車頂紅十字＋兩側藍燈） */
+function PieceAmbulance(props: ArtProps) {
+  return (
+    <Svg {...props}>
+      <rect x="14" y="4" width="20" height="11" rx="3" fill="#fff" stroke="#7d8aa0" strokeWidth="1.5" />
+      <rect x="22" y="5.5" width="4" height="8" fill="#e33" />
+      <rect x="20" y="7.5" width="8" height="4" fill="#e33" />
+      <circle cx="11" cy="11" r="2.6" fill="#4da3ff" />
+      <circle cx="37" cy="11" r="2.6" fill="#4da3ff" />
+      <FaceBase body="#f4f7fb" bodyDark="#7d8aa0" />
+    </Svg>
+  );
+}
+
+/** 消防車（橘紅，頂上銀色梯子）。不與小紅同關。 */
+function PieceFireTruck(props: ArtProps) {
+  return (
+    <Svg {...props}>
+      <rect x="8" y="6" width="32" height="3" rx="1.5" fill="#dfe6ee" stroke="#8a97a8" strokeWidth="1" />
+      <rect x="8" y="11" width="32" height="3" rx="1.5" fill="#dfe6ee" stroke="#8a97a8" strokeWidth="1" />
+      <rect x="12" y="5" width="2" height="10" fill="#8a97a8" />
+      <rect x="23" y="5" width="2" height="10" fill="#8a97a8" />
+      <rect x="34" y="5" width="2" height="10" fill="#8a97a8" />
+      <FaceBase body="#ff8a3d" bodyDark="#c95a14" />
+    </Svg>
+  );
+}
+
+/** 小火車（深海軍藍，煙囪冒煙） */
+function PieceTrain(props: ArtProps) {
+  return (
+    <Svg {...props}>
+      <rect x="28" y="4" width="7" height="11" rx="2" fill="#26396a" />
+      <circle cx="31" cy="3" r="2.6" fill="#e8eef6" />
+      <circle cx="36" cy="1.8" r="1.8" fill="#e8eef6" />
+      <rect x="10" y="9" width="12" height="5" rx="2" fill="#3d5a98" stroke="#26396a" strokeWidth="1.4" />
+      <FaceBase body="#3d5a98" bodyDark="#26396a" />
+    </Svg>
+  );
+}
+
 /** 禮物盒（掉落物任務） */
 export function PieceGift(props: ArtProps) {
   return (
@@ -143,7 +185,7 @@ export function DirtOverlay({ thick, ...props }: ArtProps & { thick?: boolean })
   );
 }
 
-/** 依圖案索引渲染（0..4 對應 CANDY_MATCH_PIECES 順序）。 */
+/** 依圖案索引渲染（0..7 對應 CANDY_MATCH_PIECES 順序）。 */
 export function PieceArt({ piece, size, style }: ArtProps & { piece: number }) {
   switch (piece) {
     case 0:
@@ -156,6 +198,12 @@ export function PieceArt({ piece, size, style }: ArtProps & { piece: number }) {
       return <PieceLingLing size={size} style={style} />;
     case 4:
       return <PieceDuoDuo size={size} style={style} />;
+    case 5:
+      return <PieceAmbulance size={size} style={style} />;
+    case 6:
+      return <PieceFireTruck size={size} style={style} />;
+    case 7:
+      return <PieceTrain size={size} style={style} />;
     default:
       return null;
   }

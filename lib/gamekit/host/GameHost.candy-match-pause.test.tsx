@@ -54,6 +54,8 @@ describe("GameHost × candy-match 暫停", () => {
     fireEvent.click(screen.getByRole("button", { name: /開始冒險/ }));
     fireEvent.click(screen.getByRole("button", { name: /^開始：第 1 站/ }));
     await act(async () => {});
+    fireEvent.click(screen.getByRole("button", { name: "開始！" }));
+    await act(async () => {});
 
     const board = () => screen.getByTestId("candy-match-board");
     expect(board().getAttribute("aria-disabled")).toBeNull();

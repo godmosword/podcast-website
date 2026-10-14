@@ -20,7 +20,7 @@ const onlyMode = process.argv[3] as CandyMode | undefined;
 const pct = (n: number) => `${Math.round(n * 100)}%`.padStart(4);
 
 console.log(`seeds=${seeds}`);
-console.log("mode      lv stage                      greedy  med p90 quick | random  med | sp-made deto resh | eff");
+console.log("mode      lv stage                            greedy  med p90 quick | random  med | sp-made deto resh | eff");
 for (const mode of ["easy", "challenge"] as const) {
   if (onlyMode && onlyMode !== mode) continue;
   CANDY_STAGES[mode].forEach((set, levelIndex) => {
@@ -33,7 +33,7 @@ for (const mode of ["easy", "challenge"] as const) {
         [
           mode.padEnd(9),
           String(levelIndex + 1).padStart(2),
-          stage.id.padEnd(26),
+          stage.id.padEnd(34),
           pct(greedy.winRate),
           String(greedy.medianSwaps).padStart(4),
           String(greedy.p90Swaps).padStart(3),

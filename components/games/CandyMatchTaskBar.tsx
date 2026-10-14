@@ -2,13 +2,14 @@
 
 import { DirtOverlay, PieceArt, PieceGift } from "@/components/games/CandyMatchPieceArt";
 import { IconBroom, IconRainbow } from "@/components/games/ClayIcons";
-import { IconCheck, IconFootprints } from "@/components/games/CandyMatchIcons";
+import { IconFootprints } from "@/components/games/CandyMatchIcons";
 import Icon from "@/components/ui/Icon";
 import type { CandyMatchRound } from "@/lib/games/candy-match/stages";
 import {
   goalCompletion,
+  goalLine,
+  goalShortfallLabel,
   goalStatus,
-  goalTitle,
   type CandyGoal,
   type CandyProgress,
 } from "@/lib/games/candy-match/tasks";
@@ -20,19 +21,14 @@ type CandyMatchTaskBarProps = {
   movesLeft: number;
   /** 朗讀關著時再聽一次不出聲，按鈕還在。 */
   voiceMuted: boolean;
+  reducedMotion: boolean;
   onReplay: () => void;
   onToggleVoice: () => void;
+  /** 點目標卡，再念這一項。 */
+  onHearGoal: (goal: CandyGoal) => void;
 };
 
-const UNIT: Record<CandyGoal["kind"], string> = {
-  "collect-any": "個",
-  collect: "個",
-  "clean-dirt": "格",
-  "drop-item": "個",
-  detonate: "次",
-};
-
-/** 目標圖示（任務列與地圖大卡共用）：孩子靠圖認任務，數字與短句輔助。 */
+/** 目標圖示（任務列、關前介紹、地圖大卡共用）：孩子靠圖認任務。 */
 export function CandyGoalIcon({ goal, size = 32 }: { goal: CandyGoal; size?: number }) {
   switch (goal.kind) {
     case "collect":
@@ -59,9 +55,91 @@ export function CandyGoalIcon({ goal, size = 32 }: { goal: CandyGoal; size?: num
   }
 }
 
+const RING_R = 18;
+const RING_C = 2 * Math.PI * RING_R;
+
+function GoalProgressRing({ ratio, done }: { ratio: number; done: boolean }) {
+  const clamped = done ? 1 : Math.max(0, Math.min(1, ratio));
+  return (
+    <svg className={styles.goalRing} viewBox="0 0 48 48" aria-hidden focusable="false">
+      <circle className={styles.goalRingTrack} cx="24" cy="24" r={RING_R} />
+      <circle
+        className={done ? styles.goalRingDone : styles.goalRingValue}
+        cx="24"
+        cy="24"
+        r={RING_R}
+        strokeDasharray={RING_C}
+        strokeDashoffset={RING_C * (1 - clamped)}
+        transform="rotate(-90 24 24)"
+      />
+    </svg>
+  );
+}
+
+type CandyGoalCardProps = {
+  goal: CandyGoal;
+  progress: CandyProgress;
+  /** 點了再念這一項。沒給就是結算上的靜態卡。 */
+  onHear?: () => void;
+  /** short：沒完成時改顯示「再差 N 台！」。 */
+  emphasis?: "play" | "short";
+};
+
+/** 一張目標卡：車車圖、進度環、倒數或「完成！」印章。 */
+export function CandyGoalCard({ goal, progress, onHear, emphasis = "play" }: CandyGoalCardProps) {
+  const status = goalStatus(goal, progress);
+  const label = goalLine(goal, progress);
+  const ratio = status.need > 0 ? status.got / status.need : 0;
+  const showShort = emphasis === "short" && !status.done;
+  const body = (
+    <>
+      <span
+        className={styles.goalRingWrap}
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={status.need}
+        aria-valuenow={status.got}
+        aria-label={label}
+      >
+        <GoalProgressRing ratio={ratio} done={status.done} />
+        <span className={styles.goalArt} aria-hidden>
+          <CandyGoalIcon goal={goal} size={42} />
+        </span>
+      </span>
+      {status.done ? (
+        <span className={styles.goalStamp} data-testid="candy-goal-stamp">
+          完成！
+        </span>
+      ) : showShort ? (
+        <b className={styles.goalShort}>{goalShortfallLabel(goal, status.remaining)}</b>
+      ) : (
+        <b className={styles.goalCount}>{status.remaining}</b>
+      )}
+    </>
+  );
+  if (onHear) {
+    return (
+      <button
+        type="button"
+        className={styles.goalCardButton}
+        data-done={status.done ? "true" : undefined}
+        aria-label={label}
+        onClick={onHear}
+      >
+        {body}
+      </button>
+    );
+  }
+  return (
+    <div className={styles.goalCardButton} data-done={status.done ? "true" : undefined} data-static="true" aria-label={label}>
+      {body}
+    </div>
+  );
+}
+
 /**
- * 局內第一眼：本關要做什麼。站點圖＋站名、逐項目標（圖案＋剩下的數字，完成打勾）、
- * 挑戰模式的步數（腳印）、整體進度。目標名稱與「還差幾個」整句留給讀屏。
+ * 局內第一眼：本關要做什麼。站點圖＋站名、逐項目標卡（圖案＋進度環＋剩下的數字，完成蓋章）、
+ * 挑戰模式的步數（腳印）。目標名稱與「還差幾個」整句留給讀屏。
  * 第三顆星的交換次數不在局內倒數，結算時才用腳印那顆星說明。
  */
 export function CandyMatchTaskBar({
@@ -69,8 +147,10 @@ export function CandyMatchTaskBar({
   progress,
   movesLeft,
   voiceMuted,
+  reducedMotion,
   onReplay,
   onToggleVoice,
+  onHearGoal,
 }: CandyMatchTaskBarProps) {
   const goals = round.stage.goals;
   const completion = goalCompletion(goals, progress);
@@ -80,6 +160,7 @@ export function CandyMatchTaskBar({
       className={styles.taskBar}
       aria-label="本關任務進度"
       data-near-complete={nearComplete ? "true" : undefined}
+      data-reduced={reducedMotion ? "true" : undefined}
     >
       <div className={styles.taskHead}>
         <span className={styles.taskPlace}>
@@ -126,41 +207,12 @@ export function CandyMatchTaskBar({
         </span>
       </div>
       <ul className={styles.goalList} data-count={goals.length}>
-        {goals.map((goal, i) => {
-          const status = goalStatus(goal, progress);
-          return (
-            <li
-              key={i}
-              className={styles.goal}
-              data-done={status.done ? "true" : undefined}
-              aria-label={`${goalTitle(goal)}，${status.done ? "完成" : `還差 ${status.remaining} ${UNIT[goal.kind]}`}`}
-            >
-              <span className={styles.goalIcon} aria-hidden>
-                <CandyGoalIcon goal={goal} size={36} />
-              </span>
-              {status.done ? (
-                <span className={styles.goalCheck} aria-hidden>
-                  <IconCheck size={22} />
-                </span>
-              ) : (
-                <b className={styles.goalNum} aria-hidden>
-                  {status.remaining}
-                </b>
-              )}
-            </li>
-          );
-        })}
+        {goals.map((goal, i) => (
+          <li key={i}>
+            <CandyGoalCard goal={goal} progress={progress} onHear={() => onHearGoal(goal)} />
+          </li>
+        ))}
       </ul>
-      <div
-        className={styles.progressTrack}
-        role="progressbar"
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={Math.round(completion * 100)}
-        aria-label="任務完成度"
-      >
-        <span className={styles.progressFill} style={{ width: `${Math.max(5, completion * 100)}%` }} />
-      </div>
     </section>
   );
 }
