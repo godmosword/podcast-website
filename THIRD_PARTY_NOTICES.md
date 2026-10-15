@@ -9,13 +9,18 @@
 |------|------|------|----------|
 | jf-open 粉圓（huninn）子集 | 中文內文（`app/fonts/huninn-subset.woff2`） | SIL Open Font License 1.1 | [app/fonts/OFL-huninn.txt](./app/fonts/OFL-huninn.txt) |
 | 源泉圓體 TW Bold 子集 | 中文標題（`app/fonts/gensen-rounded-tw-bold-subset.woff2`） | SIL OFL 1.1 | [app/fonts/OFL-gensen-rounded.txt](./app/fonts/OFL-gensen-rounded.txt) |
-| Fredoka | 拉丁字母與數字 | SIL OFL 1.1 | [Google Fonts](https://fonts.google.com/specimen/Fredoka) |
-| Gochi Hand | 手繪風拉丁標題 | SIL OFL 1.1 | [Google Fonts](https://fonts.google.com/specimen/Gochi+Hand) |
+| Fredoka | 拉丁字母與數字（`next/font` 自 Google Fonts 載入） | SIL OFL 1.1 | [app/fonts/OFL-fredoka.txt](./app/fonts/OFL-fredoka.txt) |
+| Gochi Hand | 手繪風拉丁標題（`next/font` 自 Google Fonts 載入） | SIL OFL 1.1 | [app/fonts/OFL-gochi-hand.txt](./app/fonts/OFL-gochi-hand.txt) |
+| Noto Sans TC | OG 圖用的單一粗細（`app/fonts/noto-sans-tc-og.ttf`） | SIL OFL 1.1 | [app/fonts/OFL-noto-sans-tc.txt](./app/fonts/OFL-noto-sans-tc.txt) |
 
 ## 內嵌圖形資產
 
 | 資產 | 用途 | 來源 | 授權 |
 |------|------|------|------|
+| 多多壽司屋圖檔（`public/games/v2/dino-sushi/` 的 cover、`duoduo/`、`food/`、`shop/` 與 `sm/` 副本） | 恐龍車多多的壽司小遊戲：封面、角色貼紙、食材與店面 | 逐檔見 [public/games/v2/dino-sushi/SOURCES.md](./public/games/v2/dino-sushi/SOURCES.md) | 本站以工具輔助產生，經人工挑選與核准後使用。保護範圍的整理見 [docs/legal/IP-NOTES.md](./docs/legal/IP-NOTES.md)（非法律意見） |
+
+本表這次只登記多多壽司屋。節目插圖與其他遊戲圖不在這張表。
+
 ## 商標（指示性使用）
 
 頁面上的 Apple Podcasts、Spotify、KKBOX、YouTube、LINE、Instagram、Threads、Facebook
