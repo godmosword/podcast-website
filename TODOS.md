@@ -58,7 +58,8 @@
 - **離場剩下的**：小聲「啵」、手捲上留下的料滑到新位置、布丁放中間只露焦糖（彩蛋、不進訂單）。`ux · S · 無`
 - **矮直向可能要捲**：320×568 料位 64px、「給多多吃」改到料位下面之後，廚房比一屏高。舞台收到 152px（再矮會讓疊盤蓋到「多多吃飽了」），仍可能要往下捲一點。`ui · S · 無`
 - [ ] **重錄 darwin 視覺基準（觸控尺寸）**：雲端無法產 `-chromium-darwin`。需在 Mac 重錄並目檢：`dino-sushi-title-390-light`、`dino-sushi-title-1280-night`、`dino-sushi-kitchen-390x844-light`、`dino-sushi-kitchen-844x390-light`、`dino-sushi-kitchen-1280x800-night`、`dino-sushi-result-390-light`。
-- **重玩動機**：貼紙收集冊／料理圖鑑，三星拿滿後仍有目標。`product · M · 美術（生圖先估價）`
+- ✅ **重玩動機（貼紙書，Phase 2）**：24 張貼紙（12 料、3 種飯、5 個表情、4 個驚喜；不含客人）。放上料、送出飯、多多的反應、點餐送完、五盤一次做對、自由做吃飽、第一次來玩都會拿到；一輪結束若沒有新的，依目錄再送一張，直到收滿。存在 `cheche:progress` 的 `preferences.gameKit.dinoSushiStickers`，不進家長儀表板的 24 個 id；收滿才加全站貼紙「多多貼紙書收集完成」。圖只用現有飯、料、多多縮小副本。見本 commit。
+- [ ] **重錄 darwin 視覺基準（貼紙書）**：標題多了貼紙書入口（會顯示 1/24 與「新」），結算多了新貼紙列。雲端無法產 `-chromium-darwin`。需在 Mac 重錄並目檢：`dino-sushi-title-390-light`、`dino-sushi-title-1280-night`、`dino-sushi-result-390-light`。廚房三張（`dino-sushi-kitchen-390x844-light`、`dino-sushi-kitchen-844x390-light`、`dino-sushi-kitchen-1280x800-night`）這次沒改廚房版面，不必為貼紙書重錄。觸控尺寸那列的重錄仍見上一項。
 
 ### 遊樂園美術／可玩性審（2026-09-19）待做
 
