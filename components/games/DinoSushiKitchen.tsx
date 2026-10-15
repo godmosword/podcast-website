@@ -1,12 +1,13 @@
 "use client";
 
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { BaseArt, PlateArt, SHOP_SRC, SushiArt, ToppingArt } from "@/lib/games/dino-sushi/art";
 import { matchOrder, orderSpeechLine } from "@/lib/games/dino-sushi/orders";
 import { currentOrder } from "@/lib/games/dino-sushi/round";
 import { MAX_TOPPINGS } from "@/lib/games/dino-sushi/sushi";
-import { BASES, baseById, toppingById } from "@/lib/games/dino-sushi/toppings";
+import { BASES, baseById, toppingById, type ToppingId } from "@/lib/games/dino-sushi/toppings";
 import { DinoSushiDuoDuo } from "./DinoSushiDuoDuo";
+import { DinoSushiEvictFly, type EvictFly } from "./DinoSushiEvictFly";
 import { DinoSushiOrderBubble } from "./DinoSushiOrderBubble";
 import { TapButton, TapFinger as Finger, type TapPoint } from "./DinoSushiPiece";
 import { DinoSushiPlateStack } from "./DinoSushiPlateStack";
@@ -86,6 +87,8 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused, soundOn, ga
   const { rootRef, focusProps } = useFocusAcrossPhases(choosingBase);
   const picked = useRef<{ at: number; rect: DOMRect } | null>(null);
   const slotsRef = useRef<HTMLDivElement>(null);
+  const flySeq = useRef(0);
+  const [flies, setFlies] = useState<EvictFly[]>([]);
   /** 用鍵盤拿掉第幾格：料位以料當 key，那顆鈕會消失，焦點接到同一格（或最後一格），料位空了就回托盤。 */
   const refocusSlot = useRef<number | null>(null);
   const toppings = round?.sushi.toppings;
@@ -136,6 +139,17 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused, soundOn, ga
   const clearPickGuard = () => {
     picked.current = null;
   };
+  /** 滿格再加料：最舊那層還在畫面上時先記住位子，再讓它縮小飛回托盤。 */
+  const launchEvict = (id: ToppingId) => {
+    const fromEl = slotsRef.current?.querySelector("button");
+    const toEl = rootRef.current?.querySelector<HTMLElement>(`[data-role="tray"] [data-topping="${id}"]`);
+    if (!fromEl || !toEl) return;
+    const from = fromEl.getBoundingClientRect();
+    const to = toEl.getBoundingClientRect();
+    const key = flySeq.current + 1;
+    flySeq.current = key;
+    setFlies((list) => [...list, { key, id, from, to }]);
+  };
   /* 吃完才出牙刷，不擋嘴；出現時店面道具讓位，牙刷才看得出是下一步 */
   const brushShown =
     ((round.pending?.brush ?? false) || round.brushReady) && !brushing && (phase === "react" || phase === "idle");
@@ -169,14 +183,9 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused, soundOn, ga
         {/* 右上一欄由上往下排：自由做的「多多吃飽了」→ 點餐泡泡 → 多多的字卡，彼此不會疊在一起 */}
         <div className={styles.talk}>
           {round.mode === "free" ? (
-            <button
-              type="button"
-              className={styles.fullButton}
-              onClick={actions.finish}
-              disabled={disabled}
-            >
+            <TapButton className={styles.fullButton} onTap={actions.finish} disabled={disabled}>
               多多吃飽了
-            </button>
+            </TapButton>
           ) : null}
           {/* 吃的時候收起泡泡，字卡接手；下一單泡泡等反應結束才出現 */}
           {order && !eating ? (
@@ -324,9 +333,17 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused, soundOn, ga
         teaching={teaching}
         onAdd={(id) => {
           clearPickGuard();
+          if (sushi.toppings.length >= MAX_TOPPINGS) launchEvict(sushi.toppings[0]!);
           actions.add(id);
         }}
       />
+      {flies.map((fly) => (
+        <DinoSushiEvictFly
+          key={fly.key}
+          fly={fly}
+          onDone={(key) => setFlies((list) => list.filter((item) => item.key !== key))}
+        />
+      ))}
     </div>
   );
 }

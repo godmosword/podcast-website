@@ -41,9 +41,25 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* 卡面裡的鈕：雙擊不放大、沒有 300ms 延遲、文字不會被選取 */
+.surface button,
+.surface a {
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
 .surface[data-screen="kitchen"],
 .surface[data-screen="result"] {
   padding: 8px;
+}
+
+/* 320 寬：內距收一點，四格托盤（64×4＋間距 8×3）才放得進，不會橫向捲 */
+@media (max-width: 359px) {
+  .surface[data-screen="kitchen"] {
+    padding: 6px 4px;
+  }
 }
 
 /* 寬螢幕：廚房在卡片裡垂直置中，不要全擠在上半 */
@@ -207,7 +223,8 @@
 
 /* 自由做：小膠囊，離主鈕有距離 */
 .freeButton {
-  min-height: 48px;
+  min-width: 120px;
+  min-height: 64px;
   padding: 0 24px;
   border: none;
   border-radius: 999px;
@@ -272,7 +289,7 @@
   }
 
   .titleStart {
-    --start-size: 84px;
+    --start-size: 88px;
     gap: 2px;
   }
 }
@@ -287,7 +304,7 @@
   }
 
   .titleStart {
-    --start-size: 76px;
+    --start-size: 88px;
   }
 }
 
@@ -306,7 +323,7 @@
   }
 
   .titleStart {
-    --start-size: 72px;
+    --start-size: 88px;
   }
 }
 

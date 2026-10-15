@@ -1,13 +1,22 @@
 /*
  * 多多壽司屋廚房。直向：上＝迴轉壽司店（多多＋泡泡＋疊盤）；中＝檜木砧板＋「給多多吃」；下＝食材托盤 2×4。
- * 320×568 必須一屏放下；橫向手機與寬螢幕三欄（多多｜砧板｜托盤 4×2），斷點同消消樂 WIDE_LAYOUT_QUERY。
+ * 直向手機把「給多多吃」放到料位下面（全寬），料位才維持 64px；窄螢幕把多多舞台縮短，少捲一點。
+ * 橫向手機（寬 ≥560、高 ≤520）與寬螢幕三欄（多多｜砧板｜托盤 4×2）。
  * 材質：店面是粉彩雨棚＋木牆＋不鏽鋼迴轉帶（DinoSushiShop）、砧板是檜木、料位與托盤是瓷碟。
  * 常駐動態是迴轉帶慢慢繞，加上貼紙多多輕微浮動（圖上沒有眨眼）；吃的時候改成擠壓。
  * 其餘只在加料、送盤、提示、晃動時出現。減少動態時全部收掉。
  */
+/* 遊戲鈕：關掉雙擊放大與 300ms 延遲，文字也不會被選取 */
+.kitchen button {
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
 .kitchen {
   --duo-h: clamp(150px, 30svh, 230px);
-  /* 料位（小瓷碟）上限：直向與桌面 64px；矮螢幕在下方媒體查詢收回 48px */
+  /* 料位（小瓷碟）三個寬度都是 64px，不再跟著欄寬縮到 48 */
   --slot: 64px;
   --wood-edge: #d6b07a;
   --ink-warm: #4a3722;
@@ -18,7 +27,8 @@
     "board"
     "tray";
   /* 直向：多多區吃掉剩下的高度，廚房上下不留大片空白 */
-  grid-template-rows: minmax(var(--duo-h), 1fr) auto auto;
+  /* --duo-brush：牙刷出現時舞台至少 132px，平常是 0，不把高舞台壓矮 */
+  grid-template-rows: minmax(max(var(--duo-h), var(--duo-brush, 0px)), 1fr) auto auto;
   gap: 8px;
   width: min(100%, 560px);
   margin-inline: auto;
@@ -290,12 +300,12 @@
 
 .replayBadge {
   position: absolute;
-  top: -12px;
-  left: -12px;
+  top: -14px;
+  left: -14px;
   display: grid;
   place-items: center;
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: #fffdf8;
   color: var(--ink-warm);
@@ -643,9 +653,10 @@
   top: calc(var(--awning-h) + 4px);
   display: grid;
   place-items: center;
-  width: 64px;
-  height: 64px;
-  padding: 7px;
+  box-sizing: border-box;
+  width: 80px;
+  height: 80px;
+  padding: 8px;
   border: 3px solid #8ddff0;
   border-radius: 50%;
   background: #fff;
@@ -679,7 +690,7 @@
 
 /* 自由做「多多吃飽了」：右上（自由做沒有泡泡），離「給多多吃」遠 */
 .fullButton {
-  min-height: 48px;
+  min-height: 64px;
   padding: 0 18px;
   border: none;
   border-radius: 999px;
@@ -854,16 +865,15 @@
   width: 100%;
 }
 
-/* 料位＝小瓷碟：白釉、藍色細邊、碟底陰影。最大 --slot，窄螢幕跟著欄寬縮，但不小於兒童觸控紅線 48px */
+/* 料位＝小瓷碟：白釉、藍色細邊、碟底陰影。每個寬度都是 64px（3×64＋2×8＝208，窄螢幕把「給多多吃」移到下面才放得下） */
 .slot,
 .slotEmpty {
   display: grid;
   place-items: center;
   box-sizing: border-box;
   flex: none;
-  width: clamp(48px, calc((100% - 16px) / 3), var(--slot));
-  height: auto;
-  aspect-ratio: 1;
+  width: 64px;
+  height: 64px;
   padding: calc(var(--slot) * 0.1);
   border-radius: 50%;
 }
@@ -878,6 +888,49 @@
     inset 0 0 0 3.5px #4fa9c9,
     0 3px 0 rgba(160, 115, 60, 0.3),
     0 5px 8px rgba(110, 75, 35, 0.14);
+}
+
+/* 擠掉最舊那層：縮小、飛回托盤同一種料。座標是按下當下量的視窗位置。 */
+.evictFly {
+  position: fixed;
+  z-index: 30;
+  left: 0;
+  top: 0;
+  width: var(--fly-size, 64px);
+  height: var(--fly-size, 64px);
+  display: grid;
+  place-items: center;
+  margin: 0;
+  pointer-events: none;
+  animation: evictFly 420ms cubic-bezier(0.3, 0.7, 0.4, 1) both;
+}
+
+.evictFly > img {
+  width: 78%;
+  height: 78%;
+  object-fit: contain;
+}
+
+@keyframes evictFly {
+  from {
+    transform: translate(var(--from-x), var(--from-y)) scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: translate(var(--to-x), var(--to-y)) scale(0.35);
+    opacity: 0;
+  }
+}
+
+@keyframes evictFade {
+  from {
+    transform: translate(var(--from-x), var(--from-y)) scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: translate(var(--from-x), var(--from-y)) scale(1);
+    opacity: 0;
+  }
 }
 
 /* 只彈裡面的料，碟子（點擊範圍）大小不變 */
@@ -898,7 +951,7 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   align-self: stretch;
-  gap: 6px;
+  gap: 8px;
   width: 100%;
 }
 
@@ -1019,7 +1072,7 @@
   grid-area: tray;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 6px;
+  gap: 8px;
 }
 
 /* 中明度底：白色的飯、蟹肉棒才不會融進底色；碟心一圈淡影讓料「放在」碟上 */
@@ -1030,7 +1083,8 @@
   grid-template-rows: auto auto;
   place-items: center;
   gap: 1px;
-  min-height: 60px;
+  min-width: 64px;
+  min-height: 64px;
   padding: 2px 2px 4px;
   border: none;
   border-radius: 16px;
@@ -1181,19 +1235,50 @@
   outline-offset: 3px;
 }
 
-/* 矮的直排版面（iPhone SE 667 高、Safari 扣掉工具列的 390×664、800×600 視窗）：料位收回 48px，放大的那一截會把廚房推出一屏。
-   寬 ≥900 是三欄，高度不受料位影響，不收 */
-@media (max-width: 899px) and (max-height: 700px) {
-  .kitchen {
-    --slot: 48px;
+/* 直向手機（含 320 與 390）：「給多多吃」移到料位下面、拉成全寬，料位欄拿到全寬才放得下 3×64＋間距。主按鈕落在托盤上方的拇指區。 */
+@media (max-width: 899px) and (orientation: portrait) {
+  .boardLayer {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-items: center;
+    justify-items: stretch;
+    gap: 8px;
+  }
+
+  .serveButton {
+    width: 100%;
+    max-width: none;
+    min-height: 80px;
+    aspect-ratio: auto;
+    grid-auto-flow: column;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .serveArt {
+    width: 72px;
+  }
+
+  /* 選飯的三張皿只佔上面，不要被拉高蓋住「給多多吃」。
+     蓋住的話，選完飯立刻點送出，會被連點防呆當成還在點同一張皿。 */
+  .basePicker {
+    align-self: start;
+    height: auto;
+  }
+
+  .baseButton {
+    align-self: start;
+    height: auto;
+    min-height: 96px;
+    max-height: 160px;
   }
 }
 
-/* 矮直向手機（320×568）：多多區與托盤再收一點 */
-@media (max-height: 640px) and (orientation: portrait) {
+/* 窄直向（320×568）：舞台收短，但仍要讓泡泡和疊盤上下分開。間距仍至少 8px。 */
+@media (max-width: 420px) and (orientation: portrait) {
   .kitchen {
-    --duo-h: 148px;
-    gap: 6px;
+    --duo-h: 152px;
+    gap: 8px;
   }
 
   .board {
@@ -1201,32 +1286,21 @@
   }
 
   .prep {
-    width: min(100%, 136px);
+    width: min(100%, 112px);
   }
 
   .boardMain {
-    gap: 10px;
-  }
-
-  /* 三個 48px 料位＋兩個 8px 間距要 160px；寬度從「給多多吃」那欄拿（320 寬約 92px，仍 ≥56px） */
-  .boardLayer {
-    grid-template-columns: minmax(160px, 1fr) minmax(0, 92px);
-  }
-
-  .serveButton {
-    max-width: 92px;
-    min-height: 84px;
-    aspect-ratio: auto;
-    font-size: 0.92rem;
+    gap: 8px;
   }
 
   .baseButton {
     min-height: 96px;
   }
+}
 
-  .trayButton {
-    min-height: 56px;
-  }
+/* 牙刷 80px 要比平常的矮舞台高，出現時才不會被舞台裁掉 */
+.kitchen:has([data-brush="true"]) {
+  --duo-brush: 132px;
 }
 
 /* 一般直向手機：皿拉滿後多出的高度給圖 */
@@ -1236,8 +1310,8 @@
   }
 }
 
-/* 寬螢幕與橫向手機：三欄 多多｜砧板｜托盤 4×2 */
-@media (min-width: 900px), (min-width: 640px) and (orientation: landscape) and (max-height: 520px) {
+/* 寬螢幕與橫向手機：三欄 多多｜砧板｜托盤 4×2。560 含 568×320，料位欄至少放得下 3×64。 */
+@media (min-width: 900px), (min-width: 560px) and (orientation: landscape) and (max-height: 520px) {
   .kitchen {
     --duo-h: 0px;
     flex: 0 0 auto;
@@ -1269,7 +1343,7 @@
     justify-content: center;
     width: min(100%, 220px);
     max-width: 220px;
-    min-height: 64px;
+    min-height: 80px;
     aspect-ratio: auto;
     grid-auto-flow: column;
     gap: 8px;
@@ -1289,8 +1363,10 @@
 @media (orientation: landscape) and (max-height: 520px) {
   .kitchen {
     --duo-min: 0px;
-    --tray-art: 48px;
-    --slot: 48px;
+    --tray-art: 40px;
+    /* 砧板欄至少 3×64＋兩個 8px 間距＋左右內距，料位才不會被欄寬壓扁 */
+    /* 多的寬度給舞台，四格泡泡才放得進；砧板維持三個 64px 料位 */
+    grid-template-columns: minmax(96px, 1.6fr) minmax(224px, 0.9fr) minmax(128px, 0.55fr);
   }
 
   /* 托盤圖是寬的盤子（858:480），用圖高定上限，寬跟著算 */
@@ -1313,7 +1389,32 @@
   }
 
   .trayButton {
-    min-height: 56px;
+    min-height: 64px;
+  }
+
+  .serveButton {
+    min-height: 80px;
+  }
+
+  /* 舞台欄變窄時，四格泡泡收進舞台，不要被裁掉 */
+  .talk {
+    max-width: calc(100% - 12px);
+  }
+
+  .bubbleItem {
+    --cell: clamp(20px, 7cqw, 34px);
+  }
+
+  .bubble {
+    padding: 4px 5px;
+  }
+
+  .bubbleItems {
+    gap: 2px;
+  }
+
+  .bubbleItem:first-child {
+    margin-right: 2px;
   }
 }
 
@@ -1383,12 +1484,12 @@
   .replayBadge {
     top: -14px;
     left: -14px;
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
   }
 }
 
-/* 寬 ≥900 的橫向手機（如 932×430）同時中上面的桌面區塊：舞台下限、托盤鈕高度要收回矮橫向的值才放得進一屏（料位桌面區塊不設，沿用矮橫向的 48px） */
+/* 寬 ≥900 的橫向手機（如 932×430）同時中上面的桌面區塊：舞台下限收回，托盤鈕仍 ≥64 */
 @media (min-width: 900px) and (orientation: landscape) and (max-height: 520px) {
   .kitchen {
     --duo-min: 0px;
@@ -1396,7 +1497,7 @@
   }
 
   .trayButton {
-    min-height: 56px;
+    min-height: 64px;
   }
 }
 
@@ -1430,6 +1531,12 @@
   .serveButton {
     transition: none;
   }
+
+  /* 飛回托盤改成原地淡出，不位移 */
+  .evictFly {
+    animation-name: evictFade;
+    animation-duration: 180ms;
+  }
 }
 
 .kitchen[data-reduced="true"] .servingPlate,
@@ -1453,6 +1560,11 @@
   animation: none;
 }
 
+.kitchen[data-reduced="true"] .evictFly {
+  animation-name: evictFade;
+  animation-duration: 180ms;
+}
+
 /* 暫停時新的表情與疊盤動畫停在原地（時間軸由 useDinoSushiPlay 一起暫停） */
 .kitchen[data-paused="true"] [data-hint="true"] {
   animation-play-state: paused;
@@ -1462,7 +1574,8 @@
 .kitchen[data-paused="true"] .duoArt [data-part="cheeks"] > g,
 .kitchen[data-paused="true"] .duoArt [data-part="puff-cloud"],
 .kitchen[data-paused="true"] .duoArt [data-part="sweet-stars"] > path,
-.kitchen[data-paused="true"] .plates[data-land] {
+.kitchen[data-paused="true"] .plates[data-land],
+.kitchen[data-paused="true"] .evictFly {
   animation-play-state: paused;
 }
 
@@ -1472,15 +1585,15 @@
   transition: none;
 }
 
-/* iPhone 橫向扣掉 Safari 工具列只剩約 340px 高：收緊間距（托盤鈕仍 ≥56px），托盤四列才不被切掉 */
+/* iPhone 橫向扣掉 Safari 工具列只剩約 340px 高：托盤圖再縮小，鈕本身仍 ≥64、間距仍 ≥8 */
 @media (orientation: landscape) and (max-height: 400px) {
   .kitchen {
-    --tray-art: 40px;
-    gap: 6px;
+    --tray-art: 36px;
+    gap: 8px;
   }
 
   .tray {
-    gap: 4px;
+    gap: 8px;
   }
 
   .board {
