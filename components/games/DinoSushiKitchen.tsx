@@ -85,6 +85,20 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused, soundOn, ga
   } = play;
   const { rootRef, focusProps } = useFocusAcrossPhases(choosingBase);
   const picked = useRef<{ at: number; rect: DOMRect } | null>(null);
+  const slotsRef = useRef<HTMLDivElement>(null);
+  /** 用鍵盤拿掉第幾格：料位以料當 key，那顆鈕會消失，焦點接到同一格（或最後一格），料位空了就回托盤。 */
+  const refocusSlot = useRef<number | null>(null);
+  const toppings = round?.sushi.toppings;
+  useLayoutEffect(() => {
+    const slot = refocusSlot.current;
+    refocusSlot.current = null;
+    if (slot === null) return;
+    const filled = slotsRef.current?.querySelectorAll<HTMLButtonElement>("button");
+    const target =
+      filled?.[Math.min(slot, filled.length - 1)] ??
+      rootRef.current?.querySelector<HTMLButtonElement>('[data-role="tray"] button:not(:disabled)');
+    target?.focus({ preventScroll: true });
+  }, [rootRef, toppings]);
   const orderForSpeech = round ? currentOrder(round) : null;
   const speech = useDinoSushiSpeech({
     orderToken: round && orderForSpeech ? `${round.mode}:${round.seed}:${round.index}` : null,
@@ -221,6 +235,7 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused, soundOn, ga
               </TapButton>
             </div>
             <div
+              ref={slotsRef}
               className={styles.slots}
               role="group"
               aria-label={`料位，最多 ${MAX_TOPPINGS} 個`}
@@ -228,15 +243,18 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused, soundOn, ga
               {Array.from({ length: MAX_TOPPINGS }, (_, i) => {
                 const id = eating ? undefined : sushi.toppings[i];
                 const removeHint = layerHint?.kind === "remove" && layerHint.slot === i;
+                /* 跟砧板上的料同一種 key：滿了擠掉最舊那層時只有新的那格會彈，留下來的不重掛 */
+                const nth = id ? sushi.toppings.slice(0, i).filter((t) => t === id).length : 0;
                 return id ? (
                   <TapButton
-                    key={i}
+                    key={`${id}-${nth}`}
                     className={styles.slot}
                     aria-label={`拿掉${toppingById(id).label}`}
                     data-hint={removeHint ? "true" : undefined}
                     disabled={disabled}
-                    onTap={() => {
+                    onTap={(point) => {
                       clearPickGuard();
+                      if (!point) refocusSlot.current = i;
                       actions.remove(i);
                     }}
                   >
@@ -244,7 +262,7 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused, soundOn, ga
                     {teaching && removeHint ? <Finger /> : null}
                   </TapButton>
                 ) : (
-                  <span key={i} className={styles.slotEmpty} aria-hidden />
+                  <span key={`empty-${i}`} className={styles.slotEmpty} aria-hidden />
                 );
               })}
             </div>

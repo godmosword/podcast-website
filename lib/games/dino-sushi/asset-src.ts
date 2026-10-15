@@ -29,7 +29,7 @@ export const DINO_SUSHI_SM_WIDTH = {
   "food/gunkan.webp": 576,
   "food/temaki.webp": 256,
   "food/temaki-front.webp": 256,
-  // 料：單料放在握壽司上最大，也是橫放手機（括號是手機最大寬）
+  // 料：多半是單料放在握壽司上最大，也是橫放手機（括號是手機最大寬）；布丁是手捲上的單料最大（932×430 約 79px）
   "food/tamago.webp": 448, // 144px
   "food/shrimp.webp": 512, // 154px
   "food/crab.webp": 512, // 164px

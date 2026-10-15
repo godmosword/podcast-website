@@ -66,23 +66,23 @@ const ANCHOR: Record<Exclude<BaseId, "temaki">, { x: number; y: number; w: numbe
 };
 
 /**
- * 手捲：寬、高都是舞台百分比。海苔前層從高度 34.5% 蓋下來，
- * 所以料的中心比開口再低一點，下半截才會埋進飯裡。
- * 數字是十二種料各別量過：大約一半露在飯口、一半被前層蓋住，而且不伸出筒身。
+ * 手捲：寬、高都是舞台百分比。料坐在飯口上、往上冒出筒口，下緣塞進海苔前層（從高度 34.5% 蓋下來），
+ * 像真的手捲一樣一眼看得到包了什麼；兩三樣時往左右散開，可以略超出筒身。
+ * 芥末是一小坨，不跟其他料一樣大；玉子、肉鬆不能太寬，三樣時才不會擋住中間那樣。
  */
 const TEMAKI_PLACE: Record<ToppingId, { w: number; y: number }> = {
-  tamago: { w: 76, y: 34 },
-  shrimp: { w: 76, y: 36 },
-  crab: { w: 76, y: 34 },
-  corn: { w: 76, y: 32 },
-  cucumber: { w: 64, y: 34 },
-  tuna: { w: 64, y: 32 },
-  floss: { w: 76, y: 32 },
-  salmon: { w: 52, y: 36 },
-  avocado: { w: 40, y: 34 },
-  strawberry: { w: 52, y: 36 },
-  pudding: { w: 70, y: 32 },
-  wasabi: { w: 70, y: 32 },
+  tamago: { w: 84, y: 26 },
+  shrimp: { w: 98, y: 27 },
+  crab: { w: 98, y: 25 },
+  corn: { w: 98, y: 23 },
+  cucumber: { w: 84, y: 25 },
+  tuna: { w: 84, y: 23 },
+  floss: { w: 88, y: 24 },
+  salmon: { w: 68, y: 27 },
+  avocado: { w: 72, y: 26 },
+  strawberry: { w: 68, y: 27 },
+  pudding: { w: 90, y: 25 },
+  wasabi: { w: 60, y: 25 },
 };
 
 /** 每種料的圖形差很多：條狀蓋滿、方塊與高的甜點要縮小，才不會蓋過飯。 */
@@ -111,13 +111,14 @@ function layerSpots(base: BaseId, toppings: readonly ToppingId[]): Spot[] {
         ? [{ x: 50, dy: 0, mul: 1, rot: -17 }]
         : n === 2
           ? [
-              { x: 38, dy: -1, mul: 0.7, rot: -20 },
-              { x: 62, dy: 2, mul: 0.7, rot: -14 },
+              { x: 36, dy: -1, mul: 0.8, rot: -22 },
+              { x: 64, dy: 2, mul: 0.8, rot: -12 },
             ]
           : [
-              { x: 50, dy: -2, mul: 0.7, rot: -18 },
-              { x: 38, dy: 2, mul: 0.7, rot: -22 },
-              { x: 62, dy: 1, mul: 0.7, rot: -12 },
+              /* 中間那樣疊在最後面：抬高到兩側料的上方，才不會整個被擋住 */
+              { x: 50, dy: -12, mul: 0.72, rot: -18 },
+              { x: 30, dy: 3, mul: 0.68, rot: -26 },
+              { x: 70, dy: 2, mul: 0.68, rot: -8 },
             ];
     return toppings.map((id, i) => {
       const place = TEMAKI_PLACE[id];
@@ -225,17 +226,23 @@ export function SushiArt({
     .map((id, i) => {
       const fit = TOPPING_FIT[id];
       const spot = spots[i] ?? spots[0]!;
-      /* 手捲的下移已經寫在 TEMAKI_PLACE，不再加握壽司那組 dy。 */
+      /* 用「第幾個同樣的料」當 key：拿掉一層或滿了擠掉最舊那層時，留下來的不重掛、不重播落下動畫，只有新的那層會彈 */
+      const nth = sushi.toppings.slice(0, i).filter((t) => t === id).length;
+      /* 手捲的位置與大小已經寫在 TEMAKI_PLACE，不再套握壽司那組 dy 與縮放。 */
       return {
         id,
-        i,
+        key: `${id}-${nth}`,
         x: spot.x,
         y: temaki ? spot.y : spot.y + fit.dy,
         w: temaki ? spot.w : spot.w * fit.scale,
         rot: spot.rot,
       };
-    })
-    .sort((a, b) => a.y - b.y);
+    });
+  /*
+   * 疊放順序用 z-index，DOM 照放料的順序不重排：換位置時重排 DOM 會把留下來的料搬走，
+   * 瀏覽器會讓被搬的那層重播落下動畫。越下面（y 越大）越前面；海苔前層蓋在所有料上面。
+   */
+  const depth = [...layers].sort((a, b) => a.y - b.y).map((l) => l.key);
   return (
     <span
       data-sushi=""
@@ -246,6 +253,7 @@ export function SushiArt({
         display: "block",
         ...(size != null ? { width: typeof size === "number" ? `${size}px` : size } : null),
         aspectRatio: BASE_ASPECT[sushi.base],
+        isolation: "isolate",
         ...style,
       }}
     >
@@ -253,14 +261,15 @@ export function SushiArt({
         src={BASE_SRC[sushi.base]}
         style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain" }}
       />
-      {layers.map(({ id, i, x, y, w, rot }) => (
+      {layers.map(({ id, key, x, y, w, rot }) => (
         <span
-          key={`${id}-${i}`}
+          key={key}
           style={{
             position: "absolute",
             left: `${x}%`,
             top: `${y}%`,
             width: `${w}%`,
+            zIndex: depth.indexOf(key) + 1,
             transform: rot ? `translate(-50%, -50%) rotate(${rot}deg)` : "translate(-50%, -50%)",
           }}
         >
@@ -279,6 +288,7 @@ export function SushiArt({
             height: "100%",
             objectFit: "contain",
             pointerEvents: "none",
+            zIndex: layers.length + 1,
           }}
         />
       ) : null}

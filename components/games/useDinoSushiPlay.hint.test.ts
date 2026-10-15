@@ -90,23 +90,31 @@ describe("點偏了立刻亮下一步", () => {
     expect(result.current.hint).toEqual({ kind: "topping", id: second.toppings[0] });
   });
 
-  it("料位滿了還點料（彩蛋或訂單缺的那樣）：放不上去，亮著的「拿掉這層」不能被收掉", () => {
+  it("料位滿了還點料：擠掉最舊那層，不會卡住；擠掉單上要的那層才立刻亮下一步", () => {
     const { result } = setup();
     finishFirstOrder(result);
     const second = result.current.round!.orders[1]!;
+    const want = second.toppings[0]!;
     const sweet = result.current.round!.tray.find((id) => toppingById(id).kind === "sweet")!;
     act(() => result.current.actions.pickBase(second.base));
     for (const id of ["wasabi", "wasabi", sweet] as const) act(() => result.current.actions.add(id));
-    expect(result.current.round!.sushi.toppings).toHaveLength(3);
     act(() => {
       vi.advanceTimersByTime(IDLE_HINT_MS);
     });
-    expect(result.current.hint).toEqual({ kind: "remove", slot: 0 });
+    expect(result.current.hint).toEqual({ kind: "topping", id: want });
+    act(() => result.current.actions.add(want));
+    expect(result.current.round!.sushi.toppings).toEqual(["wasabi", sweet, want]);
+    expect(result.current.shake).toBe(0);
+    expect(result.current.hint).toBeNull();
+    // 再放兩樣彩蛋：擠掉的都是彩蛋，單上要的還在，不亮
     act(() => result.current.actions.add("wasabi"));
-    expect(result.current.round!.sushi.toppings).toHaveLength(3);
-    expect(result.current.hint).toEqual({ kind: "remove", slot: 0 });
-    act(() => result.current.actions.add(second.toppings[0]!));
-    expect(result.current.hint).toEqual({ kind: "remove", slot: 0 });
+    act(() => result.current.actions.add(sweet));
+    expect(result.current.round!.sushi.toppings).toEqual([want, "wasabi", sweet]);
+    expect(result.current.hint).toBeNull();
+    // 這次擠掉的是單上要的：馬上亮缺的那樣
+    act(() => result.current.actions.add("wasabi"));
+    expect(result.current.round!.sushi.toppings).toEqual(["wasabi", sweet, "wasabi"]);
+    expect(result.current.hint).toEqual({ kind: "topping", id: want });
   });
 
   it("放彩蛋會把閒置重新起算：剛玩過不會馬上亮", () => {

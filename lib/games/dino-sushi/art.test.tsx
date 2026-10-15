@@ -18,6 +18,17 @@ describe("壽司黏土圖", () => {
     expect(html.match(/<img /g)).toHaveLength(4);
   });
 
+  it("手捲的料坐在飯口上：每一樣中心都在海苔前層（34.5%）以上、夠寬，一眼看得到包了什麼", () => {
+    const ids = ["tamago", "shrimp", "crab", "corn", "cucumber", "tuna", "floss", "salmon", "avocado", "strawberry", "pudding", "wasabi"] as const;
+    for (const id of ids) {
+      const html = renderToStaticMarkup(<SushiArt sushi={{ base: "temaki", toppings: [id] }} />);
+      const top = Number(html.match(/top:(\d+(?:\.\d+)?)%/)?.[1]);
+      const width = Number(html.match(/left:\d+%;top:[\d.]+%;width:(\d+(?:\.\d+)?)%/)?.[1]);
+      expect(top, id).toBeLessThan(30);
+      expect(width, id).toBeGreaterThanOrEqual(50);
+    }
+  });
+
   it("沒選飯不畫", () => {
     expect(renderToStaticMarkup(<SushiArt sushi={{ base: null, toppings: [] }} />)).toBe("");
   });
