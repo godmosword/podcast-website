@@ -1181,8 +1181,9 @@
   outline-offset: 3px;
 }
 
-/* 矮直向（iPhone SE 667 高、Safari 扣掉工具列的 390×664）：料位收回 48px，放大的那一截會把廚房推出一屏 */
-@media (orientation: portrait) and (max-height: 700px) {
+/* 矮的直排版面（iPhone SE 667 高、Safari 扣掉工具列的 390×664、800×600 視窗）：料位收回 48px，放大的那一截會把廚房推出一屏。
+   寬 ≥900 是三欄，高度不受料位影響，不收 */
+@media (max-width: 899px) and (max-height: 700px) {
   .kitchen {
     --slot: 48px;
   }

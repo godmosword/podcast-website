@@ -68,18 +68,18 @@ const ANCHOR: Record<Exclude<BaseId, "temaki">, { x: number; y: number; w: numbe
 /**
  * 手捲：寬、高都是舞台百分比。料坐在飯口上、往上冒出筒口，下緣塞進海苔前層（從高度 34.5% 蓋下來），
  * 像真的手捲一樣一眼看得到包了什麼；兩三樣時往左右散開，可以略超出筒身。
- * 芥末是一小坨，不跟其他料一樣大。
+ * 芥末是一小坨，不跟其他料一樣大；玉子、肉鬆不能太寬，三樣時才不會擋住中間那樣。
  */
 const TEMAKI_PLACE: Record<ToppingId, { w: number; y: number }> = {
-  tamago: { w: 98, y: 25 },
+  tamago: { w: 84, y: 26 },
   shrimp: { w: 98, y: 27 },
   crab: { w: 98, y: 25 },
   corn: { w: 98, y: 23 },
   cucumber: { w: 84, y: 25 },
   tuna: { w: 84, y: 23 },
-  floss: { w: 98, y: 23 },
+  floss: { w: 88, y: 24 },
   salmon: { w: 68, y: 27 },
-  avocado: { w: 52, y: 25 },
+  avocado: { w: 72, y: 26 },
   strawberry: { w: 68, y: 27 },
   pudding: { w: 90, y: 25 },
   wasabi: { w: 60, y: 25 },
@@ -237,8 +237,12 @@ export function SushiArt({
         w: temaki ? spot.w : spot.w * fit.scale,
         rot: spot.rot,
       };
-    })
-    .sort((a, b) => a.y - b.y);
+    });
+  /*
+   * 疊放順序用 z-index，DOM 照放料的順序不重排：換位置時重排 DOM 會把留下來的料搬走，
+   * 瀏覽器會讓被搬的那層重播落下動畫。越下面（y 越大）越前面；海苔前層蓋在所有料上面。
+   */
+  const depth = [...layers].sort((a, b) => a.y - b.y).map((l) => l.key);
   return (
     <span
       data-sushi=""
@@ -249,6 +253,7 @@ export function SushiArt({
         display: "block",
         ...(size != null ? { width: typeof size === "number" ? `${size}px` : size } : null),
         aspectRatio: BASE_ASPECT[sushi.base],
+        isolation: "isolate",
         ...style,
       }}
     >
@@ -264,6 +269,7 @@ export function SushiArt({
             left: `${x}%`,
             top: `${y}%`,
             width: `${w}%`,
+            zIndex: depth.indexOf(key) + 1,
             transform: rot ? `translate(-50%, -50%) rotate(${rot}deg)` : "translate(-50%, -50%)",
           }}
         >
@@ -282,6 +288,7 @@ export function SushiArt({
             height: "100%",
             objectFit: "contain",
             pointerEvents: "none",
+            zIndex: layers.length + 1,
           }}
         />
       ) : null}
