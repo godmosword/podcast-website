@@ -57,14 +57,11 @@
 - ✅ **擠掉最舊那層的離場**：被擠掉的料縮小飛回托盤（約 420ms）；減少動態改成原地淡出，暫停時停住。見本 commit。
 - **離場剩下的**：小聲「啵」、手捲上留下的料滑到新位置、布丁放中間只露焦糖（彩蛋、不進訂單）。`ux · S · 無`
 - **矮直向可能要捲**：320×568 料位 64px、「給多多吃」改到料位下面之後，廚房比一屏高。舞台收到 152px（再矮會讓疊盤蓋到「多多吃飽了」），仍可能要往下捲一點。`ui · S · 無`
-- [ ] **重錄 darwin 視覺基準（觸控尺寸）**：雲端無法產 `-chromium-darwin`。需在 Mac 重錄並目檢：`dino-sushi-title-390-light`、`dino-sushi-title-1280-night`、`dino-sushi-kitchen-390x844-light`、`dino-sushi-kitchen-844x390-light`、`dino-sushi-kitchen-1280x800-night`、`dino-sushi-result-390-light`。
+- [ ] **重錄 darwin 視覺基準**：涵蓋 #232、#234、#235、#236，以及更早的廚房改動（料位 64px、手捲餡料放大、托盤置中）。雲端無法產 `-chromium-darwin`。請在擁有者的 Mac 上執行 `npm run test:visual:trusted -- --update-snapshots -g 多多壽司屋`。視覺用 seed 7。六張：`dino-sushi-title-390-light`、`dino-sushi-title-1280-night`、`dino-sushi-kitchen-390x844-light`、`dino-sushi-kitchen-844x390-light`、`dino-sushi-kitchen-1280x800-night`、`dino-sushi-result-390-light`。目檢：標題看今天的客人與主題、貼紙書 n/30；廚房看客人頭像泡泡、主題托盤底色、圓窗天氣與燈籠；結算看新貼紙列（含客人頭像）。
 - ✅ **重玩動機（貼紙書，Phase 2）**：24 張貼紙（12 料、3 種飯、5 個表情、4 個驚喜；不含客人）。放上料、送出飯、多多的反應、點餐送完、五盤一次做對、自由做吃飽、第一次來玩都會拿到；一輪結束若沒有新的，依目錄再送一張，直到收滿。存在 `cheche:progress` 的 `preferences.gameKit.dinoSushiStickers`，不進家長儀表板的 24 個 id；收滿才加全站貼紙「多多貼紙書收集完成」。圖只用現有飯、料、多多縮小副本。見本 commit。
-- [ ] **重錄 darwin 視覺基準（貼紙書）**：標題多了貼紙書入口（計數現在是 n/30，也會顯示「新」），結算多了新貼紙列（含客人頭像）。雲端無法產 `-chromium-darwin`。需在 Mac 重錄並目檢：`dino-sushi-title-390-light`、`dino-sushi-title-1280-night`、`dino-sushi-result-390-light`。廚房三張見下面客人那列。觸控尺寸那列的重錄仍見上一項。
 - ✅ **客人來店點餐（Phase 3）**：小紅、安安、阿樂、鈴鈴、東東、香香用現有定裝照當圓頭像，只點餐、不吃。多多仍吃、仍做表情。訂單仍是熟食家常料，不含草莓、布丁、芥末，沒有新料。每輪 5 位不重複（6 位裡輪空 1 位）；小紅在前兩單、東東在最後一單。招呼與做好時的話跟著音效與「念出來」。見本 commit。
 - ✅ **貼紙書加上 6 位客人（第 25–30 張）**：小紅、安安、阿樂、鈴鈴、東東、香香。這位客人的訂單第一次做對（多多吃下去）就拿到；圖用現有定裝照。前 24 張的規則與 id 不變，舊存檔仍有效。一輪沒拿到新的，仍先送原本 24 張裡缺的，那些都有了才送客人。全站「多多貼紙書收集完成」改為收滿 30 張才加；已經拿到的不會收回。最愛料的星星不做成貼紙。見本 commit。
-- [ ] **重錄 darwin 視覺基準（客人＋貼紙書 30 張）**：雲端無法產 `-chromium-darwin`。需在 Mac 重錄並目檢：廚房三張（泡泡圓頭像）`dino-sushi-kitchen-390x844-light`、`dino-sushi-kitchen-844x390-light`、`dino-sushi-kitchen-1280x800-night`；標題兩張（計數改 n/30）`dino-sushi-title-390-light`、`dino-sushi-title-1280-night`；結算（新貼紙列多了客人頭像）`dino-sushi-result-390-light`。若觸控尺寸那列還沒重錄，同一批一起重錄即可。若接著做每輪小變化，下面那列會再改這 6 張，重錄一次即可。
 - ✅ **每輪小變化（Phase 4）**：同一個 seed 決定今天 3–5 位客人（輪流坐滿 5 單；小紅來就坐前兩單，東東來就坐最後一單）、黃色日／綠色日／海鮮日（托盤先放該主題的熟食，訂單也帶一種，托盤底換色）、晴天／傍晚／下雪（圓窗濾鏡＋牆面罩）和燈籠色相。送完第 3 盤，迴轉帶圓蓋掀開，裡面是已經拿到的貼紙（還沒有就畫一顆星），並念「哇，蓋子打開了！」。標題顯示今天的主題和會來的圓頭像。難度不變：仍是 5 單、料數 1、1、2、2、3。沒有第 6 單，訂單不含草莓、布丁、芥末，沒有新料。貼紙規則與 `dinoSushiStickers` 存檔不變。沒有新圖。`55978619`
-- [ ] **重錄 darwin 視覺基準（每輪小變化）**：雲端無法產 `-chromium-darwin`。seed 7 的標題多了今天會來的人與主題、廚房的天色／燈籠／托盤底色與點餐可能不同、結算店面天色也不同。需在 Mac 重錄並目檢：`dino-sushi-title-390-light`、`dino-sushi-title-1280-night`、`dino-sushi-kitchen-390x844-light`、`dino-sushi-kitchen-844x390-light`、`dino-sushi-kitchen-1280x800-night`、`dino-sushi-result-390-light`。上面觸控、貼紙書、客人那幾列若還沒重錄，這 6 張一次重錄即可。
 
 ### 遊樂園美術／可玩性審（2026-09-19）待做
 
@@ -1556,7 +1553,7 @@ D0 → D2-A(smoke) → D1 → D13-剩餘 → D3 → D14 → D6 ∥ D12
 - [x] 美術與音效改版（2026-10-12）：迴轉壽司店場景、檜木砧板與瓷碟、標題用封面、結算小店面、WebAudio 合成音效（Game Kit `voices()`）。
 - [x] 店內背景環境音（2026-10-12）：Game Kit `AmbiencePlayer`（music 分軌，跟 BGM 開關／暫停）；順手修掉每次點擊 BGM 從頭重播。
 - [x] 改版後壽司屋 6 張視覺 baseline 已在 Mac 重錄並目檢（`52102826`，#226）。
-- [ ] 料位 64px、手捲餡料放大、托盤置中之後，廚房三張（390×844、844×390、1280 夜）需在 Mac 重錄並目檢（`npm run test:visual:trusted -- --update-snapshots -g 多多壽司屋`）；雲端 Linux 無法產 `-chromium-darwin` 基準。
+- 廚房三張的 darwin 重錄見現役隊列未勾的「重錄 darwin 視覺基準」。
 - [ ] 實機 QA：`GAME_PHYSICAL_DEVICE_QA.md` 已加壽司屋 5 項；Playwright WebKit iPhone 15 模擬 12 項 e2e 全過，並修掉 iPhone 橫向（扣掉 Safari 工具列約 343px 高）托盤第四列被切的問題。真機（iOS Safari、主畫面 App safe area）待使用者勾，之後再評估拖曳放料。
 - [ ] 語音（請 Bonbon／馬米錄 5–6 句短語音）另案。
 - [ ] 多多美食圖鑑（需新存檔欄位＋遷移，L3）另案；宇宙地圖恐龍島第二入口另案。
