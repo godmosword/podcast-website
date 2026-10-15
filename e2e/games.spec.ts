@@ -526,6 +526,13 @@ test.describe("多多壽司屋", () => {
     { vp: { width: 360, height: 740 } },
     { vp: { width: 1280, height: 800 } },
     { vp: { width: 375, height: 667 } },
+    // Safari 扣掉工具列的真實高度：390（iPhone 15）、414（iPhone 11）、430（Pro Max）都要一屏放下
+    { vp: { width: 390, height: 664 } },
+    { vp: { width: 414, height: 715 } },
+    { vp: { width: 430, height: 664 } },
+    { vp: { width: 430, height: 739 } },
+    // 801–840 高原本不收緊、會超出 12–31px
+    { vp: { width: 430, height: 820 } },
     // 800×600 視窗是直排版面，本來就放不進一屏（既有），只量料位
     { vp: { width: 800, height: 600 }, fits: false },
     { vp: { width: 844, height: 390 }, fits: false },
@@ -557,6 +564,32 @@ test.describe("多多壽司屋", () => {
       }
     });
   }
+
+  /** 矮的大手機收緊時，舞台仍要 >190px 才留得住燈籠與店名；高的大手機不收緊，備料盤維持原本大小。 */
+  test("430 寬：739 高舞台留得住店名，932 高不收緊", async ({ page }) => {
+    for (const { height, check } of [
+      { height: 739, check: "stage" },
+      { height: 932, check: "prep" },
+    ] as const) {
+      await page.setViewportSize({ width: 430, height });
+      await page.goto("/games/dino-sushi");
+      await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+      await page.getByRole("button", { name: "選握壽司" }).click();
+      await settled(page);
+      if (check === "stage") {
+        const region = page.getByRole("region", { name: "多多" });
+        expect((await region.boundingBox())!.height).toBeGreaterThan(190);
+        const nameShown = await region.evaluate((stage) => {
+          const name = [...stage.querySelectorAll("span")].find((el) => el.textContent === "多多壽司");
+          return name ? name.getBoundingClientRect().height > 0 : false;
+        });
+        expect(nameShown, "櫃台店名沒被矮舞台規則收起").toBe(true);
+      } else {
+        const prep = (await page.getByRole("button", { name: /^換飯/ }).boundingBox())!;
+        expect(prep.width).toBeGreaterThanOrEqual(150);
+      }
+    }
+  });
 
   test("料位滿了再點料：擠掉最舊那層，新的放最後，不會卡住", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
@@ -711,6 +744,10 @@ test.describe("多多壽司屋", () => {
     test(`${vp.width}×${vp.height}：手捲三樣料，中間那樣看得到、不冒出砧板`, async ({ page }) => {
       await page.emulateMedia({ reducedMotion: "reduce" });
       await page.setViewportSize(vp);
+      // 托盤跟著每輪主題換料；seed 4 的托盤有鮭魚、蝦、蟹肉棒、布丁
+      await page.addInitScript(() => {
+        (window as unknown as { __dinoSushiSeed: number }).__dinoSushiSeed = 4;
+      });
       await page.goto("/games/dino-sushi");
       await page.getByRole("button", { name: "自由做" }).click();
       await page.getByRole("button", { name: "選手捲" }).click();
@@ -820,8 +857,9 @@ test.describe("多多壽司屋", () => {
 
     await page.goto("/games/dino-sushi");
     await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
-    await expect.poll(spoken).toEqual([expect.stringMatching(/^今天是.+我想要/)]);
-    const firstOrder = (await spoken())[0];
+    // 第一次來玩：標題頁先領「天天來」貼紙並念出來，按開始才念第 1 單
+    await expect.poll(spoken).toEqual(["新貼紙！天天來！", expect.stringMatching(/^今天是.+我想要/)]);
+    const firstOrder = (await spoken()).at(-1);
     await finish();
 
     // 點泡泡再聽一次（音效開著時有念：正向對照）
@@ -852,8 +890,8 @@ test.describe("多多壽司屋", () => {
 
     await page.goto("/games/dino-sushi");
     await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
-    // 正向對照：預設開著，第 1 單有念
-    await expect.poll(spoken).toEqual([expect.stringMatching(/^今天是.+我想要/)]);
+    // 正向對照：預設開著，第 1 單有念（前面是第一次來玩的「天天來」貼紙）
+    await expect.poll(spoken).toEqual(["新貼紙！天天來！", expect.stringMatching(/^今天是.+我想要/)]);
     await finish();
     await expect(page.getByRole("button", { name: "再聽一次" })).toBeVisible();
 

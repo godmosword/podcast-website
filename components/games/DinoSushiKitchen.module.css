@@ -938,6 +938,16 @@
   max-width: 78%;
 }
 
+/* 料換位置（加第二樣、拿掉一層、擠掉最舊那層）時，留下來的料滑過去，不瞬間跳位。
+   每層的 key 是「第幾個同樣的料」，留下來的不重掛，transition 才接得上 */
+.sushiButton > [data-sushi] > span {
+  transition:
+    left 200ms ease-out,
+    top 200ms ease-out,
+    width 200ms ease-out,
+    transform 200ms ease-out;
+}
+
 @keyframes baseDrop {
   from {
     transform: translateY(-10px) scale(0.92);
@@ -1398,8 +1408,10 @@
   }
 }
 
-/* 窄直向（320×568）：舞台收短，但仍要讓泡泡和疊盤上下分開。間距仍至少 8px。 */
-@media (max-width: 420px) and (orientation: portrait) {
+/* 窄直向（320×568）：舞台收短，但仍要讓泡泡和疊盤上下分開。間距仍至少 8px。
+   430 寬的大 iPhone 在 Safari 扣掉工具列（430×664、430×739）也要收，不然廚房超出一屏 85–140px；
+   高的大手機（430×932）不收，砧板維持原本大小。840 以上不收也放得下（430×833 起） */
+@media (max-width: 420px) and (orientation: portrait), (max-width: 559px) and (max-height: 840px) and (orientation: portrait) {
   .kitchen {
     --duo-h: 152px;
     gap: 8px;
@@ -1419,6 +1431,24 @@
 
   .baseButton {
     min-height: 96px;
+  }
+}
+
+/*
+ * 矮的大手機（430 寬、高 ≤840）：
+ * - 托盤圖跟著較寬的格子長高，鈕會變 69px；圖高收到 40px，鈕回到 64px，兩列省 10px。
+ * - 舞台下限跟著螢幕高度走（152–192px），廚房底永遠離螢幕底約 5px：430×739 舞台約 192px，
+ *   超過 190px 才留得住燈籠、櫃台店名與泡泡裡的客人名字（DinoSushiShop、泡泡的矮舞台規則）。
+ * 420.01：小數寬度的 Android 不會掉進 420–421 之間的縫。
+ */
+@media (min-width: 420.01px) and (max-width: 559px) and (max-height: 840px) and (orientation: portrait) {
+  .kitchen {
+    --tray-art: 40px;
+    --duo-h: clamp(152px, calc(100svh - 516px), 192px);
+  }
+
+  .trayArt {
+    width: min(100%, calc(var(--tray-art) * 858 / 480));
   }
 }
 
@@ -1670,7 +1700,8 @@
 
   .trayButton,
   .baseButton,
-  .serveButton {
+  .serveButton,
+  .sushiButton > [data-sushi] > span {
     transition: none;
   }
 
@@ -1723,7 +1754,8 @@
 
 .kitchen[data-reduced="true"] .trayButton,
 .kitchen[data-reduced="true"] .baseButton,
-.kitchen[data-reduced="true"] .serveButton {
+.kitchen[data-reduced="true"] .serveButton,
+.kitchen[data-reduced="true"] .sushiButton > [data-sushi] > span {
   transition: none;
 }
 
