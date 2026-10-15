@@ -74,7 +74,7 @@ async function finishCandyLevel(page: Page) {
 /** 照泡泡做第 n 單並送出（n 從 1 起）。 */
 async function serveSushiOrder(page: Page, n: number, opts: { skipLast?: boolean } = {}) {
   const label = await page.getByRole("img", { name: new RegExp(`^第 ${n} 單`) }).getAttribute("aria-label");
-  const [base, ...toppings] = label!.split("多多想吃：")[1]!.split("、");
+  const [base, ...toppings] = label!.split("想吃：")[1]!.split("、");
   await page.getByRole("button", { name: `選${base}` }).click();
   const put = opts.skipLast ? toppings.slice(0, -1) : toppings;
   for (const t of put) await page.getByRole("button", { name: `加${t}` }).click();

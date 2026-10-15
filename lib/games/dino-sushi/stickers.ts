@@ -1,22 +1,25 @@
 /**
- * 《多多壽司屋》貼紙書：24 張，不含客人（客人留到下一階段）。
- * 圖只用現有的飯、料、多多縮小副本，再加上程式畫的獎章框。
- * 貼紙只會增加、不會收回。一輪結束若一張新的都沒有，依目錄順序送出下一張，直到收滿。
+ * 《多多壽司屋》貼紙書：30 張。前 24 張是料、飯、表情、驚喜；第 25–30 張是來店的朋友。
+ * 圖只用現有的飯、料、多多縮小副本、角色定裝照，再加上程式畫的獎章框。不另生圖。
+ * 貼紙只會增加、不會收回。一輪結束若一張新的都沒有，依目錄順序送出下一張
+ * （先補原本 24 張，那些都有了才送客人），直到收滿。
  */
 
+import { CUSTOMERS, type CustomerId } from "./customers";
 import { roundMedals } from "./medals";
 import type { Mood } from "./reactions";
 import { BASES, TOPPINGS, type BaseId, type ToppingId } from "./toppings";
 
-export const DINO_SUSHI_STICKER_TOTAL = 24;
+export const DINO_SUSHI_STICKER_TOTAL = 30;
 
-export type StickerGroup = "food" | "base" | "mood" | "surprise";
+export type StickerGroup = "food" | "base" | "mood" | "surprise" | "customer";
 
 export type StickerArt =
   | { kind: "topping"; id: ToppingId }
   | { kind: "base"; id: BaseId }
   | { kind: "duoduo"; state: "love" | "yum" | "sweet" | "fire" | "toothbrush" | "laugh" | "chew" | "closed" }
-  | { kind: "medal"; state: "chew" | "laugh"; frame: "gold" | "sun" };
+  | { kind: "medal"; state: "chew" | "laugh"; frame: "gold" | "sun" }
+  | { kind: "customer"; id: CustomerId };
 
 export type DinoSushiSticker = {
   id: string;
@@ -51,6 +54,14 @@ const MOOD_STICKERS: DinoSushiSticker[] = [
   { id: "mood-brush", name: "刷牙", group: "mood", rule: "幫多多刷牙", art: { kind: "duoduo", state: "toothbrush" } },
 ];
 
+const CUSTOMER_STICKERS: DinoSushiSticker[] = CUSTOMERS.map((customer) => ({
+  id: `customer-${customer.id}`,
+  name: customer.name,
+  group: "customer",
+  rule: `幫${customer.name}做對一盤`,
+  art: { kind: "customer", id: customer.id },
+}));
+
 const SURPRISE_STICKERS: DinoSushiSticker[] = [
   { id: "surprise-round", name: "吃飽飽", group: "surprise", rule: "點餐，送完 5 盤", art: { kind: "duoduo", state: "laugh" } },
   {
@@ -75,6 +86,7 @@ export const DINO_SUSHI_STICKERS: readonly DinoSushiSticker[] = [
   ...BASE_STICKERS,
   ...MOOD_STICKERS,
   ...SURPRISE_STICKERS,
+  ...CUSTOMER_STICKERS,
 ];
 
 export const DINO_SUSHI_STICKER_IDS: readonly string[] = DINO_SUSHI_STICKERS.map((sticker) => sticker.id);
@@ -87,6 +99,7 @@ export const STICKER_GROUP_LABEL: Record<StickerGroup, string> = {
   base: "送出的飯",
   mood: "多多的臉",
   surprise: "驚喜",
+  customer: "來過的朋友",
 };
 
 /** 貼紙書最下面那一句：沒拿到新的也還有一張。 */
@@ -105,6 +118,8 @@ export function stickerById(id: string): DinoSushiSticker | undefined {
 export type PlateFact = {
   sushi: { base: BaseId | null; toppings: readonly ToppingId[] };
   mood: Mood;
+  /** 點餐做對、多多吃下去時才有。看一看或自由做不會記客人。 */
+  customerId?: CustomerId;
 };
 
 /** 一輪裡跟貼紙有關的事實。看的是這一輪累積，不是畫面上還留著的那層。 */
@@ -126,6 +141,8 @@ export type StickerFacts = {
   perfectRound: boolean;
   freeDone: boolean;
   firstVisitToday: boolean;
+  /** 這一輪做對、多多吃下去的客人。同一位只算一次。 */
+  servedCustomers: readonly CustomerId[];
 };
 
 const EMPTY_FACTS: StickerFacts = {
@@ -137,6 +154,7 @@ const EMPTY_FACTS: StickerFacts = {
   perfectRound: false,
   freeDone: false,
   firstVisitToday: false,
+  servedCustomers: [],
 };
 
 export function rememberPlaced(memory: readonly ToppingId[], round: RoundFactSource): ToppingId[] {
@@ -156,10 +174,12 @@ export function factsFromRound(
   const placed = rememberPlaced(remembered, round);
   const eaten = round.plates.filter((plate) => plate.mood !== "look");
   const moods: Array<"love" | "yum" | "sweet" | "puff"> = [];
+  const servedCustomers: CustomerId[] = [];
   for (const plate of eaten) {
     if (plate.mood === "love" || plate.mood === "yum" || plate.mood === "sweet" || plate.mood === "puff") {
       moods.push(plate.mood);
     }
+    if (plate.customerId && !servedCustomers.includes(plate.customerId)) servedCustomers.push(plate.customerId);
   }
   const perfect =
     round.mode === "order" && round.done && roundMedals(round.firstTries).collectedAll;
@@ -172,6 +192,7 @@ export function factsFromRound(
     perfectRound: perfect,
     freeDone: round.mode === "free" && round.done,
     firstVisitToday,
+    servedCustomers,
   };
 }
 
@@ -210,6 +231,9 @@ export function collectStickers(
   grant("surprise-perfect", facts.perfectRound);
   grant("surprise-free", facts.freeDone);
   grant("surprise-daily", facts.firstVisitToday);
+  for (const customer of CUSTOMERS) {
+    grant(`customer-${customer.id}`, facts.servedCustomers.includes(customer.id));
+  }
 
   const earnedEarlier = options?.earnedThisRound?.length ?? 0;
   if (unlocked.length > 0 || !options?.finishedRound || earnedEarlier > 0) {

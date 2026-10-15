@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { CUSTOMERS, type CustomerId } from "./customers";
 import { BASES, TOPPINGS, type BaseId, type ToppingId } from "./toppings";
 import {
   DINO_SUSHI_STICKER_TOTAL,
@@ -17,8 +18,13 @@ import {
   type RoundFactSource,
 } from "./stickers";
 
-function plate(base: BaseId, mood: PlateFact["mood"], toppings: ToppingId[] = []): PlateFact {
-  return { sushi: { base, toppings }, mood };
+function plate(
+  base: BaseId,
+  mood: PlateFact["mood"],
+  toppings: ToppingId[] = [],
+  customerId?: CustomerId,
+): PlateFact {
+  return { sushi: { base, toppings }, mood, ...(customerId ? { customerId } : {}) };
 }
 
 function round(partial: Partial<RoundFactSource> = {}): RoundFactSource {
@@ -34,14 +40,36 @@ function round(partial: Partial<RoundFactSource> = {}): RoundFactSource {
 }
 
 describe("多多壽司屋貼紙目錄", () => {
-  it("正好 24 張：12 料、3 飯、5 表情、4 驚喜，沒有客人", () => {
+  it("正好 30 張：前 24 張不變，後面是 6 位客人", () => {
     expect(DINO_SUSHI_STICKERS).toHaveLength(DINO_SUSHI_STICKER_TOTAL);
+    expect(DINO_SUSHI_STICKER_TOTAL).toBe(30);
     expect(DINO_SUSHI_STICKERS.filter((s) => s.group === "food")).toHaveLength(12);
     expect(DINO_SUSHI_STICKERS.filter((s) => s.group === "base")).toHaveLength(3);
     expect(DINO_SUSHI_STICKERS.filter((s) => s.group === "mood")).toHaveLength(5);
     expect(DINO_SUSHI_STICKERS.filter((s) => s.group === "surprise")).toHaveLength(4);
-    expect(DINO_SUSHI_STICKERS.some((s) => s.id.startsWith("customer-"))).toBe(false);
-    expect(new Set(DINO_SUSHI_STICKERS.map((s) => s.id)).size).toBe(24);
+    expect(DINO_SUSHI_STICKERS.filter((s) => s.group === "customer")).toHaveLength(6);
+    const ids = DINO_SUSHI_STICKERS.map((s) => s.id);
+    expect(new Set(ids).size).toBe(30);
+    expect(ids.slice(0, 24)).toEqual([
+      ...TOPPINGS.map((topping) => `topping-${topping.id}`),
+      ...BASES.map((base) => `base-${base.id}`),
+      "mood-love",
+      "mood-yum",
+      "mood-sweet",
+      "mood-puff",
+      "mood-brush",
+      "surprise-round",
+      "surprise-perfect",
+      "surprise-free",
+      "surprise-daily",
+    ]);
+    expect(ids.slice(24)).toEqual(CUSTOMERS.map((customer) => `customer-${customer.id}`));
+    expect(stickerById("customer-xiaohong")).toMatchObject({
+      name: "小紅",
+      group: "customer",
+      rule: "幫小紅做對一盤",
+      art: { kind: "customer", id: "xiaohong" },
+    });
   });
 
   it("每種現有的料、每種飯都有一張，規則寫的是放上去或送出去", () => {
@@ -160,13 +188,52 @@ describe("貼紙解鎖", () => {
     expect(playing.unlocked).toEqual([]);
   });
 
+  it("原本 24 張都有了、這一輪沒新的，保底才從客人開始送", () => {
+    const owned = DINO_SUSHI_STICKERS.filter((sticker) => sticker.group !== "customer").map((sticker) => sticker.id);
+    const gift = collectStickers(owned, factsFromRound(round({ mode: "free", done: true })), {
+      finishedRound: true,
+    });
+    expect(gift).toEqual({ unlocked: ["customer-xiaohong"], gifted: "customer-xiaohong" });
+    const next = collectStickers(
+      [...owned, "customer-xiaohong"],
+      factsFromRound(round({ mode: "free", done: true })),
+      { finishedRound: true },
+    );
+    expect(next.gifted).toBe("customer-anan");
+  });
+
+  it("客人的訂單做對才拿到；看一看、自由做、做第二次都不算", () => {
+    const served = collectStickers(
+      [],
+      factsFromRound(round({ plates: [plate("nigiri", "yum", ["shrimp"], "xiaohong")] })),
+    );
+    expect(served.unlocked).toContain("customer-xiaohong");
+    expect(served.gifted).toBeNull();
+    const looked = collectStickers(
+      [],
+      factsFromRound(round({ plates: [plate("nigiri", "look", ["shrimp"], "xiaohong")] })),
+    );
+    expect(looked.unlocked).not.toContain("customer-xiaohong");
+    const free = collectStickers(
+      [],
+      factsFromRound(round({ mode: "free", plates: [plate("nigiri", "yum", ["shrimp"])] })),
+    );
+    expect(free.unlocked).not.toContain("customer-xiaohong");
+    const again = collectStickers(
+      ["customer-xiaohong"],
+      factsFromRound(round({ plates: [plate("nigiri", "love", ["shrimp"], "xiaohong")] })),
+    );
+    expect(again.unlocked).not.toContain("customer-xiaohong");
+  });
+
   it("收滿就不再送，也不會給不認識的 id", () => {
     const owned = DINO_SUSHI_STICKERS.map((s) => s.id);
     const full = collectStickers(owned, factsFromRound(round({ mode: "order", done: true })), {
       finishedRound: true,
     });
     expect(full).toEqual({ unlocked: [], gifted: null });
-    expect(isDinoSushiStickerId("customer-xiaohong")).toBe(false);
+    expect(isDinoSushiStickerId("customer-xiaohong")).toBe(true);
+    expect(isDinoSushiStickerId("customer-nobody")).toBe(false);
   });
 });
 

@@ -32,6 +32,7 @@ describe("點餐一輪", () => {
     expect(s.done).toBe(true);
     expect(s.plates).toHaveLength(5);
     expect(s.plates.every((p) => p.gold)).toBe(true);
+    expect(s.plates.map((p) => p.customerId)).toEqual(createRound("order", 9).orders.map((order) => order.customerId));
     expect(s.firstTries).toEqual([true, true, true, true, true]);
   });
 
@@ -151,6 +152,7 @@ describe("自由做", () => {
     s = roundReducer(s, { type: "reaction-done" });
     expect(s.plates).toHaveLength(1);
     expect(s.plates[0]!.gold).toBe(false);
+    expect(s.plates[0]!.customerId).toBeUndefined();
     expect(s.done).toBe(false);
     s = roundReducer(s, { type: "finish" });
     expect(s.done).toBe(true);

@@ -512,7 +512,7 @@ async function openDinoSushi(page: Page, width: number, height: number, theme: V
 /** 照第 n 單的泡泡選飯、放料；serve 時順便送出並等多多吃完。 */
 async function makeDinoOrder(page: Page, n: number, serve: boolean) {
   const label = await page.getByRole("img", { name: new RegExp(`^第 ${n} 單`) }).getAttribute("aria-label");
-  const [base, ...toppings] = label!.split("多多想吃：")[1]!.split("、");
+  const [base, ...toppings] = label!.split("想吃：")[1]!.split("、");
   await page.getByRole("button", { name: `選${base}` }).click();
   for (const t of toppings) await page.getByRole("button", { name: `加${t}` }).click();
   if (!serve) return;

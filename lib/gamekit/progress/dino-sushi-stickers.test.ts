@@ -86,7 +86,7 @@ describe("多多壽司屋貼紙存檔", () => {
         schemaVersion: 2,
         preferences: {
           gameKit: {
-            dinoSushiStickers: ["topping-tamago", "customer-xiaohong", 3, "topping-tamago", "base-nigiri"],
+            dinoSushiStickers: ["topping-tamago", "customer-nobody", 3, "topping-tamago", "base-nigiri"],
             dinoSushiStickersSeen: ["topping-tamago", "mood-love", "bogus"],
             dinoSushiStickersFresh: ["base-nigiri", "nope"],
           },
@@ -165,13 +165,34 @@ describe("多多壽司屋貼紙存檔", () => {
     expect(seen.seen).toEqual(["topping-salmon", "base-temaki"]);
   });
 
-  it("收滿才在全站貼紙加一張中文名，不滿不加、加過不重複", () => {
+  it("舊的 24 張 id 還讀得回來，客人 id 也留著，不認識的會拿掉", () => {
+    const original = DINO_SUSHI_STICKERS.filter((sticker) => sticker.group !== "customer").map((sticker) => sticker.id);
+    expect(original).toHaveLength(24);
+    store.set(
+      PROGRESS_STORAGE_KEY,
+      JSON.stringify({
+        schemaVersion: 2,
+        preferences: {
+          gameKit: {
+            dinoSushiStickers: [...original, "customer-xiaohong", "not-a-sticker"],
+          },
+        },
+      }),
+    );
+    expect(loadDinoSushiStickers().unlocked).toEqual([...original, "customer-xiaohong"]);
+  });
+
+  it("收滿 30 張才加全站貼紙；只有舊的 24 張不會加，加過不重複", () => {
     const ids = DINO_SUSHI_STICKERS.map((s) => s.id);
-    addDinoSushiStickers(ids.slice(0, 23));
-    expect(JSON.parse(store.get(PROGRESS_STORAGE_KEY) ?? "{}").gameProfile.stickers ?? []).not.toContain(
+    addDinoSushiStickers(ids.slice(0, 24));
+    expect(JSON.parse(store.get(PROGRESS_STORAGE_KEY) ?? "{}").gameProfile?.stickers ?? []).not.toContain(
       DINO_SUSHI_BOOK_STICKER,
     );
-    addDinoSushiStickers([ids[23]!]);
+    addDinoSushiStickers(ids.slice(24, 29));
+    expect(JSON.parse(store.get(PROGRESS_STORAGE_KEY) ?? "{}").gameProfile?.stickers ?? []).not.toContain(
+      DINO_SUSHI_BOOK_STICKER,
+    );
+    addDinoSushiStickers([ids[29]!]);
     const profile = JSON.parse(store.get(PROGRESS_STORAGE_KEY) ?? "{}").gameProfile;
     expect(profile.stickers.filter((id: string) => id === DINO_SUSHI_BOOK_STICKER)).toEqual([
       DINO_SUSHI_BOOK_STICKER,
@@ -180,5 +201,24 @@ describe("多多壽司屋貼紙存檔", () => {
     saveDinoSushiStickerState(loadDinoSushiStickers());
     const again = JSON.parse(store.get(PROGRESS_STORAGE_KEY) ?? "{}").gameProfile.stickers;
     expect(again.filter((id: string) => id === DINO_SUSHI_BOOK_STICKER)).toHaveLength(1);
+  });
+
+  it("以前用 24 張換到的收集完成還留著，不會因為改成 30 張被收回", () => {
+    const original = DINO_SUSHI_STICKERS.filter((sticker) => sticker.group !== "customer").map((sticker) => sticker.id);
+    store.set(
+      PROGRESS_STORAGE_KEY,
+      JSON.stringify({
+        schemaVersion: 2,
+        preferences: { gameKit: { dinoSushiStickers: original } },
+        gameProfile: { stickers: [DINO_SUSHI_BOOK_STICKER, "played-candy-match"], bests: {} },
+      }),
+    );
+    saveDinoSushiStickerState(loadDinoSushiStickers());
+    const profile = JSON.parse(store.get(PROGRESS_STORAGE_KEY) ?? "{}").gameProfile;
+    expect(profile.stickers.filter((id: string) => id === DINO_SUSHI_BOOK_STICKER)).toEqual([
+      DINO_SUSHI_BOOK_STICKER,
+    ]);
+    expect(profile.stickers).toContain("played-candy-match");
+    expect(loadDinoSushiStickers().unlocked).toEqual(original);
   });
 });

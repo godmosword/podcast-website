@@ -20,7 +20,7 @@ describe("多多的字卡", () => {
 });
 
 describe("點餐反應", () => {
-  const order: Order = { base: "nigiri", toppings: ["tamago", "shrimp"] };
+  const order: Order = { base: "nigiri", toppings: ["tamago", "shrimp"], customerId: "xiaohong" };
 
   it("缺料時不吃，字卡說出還缺什麼", () => {
     const r = reactionFor(make("nigiri", ["tamago"]), { order, firstTry: true });
@@ -85,7 +85,7 @@ describe("自由做反應", () => {
         reactionFor(make("gunkan", ["salmon"]), { favorite: "salmon" }),
         reactionFor(make("gunkan", ["pudding"]), { favorite: "salmon" }),
         reactionFor(make("gunkan", ["wasabi"]), { favorite: "salmon" }),
-        reactionFor(make("gunkan", []), { order: { base: "nigiri", toppings: ["corn"] }, firstTry: true }),
+        reactionFor(make("gunkan", []), { order: { base: "nigiri", toppings: ["corn"], customerId: "ale" }, firstTry: true }),
       ].map((r) => r.sfx),
     );
     expect(sfx.size).toBe(5);

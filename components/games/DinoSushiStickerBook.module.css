@@ -1,6 +1,9 @@
 /*
- * 貼紙書蓋在標題或結算上。顏色吃卡片上的 --sushi-*，不另寫色碼。
+ * 貼紙書蓋在標題或結算上。30 張：料 12、飯 3、表情 5、驚喜 4、朋友 6。
+ * 顏色吃卡片上的 --sushi-*，不另寫色碼。
  * 格子是按鈕：點得到的念名字，點不到的念怎麼拿到。
+ * 直向 320／390 三欄（朋友 6 張正好兩列）；560 起四欄；800 起六欄（1280 朋友一列）。
+ * 矮橫向維持格高 64、間距 8，書本自己上下捲，不橫向溢出。
  */
 
 .book {
@@ -145,6 +148,18 @@
   font-size: 1.5rem;
   font-weight: 900;
   text-shadow: 0 1px 0 rgba(40, 30, 20, 0.35);
+}
+
+.face {
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--sushi-cream, Canvas);
+  box-shadow: inset 0 0 0 2px rgba(180, 120, 60, 0.72);
+}
+
+.face img {
+  object-fit: cover;
+  object-position: center 40%;
 }
 
 .frameGold,
