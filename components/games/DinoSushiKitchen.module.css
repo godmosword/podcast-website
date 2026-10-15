@@ -467,6 +467,8 @@
  */
 @container duo-stage (max-height: 190px) {
   .bubble {
+    box-sizing: border-box;
+    min-height: 64px;
     padding-right: 30px;
   }
 
