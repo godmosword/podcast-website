@@ -1,15 +1,20 @@
 /**
  * 家長區「育兒文章分享」。
  *
- * 新增一篇：在 `PARENT_ARTICLES` 陣列最後（或你要的閱讀順序位置）加一筆。
+ * 方格子新文由 `npm run sync:vocus` 附加到 `PARENT_ARTICLES` 末端
+ * （閱讀順序＝陣列順序；多篇時較早發布的在前）。手動補一篇時也加在最後。
+ * 流程、列表 API 與自動合併見 `docs/VOCUS-ARTICLE-SYNC.md`。
  * 列表、上一篇／下一篇與靜態路徑都讀這個陣列，不用改版面元件。
  *
  * - `blocks` 保留原文分段：`paragraph` 是作者的一行、`spacer` 是原文空行。
  *   也可使用 `heading`（level 2 或 3）、`list`、`image`。
  * - 圖片請放到 `public/parent-articles/`，用站內路徑（例如
- *   `/parent-articles/example.jpg`）。`coverImage` 是列表封面；內文圖放 `image` block。
+ *   `/parent-articles/example.webp`）。`coverImage` 是列表封面；內文圖放 `image` block。
  * - `excerpt` 請從開頭原文摘一句或一小段，不要改寫。
+ *   同步腳本沿用「第一個 spacer 之前的 paragraph」。
+ * - `slug`：手寫篇用英文短名；同步篇為 `vocus-<方格子 contentId>`。
  * - 新增中文後若字型缺字，執行 `npm run font:subset`。
+ *   手動：`npm run sync:vocus -- --dry-run`，確認後再 `npm run sync:vocus`。
  */
 export type ParentArticleBlock =
   | { readonly type: "paragraph"; readonly text: string }
@@ -162,6 +167,40 @@ export const PARENT_ARTICLES: readonly ParentArticle[] = [
       { type: "paragraph", text: "一年後的遠視儲備量跟一年前完全一樣" },
       { type: "paragraph", text: "表示以上方法對我家孩子來說是可行的" },
       { type: "paragraph", text: "我還是會繼續堅持下去🧡" },
+    ],
+  },
+  {
+    slug: "vocus-6ad06360fd89780001c70f77",
+    title: "當孩子的情緒像小火山爆發時，該怎麼辦？",
+    publishedAt: "2026-10-15",
+    sourceUrl: "https://vocus.cc/post/6ad06360fd89780001c70f77",
+    excerpt: "我想很多爸爸媽媽有感，\n當孩子情緒一上來，就像小火山突然爆發一樣🌋\n這時候，不管大人說什麼，孩子好像都聽不進去。\n我一直在想，有沒有什麼簡單又好懂的方法，\n可以讓孩子學習怎麼面對生氣的情緒？",
+    blocks: [
+      { type: "paragraph", text: "我想很多爸爸媽媽有感，" },
+      { type: "paragraph", text: "當孩子情緒一上來，就像小火山突然爆發一樣🌋" },
+      { type: "paragraph", text: "這時候，不管大人說什麼，孩子好像都聽不進去。" },
+      { type: "paragraph", text: "我一直在想，有沒有什麼簡單又好懂的方法，" },
+      { type: "paragraph", text: "可以讓孩子學習怎麼面對生氣的情緒？" },
+      { type: "spacer" },
+      { type: "paragraph", text: "直到有一天……" },
+      { type: "spacer" },
+      { type: "paragraph", text: "我跟平常一樣，開車經過每天都會走的十字路口。" },
+      { type: "paragraph", text: "停下來等紅燈，看著眼前的倒數30秒。" },
+      { type: "paragraph", text: "突然想到！" },
+      { type: "paragraph", text: "如果把孩子每天都會看到的紅綠燈，跟情緒管理結合在一起，會不會更容易理解呢？" },
+      { type: "spacer" },
+      { type: "paragraph", text: "🔴 紅燈 停一停" },
+      { type: "paragraph", text: "🟡 黃燈 數一數" },
+      { type: "paragraph", text: "🟢 綠燈 向前走" },
+      { type: "spacer" },
+      { type: "paragraph", text: "透過簡單的隨口唸" },
+      { type: "paragraph", text: "於是，就有了這一集" },
+      { type: "paragraph", text: "《小紅賽車好想生氣怎麼辦？》" },
+      { type: "paragraph", text: "還誕生了一個新角色，會唱歌的紅綠燈「燈叔叔」🚦" },
+      { type: "paragraph", text: "希望透過故事，讓孩子知道平常就可以開始練習，" },
+      { type: "paragraph", text: "當我們很生氣的時候，可以怎麼做。" },
+      { type: "paragraph", text: "也許下次孩子氣噗噗的時候，" },
+      { type: "paragraph", text: "我們就可以一起想起燈叔叔的那首歌❤️" },
     ],
   },
 ];

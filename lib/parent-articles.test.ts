@@ -9,11 +9,12 @@ import {
 } from "./parent-articles";
 
 describe("parent articles", () => {
-  it("依視力系列一、二、三的閱讀順序排列", () => {
-    expect(listParentArticles().map((article) => article.title)).toEqual([
+  it("視力系列維持一、二、三，同步的新文接在後面", () => {
+    expect(listParentArticles().map((article) => article.title).slice(0, 4)).toEqual([
       "注意孩子的視力保健（ㄧ）",
       "注意孩子的視力（二）",
       "注意孩子的視力（三）",
+      "當孩子的情緒像小火山爆發時，該怎麼辦？",
     ]);
   });
 
@@ -35,19 +36,27 @@ describe("parent articles", () => {
     }
   });
 
-  it("每篇都有方格子原文連結、發布日，且目前沒有封面圖", () => {
+  it("每篇都有方格子原文連結與台北發布日", () => {
     for (const article of PARENT_ARTICLES) {
       expect(article.sourceUrl).toBe(
         `https://vocus.cc/post/${article.sourceUrl.split("/").pop()}`,
       );
-      expect(article.sourceUrl.startsWith("https://vocus.cc/post/")).toBe(true);
-      expect(article.publishedAt).toBe("2026-09-12");
-      expect(article.coverImage).toBeUndefined();
+      expect(article.sourceUrl).toMatch(/^https:\/\/vocus\.cc\/post\/[a-f0-9]{24}$/);
+      expect(article.publishedAt).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+      if (article.coverImage) {
+        expect(article.coverImage.startsWith("/parent-articles/")).toBe(true);
+      }
       expect(getParentArticle(article.slug)?.title).toBe(article.title);
       expect(parentArticlePath(article.slug)).toBe(
         `/for-parents/articles/${article.slug}`,
       );
     }
+    for (const slug of ["vision-care-1", "vision-care-2", "vision-care-3"]) {
+      expect(getParentArticle(slug)?.publishedAt).toBe("2026-09-12");
+    }
+    expect(getParentArticle("vocus-6ad06360fd89780001c70f77")?.publishedAt).toBe(
+      "2026-10-15",
+    );
   });
 
   it("系列內上一篇與下一篇相鄰", () => {
@@ -61,8 +70,12 @@ describe("parent articles", () => {
     });
     expect(parentArticleNeighbors("vision-care-3")).toMatchObject({
       previous: { slug: "vision-care-2" },
-      next: null,
+      next: { slug: "vocus-6ad06360fd89780001c70f77" },
     });
+    expect(
+      parentArticleNeighbors("vocus-6ad06360fd89780001c70f77").previous?.slug,
+    ).toBe("vision-care-3");
     expect(formatParentArticleDate("2026-09-12")).toBe("2026年9月12日");
+    expect(formatParentArticleDate("2026-10-15")).toBe("2026年10月15日");
   });
 });

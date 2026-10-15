@@ -10,7 +10,7 @@ export const PARENT_SECTION_ITEMS = [
     href: "/for-parents/articles",
     icon: "notebook",
     description:
-      "車車遊樂園在方格子刊登的育兒文章。目前依序收錄視力保健系列三篇。",
+      "車車遊樂園在方格子刊登的育兒文章，依發布先後排列。",
   },
   {
     id: "parent-travel-abroad",
