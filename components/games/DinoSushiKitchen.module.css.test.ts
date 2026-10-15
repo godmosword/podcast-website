@@ -90,6 +90,10 @@ describe("標題與結算觸控尺寸", () => {
     expect(view).not.toMatch(/--start-size:\s*7[26]px/);
     expect(view).toMatch(/\.freeButton\s*\{[^}]*min-height:\s*64px/);
     expect(view).toMatch(/\.freeButton\s*\{[^}]*min-width:\s*120px/);
+    expect(view).toMatch(/\.bookButton\s*\{[^}]*width:\s*96px/);
+    expect(view).toMatch(/\.bookButton\s*\{[^}]*height:\s*96px/);
+    expect(view).toMatch(/\.resultBook\s*\{[^}]*min-height:\s*64px/);
+    expect(view).toMatch(/\.titleActions\s*\{[^}]*gap:\s*12px/);
     expect(view).toMatch(/\.surface button,\s*\n\.surface a\s*\{[^}]*touch-action:\s*manipulation/);
     expect(view).toMatch(/user-select:\s*none/);
   });

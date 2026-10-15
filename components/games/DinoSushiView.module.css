@@ -75,6 +75,11 @@
   container: sushi-title / inline-size;
 }
 
+/* 不產生盒子，標題和廚房的排版跟以前一樣；inert 仍罩住裡面的鈕 */
+.stage {
+  display: contents;
+}
+
 .visuallyHidden {
   position: absolute;
   width: 1px;
@@ -90,7 +95,8 @@
   flex: 1;
   flex-direction: column;
   gap: 14px;
-  min-height: 300px;
+  min-height: 0;
+  overflow-y: auto;
   text-align: center;
 }
 
@@ -210,7 +216,9 @@
 }
 
 .startButton:focus-visible,
-.freeButton:focus-visible {
+.freeButton:focus-visible,
+.bookButton:focus-visible,
+.resultBook:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 4px;
 }
@@ -221,8 +229,19 @@
   font-weight: 900;
 }
 
+/* 自由做與貼紙書並排；窄的時候換行，兩顆都不縮小 */
+.titleActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+}
+
 /* 自由做：小膠囊，離主鈕有距離 */
 .freeButton {
+  flex: none;
   min-width: 120px;
   min-height: 64px;
   padding: 0 24px;
@@ -248,16 +267,84 @@
     0 2px 0 #9cc982;
 }
 
+/* 貼紙書：96×96，跟「自由做」隔 12px，窄螢幕換行也不縮小 */
+.bookButton {
+  position: relative;
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  width: 96px;
+  height: 96px;
+  padding: 4px;
+  border: none;
+  border-radius: 24px;
+  background: linear-gradient(180deg, #e7f8d8, #b7e39a);
+  color: #245c18;
+  font: inherit;
+  font-weight: 900;
+  line-height: 1.1;
+  cursor: pointer;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.85),
+    0 4px 0 #7fb56a,
+    0 8px 14px rgba(60, 100, 40, 0.16);
+}
+
+.bookButton:active {
+  transform: translateY(2px);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.85),
+    0 2px 0 #7fb56a;
+}
+
+.bookArt {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.bookCaption {
+  font-size: 0.82rem;
+}
+
+.bookCount {
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.bookNew {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: #3f7f2a;
+  color: #fffdf8;
+  font-size: 0.7rem;
+  line-height: 1.3;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .startButton,
-  .freeButton {
+  .freeButton,
+  .bookButton,
+  .resultBook,
+  .freshThumb {
     transition: none;
+    animation: none;
   }
 }
 
 .surface[data-reduced="true"] .startButton,
-.surface[data-reduced="true"] .freeButton {
+.surface[data-reduced="true"] .freeButton,
+.surface[data-reduced="true"] .bookButton,
+.surface[data-reduced="true"] .freshThumb {
   transition: none;
+  animation: none;
 }
 
 @container sushi-title (min-width: 720px) {
@@ -449,17 +536,140 @@
   object-fit: contain;
 }
 
-/* 矮直向手機（320×568）：放不下店面，收起才不會把「回遊樂園」擠出畫面 */
+.freshStickers {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin: 0 0 4px;
+}
+
+.freshTitle {
+  margin: 0;
+  color: var(--sushi-accent);
+  font-size: 1.05rem;
+  font-weight: 900;
+}
+
+.freshRow {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0 0 4px;
+  overflow-x: auto;
+  list-style: none;
+  touch-action: pan-x;
+}
+
+.freshThumb {
+  flex: none;
+  width: 64px;
+  height: 64px;
+  animation: stickerPop 280ms ease-out both;
+}
+
+.freshStickers[data-reduced="true"] .freshThumb {
+  animation: none;
+}
+
+@keyframes stickerPop {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+.resultBook {
+  min-width: 160px;
+  min-height: 64px;
+  margin-top: 8px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #e7f8d8, #b7e39a);
+  color: #245c18;
+  font: inherit;
+  font-size: 1.05rem;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.85),
+    0 4px 0 #7fb56a;
+}
+
+.resultBook:active {
+  transform: translateY(2px);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.85),
+    0 2px 0 #7fb56a;
+}
+
+/* 矮直向手機（320×568）：放不下店面，收起才不會把「回遊樂園」擠出畫面。
+   新貼紙列也收短，結算的「放進貼紙書」才留在同一屏。 */
 @media (max-height: 640px) and (orientation: portrait) {
   .resultHero {
     display: none;
   }
+
+  .resultOverlay {
+    padding: 8px;
+  }
+
+  .freshStickers {
+    gap: 4px;
+  }
+
+  .freshThumb {
+    width: 48px;
+    height: 48px;
+  }
+
+  .resultBook {
+    margin-top: 4px;
+  }
 }
 
-/* 橫向手機高度不夠同時放店面與結算鈕：店面收起，焦點移到主鈕時不會把畫面捲掉一半 */
+/* 矮橫向：店面與彩紙收起、貼紙縮小，主鈕和「放進貼紙書」不用再往下捲 */
 @media (orientation: landscape) and (max-height: 520px) {
   .resultHero {
     display: none;
+  }
+
+  .resultOverlay {
+    padding: 6px 8px;
+  }
+
+  .resultStation {
+    gap: 4px;
+    width: min(100%, 640px);
+  }
+
+  .resultStation > p:first-of-type {
+    display: none;
+  }
+
+  .resultPlates {
+    display: none;
+  }
+
+  .freshStickers {
+    gap: 2px;
+  }
+
+  .freshThumb {
+    width: 44px;
+    height: 44px;
+  }
+
+  .resultBook {
+    margin-top: 2px;
   }
 }
 

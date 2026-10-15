@@ -13,8 +13,11 @@ import { SUSHI_SFX } from "@/lib/games/dino-sushi/sfx";
 import type { Mode, RoundState } from "@/lib/games/dino-sushi/round";
 import { DinoSushiKitchen } from "./DinoSushiKitchen";
 import { DinoSushiResult } from "./DinoSushiResult";
+import { DinoSushiStickerBook } from "./DinoSushiStickerBook";
 import { DinoSushiTitle } from "./DinoSushiTitle";
 import { playVoices, useDinoSushiPlay } from "./useDinoSushiPlay";
+import { useDinoSushiStickers } from "./useDinoSushiStickers";
+import { DINO_SUSHI_STICKER_TOTAL } from "@/lib/games/dino-sushi/stickers";
 import styles from "./DinoSushiView.module.css";
 
 type Screen = "title" | "kitchen" | "result";
@@ -80,11 +83,17 @@ export function DinoSushiView({
 
   const play = useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, onDone });
   const { actions } = play;
+  const voiceOn = soundOn && voiceEnabled && gameVolume > 0;
+  const stickers = useDinoSushiStickers(play.round, { on: voiceOn, volume: gameVolume });
+  const [book, setBook] = useState(false);
+  const unseen = stickers.state.unlocked.filter((id) => !stickers.state.seen.includes(id));
 
   const begin = useCallback(
     (next: Mode) => {
       audio?.ensureAudio();
       playVoices(audio, SUSHI_SFX.welcome);
+      stickers.beginRound();
+      setBook(false);
       setMode(next);
       setOutcome(null);
       actions.start(next);
@@ -92,16 +101,22 @@ export function DinoSushiView({
       instance.notifyPlaying(next);
       syncHost();
     },
-    [actions, audio, instance, syncHost],
+    [actions, audio, instance, stickers, syncHost],
   );
 
   const goToTitle = useCallback(() => {
     actions.leave();
+    setBook(false);
     setOutcome(null);
     setScreen("title");
     instance.notifyReady();
     syncHost();
   }, [actions, instance, syncHost]);
+
+  const closeBook = useCallback(() => {
+    stickers.markSeen();
+    setBook(false);
+  }, [stickers]);
 
   /* controller 經 ref 轉呼叫、只在 mount 註冊一次（同消消樂 G-C1：避免 paused 連鎖重註冊把狀態打回 ready）。 */
   const controllerRef = useRef({ begin, goToTitle, mode });
@@ -130,28 +145,51 @@ export function DinoSushiView({
       /* 外框的操作提示只在廚房顯示；標題與結算沒有可操作的砧板 */
       data-play-hints={screen === "kitchen" ? undefined : "off"}
     >
-      {screen === "title" ? (
-        <DinoSushiTitle starsGot={starsGot} onStart={() => begin("order")} onFree={() => begin("free")} />
-      ) : null}
+      <div className={styles.stage} inert={book} aria-hidden={book ? true : undefined}>
+        {screen === "title" ? (
+          <DinoSushiTitle
+            starsGot={starsGot}
+            stickerCount={stickers.state.unlocked.length}
+            stickerTotal={DINO_SUSHI_STICKER_TOTAL}
+            stickerNew={unseen.length > 0}
+            onStart={() => begin("order")}
+            onFree={() => begin("free")}
+            onBook={() => setBook(true)}
+          />
+        ) : null}
 
-      {screen !== "title" && play.round ? (
-        <DinoSushiKitchen
-          play={play}
-          reducedMotion={reducedMotion}
-          inputPaused={inputPaused}
-          soundOn={soundOn}
-          gameVolume={gameVolume}
-          voiceEnabled={voiceEnabled}
-        />
-      ) : null}
+        {screen !== "title" && play.round ? (
+          <DinoSushiKitchen
+            play={play}
+            reducedMotion={reducedMotion}
+            inputPaused={inputPaused}
+            soundOn={soundOn}
+            gameVolume={gameVolume}
+            voiceEnabled={voiceEnabled}
+          />
+        ) : null}
 
-      {screen === "result" && outcome ? (
-        <DinoSushiResult
-          outcome={outcome}
-          stars={outcome.medals ? medalCount(medalFlags(outcome.medals.cleared, outcome.medals.flawless, outcome.medals.collectedAll)) : null}
+        {screen === "result" && outcome && !book ? (
+          <DinoSushiResult
+            outcome={outcome}
+            stars={outcome.medals ? medalCount(medalFlags(outcome.medals.cleared, outcome.medals.flawless, outcome.medals.collectedAll)) : null}
+            fresh={stickers.state.fresh}
+            gift={stickers.state.gift}
+            reducedMotion={reducedMotion}
+            onReplay={() => begin(outcome.mode)}
+            onTitle={goToTitle}
+            onBook={() => setBook(true)}
+          />
+        ) : null}
+      </div>
+
+      {book ? (
+        <DinoSushiStickerBook
+          unlocked={stickers.state.unlocked}
+          seen={stickers.state.seen}
           reducedMotion={reducedMotion}
-          onReplay={() => begin(outcome.mode)}
-          onTitle={goToTitle}
+          onClose={closeBook}
+          onSpeak={stickers.speak}
         />
       ) : null}
 
