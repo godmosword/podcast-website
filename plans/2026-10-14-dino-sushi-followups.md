@@ -1,6 +1,6 @@
 # SPEC：多多壽司屋後續五項（2026-10-14）
 
-> 來源：2026-10-14 美術與遊戲性審查（#217–#219 已出貨），TODOS「多多壽司店後續」。
+> 來源：2026-10-14 美術與遊戲性審查（#217–#219 已出貨），TODOS「多多壽司屋後續」。
 > 每一項各自一個 PR，可以分開排程。標「待決定」的地方要先確認才動工。
 
 | # | 項目 | 大小 | 風險級別 | 審查 | 待決定 |
@@ -179,7 +179,7 @@
 - 每個 PR 都要跑：`npm run lint`、`npm run typecheck`、`npx vitest run components/games lib/games`、`npm run build` 後跑 `e2e/games.spec.ts`。
 - 動到畫面的 PR，push 時用 `SKIP_VISUAL_GATE=1`，並在 TODOS 的「重錄 darwin 視覺基準」補記（Linux 無法重錄）。
 - 生圖一律照 `docs/AGENT-DOMAIN.md` 的成本紅線：先列張數等文字確認、只跑一輪、人工看過才上線。
-- 完成後同步 CHANGELOG 與 TODOS（「多多壽司店後續」各項打 ✅ 並附 commit）。
+- 完成後同步 CHANGELOG 與 TODOS（「多多壽司屋後續」各項打 ✅ 並附 commit）。
 
 ## 決定（2026-10-14，使用者：「照你建議開工」）
 
