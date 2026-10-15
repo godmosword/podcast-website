@@ -1,8 +1,9 @@
 /**
  * 多多壽司屋貼紙存檔。
  * 寫在 cheche:progress 的 preferences.gameKit，跟消消樂的玩法記在同一層，
- * 不放進全站 profile.stickers（家長儀表板才不會多出 24 個 id）。
- * 收滿 24 張時，全站貼紙只加一張「多多貼紙書收集完成」。
+ * 不放進全站 profile.stickers（家長儀表板才不會多出 30 個 id）。
+ * 收滿 30 張時，全站貼紙只加一張「多多貼紙書收集完成」。
+ * 只會加上、不會收回：以前用 24 張換到的那張還留著。
  */
 
 import { stickerLabel } from "@/lib/gamekit/progress/stickers";

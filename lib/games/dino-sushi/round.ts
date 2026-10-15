@@ -3,6 +3,7 @@
  * View 以 `next === prev` 判斷要不要給「輕晃」回饋。反應播放中（pending）鎖輸入。
  */
 
+import type { CustomerId } from "./customers";
 import { buildOrders, buildTray, type Order } from "./orders";
 import { favoriteFor, reactionFor, type Mood, type Reaction } from "./reactions";
 import { addTopping, changeBase, EMPTY_SUSHI, isServable, removeTopping, type Sushi } from "./sushi";
@@ -10,7 +11,7 @@ import type { BaseId, ToppingId } from "./toppings";
 
 export type Mode = "order" | "free";
 
-export type Plate = { sushi: Sushi; gold: boolean; mood: Mood };
+export type Plate = { sushi: Sushi; gold: boolean; mood: Mood; customerId?: CustomerId };
 
 export type RoundState = {
   mode: Mode;
@@ -95,13 +96,17 @@ function reactionDone(state: RoundState): RoundState {
   const isOrder = state.mode === "order";
   const gold = isOrder && state.pendingFirstTry;
   const index = isOrder ? state.index + 1 : state.index;
+  const customerId = isOrder ? state.orders[state.index]?.customerId : undefined;
   return {
     ...state,
     pending: null,
     brushReady: pending.brush,
     sushi: EMPTY_SUSHI,
     attempts: 0,
-    plates: [...state.plates, { sushi: state.sushi, gold, mood: pending.mood }],
+    plates: [
+      ...state.plates,
+      { sushi: state.sushi, gold, mood: pending.mood, ...(customerId ? { customerId } : {}) },
+    ],
     firstTries: isOrder ? [...state.firstTries, state.pendingFirstTry] : state.firstTries,
     index,
     done: isOrder && index >= state.orders.length,

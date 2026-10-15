@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { ToppingArt, BaseArt } from "@/lib/games/dino-sushi/art";
+import { customerById } from "@/lib/games/dino-sushi/customers";
 import { DUODUO_TOOTHBRUSH_SRC, duoduoStickerSrc } from "@/lib/games/dino-sushi/duoduo-sticker";
 import {
   DINO_SUSHI_STICKER_TOTAL,
@@ -16,7 +17,7 @@ import {
 import { TapButton } from "./DinoSushiPiece";
 import styles from "./DinoSushiStickerBook.module.css";
 
-const GROUPS: StickerGroup[] = ["food", "base", "mood", "surprise"];
+const GROUPS: StickerGroup[] = ["food", "base", "mood", "surprise", "customer"];
 
 export function DinoSushiStickerFace({
   sticker,
@@ -27,7 +28,13 @@ export function DinoSushiStickerFace({
 }) {
   const art = sticker.art;
   const frame =
-    art.kind === "medal" ? (art.frame === "gold" ? styles.frameGold : styles.frameSun) : "";
+    art.kind === "medal"
+      ? art.frame === "gold"
+        ? styles.frameGold
+        : styles.frameSun
+      : art.kind === "customer"
+        ? styles.face
+        : "";
   let image = null;
   if (art.kind === "topping") image = <ToppingArt id={art.id} />;
   else if (art.kind === "base") image = <BaseArt id={art.id} />;
@@ -35,6 +42,11 @@ export function DinoSushiStickerFace({
     image = (
       // eslint-disable-next-line @next/next/no-img-element -- 現有多多貼紙
       <img src={duoduoStickerSrc(art.state)} alt="" draggable={false} decoding="async" />
+    );
+  } else if (art.kind === "customer") {
+    image = (
+      // eslint-disable-next-line @next/next/no-img-element -- 現有角色定裝照，圓裁現成的 jpg
+      <img src={customerById(art.id).avatar} alt="" draggable={false} decoding="async" />
     );
   } else {
     const src = art.state === "toothbrush" ? DUODUO_TOOTHBRUSH_SRC : duoduoStickerSrc(art.state);
@@ -44,7 +56,7 @@ export function DinoSushiStickerFace({
     );
   }
   return (
-    <span className={`${styles.pic} ${frame}`}>
+    <span className={`${styles.pic} ${frame}`} data-kind={art.kind}>
       {image}
       {locked ? (
         <span className={styles.mystery} aria-hidden>
