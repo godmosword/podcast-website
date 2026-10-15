@@ -1,6 +1,8 @@
 // @vitest-environment jsdom
 import { act, cleanup, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import type { SynthVoice } from "@/lib/gamekit/runtime/audio";
+import { EVICT_POP_DELAY, SUSHI_SFX } from "@/lib/games/dino-sushi/sfx";
 import { toppingById, type ToppingId } from "@/lib/games/dino-sushi/toppings";
 import { IDLE_HINT_MS, useDinoSushiPlay } from "./useDinoSushiPlay";
 
@@ -203,5 +205,31 @@ describe("點偏了立刻亮下一步", () => {
     });
     const second = result.current.round!.orders[1]!;
     expect(result.current.hint).toEqual({ kind: "base", id: second.base });
+  });
+});
+
+describe("擠掉最舊那層的音效", () => {
+  it("料位滿了再放：先一聲輕的「咻」，「啵」晚一點才響；沒滿時不咻", () => {
+    vi.useFakeTimers();
+    (window as Window & { __dinoSushiSeed?: number }).__dinoSushiSeed = 7;
+    const audio = { ensureAudio: vi.fn(), tone: vi.fn(), voices: vi.fn() };
+    const { result } = renderHook(() =>
+      useDinoSushiPlay({ audio, reducedMotion: true, inputPaused: false, onServed: vi.fn(), onDone: vi.fn() }),
+    );
+    act(() => result.current.actions.start("free"));
+    act(() => result.current.actions.pickBase("nigiri"));
+    const tray = result.current.round!.tray;
+    for (const id of tray.slice(0, 3)) act(() => result.current.actions.add(id));
+    expect(audio.voices).not.toHaveBeenCalledWith(SUSHI_SFX.evict);
+
+    audio.voices.mockClear();
+    act(() => result.current.actions.add(tray[3]!));
+    // 合成一組送出：同時起播的話輕的「咻」會被「啵」蓋掉，所以「啵」整組晚 EVICT_POP_DELAY
+    expect(audio.voices).toHaveBeenCalledTimes(1);
+    const voices = audio.voices.mock.calls[0]![0] as SynthVoice[];
+    const evict = SUSHI_SFX.evict.length;
+    expect(voices.slice(0, evict)).toEqual(SUSHI_SFX.evict);
+    expect(voices.length).toBeGreaterThan(evict);
+    for (const v of voices.slice(evict)) expect(v.at ?? 0).toBeGreaterThanOrEqual(EVICT_POP_DELAY);
   });
 });

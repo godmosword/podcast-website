@@ -13,7 +13,7 @@ import {
   type RoundAction,
   type RoundState,
 } from "@/lib/games/dino-sushi/round";
-import { addSfx, MOOD_SFX, plateSfx, SUSHI_SFX, varied } from "@/lib/games/dino-sushi/sfx";
+import { addSfx, evictThenPop, MOOD_SFX, plateSfx, SUSHI_SFX, varied } from "@/lib/games/dino-sushi/sfx";
 import { MAX_TOPPINGS } from "@/lib/games/dino-sushi/sushi";
 import { toppingById, type BaseId, type ToppingId } from "@/lib/games/dino-sushi/toppings";
 import { DOME_AFTER_PLATES, DOME_SPEECH, readRoundSeed, roundVariety } from "@/lib/games/dino-sushi/variety";
@@ -264,7 +264,8 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
         setShake((n) => n + 1);
         return;
       }
-      sfx(varied(addSfx(next.sushi.toppings.length)));
+      const pop = varied(addSfx(next.sushi.toppings.length));
+      sfx(round.sushi.toppings.length >= MAX_TOPPINGS ? evictThenPop(pop) : pop);
       dispatch({ type: "add", id });
       if (isOffStep(round, { type: "add", id })) showHint();
       else if (currentOrder(round) && isTreat(id)) {

@@ -49,6 +49,14 @@ describe("DinoSushiKitchen.module.css 動畫", () => {
     expect(css).toContain('.kitchen[data-paused="true"] .evictFly');
   });
 
+  it("料換位置時滑過去；減少動態與 data-reduced 不滑", () => {
+    const layer = ".sushiButton > [data-sushi] > span";
+    expect(block(`${layer} {`)).toMatch(/transition:[^;]*left 200ms/);
+    const media = css.slice(css.indexOf("@media (prefers-reduced-motion: reduce)"));
+    expect(media.slice(0, media.indexOf("\n}\n"))).toMatch(new RegExp(`${layer.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*\\{\\s*transition:\\s*none`));
+    expect(css).toContain(`.kitchen[data-reduced="true"] ${layer} {\n  transition: none;`);
+  });
+
   it("料位、托盤、給多多吃、刷牙、吃飽了的觸控下限", () => {
     expect(block(".slot,\n.slotEmpty {")).toMatch(/width:\s*64px/);
     expect(block(".slot,\n.slotEmpty {")).toMatch(/height:\s*64px/);
