@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import rawCharacters from "@/data/characters.json";
 import { toppingById } from "./toppings";
-import { CUSTOMERS, customerById, customersForRound, type CustomerId } from "./customers";
+import { CUSTOMERS, customerById, type CustomerId } from "./customers";
 
 const roster = rawCharacters as Array<{ name: string; aliases?: string[]; ref: string }>;
 
@@ -22,24 +22,6 @@ describe("壽司屋客人", () => {
         expect(toppingById(id).kind).toBe("savory");
       }
     }
-  });
-
-  it("一輪五位不重複：小紅在前兩單，東東在最後一單", () => {
-    const satOut = new Set<CustomerId>();
-    for (let seed = 1; seed <= 48; seed++) {
-      const seats = customersForRound(seed);
-      expect(seats).toHaveLength(5);
-      expect(new Set(seats).size).toBe(5);
-      expect(seats[4]).toBe("dongdong");
-      expect(seats.indexOf("xiaohong")).toBeGreaterThanOrEqual(0);
-      expect(seats.indexOf("xiaohong")).toBeLessThanOrEqual(1);
-      const missing = CUSTOMERS.map((customer) => customer.id).filter((id) => !seats.includes(id));
-      expect(missing).toHaveLength(1);
-      expect(["anan", "ale", "lingling", "xiangxiang"]).toContain(missing[0]);
-      satOut.add(missing[0]!);
-      expect(customersForRound(seed)).toEqual(seats);
-    }
-    expect(satOut).toEqual(new Set(["anan", "ale", "lingling", "xiangxiang"]));
   });
 
   it("不認識的 id 會丟錯", () => {

@@ -820,7 +820,7 @@ test.describe("多多壽司屋", () => {
 
     await page.goto("/games/dino-sushi");
     await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
-    await expect.poll(spoken).toEqual([expect.stringMatching(/^我想要/)]);
+    await expect.poll(spoken).toEqual([expect.stringMatching(/^今天是.+我想要/)]);
     const firstOrder = (await spoken())[0];
     await finish();
 
@@ -835,7 +835,7 @@ test.describe("多多壽司屋", () => {
     await expect(page.getByRole("img", { name: /^第 2 單/ })).toBeVisible();
     expect((await log()).slice(mark)).toEqual([{ op: "speak", text: expect.stringMatching(/！$/) }]);
     await finish();
-    await expect.poll(async () => (await spoken()).at(-1)).toMatch(/^我想要/);
+    await expect.poll(async () => (await spoken()).at(-1)).toMatch(/我想要/);
 
     // 關掉抬頭音效：之後不念、泡泡上的「再聽一次」也收起來
     await page.getByRole("button", { name: "關閉音效" }).click();
@@ -853,7 +853,7 @@ test.describe("多多壽司屋", () => {
     await page.goto("/games/dino-sushi");
     await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
     // 正向對照：預設開著，第 1 單有念
-    await expect.poll(spoken).toEqual([expect.stringMatching(/^我想要/)]);
+    await expect.poll(spoken).toEqual([expect.stringMatching(/^今天是.+我想要/)]);
     await finish();
     await expect(page.getByRole("button", { name: "再聽一次" })).toBeVisible();
 

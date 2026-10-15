@@ -3,7 +3,9 @@
 import Image from "next/image";
 import { IconPlay, IconStar } from "@/components/games/ClayIcons";
 import { gameBySlug } from "@/data/games";
+import { customerById } from "@/lib/games/dino-sushi/customers";
 import { duoduoStickerSrc } from "@/lib/games/dino-sushi/duoduo-sticker";
+import { todayAnnouncement, type RoundVariety } from "@/lib/games/dino-sushi/variety";
 import { TapButton } from "./DinoSushiPiece";
 import styles from "./DinoSushiView.module.css";
 
@@ -14,6 +16,8 @@ type Props = {
   stickerCount: number;
   stickerTotal: number;
   stickerNew: boolean;
+  /** 這一輪會來的朋友與主題日。種子還沒好時不顯示。 */
+  today: RoundVariety | null;
   onStart: () => void;
   onFree: () => void;
   onBook: () => void;
@@ -25,6 +29,7 @@ export function DinoSushiTitle({
   stickerCount,
   stickerTotal,
   stickerNew,
+  today,
   onStart,
   onFree,
   onBook,
@@ -52,6 +57,25 @@ export function DinoSushiTitle({
           <b aria-hidden>{starsGot}</b>
           <span aria-hidden>/ 3</span>
         </p>
+        {today ? (
+          <p className={styles.today} data-theme={today.theme.id} role="img" aria-label={todayAnnouncement(today)}>
+            <span className={styles.todayTheme} aria-hidden>
+              {today.theme.name}
+            </span>
+            <span className={styles.todayFaces} aria-hidden>
+              {today.visitors.map((id) => (
+                // eslint-disable-next-line @next/next/no-img-element -- 現成定裝照圓形裁切，不另生圖
+                <img
+                  key={id}
+                  className={styles.todayFace}
+                  src={customerById(id).avatar}
+                  alt=""
+                  draggable={false}
+                />
+              ))}
+            </span>
+          </p>
+        ) : null}
         <div className={styles.titleStart}>
           <TapButton className={styles.startButton} onTap={onStart} aria-label="開始幫多多做壽司">
             <IconPlay size={46} />

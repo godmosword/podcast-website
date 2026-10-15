@@ -6,6 +6,7 @@ import { matchOrder, orderSpeechLine, orderThanksLine } from "@/lib/games/dino-s
 import { currentOrder } from "@/lib/games/dino-sushi/round";
 import { MAX_TOPPINGS } from "@/lib/games/dino-sushi/sushi";
 import { BASES, baseById, toppingById, type ToppingId } from "@/lib/games/dino-sushi/toppings";
+import { DOME_AFTER_PLATES, domeStickerId, orderLead, roundVariety } from "@/lib/games/dino-sushi/variety";
 import { DinoSushiDuoDuo } from "./DinoSushiDuoDuo";
 import { DinoSushiEvictFly, type EvictFly } from "./DinoSushiEvictFly";
 import { DinoSushiOrderBubble } from "./DinoSushiOrderBubble";
@@ -27,6 +28,8 @@ type Props = {
   gameVolume: number;
   /** 設定裡的「念出來」；關掉時泡泡不念、小喇叭收起來。 */
   voiceEnabled: boolean;
+  /** 已經拿到的貼紙。圓蓋只從這裡挑，不發新的。 */
+  ownedStickers: readonly string[];
 };
 
 /**
@@ -71,7 +74,15 @@ function useFocusAcrossPhases(choosingBase: boolean) {
 }
 
 /** 廚房：迴轉壽司店（多多＋泡泡＋疊盤）｜砧板（3 料位）＋「給多多吃」｜托盤。 */
-export function DinoSushiKitchen({ play, reducedMotion, inputPaused, soundOn, gameVolume, voiceEnabled }: Props) {
+export function DinoSushiKitchen({
+  play,
+  reducedMotion,
+  inputPaused,
+  soundOn,
+  gameVolume,
+  voiceEnabled,
+  ownedStickers,
+}: Props) {
   const {
     round,
     phase,
@@ -103,11 +114,13 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused, soundOn, ga
     target?.focus({ preventScroll: true });
   }, [rootRef, toppings]);
   const orderForSpeech = round ? currentOrder(round) : null;
+  const variety = round ? roundVariety(round.seed) : null;
+  const domeOpen = round?.mode === "order" && round.plates.length >= DOME_AFTER_PLATES;
   const thanksLine =
     orderForSpeech && caption?.eats && caption.match?.ok ? orderThanksLine(orderForSpeech) : null;
   const speech = useDinoSushiSpeech({
     orderToken: round && orderForSpeech ? `${round.mode}:${round.seed}:${round.index}` : null,
-    orderLine: orderForSpeech ? orderSpeechLine(orderForSpeech) : null,
+    orderLine: orderForSpeech ? orderSpeechLine(orderForSpeech, variety ? orderLead(round?.index ?? 0, variety) : "") : null,
     firstOrder: round?.index === 0,
     caption,
     thanksLine,
@@ -171,7 +184,7 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused, soundOn, ga
         data-mode={round.mode}
         data-brush={brushShown ? "true" : undefined}
       >
-        <ShopWall />
+        <ShopWall sky={variety?.sky} lantern={variety?.lantern} />
         <DinoSushiDuoDuo
           phase={phase}
           caption={caption}
@@ -181,7 +194,10 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused, soundOn, ga
           disabled={inputPaused}
           onBrush={actions.brush}
         />
-        <ShopBelt />
+        <ShopBelt
+          domeOpen={domeOpen}
+          stickerId={domeOpen && round ? domeStickerId(round.seed, ownedStickers) : null}
+        />
         <DinoSushiPlateStack plates={round.plates} />
         {/* 右上一欄由上往下排：自由做的「多多吃飽了」→ 點餐泡泡 → 多多的字卡，彼此不會疊在一起 */}
         <div className={styles.talk}>
@@ -330,6 +346,8 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused, soundOn, ga
 
       <DinoSushiTray
         tray={round.tray}
+        theme={variety?.theme.id}
+        themeLabel={variety?.theme.label}
         disabled={disabled || !sushi.base || choosingBase}
         waitingForBase={!sushi.base || choosingBase}
         hint={hint?.kind === "topping" ? hint.id : null}
