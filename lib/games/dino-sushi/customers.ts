@@ -2,9 +2,9 @@
  * 《多多壽司屋》來店的朋友。只點餐，不吃；壽司仍是多多吃、多多做反應。
  * 頭像用 podcast 現成定裝照（public/characters），不另生圖、不改舊圖。
  * 最愛只從熟食家常料挑。草莓、布丁、芥末不進訂單。
+ * 這一輪誰來、坐哪一單，見 variety.ts（同一個 seed）。
  */
 
-import { pickIndex, seededRng } from "@/lib/games/candy-match/rng";
 import type { ToppingId } from "./toppings";
 
 export type CustomerId = "xiaohong" | "anan" | "ale" | "lingling" | "dongdong" | "xiangxiang";
@@ -82,45 +82,8 @@ export const CUSTOMERS: readonly Customer[] = [
 
 const BY_ID = new Map(CUSTOMERS.map((customer) => [customer.id, customer]));
 
-/** 跟點餐亂數錯開，同一個 seed 的客人名單才不會跟著托盤一起變。 */
-const ASSIGN_SALT = 0x27d4eb2f;
-
 export function customerById(id: CustomerId): Customer {
   const customer = BY_ID.get(id);
   if (!customer) throw new Error(`unknown customer: ${id}`);
   return customer;
-}
-
-function shuffled<T>(items: readonly T[], rng: () => number): T[] {
-  const out = [...items];
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = pickIndex(i + 1, rng);
-    const swap = out[i]!;
-    out[i] = out[j]!;
-    out[j] = swap;
-  }
-  return out;
-}
-
-/**
- * 一輪 5 個位子，5 位不同的朋友（6 位裡有 1 位這輪不來）。
- * 東東固定最後一單（飯＋3 料）；小紅在前兩單其中一單（飯＋1 料）。
- */
-export function customersForRound(seed: number): CustomerId[] {
-  const rng = seededRng((seed ^ ASSIGN_SALT) >>> 0);
-  const seats: Array<CustomerId | undefined> = [undefined, undefined, undefined, undefined, "dongdong"];
-  seats[rng() < 0.5 ? 0 : 1] = "xiaohong";
-  const rest = shuffled(
-    CUSTOMERS.filter((customer) => customer.id !== "dongdong" && customer.id !== "xiaohong"),
-    rng,
-  );
-  let cursor = 0;
-  for (let i = 0; i < seats.length; i++) {
-    if (seats[i]) continue;
-    const next = rest[cursor];
-    if (!next) throw new Error("not enough customers");
-    seats[i] = next.id;
-    cursor += 1;
-  }
-  return seats.filter((id): id is CustomerId => id !== undefined);
 }

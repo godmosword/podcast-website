@@ -178,6 +178,54 @@
   font-weight: 700;
 }
 
+/* 今天會來誰：圓頭像不是按鈕，避免誤點。主題色給家長看，孩子認臉。 */
+.today {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  margin: 0;
+}
+
+.todayTheme {
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: #fff6d2;
+  color: #5a360d;
+  font-size: 0.95rem;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.today[data-theme="green"] .todayTheme {
+  background: #e5f6d4;
+  color: #245c18;
+}
+
+.today[data-theme="seafood"] .todayTheme {
+  background: #d9f0f8;
+  color: #1d4e6e;
+}
+
+.todayFaces {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  max-width: 100%;
+}
+
+.todayFace {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #fffdf8;
+  box-shadow: 0 0 0 2px #f1dfc0;
+  pointer-events: none;
+}
+
 .titleStart {
   display: grid;
   justify-items: center;
@@ -383,15 +431,32 @@
 
 @media (max-height: 640px) and (orientation: portrait) {
   .titleStage {
-    max-height: 24vh;
+    max-height: 16vh;
   }
 
   .titleHeading {
     font-size: 1.6rem;
   }
 
+  .titlePanel {
+    gap: 6px;
+  }
+
   .titleStart {
     --start-size: 88px;
+  }
+
+  /* 主題和頭像同一列，五顆圓頭像才不會把「自由做」和貼紙書推出 568 高的畫面。 */
+  .today {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: center;
+    margin-bottom: 2px;
+  }
+
+  .todayFace {
+    width: 28px;
+    height: 28px;
   }
 }
 
@@ -401,16 +466,44 @@
   }
 
   .titlePanel {
-    gap: 8px;
+    gap: 4px;
     padding-block: 0;
   }
 
   .titleHeading {
-    font-size: 1.6rem;
+    font-size: 1.25rem;
+    line-height: 1.1;
+  }
+
+  .titleStars {
+    padding: 2px 10px;
+    font-size: 16px;
+  }
+
+  .startCaption {
+    font-size: 0.9rem;
   }
 
   .titleStart {
     --start-size: 88px;
+    gap: 2px;
+  }
+
+  .today {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: center;
+    margin-bottom: 4px;
+  }
+
+  .todayTheme {
+    padding: 2px 10px;
+    font-size: 0.85rem;
+  }
+
+  .todayFace {
+    width: 32px;
+    height: 32px;
   }
 }
 

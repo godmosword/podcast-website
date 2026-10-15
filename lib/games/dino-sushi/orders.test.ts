@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { seededRng } from "@/lib/games/candy-match/rng";
 import { customerById } from "./customers";
+import { roundVariety } from "./variety";
 import {
   buildOrders,
   buildTray,
@@ -55,12 +56,11 @@ describe("點餐", () => {
     for (let seed = 1; seed <= 60; seed++) {
       const tray = buildTray(seed);
       const orders = buildOrders(seed, tray);
-      expect(new Set(orders.map((o) => o.customerId)).size).toBe(orders.length);
-      expect(orders[4]?.customerId).toBe("dongdong");
-      const xiaohongAt = orders.findIndex((o) => o.customerId === "xiaohong");
-      expect(xiaohongAt).toBeGreaterThanOrEqual(0);
-      expect(xiaohongAt).toBeLessThan(2);
+      const variety = roundVariety(seed);
+      expect(orders.map((o) => o.customerId)).toEqual(variety.seats);
+      expect(variety.theme.toppings.every((id) => tray.includes(id))).toBe(true);
       for (const o of orders) {
+        expect(o.toppings.some((id) => variety.theme.toppings.includes(id))).toBe(true);
         expect(new Set(o.toppings).size).toBe(o.toppings.length);
         for (const t of o.toppings) {
           expect(tray).toContain(t);
@@ -82,14 +82,14 @@ describe("點餐", () => {
     }
   });
 
-  it("托盤上有客人的最愛時，那一單會點到", () => {
+  it("兩樣以上的單，托盤上有最愛就會點到", () => {
     let hits = 0;
     let chances = 0;
     for (let seed = 1; seed <= 40; seed++) {
       const tray = buildTray(seed);
-      const pool = tray.filter((id) => toppingById(id).kind === "savory");
       for (const order of buildOrders(seed, tray)) {
-        const fav = customerById(order.customerId).favorites.filter((id) => pool.includes(id));
+        if (order.toppings.length < 2) continue;
+        const fav = customerById(order.customerId).favorites.filter((id) => tray.includes(id));
         if (fav.length === 0) continue;
         chances += 1;
         if (order.toppings.some((id) => fav.includes(id))) hits += 1;
@@ -187,6 +187,9 @@ describe("比對訂單", () => {
       "你好，我是香香。我想要鮭魚、玉子和小黃瓜軍艦。",
     );
     expect(orderSpeechLine(order)).toBe("你好，我是安安。我想要玉子和小黃瓜手捲。");
+    expect(orderSpeechLine(order, "今天是綠色日。")).toBe(
+      "今天是綠色日。你好，我是安安。我想要玉子和小黃瓜手捲。",
+    );
   });
 
   it("做對時念朋友的那一句，不把甜點或芥末說成點餐", () => {

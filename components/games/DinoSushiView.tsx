@@ -18,6 +18,7 @@ import { DinoSushiTitle } from "./DinoSushiTitle";
 import { playVoices, useDinoSushiPlay } from "./useDinoSushiPlay";
 import { useDinoSushiStickers } from "./useDinoSushiStickers";
 import { DINO_SUSHI_STICKER_TOTAL } from "@/lib/games/dino-sushi/stickers";
+import { readRoundSeed, roundVariety } from "@/lib/games/dino-sushi/variety";
 import styles from "./DinoSushiView.module.css";
 
 type Screen = "title" | "kitchen" | "result";
@@ -31,6 +32,7 @@ export type DinoSushiOutcome = {
   mode: Mode;
   plates: RoundState["plates"];
   medals: RoundMedals | null;
+  seed: number;
 };
 
 export function DinoSushiView({
@@ -70,10 +72,10 @@ export function DinoSushiView({
       if (round.mode === "order") {
         const medals = roundMedals(round.firstTries);
         instance.notifyWon(medals);
-        setOutcome({ mode: "order", plates: round.plates, medals });
+        setOutcome({ mode: "order", plates: round.plates, medals, seed: round.seed });
       } else {
         instance.notifyFinished();
-        setOutcome({ mode: "free", plates: round.plates, medals: null });
+        setOutcome({ mode: "free", plates: round.plates, medals: null, seed: round.seed });
       }
       setScreen("result");
       syncHost();
@@ -86,6 +88,10 @@ export function DinoSushiView({
   const voiceOn = soundOn && voiceEnabled && gameVolume > 0;
   const stickers = useDinoSushiStickers(play.round, { on: voiceOn, volume: gameVolume });
   const [book, setBook] = useState(false);
+  const [queuedSeed, setQueuedSeed] = useState<number | null>(null);
+  useEffect(() => {
+    setQueuedSeed((current) => current ?? readRoundSeed());
+  }, []);
   const unseen = stickers.state.unlocked.filter((id) => !stickers.state.seen.includes(id));
 
   const begin = useCallback(
@@ -96,12 +102,14 @@ export function DinoSushiView({
       setBook(false);
       setMode(next);
       setOutcome(null);
-      actions.start(next);
+      const seed = queuedSeed ?? readRoundSeed();
+      actions.start(next, seed);
+      setQueuedSeed(readRoundSeed());
       setScreen("kitchen");
       instance.notifyPlaying(next);
       syncHost();
     },
-    [actions, audio, instance, stickers, syncHost],
+    [actions, audio, instance, queuedSeed, stickers, syncHost],
   );
 
   const goToTitle = useCallback(() => {
@@ -152,6 +160,7 @@ export function DinoSushiView({
             stickerCount={stickers.state.unlocked.length}
             stickerTotal={DINO_SUSHI_STICKER_TOTAL}
             stickerNew={unseen.length > 0}
+            today={queuedSeed === null ? null : roundVariety(queuedSeed)}
             onStart={() => begin("order")}
             onFree={() => begin("free")}
             onBook={() => setBook(true)}
@@ -166,6 +175,7 @@ export function DinoSushiView({
             soundOn={soundOn}
             gameVolume={gameVolume}
             voiceEnabled={voiceEnabled}
+            ownedStickers={stickers.state.unlocked}
           />
         ) : null}
 

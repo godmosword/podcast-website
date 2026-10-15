@@ -7,6 +7,7 @@ import { PlateArt } from "@/lib/games/dino-sushi/art";
 import { DuoDuoSticker } from "@/lib/games/dino-sushi/duoduo-sticker";
 import type { RoundMedals } from "@/lib/games/dino-sushi/medals";
 import { stickerById } from "@/lib/games/dino-sushi/stickers";
+import { roundVariety } from "@/lib/games/dino-sushi/variety";
 import { DinoSushiStickerFace } from "./DinoSushiStickerBook";
 import { TapButton } from "./DinoSushiPiece";
 import { ShopBelt, ShopWall } from "./DinoSushiShop";
@@ -118,11 +119,12 @@ export function DinoSushiResult({
       </>
     );
   const bookLabel = fresh.length > 0 ? "放進貼紙書" : "貼紙書";
+  const mood = roundVariety(outcome.seed);
   return (
     <div className={styles.resultOverlay} data-testid="dino-sushi-result">
       {/* 店裡吃飽飽的多多（裝飾）：同一間迴轉壽司店，結算不像跳到另一個畫面 */}
       <div className={styles.resultHero} data-reduced={reducedMotion ? "true" : undefined} aria-hidden>
-        <ShopWall />
+        <ShopWall sky={mood.sky} lantern={mood.lantern} />
         <span className={styles.resultDuo}>
           <DuoDuoSticker mouth="closed" face="love" />
         </span>

@@ -467,6 +467,8 @@
  */
 @container duo-stage (max-height: 190px) {
   .bubble {
+    box-sizing: border-box;
+    min-height: 64px;
     padding-right: 30px;
   }
 
@@ -1181,6 +1183,20 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
+  border-radius: 20px;
+}
+
+/* 主題日只染托盤底，食材圖本身不套色相，孩子才認得出玉米和蝦。 */
+.tray[data-theme="yellow"] {
+  background: rgba(255, 214, 102, 0.55);
+}
+
+.tray[data-theme="green"] {
+  background: rgba(168, 214, 140, 0.55);
+}
+
+.tray[data-theme="seafood"] {
+  background: rgba(140, 196, 220, 0.5);
 }
 
 /* 中明度底：白色的飯、蟹肉棒才不會融進底色；碟心一圈淡影讓料「放在」碟上 */

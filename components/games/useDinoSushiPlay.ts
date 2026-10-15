@@ -16,6 +16,7 @@ import {
 import { addSfx, MOOD_SFX, plateSfx, SUSHI_SFX, varied } from "@/lib/games/dino-sushi/sfx";
 import { MAX_TOPPINGS } from "@/lib/games/dino-sushi/sushi";
 import { toppingById, type BaseId, type ToppingId } from "@/lib/games/dino-sushi/toppings";
+import { DOME_AFTER_PLATES, DOME_SPEECH, readRoundSeed, roundVariety } from "@/lib/games/dino-sushi/variety";
 
 /** 送出後的動畫段：盤子滑過去 → 張嘴 → 咀嚼 → 表情＋字卡。 */
 export type ServePhase = "idle" | "slide" | "open" | "chew" | "react";
@@ -66,8 +67,7 @@ export function playVoices(audio: GameAudioBus | undefined, voices: readonly Syn
 }
 
 function nextSeed(): number {
-  const fixed = typeof window !== "undefined" ? (window as Window & { __dinoSushiSeed?: number }).__dinoSushiSeed : undefined;
-  return typeof fixed === "number" && Number.isFinite(fixed) ? fixed : Math.floor(Math.random() * 0x7fffffff);
+  return readRoundSeed();
 }
 
 /**
@@ -215,13 +215,13 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
   }, [armIdle]);
 
   const start = useCallback(
-    (mode: Mode) => {
+    (mode: Mode, seed?: number) => {
       clearTimers();
       setPhase("idle");
       setCaption(null);
       setChoosingBase(false);
       setBrushing(false);
-      dispatch({ type: "init", mode, seed: nextSeed() });
+      dispatch({ type: "init", mode, seed: seed ?? nextSeed() });
       touch();
     },
     [clearTimers, touch],
@@ -382,7 +382,14 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
     if (order && (isNewRound || before.index !== round.index)) {
       // 第一單跟「歡迎光臨」同時出現，不疊兩個聲音
       if (!isNewRound) sfx(SUSHI_SFX.order);
-      setMessage(orderAnnouncement(order));
+      const themeLead = round.index === 0 ? `${roundVariety(round.seed).theme.label}。` : "";
+      const domeLead =
+        round.mode === "order" &&
+        round.plates.length >= DOME_AFTER_PLATES &&
+        (before?.plates.length ?? 0) < DOME_AFTER_PLATES
+          ? DOME_SPEECH
+          : "";
+      setMessage(`${domeLead}${themeLead}${orderAnnouncement(order)}`);
       // 閒置提示從新訂單出現才起算：孩子要先看泡泡、聽完訂單
       setIdle(false);
       armIdle();

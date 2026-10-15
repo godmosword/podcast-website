@@ -62,7 +62,9 @@
 - [ ] **重錄 darwin 視覺基準（貼紙書）**：標題多了貼紙書入口（計數現在是 n/30，也會顯示「新」），結算多了新貼紙列（含客人頭像）。雲端無法產 `-chromium-darwin`。需在 Mac 重錄並目檢：`dino-sushi-title-390-light`、`dino-sushi-title-1280-night`、`dino-sushi-result-390-light`。廚房三張見下面客人那列。觸控尺寸那列的重錄仍見上一項。
 - ✅ **客人來店點餐（Phase 3）**：小紅、安安、阿樂、鈴鈴、東東、香香用現有定裝照當圓頭像，只點餐、不吃。多多仍吃、仍做表情。訂單仍是熟食家常料，不含草莓、布丁、芥末，沒有新料。每輪 5 位不重複（6 位裡輪空 1 位）；小紅在前兩單、東東在最後一單。招呼與做好時的話跟著音效與「念出來」。見本 commit。
 - ✅ **貼紙書加上 6 位客人（第 25–30 張）**：小紅、安安、阿樂、鈴鈴、東東、香香。這位客人的訂單第一次做對（多多吃下去）就拿到；圖用現有定裝照。前 24 張的規則與 id 不變，舊存檔仍有效。一輪沒拿到新的，仍先送原本 24 張裡缺的，那些都有了才送客人。全站「多多貼紙書收集完成」改為收滿 30 張才加；已經拿到的不會收回。最愛料的星星不做成貼紙。見本 commit。
-- [ ] **重錄 darwin 視覺基準（客人＋貼紙書 30 張）**：雲端無法產 `-chromium-darwin`。需在 Mac 重錄並目檢：廚房三張（泡泡圓頭像）`dino-sushi-kitchen-390x844-light`、`dino-sushi-kitchen-844x390-light`、`dino-sushi-kitchen-1280x800-night`；標題兩張（計數改 n/30）`dino-sushi-title-390-light`、`dino-sushi-title-1280-night`；結算（新貼紙列多了客人頭像）`dino-sushi-result-390-light`。若觸控尺寸那列還沒重錄，同一批一起重錄即可。
+- [ ] **重錄 darwin 視覺基準（客人＋貼紙書 30 張）**：雲端無法產 `-chromium-darwin`。需在 Mac 重錄並目檢：廚房三張（泡泡圓頭像）`dino-sushi-kitchen-390x844-light`、`dino-sushi-kitchen-844x390-light`、`dino-sushi-kitchen-1280x800-night`；標題兩張（計數改 n/30）`dino-sushi-title-390-light`、`dino-sushi-title-1280-night`；結算（新貼紙列多了客人頭像）`dino-sushi-result-390-light`。若觸控尺寸那列還沒重錄，同一批一起重錄即可。若接著做每輪小變化，下面那列會再改這 6 張，重錄一次即可。
+- ✅ **每輪小變化（Phase 4）**：同一個 seed 決定今天 3–5 位客人（輪流坐滿 5 單；小紅來就坐前兩單，東東來就坐最後一單）、黃色日／綠色日／海鮮日（托盤先放該主題的熟食，訂單也帶一種，托盤底換色）、晴天／傍晚／下雪（圓窗濾鏡＋牆面罩）和燈籠色相。送完第 3 盤，迴轉帶圓蓋掀開，裡面是已經拿到的貼紙（還沒有就畫一顆星），並念「哇，蓋子打開了！」。標題顯示今天的主題和會來的圓頭像。難度不變：仍是 5 單、料數 1、1、2、2、3。沒有第 6 單，訂單不含草莓、布丁、芥末，沒有新料。貼紙規則與 `dinoSushiStickers` 存檔不變。沒有新圖。`55978619`
+- [ ] **重錄 darwin 視覺基準（每輪小變化）**：雲端無法產 `-chromium-darwin`。seed 7 的標題多了今天會來的人與主題、廚房的天色／燈籠／托盤底色與點餐可能不同、結算店面天色也不同。需在 Mac 重錄並目檢：`dino-sushi-title-390-light`、`dino-sushi-title-1280-night`、`dino-sushi-kitchen-390x844-light`、`dino-sushi-kitchen-844x390-light`、`dino-sushi-kitchen-1280x800-night`、`dino-sushi-result-390-light`。上面觸控、貼紙書、客人那幾列若還沒重錄，這 6 張一次重錄即可。
 
 ### 遊樂園美術／可玩性審（2026-09-19）待做
 
