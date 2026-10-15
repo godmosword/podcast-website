@@ -7,6 +7,8 @@
  */
 .kitchen {
   --duo-h: clamp(150px, 30svh, 230px);
+  /* 料位（小瓷碟）上限：直向與桌面 64px；矮螢幕在下方媒體查詢收回 48px */
+  --slot: 64px;
   --wood-edge: #d6b07a;
   --ink-warm: #4a3722;
   flex: 1 1 auto;
@@ -723,8 +725,9 @@
 
 .boardLayer {
   display: grid;
-  /* 左：備料盤＋料位；右：給多多吃。兩邊重量接近，鈕不要被拉成空的黃塊 */
-  grid-template-columns: minmax(0, 1.4fr) minmax(108px, 0.86fr);
+  /* 左：備料盤＋料位；右：給多多吃。兩邊重量接近，鈕不要被拉成空的黃塊。
+     左欄至少放得下三個料位＋兩個 8px 間距，但要留 108px＋10px 給「給多多吃」 */
+  grid-template-columns: minmax(min(calc(3 * var(--slot) + 16px), 100% - 118px), 1.4fr) minmax(108px, 0.86fr);
   align-items: center;
   gap: 10px;
   min-width: 0;
@@ -845,19 +848,23 @@
 
 .slots {
   display: flex;
+  justify-content: center;
   /* 兒童觸控：相鄰可點至少 8px（STYLE-BIBLE §3） */
   gap: 8px;
+  width: 100%;
 }
 
-/* 料位＝小瓷碟：白釉、藍色細邊、碟底陰影 */
+/* 料位＝小瓷碟：白釉、藍色細邊、碟底陰影。最大 --slot，窄螢幕跟著欄寬縮，但不小於兒童觸控紅線 48px */
 .slot,
 .slotEmpty {
   display: grid;
   place-items: center;
   box-sizing: border-box;
-  width: 48px;
-  height: 48px;
-  padding: 5px;
+  flex: none;
+  width: clamp(48px, calc((100% - 16px) / 3), var(--slot));
+  height: auto;
+  aspect-ratio: 1;
+  padding: calc(var(--slot) * 0.1);
   border-radius: 50%;
 }
 
@@ -1071,21 +1078,16 @@
   position: relative;
   width: 100%;
   aspect-ratio: 858 / 480;
-  overflow: hidden;
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
 }
 
-/* 料圖絕對定位，才不會被高的圖（小黃瓜、布丁）把整列托盤撐高 */
+/* 料圖絕對定位，才不會被高的圖（小黃瓜、布丁）把整列托盤撐高。
+   圖撐滿這一格（ToppingArt 行內寫了 100%）、置中：蝦、蟹肉棒這種高的料頂端不會被切平 */
 .trayArt > img {
   position: absolute;
-  left: 50%;
-  top: 42%;
-  width: 62%;
-  height: 68%;
-  transform: translate(-50%, -50%);
-  object-fit: contain;
+  inset: 0;
 }
 
 .trayLabel {
@@ -1177,6 +1179,13 @@
 .fullButton:focus-visible {
   outline: 3px solid var(--focus-ring, #34302b);
   outline-offset: 3px;
+}
+
+/* 矮直向（iPhone SE 667 高、Safari 扣掉工具列的 390×664）：料位收回 48px，放大的那一截會把廚房推出一屏 */
+@media (orientation: portrait) and (max-height: 700px) {
+  .kitchen {
+    --slot: 48px;
+  }
 }
 
 /* 矮直向手機（320×568）：多多區與托盤再收一點 */
@@ -1280,6 +1289,7 @@
   .kitchen {
     --duo-min: 0px;
     --tray-art: 48px;
+    --slot: 48px;
   }
 
   /* 托盤圖是寬的盤子（858:480），用圖高定上限，寬跟著算 */
@@ -1361,12 +1371,6 @@
     --hand: 40px;
   }
 
-  .slot,
-  .slotEmpty {
-    width: 60px;
-    height: 60px;
-  }
-
   .caption {
     font-size: 1.15rem;
   }
@@ -1383,7 +1387,7 @@
   }
 }
 
-/* 寬 ≥900 的橫向手機（如 932×430）同時中上面的桌面區塊：舞台下限、托盤鈕高度、料位要收回矮橫向的值才放得進一屏 */
+/* 寬 ≥900 的橫向手機（如 932×430）同時中上面的桌面區塊：舞台下限、托盤鈕高度要收回矮橫向的值才放得進一屏（料位桌面區塊不設，沿用矮橫向的 48px） */
 @media (min-width: 900px) and (orientation: landscape) and (max-height: 520px) {
   .kitchen {
     --duo-min: 0px;
@@ -1392,12 +1396,6 @@
 
   .trayButton {
     min-height: 56px;
-  }
-
-  .slot,
-  .slotEmpty {
-    width: 48px;
-    height: 48px;
   }
 }
 

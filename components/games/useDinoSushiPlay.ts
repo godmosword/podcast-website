@@ -23,7 +23,7 @@ export type ServePhase = "idle" | "slide" | "open" | "chew" | "react";
 export type HintTarget =
   | { kind: "base"; id: BaseId }
   | { kind: "topping"; id: ToppingId }
-  /** 料位滿了還缺料：先拿掉這一格（不在單上或重複的那層）。 */
+  /** 料位滿了還缺料、最舊那層又是單上要的：先拿掉這一格（不在單上或重複的那層），免得新料把要的擠掉。 */
   | { kind: "remove"; slot: number }
   | { kind: "serve" };
 
@@ -73,7 +73,8 @@ function nextSeed(): number {
 /**
  * 這一點是不是偏離了訂單的下一步。
  * 偏了也不算錯：料還是放得上去，只是立刻亮出正確的下一格，不另出「錯了」字卡。
- * 訂單裡還沒放的另一樣料仍算往前。芥末、甜點是彩蛋（多放也不算錯），放了不算偏。
+ * 訂單裡還沒放的另一樣料仍算往前。芥末、甜點是彩蛋（多放也不算錯），放了不算偏；
+ * 但料位滿了會擠掉最舊那層，擠掉的是單上要的（不管放的是什麼）就算退一步。
  */
 export function isOffStep(
   round: RoundState,
@@ -82,6 +83,7 @@ export function isOffStep(
   const order = currentOrder(round);
   if (!order || round.pending || round.done) return false;
   if (action.type === "pick-base") return action.base !== order.base;
+  if (evictsWanted(round.sushi.toppings, order.toppings)) return true;
   if (isTreat(action.id)) return false;
   if (round.sushi.base !== order.base) return true;
   const placed = round.sushi.toppings;
@@ -93,7 +95,17 @@ function isTreat(id: ToppingId): boolean {
   return toppingById(id).kind !== "savory";
 }
 
-/** 點餐模式下一個該點的東西：飯型 → 缺的料（料位滿了先拿掉多的那層）→ 送出。 */
+/** 料位滿了再放會擠掉最舊那層：那層是單上要的、而且後面沒有重複的，擠掉就變成缺料。 */
+function evictsWanted(placed: readonly ToppingId[], wanted: readonly ToppingId[]): boolean {
+  if (placed.length < MAX_TOPPINGS) return false;
+  const oldest = placed[0]!;
+  return wanted.includes(oldest) && placed.indexOf(oldest, 1) === -1;
+}
+
+/**
+ * 點餐模式下一個該點的東西：飯型 → 缺的料 → 送出。
+ * 料位滿了還缺料：最舊那層本來就是多的，直接點缺的料就會把它擠掉；不然先拿掉多的那層。
+ */
 export function hintTarget(round: RoundState): HintTarget | null {
   const order = currentOrder(round);
   if (!order || round.pending) return null;
@@ -101,7 +113,7 @@ export function hintTarget(round: RoundState): HintTarget | null {
   const placed = round.sushi.toppings;
   const missing = order.toppings.find((t) => !placed.includes(t));
   if (!missing) return { kind: "serve" };
-  if (placed.length < MAX_TOPPINGS) return { kind: "topping", id: missing };
+  if (!evictsWanted(placed, order.toppings)) return { kind: "topping", id: missing };
   const extra = placed.findIndex((t, i) => !order.toppings.includes(t) || placed.indexOf(t) !== i);
   return { kind: "remove", slot: Math.max(0, extra) };
 }
@@ -247,13 +259,14 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
     (id: ToppingId) => {
       if (locked || !round) return;
       const next = roundReducer(round, { type: "add", id });
-      // 第 4 料：料位輕晃，不出錯音
-      if (next === round) setShake((n) => n + 1);
-      else sfx(varied(addSfx(next.sushi.toppings.length)));
+      // 放不上去（還沒選飯）：料位輕晃，不出錯音。料位滿了不算：會擠掉最舊那層
+      if (next === round) {
+        setShake((n) => n + 1);
+        return;
+      }
+      sfx(varied(addSfx(next.sushi.toppings.length)));
       dispatch({ type: "add", id });
-      // 料位滿了放不上去：孩子卡住了，不管點的是什麼都亮下一步（通常是拿掉多的那層），不能把亮著的提示收掉
-      if (next === round && currentOrder(round)) showHint();
-      else if (isOffStep(round, { type: "add", id })) showHint();
+      if (isOffStep(round, { type: "add", id })) showHint();
       else if (currentOrder(round) && isTreat(id)) {
         // 彩蛋：孩子在玩，閒置重新起算；點偏留下的光暈照留（該補的還沒補）
         setIdle(false);

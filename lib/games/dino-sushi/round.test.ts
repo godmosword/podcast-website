@@ -74,16 +74,21 @@ describe("點餐一輪", () => {
     }
   });
 
-  it("還沒選飯不能送出；第 4 料不改 state", () => {
+  it("還沒選飯不能送出也不能加料；第 4 料擠掉最舊那層", () => {
     const start = createRound("order", 2);
     expect(roundReducer(start, { type: "serve" })).toBe(start);
+    expect(roundReducer(start, { type: "add", id: start.tray[0]! })).toBe(start);
     const full = run(start, [
       { type: "pick-base", base: "nigiri" },
       { type: "add", id: start.tray[0]! },
       { type: "add", id: start.tray[1]! },
       { type: "add", id: start.tray[2]! },
     ]);
-    expect(roundReducer(full, { type: "add", id: start.tray[3]! })).toBe(full);
+    expect(roundReducer(full, { type: "add", id: start.tray[3]! }).sushi.toppings).toEqual([
+      start.tray[1],
+      start.tray[2],
+      start.tray[3],
+    ]);
   });
 
   it("托盤以外的料不能加", () => {

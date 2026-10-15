@@ -256,6 +256,17 @@ test.describe("多多壽司屋", () => {
     await ctx.close();
   });
 
+  /** 平行跑滿載時，點完按鈕立刻量可能還在載圖、還沒排好：等廚房裡的圖都載完、字型就緒、再過兩個畫格才量。 */
+  async function settled(page: import("@playwright/test").Page) {
+    await page.getByTestId("dino-sushi").evaluate(async (root) => {
+      await Promise.all(
+        [...root.querySelectorAll("img")].map((img) => (img.complete ? null : img.decode().catch(() => null))),
+      );
+      await document.fonts.ready;
+      await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));
+    });
+  }
+
   /** 美術審 H2：選飯（三張皿）和加料（砧板＋給多多吃）同高，店面舞台不跟著伸縮；矮畫面一屏放下。 */
   for (const vp of [
     { width: 390, height: 844 },
@@ -269,7 +280,10 @@ test.describe("多多壽司屋", () => {
       await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
       const stage = page.getByRole("region", { name: "多多" });
       const game = page.getByTestId("dino-sushi");
-      const measure = async () => ({ stage: (await stage.boundingBox())!, game: (await game.boundingBox())! });
+      const measure = async () => {
+        await settled(page);
+        return { stage: (await stage.boundingBox())!, game: (await game.boundingBox())! };
+      };
       const choosing = await measure();
       await page.getByRole("button", { name: "選握壽司" }).click();
       await expect(page.getByRole("button", { name: "給多多吃" })).toBeVisible();
@@ -503,6 +517,100 @@ test.describe("多多壽司屋", () => {
     }
     for (let i = 1; i < boxes.length; i++) {
       expect(boxes[i]!.x - (boxes[i - 1]!.x + boxes[i - 1]!.width)).toBeGreaterThanOrEqual(8);
+    }
+  });
+
+  /** 料位直向與桌面 64px（窄的直向跟著欄寬縮、不小於 48px）；矮直向、矮橫向收回 48px 才放得進一屏。 */
+  for (const { vp, size } of [
+    { vp: { width: 390, height: 844 }, size: 64 },
+    { vp: { width: 360, height: 740 }, size: 54 },
+    { vp: { width: 1280, height: 800 }, size: 64 },
+    { vp: { width: 375, height: 667 }, size: 48 },
+    { vp: { width: 844, height: 390 }, size: 48 },
+  ]) {
+    test(`${vp.width}×${vp.height}：料位 ${size === 54 ? "≥54" : size}px，跟「給多多吃」不重疊、一屏放得下`, async ({ page }) => {
+      await page.setViewportSize(vp);
+      await page.goto("/games/dino-sushi");
+      await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+      await page.getByRole("button", { name: "選軍艦" }).click();
+      const tray = page.getByRole("group", { name: "壽司料" }).getByRole("button");
+      for (let i = 0; i < 3; i++) await tray.nth(i).click();
+      await settled(page);
+      const slots = await Promise.all((await page.getByRole("button", { name: /^拿掉/ }).all()).map(async (s) => (await s.boundingBox())!));
+      expect(slots).toHaveLength(3);
+      for (const box of slots) {
+        if (size === 54) expect(box.width).toBeGreaterThanOrEqual(54);
+        else expect(box.width).toBeCloseTo(size, 0);
+        expect(Math.abs(box.height - box.width)).toBeLessThanOrEqual(1);
+      }
+      const serve = (await page.getByRole("button", { name: "給多多吃" }).boundingBox())!;
+      const last = slots[2]!;
+      const apart = serve.x >= last.x + last.width + 8 || serve.y >= last.y + last.height + 8;
+      expect(apart, "料位和「給多多吃」相隔至少 8px").toBe(true);
+      const bottom = await page.getByTestId("dino-sushi").evaluate((el) => el.getBoundingClientRect().bottom);
+      expect(bottom).toBeLessThanOrEqual(vp.height);
+    });
+  }
+
+  test("料位滿了再點料：擠掉最舊那層，新的放最後，不會卡住", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/games/dino-sushi");
+    await page.getByRole("button", { name: "自由做" }).click();
+    await page.getByRole("button", { name: "選握壽司" }).click();
+    const tray = page.getByRole("group", { name: "壽司料" }).getByRole("button");
+    const names = (await tray.evaluateAll((bs) => bs.map((b) => b.getAttribute("aria-label")!))).map((n) => n.slice(1));
+    for (let i = 0; i < 4; i++) await tray.nth(i).click();
+    await expect(page.getByRole("button", { name: /^拿掉/ })).toHaveCount(3);
+    const slots = await page.getByRole("button", { name: /^拿掉/ }).evaluateAll((bs) => bs.map((b) => b.getAttribute("aria-label")));
+    expect(slots).toEqual(names.slice(1, 4).map((n) => `拿掉${n}`));
+  });
+
+  /** 手捲三樣料時中間那樣抬高到兩側上方；最高的布丁也不能冒出砧板、壓到上面的店面。 */
+  for (const vp of [{ width: 390, height: 844 }, { width: 844, height: 390 }]) {
+    test(`${vp.width}×${vp.height}：手捲三樣料，中間那樣看得到、不冒出砧板`, async ({ page }) => {
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await page.setViewportSize(vp);
+      await page.goto("/games/dino-sushi");
+      await page.getByRole("button", { name: "自由做" }).click();
+      await page.getByRole("button", { name: "選手捲" }).click();
+      for (const name of ["加布丁", "加蝦", "加蟹肉棒"]) await page.getByRole("button", { name }).click();
+      await settled(page);
+      const m = await page.getByRole("region", { name: "砧板" }).evaluate((board) => {
+        const layers = [...board.querySelectorAll("[data-sushi] > span img")].map((img) => ({
+          src: img.getAttribute("src")!,
+          r: img.getBoundingClientRect(),
+        }));
+        const pudding = layers.find((l) => l.src.endsWith("pudding.webp"))!.r;
+        const others = layers.filter((l) => !l.src.endsWith("pudding.webp")).map((l) => l.r);
+        return {
+          boardTop: board.getBoundingClientRect().top,
+          top: Math.min(...layers.map((l) => l.r.top)),
+          // 布丁的上緣要比兩側的料都高，才看得到
+          puddingAbove: others.every((r) => pudding.top < r.top - 4),
+        };
+      });
+      expect(m.top).toBeGreaterThanOrEqual(m.boardTop - 0.5);
+      expect(m.puddingAbove).toBe(true);
+    });
+  }
+
+  test("托盤的料圖整張在格子裡，高的料（蝦、蟹肉棒）頂端不被切平", async ({ page }) => {
+    for (const vp of [{ width: 390, height: 844 }, { width: 844, height: 390 }, { width: 1280, height: 800 }]) {
+      await page.setViewportSize(vp);
+      await page.goto("/games/dino-sushi");
+      await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+      await settled(page);
+      const out = await page.getByRole("group", { name: "壽司料" }).evaluate((tray) =>
+        [...tray.querySelectorAll("button")].flatMap((b) => {
+          const art = b.querySelector("img")!;
+          const cell = art.parentElement!.getBoundingClientRect();
+          const r = art.getBoundingClientRect();
+          const clipped = getComputedStyle(art.parentElement!).overflow !== "visible";
+          const inside = r.top >= cell.top - 1 && r.bottom <= cell.bottom + 1 && r.left >= cell.left - 1 && r.right <= cell.right + 1;
+          return inside && !clipped && r.height > 0 ? [] : [b.getAttribute("aria-label")];
+        }),
+      );
+      expect(out, `${vp.width}×${vp.height}`).toEqual([]);
     }
   });
 

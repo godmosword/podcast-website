@@ -39,14 +39,21 @@ describe("組壽司", () => {
     expect(isServable(rice)).toBe(true);
   });
 
-  it("最多 3 層；第 4 料回傳同一物件（View 只讓料位輕晃）", () => {
+  it("最多 3 層；第 4 料擠掉最舊那層，飯不變", () => {
     let s = changeBase(EMPTY_SUSHI, "gunkan");
     s = addTopping(s, "tamago");
     s = addTopping(s, "shrimp");
     s = addTopping(s, "tamago");
     expect(s.toppings).toEqual(["tamago", "shrimp", "tamago"]);
     expect(MAX_TOPPINGS).toBe(3);
-    expect(addTopping(s, "corn")).toBe(s);
+    const next = addTopping(s, "corn");
+    expect(next.toppings).toEqual(["shrimp", "tamago", "corn"]);
+    expect(next.base).toBe("gunkan");
+    expect(s.toppings).toEqual(["tamago", "shrimp", "tamago"]);
+  });
+
+  it("還沒選飯加料回傳同一物件（View 只讓料位輕晃）", () => {
+    expect(addTopping(EMPTY_SUSHI, "corn")).toBe(EMPTY_SUSHI);
   });
 
   it("點料位拿掉那一層，其餘順序不變；越界不動", () => {

@@ -19,7 +19,7 @@ describe("點餐提示指向下一步", () => {
     expect(hintTarget(done)).toEqual({ kind: "serve" });
   });
 
-  it("料位塞滿錯的料：改指要拿掉的那一格，不會卡住", () => {
+  it("料位塞滿錯的料：直接指缺的料，點下去會擠掉最舊那層", () => {
     const start = createRound("order", 7);
     const order = start.orders[0]!;
     const full = run(start, [
@@ -28,13 +28,16 @@ describe("點餐提示指向下一步", () => {
       { type: "add", id: "wasabi" },
       { type: "add", id: "wasabi" },
     ]);
-    expect(hintTarget(full)).toEqual({ kind: "remove", slot: 0 });
+    expect(hintTarget(full)).toEqual({ kind: "topping", id: order.toppings[0] });
+    const swapped = roundReducer(full, { type: "add", id: order.toppings[0]! });
+    expect(swapped.sushi.toppings).toEqual(["wasabi", "wasabi", order.toppings[0]]);
+    expect(isOffStep(full, { type: "add", id: order.toppings[0]! })).toBe(false);
   });
 
-  it("重複的料也算多的：拿掉第二個重複", () => {
+  it("重複的料：最舊那層後面還有一樣的，擠掉也不缺，直接指缺的料", () => {
     const start = createRound("order", 7);
-    const order = start.orders[2]!;
     const s0 = { ...start, index: 2 };
+    const order = start.orders[2]!;
     const wanted = order.toppings[0]!;
     const full = run(s0, [
       { type: "pick-base", base: order.base },
@@ -42,7 +45,27 @@ describe("點餐提示指向下一步", () => {
       { type: "add", id: wanted },
       { type: "add", id: wanted },
     ]);
+    expect(hintTarget(full)).toEqual({ kind: "topping", id: order.toppings[1] });
+  });
+
+  it("料位滿了、最舊那層是單上要的：先指要拿掉的那一格，點別的料算偏", () => {
+    const start = createRound("order", 7);
+    const s0 = { ...start, index: 2 };
+    const order = start.orders[2]!;
+    const [first, second] = order.toppings;
+    const sweet = start.tray.find((id) => toppingById(id).kind === "sweet")!;
+    const full = run(s0, [
+      { type: "pick-base", base: order.base },
+      { type: "add", id: first! },
+      { type: "add", id: "wasabi" },
+      { type: "add", id: "wasabi" },
+    ]);
     expect(hintTarget(full)).toEqual({ kind: "remove", slot: 1 });
+    // 不管放的是缺的料還是彩蛋，都會把單上要的那層擠掉
+    expect(isOffStep(full, { type: "add", id: second! })).toBe(true);
+    expect(isOffStep(full, { type: "add", id: sweet })).toBe(true);
+    const removed = roundReducer(full, { type: "remove", slot: 1 });
+    expect(hintTarget(removed)).toEqual({ kind: "topping", id: second });
   });
 
   it("反應播放中與自由做不給提示", () => {
