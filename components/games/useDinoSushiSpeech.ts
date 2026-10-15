@@ -12,6 +12,11 @@ type Options = {
   firstOrder: boolean;
   /** 多多的字卡；同一個物件不重複念。 */
   caption: Reaction | null;
+  /**
+   * 這單做對時，接在多多字卡後面一起念的朋友台詞。
+   * 跟字卡合成一句：共用朗讀只留一句排隊，分開念會把字卡蓋掉。
+   */
+  thanksLine: string | null;
   inputPaused: boolean;
   /** 抬頭的「音效」開關；朗讀跟它同一個開關。 */
   soundOn: boolean;
@@ -22,7 +27,8 @@ type Options = {
 };
 
 /**
- * 新訂單、多多的字卡出現時念出來。字卡念完才接著念下一單，不會被換單切掉。
+ * 新訂單、多多的字卡出現時念出來。做對時朋友的話接在字卡後面，合成一句。
+ * 字卡念完才接著念下一單，不會被換單切掉。
  * 音效或音量改了只影響之後的句子，不會重念。暫停、關音效、關「念出來」、卸載都會取消。
  */
 export function useDinoSushiSpeech({
@@ -30,6 +36,7 @@ export function useDinoSushiSpeech({
   orderLine,
   firstOrder,
   caption,
+  thanksLine,
   inputPaused,
   soundOn,
   volume,
@@ -58,8 +65,9 @@ export function useDinoSushiSpeech({
   }, [firstOrder, orderLine, orderToken, say]);
 
   useEffect(() => {
-    if (caption) say(caption.line, false);
-  }, [caption, say]);
+    if (!caption) return;
+    say(thanksLine ? `${caption.line}${thanksLine}` : caption.line, false);
+  }, [caption, say, thanksLine]);
 
   /** 點泡泡再聽一次：插隊；同一句正在念就不從頭念。 */
   const replay = useCallback(() => {

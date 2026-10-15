@@ -2,10 +2,11 @@
 
 import Icon from "@/components/ui/Icon";
 import { BaseArt, ToppingArt } from "@/lib/games/dino-sushi/art";
-import { TapButton } from "./DinoSushiPiece";
+import { customerById } from "@/lib/games/dino-sushi/customers";
 import { orderAnnouncement, orderChecks, type Order, type OrderMatch } from "@/lib/games/dino-sushi/orders";
 import type { Sushi } from "@/lib/games/dino-sushi/sushi";
 import styles from "./DinoSushiKitchen.module.css";
+import { TapButton } from "./DinoSushiPiece";
 
 type Props = {
   order: Order;
@@ -28,16 +29,58 @@ function Check() {
   );
 }
 
+function Heart() {
+  return (
+    <svg viewBox="0 0 24 24" className={styles.guestHeart} aria-hidden focusable="false">
+      <path
+        d="M12 20.4s-6.6-4.1-8.8-8C1.4 9.8 1.8 6.6 4.5 5.4c1.8-.8 3.6-.3 5.5 2.2 1.9-2.5 3.7-3 5.5-2.2 2.7 1.2 3.1 4.4 1.3 7-2.2 3.9-8.8 8-8.8 8z"
+        fill="#e25b78"
+        stroke="#fff"
+        strokeWidth="1.6"
+      />
+    </svg>
+  );
+}
+
+function Star() {
+  return (
+    <svg viewBox="0 0 24 24" className={styles.favStar} aria-hidden focusable="false">
+      <path
+        d="M12 3.2l2.2 5.8 6.2.5-4.7 4 1.5 6.1L12 16.6 6.8 19.6l1.5-6.1-4.7-4 6.2-.5z"
+        fill="#ffd34d"
+        stroke="#b07f43"
+        strokeWidth="1.4"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 /**
- * 多多頭上的點餐泡泡：圖案說想吃什麼，放對一樣就打勾；下面一排小盤是這輪第幾單。
- * 整顆泡泡可以點，再聽一次；左上角的小喇叭是提示，不佔泡泡寬度。
+ * 多多頭上的點餐泡泡：朋友的圓頭像說是誰點的，圖案說想吃什麼，放對一樣就打勾。
+ * 客人只點餐；壽司仍是多多吃。整顆泡泡可以點，再聽一次；左上角的小喇叭是提示。
  */
 export function DinoSushiOrderBubble({ order, sushi, flash, index, total, onReplay }: Props) {
   const checks = orderChecks(sushi, order);
+  const customer = customerById(order.customerId);
+  const ready = checks.base && checks.toppings.every((item) => item.done);
   return (
     <div className={styles.bubbleWrap}>
-      <div className={styles.bubble} role="img" aria-label={`第 ${index + 1} 單，共 ${total} 單。${orderAnnouncement(order)}`}>
-        <span className={styles.bubbleItems}>
+      <div
+        className={styles.bubble}
+        role="img"
+        aria-label={`第 ${index + 1} 單，共 ${total} 單。${orderAnnouncement(order)}`}
+        data-customer={customer.id}
+      >
+        <span className={styles.guest} data-ready={ready ? "true" : undefined}>
+          <span className={styles.guestName}>{customer.name}想吃</span>
+          <span className={styles.guestFaceWrap}>
+            {/* eslint-disable-next-line @next/next/no-img-element -- 現成定裝照圓形裁切，不另生圖 */}
+            <img className={styles.guestFace} src={customer.avatar} alt="" draggable={false} decoding="sync" />
+            {ready ? <Heart /> : null}
+          </span>
+        </span>
+        <span className={styles.bubbleItems} data-order-items>
           <span
             className={styles.bubbleItem}
             data-base={order.base}
@@ -53,8 +96,10 @@ export function DinoSushiOrderBubble({ order, sushi, flash, index, total, onRepl
               className={styles.bubbleItem}
               data-done={done ? "true" : undefined}
               data-flash={flash?.missing.includes(id) ? "true" : undefined}
+              data-favorite={customer.favorites.includes(id) ? "true" : undefined}
             >
               <ToppingArt id={id} />
+              {customer.favorites.includes(id) ? <Star /> : null}
               {done ? <Check /> : null}
             </span>
           ))}

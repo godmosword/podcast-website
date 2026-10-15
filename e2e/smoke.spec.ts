@@ -492,7 +492,7 @@ test("多多壽司屋：照點餐做一盤，多多吃完疊盤", async ({ page 
   await expect(page.getByRole("heading", { name: "多多肚子餓了！" })).toBeVisible();
   await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
   const label = await page.getByRole("img", { name: /^第 1 單/ }).getAttribute("aria-label");
-  const [base, ...toppings] = label!.split("多多想吃：")[1]!.split("、");
+  const [base, ...toppings] = label!.split("想吃：")[1]!.split("、");
   await page.getByRole("button", { name: `選${base}` }).click();
   for (const t of toppings) await page.getByRole("button", { name: `加${t}` }).click();
   await page.getByRole("button", { name: "給多多吃" }).click();

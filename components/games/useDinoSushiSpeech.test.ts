@@ -46,6 +46,7 @@ const base: Props = {
   orderLine: "我想要蟹肉棒手捲",
   firstOrder: false,
   caption: null,
+  thanksLine: null,
   inputPaused: false,
   soundOn: true,
   volume: 1,
@@ -108,6 +109,18 @@ describe("useDinoSushiSpeech", () => {
     synth.finish();
     rerender({ ...base, caption: look });
     expect(texts().at(-1)).toBe("還想要蟹肉棒！");
+  });
+
+  it("做對時把朋友的話接在多多字卡後面，合成一句", () => {
+    const { rerender } = render();
+    synth.finish();
+    rerender({ ...base, caption: yum, thanksLine: "咻～好快好好吃！" });
+    expect(texts().at(-1)).toBe("蟹肉棒，好好吃！咻～好快好好吃！");
+  });
+
+  it("音效關著時，朋友的話也不念", () => {
+    render({ soundOn: false, caption: yum, thanksLine: "咻～好快好好吃！" });
+    expect(synth.speak).not.toHaveBeenCalled();
   });
 
   it("卸載時取消還沒念完的", () => {

@@ -2,7 +2,7 @@
 
 import { useLayoutEffect, useRef, useState } from "react";
 import { BaseArt, PlateArt, SHOP_SRC, SushiArt, ToppingArt } from "@/lib/games/dino-sushi/art";
-import { matchOrder, orderSpeechLine } from "@/lib/games/dino-sushi/orders";
+import { matchOrder, orderSpeechLine, orderThanksLine } from "@/lib/games/dino-sushi/orders";
 import { currentOrder } from "@/lib/games/dino-sushi/round";
 import { MAX_TOPPINGS } from "@/lib/games/dino-sushi/sushi";
 import { BASES, baseById, toppingById, type ToppingId } from "@/lib/games/dino-sushi/toppings";
@@ -103,11 +103,14 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused, soundOn, ga
     target?.focus({ preventScroll: true });
   }, [rootRef, toppings]);
   const orderForSpeech = round ? currentOrder(round) : null;
+  const thanksLine =
+    orderForSpeech && caption?.eats && caption.match?.ok ? orderThanksLine(orderForSpeech) : null;
   const speech = useDinoSushiSpeech({
     orderToken: round && orderForSpeech ? `${round.mode}:${round.seed}:${round.index}` : null,
     orderLine: orderForSpeech ? orderSpeechLine(orderForSpeech) : null,
     firstOrder: round?.index === 0,
     caption,
+    thanksLine,
     inputPaused,
     soundOn,
     volume: gameVolume,

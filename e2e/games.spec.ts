@@ -348,7 +348,7 @@ test.describe("多多壽司屋", () => {
       await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
       for (let n = 1; n <= 4; n++) {
         const label = await page.getByRole("img", { name: new RegExp(`^第 ${n} 單`) }).getAttribute("aria-label");
-        const [base, ...toppings] = label!.split("多多想吃：")[1]!.split("、");
+        const [base, ...toppings] = label!.split("想吃：")[1]!.split("、");
         await page.getByRole("button", { name: `選${base}` }).click();
         for (const t of toppings) await page.getByRole("button", { name: `加${t}` }).click();
         await page.getByRole("button", { name: "給多多吃" }).click();
@@ -408,7 +408,7 @@ test.describe("多多壽司屋", () => {
         };
       });
     const label = await page.getByRole("img", { name: /^第 1 單/ }).getAttribute("aria-label");
-    const [base, ...toppings] = label!.split("多多想吃：")[1]!.split("、");
+    const [base, ...toppings] = label!.split("想吃：")[1]!.split("、");
     const expectHand = async (name: string) => {
       await expect.poll(async () => (await probe())?.label).toBe(name);
       expect(await probe()).toMatchObject({ tipOnHost: true, bodyClear: true, inside: true });
@@ -426,7 +426,7 @@ test.describe("多多壽司屋", () => {
   /** 照第 n 單的泡泡選飯、放料、送出，等這一盤疊上去。 */
   const serveOrder = async (page: import("@playwright/test").Page, n: number) => {
     const label = await page.getByRole("img", { name: new RegExp(`^第 ${n} 單`) }).getAttribute("aria-label");
-    const [base, ...toppings] = label!.split("多多想吃：")[1]!.split("、");
+    const [base, ...toppings] = label!.split("想吃：")[1]!.split("、");
     await page.getByRole("button", { name: `選${base}` }).click();
     for (const t of toppings) await page.getByRole("button", { name: `加${t}` }).click();
     await page.getByRole("button", { name: "給多多吃" }).click();
@@ -479,7 +479,7 @@ test.describe("多多壽司屋", () => {
       const stage = (await page.getByRole("region", { name: "多多" }).boundingBox())!;
       // 溢出的子元素不算在泡泡的框裡，要一格一格量
       const items = await bubble.evaluate((el) =>
-        [...el.firstElementChild!.children].map((c) => {
+        [...el.querySelector("[data-order-items]")!.children].map((c) => {
           const r = c.getBoundingClientRect();
           return { left: r.left, right: r.right };
         }),
@@ -896,7 +896,7 @@ test.describe("多多壽司屋", () => {
   /** 泡泡每一格的圖都要縮在格子裡：瘦長的手捲曾經把格子撐高、凸出泡泡、蓋住進度小盤。 */
   const bubbleOverflow = (page: import("@playwright/test").Page) =>
     page.getByRole("img", { name: /^第 \d 單/ }).evaluate((bubble) =>
-      [...bubble.firstElementChild!.children].flatMap((cell) => {
+      [...bubble.querySelector("[data-order-items]")!.children].flatMap((cell) => {
         const c = cell.getBoundingClientRect();
         const i = cell.querySelector("img")!.getBoundingClientRect();
         const out = i.top < c.top - 1 || i.bottom > c.bottom + 1 || i.left < c.left - 1 || i.right > c.right + 1;
@@ -918,7 +918,7 @@ test.describe("多多壽司屋", () => {
       const bases = new Set<string>();
       for (let n = 1; n <= 5; n++) {
         const label = (await page.getByRole("img", { name: new RegExp(`^第 ${n} 單`) }).getAttribute("aria-label"))!;
-        bases.add(label.split("多多想吃：")[1]!.split("、")[0]!);
+        bases.add(label.split("想吃：")[1]!.split("、")[0]!);
         expect(await bubbleOverflow(page), `第 ${n} 單`).toEqual([]);
         if (n < 5) await serveOrder(page, n);
       }

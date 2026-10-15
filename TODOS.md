@@ -60,6 +60,9 @@
 - [ ] **重錄 darwin 視覺基準（觸控尺寸）**：雲端無法產 `-chromium-darwin`。需在 Mac 重錄並目檢：`dino-sushi-title-390-light`、`dino-sushi-title-1280-night`、`dino-sushi-kitchen-390x844-light`、`dino-sushi-kitchen-844x390-light`、`dino-sushi-kitchen-1280x800-night`、`dino-sushi-result-390-light`。
 - ✅ **重玩動機（貼紙書，Phase 2）**：24 張貼紙（12 料、3 種飯、5 個表情、4 個驚喜；不含客人）。放上料、送出飯、多多的反應、點餐送完、五盤一次做對、自由做吃飽、第一次來玩都會拿到；一輪結束若沒有新的，依目錄再送一張，直到收滿。存在 `cheche:progress` 的 `preferences.gameKit.dinoSushiStickers`，不進家長儀表板的 24 個 id；收滿才加全站貼紙「多多貼紙書收集完成」。圖只用現有飯、料、多多縮小副本。見本 commit。
 - [ ] **重錄 darwin 視覺基準（貼紙書）**：標題多了貼紙書入口（會顯示 1/24 與「新」），結算多了新貼紙列。雲端無法產 `-chromium-darwin`。需在 Mac 重錄並目檢：`dino-sushi-title-390-light`、`dino-sushi-title-1280-night`、`dino-sushi-result-390-light`。廚房三張（`dino-sushi-kitchen-390x844-light`、`dino-sushi-kitchen-844x390-light`、`dino-sushi-kitchen-1280x800-night`）這次沒改廚房版面，不必為貼紙書重錄。觸控尺寸那列的重錄仍見上一項。
+- ✅ **客人來店點餐（Phase 3）**：小紅、安安、阿樂、鈴鈴、東東、香香用現有定裝照當圓頭像，只點餐、不吃。多多仍吃、仍做表情。訂單仍是熟食家常料，不含草莓、布丁、芥末，沒有新料。每輪 5 位不重複（6 位裡輪空 1 位）；小紅在前兩單、東東在最後一單。招呼與做好時的話跟著音效與「念出來」。見本 commit。
+- **貼紙書先不加客人**：維持 24 張。之後可以另開「來過的朋友」（用現有 jpg，不佔 24 張），或把 6 位加成第 25–30 張（這位客人的訂單第一次做對就拿到）。最愛料的星星不做成貼紙。
+- [ ] **重錄 darwin 視覺基準（客人）**：廚房泡泡多了圓頭像、名字與最愛星星，三張廚房基準要重錄：`dino-sushi-kitchen-390x844-light`、`dino-sushi-kitchen-844x390-light`、`dino-sushi-kitchen-1280x800-night`。標題兩張與結算這次沒改版面；若觸控尺寸或貼紙書那列還沒重錄，仍要一起重錄。雲端無法產 `-chromium-darwin`。
 
 ### 遊樂園美術／可玩性審（2026-09-19）待做
 
