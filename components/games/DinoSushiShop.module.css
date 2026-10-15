@@ -108,14 +108,16 @@
   left: calc(4% + clamp(26px, 9cqw, 44px) + clamp(12px, 4cqw, 24px));
 }
 
-/* 圓窗：直向高舞台右側的空牆；寬版多多很大會擋住，收起 */
+/* 圓窗：直向舞台右側、多多與點餐泡泡之間的牆，坐在櫃台上緣。
+   從櫃台往上量、大小跟舞台高度走：泡泡在上方，從上面量（舊的 top: 36%）會鑽到泡泡底下。
+   寬版多多很大會擋住，收起 */
 .window {
   display: none;
   position: absolute;
   z-index: 2;
   right: 6%;
-  top: 36%;
-  width: clamp(64px, 25%, 120px);
+  bottom: calc(var(--counter-h) + 6px);
+  width: clamp(64px, min(30cqh, 26cqw), 120px);
   aspect-ratio: 821 / 816;
   filter: drop-shadow(0 4px 6px rgba(110, 70, 40, 0.16));
 }
@@ -379,7 +381,8 @@
   }
 }
 
-@container duo-stage (min-height: 290px) {
+/* 390×844 舞台約 276px；再矮（≤ 172px 的手機）泡泡下面就沒有牆了 */
+@container duo-stage (min-height: 260px) {
   .window {
     display: block;
   }

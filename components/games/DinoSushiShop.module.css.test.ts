@@ -18,6 +18,14 @@ describe("DinoSushiShop.module.css 每輪氣氛", () => {
     expect(css).toMatch(/@keyframes domeLift\s*\{[^}]*transform:/);
   });
 
+  it("圓窗從櫃台往上放，390×844 的舞台（約 276px 高）也看得到", () => {
+    const rule = css.match(/\n\.window \{[^}]*\}/)?.[0] ?? "";
+    expect(rule).toMatch(/bottom:\s*calc\(var\(--counter-h\)/);
+    expect(rule).not.toMatch(/\btop:/);
+    const shown = css.match(/@container duo-stage \(min-height: (\d+)px\) \{\s*\.window \{\s*display: block;/);
+    expect(Number(shown?.[1])).toBeLessThanOrEqual(276);
+  });
+
   it("減少動態直接掀開，暫停時停住", () => {
     const media = css.slice(css.indexOf("@media (prefers-reduced-motion: reduce)"));
     expect(media).toMatch(/\.dome\[data-open="true"\]\s*\{[^}]*animation:\s*none/);
