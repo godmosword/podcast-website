@@ -35,6 +35,7 @@ export function DinoSushiTray({ tray, disabled, waitingForBase, hint, teaching, 
             data-kind={meta.kind}
             data-hint={hinted ? "true" : undefined}
             aria-label={`加${meta.label}`}
+            data-topping={id}
             disabled={disabled}
             onTap={() => onAdd(id)}
           >

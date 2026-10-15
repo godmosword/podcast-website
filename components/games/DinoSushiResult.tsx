@@ -88,6 +88,8 @@ export function DinoSushiResult({ outcome, stars, reducedMotion, onReplay, onTit
         replayLabel={outcome.mode === "order" ? "再做一輪" : "再自由做"}
         details={details}
         leadingAction={titleAction}
+        sideSize={64}
+        mainSize={88}
       />
     </div>
   );

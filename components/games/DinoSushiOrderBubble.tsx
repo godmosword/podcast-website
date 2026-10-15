@@ -2,6 +2,7 @@
 
 import Icon from "@/components/ui/Icon";
 import { BaseArt, ToppingArt } from "@/lib/games/dino-sushi/art";
+import { TapButton } from "./DinoSushiPiece";
 import { orderAnnouncement, orderChecks, type Order, type OrderMatch } from "@/lib/games/dino-sushi/orders";
 import type { Sushi } from "@/lib/games/dino-sushi/sushi";
 import styles from "./DinoSushiKitchen.module.css";
@@ -71,11 +72,11 @@ export function DinoSushiOrderBubble({ order, sushi, flash, index, total, onRepl
         </span>
       </div>
       {onReplay ? (
-        <button type="button" className={styles.replay} aria-label="再聽一次" onClick={onReplay}>
+        <TapButton className={styles.replay} aria-label="再聽一次" onTap={onReplay}>
           <span className={styles.replayBadge} aria-hidden>
-            <Icon name="volume-on" size={15} />
+            <Icon name="volume-on" size={18} />
           </span>
-        </button>
+        </TapButton>
       ) : null}
     </div>
   );

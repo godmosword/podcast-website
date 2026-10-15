@@ -152,6 +152,9 @@
   background: color-mix(in srgb, var(--card) 90%, var(--c-sky));
   box-shadow: 0 4px 0 color-mix(in srgb, var(--ink) 10%, transparent);
   font-size: var(--fs-h3);
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .back {
@@ -168,6 +171,9 @@
   font-size: var(--fs-control);
   color: var(--ink);
   text-decoration: none;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
   background: color-mix(in srgb, var(--card) 90%, var(--c-sky));
   border: 1.5px solid color-mix(in srgb, var(--ink) 12%, var(--line));
   box-shadow: 0 4px 0 color-mix(in srgb, var(--ink) 10%, transparent);
@@ -430,9 +436,8 @@
   }
 }
 
-/* 320 寬手機局內：返回＋三顆工具＋日夜切換塞不進一列，日夜鈕會被擠出畫面。
- * 360 以下才把四顆方鈕與返回鈕收到觸控下限 44px、間距 4px（與 GameChrome 同斷點）；
- * 「回遊樂園」文字保留。 */
+/* 320 寬手機局內：返回＋三顆工具＋日夜切換都要 ≥48px。
+ * 文字鈕左右內距與字級收一點、間距 4px，整列才留在 296px 裡面；「回遊樂園」文字保留。 */
 @media (max-width: 359.98px) {
   .playHeader {
     gap: 4px;
@@ -445,15 +450,27 @@
   }
 
   .headerActions .themeSlot > button {
-    width: 44px;
-    height: 44px;
-    min-width: 44px;
-    min-height: 44px;
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    min-height: 48px;
+    touch-action: manipulation;
   }
 
   .back {
-    min-height: 44px;
-    padding: 0 var(--space-2);
+    gap: 2px;
+    min-height: 48px;
+    padding: 0 6px;
+    font-size: 0.82rem;
+  }
+}
+
+/* 橫向手機比 640 寬（例如 844×390）時，左右與底部仍讓給瀏海與指示條 */
+@media (min-width: 641px) and (orientation: landscape) {
+  .main[data-game-id="dino-sushi"] {
+    padding-left: calc(0.75rem + var(--safe-left));
+    padding-right: calc(0.75rem + var(--safe-right));
+    padding-bottom: max(0.75rem, var(--safe-bottom));
   }
 }
 

@@ -98,6 +98,17 @@
   height: 56px;
 }
 
+.station[data-side="64"] .sideBtn,
+.station[data-side="64"] .actions:has(.leadingBtn) .nextThumb {
+  width: 64px;
+  height: 64px;
+}
+
+.station[data-main="88"] .mainBtn {
+  width: 88px;
+  height: 88px;
+}
+
 .leadingBtn {
   order: -1;
 }
