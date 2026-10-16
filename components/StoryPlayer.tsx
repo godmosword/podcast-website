@@ -387,7 +387,7 @@ export default function StoryPlayer({
     window.requestAnimationFrame(() => timerButtonRef.current?.focus());
   }, []);
 
-  useFocusTrap(showNightPrompt, nightPromptRef);
+  useFocusTrap(showNightPrompt, nightPromptRef, { initialFocus: "none" });
 
   function handleTimerMenuKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
     const items = Array.from(
@@ -412,8 +412,18 @@ export default function StoryPlayer({
     }
   }
 
-  // Tab 圈禁與初始焦點交給 useFocusTrap。不要再排一個 rAF 把焦點拉回第一顆，
-  // 否則 Tab 循環會在那一幀被打斷（「好呀」→「不用了」途中被拉回去）。
+  // 只在打開後的下一幀移一次焦點。useFocusTrap 的同步 focus 在 CI 上常常
+  // 趕在按鈕排版前（offsetParent 還是 null）就落空；若兩邊都移，本機又會在
+  // Tab 循環中途把焦點拉回「好呀」。
+  useEffect(() => {
+    if (!showNightPrompt) return;
+    const frame = window.requestAnimationFrame(() => {
+      nightPromptRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [showNightPrompt]);
+
+  // Tab 圈禁交給 useFocusTrap。Escape 仍在這個對話框上收。
   function handleNightPromptKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
     if (e.key === "Escape") {
       e.preventDefault();
