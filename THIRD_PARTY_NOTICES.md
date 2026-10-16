@@ -23,7 +23,7 @@
 
 ## 商標（指示性使用）
 
-Apple Podcasts、Spotify、YouTube、Instagram、Threads、Facebook 的畫面上標誌，使用各權利人公開品牌資源的官方檔（見 `public/brand/SOURCES.md`，規則見 `lib/BRAND-ASSETS-HARD-RULES.md`），僅作指示性連結，商標權屬各權利人。KKBOX 字標沿用公開典藏路徑並換成規範色，不是向 KKBOX 索取的正式套件。LINE 只出現在「以 LINE 分享」的名稱，沒有使用 LINE 官方標誌。電子郵件圖示是本站通用符號。
+Apple Podcasts、Spotify、YouTube、Instagram、Threads、Facebook 的畫面上標誌，使用各權利人公開品牌資源的官方檔（見 `public/brand/SOURCES.md`，規則見 `lib/BRAND-ASSETS-HARD-RULES.md`），僅作指示性連結，商標權屬各權利人。Spotify 日間純白底用官方綠色標誌，夜間非純黑底用官方白色標誌。KKBOX 字標沿用公開典藏路徑並換成規範色，不是向 KKBOX 索取的正式套件。LINE 只出現在「以 LINE 分享」的名稱，沒有使用 LINE 官方標誌。電子郵件圖示是本站通用符號。
 
 ## 地圖圖磚
 

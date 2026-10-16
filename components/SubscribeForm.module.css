@@ -184,7 +184,7 @@
   transform: translateY(1px);
 }
 
-/* 不加章：按鈕底是 --cta-soft-bg（非純白），BrandMark 用 row 色版（Spotify、KKBOX 黑色版）。
+/* 不加章：日間按鈕底是 --card 純白，Spotify 用官方綠標；夜間改白標。KKBOX 文字列用黑色版。
    槽位 38px（KKBOX 字標寬），和文字的 12px 間距讓 30px 標誌與字距 16px，過半個標誌的淨空。 */
 .platformBadge {
   flex: 0 0 auto;

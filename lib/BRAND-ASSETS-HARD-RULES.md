@@ -25,10 +25,9 @@
 
 色版規則（`lib/brand-marks.tsx` 的 `art`）：
 
-- 純白章與其他淺色底 → Spotify 黑色圖示、KKBOX 在白章用標準青、其他淺色底用黑色字標、Threads 黑色圖示。
-- 深色底（夜間）→ 白色版（Spotify、KKBOX、Threads、YouTube 白字字標）。
+- 純白章與其他日間淺色底（`--card` 為 `#ffffff`）→ Spotify 官方綠標、KKBOX 在白章用標準青、其他淺色底的 KKBOX／Threads 用黑色版。
+- 深色底（夜間章 `#312e2a`／`#272422`，不是純黑）→ 白色版（Spotify、KKBOX、Threads、YouTube 白字字標）。純黑底才可改放 Spotify 綠標。
 - Apple Podcasts 彩色圖示、Instagram 漸層圖示、Facebook 主標誌，日夜不變。
-- Spotify 不使用綠色檔（`spotify-icon-green.png` 已下架）。白章雖是純白，本站仍用黑色官方圖示。
 - YouTube 用完整字標，不使用裁切後的 `youtube-icon.svg`。字標比 60px 章寬，頁尾章改成膠囊，窄螢幕該格跨兩欄。
 
 淨空解讀：標誌所在的底（章、按鈕、列）邊緣不算侵入淨空；淨空範圍內不得有其他文字或圖形。
@@ -46,9 +45,9 @@
 
 ### Spotify（[Design & Branding Guidelines](https://developer.spotify.com/documentation/design)）
 
-- **檔案：** `spotify-icon-black.png`、`spotify-icon-white.png`（Newsroom media kit `Spotify_Primary_Logo_RGB_Black/White`，等比縮成 128×128）。不用綠色檔。
+- **檔案：** `spotify-icon-green.png`（Newsroom `Spotify_Primary_Logo_RGB_Green.png`，939×940 等比縮成 128×128，不改色、不裁切）、`spotify-icon-white.png`。`spotify-icon-black.png` 備存，目前畫面未引用。
 - 空間不夠放完整 logo 時可只用圖示；最小 21px；淨空為圖示高度的一半。
-- 淺色底（含頁尾白章）用黑色版、深色底用白色版。
+- 綠標只放純白或純黑底。日間白章與文字列底是純白，用綠標。夜間底不是純黑，用白標。
 
 ### KKBOX（[品牌標誌](https://www.kkbox.com/about/tw/zh-tw/logo)，官網有機器人驗證，內容依搜尋摘要）
 

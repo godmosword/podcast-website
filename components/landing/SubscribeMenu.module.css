@@ -101,8 +101,8 @@
   background: color-mix(in srgb, var(--ink) 6%, transparent);
 }
 
-/* 標誌和文字在同一個可點列，不加章；日間底不一定純白（hover 有混色），
-   所以 BrandMark 用 row 色版（Spotify、KKBOX、Threads 黑色版）。 */
+/* 標誌和文字在同一個可點列，不加章。日間底是純白，Spotify 用官方綠標；
+   夜間改白標。KKBOX、Threads 文字列用黑色版。hover 有淡混色。 */
 .badge {
   flex: none;
   width: 38px;

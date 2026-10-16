@@ -44,9 +44,9 @@ describe("BRAND_MARKS 官方檔", () => {
 });
 
 describe("BRAND_MARKS 色版", () => {
-  it("Spotify：淺色底用黑、深色底用白，不使用已下架的綠色檔", () => {
-    expect(imageSrc("spotify", "white")).toBe("/brand/spotify-icon-black.png");
-    expect(imageSrc("spotify", "light")).toBe("/brand/spotify-icon-black.png");
+  it("Spotify：白與淺色底用官方綠標、深色底用白標", () => {
+    expect(imageSrc("spotify", "white")).toBe("/brand/spotify-icon-green.png");
+    expect(imageSrc("spotify", "light")).toBe("/brand/spotify-icon-green.png");
     expect(imageSrc("spotify", "dark")).toBe("/brand/spotify-icon-white.png");
   });
 

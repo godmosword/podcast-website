@@ -8,11 +8,11 @@ vi.stubGlobal("React", React);
 const imgs = (html: string) => html.match(/<img\b[^>]*>/g) ?? [];
 
 describe("BrandMark", () => {
-  it("章上的 Spotify：日間黑色版、夜間白色版各一張，裝飾用", () => {
+  it("章上的 Spotify：日間綠色版、夜間白色版各一張，裝飾用", () => {
     const html = renderToStaticMarkup(<BrandMark id="spotify" surface="chip" />);
     const [day, night] = imgs(html);
     expect(imgs(html)).toHaveLength(2);
-    expect(day).toContain('src="/brand/spotify-icon-black.png"');
+    expect(day).toContain('src="/brand/spotify-icon-green.png"');
     expect(night).toContain('src="/brand/spotify-icon-white.png"');
     for (const img of [day, night]) {
       expect(img).toContain('alt=""');
@@ -22,9 +22,9 @@ describe("BrandMark", () => {
     expect(html).toContain('aria-hidden="true"');
   });
 
-  it("文字列上的 Spotify 日間用黑色版", () => {
+  it("文字列上的 Spotify 日間用綠色版", () => {
     const html = renderToStaticMarkup(<BrandMark id="spotify" surface="row" />);
-    expect(imgs(html)[0]).toContain('src="/brand/spotify-icon-black.png"');
+    expect(imgs(html)[0]).toContain('src="/brand/spotify-icon-green.png"');
   });
 
   it("日夜同一個檔時只輸出一張圖", () => {

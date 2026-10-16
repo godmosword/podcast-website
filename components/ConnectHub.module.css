@@ -67,7 +67,8 @@
 }
 
 /* 白章：直徑 = 2 × 標誌 30px，讓 Spotify／Instagram 要求的半個標誌淨空落在章內。
-   日間是純白、夜間換暗章。YouTube 是完整字標，比圓章寬，改成同高膠囊。
+   日間 --card 是純白，Spotify 用官方綠標；夜間章不是純黑，改白標。
+   YouTube 是完整字標，比圓章寬，改成同高膠囊。
    不做硬底邊（STYLE-BIBLE §5：硬底邊只給遊戲與著色）。 */
 .badge {
   box-sizing: border-box;

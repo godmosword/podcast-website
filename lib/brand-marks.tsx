@@ -66,9 +66,9 @@ export const BRAND_MARKS: Record<BrandMarkId, BrandMarkSpec> = {
   spotify: {
     sizing: "square",
     art: {
-      // 不用綠色版：該檔已下架。白章與其他淺色底都用黑色官方圖示。
-      white: image("/brand/spotify-icon-black.png"),
-      light: image("/brand/spotify-icon-black.png"),
+      // 日間白／淺底是純白，用官方綠標。夜間章不是純黑，用白標（純黑底才可再用綠標）。
+      white: image("/brand/spotify-icon-green.png"),
+      light: image("/brand/spotify-icon-green.png"),
       dark: image("/brand/spotify-icon-white.png"),
     },
   },

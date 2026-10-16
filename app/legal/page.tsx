@@ -158,7 +158,7 @@ export default function LegalPage() {
               Apple Podcasts、Spotify、YouTube、Instagram、Threads、Facebook
               的名稱與畫面上的標誌，使用各權利人公開品牌資源裡的官方檔（見{" "}
               <code>public/brand/</code> 與 <code>public/brand/SOURCES.md</code>
-              ），依其規範以原色、原比例呈現，僅作<strong>指示性連結</strong>
+              ），依其規範以原色、原比例呈現。Spotify 日間放在純白底上，使用官方綠色標誌；夜間底不是純黑，改用官方白色標誌。僅作<strong>指示性連結</strong>
               （導向官方頁面），不代表與上述公司之合作或代言關係。
             </li>
             <li>
