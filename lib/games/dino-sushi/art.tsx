@@ -85,6 +85,15 @@ const TEMAKI_PLACE: Record<ToppingId, { w: number; y: number }> = {
   wasabi: { w: 60, y: 25 },
 };
 
+/**
+ * 手捲三樣料時，中間那格（疊在最後面、抬到兩側上方）的個別調整。
+ * 布丁（彩蛋）：照一般抬高會整顆連綠盤冒出來；沉到 y 20%、少斜一點，只露焦糖頂和一截黃色布丁身，
+ * 盤子藏在兩側的料後面。只露焦糖在手機上會被看成巧克力，所以留一截布丁身。
+ */
+const TEMAKI_MIDDLE: Partial<Record<ToppingId, { dy: number; rot: number }>> = {
+  pudding: { dy: -5, rot: -10 },
+};
+
 /** 每種料的圖形差很多：條狀蓋滿、方塊與高的甜點要縮小，才不會蓋過飯。 */
 const TOPPING_FIT: Record<ToppingId, { scale: number; dy: number }> = {
   tamago: { scale: 0.84, dy: 4 },
@@ -122,7 +131,8 @@ function layerSpots(base: BaseId, toppings: readonly ToppingId[]): Spot[] {
             ];
     return toppings.map((id, i) => {
       const place = TEMAKI_PLACE[id];
-      const fanSpot = fan[i] ?? fan[0]!;
+      const middle = n === 3 && i === 0 ? TEMAKI_MIDDLE[id] : undefined;
+      const fanSpot = middle ? { ...fan[0]!, ...middle } : (fan[i] ?? fan[0]!);
       return {
         x: fanSpot.x,
         y: place.y + fanSpot.dy,

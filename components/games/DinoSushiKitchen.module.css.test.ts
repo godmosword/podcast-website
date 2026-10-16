@@ -11,9 +11,6 @@ const css = readCss("DinoSushiKitchen.module.css");
 
 const ANIMATED = [
   '.servingSushi[data-phase="open"]',
-  '.duoArt [data-part="cheeks"] > g',
-  '.duoArt [data-part="puff-cloud"]',
-  '.duoArt [data-part="sweet-stars"] > path',
   ".plates[data-land]",
 ];
 
@@ -55,6 +52,28 @@ describe("DinoSushiKitchen.module.css 動畫", () => {
     const media = css.slice(css.indexOf("@media (prefers-reduced-motion: reduce)"));
     expect(media.slice(0, media.indexOf("\n}\n"))).toMatch(new RegExp(`${layer.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*\\{\\s*transition:\\s*none`));
     expect(css).toContain(`.kitchen[data-reduced="true"] ${layer} {\n  transition: none;`);
+  });
+
+  it("等選飯點托盤的皿提示：光圈在 ::after、有限次數；減少動態只亮不跳，暫停時停住", () => {
+    for (const v of ["a", "b"]) {
+      expect(block(`.baseButton[data-nudge="${v}"]::after {`)).toMatch(new RegExp(`animation:\\s*nudgeRing${v.toUpperCase()} 440ms`));
+      expect(block(`.baseButton[data-nudge="${v}"] .baseArt {`)).toMatch(/220ms ease-in-out var\(--nudge-delay, 0ms\) 2;/);
+      expect(block(`.kitchen[data-reduced="true"] .baseButton[data-nudge="${v}"]::after {`)).toMatch(/nudgeHold\w 900ms step-end/);
+    }
+    expect(css).not.toMatch(/nudge\w+ [^;]*infinite/);
+    expect(block('.kitchen[data-reduced="true"] .baseButton[data-nudge] .baseArt {')).toMatch(/animation:\s*none/);
+    expect(css).toContain('.kitchen[data-paused="true"] .baseButton[data-nudge]::after');
+    const media = css.slice(css.indexOf("@media (prefers-reduced-motion: reduce)"));
+    const reduced = media.slice(0, media.indexOf("\n}\n"));
+    expect(reduced).toMatch(/nudgeHoldA 900ms step-end/);
+    expect(reduced).toMatch(/\.baseButton\[data-nudge\] \.baseArt\s*\{\s*animation:\s*none/);
+    // 提示光暈的 animation 掛在按鈕本身，nudge 不碰它
+    expect(css).not.toMatch(/\.baseButton\[data-nudge[^\]]*\]\s*\{[^}]*animation/);
+  });
+
+  it("選飯過場飛過的那顆不播落下動畫（飛完也不重播）；等選飯的托盤按下去不下沉", () => {
+    expect(block(".sushiButton > [data-sushi][data-flew] {")).toMatch(/animation:\s*none/);
+    expect(css).toContain('.trayButton:active:not(:disabled):not([aria-disabled="true"])');
   });
 
   it("料位、托盤、給多多吃、刷牙、吃飽了的觸控下限", () => {

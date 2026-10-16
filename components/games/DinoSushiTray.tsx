@@ -10,16 +10,22 @@ type Props = {
   /** 主題日：托盤底換色。料的顏色不變。 */
   theme?: "yellow" | "green" | "seafood";
   themeLabel?: string;
+  /** 吃東西、看泡泡、暫停：真的停用（原生 disabled）。 */
   disabled: boolean;
-  /** 還沒選飯：托盤變淡、看得出現在不能點。吃東西或看泡泡的短暫鎖定只擋點擊、不變淡。 */
+  /**
+   * 還沒選飯：托盤變淡、看得出現在不能放料。仍可點（aria-disabled），點了不加料，
+   * 改成叫 onWaitTap（廚房讓該點的皿跳一下）。
+   */
   waitingForBase: boolean;
+  onWaitTap: () => void;
   hint: ToppingId | null;
   teaching: boolean;
   onAdd: (id: ToppingId) => void;
 };
 
 /** 托盤 2×4（橫向 4×2）：每格圖＋字，不分頁不捲動。 */
-export function DinoSushiTray({ tray, theme, themeLabel, disabled, waitingForBase, hint, teaching, onAdd }: Props) {
+export function DinoSushiTray({ tray, theme, themeLabel, disabled, waitingForBase, onWaitTap, hint, teaching, onAdd }: Props) {
+  const waiting = waitingForBase && !disabled;
   return (
     <div
       className={styles.tray}
@@ -41,7 +47,8 @@ export function DinoSushiTray({ tray, theme, themeLabel, disabled, waitingForBas
             aria-label={`加${meta.label}`}
             data-topping={id}
             disabled={disabled}
-            onTap={() => onAdd(id)}
+            aria-disabled={waiting ? true : undefined}
+            onTap={() => (waiting ? onWaitTap() : onAdd(id))}
           >
             <span
               className={styles.trayArt}

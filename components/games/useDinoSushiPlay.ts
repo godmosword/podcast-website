@@ -241,18 +241,30 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
 
   const locked = inputPaused || !round || round.pending !== null || round.done;
 
+  /** 等選飯時點了托盤：讀屏念一次「先選飯」（每次等選飯只念一次，選了飯才重來）。 */
+  const remindedBase = useRef(false);
+  const remindBase = useCallback((): boolean => {
+    if (remindedBase.current) return false;
+    remindedBase.current = true;
+    setMessage("先選飯，再放料");
+    return true;
+  }, []);
+
+  /** landInMs：飯飛到砧板要多久（選飯過場）；「咚」等落地才響，沒有過場就立刻響。 */
   const pickBase = useCallback(
-    (base: BaseId) => {
+    (base: BaseId, landInMs = 0) => {
       if (locked || !round) return;
       audio?.ensureAudio();
       const off = isOffStep(round, { type: "pick-base", base });
       dispatch({ type: "pick-base", base });
       setChoosingBase(false);
-      sfx(SUSHI_SFX.base);
+      remindedBase.current = false;
+      if (landInMs > 0) later(landInMs, () => sfx(SUSHI_SFX.base));
+      else sfx(SUSHI_SFX.base);
       if (off) showHint();
       else touch();
     },
-    [audio, locked, round, sfx, showHint, touch],
+    [audio, later, locked, round, sfx, showHint, touch],
   );
 
   const add = useCallback(
@@ -413,7 +425,7 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
     /** 首單手指示範（做對第一單才收起）；之後只在閒置時亮。 */
     teaching: !taught,
     locked,
-    actions: { start, leave, pickBase, add, remove, serve, brush, finish, reopenBase },
+    actions: { start, leave, pickBase, add, remove, serve, brush, finish, reopenBase, remindBase },
   };
 }
 

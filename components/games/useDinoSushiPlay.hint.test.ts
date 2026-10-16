@@ -233,3 +233,49 @@ describe("擠掉最舊那層的音效", () => {
     for (const v of voices.slice(evict)) expect(v.at ?? 0).toBeGreaterThanOrEqual(EVICT_POP_DELAY);
   });
 });
+
+describe("等選飯與選飯過場", () => {
+  function setupWithAudio() {
+    vi.useFakeTimers();
+    (window as Window & { __dinoSushiSeed?: number }).__dinoSushiSeed = 7;
+    const audio = { ensureAudio: vi.fn(), tone: vi.fn(), voices: vi.fn() };
+    const hook = renderHook(() =>
+      useDinoSushiPlay({ audio, reducedMotion: false, inputPaused: false, onServed: vi.fn(), onDone: vi.fn() }),
+    );
+    return { audio, ...hook };
+  }
+
+  it("等選飯時點托盤：讀屏念「先選飯」；同一次等選飯只念一次，選了飯再等選飯才會再念", () => {
+    const { result } = setupWithAudio();
+    act(() => result.current.actions.start("free"));
+    let said: boolean[] = [];
+    act(() => {
+      said = [result.current.actions.remindBase(), result.current.actions.remindBase()];
+    });
+    expect(said).toEqual([true, false]);
+    expect(result.current.message).toBe("先選飯，再放料");
+    act(() => result.current.actions.pickBase("nigiri"));
+    act(() => result.current.actions.reopenBase());
+    act(() => {
+      said = [result.current.actions.remindBase()];
+    });
+    expect(said).toEqual([true]);
+  });
+
+  it("選飯有過場：「咚」等落地才響；沒有過場就立刻響", () => {
+    const { result, audio } = setupWithAudio();
+    act(() => result.current.actions.start("free"));
+    audio.voices.mockClear();
+    act(() => result.current.actions.pickBase("nigiri", 320));
+    expect(audio.voices).not.toHaveBeenCalledWith(SUSHI_SFX.base);
+    act(() => {
+      vi.advanceTimersByTime(320);
+    });
+    expect(audio.voices).toHaveBeenCalledWith(SUSHI_SFX.base);
+
+    act(() => result.current.actions.reopenBase());
+    audio.voices.mockClear();
+    act(() => result.current.actions.pickBase("gunkan"));
+    expect(audio.voices).toHaveBeenCalledWith(SUSHI_SFX.base);
+  });
+});

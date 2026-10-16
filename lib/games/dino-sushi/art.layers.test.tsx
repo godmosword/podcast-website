@@ -65,4 +65,19 @@ describe("砧板上的料重掛規則", () => {
     const front = container.querySelector('img[src$="temaki-front.webp"]');
     expect(z(front)).toBeGreaterThan(Math.max(...zs));
   });
+
+  it("手捲三樣料、布丁在中間：沉一點、少斜一點，露出焦糖頂和一截布丁身（彩蛋）；其他料與其他位置不變", () => {
+    const spot = (toppings: ToppingId[], name: string) => {
+      const { container } = render(<SushiArt sushi={{ base: "temaki", toppings }} />);
+      const span = layers(container).get(name)!;
+      const out = { top: parseFloat(span.style.top), transform: span.style.transform };
+      cleanup();
+      return out;
+    };
+    expect(spot(["pudding", "shrimp", "crab"], "pudding")).toEqual({ top: 20, transform: "translate(-50%, -50%) rotate(-10deg)" });
+    // 中間是別的料：照舊抬高到兩側上方
+    expect(spot(["salmon", "shrimp", "crab"], "salmon")).toEqual({ top: 15, transform: "translate(-50%, -50%) rotate(-18deg)" });
+    // 布丁在兩側：照舊
+    expect(spot(["shrimp", "pudding", "crab"], "pudding")).toEqual({ top: 28, transform: "translate(-50%, -50%) rotate(-26deg)" });
+  });
 });

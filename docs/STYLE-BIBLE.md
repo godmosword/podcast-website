@@ -57,11 +57,16 @@
 | 檔案 | 什麼時候用 |
 |------|------------|
 | `sticker-closed.webp` | 待機（閉著的嘴） |
-| `sticker-open.webp`、`sticker-chew.webp`、`sticker-laugh.webp` | 張嘴、咀嚼、笑 |
-| `sticker-love.webp`、`sticker-yum.webp`、`sticker-sweet.webp`、`sticker-puff.webp`、`sticker-look.webp` | 反應表情 |
+| `sticker-open.webp`、`sticker-chew.webp` | 張嘴、咀嚼 |
+| `sticker-love.webp`、`sticker-yum.webp`、`sticker-sweet.webp`、`sticker-fire.webp`、`sticker-look.webp` | 反應表情（芥末是 fire：頭上蒸氣＋嘴噴火） |
+| `sticker-laugh.webp` | 貼紙書的圖示與貼紙（局內廚房不用） |
 | `sticker-toothbrush.webp` | 刷牙按鈕 |
 
-對應寫在 `lib/games/dino-sushi/duoduo-sticker.tsx`。張嘴、咀嚼比表情優先。芥末的嘴是 laugh，貼紙用有白煙的 `puff`。封面是 `public/games/v2/dino-sushi/cover.webp`（主人核准的原檔）。`duoduo-art.tsx` 仍是 main 的黏土向量（漸層、不用 filter），局內畫面用貼紙。
+對應寫在 `lib/games/dino-sushi/duoduo-sticker.tsx`。張嘴、咀嚼比表情優先。芥末用噴火的 `fire`（`sticker-puff.webp` 已不用）。封面是 `public/games/v2/dino-sushi/cover.webp`（主人核准的原檔）。向量版多多已退役（`duoduo-art.tsx` 已刪，2026-10-15）。
+
+**眉毛以暖棕粗眉為準**：遊戲貼紙與封面都是暖棕粗眉；`public/characters/恐龍車多多.jpg` 定裝照是黑眉版，不拿來校正遊戲貼紙。
+
+**貼紙對齊**：九張貼紙的車身姿勢不一，畫面上每張 `<img>` 掛固定的 `translateY`＋`scale`（常數表在 `duoduo-sticker.tsx`，量法寫在表上），讓輪底都落在畫布 92%（`.figure` 原點與接地影的位置），換表情時不上下沉浮；不做水平平移。fire 的車身刻意偏左、右邊留給火焰，只對齊輪底、不縮放。
 
 390 與 320 寬的廚房裡，整張貼紙（含輪子）落在雨棚下緣與櫃台上緣之間。接地影兩層，不跟著身體浮動。待機上下約 2px、2.6 秒一循環。吃東西（張嘴、咀嚼、笑）改成擠壓。貼紙沒有眨眼。`prefers-reduced-motion: reduce`，以及遊戲的 `data-reduced`／`data-paused`，這些動作都停。牙刷在畫布裡畫得比較小，按鈕裡用 CSS 放大。
 

@@ -591,6 +591,69 @@ test.describe("多多壽司屋", () => {
     }
   });
 
+  /** 還沒選飯就點托盤（觸控與鍵盤）：不加料、不出錯，該點的皿跳一下；讀屏念「先選飯」。 */
+  test("等選飯時點托盤：不加料，該點的皿跳一下", async ({ page }) => {
+    await page.goto("/games/dino-sushi");
+    await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+    const label = await page.getByRole("img", { name: /^第 1 單/ }).getAttribute("aria-label");
+    const base = label!.split("想吃：")[1]!.split("、")[0]!;
+    const tray = page.getByRole("group", { name: /^壽司料/ }).getByRole("button");
+    await expect(tray.first()).toHaveAttribute("aria-disabled", "true");
+    // Playwright 把 aria-disabled 當停用，要 force 才會點
+    await tray.first().click({ force: true });
+    await expect(page.getByRole("button", { name: /^拿掉/ })).toHaveCount(0);
+    const picker = page.getByRole("group", { name: "選飯" });
+    await expect(picker.locator("[data-nudge]")).toHaveCount(1);
+    await expect(picker.getByRole("button", { name: `選${base}` })).toHaveAttribute("data-nudge", /^[ab]$/);
+    await expect(page.locator('[aria-live="polite"]').filter({ hasText: "先選飯，再放料" })).toHaveCount(1);
+    // 播完就收掉
+    await expect(picker.locator("[data-nudge]")).toHaveCount(0);
+    // 鍵盤也一樣：不加料、皿亮
+    await tray.nth(1).focus();
+    await page.keyboard.press("Enter");
+    await expect(picker.locator("[data-nudge]")).toHaveCount(1);
+    await expect(page.getByRole("button", { name: /^拿掉/ })).toHaveCount(0);
+  });
+
+  test("自由做等選飯時點托盤：三張皿都亮", async ({ page }) => {
+    await page.goto("/games/dino-sushi");
+    await page.getByRole("button", { name: "自由做" }).click();
+    await page.getByRole("group", { name: /^壽司料/ }).getByRole("button").first().click({ force: true });
+    await expect(page.getByRole("group", { name: "選飯" }).locator("[data-nudge]")).toHaveCount(3);
+  });
+
+  /** 選飯過場：皿上的飯飛到砧板（FLIP）；落地後位置跟沒有過場一樣；減少動態不飛。 */
+  test("選飯過場：飛的時候掛 data-flying，落地後位置與減少動態相同", async ({ page }) => {
+    const pick = async (reduced: boolean) => {
+      await page.emulateMedia({ reducedMotion: reduced ? "reduce" : "no-preference" });
+      await page.goto("/games/dino-sushi");
+      await page.getByRole("button", { name: "自由做" }).click();
+      await page.evaluate(() => {
+        const w = window as unknown as { __flew: boolean };
+        w.__flew = false;
+        // oldValue 是 null＝這次是「加上」data-flying
+        new MutationObserver((records) => {
+          if (records.some((r) => r.oldValue === null)) w.__flew = true;
+        }).observe(document.body, { subtree: true, attributeOldValue: true, attributeFilter: ["data-flying"] });
+      });
+      await page.getByRole("button", { name: "選手捲" }).click();
+      const sushi = page.locator('[data-role="prep-sushi"] > [data-sushi]');
+      await expect(sushi).toBeVisible();
+      await expect(page.locator("[data-flying]")).toHaveCount(0);
+      await page.waitForTimeout(200);
+      const box = (await sushi.boundingBox())!;
+      const flew = await page.evaluate(() => (window as unknown as { __flew: boolean }).__flew);
+      return { box, flew };
+    };
+    const flying = await pick(false);
+    const still = await pick(true);
+    expect(flying.flew).toBe(true);
+    expect(still.flew).toBe(false);
+    for (const k of ["x", "y", "width", "height"] as const) {
+      expect(Math.abs(flying.box[k] - still.box[k]), k).toBeLessThanOrEqual(1);
+    }
+  });
+
   test("料位滿了再點料：擠掉最舊那層，新的放最後，不會卡住", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/games/dino-sushi");

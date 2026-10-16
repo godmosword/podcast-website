@@ -1,8 +1,12 @@
 "use client";
 
 import { PlateArt, SushiArt } from "@/lib/games/dino-sushi/art";
-import type { DuoDuoFace, DuoDuoMouth } from "@/lib/games/dino-sushi/duoduo-art";
-import { DuoDuoSticker, ToothbrushSticker } from "@/lib/games/dino-sushi/duoduo-sticker";
+import {
+  DuoDuoSticker,
+  ToothbrushSticker,
+  type DuoDuoFace,
+  type DuoDuoMouth,
+} from "@/lib/games/dino-sushi/duoduo-sticker";
 import type { Reaction } from "@/lib/games/dino-sushi/reactions";
 import type { Sushi } from "@/lib/games/dino-sushi/sushi";
 import { TapButton } from "./DinoSushiPiece";
