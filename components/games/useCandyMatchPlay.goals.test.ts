@@ -2,6 +2,7 @@
 import { act, cleanup, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { CandyMatchInstance } from "@/lib/gamekit/games/candy-match/adapter";
+import * as engine from "@/lib/games/candy-match/engine";
 import { findHintMove } from "@/lib/games/candy-match/engine";
 import { buildRound } from "@/lib/games/candy-match/stages";
 import { useCandyMatchPlay } from "./useCandyMatchPlay";
@@ -35,9 +36,31 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   vi.useRealTimers();
+  vi.restoreAllMocks();
 });
 
 describe("消消樂關前與結算朗讀", () => {
+  it("逐波更新收集數，最後不重複加總，並回報本局模式", async () => {
+    const waveSpy = vi.spyOn(engine, "stepWave");
+    const { result } = render();
+    const round = buildRound(0, "challenge", { replay: false, rng: () => 0.2 });
+    act(() => result.current.actions.start({ ...round, stage: { ...round.stage, goals: [{ kind: "collect-any", count: 1 }] } }));
+    act(() => result.current.actions.beginPlay());
+    const board = result.current.play!.board;
+    const move = findHintMove(board.pieces, board.cols, board.rows, board.specials)!;
+    await act(async () => {
+      result.current.actions.attemptSwap(move.a, move.b);
+      await vi.advanceTimersByTimeAsync(300);
+    });
+    expect(result.current.busy).toBe(true);
+    expect(result.current.play!.progress.collected.reduce((a, b) => a + b, 0)).toBeGreaterThanOrEqual(3);
+    await act(async () => { await vi.advanceTimersByTimeAsync(20000); });
+    const total = waveSpy.mock.results.reduce((sum, call) => sum + (call.value?.collected.reduce((a: number, b: number) => a + b, 0) ?? 0), 0);
+    expect(result.current.play!.progress.collected.reduce((a, b) => a + b, 0)).toBe(total);
+    expect(result.current.outcome?.kind).toBe("win");
+    expect(instance.notifyWon).toHaveBeenLastCalledWith(expect.objectContaining({ candyMode: "challenge" }));
+  });
+
   it("介紹還沒收起時不能交換", () => {
     const { result } = render();
     act(() => {

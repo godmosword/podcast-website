@@ -2,6 +2,7 @@
   position: absolute;
   inset: 3px;
   display: block;
+  filter: drop-shadow(0 2px 1px rgba(93, 74, 103, 0.12));
   transition: opacity 0.22s ease, transform 0.22s ease;
 }
 

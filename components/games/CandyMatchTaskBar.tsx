@@ -19,13 +19,12 @@ type CandyMatchTaskBarProps = {
   round: CandyMatchRound;
   progress: CandyProgress;
   movesLeft: number;
-  /** 遊戲設定的「念出來」；關掉時再聽一次與朗讀開關都收起來。 */
+  /** 遊戲設定的「念出來」；關掉時再聽一次收起來。 */
   voiceEnabled: boolean;
-  /** 朗讀關著時再聽一次不出聲，按鈕還在。 */
+  /** 朗讀關著時停用重播，由頂部音效或設定恢復。 */
   voiceMuted: boolean;
   reducedMotion: boolean;
   onReplay: () => void;
-  onToggleVoice: () => void;
   /** 點目標卡，再念這一項。 */
   onHearGoal: (goal: CandyGoal) => void;
 };
@@ -152,7 +151,6 @@ export function CandyMatchTaskBar({
   voiceMuted,
   reducedMotion,
   onReplay,
-  onToggleVoice,
   onHearGoal,
 }: CandyMatchTaskBarProps) {
   const goals = round.stage.goals;
@@ -194,26 +192,19 @@ export function CandyMatchTaskBar({
               className={styles.replayButton}
               aria-label="再聽一次"
               data-muted={voiceMuted ? "true" : undefined}
+              disabled={voiceMuted}
               onClick={onReplay}
             >
+              <span aria-hidden>↻</span>
               <Icon name={voiceMuted ? "volume-off" : "volume-on"} size={20} />
               <span>再聽一次</span>
-            </button>
-            <button
-              type="button"
-              className={styles.muteButton}
-              aria-pressed={!voiceMuted}
-              aria-label={voiceMuted ? "打開朗讀" : "關閉朗讀"}
-              onClick={onToggleVoice}
-            >
-              <Icon name={voiceMuted ? "volume-off" : "volume-on"} size={22} />
             </button>
           </span>
         ) : null}
       </div>
       <ul className={styles.goalList} data-count={goals.length}>
         {goals.map((goal, i) => (
-          <li key={i}>
+          <li key={i} data-candy-goal={i}>
             <CandyGoalCard goal={goal} progress={progress} onHear={() => onHearGoal(goal)} />
           </li>
         ))}

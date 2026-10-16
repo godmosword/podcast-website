@@ -31,6 +31,7 @@ function migrateV1(parsed: Partial<PlayerProfile>): PlayerProfile {
     medals: parsed.medals ?? {},
     stickers: parsed.stickers ?? [],
     gamesPlayed: parsed.gamesPlayed ?? {},
+    candyMatchMedals: parsed.candyMatchMedals,
     version: 2,
   })));
 }

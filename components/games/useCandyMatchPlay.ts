@@ -358,17 +358,18 @@ export function useCandyMatchPlay(options: Options) {
   );
 
   const finishResolve = useCallback(
-    async (state: BoardState, events: ResolveEvents, token: number) => {
+    async (state: BoardState, events: ResolveEvents, token: number, baseProgress?: CandyProgress) => {
       const snap = playRef.current;
       if (!snap) return;
       const { instance, syncHost, tone } = optsRef.current;
-      const progress = applyEvents(snap.progress, events);
+      const before = baseProgress ?? snap.progress;
+      const progress = applyEvents(before, events);
       commit({ progress, board: state });
       const score = computeScore(progress, snap.movesLeft);
       instance.notifyScore(score);
       syncHost();
       const newlyDone = snap.round.stage.goals.filter(
-        (goal) => !goalStatus(goal, snap.progress).done && goalStatus(goal, progress).done,
+        (goal) => !goalStatus(goal, before).done && goalStatus(goal, progress).done,
       );
       if (newlyDone.length === 0 && events.waves > 0) {
         const cheer = pick(CHEER_SUCCESS);
@@ -386,7 +387,7 @@ export function useCandyMatchPlay(options: Options) {
         setMessage(CHEER_WIN);
         cueSpeech(CHEER_WIN, true);
         [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => tone(f, 0.18, "triangle", 0.07), i * 120));
-        instance.notifyWon({ score, levelIndex: snap.round.index, cleared: true, flawless, collectedAll: efficient });
+        instance.notifyWon({ candyMode: snap.round.mode, score, levelIndex: snap.round.index, cleared: true, flawless, collectedAll: efficient });
         syncHost();
         setBusyState(false);
         return;
@@ -508,14 +509,16 @@ export function useCandyMatchPlay(options: Options) {
         if (token !== tokenRef.current) return;
         setPopping(EMPTY_SET);
         setMotion((m) => ({ ...m, sweep: null, fx: [], particles: [], shake: false, still: false }));
-        commit({ board: wave.afterClear });
+        events = addWaveEvents(events, wave);
+        // 車車飛抵任務後更新收集；禮物要等掉落演出完成才算送達。
+        commit({ board: wave.afterClear, progress: applyEvents(snap0.progress, { ...events, dropped: events.dropped - wave.dropped }) });
         if (wave.cleaned > 0) optsRef.current.tone(1046, 0.14, "triangle", 0.05);
         if (!(await animatePhases(wave.phases, token))) return;
-        events = addWaveEvents(events, wave);
+        commit({ progress: applyEvents(snap0.progress, events) });
         for (const spawn of wave.spawns) showTip(spawn.kind);
         state = wave.state;
       }
-      await finishResolve(state, events, token);
+      await finishResolve(state, events, token, snap0.progress);
     },
     [animatePhases, commit, cueSpeech, finishResolve, playHorn, setBusyState, showTip],
   );

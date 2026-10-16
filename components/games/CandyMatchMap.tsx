@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import type { CandyMatchLevel } from "@/lib/games/candy-match/levels";
 import { CANDY_MODES, type CandyMode } from "@/lib/games/candy-match/stages";
 import { IconLock, IconPlay, IconStar } from "@/components/games/ClayIcons";
@@ -19,6 +19,7 @@ export type CandyStationPreview = {
   goals: readonly CandyGoal[];
   summary: string;
   moves: number;
+  efficiency: number;
   replay: boolean;
 };
 
@@ -105,10 +106,20 @@ export function CandyMatchMap({
 }: CandyMatchMapProps) {
   const nextIndex = Math.min(maxCleared, Math.max(0, levels.length - 1));
   const finished = maxCleared >= levels.length;
+  const heroRef = useRef<HTMLDivElement>(null);
   const [picked, setPicked] = useState<number | null>(null);
   const [notice, setNotice] = useState("");
   const heroIndex = picked != null && picked <= maxCleared ? picked : nextIndex;
   const hero = levels[heroIndex];
+
+  useEffect(() => {
+    const hero = heroRef.current;
+    if (!hero) return;
+    const rect = hero.getBoundingClientRect();
+    if (rect.top < 0 || rect.bottom > window.innerHeight) {
+      hero.scrollIntoView({ block: "start", behavior: "instant" });
+    }
+  }, [mode, nextIndex]);
 
   if (!hero) return null;
   const preview = previewFor(heroIndex);
@@ -123,7 +134,7 @@ export function CandyMatchMap({
     <div className={styles.map} data-testid="candy-match-map">
       <ModeToggle mode={mode} onChange={onModeChange} />
 
-      <div className={styles.hero}>
+      <div ref={heroRef} className={styles.hero}>
         <span className={styles.heroArt} aria-hidden>
           {/* eslint-disable-next-line @next/next/no-img-element -- 固定 256px 黏土小圖 */}
           <img
@@ -163,6 +174,17 @@ export function CandyMatchMap({
         </button>
       </div>
 
+      <details className={styles.starRules}>
+        <summary>★ 怎麼拿三星？</summary>
+        <ul>
+          <li>完成本關任務</li>
+          <li>不用消除道具過關</li>
+          <li>{mode === "challenge" ? `過關時剩 ${preview.efficiency} 步以上` : `${preview.efficiency} 次有效交換內過關`}</li>
+        </ul>
+        <p>提示不影響星星。獎章可分次收集，兩種玩法分開記錄。</p>
+        {preview.replay ? <p>這次是新任務，三星條件也依本次任務計算。</p> : null}
+      </details>
+
       <p className={styles.notice} role="status">
         {notice}
       </p>
@@ -196,7 +218,7 @@ export function CandyMatchMap({
               aria-disabled={locked || undefined}
               aria-current={i === heroIndex ? "true" : undefined}
               data-locked={locked ? "true" : undefined}
-              aria-label={`第 ${i + 1} 站 ${lv.place}${locked ? "（未解鎖）" : `，${got} 顆星`}`}
+              aria-label={`第 ${i + 1} 站 ${lv.place}${locked ? "（未解鎖）" : `，${got > 0 ? "已完成，" : ""}${got} 顆星`}`}
               title={lv.place}
               onClick={() => {
                 if (locked) {
@@ -222,6 +244,7 @@ export function CandyMatchMap({
                 <span className={styles.nodeNumber} aria-hidden>
                   {i + 1}
                 </span>
+                {got > 0 ? <span className={styles.stationStamp} aria-hidden>✓</span> : null}
                 {locked ? (
                   <span className={styles.lock} aria-hidden>
                     <IconLock size={22} />

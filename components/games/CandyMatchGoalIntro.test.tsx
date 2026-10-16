@@ -52,6 +52,6 @@ describe("CandyMatchGoalIntro", () => {
     const css = readFileSync("components/games/CandyMatchPlay.module.css", "utf8");
     expect(css).toMatch(/\.introStart\s*\{[^}]*min-height:\s*56px/);
     expect(css).toMatch(/\.goalCardButton\s*\{[^}]*min-height:\s*84px/);
-    expect(css).toMatch(/\.muteButton\s*\{[^}]*width:\s*56px/);
+    expect(css).toMatch(/\.replayButton\s*\{[^}]*min-width:\s*56px/);
   });
 });

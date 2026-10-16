@@ -316,6 +316,7 @@ test.describe("遊戲完整 lifecycle", () => {
     await page.evaluate(() => {
       const raw = JSON.parse(localStorage.getItem("cheche:progress") ?? "{}");
       raw.gameProfile.medals["candy-match"] = [1, 1, 1, 1, 1];
+      raw.gameProfile.candyMatchMedals = { easy: [1, 1, 1, 1, 1], challenge: [] };
       localStorage.setItem("cheche:progress", JSON.stringify(raw));
     });
     await page.reload();

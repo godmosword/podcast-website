@@ -431,3 +431,10 @@
     transform: none;
   }
 }
+
+.starRules { padding: 10px 14px; border-radius: 16px; background: #ffffffd9; color: #5d4a67; font-size: 14px; line-height: 1.6; }
+.starRules summary { cursor: pointer; min-height: 44px; align-content: center; font-weight: 800; }
+.starRules p { margin: 6px 0; }
+.starRules ul { margin: 6px 0; padding-left: 22px; }
+
+.stationStamp { position: absolute; top: -7px; right: -6px; display: grid; place-items: center; width: 24px; height: 24px; border: 2px solid #fff; border-radius: 50%; background: #23744a; color: #fff; font-size: 16px; font-weight: 900; }

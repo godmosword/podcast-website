@@ -13,11 +13,12 @@ function doneProgress(roundGoals: number): CandyProgress {
   return { ...freshCandyProgress(4), collected: [roundGoals, 0, 0, 0] };
 }
 
-function renderWin(flawless: boolean, efficient: boolean) {
+function renderWin(flawless: boolean, efficient: boolean, previousMedals = 0) {
   const round = buildRound(0, "easy", { replay: false, rng: () => 0.5 });
   return render(
     <CandyMatchResult
       round={round}
+      previousMedals={previousMedals}
       progress={doneProgress(50)}
       outcome={{ kind: "win", stars: 1 + Number(flawless) + Number(efficient), flawless, efficient }}
       isLastLevel={false}
@@ -35,6 +36,12 @@ function starStates() {
 }
 
 describe("CandyMatchResult", () => {
+  it("本次兩星也能補齊先前缺的效率獎章，區分本次與累積", () => {
+    renderWin(false, true, 3);
+    expect(screen.getByRole("img", { name: "拿到 2 顆星，共 3 顆" })).toBeTruthy();
+    expect(screen.getByText("新獲得 1 枚獎章 · 累積 3/3")).toBeTruthy();
+  });
+
   it("星星由左往右亮，不跟條件綁位置（沒用道具也不會中間空一顆）", () => {
     renderWin(false, true);
 

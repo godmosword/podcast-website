@@ -6,12 +6,14 @@ import { IconFootprints, IconMapFold } from "@/components/games/CandyMatchIcons"
 import { CandyGoalCard } from "@/components/games/CandyMatchTaskBar";
 import { ResultStars, type ResultStarHint } from "@/components/games/ResultStars";
 import type { CandyMatchRound } from "@/lib/games/candy-match/stages";
+import { medalCount, medalFlags } from "@/lib/gamekit/progress/meta";
 import { goalStatus, type CandyGoal, type CandyProgress } from "@/lib/games/candy-match/tasks";
 import type { CandyRoundOutcome } from "./useCandyMatchPlay";
 import styles from "./CandyMatchPlay.module.css";
 
 type CandyMatchResultProps = {
   round: CandyMatchRound;
+  previousMedals?: number;
   progress: CandyProgress;
   outcome: CandyRoundOutcome;
   isLastLevel: boolean;
@@ -88,6 +90,7 @@ function GoalRecap({
 /** 結算：過關蓋章，或挑戰沒過時標出還差幾台。按鈕一排「回地圖｜下一站｜再挑戰」，主鈕在中線。 */
 export function CandyMatchResult({
   round,
+  previousMedals = 0,
   progress,
   outcome,
   isLastLevel,
@@ -133,6 +136,10 @@ export function CandyMatchResult({
             <>
               {isLastLevel ? <p className={styles.introLine}>全部完成！</p> : null}
               <GoalRecap goals={goals} progress={progress} emphasis="play" />
+              <p className={styles.medalRecap}>
+                本次表現
+                <span>新獲得 {medalCount(medalFlags(true, outcome.flawless, outcome.efficient) & ~previousMedals)} 枚獎章 · 累積 {medalCount(previousMedals | medalFlags(true, outcome.flawless, outcome.efficient))}/3</span>
+              </p>
               <ResultStars stars={outcome.stars} hints={missedRules(round, outcome)} animate={!reducedMotion} />
             </>
           }

@@ -20,6 +20,7 @@ export { GAMEKIT_PROGRESS_EVENT } from "../runtime/constants";
 export type GameSessionResult = {
   gameId: GameScoreId;
   score: number;
+  candyMode?: "easy" | "challenge";
   /** 關卡索引。 */
   levelIndex?: number;
   cleared?: boolean;
@@ -66,18 +67,27 @@ export function reportGameSession(result: GameSessionResult): PlayerProfile {
 
   if (result.cleared) {
     const idx = result.levelIndex ?? 0;
-    const prevFlags = profile.medals[result.gameId]?.[idx] ?? 0;
+    const candyMode = result.gameId === "candy-match" ? result.candyMode ?? "easy" : null;
+    const modeMedals = profile.candyMatchMedals ?? {
+      easy: profile.medals["candy-match"]?.slice() ?? [], challenge: [],
+    };
+    const prevFlags = (candyMode ? modeMedals[candyMode][idx] : profile.medals[result.gameId]?.[idx]) ?? 0;
     const flags = medalFlags(
       true,
       Boolean(result.flawless),
       Boolean(result.collectedAll),
     );
     profile = recordMedal(profile, result.gameId, idx, flags);
-    const merged = profile.medals[result.gameId]?.[idx] ?? flags;
+    const merged = prevFlags | flags;
+    if (candyMode) {
+      const medals = modeMedals[candyMode].slice();
+      medals[idx] = merged;
+      profile = { ...profile, candyMatchMedals: { ...modeMedals, [candyMode]: medals } };
+    }
     for (let bit = 1; bit <= 4; bit <<= 1) {
       if ((merged & bit) && !(prevFlags & bit)) {
         profile = applyGrantStars(profile, {
-          id: `medal:${result.gameId}:${idx}:${bit}`,
+          id: `medal:${result.gameId}:${candyMode === "challenge" ? "challenge:" : ""}${idx}:${bit}`,
           amount: 1,
           source: `game:${result.gameId}:medal`,
         });

@@ -43,6 +43,8 @@ export type PlayerProfile = {
   bests: Partial<Record<GameScoreId, number>>;
   /** 每款遊戲各關／迷宮的三星 bit flags */
   medals: Partial<Record<GameKitGameId, number[]>>;
+  /** 消消樂依模式記錄；舊版未分流的獎章歸入 easy。 */
+  candyMatchMedals?: { easy: number[]; challenge: number[] };
   stickers: string[];
   gamesPlayed: Partial<Record<GameScoreId, boolean>>;
 };

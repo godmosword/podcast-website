@@ -13,7 +13,6 @@ const voice = {
   voiceMuted: false,
   reducedMotion: true,
   onReplay: () => {},
-  onToggleVoice: () => {},
   onHearGoal: () => {},
 };
 
@@ -88,10 +87,9 @@ describe("CandyMatchTaskBar", () => {
     expect(container.querySelector('img[src*="ice-cream-shop"]')).toBeTruthy();
   });
 
-  it("再聽一次與朗讀開關都在，關著時換圖示與名稱", () => {
+  it("朗讀關閉時停用重播，不重複顯示音效開關", () => {
     const round = buildRound(0, "easy", { replay: false, rng: fixedRng });
     const onReplay = vi.fn();
-    const onToggleVoice = vi.fn();
     render(
       <CandyMatchTaskBar
         round={round}
@@ -100,13 +98,12 @@ describe("CandyMatchTaskBar", () => {
         {...voice}
         voiceMuted
         onReplay={onReplay}
-        onToggleVoice={onToggleVoice}
       />,
     );
     screen.getByRole("button", { name: "再聽一次" }).click();
-    screen.getByRole("button", { name: "打開朗讀" }).click();
-    expect(onReplay).toHaveBeenCalledTimes(1);
-    expect(onToggleVoice).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("button", { name: "再聽一次" }).hasAttribute("disabled")).toBe(true);
+    expect(screen.queryByRole("button", { name: /朗讀/ })).toBeNull();
+    expect(onReplay).not.toHaveBeenCalled();
   });
 
   it("家長在設定裡關掉念出來：再聽一次與朗讀開關都收起來", () => {

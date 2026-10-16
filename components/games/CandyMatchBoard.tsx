@@ -311,8 +311,8 @@ export function CandyMatchBoard({
             borderRadius: Math.max(10, cellPx * 0.26),
             background:
               (i % cols) % 2 === Math.floor(i / cols) % 2
-                ? "rgba(255,221,230,.5)"
-                : "rgba(208,240,255,.5)",
+                ? "rgba(255,221,230,.28)"
+                : "rgba(208,240,255,.28)",
             cursor: disabled ? "default" : "pointer",
             WebkitTapHighlightColor: "transparent",
             transition: reduced ? "none" : "transform .15s ease",

@@ -21,6 +21,8 @@ import {
   type CandyMatchPrefs,
   type CandyMatchTipId,
 } from "@/lib/gamekit/progress/candy-match-prefs";
+import { candyModeMedals } from "@/lib/gamekit/progress/candy-match-medals";
+import { CandyMatchCollectionFx } from "./CandyMatchCollectionFx";
 import { medalCount } from "@/lib/gamekit/progress/meta";
 import { loadPlayerProfile } from "@/lib/gamekit/progress/save";
 import { GAMEKIT_PROGRESS_EVENT } from "@/lib/gamekit/progress/session";
@@ -84,6 +86,7 @@ export function CandyMatchView({
   const tone = audio?.tone ?? noopTone;
 
   const [screen, setScreen] = useState<Screen>("title");
+  const [roundMedals, setRoundMedals] = useState(0);
   const [medals, setMedals] = useState<number[]>([]);
   const [prefs, setPrefs] = useState<CandyMatchPrefs>(EMPTY_PREFS);
   const [brandFontsEnabled, setBrandFontsEnabled] = useState(false);
@@ -123,8 +126,8 @@ export function CandyMatchView({
   });
 
   const refreshMedals = useCallback(() => {
-    setMedals(loadPlayerProfile().medals["candy-match"]?.slice() ?? []);
-  }, []);
+    setMedals(candyModeMedals(loadPlayerProfile(), mode).slice());
+  }, [mode]);
   useEffect(() => {
     refreshMedals();
     setPrefs(loadCandyMatchPrefs());
@@ -164,6 +167,7 @@ export function CandyMatchView({
         summary: goalsSummary(round.stage.goals),
         moves: round.stage.moves,
         replay: round.replay,
+        efficiency: round.stage.efficiency,
       };
     },
     [planRound],
@@ -175,12 +179,13 @@ export function CandyMatchView({
       const round = planRound(index);
       delete pendingRef.current[roundKey(round.mode, index, round.replay)];
       lastStageRef.current[`${round.mode}:${index}`] = round.stage.id;
+      setRoundMedals(medals[index] ?? 0);
       actions.start(round);
       setScreen("play");
       instance.notifyPlaying(index, 0);
       syncHost();
     },
-    [actions, ensureAudio, instance, planRound, syncHost],
+    [actions, ensureAudio, instance, medals, planRound, syncHost],
   );
 
   const goToMap = useCallback(() => {
@@ -310,9 +315,10 @@ export function CandyMatchView({
           </button>
           <div className={styles.titlePanel}>
             {/* 頁面唯一 h1 屬 GamePageShell；此處為關卡畫面標題，降為 h2 避免重複 h1。 */}
-            <h2 className={styles.titleHeading}>準備找糖果！</h2>
+            <h2 className={styles.titleHeading}>車車排排，出發！</h2>
             {/* 拿到幾顆星：圖＋數字，不寫「完成小任務，就有星星」這種要讀的句子 */}
-            <p className={styles.titleStars} role="img" aria-label={`已經拿到 ${starsGot} 顆星，全部 ${starsTotal} 顆`}>
+            <p className={styles.titleStars} role="img" aria-label={`${mode === "easy" ? "輕鬆" : "挑戰"}冒險，已經拿到 ${starsGot} 顆星，全部 ${starsTotal} 顆`}>
+              <span aria-hidden>{mode === "easy" ? "輕鬆" : "挑戰"}</span>
               <IconStar size={22} />
               <b aria-hidden>{starsGot}</b>
               <span aria-hidden>/ {starsTotal}</span>
@@ -357,7 +363,6 @@ export function CandyMatchView({
               voiceMuted={speech.muted}
               reducedMotion={reducedMotion}
               onReplay={speech.replay}
-              onToggleVoice={speech.toggleMuted}
               onHearGoal={(goal) => speech.speak(goalHearLine(goal, play.progress))}
             />
           </div>
@@ -417,6 +422,11 @@ export function CandyMatchView({
             </p>
           </div>
 
+          {!reducedMotion && !inputPaused && game.popping.size > 0 ? (
+            <CandyMatchCollectionFx boardRef={boardWrapRef} board={play.board} popping={game.popping}
+              goals={play.round.stage.goals} progress={play.progress} duration={game.motion.sweepMs} />
+          ) : null}
+
           {game.briefing ? (
             <CandyMatchGoalIntro
               round={play.round}
@@ -431,6 +441,7 @@ export function CandyMatchView({
               round={play.round}
               progress={play.progress}
               outcome={game.outcome}
+              previousMedals={roundMedals}
               isLastLevel={isLastLevel}
               reducedMotion={reducedMotion}
               onNext={() => startLevel(play.round.index + 1)}
