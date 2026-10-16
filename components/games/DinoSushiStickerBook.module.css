@@ -2,8 +2,9 @@
  * 貼紙書蓋在標題或結算上。30 張：料 12、飯 3、表情 5、驚喜 4、朋友 6。
  * 顏色吃卡片上的 --sushi-*，不另寫色碼。
  * 格子是按鈕：點得到的念名字，點不到的念怎麼拿到。
- * 直向 320／390 三欄（朋友 6 張正好兩列）；560 起四欄；800 起六欄（1280 朋友一列）。
+ * 直向 320／390 三欄（朋友 6 張正好兩列）；560 起四欄；800 起固定六欄、每欄 112–148px 置中（1280 朋友一列）。
  * 矮橫向維持格高 64、間距 8，書本自己上下捲，不橫向溢出。
+ * 書、標題列、格子的底都不透明：半透明時底下廚房的字會從鎖住的格子透出來。
  */
 
 .book {
@@ -16,14 +17,14 @@
   padding: 8px 8px 12px;
   overflow: auto;
   overscroll-behavior: contain;
-  background:
-    linear-gradient(180deg, rgba(255, 250, 240, 0.96), rgba(253, 240, 218, 0.94));
+  background: linear-gradient(180deg, #fffaf0, #fdf0da);
   color: var(--sushi-ink, CanvasText);
 }
 
+/* 書有 8px 上內距；sticky 釘在 -8px 才貼齊書頂，捲動時上面不露出底下的格子 */
 .bar {
   position: sticky;
-  top: 0;
+  top: -8px;
   z-index: 1;
   display: flex;
   align-items: center;
@@ -31,7 +32,7 @@
   min-height: 72px;
   margin: -8px -8px 8px;
   padding: 8px;
-  background: rgba(255, 248, 234, 0.96);
+  background: #fff8ea;
 }
 
 .close {
@@ -74,10 +75,24 @@
 }
 
 .sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin: 0 0 8px;
   font-size: 1rem;
   font-weight: 900;
   text-align: start;
+}
+
+/* 區塊標題後的「新 N」：跟格子右上的「新」同一個綠章 */
+.sectionNew {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--sushi-accent, CanvasText);
+  color: var(--sushi-cream, Canvas);
+  font-size: 0.75rem;
+  font-weight: 900;
+  line-height: 1.2;
 }
 
 .grid {
@@ -108,7 +123,7 @@
   padding: 6px 4px 4px;
   border: none;
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.78);
+  background: #fffcf6;
   box-shadow: 0 0 0 2px rgba(120, 90, 50, 0.14);
   color: inherit;
   font: inherit;
@@ -117,13 +132,19 @@
 }
 
 .cell[data-locked="true"] {
-  background: rgba(90, 70, 40, 0.08);
+  background: #efe4d2;
 }
 
 .pic {
   position: relative;
   width: 56px;
   height: 56px;
+}
+
+/* 書裡的圖放大一階；.pic 也用在結算新貼紙與圓蓋，那邊各自定尺寸 */
+.cell .pic {
+  width: 64px;
+  height: 64px;
 }
 
 .pic img {
@@ -134,9 +155,24 @@
   pointer-events: none;
 }
 
+/* 鎖住：原圖當遮罩的不透明暖棕剪影（--sil 由元件給圖檔路徑），圖本身藏起來 */
 .cell[data-locked="true"] .pic img {
-  filter: grayscale(1) brightness(0.2);
-  opacity: 0.85;
+  visibility: hidden;
+}
+
+.cell[data-locked="true"] .pic::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #c8ad8a;
+  -webkit-mask: var(--sil) center / contain no-repeat;
+  mask: var(--sil) center / contain no-repeat;
+}
+
+/* 朋友是方形照片圓裁：剪影填滿整個圓 */
+.cell[data-locked="true"] .face::before {
+  -webkit-mask-size: cover;
+  mask-size: cover;
 }
 
 .mystery {
@@ -144,10 +180,10 @@
   inset: 0;
   display: grid;
   place-items: center;
-  color: var(--sushi-cream, Canvas);
+  color: #5a4128;
   font-size: 1.5rem;
   font-weight: 900;
-  text-shadow: 0 1px 0 rgba(40, 30, 20, 0.35);
+  text-shadow: 0 1px 0 rgba(255, 250, 240, 0.6);
 }
 
 .face {
@@ -201,6 +237,26 @@
   animation: stickerIn 280ms ease-out both;
 }
 
+/* 開書時畫面內的新貼紙閃一次：綠環往外擴、淡掉（不用金色，金色是「一次做對」） */
+.cell[data-flash="true"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  animation: newRing 600ms ease-out both;
+  animation-delay: calc(var(--flash-wait, 0ms) + var(--flash-i, 0) * 60ms);
+}
+
+@keyframes newRing {
+  from {
+    box-shadow: 0 0 0 0 rgba(95, 191, 133, 1);
+  }
+  to {
+    box-shadow: 0 0 0 8px rgba(95, 191, 133, 0);
+  }
+}
+
 .footer {
   margin: 4px 0 0;
   color: var(--sushi-ink-soft, GrayText);
@@ -228,8 +284,25 @@
 }
 
 @media (min-width: 800px) {
+  /* 區塊跟格子一樣寬並置中，標題才對齊格子左緣 */
+  .section,
+  .footer {
+    width: min(100%, calc(6 * 148px + 5 * 8px));
+    margin-inline: auto;
+  }
+
   .grid {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(112px, 148px));
+    justify-content: center;
+  }
+
+  .cell {
+    min-height: 120px;
+  }
+
+  .cell .pic {
+    width: 76px;
+    height: 76px;
   }
 }
 
@@ -243,18 +316,20 @@
     min-height: 64px;
   }
 
-  .pic {
+  .cell .pic {
     width: 44px;
     height: 44px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .cell[data-new="true"] .pic {
+  .cell[data-new="true"] .pic,
+  .cell[data-flash="true"]::after {
     animation: none;
   }
 }
 
-.book[data-reduced="true"] .cell[data-new="true"] .pic {
+.book[data-reduced="true"] .cell[data-new="true"] .pic,
+.book[data-reduced="true"] .cell[data-flash="true"]::after {
   animation: none;
 }

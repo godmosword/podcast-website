@@ -52,6 +52,15 @@ const TOPPING_SRC: Record<ToppingId, string> = {
   wasabi: dinoSushiSrc("food/wasabi.webp"),
 };
 
+/** 貼紙書的剪影要拿原圖當遮罩，所以讓外面拿得到圖檔路徑。 */
+export function baseSrc(id: BaseId): string {
+  return BASE_SRC[id];
+}
+
+export function toppingSrc(id: ToppingId): string {
+  return TOPPING_SRC[id];
+}
+
 /** 飯圖原生寬高比，組裝舞台跟這張圖同比例，料的百分比才對得準。 */
 const BASE_ASPECT: Record<BaseId, string> = {
   nigiri: "581 / 416",

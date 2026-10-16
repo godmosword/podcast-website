@@ -670,6 +670,12 @@
   animation-delay: calc(600ms + var(--i, 0) * 50ms);
 }
 
+/* 貼紙圖跟著格子大小（56／48／44），不吃貼紙書的固定尺寸 */
+.freshThumb > span {
+  width: 100%;
+  height: 100%;
+}
+
 /* 「+N」：跟「放進貼紙書」同一種淡綠，一看就是「打開書」；不做實心綠圓（會像「新」徽章） */
 .freshMore {
   position: relative;
