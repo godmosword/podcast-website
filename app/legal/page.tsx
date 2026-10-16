@@ -138,6 +138,10 @@ export default function LegalPage() {
             <code>contact.html</code> 審圖清單<strong>逐張人工審稿</strong>
             ，通過後才發佈至網站。未通過審核之暫存圖不對外提供。
           </p>
+          <p className={styles.text}>
+            遊戲畫面也可能由工具輔助產生，不限於劇情插圖。多多壽司屋是恐龍車多多的小遊戲，封面、角色貼紙、店面與食材都先經人工挑選與修改，核准後才放上網站。未核准的候選圖不對外提供。提示詞與候選圖不在本儲存庫；已上線圖的逐檔來源見{" "}
+            <code>public/games/v2/dino-sushi/SOURCES.md</code>。
+          </p>
         </section>
 
         <section className={styles.section} id="age">
@@ -154,11 +158,11 @@ export default function LegalPage() {
               Apple Podcasts、Spotify、YouTube、Instagram、Threads、Facebook
               的名稱與畫面上的標誌，使用各權利人公開品牌資源裡的官方檔（見{" "}
               <code>public/brand/</code> 與 <code>public/brand/SOURCES.md</code>
-              ），依其規範以原色、原比例與留白呈現，僅作<strong>指示性連結</strong>
+              ），依其規範以原色、原比例呈現，僅作<strong>指示性連結</strong>
               （導向官方頁面），不代表與上述公司之合作或代言關係。
             </li>
             <li>
-              KKBOX 名稱為其商標。站上的 KKBOX 圖示是本站自繪的連結標記，不是 KKBOX 官方徽章。
+              KKBOX 名稱為其商標。站上字標沿用公開典藏的 KKBOX 字標路徑，並換成淺色青／黑與深色白，不是向 KKBOX 索取的正式套件，也不代表合作。
             </li>
             <li>
               「以 LINE 分享」只使用 LINE 這個名稱與本站自繪的分享圖示，沒有使用 LINE 官方標誌。
@@ -191,7 +195,12 @@ export default function LegalPage() {
             </li>
             <li>
               拉丁字母與數字：<a href="https://fonts.google.com/specimen/Fredoka">Fredoka</a>、<a href="https://fonts.google.com/specimen/Gochi+Hand">Gochi Hand</a>（SIL
-              Open Font License，經 Google Fonts 自託管）。
+              Open Font License 1.1，經 Google Fonts 自託管）。條款全文見{" "}
+              <code>app/fonts/OFL-fredoka.txt</code>、<code>app/fonts/OFL-gochi-hand.txt</code>。
+            </li>
+            <li>
+              分享圖用的 <a href="https://fonts.google.com/noto/specimen/Noto+Sans+TC">Noto Sans TC</a>（<code>app/fonts/noto-sans-tc-og.ttf</code>）同為 SIL OFL 1.1，條款全文見{" "}
+              <code>app/fonts/OFL-noto-sans-tc.txt</code>。
             </li>
           </ul>
         </section>

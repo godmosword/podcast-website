@@ -47,6 +47,8 @@ export type OverlayProps = {
   reducedMotion: boolean;
   gameVolume: number;
   soundOn: boolean;
+  /** 遊戲設定的「念出來」；只有會朗讀的遊戲用得到。 */
+  voiceEnabled: boolean;
   onStart: () => void;
   onResume: () => void;
   onRestart: () => void;

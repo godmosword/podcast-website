@@ -477,7 +477,9 @@ test.describe("coloring book 離開提醒與塗過標記", () => {
     test(`${vp.width}×${vp.height}：畫布和全部顏色不用捲動就看得到`, async ({ page }) => {
       await page.setViewportSize(vp);
       await openFirstColoringPage(page);
-      const fit = await page.evaluate(() => {
+      // <340px 寬一排塞不下 6 個 48px 色塊，才收到 44px（見 ColoringPalette.module.css）。
+      const minSwatch = vp.width < 340 ? 44 : 48;
+      const fit = await page.evaluate((minSwatch) => {
         const canvas = document.querySelector("canvas")!.getBoundingClientRect();
         const controls = document
           .querySelector("[data-testid='coloring-controls']")!
@@ -506,12 +508,16 @@ test.describe("coloring book 離開提醒與塗過標記", () => {
               r.bottom <= window.innerHeight + 1 &&
               r.left >= -1 &&
               r.right <= window.innerWidth + 1 &&
-              r.width >= 48 &&
-              r.height >= 48,
+              r.width >= minSwatch &&
+              r.height >= minSwatch,
           ),
+          swatchRows: new Set(swatches.map((r) => Math.round(r.top))).size,
         };
-      });
-      expect(fit).toEqual({
+      }, minSwatch);
+      const { swatchRows, ...fitRest } = fit;
+      // 直式窄螢幕排成三排會把畫布擠到 140px；兩排才留得下畫布。
+      if (vp.width < 400 && vp.height > vp.width) expect(swatchRows).toBe(2);
+      expect(fitRest).toEqual({
         noScroll: true,
         noHorizontal: true,
         canvasInView: true,

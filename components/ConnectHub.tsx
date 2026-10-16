@@ -1,12 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ConnectMark } from "@/components/brand/OfficialMark";
-import {
-  BrandSvg,
-  PLATFORM_ICON_PATHS,
-  SOCIAL_ICON_PATHS,
-} from "@/lib/connect-icons";
+import BrandMark from "@/components/BrandMark";
 import { trackPlatformClick } from "@/lib/analytics";
 import { appendPlatformUtm } from "@/lib/platform-utm";
 import { visiblePlatforms } from "@/lib/platforms";
@@ -40,7 +35,7 @@ function IconLink({
 }) {
   const content = (
     <>
-      {children}
+      <span className={styles.badge}>{children}</span>
       <span className={styles.label}>{label}</span>
     </>
   );
@@ -67,7 +62,7 @@ function IconLink({
   );
 }
 
-/** 頁尾頻道與社群：分兩區塊，圓形圖示。 */
+/** 頁尾頻道與社群：分兩區塊，每個官方標誌放進同一顆白章（規則見 lib/BRAND-ASSETS-HARD-RULES.md）。 */
 export default function ConnectHub({
   id = "connect",
   className,
@@ -105,16 +100,7 @@ export default function ConnectHub({
                 ariaLabel={`在 ${p.label} 收聽`}
                 onClick={() => trackPlatformClick(p.label, "footer-connect")}
               >
-                <ConnectMark
-                  icon={p.icon}
-                  fallback={
-                    <span className={styles.badge} style={{ background: p.color }}>
-                      <BrandSvg className={styles.icon}>
-                        {PLATFORM_ICON_PATHS[p.icon]}
-                      </BrandSvg>
-                    </span>
-                  }
-                />
+                <BrandMark id={p.icon} surface="chip" />
               </IconLink>
             ))}
           </nav>
@@ -139,19 +125,7 @@ export default function ConnectHub({
                     : `前往 ${s.label}`
                 }
               >
-                <ConnectMark
-                  icon={s.icon}
-                  fallback={
-                    <span
-                      className={styles.badge}
-                      style={{ background: s.background }}
-                    >
-                      <BrandSvg className={styles.icon}>
-                        {SOCIAL_ICON_PATHS[s.icon]}
-                      </BrandSvg>
-                    </span>
-                  }
-                />
+                <BrandMark id={s.icon} surface="chip" />
               </IconLink>
             ))}
           </nav>

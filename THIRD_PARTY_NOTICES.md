@@ -9,16 +9,25 @@
 |------|------|------|----------|
 | jf-open 粉圓（huninn）子集 | 中文內文（`app/fonts/huninn-subset.woff2`） | SIL Open Font License 1.1 | [app/fonts/OFL-huninn.txt](./app/fonts/OFL-huninn.txt) |
 | 源泉圓體 TW Bold 子集 | 中文標題（`app/fonts/gensen-rounded-tw-bold-subset.woff2`） | SIL OFL 1.1 | [app/fonts/OFL-gensen-rounded.txt](./app/fonts/OFL-gensen-rounded.txt) |
-| Fredoka | 拉丁字母與數字 | SIL OFL 1.1 | [Google Fonts](https://fonts.google.com/specimen/Fredoka) |
-| Gochi Hand | 手繪風拉丁標題 | SIL OFL 1.1 | [Google Fonts](https://fonts.google.com/specimen/Gochi+Hand) |
+| Fredoka | 拉丁字母與數字（`next/font` 自 Google Fonts 載入） | SIL OFL 1.1 | [app/fonts/OFL-fredoka.txt](./app/fonts/OFL-fredoka.txt) |
+| Gochi Hand | 手繪風拉丁標題（`next/font` 自 Google Fonts 載入） | SIL OFL 1.1 | [app/fonts/OFL-gochi-hand.txt](./app/fonts/OFL-gochi-hand.txt) |
+| Noto Sans TC | OG 圖用的單一粗細（`app/fonts/noto-sans-tc-og.ttf`） | SIL OFL 1.1 | [app/fonts/OFL-noto-sans-tc.txt](./app/fonts/OFL-noto-sans-tc.txt) |
 
 ## 內嵌圖形資產
 
 | 資產 | 用途 | 來源 | 授權 |
 |------|------|------|------|
+| 多多壽司屋圖檔（`public/games/v2/dino-sushi/` 的 cover、`duoduo/`、`food/`、`shop/` 與 `sm/` 副本） | 恐龍車多多的壽司小遊戲：封面、角色貼紙、食材與店面 | 逐檔見 [public/games/v2/dino-sushi/SOURCES.md](./public/games/v2/dino-sushi/SOURCES.md) | 本站以工具輔助產生，經人工挑選與核准後使用。保護範圍的整理見 [docs/legal/IP-NOTES.md](./docs/legal/IP-NOTES.md)（非法律意見） |
+
+本表這次只登記多多壽司屋。節目插圖與其他遊戲圖不在這張表。
+
 ## 商標（指示性使用）
 
-Apple Podcasts、Spotify、YouTube、Instagram、Threads、Facebook 的畫面上標誌，使用各權利人公開品牌資源的官方檔（見 `public/brand/SOURCES.md`），僅作指示性連結，商標權屬各權利人。KKBOX 圖示為本站自繪，不是官方徽章。LINE 只出現在「以 LINE 分享」的名稱，沒有使用 LINE 官方標誌。電子郵件圖示是本站通用符號。
+Apple Podcasts、Spotify、YouTube、Instagram、Threads、Facebook 的畫面上標誌，使用各權利人公開品牌資源的官方檔（見 `public/brand/SOURCES.md`，規則見 `lib/BRAND-ASSETS-HARD-RULES.md`），僅作指示性連結，商標權屬各權利人。KKBOX 字標沿用公開典藏路徑並換成規範色，不是向 KKBOX 索取的正式套件。LINE 只出現在「以 LINE 分享」的名稱，沒有使用 LINE 官方標誌。電子郵件圖示是本站通用符號。
+
+## 地圖圖磚
+
+親子遊樂地圖使用 [OpenFreeMap](https://openfreemap.org/) Liberty 樣式（免註冊、可商業使用）。畫面署名為 OpenFreeMap、OpenMapTiles 與 OpenStreetMap。不再向 `tile.openstreetmap.org` 要圖。
 
 ## npm 依賴
 

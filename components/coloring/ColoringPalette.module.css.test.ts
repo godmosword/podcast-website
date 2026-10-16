@@ -17,4 +17,14 @@ describe("ColoringPalette.module.css", () => {
     expect(css).toMatch(/\.name\s*\{[\s\S]*?color:\s*var\(--ink\)/);
     expect(css).toMatch(/box-shadow:\s*0 2px 0/);
   });
+
+  it("畫面 <340px 才把色塊收到 44px，間距仍是 8px，一排排得下 6 個", () => {
+    const narrow = css.match(/@media \(max-width: 339px\)\s*\{([\s\S]*?)\n\}/)?.[1];
+    expect(narrow).toBeDefined();
+    for (const selector of ["item", "swatch", "name"])
+      expect(narrow).toMatch(new RegExp(`\\.${selector}[^{]*\\{[^}]*width:\\s*44px`));
+    expect(narrow).toMatch(/\.swatch[^{]*\{[^}]*min-height:\s*44px/);
+    expect(narrow).not.toMatch(/gap:/);
+    expect(narrow).not.toMatch(/(?:width|height):\s*(?:[0-3]\d|4[0-3])px/);
+  });
 });

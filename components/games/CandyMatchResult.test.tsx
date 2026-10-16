@@ -2,17 +2,23 @@
 import { cleanup, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { buildRound } from "@/lib/games/candy-match/stages";
+import { freshCandyProgress, type CandyProgress } from "@/lib/games/candy-match/tasks";
 import { CandyMatchResult } from "./CandyMatchResult";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 
 afterEach(cleanup);
 
+function doneProgress(roundGoals: number): CandyProgress {
+  return { ...freshCandyProgress(4), collected: [roundGoals, 0, 0, 0] };
+}
+
 function renderWin(flawless: boolean, efficient: boolean) {
   const round = buildRound(0, "easy", { replay: false, rng: () => 0.5 });
   return render(
     <CandyMatchResult
       round={round}
+      progress={doneProgress(50)}
       outcome={{ kind: "win", stars: 1 + Number(flawless) + Number(efficient), flawless, efficient }}
       isLastLevel={false}
       reducedMotion
@@ -74,6 +80,7 @@ describe("CandyMatchResult", () => {
     render(
       <CandyMatchResult
         round={round}
+        progress={freshCandyProgress(4)}
         outcome={{ kind: "retry" }}
         isLastLevel={false}
         reducedMotion
@@ -85,5 +92,33 @@ describe("CandyMatchResult", () => {
 
     const map = screen.getByRole("button", { name: "回地圖" });
     expect(map.parentElement).toBe(screen.getByRole("button", { name: "再來一次" }).parentElement);
+  });
+
+  it("過關時每張目標卡蓋完成章", () => {
+    renderWin(true, true);
+    expect(screen.getByRole("dialog", { name: "過關！" })).toBeTruthy();
+    expect(screen.getAllByTestId("candy-goal-stamp").map((el) => el.textContent)).toEqual(["完成！"]);
+  });
+
+  it("挑戰沒過：用圖案標出還差幾台，達標的不重複", () => {
+    const round = buildRound(2, "challenge", { replay: false, rng: () => 0.5 });
+    const progress: CandyProgress = { ...freshCandyProgress(4), collected: [36, 34, 0, 0] };
+    render(
+      <CandyMatchResult
+        round={round}
+        progress={progress}
+        outcome={{ kind: "retry" }}
+        isLastLevel={false}
+        reducedMotion
+        onNext={vi.fn()}
+        onReplay={vi.fn()}
+        onMap={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("dialog", { name: "再試一次！" })).toBeTruthy();
+    expect(screen.getByText("再差 2 台！")).toBeTruthy();
+    expect(screen.queryByText("完成！")).toBeNull();
+    expect(screen.getByRole("progressbar", { name: "收集計程車，還差 2 台" }).querySelector("svg")).toBeTruthy();
   });
 });

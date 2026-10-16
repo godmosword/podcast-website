@@ -1,0 +1,106 @@
+/*
+ * 貼紙沒有眨眼。待機只上下浮動；張嘴、咀嚼、笑改成擠壓。
+ * 減少動態或遊戲暫停時停住。
+ */
+
+.figure {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  transform-origin: 50% 92%;
+  animation: duoFloat 2.6s ease-in-out infinite;
+}
+
+.figure[data-mouth="open"],
+.figure[data-mouth="chew"],
+.figure[data-mouth="laugh"] {
+  animation: duoMunch 0.46s ease-in-out infinite;
+}
+
+/* 吃到芥末：噴火貼紙短短晃兩下，然後停住。不要無限晃。 */
+.figure[data-face="puff"] {
+  animation: duoFireShake 0.42s ease-in-out 2;
+}
+
+.figure > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  pointer-events: none;
+  user-select: none;
+}
+
+.figure > img[data-active="true"] {
+  opacity: 1;
+}
+
+@keyframes duoFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes duoMunch {
+  0%,
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+  38% {
+    transform: translateY(1px) scale(1.045, 0.92);
+  }
+  72% {
+    transform: translateY(-2px) scale(0.975, 1.05);
+  }
+}
+
+@keyframes duoFireShake {
+  0%,
+  100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  20% {
+    transform: translateX(-3px) rotate(-2.5deg);
+  }
+  40% {
+    transform: translateX(3px) rotate(2.5deg);
+  }
+  60% {
+    transform: translateX(-2px) rotate(-1.5deg);
+  }
+  80% {
+    transform: translateX(2px) rotate(1.5deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .figure,
+  .figure[data-mouth="open"],
+  .figure[data-mouth="chew"],
+  .figure[data-mouth="laugh"],
+  .figure[data-face="puff"] {
+    animation: none;
+  }
+}
+
+:global([data-reduced="true"]) .figure,
+:global([data-reduced="true"]) .figure[data-mouth="open"],
+:global([data-reduced="true"]) .figure[data-mouth="chew"],
+:global([data-reduced="true"]) .figure[data-mouth="laugh"],
+:global([data-reduced="true"]) .figure[data-face="puff"] {
+  animation: none;
+}
+
+:global([data-paused="true"]) .figure,
+:global([data-paused="true"]) .figure[data-mouth="open"],
+:global([data-paused="true"]) .figure[data-mouth="chew"],
+:global([data-paused="true"]) .figure[data-mouth="laugh"],
+:global([data-paused="true"]) .figure[data-face="puff"] {
+  animation-play-state: paused;
+}

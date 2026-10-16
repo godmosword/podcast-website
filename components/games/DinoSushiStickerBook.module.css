@@ -1,0 +1,260 @@
+/*
+ * 貼紙書蓋在標題或結算上。30 張：料 12、飯 3、表情 5、驚喜 4、朋友 6。
+ * 顏色吃卡片上的 --sushi-*，不另寫色碼。
+ * 格子是按鈕：點得到的念名字，點不到的念怎麼拿到。
+ * 直向 320／390 三欄（朋友 6 張正好兩列）；560 起四欄；800 起六欄（1280 朋友一列）。
+ * 矮橫向維持格高 64、間距 8，書本自己上下捲，不橫向溢出。
+ */
+
+.book {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 8px 8px 12px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  background:
+    linear-gradient(180deg, rgba(255, 250, 240, 0.96), rgba(253, 240, 218, 0.94));
+  color: var(--sushi-ink, CanvasText);
+}
+
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 72px;
+  margin: -8px -8px 8px;
+  padding: 8px;
+  background: rgba(255, 248, 234, 0.96);
+}
+
+.close {
+  flex: none;
+  min-width: 64px;
+  min-height: 64px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 999px;
+  background: var(--sushi-accent, CanvasText);
+  color: var(--sushi-cream, Canvas);
+  font: inherit;
+  font-size: 1.05rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.close:focus-visible,
+.cell:focus-visible {
+  outline: 3px solid var(--focus-ring, CanvasText);
+  outline-offset: 3px;
+}
+
+.heading {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.count {
+  margin: 0;
+  color: var(--sushi-ink-soft, GrayText);
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.section {
+  margin: 0 0 12px;
+}
+
+.sectionTitle {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  font-weight: 900;
+  text-align: start;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.grid > li {
+  display: flex;
+  min-width: 0;
+}
+
+.cell {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 100%;
+  min-width: 0;
+  min-height: 72px;
+  padding: 6px 4px 4px;
+  border: none;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 0 0 2px rgba(120, 90, 50, 0.14);
+  color: inherit;
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.cell[data-locked="true"] {
+  background: rgba(90, 70, 40, 0.08);
+}
+
+.pic {
+  position: relative;
+  width: 56px;
+  height: 56px;
+}
+
+.pic img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.cell[data-locked="true"] .pic img {
+  filter: grayscale(1) brightness(0.2);
+  opacity: 0.85;
+}
+
+.mystery {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--sushi-cream, Canvas);
+  font-size: 1.5rem;
+  font-weight: 900;
+  text-shadow: 0 1px 0 rgba(40, 30, 20, 0.35);
+}
+
+.face {
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--sushi-cream, Canvas);
+  box-shadow: inset 0 0 0 2px rgba(180, 120, 60, 0.72);
+}
+
+.face img {
+  object-fit: cover;
+  object-position: center 40%;
+}
+
+.frameGold,
+.frameSun {
+  border-radius: 50%;
+}
+
+.frameGold {
+  box-shadow: inset 0 0 0 3px rgba(214, 168, 52, 0.95);
+}
+
+.frameSun {
+  box-shadow: inset 0 0 0 3px rgba(230, 140, 50, 0.95);
+}
+
+.name {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 0.8rem;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: var(--sushi-accent, CanvasText);
+  color: var(--sushi-cream, Canvas);
+  font-size: 0.75rem;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.cell[data-new="true"] .pic {
+  animation: stickerIn 280ms ease-out both;
+}
+
+.footer {
+  margin: 4px 0 0;
+  color: var(--sushi-ink-soft, GrayText);
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1.4;
+  text-align: start;
+}
+
+@keyframes stickerIn {
+  from {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@media (min-width: 560px) {
+  .grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 800px) {
+  .grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  }
+
+  .cell,
+  .close {
+    min-height: 64px;
+  }
+
+  .pic {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cell[data-new="true"] .pic {
+    animation: none;
+  }
+}
+
+.book[data-reduced="true"] .cell[data-new="true"] .pic {
+  animation: none;
+}

@@ -1,0 +1,27 @@
+/* 品牌標誌本身不加 scale、filter、opacity、陰影（見 lib/BRAND-ASSETS-HARD-RULES.md）；
+   只能隨父層位移。日夜各一張官方色版，由 THEME_INIT_SCRIPT 在首繪前設好的 data-theme 切換。 */
+.mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  line-height: 0;
+}
+
+.mark > img,
+.mark > svg {
+  display: block;
+  max-width: none;
+}
+
+.mark > .night {
+  display: none;
+}
+
+:global(html[data-theme="night"]) .mark > .day {
+  display: none;
+}
+
+:global(html[data-theme="night"]) .mark > .night {
+  display: block;
+}

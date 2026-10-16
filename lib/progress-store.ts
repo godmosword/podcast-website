@@ -4,6 +4,7 @@ import {
 } from "@/lib/gamekit/progress/economy";
 import type { GameKitGameId } from "@/lib/gamekit/types";
 import type { PlayerProfile } from "@/lib/gamekit/types";
+import { isDinoSushiStickerId } from "@/lib/games/dino-sushi/stickers";
 import { canonicalStorySlug } from "@/lib/story-slug-aliases";
 import { normalizeThemeMode, type ThemeMode } from "@/lib/theme";
 
@@ -37,11 +38,23 @@ export type GameKitPreferenceStore = {
   blockDropDifficulty: BlockDropDifficultyPreference;
   blockDropSpecialMode: BlockDropSpecialModePreference;
   gameVolume: number;
+  /** 朗讀訂單、提示與台詞（消消樂、壽司屋）；關掉只停人聲，音效照常。舊存檔沒有＝開著。 */
+  voiceEnabled: boolean;
   motionPreference: MotionPreference;
   candyMatchMode: CandyMatchModePreference;
   candyMatchTips: CandyMatchTipId[];
   blockDropMode: BlockDropModePreference;
   blockDropTips: BlockDropTipId[];
+  /** 多多壽司屋已拿到的貼紙 id。舊存檔沒有＝還沒有；不會寫進全站 profile.stickers。 */
+  dinoSushiStickers: string[];
+  /** 貼紙書裡已經看過的 id，用來收掉「新！」。 */
+  dinoSushiStickersSeen: string[];
+  /** 這一輪新拿到的，結算頁慶祝用。 */
+  dinoSushiStickersFresh: string[];
+  /** 已經結算過貼紙的那一輪，避免同一輪保底送兩次。 */
+  dinoSushiStickerRoundKey: string;
+  /** 這一輪如果是保底送的，記那張的 id；沒有就是空字串。 */
+  dinoSushiStickerGift: string;
 };
 
 export type ContinueState = {
@@ -125,11 +138,17 @@ export const DEFAULT_PROGRESS: ProgressStore = {
       blockDropDifficulty: "relaxed",
       blockDropSpecialMode: "classic",
       gameVolume: 1,
+      voiceEnabled: true,
       motionPreference: "system",
       candyMatchMode: null,
       candyMatchTips: [],
       blockDropMode: null,
       blockDropTips: [],
+      dinoSushiStickers: [],
+      dinoSushiStickersSeen: [],
+      dinoSushiStickersFresh: [],
+      dinoSushiStickerRoundKey: "",
+      dinoSushiStickerGift: "",
     },
     theme: "system",
     nightPromptDismissed: false,
@@ -235,6 +254,23 @@ function normalizeBlockDropTips(value: unknown): BlockDropTipId[] {
   return BLOCK_DROP_TIP_IDS.filter((id) => value.includes(id));
 }
 
+/** 只留認識的壽司屋貼紙，順序照第一次寫入，重複的丟掉。壞掉的欄位當成還沒有。 */
+function normalizeDinoSushiStickerIds(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  const out: string[] = [];
+  for (const item of value) {
+    if (typeof item !== "string" || !isDinoSushiStickerId(item) || out.includes(item)) continue;
+    out.push(item);
+  }
+  return out;
+}
+
+function normalizeDinoSushiRoundKey(value: unknown): string {
+  if (typeof value !== "string") return "";
+  const trimmed = value.trim();
+  return trimmed.length > 0 && trimmed.length <= 80 ? trimmed : "";
+}
+
 function normalizeGameKitPreferences(
   value: Partial<GameKitPreferenceStore> | undefined,
 ): GameKitPreferenceStore {
@@ -246,11 +282,23 @@ function normalizeGameKitPreferences(
     blockDropDifficulty: normalizeBlockDropDifficulty(value?.blockDropDifficulty),
     blockDropSpecialMode: normalizeBlockDropSpecialMode(value?.blockDropSpecialMode),
     gameVolume: normalizeGameVolume(value?.gameVolume),
+    voiceEnabled:
+      typeof value?.voiceEnabled === "boolean"
+        ? value.voiceEnabled
+        : DEFAULT_PROGRESS.preferences.gameKit.voiceEnabled,
     motionPreference: normalizeMotionPreference(value?.motionPreference),
     candyMatchMode: normalizeCandyMatchMode(value?.candyMatchMode),
     candyMatchTips: normalizeCandyMatchTips(value?.candyMatchTips),
     blockDropMode: normalizeBlockDropMode(value?.blockDropMode),
     blockDropTips: normalizeBlockDropTips(value?.blockDropTips),
+    dinoSushiStickers: normalizeDinoSushiStickerIds(value?.dinoSushiStickers),
+    dinoSushiStickersSeen: normalizeDinoSushiStickerIds(value?.dinoSushiStickersSeen),
+    dinoSushiStickersFresh: normalizeDinoSushiStickerIds(value?.dinoSushiStickersFresh),
+    dinoSushiStickerRoundKey: normalizeDinoSushiRoundKey(value?.dinoSushiStickerRoundKey),
+    dinoSushiStickerGift:
+      typeof value?.dinoSushiStickerGift === "string" && isDinoSushiStickerId(value.dinoSushiStickerGift)
+        ? value.dinoSushiStickerGift
+        : "",
   };
 }
 

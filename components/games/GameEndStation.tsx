@@ -57,6 +57,10 @@ export type GameEndStationProps = {
    */
   leadingAction?: { label: string; icon: ReactNode; onClick: () => void };
   className?: string;
+  /** 次要圓鈕邊長。消消樂結算要 56px；壽司屋「回標題」64px；其他遊戲維持 48。 */
+  sideSize?: 48 | 56 | 64;
+  /** 主圓鈕邊長。壽司屋「再做一輪」88px；其他遊戲維持 76。 */
+  mainSize?: 76 | 88;
 };
 
 const MOOD_TITLES: Record<GameEndMood, readonly string[]> = {
@@ -97,6 +101,8 @@ export function GameEndStation({
   extraActions,
   leadingAction,
   className,
+  sideSize = 48,
+  mainSize = 76,
 }: GameEndStationProps) {
   const resolvedTitle = pickTitle(mood, title, stars ?? scoreLabel?.length ?? 0);
   const fromSlug = gameSlug ? getNextGame(gameSlug) : null;
@@ -125,6 +131,8 @@ export function GameEndStation({
       ref={stationRef}
       className={`${styles.station}${className ? ` ${className}` : ""}`}
       data-mood={mood}
+      data-side={sideSize}
+      data-main={mainSize}
       role="dialog"
       aria-modal="true"
       aria-label={resolvedTitle}

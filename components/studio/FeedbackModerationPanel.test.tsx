@@ -293,6 +293,9 @@ describe("FeedbackModerationPanel", () => {
 
     render(<FeedbackModerationPanel />);
 
-    expect((await screen.findByRole("status")).textContent).toBe(MOD_UNAVAILABLE);
+    // 確認中與無法使用都是 role=status。findByRole 會立刻命中載入文案，
+    // 必須等到 503 套用後的那句才算。
+    expect(await screen.findByText(MOD_UNAVAILABLE)).toBeTruthy();
+    expect(screen.queryByText("正在確認登入狀態…")).toBeNull();
   });
 });

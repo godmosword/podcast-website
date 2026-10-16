@@ -3,6 +3,8 @@
  * 提示與重排。無 DOM 依賴，全部回傳新物件（不可變），可單元測試。
  */
 
+import { planClearFx, type ClearFx } from "@/lib/games/candy-match/effects";
+
 export const EMPTY = -1;
 /** 掉落物（禮物盒）：不可消除，會隨重力下落，到底排即送達。 */
 export const DROP_ITEM = -2;
@@ -32,7 +34,7 @@ export type SpecialSpawn = {
 export type BoardState = {
   cols: number;
   rows: number;
-  /** 每格圖案索引（0..kinds-1）、EMPTY 或 DROP_ITEM */
+  /** 每格圖案索引（CANDY_MATCH_PIECES）、EMPTY 或 DROP_ITEM */
   pieces: number[];
   /** 髒格層數：0 乾淨、1 掃一次就乾淨、2 厚污漬要再掃一次。黏在格子上，不跟著圖案掉。 */
   dirt: number[];
@@ -577,8 +579,26 @@ export function applySpecialSpawns(
   return next;
 }
 
-export function randomPiece(kinds: number, rng: Rng): number {
-  return Math.floor(rng() * kinds);
+/**
+ * 補格用的圖案池。數字 n 代表 0..n-1（舊關卡）；陣列是這一關實際上場的車，
+ * 例如 [0, 1, 2, 5] 是小紅、計程車、小巴士、救護車。
+ */
+export type CandySpawnPool = number | readonly number[];
+
+/** 數字池維持舊行為；陣列池從名單裡抽，不把編號壓回 0..n-1。 */
+export function randomPiece(kinds: CandySpawnPool, rng: Rng): number {
+  if (typeof kinds === "number") return Math.floor(rng() * kinds);
+  if (kinds.length === 0) return 0;
+  const i = Math.floor(rng() * kinds.length);
+  return kinds[Math.min(kinds.length - 1, Math.max(0, i))]!;
+}
+
+/** 收集計數陣列要蓋到最大圖案編號，救護車（5）才不會寫進長度 4 的陣列外面。 */
+export function spawnTally(kinds: CandySpawnPool): number {
+  if (typeof kinds === "number") return Math.max(0, kinds);
+  let max = kinds.length - 1;
+  for (const id of kinds) if (id > max) max = id;
+  return max + 1;
 }
 
 /** 交換位移動畫時長（ms）。減少動態時應跳過。 */
@@ -636,7 +656,7 @@ export function applyGravity(
   pieces: number[],
   cols: number,
   rows: number,
-  kinds: number,
+  kinds: CandySpawnPool,
   rng: Rng,
   specials: readonly CandySpecial[] = emptySpecials(pieces.length),
 ): { pieces: number[]; specials: CandySpecial[] } {
@@ -677,7 +697,7 @@ export type SettlePhase = {
  */
 export function settleBoard(
   state: BoardState,
-  kinds: number,
+  kinds: CandySpawnPool,
   rng: Rng,
 ): { state: BoardState; phases: SettlePhase[]; dropped: number } {
   const { cols, rows } = state;
@@ -721,6 +741,8 @@ export type WaveStep = {
   collected: number[];
   cleaned: number;
   dropped: number;
+  /** 這一波要播的消除特效（不影響消除結果） */
+  fx: ClearFx[];
 };
 
 export type WaveOptions = {
@@ -735,7 +757,7 @@ export type WaveOptions = {
 /** 解算一波；沒有可消除時回傳 null。 */
 export function stepWave(
   state: BoardState,
-  kinds: number,
+  kinds: CandySpawnPool,
   rng: Rng,
   options: WaveOptions = {},
 ): WaveStep | null {
@@ -751,6 +773,16 @@ export function stepWave(
     Boolean(options.extraOnly),
   );
   if (planned.clear.size === 0 && planned.spawns.length === 0) return null;
+  const clearedList = [...planned.clear];
+  const fx = planClearFx({
+    pieces: state.pieces,
+    specials,
+    cols,
+    rows,
+    cleared: clearedList,
+    combo: planned.combo?.kind ?? null,
+    becomeRow: planned.combo?.becomeRow ?? [],
+  });
   const cleared = clearCells(state.pieces, state.dirt, planned.clear, kinds, specials);
   const afterClear: BoardState = {
     cols,
@@ -761,7 +793,7 @@ export function stepWave(
   };
   const settled = settleBoard(afterClear, kinds, rng);
   return {
-    cleared: [...planned.clear],
+    cleared: clearedList,
     detonated: planned.detonated,
     spawns: planned.spawns,
     combo: planned.combo,
@@ -771,15 +803,16 @@ export function stepWave(
     collected: cleared.collected,
     cleaned: cleared.cleaned,
     dropped: settled.dropped,
+    fx,
   };
 }
 
 /** 單次解算的連鎖上限。 */
 export const MAX_RESOLVE_WAVES = 100;
 
-export function emptyEvents(kinds: number): ResolveEvents {
+export function emptyEvents(kinds: CandySpawnPool): ResolveEvents {
   return {
-    collected: Array<number>(kinds).fill(0),
+    collected: Array<number>(spawnTally(kinds)).fill(0),
     cleaned: 0,
     dropped: 0,
     waves: 0,
@@ -791,8 +824,9 @@ export function emptyEvents(kinds: number): ResolveEvents {
 
 /** 把一波結果累加進事件統計（回傳新物件）。 */
 export function addWaveEvents(events: ResolveEvents, wave: WaveStep): ResolveEvents {
+  const len = Math.max(events.collected.length, wave.collected.length);
   return {
-    collected: events.collected.map((n, i) => n + (wave.collected[i] ?? 0)),
+    collected: Array.from({ length: len }, (_, i) => (events.collected[i] ?? 0) + (wave.collected[i] ?? 0)),
     cleaned: events.cleaned + wave.cleaned,
     dropped: events.dropped + wave.dropped,
     waves: events.waves + 1,
@@ -808,7 +842,7 @@ export function addWaveEvents(events: ResolveEvents, wave: WaveStep): ResolveEve
  */
 export function resolveBoard(
   state: BoardState,
-  kinds: number,
+  kinds: CandySpawnPool,
   rng: Rng,
   options: WaveOptions = {},
 ): { state: BoardState; events: ResolveEvents } {
@@ -867,7 +901,7 @@ export function clearCells(
   pieces: number[],
   dirt: number[],
   cells: Iterable<number>,
-  kinds: number,
+  kinds: CandySpawnPool,
   specials: CandySpecial[] = emptySpecials(pieces.length),
 ): {
   pieces: number[];
@@ -879,7 +913,7 @@ export function clearCells(
   const nextPieces = pieces.slice();
   const nextDirt = dirt.slice();
   const nextSpecials = specials.slice();
-  const collected = Array<number>(kinds).fill(0);
+  const collected = Array<number>(spawnTally(kinds)).fill(0);
   let cleaned = 0;
   for (const i of cells) {
     const v = nextPieces[i];

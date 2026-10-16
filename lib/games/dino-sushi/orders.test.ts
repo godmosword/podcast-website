@@ -1,17 +1,23 @@
 import { describe, expect, it } from "vitest";
-import { toppingById } from "./toppings";
-import { changeBase, addTopping, EMPTY_SUSHI, type Sushi } from "./sushi";
+import { seededRng } from "@/lib/games/candy-match/rng";
+import { customerById } from "./customers";
+import { roundVariety } from "./variety";
 import {
   buildOrders,
   buildTray,
+  chooseToppings,
   matchOrder,
   orderAnnouncement,
   orderChecks,
+  orderSpeechLine,
+  orderThanksLine,
   ORDER_SIZES,
   ORDERS_PER_ROUND,
   TRAY_SIZE,
   type Order,
 } from "./orders";
+import { changeBase, addTopping, EMPTY_SUSHI, type Sushi } from "./sushi";
+import { toppingById, type ToppingId } from "./toppings";
 
 function make(base: Sushi["base"], toppings: Sushi["toppings"]): Sushi {
   return toppings.reduce((s, t) => addTopping(s, t), changeBase(EMPTY_SUSHI, base!));
@@ -46,30 +52,81 @@ describe("點餐", () => {
     expect(orders.map((o) => o.toppings.length)).toEqual([...ORDER_SIZES]);
   });
 
-  it("訂單只點托盤上的家常料，同一單料不重複；相鄰兩單不一樣", () => {
+  it("訂單只點托盤上的家常料，同一單料不重複；相鄰兩單的飯和料不一樣", () => {
     for (let seed = 1; seed <= 60; seed++) {
       const tray = buildTray(seed);
       const orders = buildOrders(seed, tray);
+      const variety = roundVariety(seed);
+      expect(orders.map((o) => o.customerId)).toEqual(variety.seats);
+      expect(variety.theme.toppings.every((id) => tray.includes(id))).toBe(true);
       for (const o of orders) {
+        expect(o.toppings.some((id) => variety.theme.toppings.includes(id))).toBe(true);
         expect(new Set(o.toppings).size).toBe(o.toppings.length);
         for (const t of o.toppings) {
           expect(tray).toContain(t);
           expect(toppingById(t).kind).toBe("savory");
+          expect(t).not.toBe("strawberry");
+          expect(t).not.toBe("pudding");
+          expect(t).not.toBe("wasabi");
         }
       }
       for (let i = 1; i < orders.length; i++) {
-        expect(orders[i]).not.toEqual(orders[i - 1]);
+        const prev = orders[i - 1]!;
+        const curr = orders[i]!;
+        const same =
+          prev.base === curr.base &&
+          prev.toppings.length === curr.toppings.length &&
+          prev.toppings.every((id) => curr.toppings.includes(id));
+        expect(same).toBe(false);
       }
     }
+  });
+
+  it("兩樣以上的單，托盤上有最愛就會點到", () => {
+    let hits = 0;
+    let chances = 0;
+    for (let seed = 1; seed <= 40; seed++) {
+      const tray = buildTray(seed);
+      for (const order of buildOrders(seed, tray)) {
+        if (order.toppings.length < 2) continue;
+        const fav = customerById(order.customerId).favorites.filter((id) => tray.includes(id));
+        if (fav.length === 0) continue;
+        chances += 1;
+        if (order.toppings.some((id) => fav.includes(id))) hits += 1;
+      }
+    }
+    expect(chances).toBeGreaterThan(0);
+    expect(hits / chances).toBeGreaterThan(0.9);
   });
 
   it("同 seed 訂單決定性", () => {
     expect(buildOrders(11, buildTray(11))).toEqual(buildOrders(11, buildTray(11)));
   });
+
+  it("seed 7 仍有手捲（泡泡溢出測試用這個種子）", () => {
+    expect(buildOrders(7, buildTray(7)).some((order) => order.base === "temaki")).toBe(true);
+  });
+});
+
+describe("客人想吃的料", () => {
+  it("先拿托盤上的最愛，不夠再補別的家常料", () => {
+    const pool: ToppingId[] = ["shrimp", "corn", "salmon", "cucumber"];
+    const picked = chooseToppings(["corn", "tamago"], pool, 2, seededRng(3));
+    expect(picked).toHaveLength(2);
+    expect(picked).toContain("corn");
+    expect(picked.every((id) => pool.includes(id))).toBe(true);
+    expect(new Set(picked).size).toBe(2);
+  });
+
+  it("最愛不在托盤上就改點別的家常料", () => {
+    const picked = chooseToppings(["corn"], ["shrimp", "salmon"], 1, seededRng(1));
+    expect(picked).toHaveLength(1);
+    expect(["shrimp", "salmon"]).toContain(picked[0]);
+  });
 });
 
 describe("比對訂單", () => {
-  const order: Order = { base: "temaki", toppings: ["tamago", "cucumber"] };
+  const order: Order = { base: "temaki", toppings: ["tamago", "cucumber"], customerId: "anan" };
 
   it("集合比對、順序無關", () => {
     expect(matchOrder(make("temaki", ["cucumber", "tamago"]), order)).toEqual({
@@ -115,7 +172,29 @@ describe("比對訂單", () => {
     expect(orderChecks(EMPTY_SUSHI, order).base).toBe(false);
   });
 
-  it("讀屏宣告用飯型＋料名", () => {
-    expect(orderAnnouncement(order)).toBe("多多想吃：手捲、玉子、小黃瓜");
+  it("讀屏宣告用客人名字、飯型與料名", () => {
+    expect(orderAnnouncement(order)).toBe("安安想吃：手捲、玉子、小黃瓜");
+  });
+
+  it("朗讀先報名字，再把料名和飯型編成一句", () => {
+    expect(orderSpeechLine({ base: "nigiri", toppings: ["salmon", "tamago"], customerId: "xiaohong" })).toBe(
+      "嗨，我是小紅。我想要鮭魚和玉子握壽司。",
+    );
+    expect(orderSpeechLine({ base: "temaki", toppings: ["crab"], customerId: "dongdong" })).toBe(
+      "挖，我是東東。我想要蟹肉棒手捲。",
+    );
+    expect(orderSpeechLine({ base: "gunkan", toppings: ["salmon", "tamago", "cucumber"], customerId: "xiangxiang" })).toBe(
+      "你好，我是香香。我想要鮭魚、玉子和小黃瓜軍艦。",
+    );
+    expect(orderSpeechLine(order)).toBe("你好，我是安安。我想要玉子和小黃瓜手捲。");
+    expect(orderSpeechLine(order, "今天是綠色日。")).toBe(
+      "今天是綠色日。你好，我是安安。我想要玉子和小黃瓜手捲。",
+    );
+  });
+
+  it("做對時念朋友的那一句，不把甜點或芥末說成點餐", () => {
+    expect(orderThanksLine(order)).toBe("謝謝你，好健康喔！");
+    expect(orderThanksLine({ base: "nigiri", toppings: ["shrimp"], customerId: "xiaohong" })).toBe("咻～好快好好吃！");
+    expect(orderThanksLine({ base: "nigiri", toppings: ["salmon"], customerId: "xiangxiang" })).not.toMatch(/草莓|布丁|芥末/);
   });
 });

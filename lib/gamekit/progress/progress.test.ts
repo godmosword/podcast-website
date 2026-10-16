@@ -110,6 +110,25 @@ describe("gamekit progress settings", () => {
     expect(settings.motionPreference).toBe("system");
   });
 
+  it("念出來預設開著；舊存檔沒有這個欄位也是開著", () => {
+    expect(loadGameKitSettings().voiceEnabled).toBe(true);
+    localStorage.setItem(
+      "cheche:progress",
+      JSON.stringify({ preferences: { gameKit: { kidsMode: true, gameVolume: 0.5 } } }),
+    );
+    const legacy = loadGameKitSettings();
+    expect(legacy.voiceEnabled).toBe(true);
+    expect(legacy.gameVolume).toBe(0.5);
+  });
+
+  it("念出來可以單獨關掉，不動其他設定", () => {
+    saveGameKitSettings({ ...loadGameKitSettings(), gameVolume: 0.4, voiceEnabled: false });
+    const off = loadGameKitSettings();
+    expect(off.voiceEnabled).toBe(false);
+    expect(off.gameVolume).toBe(0.4);
+    expect(off.kidsMode).toBe(true);
+  });
+
   it("繽紛方塊難度與特殊模式可儲存", () => {
     saveGameKitSettings({
       ...loadGameKitSettings(),

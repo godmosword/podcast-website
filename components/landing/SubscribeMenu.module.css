@@ -73,9 +73,7 @@
   list-style: none;
   margin: 0;
   padding: 6px;
-  width: max-content;
   min-width: min(240px, calc(100vw - 24px));
-  max-width: calc(100vw - 16px);
   border-radius: var(--radius-sm);
   background: var(--card);
   color: var(--ink);
@@ -86,9 +84,9 @@
 .option {
   display: flex;
   align-items: center;
-  gap: 10px;
-  min-width: 0;
-  max-width: 100%;
+  /* 槽位 38px、30px 標誌兩側各留 4px，加 12px 間距＝與文字距 16px，
+     過 Spotify／Instagram 的半個標誌淨空（15px）。 */
+  gap: 12px;
   min-height: 44px;
   padding: 10px 12px;
   border-radius: var(--radius-xs);
@@ -103,20 +101,21 @@
   background: color-mix(in srgb, var(--ink) 6%, transparent);
 }
 
+/* 標誌和文字在同一個可點列，不加章；日間底不一定純白（hover 有混色），
+   所以 BrandMark 用 row 色版（Spotify、KKBOX、Threads 黑色版）。 */
 .badge {
   flex: none;
-  width: 32px;
-  height: 32px;
+  width: 38px;
+  height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-circle);
-  color: var(--on-dark);
 }
 
-.icon {
-  width: 18px;
-  height: 18px;
+.badge:has([data-brand-mark="youtube"]) {
+  width: auto;
+  height: auto;
+  min-height: 30px;
 }
 
 .label {

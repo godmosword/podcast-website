@@ -32,6 +32,7 @@
 ## 插圖與 AI 生圖
 
 - 部分劇情插圖由工具輔助產生；產出先進暫存目錄，維護者以 `contact.html` 審圖清單**逐張人工審稿**，通過後才發佈。未通過審核之暫存圖不對外提供。
+- 遊戲畫面也可能由工具輔助產生，不限於劇情插圖。多多壽司屋是恐龍車多多的小遊戲，封面、角色貼紙、店面與食材都先經人工挑選與修改，核准後才放上網站。未核准的候選圖不對外提供。提示詞與候選圖不在本儲存庫；已上線圖的逐檔來源見 [public/games/v2/dino-sushi/SOURCES.md](./public/games/v2/dino-sushi/SOURCES.md)。
 
 ## 建議年齡
 
@@ -47,7 +48,8 @@
 
 - 中文圓體使用 [justfont 粉圓（jf-open huninn）](https://github.com/justfont/open-huninn-font) 之子集檔（SIL OFL 1.1），條款見 [app/fonts/OFL-huninn.txt](./app/fonts/OFL-huninn.txt) 與 [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md)。
 - 中文標題使用 [源泉圓體 TW Bold](https://github.com/ButTaiwan/gensen-font) 之子集檔（SIL OFL 1.1），條款見 [app/fonts/OFL-gensen-rounded.txt](./app/fonts/OFL-gensen-rounded.txt)。
-- 拉丁字母與數字使用 [Fredoka](https://fonts.google.com/specimen/Fredoka)、[Gochi Hand](https://fonts.google.com/specimen/Gochi+Hand)（SIL Open Font License，經 Google Fonts 自託管）。
+- 拉丁字母與數字使用 [Fredoka](https://fonts.google.com/specimen/Fredoka)、[Gochi Hand](https://fonts.google.com/specimen/Gochi+Hand)（SIL Open Font License 1.1，經 Google Fonts 自託管）。條款全文見 [app/fonts/OFL-fredoka.txt](./app/fonts/OFL-fredoka.txt)、[app/fonts/OFL-gochi-hand.txt](./app/fonts/OFL-gochi-hand.txt)。
+- 分享圖用的 [Noto Sans TC](https://fonts.google.com/noto/specimen/Noto+Sans+TC)（`app/fonts/noto-sans-tc-og.ttf`）同為 SIL OFL 1.1，條款全文見 [app/fonts/OFL-noto-sans-tc.txt](./app/fonts/OFL-noto-sans-tc.txt)。
 
 ## 資料收集與隱私
 

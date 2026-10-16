@@ -11,10 +11,14 @@ export const MAX_TOPPINGS = 3;
 
 export const EMPTY_SUSHI: Sushi = { base: null, toppings: [] };
 
-/** 加一層料；還沒選飯或已滿 3 層時回傳同一物件（View 以此判斷要不要讓料位輕晃）。 */
+/**
+ * 加一層料；已滿 3 層時擠掉最舊的那層，孩子不會因為放滿而卡住。
+ * 還沒選飯時回傳同一物件（View 以此判斷要不要讓料位輕晃）。
+ */
 export function addTopping(sushi: Sushi, id: ToppingId): Sushi {
-  if (sushi.base === null || sushi.toppings.length >= MAX_TOPPINGS) return sushi;
-  return { ...sushi, toppings: [...sushi.toppings, id] };
+  if (sushi.base === null) return sushi;
+  const kept = sushi.toppings.length >= MAX_TOPPINGS ? sushi.toppings.slice(1 - MAX_TOPPINGS) : sushi.toppings;
+  return { ...sushi, toppings: [...kept, id] };
 }
 
 /** 點料位拿掉那一層；越界回傳同一物件。 */

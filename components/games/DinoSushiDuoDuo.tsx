@@ -1,7 +1,8 @@
 "use client";
 
 import { PlateArt, SushiArt } from "@/lib/games/dino-sushi/art";
-import { DuoDuoArt, ToothbrushArt, type DuoDuoFace, type DuoDuoMouth } from "@/lib/games/dino-sushi/duoduo-art";
+import type { DuoDuoFace, DuoDuoMouth } from "@/lib/games/dino-sushi/duoduo-art";
+import { DuoDuoSticker, ToothbrushSticker } from "@/lib/games/dino-sushi/duoduo-sticker";
 import type { Reaction } from "@/lib/games/dino-sushi/reactions";
 import type { Sushi } from "@/lib/games/dino-sushi/sushi";
 import { TapButton } from "./DinoSushiPiece";
@@ -24,6 +25,7 @@ function pose(phase: ServePhase, caption: Reaction | null, brushing: boolean): {
   if (brushing) return { mouth: "open", face: "yum" };
   if (phase === "slide" || phase === "open") return { mouth: "open", face: "idle" };
   if (phase === "chew") return { mouth: "chew", face: "yum" };
+  /* puff 仍傳出去：貼紙層把芥末畫成噴火，並用 data-face 晃一下。 */
   if (caption) return { mouth: caption.mood === "puff" ? "laugh" : "closed", face: caption.mood };
   return { mouth: "closed", face: "idle" };
 }
@@ -35,20 +37,25 @@ export function DinoSushiDuoDuo({ phase, caption, serving, brushing, brushShown,
   return (
     <div className={styles.duo}>
       <span className={styles.duoArt} data-face={face} data-mouth={mouth}>
-        <DuoDuoArt mouth={mouth} face={face} shinyTeeth={brushing} />
+        <DuoDuoSticker mouth={mouth} face={face} />
         {brushing ? <span className={styles.foam} aria-hidden /> : null}
       </span>
 
       {plateOnBelt ? (
         <span className={styles.servingPlate} data-phase={phase} aria-hidden>
-          {phase === "chew" ? null : <SushiArt sushi={serving} />}
+          {/* 張嘴時這一口從盤上飛進嘴裡（CSS sushiBite）；嚼的時候盤上已經空了 */}
+          {phase === "chew" ? null : (
+            <span className={styles.servingSushi} data-phase={phase}>
+              <SushiArt sushi={serving} />
+            </span>
+          )}
           <PlateArt />
         </span>
       ) : null}
 
       {brushShown ? (
         <TapButton className={styles.brushButton} aria-label="幫多多刷牙" disabled={disabled} onTap={onBrush}>
-          <ToothbrushArt />
+          <ToothbrushSticker />
         </TapButton>
       ) : null}
     </div>

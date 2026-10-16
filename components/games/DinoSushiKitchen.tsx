@@ -1,36 +1,88 @@
 "use client";
 
-import { IconTap } from "@/components/games/ClayIcons";
-import { BaseArt, PlateArt, SushiArt, ToppingArt } from "@/lib/games/dino-sushi/art";
-import { matchOrder } from "@/lib/games/dino-sushi/orders";
+import { useLayoutEffect, useRef, useState } from "react";
+import { BaseArt, PlateArt, SHOP_SRC, SushiArt, ToppingArt } from "@/lib/games/dino-sushi/art";
+import { matchOrder, orderSpeechLine, orderThanksLine } from "@/lib/games/dino-sushi/orders";
 import { currentOrder } from "@/lib/games/dino-sushi/round";
 import { MAX_TOPPINGS } from "@/lib/games/dino-sushi/sushi";
-import { BASES, baseById, toppingById } from "@/lib/games/dino-sushi/toppings";
+import { BASES, baseById, toppingById, type ToppingId } from "@/lib/games/dino-sushi/toppings";
+import { DOME_AFTER_PLATES, domeStickerId, orderLead, roundVariety } from "@/lib/games/dino-sushi/variety";
 import { DinoSushiDuoDuo } from "./DinoSushiDuoDuo";
+import { DinoSushiEvictFly, type EvictFly } from "./DinoSushiEvictFly";
 import { DinoSushiOrderBubble } from "./DinoSushiOrderBubble";
-import { TapButton } from "./DinoSushiPiece";
+import { TapButton, TapFinger as Finger, type TapPoint } from "./DinoSushiPiece";
 import { DinoSushiPlateStack } from "./DinoSushiPlateStack";
 import { ShopBelt, ShopWall } from "./DinoSushiShop";
 import { DinoSushiTray } from "./DinoSushiTray";
 import type { DinoSushiPlay } from "./useDinoSushiPlay";
+import { useDinoSushiSpeech } from "./useDinoSushiSpeech";
 import styles from "./DinoSushiKitchen.module.css";
 
 type Props = {
   play: DinoSushiPlay;
   reducedMotion: boolean;
   inputPaused: boolean;
+  /** 抬頭的「音效」開關；多多說話也跟著它。 */
+  soundOn: boolean;
+  /** 設定裡的遊戲音量 0–1。 */
+  gameVolume: number;
+  /** 設定裡的「念出來」；關掉時泡泡不念、小喇叭收起來。 */
+  voiceEnabled: boolean;
+  /** 已經拿到的貼紙。圓蓋只從這裡挑，不發新的。 */
+  ownedStickers: readonly string[];
 };
 
-function Finger() {
-  return (
-    <span className={styles.finger} aria-hidden>
-      <IconTap size={30} />
-    </span>
-  );
+/**
+ * 連點防呆：第三張皿和「給多多吃」位置重疊，連點兩下會送出只有飯的壽司。
+ * 只擋「選完飯這段時間內、又點在剛才那張皿上」的那一下；點在別處、用鍵盤、或中間加過料都照常處理。
+ */
+const PICK_GUARD_MS = 400;
+
+/**
+ * 選飯⇄加料切換時，原本有焦點的鈕被拿掉或變成 inert，焦點會掉到 body。
+ * 只有焦點原本在廚房裡才接手：選完飯→第一個能加的料；回到選飯→第一張皿。
+ */
+function useFocusAcrossPhases(choosingBase: boolean) {
+  const rootRef = useRef<HTMLDivElement>(null);
+  const focusInside = useRef(false);
+  const wasChoosing = useRef(choosingBase);
+
+  useLayoutEffect(() => {
+    if (wasChoosing.current === choosingBase) return;
+    wasChoosing.current = choosingBase;
+    const root = rootRef.current;
+    if (!root || !focusInside.current) return;
+    const active = document.activeElement;
+    const lost = !active || active === document.body || active.closest("[inert]") !== null;
+    if (!lost) return;
+    const target = root.querySelector<HTMLButtonElement>(
+      choosingBase ? '[data-role="base-picker"] button:not(:disabled)' : '[data-role="tray"] button:not(:disabled)',
+    );
+    target?.focus({ preventScroll: true });
+  }, [choosingBase]);
+
+  const focusProps = {
+    onFocusCapture: () => {
+      focusInside.current = true;
+    },
+    onBlurCapture: (e: React.FocusEvent<HTMLDivElement>) => {
+      // 焦點元素被拿掉時不會觸發 blur；只有真的移到廚房外才算離開
+      if (e.relatedTarget && !e.currentTarget.contains(e.relatedTarget as Node)) focusInside.current = false;
+    },
+  };
+  return { rootRef, focusProps };
 }
 
 /** 廚房：迴轉壽司店（多多＋泡泡＋疊盤）｜砧板（3 料位）＋「給多多吃」｜托盤。 */
-export function DinoSushiKitchen({ play, reducedMotion, inputPaused }: Props) {
+export function DinoSushiKitchen({
+  play,
+  reducedMotion,
+  inputPaused,
+  soundOn,
+  gameVolume,
+  voiceEnabled,
+  ownedStickers,
+}: Props) {
   const {
     round,
     phase,
@@ -43,19 +95,85 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused }: Props) {
     locked,
     actions,
   } = play;
+  const { rootRef, focusProps } = useFocusAcrossPhases(choosingBase);
+  const picked = useRef<{ at: number; rect: DOMRect } | null>(null);
+  const slotsRef = useRef<HTMLDivElement>(null);
+  const flySeq = useRef(0);
+  const [flies, setFlies] = useState<EvictFly[]>([]);
+  /** 用鍵盤拿掉第幾格：料位以料當 key，那顆鈕會消失，焦點接到同一格（或最後一格），料位空了就回托盤。 */
+  const refocusSlot = useRef<number | null>(null);
+  const toppings = round?.sushi.toppings;
+  useLayoutEffect(() => {
+    const slot = refocusSlot.current;
+    refocusSlot.current = null;
+    if (slot === null) return;
+    const filled = slotsRef.current?.querySelectorAll<HTMLButtonElement>("button");
+    const target =
+      filled?.[Math.min(slot, filled.length - 1)] ??
+      rootRef.current?.querySelector<HTMLButtonElement>('[data-role="tray"] button:not(:disabled)');
+    target?.focus({ preventScroll: true });
+  }, [rootRef, toppings]);
+  const orderForSpeech = round ? currentOrder(round) : null;
+  const variety = round ? roundVariety(round.seed) : null;
+  const domeOpen = round?.mode === "order" && round.plates.length >= DOME_AFTER_PLATES;
+  const thanksLine =
+    orderForSpeech && caption?.eats && caption.match?.ok ? orderThanksLine(orderForSpeech) : null;
+  const speech = useDinoSushiSpeech({
+    orderToken: round && orderForSpeech ? `${round.mode}:${round.seed}:${round.index}` : null,
+    orderLine: orderForSpeech ? orderSpeechLine(orderForSpeech, variety ? orderLead(round?.index ?? 0, variety) : "") : null,
+    firstOrder: round?.index === 0,
+    caption,
+    thanksLine,
+    inputPaused,
+    soundOn,
+    volume: gameVolume,
+    voiceEnabled,
+  });
   if (!round) return null;
   const order = currentOrder(round);
   const eating = round.pending?.eats === true;
   const sushi = round.sushi;
   const flash = caption?.mood === "look" ? (caption.match ?? null) : null;
   const disabled = locked || inputPaused;
-  const serveHint = hint?.kind === "serve";
+  /* 選飯時加料層整層隱藏，裡面不出現亮框和手指 */
+  const layerHint = choosingBase ? null : hint;
+  const serveHint = layerHint?.kind === "serve";
+  const afterPick = (fn: () => void) => (point?: TapPoint) => {
+    const last = picked.current;
+    picked.current = null;
+    const doubleTap =
+      last !== null &&
+      point !== undefined &&
+      performance.now() - last.at < PICK_GUARD_MS &&
+      point.x >= last.rect.left &&
+      point.x <= last.rect.right &&
+      point.y >= last.rect.top &&
+      point.y <= last.rect.bottom;
+    if (doubleTap) return;
+    fn();
+  };
+  const clearPickGuard = () => {
+    picked.current = null;
+  };
+  /** 滿格再加料：最舊那層還在畫面上時先記住位子，再讓它縮小飛回托盤。 */
+  const launchEvict = (id: ToppingId) => {
+    const fromEl = slotsRef.current?.querySelector("button");
+    const toEl = rootRef.current?.querySelector<HTMLElement>(`[data-role="tray"] [data-topping="${id}"]`);
+    if (!fromEl || !toEl) return;
+    const from = fromEl.getBoundingClientRect();
+    const to = toEl.getBoundingClientRect();
+    const key = flySeq.current + 1;
+    flySeq.current = key;
+    setFlies((list) => [...list, { key, id, from, to }]);
+  };
   /* 吃完才出牙刷，不擋嘴；出現時店面道具讓位，牙刷才看得出是下一步 */
   const brushShown =
     ((round.pending?.brush ?? false) || round.brushReady) && !brushing && (phase === "react" || phase === "idle");
 
   return (
     <div
+      ref={rootRef}
+      {...focusProps}
       className={styles.kitchen}
       data-reduced={reducedMotion ? "true" : undefined}
       data-paused={inputPaused ? "true" : undefined}
@@ -66,7 +184,7 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused }: Props) {
         data-mode={round.mode}
         data-brush={brushShown ? "true" : undefined}
       >
-        <ShopWall />
+        <ShopWall sky={variety?.sky} lantern={variety?.lantern} />
         <DinoSushiDuoDuo
           phase={phase}
           caption={caption}
@@ -76,19 +194,17 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused }: Props) {
           disabled={inputPaused}
           onBrush={actions.brush}
         />
-        <ShopBelt />
+        <ShopBelt
+          domeOpen={domeOpen}
+          stickerId={domeOpen && round ? domeStickerId(round.seed, ownedStickers) : null}
+        />
         <DinoSushiPlateStack plates={round.plates} />
         {/* 右上一欄由上往下排：自由做的「多多吃飽了」→ 點餐泡泡 → 多多的字卡，彼此不會疊在一起 */}
         <div className={styles.talk}>
           {round.mode === "free" ? (
-            <button
-              type="button"
-              className={styles.fullButton}
-              onClick={actions.finish}
-              disabled={disabled}
-            >
+            <TapButton className={styles.fullButton} onTap={actions.finish} disabled={disabled}>
               多多吃飽了
-            </button>
+            </TapButton>
           ) : null}
           {/* 吃的時候收起泡泡，字卡接手；下一單泡泡等反應結束才出現 */}
           {order && !eating ? (
@@ -98,6 +214,7 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused }: Props) {
               flash={flash}
               index={round.index}
               total={round.orders.length}
+              onReplay={speech.voiceOn ? speech.replay : undefined}
             />
           ) : null}
           {caption ? (
@@ -113,41 +230,16 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused }: Props) {
         aria-label="砧板"
         data-choosing={choosingBase ? "true" : undefined}
       >
-        <div
-          className={styles.boardMain}
-          /* a／b 兩個同樣的晃動動畫輪流換名字才會重播；不用 key 重掛，免得壽司和料位的進場動畫一起重跳 */
-          data-shake={shake === 0 ? undefined : shake % 2 === 0 ? "a" : "b"}
-        >
-          {choosingBase ? (
-            <div className={styles.basePicker} role="group" aria-label="選飯">
-              {BASES.map((b) => (
-                <TapButton
-                  key={b.id}
-                  className={styles.baseButton}
-                  aria-label={`選${b.label}`}
-                  aria-pressed={sushi.base === b.id}
-                  data-hint={
-                    hint?.kind === "base" && hint.id === b.id
-                      ? "true"
-                      : undefined
-                  }
-                  disabled={disabled}
-                  onTap={() => actions.pickBase(b.id)}
-                >
-                  <span className={styles.baseArt} aria-hidden>
-                    <BaseArt id={b.id} />
-                  </span>
-                  <span className={styles.baseLabel} aria-hidden>
-                    {b.label}
-                  </span>
-                  {teaching && hint?.kind === "base" && hint.id === b.id ? (
-                    <Finger />
-                  ) : null}
-                </TapButton>
-              ))}
-            </div>
-          ) : (
-            <>
+        {/* 加料層一直在：砧板高度兩階段一樣，上方店面不會伸縮跳動。選飯時整層 inert＋aria-hidden */}
+        <div className={styles.boardLayer} inert={choosingBase} aria-hidden={choosingBase ? true : undefined}>
+          <div
+            className={styles.boardMain}
+            /* a／b 兩個同樣的晃動動畫輪流換名字才會重播；不用 key 重掛，免得壽司和料位的進場動畫一起重跳 */
+            data-shake={shake === 0 ? undefined : shake % 2 === 0 ? "a" : "b"}
+          >
+            <div className={styles.prep}>
+              {/* eslint-disable-next-line @next/next/no-img-element -- 原檔備料盤 */}
+              <img className={styles.prepPlate} src={SHOP_SRC.prepplate} alt="" draggable={false} decoding="sync" />
               <TapButton
                 className={styles.sushiButton}
                 aria-label={
@@ -155,48 +247,60 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused }: Props) {
                     ? `換飯：現在是${baseById(sushi.base).label}`
                     : "選飯"
                 }
-                data-hint={hint?.kind === "base" ? "true" : undefined}
+                data-hint={layerHint?.kind === "base" ? "true" : undefined}
                 disabled={disabled}
-                onTap={actions.reopenBase}
+                onTap={afterPick(actions.reopenBase)}
               >
-                {eating ? null : <SushiArt sushi={sushi} layerClassName={reducedMotion ? undefined : styles.layerPop} />}
-                {teaching && hint?.kind === "base" ? <Finger /> : null}
+                {/* 換一種飯才重掛：落下動畫照舊在選完飯時播一次 */}
+                {eating ? null : (
+                  <SushiArt
+                    key={sushi.base ?? "none"}
+                    sushi={sushi}
+                    layerClassName={reducedMotion ? undefined : styles.layerPop}
+                  />
+                )}
+                {teaching && layerHint?.kind === "base" ? <Finger /> : null}
               </TapButton>
-              <div
-                className={styles.slots}
-                role="group"
-                aria-label={`料位，最多 ${MAX_TOPPINGS} 個`}
-              >
-                {Array.from({ length: MAX_TOPPINGS }, (_, i) => {
-                  const id = eating ? undefined : sushi.toppings[i];
-                  return id ? (
-                    <TapButton
-                      key={i}
-                      className={styles.slot}
-                      aria-label={`拿掉${toppingById(id).label}`}
-                      data-hint={hint?.kind === "remove" && hint.slot === i ? "true" : undefined}
-                      disabled={disabled}
-                      onTap={() => actions.remove(i)}
-                    >
-                      <ToppingArt id={id} />
-                      {teaching && hint?.kind === "remove" && hint.slot === i ? <Finger /> : null}
-                    </TapButton>
-                  ) : (
-                    <span key={i} className={styles.slotEmpty} aria-hidden />
-                  );
-                })}
-              </div>
-            </>
-          )}
-        </div>
-        {/* 選飯時只做選飯這一步：先收起「給多多吃」 */}
-        {choosingBase ? null : (
+            </div>
+            <div
+              ref={slotsRef}
+              className={styles.slots}
+              role="group"
+              aria-label={`料位，最多 ${MAX_TOPPINGS} 個`}
+            >
+              {Array.from({ length: MAX_TOPPINGS }, (_, i) => {
+                const id = eating ? undefined : sushi.toppings[i];
+                const removeHint = layerHint?.kind === "remove" && layerHint.slot === i;
+                /* 跟砧板上的料同一種 key：滿了擠掉最舊那層時只有新的那格會彈，留下來的不重掛 */
+                const nth = id ? sushi.toppings.slice(0, i).filter((t) => t === id).length : 0;
+                return id ? (
+                  <TapButton
+                    key={`${id}-${nth}`}
+                    className={styles.slot}
+                    aria-label={`拿掉${toppingById(id).label}`}
+                    data-hint={removeHint ? "true" : undefined}
+                    disabled={disabled}
+                    onTap={(point) => {
+                      clearPickGuard();
+                      if (!point) refocusSlot.current = i;
+                      actions.remove(i);
+                    }}
+                  >
+                    <ToppingArt id={id} />
+                    {teaching && removeHint ? <Finger /> : null}
+                  </TapButton>
+                ) : (
+                  <span key={`empty-${i}`} className={styles.slotEmpty} aria-hidden />
+                );
+              })}
+            </div>
+          </div>
           <TapButton
             className={styles.serveButton}
             data-hint={serveHint ? "true" : undefined}
             data-muted={order && !matchOrder(sushi, order).ok ? "true" : undefined}
             disabled={disabled || !sushi.base}
-            onTap={actions.serve}
+            onTap={afterPick(actions.serve)}
           >
             <span className={styles.serveArt} aria-hidden>
               <PlateArt />
@@ -204,16 +308,63 @@ export function DinoSushiKitchen({ play, reducedMotion, inputPaused }: Props) {
             給多多吃
             {teaching && serveHint ? <Finger /> : null}
           </TapButton>
-        )}
+        </div>
+        {/* 選飯時只做選飯這一步：三張皿疊在加料層上面 */}
+        {choosingBase ? (
+          <div className={styles.basePicker} role="group" aria-label="選飯" data-role="base-picker">
+            {BASES.map((b) => (
+              <TapButton
+                key={b.id}
+                className={styles.baseButton}
+                aria-label={`選${b.label}`}
+                aria-pressed={sushi.base === b.id}
+                data-hint={
+                  hint?.kind === "base" && hint.id === b.id
+                    ? "true"
+                    : undefined
+                }
+                disabled={disabled}
+                onTap={(point) => {
+                  picked.current = point ? { at: performance.now(), rect: point.rect } : null;
+                  actions.pickBase(b.id);
+                }}
+              >
+                <span className={styles.baseArt} aria-hidden>
+                  <BaseArt id={b.id} />
+                </span>
+                <span className={styles.baseLabel} aria-hidden>
+                  {b.label}
+                </span>
+                {teaching && hint?.kind === "base" && hint.id === b.id ? (
+                  <Finger />
+                ) : null}
+              </TapButton>
+            ))}
+          </div>
+        ) : null}
       </section>
 
       <DinoSushiTray
         tray={round.tray}
+        theme={variety?.theme.id}
+        themeLabel={variety?.theme.label}
         disabled={disabled || !sushi.base || choosingBase}
+        waitingForBase={!sushi.base || choosingBase}
         hint={hint?.kind === "topping" ? hint.id : null}
         teaching={teaching}
-        onAdd={actions.add}
+        onAdd={(id) => {
+          clearPickGuard();
+          if (sushi.toppings.length >= MAX_TOPPINGS) launchEvict(sushi.toppings[0]!);
+          actions.add(id);
+        }}
       />
+      {flies.map((fly) => (
+        <DinoSushiEvictFly
+          key={fly.key}
+          fly={fly}
+          onDone={(key) => setFlies((list) => list.filter((item) => item.key !== key))}
+        />
+      ))}
     </div>
   );
 }

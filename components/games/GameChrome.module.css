@@ -25,6 +25,9 @@
   text-decoration: none;
   color: inherit;
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
   box-shadow: 0 4px 0 color-mix(in srgb, var(--ink) 10%, transparent);
   transition: transform var(--motion-press), box-shadow var(--motion-press), background 0.2s ease;
 }
@@ -221,17 +224,16 @@
   }
 }
 
-/* 320 寬局內：返回＋三顆工具＋日夜切換要 325px，只有 296px。
- * 360 以下才縮到觸控下限 44px（DESIGN §觸控），配合 GamePageShell 同一斷點。 */
+/* 320 寬局內：四顆方鈕維持 48px。間距收到 4px，才跟「回遊樂園」一起塞進約 296px。 */
 @media (max-width: 359.98px) {
   .toolbar {
     gap: 4px;
   }
 
   .toolBtn {
-    min-width: 44px;
-    min-height: 44px;
-    padding-inline: 6px;
+    min-width: 48px;
+    min-height: 48px;
+    padding-inline: 0;
   }
 }
 

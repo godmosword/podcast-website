@@ -24,8 +24,10 @@ import {
 } from "@/lib/games/candy-match/cell-size";
 import { CANDY_MATCH_PIECES } from "@/lib/games/candy-match/levels";
 import { DirtOverlay, PieceArt, PieceGift } from "@/components/games/CandyMatchPieceArt";
+import { CandyMatchFx } from "@/components/games/CandyMatchFx";
 import { IconBroom, IconConfetti, IconRainbow } from "@/components/games/ClayIcons";
 import { IconPointingHand } from "@/components/games/CandyMatchIcons";
+import type { CandyFxPraise, ClearFx, ParticleSeed } from "@/lib/games/candy-match/effects";
 import styles from "./CandyMatchBoard.module.css";
 
 /** 特殊糖角落徽章：站上黏土圖示（取代 🧹🌈💥，各裝置長相一致、跟棋盤同畫風）。 */
@@ -46,6 +48,17 @@ type CandyMatchBoardMotion = {
   sweep?: CandySweepKind | null;
   /** K-7：連擊時整盤車車跳一下 */
   cheer?: boolean;
+  /** 掃把車車、三角錐、彩虹。減少動態時改成靜態高亮。 */
+  fx?: readonly ClearFx[];
+  praise?: CandyFxPraise | null;
+  particles?: readonly ParticleSeed[];
+  particleBurst?: number;
+  /** 大組合輕晃，已排除減少動態與靜音。 */
+  shake?: boolean;
+  /** 減少動態的高亮，取代晃動與位移。 */
+  still?: boolean;
+  /** 這一波特效的停留，用來對齊格子上的掃過動畫。 */
+  sweepMs?: number;
 };
 
 type CandyMatchBoardProps = {
@@ -103,6 +116,9 @@ export function CandyMatchBoard({
   const reduced = Boolean(motion?.reduced);
   const swap = reduced ? null : motion?.swap ?? null;
   const sweep = reduced ? null : motion?.sweep ?? null;
+  const still = Boolean(motion?.still) || reduced;
+  const shake = Boolean(motion?.shake) && !reduced;
+  const fx = motion?.fx ?? [];
   const fallByTo = new Map<number, number>();
   if (!reduced) {
     for (const fall of motion?.falls ?? []) {
@@ -220,6 +236,11 @@ export function CandyMatchBoard({
   return (
     <div className={styles.boardFrame}>
       <div
+        className={styles.gridWrap}
+        data-shake={shake ? "true" : undefined}
+        data-still={motion?.still ? "true" : undefined}
+      >
+      <div
         ref={gridRef}
         data-testid="candy-match-board"
         aria-disabled={disabled || undefined}
@@ -296,7 +317,9 @@ export function CandyMatchBoard({
             WebkitTapHighlightColor: "transparent",
             transition: reduced ? "none" : "transform .15s ease",
             transform: isSelected && !swapOff ? "scale(1.12)" : "scale(1)",
-            boxShadow: isPreview
+            boxShadow: still && isPopping
+              ? "inset 0 0 0 4px #ffd34d"
+              : isPreview
               ? "0 0 0 3px #7a5cc9, 0 0 0 6px rgba(255,255,255,.85)"
               : isSelected
               ? "0 0 0 3px #ff9fb7, 0 6px 14px rgba(217,95,135,.3)"
@@ -314,7 +337,7 @@ export function CandyMatchBoard({
           };
           const artClass = [
             styles.pieceArt,
-            isPopping ? styles.piecePop : "",
+            isPopping && still ? styles.pieceStill : isPopping ? styles.piecePop : "",
             v < 0 && v !== DROP_ITEM ? styles.pieceHidden : "",
             swapOff ? styles.pieceSwap : "",
             teachOff && !reduced ? styles.pieceTeach : "",
@@ -347,7 +370,7 @@ export function CandyMatchBoard({
                   ["--fall-ms" as string]: `${CANDY_FALL_MS}ms`,
                 }
               : sweep
-                ? { ["--sweep-ms" as string]: `${CANDY_SWEEP_MS}ms` }
+                ? { ["--sweep-ms" as string]: `${motion?.sweepMs ?? CANDY_SWEEP_MS}ms` }
                 : {}),
           };
           return (
@@ -366,6 +389,7 @@ export function CandyMatchBoard({
               data-dirt={dirtLayer > 0 ? String(dirtLayer) : undefined}
               data-special={specialKind ?? undefined}
               data-sweep={isPopping && sweep ? sweep : undefined}
+              data-fx-still={still && isPopping ? "true" : undefined}
               data-swap={swapOff ? "true" : undefined}
               data-fall-rows={fallRows > 0 ? String(fallRows) : undefined}
               style={cellStyle}
@@ -426,6 +450,17 @@ export function CandyMatchBoard({
             [data-testid="candy-match-board"] button { animation: none !important; }
           }
         `}</style>
+      </div>
+      <CandyMatchFx
+        cols={cols}
+        rows={rows}
+        cellPx={cellPx}
+        fx={fx}
+        praise={motion?.praise ?? null}
+        particles={reduced ? [] : motion?.particles ?? []}
+        particleBurst={reduced ? 0 : motion?.particleBurst ?? 0}
+        reduced={reduced}
+      />
       </div>
       {giftColumns.size > 0 ? (
         <div

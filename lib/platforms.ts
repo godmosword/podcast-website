@@ -1,16 +1,15 @@
-import { BRAND_COLORS } from "@/lib/brand-assets";
-
 // ============================================================
 // 車車遊樂園 — 收聽平台連結（單一資料來源）
 // ============================================================
 // 這裡集中管理「整個節目」的收聽平台連結。
 // 頁尾、關於頁、每集故事頁的平台圖示都讀這份資料，改一次即全站同步。
 //
-// 要新增 / 換連結：改下方 url 即可。官方標誌見 lib/official-marks.ts；KKBOX 仍是自繪圖示。
+// 要新增 / 換連結：改下方 url 即可；標誌由 components/BrandMark.tsx 依官方檔渲染
+// （規則見 lib/BRAND-ASSETS-HARD-RULES.md）。
 // url 留空字串的項目會自動隱藏。
 // ============================================================
 
-/** 圖示識別字。apple／spotify／youtube 對官方檔，kkbox 對自繪圖。 */
+/** 標誌識別字，對應 lib/brand-marks.tsx。 */
 export type PlatformIcon = "apple" | "spotify" | "kkbox" | "youtube";
 
 export type Platform = {
@@ -18,36 +17,30 @@ export type Platform = {
   label: string;
   /** 收聽連結 */
   url: string;
-  /** 品牌主色（僅供邊框／強調；禁止作圖示底色） */
-  color: string;
   /** 品牌圖示識別字 */
   icon: PlatformIcon;
 };
 
-/** 收聽平台清單（顯示順序即陣列順序；Spotify、Apple 優先）。 */
+/** 收聽平台清單（顯示順序即陣列順序）。Apple 規定與其他平台並列時排第一。 */
 const PLATFORMS: Platform[] = [
-  {
-    label: "Spotify",
-    url: "https://open.spotify.com/show/2Ohik6D77MvLTyqHbM6CYt",
-    color: BRAND_COLORS.spotify,
-    icon: "spotify",
-  },
   {
     label: "Apple Podcasts",
     url: "https://podcasts.apple.com/tw/podcast/%E8%BB%8A%E8%BB%8A%E9%81%8A%E6%A8%82%E5%9C%92/id1896610920",
-    color: BRAND_COLORS.applePodcasts,
     icon: "apple",
+  },
+  {
+    label: "Spotify",
+    url: "https://open.spotify.com/show/2Ohik6D77MvLTyqHbM6CYt",
+    icon: "spotify",
   },
   {
     label: "KKBOX",
     url: "https://podcast.kkbox.com/tw/channel/4lgSa7YAwpk6neQme3",
-    color: BRAND_COLORS.kkbox,
     icon: "kkbox",
   },
   {
     label: "YouTube",
     url: "https://www.youtube.com/playlist?list=PLVbyl20K8lOeuJ2ky6dEsmpew7xAxZDhF",
-    color: BRAND_COLORS.youtube,
     icon: "youtube",
   },
 ];

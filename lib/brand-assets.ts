@@ -1,4 +1,4 @@
-/** 平台品牌色（圓形圖示底、邊框強調）。 */
+/** 平台品牌色：只供邊框／強調（例如 /studio 卡片左緣）與 Meta 過渡圖形本身的顏色；禁止當標誌底色（見 lib/BRAND-ASSETS-HARD-RULES.md）。 */
 export const BRAND_COLORS = {
   spotify: "#1DB954",
   applePodcasts: "#872EC4",

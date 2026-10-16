@@ -33,6 +33,9 @@ const HARDCODED_COLOR_ALLOWLIST = [
   "components/games/CandyMatchPlay.module.css",
   "components/games/CandyMatchMap.module.css",
   "components/games/CandyMatchBoard.module.css",
+  // 消消樂消除特效（彩虹車痕、碎糖、連鎖稱讚字）：疊在同一張淺色棋盤卡面上，
+  // 糖果色是美術色、稱讚字墨色要對固定淺底維持對比，夜間同樣不反轉
+  "components/games/CandyMatchFx.module.css",
   "components/games/GameLoadOverlay.module.css",
   "components/games/GameEndStation.module.css",
   // 方塊轉轉標題頁、地圖、任務列：同一張馬卡龍奶油卡面（原為 inline style，見 blockDropTheme），夜間不反轉

@@ -33,8 +33,8 @@ describe("game logic regressions", () => {
     expect(adapter).toContain('gameId: "candy-match"');
     expect(adapter).toContain("onSession");
     // 輕鬆模式閒置先文字提示、較長閒置才亮交換對
-    expect(view).toContain("HINT_SOFT_MS");
-    expect(view).toContain("HINT_SHOW_MS");
+    expect(view).toContain("HINT_SOFT_MS = 5_000");
+    expect(view).toContain("HINT_SHOW_MS = 9_000");
     expect(view).toContain("再試一次！");
     // K-7：連擊／特別糖不再出文字 toast，改整盤車車跳一下（角色動作）
     expect(view).not.toContain("掃把出發！");

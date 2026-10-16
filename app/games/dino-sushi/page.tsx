@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/games/dino-sushi" },
   openGraph: {
     title: "多多壽司屋 · 車車遊樂園",
-    description: "照多多的點餐做壽司，或自由做想放什麼都可以；一步一動作，溫柔不挫折。",
+    description: "照恐龍車多多的點餐做壽司，或自由做想放什麼都可以；一步一動作，溫柔不挫折。",
     url: `${getSiteUrl()}/games/dino-sushi`,
   },
 };

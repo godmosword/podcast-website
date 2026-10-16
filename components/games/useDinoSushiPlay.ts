@@ -15,7 +15,8 @@ import {
 } from "@/lib/games/dino-sushi/round";
 import { addSfx, MOOD_SFX, plateSfx, SUSHI_SFX, varied } from "@/lib/games/dino-sushi/sfx";
 import { MAX_TOPPINGS } from "@/lib/games/dino-sushi/sushi";
-import type { BaseId, ToppingId } from "@/lib/games/dino-sushi/toppings";
+import { toppingById, type BaseId, type ToppingId } from "@/lib/games/dino-sushi/toppings";
+import { DOME_AFTER_PLATES, DOME_SPEECH, readRoundSeed, roundVariety } from "@/lib/games/dino-sushi/variety";
 
 /** 送出後的動畫段：盤子滑過去 → 張嘴 → 咀嚼 → 表情＋字卡。 */
 export type ServePhase = "idle" | "slide" | "open" | "chew" | "react";
@@ -23,7 +24,7 @@ export type ServePhase = "idle" | "slide" | "open" | "chew" | "react";
 export type HintTarget =
   | { kind: "base"; id: BaseId }
   | { kind: "topping"; id: ToppingId }
-  /** 料位滿了還缺料：先拿掉這一格（不在單上或重複的那層）。 */
+  /** 料位滿了還缺料、最舊那層又是單上要的：先拿掉這一格（不在單上或重複的那層），免得新料把要的擠掉。 */
   | { kind: "remove"; slot: number }
   | { kind: "serve" };
 
@@ -40,8 +41,8 @@ const LOOK_DONE_MS_REDUCED = 600;
 /** 字卡在反應結束後再留一下，孩子才看得到。 */
 const CAPTION_LINGER_MS = 1800;
 const BRUSH_MS = 1400;
-/** 閒置這麼久才亮下一個要點的東西。 */
-export const IDLE_HINT_MS = 8000;
+/** 閒置這麼久才亮下一個要點的東西（約 4.5 秒）。新訂單出現時重新起算，不是從按「給多多吃」那一刻算。 */
+export const IDLE_HINT_MS = 4_500;
 
 type PlayAction = { type: "init"; mode: Mode; seed: number } | { type: "clear" } | RoundAction;
 
@@ -66,11 +67,45 @@ export function playVoices(audio: GameAudioBus | undefined, voices: readonly Syn
 }
 
 function nextSeed(): number {
-  const fixed = typeof window !== "undefined" ? (window as Window & { __dinoSushiSeed?: number }).__dinoSushiSeed : undefined;
-  return typeof fixed === "number" && Number.isFinite(fixed) ? fixed : Math.floor(Math.random() * 0x7fffffff);
+  return readRoundSeed();
 }
 
-/** 點餐模式下一個該點的東西：飯型 → 缺的料（料位滿了先拿掉多的那層）→ 送出。 */
+/**
+ * 這一點是不是偏離了訂單的下一步。
+ * 偏了也不算錯：料還是放得上去，只是立刻亮出正確的下一格，不另出「錯了」字卡。
+ * 訂單裡還沒放的另一樣料仍算往前。芥末、甜點是彩蛋（多放也不算錯），放了不算偏；
+ * 但料位滿了會擠掉最舊那層，擠掉的是單上要的（不管放的是什麼）就算退一步。
+ */
+export function isOffStep(
+  round: RoundState,
+  action: { type: "pick-base"; base: BaseId } | { type: "add"; id: ToppingId },
+): boolean {
+  const order = currentOrder(round);
+  if (!order || round.pending || round.done) return false;
+  if (action.type === "pick-base") return action.base !== order.base;
+  if (evictsWanted(round.sushi.toppings, order.toppings)) return true;
+  if (isTreat(action.id)) return false;
+  if (round.sushi.base !== order.base) return true;
+  const placed = round.sushi.toppings;
+  return !order.toppings.includes(action.id) || placed.includes(action.id);
+}
+
+/** 芥末、甜點：多多的彩蛋反應，不在訂單裡。 */
+function isTreat(id: ToppingId): boolean {
+  return toppingById(id).kind !== "savory";
+}
+
+/** 料位滿了再放會擠掉最舊那層：那層是單上要的、而且後面沒有重複的，擠掉就變成缺料。 */
+function evictsWanted(placed: readonly ToppingId[], wanted: readonly ToppingId[]): boolean {
+  if (placed.length < MAX_TOPPINGS) return false;
+  const oldest = placed[0]!;
+  return wanted.includes(oldest) && placed.indexOf(oldest, 1) === -1;
+}
+
+/**
+ * 點餐模式下一個該點的東西：飯型 → 缺的料 → 送出。
+ * 料位滿了還缺料：最舊那層本來就是多的，直接點缺的料就會把它擠掉；不然先拿掉多的那層。
+ */
 export function hintTarget(round: RoundState): HintTarget | null {
   const order = currentOrder(round);
   if (!order || round.pending) return null;
@@ -78,7 +113,7 @@ export function hintTarget(round: RoundState): HintTarget | null {
   const placed = round.sushi.toppings;
   const missing = order.toppings.find((t) => !placed.includes(t));
   if (!missing) return { kind: "serve" };
-  if (placed.length < MAX_TOPPINGS) return { kind: "topping", id: missing };
+  if (!evictsWanted(placed, order.toppings)) return { kind: "topping", id: missing };
   const extra = placed.findIndex((t, i) => !order.toppings.includes(t) || placed.indexOf(t) !== i);
   return { kind: "remove", slot: Math.max(0, extra) };
 }
@@ -99,12 +134,24 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
   const [shake, setShake] = useState(0);
   const [brushing, setBrushing] = useState(false);
   const [idle, setIdle] = useState(false);
+  /** 點偏了：不用等閒置，馬上亮下一步。 */
+  const [guide, setGuide] = useState(false);
   const [taught, setTaught] = useState(false);
   const [message, setMessage] = useState("");
   /** 可暫停的排程：暫停時記下剩餘時間、停掉計時器，繼續時再補排（暫停中不會結算或回報）。 */
   const timers = useRef<Map<number, Scheduled>>(new Map());
   const parked = useRef<Scheduled[]>([]);
   const idleTimer = useRef<number | null>(null);
+  /** 暫停時閒置計時正在跑：繼續時重新起算（不然暫停過的那一單再也不會亮提示）。 */
+  const idleParked = useRef(false);
+
+  const armIdle = useCallback(() => {
+    if (idleTimer.current !== null) window.clearTimeout(idleTimer.current);
+    idleTimer.current = window.setTimeout(() => {
+      idleTimer.current = null;
+      setIdle(true);
+    }, IDLE_HINT_MS);
+  }, []);
 
   const schedule = useCallback((ms: number, fn: () => void) => {
     const entry: Scheduled = { due: Date.now() + ms, fn };
@@ -131,13 +178,21 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
         parked.current.push({ due: entry.due - now, fn: entry.fn });
       }
       timers.current.clear();
-      if (idleTimer.current !== null) window.clearTimeout(idleTimer.current);
+      if (idleTimer.current !== null) {
+        window.clearTimeout(idleTimer.current);
+        idleTimer.current = null;
+        idleParked.current = true;
+      }
       return;
     }
     const resume = parked.current;
     parked.current = [];
     for (const entry of resume) schedule(Math.max(0, entry.due), entry.fn);
-  }, [inputPaused, schedule]);
+    if (idleParked.current) {
+      idleParked.current = false;
+      armIdle();
+    }
+  }, [armIdle, inputPaused, schedule]);
 
   useEffect(() => () => {
     clearTimers();
@@ -146,21 +201,27 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
 
   const sfx = useCallback((voices: readonly SynthVoice[]) => playVoices(audio, voices), [audio]);
 
-  /** 任何操作都重算閒置提示。 */
+  /** 做對一步：先把提示收起來，閒置後再亮下一步。 */
   const touch = useCallback(() => {
     setIdle(false);
-    if (idleTimer.current !== null) window.clearTimeout(idleTimer.current);
-    idleTimer.current = window.setTimeout(() => setIdle(true), IDLE_HINT_MS);
-  }, []);
+    setGuide(false);
+    armIdle();
+  }, [armIdle]);
+
+  /** 點到不是訂單要的飯或料：立刻只亮正確的下一格。 */
+  const showHint = useCallback(() => {
+    setGuide(true);
+    armIdle();
+  }, [armIdle]);
 
   const start = useCallback(
-    (mode: Mode) => {
+    (mode: Mode, seed?: number) => {
       clearTimers();
       setPhase("idle");
       setCaption(null);
       setChoosingBase(false);
       setBrushing(false);
-      dispatch({ type: "init", mode, seed: nextSeed() });
+      dispatch({ type: "init", mode, seed: seed ?? nextSeed() });
       touch();
     },
     [clearTimers, touch],
@@ -168,8 +229,13 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
 
   const leave = useCallback(() => {
     clearTimers();
+    if (idleTimer.current !== null) window.clearTimeout(idleTimer.current);
+    idleTimer.current = null;
+    idleParked.current = false;
     setPhase("idle");
     setCaption(null);
+    setGuide(false);
+    setIdle(false);
     dispatch({ type: "clear" });
   }, [clearTimers]);
 
@@ -177,27 +243,37 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
 
   const pickBase = useCallback(
     (base: BaseId) => {
-      if (locked) return;
+      if (locked || !round) return;
       audio?.ensureAudio();
+      const off = isOffStep(round, { type: "pick-base", base });
       dispatch({ type: "pick-base", base });
       setChoosingBase(false);
       sfx(SUSHI_SFX.base);
-      touch();
+      if (off) showHint();
+      else touch();
     },
-    [audio, locked, sfx, touch],
+    [audio, locked, round, sfx, showHint, touch],
   );
 
   const add = useCallback(
     (id: ToppingId) => {
       if (locked || !round) return;
       const next = roundReducer(round, { type: "add", id });
-      // 第 4 料：料位輕晃，不出錯音
-      if (next === round) setShake((n) => n + 1);
-      else sfx(varied(addSfx(next.sushi.toppings.length)));
+      // 放不上去（還沒選飯）：料位輕晃，不出錯音。料位滿了不算：會擠掉最舊那層
+      if (next === round) {
+        setShake((n) => n + 1);
+        return;
+      }
+      sfx(varied(addSfx(next.sushi.toppings.length)));
       dispatch({ type: "add", id });
-      touch();
+      if (isOffStep(round, { type: "add", id })) showHint();
+      else if (currentOrder(round) && isTreat(id)) {
+        // 彩蛋：孩子在玩，閒置重新起算；點偏留下的光暈照留（該補的還沒補）
+        setIdle(false);
+        armIdle();
+      } else touch();
     },
-    [locked, round, sfx, touch],
+    [armIdle, locked, round, sfx, showHint, touch],
   );
 
   const remove = useCallback(
@@ -232,7 +308,8 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
       later(reducedMotion ? LOOK_DONE_MS_REDUCED : LOOK_DONE_MS, () => {
         setPhase("idle");
         dispatch({ type: "reaction-done" });
-        // 看完泡泡：馬上亮缺的那一格，不用等閒置 8 秒
+        // 看完泡泡：馬上亮缺的那一格，不用等閒置
+        setGuide(true);
         setIdle(true);
       });
       return;
@@ -305,13 +382,23 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
     if (order && (isNewRound || before.index !== round.index)) {
       // 第一單跟「歡迎光臨」同時出現，不疊兩個聲音
       if (!isNewRound) sfx(SUSHI_SFX.order);
-      setMessage(orderAnnouncement(order));
+      const themeLead = round.index === 0 ? `${roundVariety(round.seed).theme.label}。` : "";
+      const domeLead =
+        round.mode === "order" &&
+        round.plates.length >= DOME_AFTER_PLATES &&
+        (before?.plates.length ?? 0) < DOME_AFTER_PLATES
+          ? DOME_SPEECH
+          : "";
+      setMessage(`${domeLead}${themeLead}${orderAnnouncement(order)}`);
+      // 閒置提示從新訂單出現才起算：孩子要先看泡泡、聽完訂單
+      setIdle(false);
+      armIdle();
     } else if (isNewRound && round.mode === "free") {
       setMessage("自由做：想放什麼料都可以");
     }
-  }, [onDone, onServed, round, sfx]);
+  }, [armIdle, onDone, onServed, round, sfx]);
 
-  const hint = round && !round.done && (!taught || idle) ? hintTarget(round) : null;
+  const hint = round && !round.done && (!taught || idle || guide) ? hintTarget(round) : null;
 
   return {
     round,

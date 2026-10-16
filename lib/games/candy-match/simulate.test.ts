@@ -3,7 +3,7 @@ import { createBoard } from "./board-gen";
 import { listLegalMoves } from "./engine";
 import { seededRng } from "./rng";
 import { simulateMany, simulateRound } from "./simulate";
-import { CANDY_STAGES, buildRound } from "./stages";
+import { CANDY_STAGES, buildRound, stagePalette } from "./stages";
 import { findGoalHint } from "./strategy";
 import { freshCandyProgress } from "./tasks";
 
@@ -40,7 +40,7 @@ describe("Candy 模擬回歸", () => {
   it("目標導向提示永遠是合法步", () => {
     const stage = CANDY_STAGES.easy[7]!.main;
     for (let seed = 1; seed <= 20; seed++) {
-      const board = createBoard(6, 8, stage.pieceKinds, seededRng(seed), { dropCount: stage.dropCount });
+      const board = createBoard(6, 8, stagePalette(stage), seededRng(seed), { dropCount: stage.dropCount });
       const hint = findGoalHint(board, stage.goals, freshCandyProgress());
       expect(hint).not.toBeNull();
       expect(listLegalMoves(board)).toContainEqual(hint);

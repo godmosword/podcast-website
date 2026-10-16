@@ -46,6 +46,11 @@ export function useGameKitSettings() {
     [update],
   );
 
+  const setVoiceEnabled = useCallback(
+    (voiceEnabled: boolean) => update({ voiceEnabled }),
+    [update],
+  );
+
   const setMotionPreference = useCallback(
     (motionPreference: GameKitSettings["motionPreference"]) => update({ motionPreference }),
     [update],
@@ -68,6 +73,7 @@ export function useGameKitSettings() {
     blockDropDifficulty: settings?.blockDropDifficulty ?? "relaxed",
     blockDropSpecialMode: settings?.blockDropSpecialMode ?? "classic",
     gameVolume: settings?.gameVolume ?? 1,
+    voiceEnabled: settings?.voiceEnabled ?? true,
     motionPreference: settings?.motionPreference ?? "system",
     refresh,
     update,
@@ -75,6 +81,7 @@ export function useGameKitSettings() {
     setBlockDropDifficulty,
     setBlockDropSpecialMode,
     setGameVolume,
+    setVoiceEnabled,
     setMotionPreference,
   };
 }

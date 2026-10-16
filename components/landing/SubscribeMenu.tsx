@@ -7,10 +7,9 @@ import {
   useId,
   useRef,
   useState,
-  type ReactNode,
 } from "react";
-import { ConnectMark } from "@/components/brand/OfficialMark";
-import { BrandSvg, PLATFORM_ICON_PATHS, SOCIAL_ICON_PATHS } from "@/lib/connect-icons";
+import BrandMark from "@/components/BrandMark";
+import type { BrandMarkId } from "@/lib/brand-marks";
 import { trackPlatformClick } from "@/lib/analytics";
 import { appendPlatformUtm } from "@/lib/platform-utm";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
@@ -36,7 +35,7 @@ type ConnectItem = {
   label: string;
   href: string;
   ariaLabel: string;
-  icon: ReactNode;
+  mark: BrandMarkId;
   onSelect?: () => void;
 };
 
@@ -47,18 +46,7 @@ function connectItemsFor(kind: "channels" | "socials"): ConnectItem[] {
       label: platform.label,
       href: appendPlatformUtm(platform.url, { source: "nav-dropdown" }),
       ariaLabel: `在 ${platform.label} 收聽`,
-      icon: (
-        <ConnectMark
-          icon={platform.icon}
-          fallback={
-            <span className={styles.badge} style={{ background: platform.color }}>
-              <BrandSvg className={styles.icon}>
-                {PLATFORM_ICON_PATHS[platform.icon]}
-              </BrandSvg>
-            </span>
-          }
-        />
-      ),
+      mark: platform.icon,
       onSelect: () => trackPlatformClick(platform.label, "nav-dropdown"),
     }));
   }
@@ -67,18 +55,7 @@ function connectItemsFor(kind: "channels" | "socials"): ConnectItem[] {
     label: social.label,
     href: social.url,
     ariaLabel: `前往 ${social.label}`,
-    icon: (
-      <ConnectMark
-        icon={social.icon}
-        fallback={
-          <span className={styles.badge} style={{ background: social.background }}>
-            <BrandSvg className={styles.icon}>
-              {SOCIAL_ICON_PATHS[social.icon]}
-            </BrandSvg>
-          </span>
-        }
-      />
-    ),
+    mark: social.icon,
   }));
 }
 
@@ -166,7 +143,9 @@ export default function ConnectMenu({
                     setOpen(false);
                   }}
                 >
-                  {item.icon}
+                  <span className={styles.badge}>
+                    <BrandMark id={item.mark} surface="row" />
+                  </span>
                   <span className={styles.label}>{item.label}</span>
                 </a>
               </li>

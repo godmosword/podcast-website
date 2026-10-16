@@ -1,5 +1,6 @@
 .wrap {
-  /* 兒童色票：間距至少 8px。排不下就換行（兩排或更多），不把色塊縮到 48px 以下。 */
+  /* 兒童色票：間距至少 8px。排不下就換行（兩排或更多），不把色塊縮到 48px 以下；
+     唯一例外是畫面 <340px，見檔尾。 */
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -79,6 +80,29 @@
   color: var(--ink);
   pointer-events: none;
   white-space: nowrap;
+}
+
+/* 一排 6 個 48px 加 5 個 8px 間距要 328px；<340px 寬（320 時色票只剩 308px）會排成 5／5／2 三排，
+   直式畫布被擠到約 140px。這時色塊收到全站下限 44px（6×44＋5×8＝304px）排回兩排，間距不縮。 */
+@media (max-width: 339px) {
+  .item {
+    flex-basis: 44px;
+    width: 44px;
+    min-width: 44px;
+    max-width: 44px;
+  }
+
+  .name {
+    width: 44px;
+  }
+
+  .swatch {
+    flex-basis: 44px;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+  }
 }
 
 .item:hover .swatch {
