@@ -711,6 +711,10 @@ test.describe("多多壽司屋", () => {
     test(`${vp.width}×${vp.height}：手捲三樣料，中間那樣看得到、不冒出砧板`, async ({ page }) => {
       await page.emulateMedia({ reducedMotion: "reduce" });
       await page.setViewportSize(vp);
+      // describe 釘的 seed 7 是綠色日，托盤沒有鮭魚。這支要扁鮭魚夾在蝦、蟹肉棒中間，改釘有這四樣的 seed 4。
+      await page.addInitScript(() => {
+        (window as Window & { __dinoSushiSeed?: number }).__dinoSushiSeed = 4;
+      });
       await page.goto("/games/dino-sushi");
       await page.getByRole("button", { name: "自由做" }).click();
       await page.getByRole("button", { name: "選手捲" }).click();
@@ -820,8 +824,12 @@ test.describe("多多壽司屋", () => {
 
     await page.goto("/games/dino-sushi");
     await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
-    await expect.poll(spoken).toEqual([expect.stringMatching(/^今天是.+我想要/)]);
-    const firstOrder = (await spoken())[0];
+    // 第一次進標題會先領「天天來」並念出來，接著才念第 1 單。
+    await expect.poll(spoken).toEqual([
+      "新貼紙！天天來！",
+      expect.stringMatching(/^今天是.+我想要/),
+    ]);
+    const firstOrder = (await spoken()).at(-1)!;
     await finish();
 
     // 點泡泡再聽一次（音效開著時有念：正向對照）
@@ -852,8 +860,11 @@ test.describe("多多壽司屋", () => {
 
     await page.goto("/games/dino-sushi");
     await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
-    // 正向對照：預設開著，第 1 單有念
-    await expect.poll(spoken).toEqual([expect.stringMatching(/^今天是.+我想要/)]);
+    // 正向對照：預設開著。第一次進標題先念新貼紙，接著第 1 單有念。
+    await expect.poll(spoken).toEqual([
+      "新貼紙！天天來！",
+      expect.stringMatching(/^今天是.+我想要/),
+    ]);
     await finish();
     await expect(page.getByRole("button", { name: "再聽一次" })).toBeVisible();
 

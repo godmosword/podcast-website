@@ -412,22 +412,14 @@ export default function StoryPlayer({
     }
   }
 
-  // Tab 圈禁交給 useFocusTrap（下方 useFocusTrap(showNightPrompt, ...)）：
-  // 原本寫在這裡的 Tab 分支永遠不會觸發——提示開啟時沒有把焦點移進對話框，
-  // 掛在容器上的 React onKeyDown 就收不到事件，等於宣告了 aria-modal 卻不是模態。
+  // Tab 圈禁與初始焦點交給 useFocusTrap。不要再排一個 rAF 把焦點拉回第一顆，
+  // 否則 Tab 循環會在那一幀被打斷（「好呀」→「不用了」途中被拉回去）。
   function handleNightPromptKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
     if (e.key === "Escape") {
       e.preventDefault();
       closeNightPrompt();
     }
   }
-
-  useEffect(() => {
-    if (!showNightPrompt) return;
-    window.requestAnimationFrame(() => {
-      nightPromptRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
-    });
-  }, [showNightPrompt]);
 
   // 睡前定時選單：點選單外或按 Esc 自動收起。
   useEffect(() => {
