@@ -1,18 +1,26 @@
 "use client";
 
+import { useRef, type CSSProperties } from "react";
 import { GameEndStation } from "@/components/games/GameEndStation";
 import { IconChevronLeft } from "@/components/games/ClayIcons";
 import { ResultStars, type ResultStarHint } from "@/components/games/ResultStars";
 import { PlateArt } from "@/lib/games/dino-sushi/art";
 import { DuoDuoSticker } from "@/lib/games/dino-sushi/duoduo-sticker";
+import { freshLayout } from "@/lib/games/dino-sushi/fresh-layout";
+import { ORDERS_PER_ROUND } from "@/lib/games/dino-sushi/orders";
 import type { RoundMedals } from "@/lib/games/dino-sushi/medals";
-import { stickerById } from "@/lib/games/dino-sushi/stickers";
+import { stickerById, type DinoSushiSticker } from "@/lib/games/dino-sushi/stickers";
 import { roundVariety } from "@/lib/games/dino-sushi/variety";
 import { DinoSushiStickerFace } from "./DinoSushiStickerBook";
 import { TapButton } from "./DinoSushiPiece";
 import { ShopBelt, ShopWall } from "./DinoSushiShop";
 import type { DinoSushiOutcome } from "./DinoSushiView";
+import { useFreshGrid } from "./useFreshGrid";
 import styles from "./DinoSushiView.module.css";
+
+/** 新貼紙等盤子和星星出來才彈；第 10 張以後不再往後延，整段不超過約 1.1 秒。 */
+const FRESH_STAGGER_CAP = 9;
+const FLAWLESS_TARGET = 3;
 
 type Props = {
   outcome: DinoSushiOutcome;
@@ -36,11 +44,24 @@ function GoldPlate() {
   );
 }
 
-/** 沒拿到的星各自差什麼（拿滿就空）。 */
+/** 沒拿到的星各自差什麼（拿滿就空）。帶上這輪做到幾盤，家長不會讀成已經達成。 */
 function missedRules(medals: RoundMedals): ResultStarHint[] {
   const missed: ResultStarHint[] = [];
-  if (!medals.flawless) missed.push({ key: "flawless", text: "3 盤一次做對", mark: <GoldPlate /> });
-  if (!medals.collectedAll) missed.push({ key: "all", text: "5 盤都一次做對", mark: <GoldPlate /> });
+  const got = medals.firstTryCount;
+  if (!medals.flawless) {
+    missed.push({
+      key: "flawless",
+      text: `${FLAWLESS_TARGET} 盤一次做對（${Math.min(got, FLAWLESS_TARGET)}/${FLAWLESS_TARGET}）`,
+      mark: <GoldPlate />,
+    });
+  }
+  if (!medals.collectedAll) {
+    missed.push({
+      key: "all",
+      text: `${ORDERS_PER_ROUND} 盤都一次做對（${got}/${ORDERS_PER_ROUND}）`,
+      mark: <GoldPlate />,
+    });
+  }
   return missed;
 }
 
@@ -68,14 +89,48 @@ function PlateRow({ outcome, reducedMotion }: { outcome: DinoSushiOutcome; reduc
   );
 }
 
+function staggerStyle(i: number): CSSProperties {
+  return { ["--i" as string]: i };
+}
+
+/** 新貼紙格：放得下就全放，放不下時最後一格是「+N」，點了打開貼紙書。 */
+function FreshGrid({ stickers, onBook }: { stickers: readonly DinoSushiSticker[]; onBook: () => void }) {
+  const ref = useRef<HTMLUListElement>(null);
+  const { columns, rows } = useFreshGrid(ref);
+  const { shown, more } = freshLayout(stickers.length, columns, rows);
+  return (
+    <ul ref={ref} className={styles.freshRow}>
+      {stickers.slice(0, shown).map((sticker, i) => (
+        <li key={sticker.id} className={styles.freshThumb} style={staggerStyle(Math.min(i, FRESH_STAGGER_CAP))}>
+          <DinoSushiStickerFace sticker={sticker} locked={false} />
+        </li>
+      ))}
+      {more > 0 ? (
+        <li className={styles.freshThumb} style={staggerStyle(Math.min(shown, FRESH_STAGGER_CAP) + 1)}>
+          <TapButton
+            className={styles.freshMore}
+            data-fresh-more
+            aria-label={`還有 ${more} 張，打開貼紙書`}
+            onTap={onBook}
+          >
+            +{more}
+          </TapButton>
+        </li>
+      ) : null}
+    </ul>
+  );
+}
+
 function FreshStickers({
   fresh,
   gift,
   reducedMotion,
+  onBook,
 }: {
   fresh: readonly string[];
   gift: string;
   reducedMotion: boolean;
+  onBook: () => void;
 }) {
   if (fresh.length === 0) return null;
   const gifted = fresh.length === 1 && fresh[0] === gift;
@@ -83,13 +138,7 @@ function FreshStickers({
   return (
     <div className={styles.freshStickers} data-reduced={reducedMotion ? "true" : undefined}>
       <p className={styles.freshTitle}>{gifted ? "多多送你貼紙！" : "新貼紙！"}</p>
-      <ul className={styles.freshRow}>
-        {stickers.map((sticker) => (
-          <li key={sticker.id} className={styles.freshThumb}>
-            <DinoSushiStickerFace sticker={sticker} locked={false} />
-          </li>
-        ))}
-      </ul>
+      <FreshGrid stickers={stickers} onBook={onBook} />
     </div>
   );
 }
@@ -110,18 +159,23 @@ export function DinoSushiResult({
       <>
         <PlateRow outcome={outcome} reducedMotion={reducedMotion} />
         <ResultStars stars={stars} hints={missedRules(outcome.medals)} animate={!reducedMotion} />
-        <FreshStickers fresh={fresh} gift={gift} reducedMotion={reducedMotion} />
+        <FreshStickers fresh={fresh} gift={gift} reducedMotion={reducedMotion} onBook={onBook} />
       </>
     ) : (
       <>
         <PlateRow outcome={outcome} reducedMotion={reducedMotion} />
-        <FreshStickers fresh={fresh} gift={gift} reducedMotion={reducedMotion} />
+        <FreshStickers fresh={fresh} gift={gift} reducedMotion={reducedMotion} onBook={onBook} />
       </>
     );
   const bookLabel = fresh.length > 0 ? "放進貼紙書" : "貼紙書";
   const mood = roundVariety(outcome.seed);
   return (
-    <div className={styles.resultOverlay} data-testid="dino-sushi-result">
+    <div
+      className={styles.resultOverlay}
+      data-testid="dino-sushi-result"
+      /* 有新貼紙時店面收矮、彩紙收起，「放進貼紙書」才留在同一屏 */
+      data-fresh={fresh.length > 0 ? "true" : undefined}
+    >
       {/* 店裡吃飽飽的多多（裝飾）：同一間迴轉壽司店，結算不像跳到另一個畫面 */}
       <div className={styles.resultHero} data-reduced={reducedMotion ? "true" : undefined} aria-hidden>
         <ShopWall sky={mood.sky} lantern={mood.lantern} />
