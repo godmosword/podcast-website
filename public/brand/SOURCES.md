@@ -1,18 +1,24 @@
-# 第三方品牌資產來源（唯讀）
+# 第三方品牌資產來源
 
-站內平台標誌一律由 `components/BrandMark.tsx` 讀這裡的官方檔（登記在 `lib/brand-marks.tsx`），規則見 `lib/BRAND-ASSETS-HARD-RULES.md`。檔案只可等比縮放，不可改形、改色或裁切；更換檔案時同步更新本表與硬規則檔的查證日。
+站內平台與社群標誌由 `components/BrandMark.tsx` 讀這裡的檔案（登記在 `lib/brand-marks.tsx`），規則見 `lib/BRAND-ASSETS-HARD-RULES.md`。檔案只可等比縮放，不可改形、改色或裁切。電子郵件圖示不在這個目錄，是本站自有信封（`lib/brand-marks.tsx`）。
 
-| 檔案 | 平台 | 來源 | 擷取日期 |
-|------|------|------|----------|
-| `apple-podcasts-icon.png` | Apple Podcasts | [Apple Podcasts Identity Guidelines](https://marketing.services.apple/apple-podcasts-identity-guidelines) → Apple Podcasts Icon「Download」（apple.box.com，`Apple_Podcasts_Icon_RGB_CI_082526.png`，原始 2048×2048）；等比縮成 128×128 | 2026-10-12 |
-| `spotify-icon-green.png` | Spotify | [Spotify Newsroom — Logo and Brand Assets](https://newsroom.spotify.com/media-kit/logo-and-brand-assets/)（`Spotify_Primary_Logo_RGB_Green.png`，原始 939×940）；等比縮成 128×128 | 2026-10-12 |
-| `spotify-icon-black.png` | Spotify | 同上（`Spotify_Primary_Logo_RGB_Black.png`） | 2026-10-12 |
-| `spotify-icon-white.png` | Spotify | 同上（`Spotify_Primary_Logo_RGB_White.png`） | 2026-10-12 |
-| `youtube-icon.svg` | YouTube | 自 [gstatic 官方 `youtube-logo.svg`](https://www.gstatic.com/youtube/img/branding/youtubelogo/svg/youtubelogo.svg) 擷取圖示區（路徑未改） | 2026-06-10 |
-| `kkbox-logo.svg` | KKBOX | [Wikimedia Commons — KKBOX logo.svg](https://commons.wikimedia.org/wiki/File:KKBOX_logo.svg)（標準色 `#09CEF6`）；KKBOX 官網無公開下載，正式檔待索取 | 2026-06-10 |
-| `kkbox-logo-black.svg` | KKBOX | 同上 path，填色換成 KKBOX 規範的黑色版（淺色底用） | 2026-10-12 |
-| `kkbox-logo-white.svg` | KKBOX | 同上 path，填色換成 KKBOX 規範的白色版（深色底用） | 2026-10-12 |
-| `apple-podcasts-listen-badge-zh-hant.svg` | Apple Podcasts | [Apple Media Services Badges API](https://tools.applemediaservices.com/api/badges/listen-on-apple-podcasts/badge/zh-tw)；**備存，元件不得引用**（Apple 規定徽章與圖示不可同時出現） | 2026-06-10 |
-| `youtube-logo.svg` | YouTube | [gstatic 官方完整標誌](https://www.gstatic.com/youtube/img/branding/youtubelogo/svg/youtubelogo.svg)（備存） | 2026-06-10 |
+| 檔案 | 平台 | 怎麼用 | 來源 |
+|------|------|--------|------|
+| `apple-podcasts-icon.png` | Apple Podcasts | 圖示 30×30px，與其他平台並列時排第一。徽章檔不與圖示同頁使用 | [Apple Podcasts Identity Guidelines](https://marketing.services.apple/apple-podcasts-identity-guidelines) 的 Icon（`Apple_Podcasts_Icon_RGB_CI_082526.png`），等比縮成 128×128。擷取 2026-10-12 |
+| `spotify-icon-green.png` | Spotify | 日間白章與文字列（底為純白 `#ffffff`），圖示 30×30px（規範最小 21px）。綠標只用於純白或純黑底 | [Spotify Newsroom](https://newsroom.spotify.com/media-kit/logo-and-brand-assets/) 的 [`Spotify_Primary_Logo_RGB_Green.png`](https://storage.googleapis.com/pr-newsroom-wp/1/2023/05/Spotify_Primary_Logo_RGB_Green.png)（939×940），等比縮成 128×128，不改色、不裁切。擷取 2026-10-16 |
+| `spotify-icon-white.png` | Spotify | 夜間深色底（不是純黑），尺寸同上 | 同上，`Spotify_Primary_Logo_RGB_White.png`，等比縮成 128×128。擷取 2026-10-12 |
+| `spotify-icon-black.png` | Spotify | **備存，目前畫面未引用**（非純白、也非純黑的淺色底才用） | 同上，`Spotify_Primary_Logo_RGB_Black.png`，等比縮成 128×128。擷取 2026-10-12 |
+| `youtube-logo.svg` | YouTube | 淺色介面完整字標，高 24px（規範最小 20px） | [YouTube 品牌資源](https://www.youtube.com/howyoutubeworks/resources/brand-resources/)；[`youtubelogo.svg`](https://www.gstatic.com/youtube/img/branding/youtubelogo/svg/youtubelogo.svg) |
+| `youtube-logo-dark.svg` | YouTube | 深色介面白字完整字標，尺寸同上 | [`youtubelogo_dark.svg`](https://www.gstatic.com/youtube/img/branding/youtubelogo/svg/youtubelogo_dark.svg) |
+| `instagram-glyph-gradient.png` | Instagram | 漸層圖示 30×30px（規範最小 29px）。官方 5000×5000 PNG 等比縮成 256×256，沒有裁切或改色 | [Instagram 品牌資源](https://www.meta.com/brand/resources/instagram/instagram-brand/) 的 Gradient Glyph |
+| `facebook-logo-primary.png` | Facebook | 主標誌 30×30px（規範最小寬 16px） | [Facebook 標誌規範](https://www.meta.com/brand/resources/facebook/logo/) 的 Primary Logo |
+| `threads-logo-black.svg` | Threads | 淺色介面，寬 27px，高依原比例 | [Threads 品牌資源](https://www.meta.com/brand/resources/threads/) |
+| `threads-logo-white.svg` | Threads | 深色介面，尺寸同上 | 同上 |
+| `kkbox-logo.svg` | KKBOX | 白章用的標準色字標（`#09CEF6`）。不是向 KKBOX 索取的正式套件 | [Wikimedia Commons — KKBOX logo.svg](https://commons.wikimedia.org/wiki/File:KKBOX_logo.svg) |
+| `kkbox-logo-black.svg` | KKBOX | 其他淺色底 | 同上 path，填色換成黑色 |
+| `kkbox-logo-white.svg` | KKBOX | 深色底 | 同上 path，填色換成白色 |
+| `apple-podcasts-listen-badge-zh-hant.svg` | Apple Podcasts | **備存，元件不得引用**（徽章與圖示不可同時出現） | [Apple Media Services「在 Apple Podcasts 收聽」繁中徽章](https://tools.applemediaservices.com/api/badges/listen-on-apple-podcasts/badge/zh-tw) |
 
-Instagram、Threads、Facebook 的官方檔要在 [Meta Brand Resource Center](https://www.meta.com/brand/resources/) 由本人接受條款後下載，尚未取得；過渡期圖形在 `lib/brand-marks.tsx`（`interim: true`）。
+已下架、不得再引用：`youtube-icon.svg`（自完整字標裁出的圖示）。
+
+Meta 的圖檔可從上述品牌頁取得，不需建立帳號。下載網址若帶會過期的簽章，這裡記品牌頁，不記暫時連結。

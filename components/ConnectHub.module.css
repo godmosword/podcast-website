@@ -60,13 +60,15 @@
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  width: 72px;
+  width: auto;
+  max-width: 100%;
   text-decoration: none;
   color: var(--ink);
 }
 
 /* 白章：直徑 = 2 × 標誌 30px，讓 Spotify／Instagram 要求的半個標誌淨空落在章內。
-   日間必須是純白（Spotify 綠色版只能放白或黑底）；夜間換暗章、標誌換白色版。
+   日間 --card 是純白，Spotify 用官方綠標；夜間章不是純黑，改白標。
+   YouTube 是完整字標，比圓章寬，改成同高膠囊。
    不做硬底邊（STYLE-BIBLE §5：硬底邊只給遊戲與著色）。 */
 .badge {
   box-sizing: border-box;
@@ -80,6 +82,13 @@
   border: 1.5px solid var(--hairline);
   box-shadow: var(--shadow-sm), var(--gloss);
   transition: transform var(--motion-press);
+}
+
+.badge:has([data-brand-mark="youtube"]) {
+  width: auto;
+  min-width: 60px;
+  padding-inline: 12px;
+  border-radius: 999px;
 }
 
 :global(html[data-theme="night"]) .badge {
@@ -116,12 +125,16 @@
     padding: 14px 14px 16px;
   }
 
-  /* 美術審 L1：四個平台在 390 折成 3+1（YouTube／Email 各自孤兒一列）。
-     ≤480 改固定 4 欄 grid，欄寬隨容器縮；≤360 另收內距，320 時欄寬約 62px 放得下 60px 章。 */
+  /* 美術審 L1：≤480 固定 4 欄，320 時欄寬放得下 60px 章。
+     YouTube 完整字標比一欄寬，該格跨兩欄，避免字標被壓進圓章。 */
   .row {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 12px 6px;
+  }
+
+  .item:has([data-brand-mark="youtube"]) {
+    grid-column: span 2;
   }
 
   .item {

@@ -308,7 +308,7 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
 | `StoryProgressBadge` | 「已聽完」星章，貼封面右上角。語彙與宇宙地圖一致（`⭐` + `aria-label="已聽完"`）；只表達聽完單一狀態，不做「聽到一半」（progress store 的 `continue` 為全站單一欄位，標記會無預警消失） |
 | `StoryPlayer` | 全螢幕黑底、字幕底板、底部控制列；主播放鈕 `--play-size`（72／76／80）比 `--ctrl-size` 大一階，`--controls-block` 必須跟著加同樣的差值；字級鈕圖示是大 A 小 a（不是「AI」） |
 | `SubscribeForm` | 登記關閉（API unavailable）時不是空殼：四個收聽平台做成 soft 大按鈕列（2 欄，≤360 單欄）＋一句「新集照常上架」，點擊來源 `subscribe-closed`（美術審 M8）。按鈕裡的平台標誌不加章、用黑色版（按鈕底不是純白），38px 槽位；按下只下沉 1px、不縮放 |
-| `SiteFooter` | 平台連結；不放「給家長：點播放鈕…」導讀、不放遊樂園入口（`/games` 走導覽）、不放安心訊號列；`ConnectHub` 區塊用 `--hairline` + `--elev-1`（頂欄膠囊白邊未改）。 每個平台／社群標誌放進同一顆 60px 白章（日 `--card` 純白、夜 `--card-2`），標誌用官方檔、全站 30px，規則見 `lib/BRAND-ASSETS-HARD-RULES.md`；頻道順序 Apple Podcasts 第一。≤480 每區塊四個圖示走 4 欄 grid（不折 3+1），≤360 收內距讓 320 放得下 60px 章；meta 列的法務連結分隔點由 `.metaLegal::before` 畫，法務連結獨立成行時不畫（無孤懸點）。親子遊樂地圖仍可傳 `parentNote` |
+| `SiteFooter` | 平台連結；不放「給家長：點播放鈕…」導讀、不放遊樂園入口（`/games` 走導覽）、不放安心訊號列；`ConnectHub` 區塊用 `--hairline` + `--elev-1`（頂欄膠囊白邊未改）。 每個平台／社群標誌放進同一顆 60px 白章（日 `--card` 純白、夜 `--card-2`），標誌用官方檔；方型標誌 30px，YouTube 用完整字標（高 24px）所以該章改成同高膠囊。規則見 `lib/BRAND-ASSETS-HARD-RULES.md`；頻道順序 Apple Podcasts 第一。≤480 每區塊走 4 欄 grid，YouTube 跨兩欄，≤360 收內距讓 320 放得下 60px 章；meta 列的法務連結分隔點由 `.metaLegal::before` 畫，法務連結獨立成行時不畫（無孤懸點）。親子遊樂地圖仍可傳 `parentNote` |
 | `GamePageShell` | 街機兩款遊戲共同外框，負責返回導覽、可及性與資產預載 |
 | `ColoringPageShell` | 繪本著色活動外框（不掛 GameKit） |
 | `GameChrome` | 遊戲內暫停、音效與設定對話框 |

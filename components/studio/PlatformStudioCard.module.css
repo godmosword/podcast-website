@@ -25,6 +25,12 @@
   height: 30px;
 }
 
+.badge:has([data-brand-mark="youtube"]) {
+  width: auto;
+  height: auto;
+  min-height: 30px;
+}
+
 .badgeNeutral {
   border-radius: var(--radius-sm);
   background: var(--bg-2);

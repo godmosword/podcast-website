@@ -387,7 +387,7 @@ export default function StoryPlayer({
     window.requestAnimationFrame(() => timerButtonRef.current?.focus());
   }, []);
 
-  useFocusTrap(showNightPrompt, nightPromptRef);
+  useFocusTrap(showNightPrompt, nightPromptRef, { initialFocus: "none" });
 
   function handleTimerMenuKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
     const items = Array.from(
@@ -412,22 +412,24 @@ export default function StoryPlayer({
     }
   }
 
-  // Tab 圈禁交給 useFocusTrap（下方 useFocusTrap(showNightPrompt, ...)）：
-  // 原本寫在這裡的 Tab 分支永遠不會觸發——提示開啟時沒有把焦點移進對話框，
-  // 掛在容器上的 React onKeyDown 就收不到事件，等於宣告了 aria-modal 卻不是模態。
+  // 只在打開後的下一幀移一次焦點。useFocusTrap 的同步 focus 在 CI 上常常
+  // 趕在按鈕排版前（offsetParent 還是 null）就落空；若兩邊都移，本機又會在
+  // Tab 循環中途把焦點拉回「好呀」。
+  useEffect(() => {
+    if (!showNightPrompt) return;
+    const frame = window.requestAnimationFrame(() => {
+      nightPromptRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [showNightPrompt]);
+
+  // Tab 圈禁交給 useFocusTrap。Escape 仍在這個對話框上收。
   function handleNightPromptKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
     if (e.key === "Escape") {
       e.preventDefault();
       closeNightPrompt();
     }
   }
-
-  useEffect(() => {
-    if (!showNightPrompt) return;
-    window.requestAnimationFrame(() => {
-      nightPromptRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
-    });
-  }, [showNightPrompt]);
 
   // 睡前定時選單：點選單外或按 Esc 自動收起。
   useEffect(() => {

@@ -22,9 +22,9 @@ describe("BrandMark", () => {
     expect(html).toContain('aria-hidden="true"');
   });
 
-  it("文字列上的 Spotify 日間用黑色版", () => {
+  it("文字列上的 Spotify 日間用綠色版", () => {
     const html = renderToStaticMarkup(<BrandMark id="spotify" surface="row" />);
-    expect(imgs(html)[0]).toContain('src="/brand/spotify-icon-black.png"');
+    expect(imgs(html)[0]).toContain('src="/brand/spotify-icon-green.png"');
   });
 
   it("日夜同一個檔時只輸出一張圖", () => {
@@ -39,15 +39,11 @@ describe("BrandMark", () => {
     expect(imgs(html)[0]).toMatch(/height="7\.9\d*"/);
   });
 
-  it("兩個 Instagram 的漸層 id 不互撞", () => {
-    const html = renderToStaticMarkup(
-      <>
-        <BrandMark id="instagram" surface="chip" />
-        <BrandMark id="instagram" surface="chip" />
-      </>,
-    );
-    const ids = [...html.matchAll(/<linearGradient id="([^"]+)"/g)].map((m) => m[1]);
-    expect(ids).toHaveLength(2);
-    expect(new Set(ids).size).toBe(2);
+  it("Instagram 用官方漸層圖示，日夜同一張", () => {
+    const html = renderToStaticMarkup(<BrandMark id="instagram" surface="chip" />);
+    expect(imgs(html)).toHaveLength(1);
+    expect(imgs(html)[0]).toContain('src="/brand/instagram-glyph-gradient.png"');
+    expect(html).not.toContain("youtube-icon.svg");
+    expect(html).not.toContain("spotify-icon-green.png");
   });
 });

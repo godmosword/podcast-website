@@ -11,7 +11,7 @@
 > **出圖落後：** 多頁插圖至 **`ep-29`（15 頁，`77429838`）**；`ep-25`／`ep-26`／`ep-27`／`ep-28`／`ep-30`／`ep-31` 仍為 `pageCount=1` MVP。最新全幕含 **`ep-21`（18 頁）**／**`ep-22`（24 頁）**／**`ep-23`（26 頁）**／**`ep-24`（19 頁）**／**`ep-29`（15 頁）**。
 > 完整逐字稿覆蓋至 `ep-31`（ep-1–30 已 `--mark`；`ep-31` 中秋烤肉已校對；`ep-30` 已手切 18 幕，待出圖 `8ad9df05`）。`data/games.ts` 見下表。
 >
-> **現役遊戲（canon，對齊 `data/games.ts`）：** `candy-match` 繽紛消消樂 · `block-drop` 繽紛樂園 · `coloring-book` 繪本著色。
+> **現役遊戲（canon，對齊 `data/games.ts`）：** `candy-match` 車車消消樂 · `dino-sushi` 多多壽司屋 · `coloring-book` 繪本塗塗鴉。`block-drop` 方塊轉轉已下架，`/games/block-drop` 永久導向 `/games`。
 > **歷史 slug：** `kart`／`pirate-kart`／`car-star`／`car-mission` 已退役，見 [archive](./docs/archive/TODOS-completed-2026-07-11.md)。
 
 > **商業化切割（2026-07-17）：** 本輪先完成不依賴會員身份的資產、通知、量測與依賴穩定化；家長會員帳號、會員 entitlement、訂閱付款與 Stripe 明確保留在 [STEM-P4 商業化](#stem-p4--商業化) 待辦，不在本輪誤做半套付費牆。
@@ -31,7 +31,7 @@
 
 主體已落地（官方檔＋同一顆章，見 `lib/BRAND-ASSETS-HARD-RULES.md`），剩下要使用者本人處理或決定的：
 
-- **Meta 官方檔**：在 [Meta Brand Resource Center](https://www.meta.com/brand/resources/) 接受條款後下載 Instagram glyph（漸層＋白）、Facebook logo、Threads logo 包，放進 `public/brand/`，改 `lib/brand-marks.tsx` 的 `art` 並拿掉 `interim`，更新 `SOURCES.md`。`ops · S · 使用者`
+- ✅ **Meta 官方檔**：改接公開品牌頁的 `instagram-glyph-gradient.png`、`facebook-logo-primary.png`、`threads-logo-black.svg`、`threads-logo-white.svg`，拿掉過渡 inline 圖。沒有另建 Meta 帳號。見本 merge。
 - **KKBOX 正式檔**：官網沒有下載連結、有機器人驗證；向 KKBOX 索取正式字標，並確認數位最小尺寸、淺底用標準青還是黑。`ops · S · 使用者`
 - **YouTube 連結**：規範寫只有連到頻道時才能把標誌做成連結，`lib/platforms.ts` 現在連播放清單（也影響 JSON-LD `sameAs`）。要改連頻道首頁請提供網址。`product · S · 使用者決定`
 - **/studio 卡片左緣色條**：與 DESIGN「容器不做左緣色條」衝突（既有問題，noindex 頁）。`design · S · 無`
@@ -58,6 +58,7 @@
 - **離場剩下的**：小聲「啵」、手捲上留下的料滑到新位置、布丁放中間只露焦糖（彩蛋、不進訂單）。`ux · S · 無`
 - **矮直向可能要捲**：320×568 料位 64px、「給多多吃」改到料位下面之後，廚房比一屏高。舞台收到 152px（再矮會讓疊盤蓋到「多多吃飽了」），仍可能要往下捲一點。`ui · S · 無`
 - ✅ **重錄 darwin 視覺基準**：涵蓋 #232、#234、#235、#236 與更早的廚房改動（料位 64px、手捲餡料放大、托盤置中），2026-10-15 在 Mac 上重錄六張並逐張目檢（seed 7＝綠色日、傍晚、橘燈籠）。目檢時發現圓窗在所有手機都被收起（#229 把「給多多吃」移到料位下面，390×844 舞台從約 310px 縮到 276px，低於 290px 門檻），平板則鑽到點餐泡泡底下；改成從櫃台上緣往上放、大小跟舞台高度走、門檻降到 260px，390×844、430×932、768×1024 都看得到且不碰泡泡（`DinoSushiShop.module.css.test.ts` 守）。844×390 與 ≥900px 仍刻意收起。見本 commit。
+- **重錄 darwin 視覺基準（#210 平台標誌）**：官方標誌改了頁尾與訂閱頁的像素（Spotify 日間綠、夜間白；YouTube 完整字標膠囊；Instagram／Threads／Facebook 三家官方檔）。Linux 產不出 `-chromium-darwin`，要在負責人的 Mac 上重錄並逐張目檢。可與上面壽司屋那條同一輪做（grep 加上 `多多壽司屋`）。目檢：頁尾標誌日夜都對、390 寬的 YouTube 膠囊沒被裁切、訂閱頁的平台按鈕。指令（grep 結尾留空白，才不會掃到「留言頁頂欄」）：`npm run test:visual:trusted -- --grep 'visual：(首頁|遊樂園|單集 ep-3|宇宙地圖|角色圖鑑|關於|訂閱|留言) ' --update-snapshots`。日間 17 張：`home.png`、`home-390-light.png`、`games.png`、`games-390-light.png`、`adventures.png`、`adventures-390-light.png`、`story-ep-3-390-light.png`、`story-ep-3-1280-light.png`、`story-ep-3-768-light.png`、`characters-390-light.png`、`characters-1280-light.png`、`about-390-light.png`、`about-1280-light.png`、`subscribe-390-light.png`、`subscribe-1280-light.png`、`feedback-390-light.png`、`feedback-1280-light.png`。夜間 16 張（桌面日間走上面的短檔名，沒有 `*-1280-light`；768 只有日間）：`home-390-night.png`、`home-1280-night.png`、`games-390-night.png`、`games-1280-night.png`、`adventures-390-night.png`、`adventures-1280-night.png`、`story-ep-3-390-night.png`、`story-ep-3-1280-night.png`、`characters-390-night.png`、`characters-1280-night.png`、`about-390-night.png`、`about-1280-night.png`、`subscribe-390-night.png`、`subscribe-1280-night.png`、`feedback-390-night.png`、`feedback-1280-night.png`。磁碟檔名另加 `-chromium-darwin`。`ops · S · 負責人 Mac`
 - ✅ **重玩動機（貼紙書，Phase 2）**：24 張貼紙（12 料、3 種飯、5 個表情、4 個驚喜；不含客人）。放上料、送出飯、多多的反應、點餐送完、五盤一次做對、自由做吃飽、第一次來玩都會拿到；一輪結束若沒有新的，依目錄再送一張，直到收滿。存在 `cheche:progress` 的 `preferences.gameKit.dinoSushiStickers`，不進家長儀表板的 24 個 id；收滿才加全站貼紙「多多貼紙書收集完成」。圖只用現有飯、料、多多縮小副本。見本 commit。
 - ✅ **客人來店點餐（Phase 3）**：小紅、安安、阿樂、鈴鈴、東東、香香用現有定裝照當圓頭像，只點餐、不吃。多多仍吃、仍做表情。訂單仍是熟食家常料，不含草莓、布丁、芥末，沒有新料。每輪 5 位不重複（6 位裡輪空 1 位）；小紅在前兩單、東東在最後一單。招呼與做好時的話跟著音效與「念出來」。見本 commit。
 - ✅ **貼紙書加上 6 位客人（第 25–30 張）**：小紅、安安、阿樂、鈴鈴、東東、香香。這位客人的訂單第一次做對（多多吃下去）就拿到；圖用現有定裝照。前 24 張的規則與 id 不變，舊存檔仍有效。一輪沒拿到新的，仍先送原本 24 張裡缺的，那些都有了才送客人。全站「多多貼紙書收集完成」改為收滿 30 張才加；已經拿到的不會收回。最愛料的星星不做成貼紙。見本 commit。

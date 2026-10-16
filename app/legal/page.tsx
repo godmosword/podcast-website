@@ -155,10 +155,20 @@ export default function LegalPage() {
           <h2 className={styles.heading}>第三方商標與連結</h2>
           <ul className={styles.list}>
             <li>
-              Apple Podcasts、Spotify、KKBOX、YouTube、LINE、Instagram、Threads、Facebook
-              等名稱與圖示為各權利人之商標；收聽平台使用官方提供之標誌檔（見站內{" "}
-              <code>public/brand/</code>），僅作<strong>指示性連結</strong>
+              Apple Podcasts、Spotify、YouTube、Instagram、Threads、Facebook
+              的名稱與畫面上的標誌，使用各權利人公開品牌資源裡的官方檔（見{" "}
+              <code>public/brand/</code> 與 <code>public/brand/SOURCES.md</code>
+              ），依其規範以原色、原比例呈現。Spotify 日間放在純白底上，使用官方綠色標誌；夜間底不是純黑，改用官方白色標誌。僅作<strong>指示性連結</strong>
               （導向官方頁面），不代表與上述公司之合作或代言關係。
+            </li>
+            <li>
+              KKBOX 名稱為其商標。站上字標沿用公開典藏的 KKBOX 字標路徑，並換成淺色青／黑與深色白，不是向 KKBOX 索取的正式套件，也不代表合作。
+            </li>
+            <li>
+              「以 LINE 分享」只使用 LINE 這個名稱與本站自繪的分享圖示，沒有使用 LINE 官方標誌。
+            </li>
+            <li>
+              電子郵件圖示是本站的通用信封符號，不是第三方商標。
             </li>
             <li>
               點選連結將離開本網站；第三方服務之條款、隱私政策與內容由該平台負責。

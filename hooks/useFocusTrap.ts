@@ -12,10 +12,10 @@ const FOCUSABLE_SELECTOR = [
 type FocusTrapOptions = {
   /**
    * 初始焦點落點："first"（預設）聚焦第一個可聚焦元素；
-   * "container" 聚焦容器本身（容器需自帶 tabIndex={-1}）——
-   * dialog/sheet 用，避免開啟瞬間關閉鈕出現 focus ring。
+   * "container" 聚焦容器本身（容器需自帶 tabIndex={-1}）；
+   * "none" 不移焦點，只做 Tab 環繞，讓呼叫端等排版完再移一次。
    */
-  initialFocus?: "container" | "first";
+  initialFocus?: "container" | "first" | "none";
 };
 
 /**
@@ -42,7 +42,7 @@ export function useFocusTrap(
 
     if (initialFocus === "container") {
       container.focus();
-    } else {
+    } else if (initialFocus === "first") {
       focusables()[0]?.focus();
     }
 
