@@ -96,8 +96,9 @@ function staggerStyle(i: number): CSSProperties {
 /** 新貼紙格：放得下就全放，放不下時最後一格是「+N」，點了打開貼紙書。 */
 function FreshGrid({ stickers, onBook }: { stickers: readonly DinoSushiSticker[]; onBook: () => void }) {
   const ref = useRef<HTMLUListElement>(null);
-  const { columns, rows } = useFreshGrid(ref);
-  const { shown, more } = freshLayout(stickers.length, columns, rows);
+  const grid = useFreshGrid(ref);
+  /* 量到格子寬之前先不畫（useLayoutEffect 在第一次繪製前就量好） */
+  const { shown, more } = grid ? freshLayout(stickers.length, grid.columns, grid.rows) : { shown: 0, more: 0 };
   return (
     <ul ref={ref} className={styles.freshRow}>
       {stickers.slice(0, shown).map((sticker, i) => (

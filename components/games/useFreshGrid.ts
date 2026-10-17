@@ -5,8 +5,6 @@ import { freshColumns } from "@/lib/games/dino-sushi/fresh-layout";
 
 export type FreshGrid = { columns: number; rows: number };
 
-const FALLBACK: FreshGrid = { columns: 5, rows: 1 };
-
 function readNumber(style: CSSStyleDeclaration, name: string, fallback: number): number {
   const n = parseFloat(style.getPropertyValue(name));
   return Number.isFinite(n) ? n : fallback;
@@ -16,9 +14,10 @@ function readNumber(style: CSSStyleDeclaration, name: string, fallback: number):
  * 新貼紙格放得下幾欄幾列。寬度量格子本身；格子大小、間距、列數讀 CSS 變數
  * （`--fresh-thumb`、`--fresh-gap`、`--fresh-rows`，由媒體查詢決定），版面規則只寫在 CSS 一處。
  * 視窗變高變矮時寬度不一定變，所以 resize 也重量一次。
+ * 還沒量到之前回傳 null：呼叫端先不畫貼紙，免得用猜的欄列數先算出錯的「+N」。
  */
-export function useFreshGrid(ref: RefObject<HTMLElement | null>): FreshGrid {
-  const [grid, setGrid] = useState<FreshGrid>(FALLBACK);
+export function useFreshGrid(ref: RefObject<HTMLElement | null>): FreshGrid | null {
+  const [grid, setGrid] = useState<FreshGrid | null>(null);
 
   useLayoutEffect(() => {
     const el = ref.current;
@@ -31,7 +30,7 @@ export function useFreshGrid(ref: RefObject<HTMLElement | null>): FreshGrid {
         readNumber(style, "--fresh-gap", 8),
       );
       const rows = Math.max(1, Math.round(readNumber(style, "--fresh-rows", 1)));
-      setGrid((prev) => (prev.columns === columns && prev.rows === rows ? prev : { columns, rows }));
+      setGrid((prev) => (prev && prev.columns === columns && prev.rows === rows ? prev : { columns, rows }));
     };
     measure();
     window.addEventListener("resize", measure);

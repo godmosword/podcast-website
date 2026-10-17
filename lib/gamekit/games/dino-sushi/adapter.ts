@@ -26,6 +26,17 @@ export type DinoSushiController = {
 /** 回到標題後這段時間內的 start() 視為同一次按鍵的連帶觸發。 */
 const TITLE_ENTER_GRACE_MS = 300;
 
+/**
+ * Host 在 ready/won/over 按 Enter 一律呼叫 start()，不看焦點在哪。結算畫面上焦點在按鈕或連結
+ * （放進貼紙書、+N、回標題、貼紙書格子）時，Enter 要交給那顆鈕自己（同方塊轉轉的做法），
+ * 不然會跟按鈕搶，有時直接開了新的一輪。
+ */
+function focusOnControl(): boolean {
+  if (typeof document === "undefined") return false;
+  const el = document.activeElement;
+  return el != null && el !== document.body && el.closest("button, a") !== null;
+}
+
 const NOOP_CONTROLLER: DinoSushiController = {
   startOrder: () => {},
   startFree: () => {},
@@ -76,6 +87,7 @@ class DinoSushiInstance implements GameInstance {
       this.controller.startOrder();
       return;
     }
+    if (focusOnControl()) return;
     this.controller.restart();
   }
 

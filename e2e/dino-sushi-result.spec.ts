@@ -94,6 +94,26 @@ for (const vp of [
   });
 }
 
+test("844×390：按鈕列、「放進貼紙書」、回遊樂園在右欄，書鈕點得到", async ({ page }) => {
+  await page.setViewportSize({ width: 844, height: 390 });
+  await page.goto("/games/dino-sushi");
+  await finishRound(page);
+  const result = page.getByTestId("dino-sushi-result");
+  await settledResult(result);
+  const box = async (l: Locator) => (await l.boundingBox())!;
+  const title = await box(result.getByRole("heading", { name: "多多吃飽飽！" }));
+  const replay = await box(result.getByRole("button", { name: "再做一輪" }));
+  const bookBtn = result.getByRole("button", { name: "放進貼紙書" });
+  const book = await box(bookBtn);
+  const hub = await box(result.getByRole("link", { name: "回遊樂園" }));
+  for (const right of [replay, book, hub]) expect(right.x).toBeGreaterThan(title.x + title.width);
+  await bookBtn.focus();
+  await page.keyboard.press("Enter");
+  // Enter 只開書，不會被外框當成「再做一輪」
+  await expect(page.getByTestId("dino-sushi-sticker-book")).toBeVisible();
+  await expect(page.getByRole("img", { name: /^第 1 單/ })).toHaveCount(0);
+});
+
 test("放不下的收成「+N」：露出的張數＋N＝貼紙書裡的新貼紙；點「+N」打開貼紙書", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/games/dino-sushi");

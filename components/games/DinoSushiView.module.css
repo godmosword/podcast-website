@@ -697,13 +697,6 @@
     0 3px 0 #7fb56a;
 }
 
-/* 點擊區往外擴 4px：56px 的格子點起來有 64px */
-.freshMore::before {
-  content: "";
-  position: absolute;
-  inset: -4px;
-}
-
 .freshMore:active {
   transform: translateY(2px);
   box-shadow:

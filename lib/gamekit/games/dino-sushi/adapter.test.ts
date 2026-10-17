@@ -53,6 +53,23 @@ describe("dinoSushiAdapter", () => {
     vi.useRealTimers();
   });
 
+  it("結算時焦點在按鈕或連結上：Enter 交給那顆鈕，Host 的 start() 不另外重開一輪", () => {
+    const ctrl = controller();
+    const inst = new DinoSushiInstance({ kidsMode: true, reducedMotion: false });
+    inst.registerController(ctrl);
+    inst.notifyPlaying("order");
+    inst.notifyWon({ cleared: true, flawless: false, collectedAll: false });
+    const body = { closest: () => null };
+    const book = { closest: (sel: string) => (sel.includes("button") ? book : null) };
+    vi.stubGlobal("document", { body, activeElement: book });
+    inst.start();
+    expect(ctrl.restart).not.toHaveBeenCalled();
+    vi.stubGlobal("document", { body, activeElement: body });
+    inst.start();
+    expect(ctrl.restart).toHaveBeenCalledTimes(1);
+    vi.unstubAllGlobals();
+  });
+
   it("結算後 start／restart 都是同模式再來一輪", () => {
     const ctrl = controller();
     const inst = new DinoSushiInstance({ kidsMode: true, reducedMotion: false });
