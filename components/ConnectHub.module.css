@@ -125,12 +125,12 @@
     padding: 14px 14px 16px;
   }
 
-  /* 美術審 L1：≤480 固定 4 欄，320 時欄寬放得下 60px 章。
+  /* 美術審 L1：≤480 固定 4 欄，320 時欄寬放得下 60px 章；互動間距至少 8px。
      YouTube 完整字標比一欄寬，該格跨兩欄，避免字標被壓進圓章。 */
   .row {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 12px 6px;
+    gap: 12px 8px;
   }
 
   .item:has([data-brand-mark="youtube"]) {
@@ -158,7 +158,9 @@
   }
 
   .row {
-    column-gap: 4px;
+    /* 320px 寬時欄寬約 62px；向外借 2px，讓 8px 間距下仍能容納 60px 圓章。 */
+    column-gap: 8px;
+    margin-inline: -2px;
   }
 }
 

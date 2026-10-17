@@ -4,6 +4,7 @@ import {
   createStoryOgImage,
   storyOgContentType,
   storyOgImagePath,
+  storyOgCastLine,
   storyOgImageSize,
 } from "./story-og";
 
@@ -23,5 +24,11 @@ describe("story og", () => {
     expect(res).toBeTruthy();
     const buf = await (res as Response).arrayBuffer();
     expect(buf.byteLength).toBeGreaterThan(1000);
+  });
+
+  it("分享圖角色名單不放主持人，讓位給該集主角", () => {
+    expect(storyOgCastLine("ep-13")).toBe("香香 · 阿酷");
+    expect(storyOgCastLine("ep-1")).toBe("沃特");
+    expect(storyOgCastLine("ep-15")).toBe("鈴鈴 · 多多 · 小紅");
   });
 });

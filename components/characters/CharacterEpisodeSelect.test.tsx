@@ -13,6 +13,18 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push }),
 }));
 
+vi.mock("next/link", () => ({
+  default: ({
+    href,
+    children,
+    ...rest
+  }: React.AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) => (
+    <a href={href} {...rest}>
+      {children}
+    </a>
+  ),
+}));
+
 vi.mock("@/lib/sfx", () => ({
   playSfx: (...args: unknown[]) => playSfx(...args),
 }));
@@ -48,5 +60,25 @@ describe("CharacterEpisodeSelect", () => {
 
     expect(playSfx).toHaveBeenCalledWith("tap");
     expect(push).toHaveBeenCalledWith("/story/ep-15");
+  });
+
+  it("只出場一集時直接給連結，不用多點一次下拉", () => {
+    render(
+      <CharacterEpisodeSelect
+        characterName="阿酷"
+        episodes={[{ slug: "ep-13", ep: 13, title: "阿酷溫柔救援" }]}
+      />,
+    );
+
+    expect(screen.queryByRole("combobox")).toBeNull();
+    const link = screen.getByRole("link", {
+      // 可見文字「聽 EP 13」放在名稱開頭，語音控制才點得到（WCAG 2.5.3）
+      name: "聽 EP 13 阿酷溫柔救援（阿酷的出場故事）",
+    });
+    expect(link.getAttribute("href")).toBe("/story/ep-13");
+    expect(link.textContent).toContain("聽 EP 13");
+
+    fireEvent.click(link);
+    expect(playSfx).toHaveBeenCalledWith("tap");
   });
 });

@@ -208,9 +208,15 @@ export function getCharacters(): Character[] {
   return CHARACTERS;
 }
 
+/** 主持人（Bonbon & 馬米）：串場角色，不是單集主角。 */
+export const HOST_CHARACTER_IDS: readonly string[] = ["bong-bong", "mami"];
+
+/** 單集角色：主角在前、主持人在後（故事 OG 圖只取前 3 位）。 */
 export function getCharactersForStory(slug: string): Character[] {
   const canonical = canonicalStorySlug(slug);
-  return CHARACTERS.filter((c) => c.appearsIn.includes(canonical));
+  const inStory = CHARACTERS.filter((c) => c.appearsIn.includes(canonical));
+  const isHost = (c: Character) => HOST_CHARACTER_IDS.includes(c.id);
+  return [...inStory.filter((c) => !isHost(c)), ...inStory.filter(isHost)];
 }
 
 export function getCharacterName(id: string): string | null {

@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { ImageResponse } from "next/og";
 import type { Story } from "@/data/content";
-import { getCharactersForStory } from "@/data/characters";
+import { HOST_CHARACTER_IDS, getCharactersForStory } from "@/data/characters";
 import {
   loadOgFont,
   OG_FONT_FAMILY,
@@ -84,6 +84,16 @@ function loadCoverData(story: Story): string | null {
 
 export { storyOgImagePath } from "@/lib/story-og-path";
 
+/** 分享圖角色名單：最多 3 位；主持人幾乎集集都在，只有整集只有主持人時才列。 */
+export function storyOgCastLine(slug: string): string {
+  const cast = getCharactersForStory(slug);
+  const leads = cast.filter((c) => !HOST_CHARACTER_IDS.includes(c.id));
+  return (leads.length > 0 ? leads : cast)
+    .slice(0, 3)
+    .map((c) => c.name)
+    .join(" · ");
+}
+
 type StoryOgOptions = {
   story: Story;
   coverSrc: string | null;
@@ -95,10 +105,7 @@ function buildStoryOgMarkup({
   coverSrc,
   fontFamily,
 }: StoryOgOptions) {
-  const characters = getCharactersForStory(story.slug)
-    .slice(0, 3)
-    .map((c) => c.name)
-    .join(" · ");
+  const characters = storyOgCastLine(story.slug);
   const accent = story.color;
 
   return (

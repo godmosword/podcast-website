@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getCharacters } from "@/data/characters";
 import CharacterCatalogGrid from "@/components/characters/CharacterCatalogGrid";
+import CharacterCatalogMeta from "@/components/characters/CharacterCatalogMeta";
 import JsonLd from "@/components/JsonLd";
 import SiteFooter from "@/components/SiteFooter";
 import {
@@ -8,6 +9,7 @@ import {
   characterCreativeWorkJsonLd,
   faqPageJsonLd,
 } from "@/lib/json-ld";
+import { sortCatalogCharacters } from "@/lib/character-catalog";
 import { STATIC_PAGE_MODIFIED_DATES } from "@/lib/page-freshness";
 import styles from "./page.module.css";
 
@@ -45,7 +47,7 @@ export const metadata: Metadata = {
 };
 
 export default function CharactersPage() {
-  const characters = getCharacters();
+  const characters = sortCatalogCharacters(getCharacters());
 
   return (
     <main className={styles.main}>
@@ -67,7 +69,7 @@ export default function CharactersPage() {
           <br />
           聽完故事，你就會認識他哦
         </p>
-        <p className={styles.meta}>{characters.length} 位角色</p>
+        <CharacterCatalogMeta characters={characters} className={styles.meta} />
       </header>
 
       <CharacterCatalogGrid characters={characters} />

@@ -1,5 +1,36 @@
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { getCharacterName, getCharacters, getCharactersForStory } from "./characters";
+import rawCharacters from "./characters.json";
+import {
+  HOST_CHARACTER_IDS,
+  getCharacterName,
+  getCharacters,
+  getCharactersForStory,
+} from "./characters";
+
+type SceneFile = {
+  slug: string;
+  scenes: { characters?: string[] }[];
+};
+
+function readSceneFiles(): SceneFile[] {
+  const dir = join(import.meta.dirname, "scenes");
+  return readdirSync(dir)
+    .filter((file) => file.endsWith(".json"))
+    .map((file) => JSON.parse(readFileSync(join(dir, file), "utf8")) as SceneFile);
+}
+
+/** 場景插畫裡畫到的名字（含別名）→ 名冊正式名稱。 */
+function canonicalNameByAlias(): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const entry of rawCharacters as { name: string; aliases?: string[] }[]) {
+    for (const alias of [entry.name, ...(entry.aliases ?? [])]) {
+      map.set(alias, entry.name);
+    }
+  }
+  return map;
+}
 
 describe("getCharacters", () => {
   it("回傳完整角色清單給角色頁與 JSON-LD 使用", () => {
@@ -33,6 +64,22 @@ describe("getCharactersForStory", () => {
     const ids = getCharactersForStory("ep-1").map((c) => c.id);
     expect(ids).toContain("watt");
     expect(ids).toContain("bong-bong");
+  });
+
+  it("主持人排在該集角色最後，故事 OG 圖的前 3 位留給主角", () => {
+    const hosts = new Set(HOST_CHARACTER_IDS);
+    for (let ep = 1; ep <= 40; ep += 1) {
+      const ids = getCharactersForStory(`ep-${ep}`).map((c) => c.id);
+      const firstHost = ids.findIndex((id) => hosts.has(id));
+      if (firstHost < 0) continue;
+      expect(
+        ids.slice(firstHost).every((id) => hosts.has(id)),
+        `ep-${ep}：${ids.join("、")}`,
+      ).toBe(true);
+    }
+    expect(getCharactersForStory("ep-13").slice(0, 3).map((c) => c.id)).toContain(
+      "a-ku",
+    );
   });
 
   it("ep-2 含小飛", () => {
@@ -107,6 +154,34 @@ describe("getCharactersForStory", () => {
     expect(ids).toContain("xiao-hong");
     expect(ids).toContain("xiao-hong-baby");
     expect(ids).toContain("xiao-hong-dad-young");
+  });
+});
+
+describe("出場集數與場景插畫一致", () => {
+  it("角色被畫進哪一集的場景，出場集數就要有那一集（圖鑑、故事頁角色條、已認識都靠它）", () => {
+    const byAlias = canonicalNameByAlias();
+    const nameById = new Map(
+      getCharacters().map((character) => [character.id, getCharacterName(character.id)]),
+    );
+    const appearsInByName = new Map(
+      getCharacters().map((character) => [
+        nameById.get(character.id),
+        new Set(character.appearsIn),
+      ]),
+    );
+
+    const missing: string[] = [];
+    for (const file of readSceneFiles()) {
+      const drawn = new Set(
+        file.scenes.flatMap((scene) => scene.characters ?? []).map((n) => byAlias.get(n) ?? n),
+      );
+      for (const name of drawn) {
+        if (!appearsInByName.get(name)?.has(file.slug)) {
+          missing.push(`${name} 缺 ${file.slug}`);
+        }
+      }
+    }
+    expect(missing).toEqual([]);
   });
 });
 

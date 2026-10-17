@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   catalogEpisodeLabel,
@@ -21,6 +22,28 @@ export default function CharacterEpisodeSelect({
   const router = useRouter();
 
   if (episodes.length === 0) return null;
+
+  // 只出場一集：直接連過去，不讓孩子點開只有一個選項的下拉。
+  if (episodes.length === 1) {
+    const [episode] = episodes;
+    const label = catalogEpisodeLabel(episode);
+    return (
+      <div className={styles.episodeSelect}>
+        <Link
+          href={`/story/${episode.slug}`}
+          className={`${styles.episodeSelectControl} ${styles.episodeLink}`}
+          aria-label={`聽 ${label}（${characterName}的出場故事）`}
+          title={label}
+          onClick={() => playSfx("tap")}
+        >
+          聽 EP {episode.ep}
+          <span className={styles.episodeSelectArrow} aria-hidden>
+            <Icon name="chevron-right" size={16} />
+          </span>
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <label className={styles.episodeSelect}>
