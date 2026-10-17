@@ -11,23 +11,48 @@ const seats: CustomerId[] = ["xiangxiang", "xiaohong", "anan", "ale", "lingling"
 afterEach(cleanup);
 
 describe("門口排隊", () => {
-  it("5 個位子：做完打勾、現在放大、還沒到的小貼紙，而且不能點", () => {
+  it("只排還沒輪到的人：下一位放大、後面的小貼紙，不能點", () => {
     render(<DinoSushiCustomerQueue seats={seats} index={2} />);
     const queue = document.querySelector("[data-customer-queue]");
     expect(queue?.getAttribute("aria-hidden")).toBe("true");
     const items = [...(queue?.querySelectorAll("li") ?? [])];
-    expect(items).toHaveLength(5);
-    expect(items.map((item) => item.getAttribute("data-state"))).toEqual(["done", "done", "now", "wait", "wait"]);
-    expect(items.map((item) => item.getAttribute("data-customer"))).toEqual(seats);
-    for (const [item, id] of items.map((item, i) => [item, seats[i]!] as const)) {
+    expect(items).toHaveLength(2);
+    expect(items.map((item) => item.getAttribute("data-state"))).toEqual(["next", "wait"]);
+    expect(items.map((item) => item.getAttribute("data-customer"))).toEqual(["ale", "lingling"]);
+    for (const item of items) {
+      const id = item.getAttribute("data-customer") as CustomerId;
       expect(item.querySelector("img")?.getAttribute("src")).toBe(customerById(id).sticker);
+      expect(item.querySelector("svg")).toBeNull();
     }
-    expect(items[0]?.querySelector("svg")).not.toBeNull();
-    expect(items[1]?.querySelector("svg")).not.toBeNull();
-    expect(items[2]?.querySelector("svg")).toBeNull();
-    expect(items[4]?.querySelector("svg")).toBeNull();
     expect(queue?.querySelector("button")).toBeNull();
     expect(screen.queryByRole("button")).toBeNull();
+  });
+
+  it("坐著或正在吃的這位，以及做完的人，都不在可見的排隊裡", () => {
+    for (const index of [0, 1, 2, 3, 4]) {
+      const { unmount } = render(
+        <>
+          <DinoSushiCustomerQueue seats={seats} index={index} />
+          <DinoSushiCustomerSeat
+            order={{ base: "nigiri", toppings: ["shrimp", "cucumber"], customerId: seats[index]! }}
+          />
+        </>,
+      );
+      const seated = document.querySelector("[data-customer-seat]")?.getAttribute("data-customer");
+      const queued = [...document.querySelectorAll("[data-customer-queue] li")].map((item) =>
+        item.getAttribute("data-customer"),
+      );
+      expect(seated).toBe(seats[index]);
+      expect(queued).not.toContain(seated);
+      expect(queued).toEqual(seats.slice(index + 1));
+      for (const done of seats.slice(0, index)) expect(queued).not.toContain(done);
+      unmount();
+    }
+  });
+
+  it("最後一單沒有人等，就不畫排隊", () => {
+    render(<DinoSushiCustomerQueue seats={seats} index={4} />);
+    expect(document.querySelector("[data-customer-queue]")).toBeNull();
   });
 });
 

@@ -198,7 +198,7 @@ export function DinoSushiKitchen({
         data-brush={brushShown ? "true" : undefined}
       >
         <ShopWall sky={variety?.sky} lantern={variety?.lantern} />
-        {/* 點餐才排隊。全身貼紙畫在雨棚下、燈籠右邊，輪子在多多頭頂上面，也不能點。 */}
+        {/* 點餐才排隊，而且只排還沒輪到的人。正在點或坐著吃的這位不在雨棚下。 */}
         {round.mode === "order" && variety ? (
           <DinoSushiCustomerQueue seats={variety.seats} index={round.index} />
         ) : null}

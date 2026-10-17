@@ -83,7 +83,7 @@
 }
 
 /* 點餐：雨棚下留一條排隊帶。多多的頭改從這條下面開始，才不會被貼紙蓋住。自由做不設。
-   --queue-now／wait 是貼紙槽的寬，跟著舞台變大，現在這位約是等候的 1.5 倍。
+   --queue-now／wait 是貼紙槽的寬，跟著舞台變大，下一位約是後面等候的 1.5 倍。
    正方形畫布只露出底下 88%（輪底在 92%，上面的空天切掉）。
    多多收窄，櫃台旁才站得下約六成四寬的客人（看起來超過多多的一半高）。燈籠讓出這條寬度。 */
 .duoArea[data-mode="order"] {
@@ -224,8 +224,8 @@
 }
 
 /*
- * 門口排隊：今天 5 位的全身貼紙，排在雨棚下，輪子站同一條線。
- * 槽寬跟著舞台走（現在這位約 23cqw），還沒輪到的小一號；做完打勾。再窄的舞台改兩列。
+ * 門口排隊：還沒輪到的全身貼紙，排在雨棚下，輪子站同一條線。
+ * 正在點餐或坐著吃的這位不在隊伍裡。槽寬跟著舞台走（下一位約 23cqw），再後面的小一號。再窄的舞台改兩列。
  * 槽是寬、圖往下對齊，只露出畫布底下 88%，空的天不佔高度。
  * pointer-events: none，不搶抬頭按鈕、泡泡、砧板或托盤。
  */
@@ -257,7 +257,7 @@
   height: calc(var(--queue-wait, 36px) * var(--queue-show, 0.88));
 }
 
-.queueItem[data-state="now"] {
+.queueItem[data-state="next"] {
   flex-basis: var(--queue-now, 52px);
   width: var(--queue-now, 52px);
   min-width: var(--queue-now, 52px);
@@ -265,7 +265,7 @@
   height: calc(var(--queue-now, 52px) * var(--queue-show, 0.88));
 }
 
-/* 現在這位腳下一條暖橘，其他人是淡的接地影。不是圓框。 */
+/* 下一位腳下一條暖橘，其他人是淡的接地影。不是圓框。 */
 .queueItem::after {
   content: "";
   position: absolute;
@@ -278,7 +278,7 @@
   pointer-events: none;
 }
 
-.queueItem[data-state="now"]::after {
+.queueItem[data-state="next"]::after {
   background: radial-gradient(closest-side, rgba(255, 140, 43, 0.5), transparent 74%);
 }
 
@@ -300,17 +300,7 @@
   pointer-events: none;
 }
 
-.queueCheck {
-  position: absolute;
-  z-index: 2;
-  right: -3px;
-  bottom: -3px;
-  width: 14px;
-  height: 14px;
-  pointer-events: none;
-}
-
-/* 點餐時泡泡讓到排隊下面。多留小喇叭徽章（往上 14px），才不會壓到現在這位。 */
+/* 點餐時泡泡讓到排隊下面。多留小喇叭徽章（往上 14px），才不會壓到下一位。 */
 .duoArea[data-mode="order"] .talk {
   top: calc(var(--queue-top, 8px) + var(--queue-now, 52px) * var(--queue-show, 0.88) + 26px);
 }
@@ -643,7 +633,7 @@
     --cell: 30px;
   }
 
-  /* 第幾單的小點改由排隊的打勾表示，省下一列才不會壓到疊盤 */
+  /* 矮舞台收起第幾單的小點，省下一列才不會壓到疊盤。做到哪一單看旁邊疊了幾盤。 */
   .orderDots {
     display: none;
   }
@@ -872,7 +862,7 @@
   box-shadow: inset 0 0 0 1.5px #3f7f2a;
 }
 
-/* 寫在 .orderDots 後面，矮舞台才蓋得過 display:flex。排隊已經表示做到哪一單。 */
+/* 寫在 .orderDots 後面，矮舞台才蓋得過 display:flex。 */
 @container duo-stage (max-height: 190px) {
   .orderDots {
     display: none;
