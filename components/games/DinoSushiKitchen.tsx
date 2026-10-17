@@ -9,6 +9,7 @@ import { BASES, baseById, toppingById, type BaseId, type ToppingId } from "@/lib
 import { DOME_AFTER_PLATES, domeStickerId, orderLead, roundVariety } from "@/lib/games/dino-sushi/variety";
 import { DinoSushiDuoDuo } from "./DinoSushiDuoDuo";
 import { DinoSushiEvictFly, type EvictFly } from "./DinoSushiEvictFly";
+import { DinoSushiGuestThanks } from "./DinoSushiGuestThanks";
 import { DinoSushiOrderBubble } from "./DinoSushiOrderBubble";
 import { TapButton, TapFinger as Finger, type TapPoint } from "./DinoSushiPiece";
 import { DinoSushiPlateStack } from "./DinoSushiPlateStack";
@@ -213,6 +214,10 @@ export function DinoSushiKitchen({
         <div className={styles.talk}>
           {round.mode === "free" ? (
             <TapButton className={styles.fullButton} onTap={actions.finish} disabled={disabled}>
+              <span className={styles.fullArt} aria-hidden>
+                <PlateArt />
+                <PlateArt />
+              </span>
               多多吃飽了
             </TapButton>
           ) : null}
@@ -231,6 +236,10 @@ export function DinoSushiKitchen({
             <p className={styles.caption} data-mood={caption.mood} aria-hidden>
               {caption.line}
             </p>
+          ) : null}
+          {/* 先多多、再朋友（朗讀也是這個順序）；只在反應那一段，下一單泡泡出來前收起 */}
+          {phase === "react" && thanksLine && orderForSpeech ? (
+            <DinoSushiGuestThanks order={orderForSpeech} line={thanksLine} />
           ) : null}
         </div>
       </section>

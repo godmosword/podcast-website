@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { PlateArt, SHOP_SRC, SushiArt } from "@/lib/games/dino-sushi/art";
 import { BELT_PLATES } from "@/lib/games/dino-sushi/shop-art";
 import { stickerById } from "@/lib/games/dino-sushi/stickers";
@@ -60,6 +61,14 @@ export function ShopBelt({
   const plates = [...BELT_PLATES, ...BELT_PLATES];
   const sticker = stickerId ? stickerById(stickerId) : undefined;
   const cycle = BELT_PLATES.length;
+  /* 開蓋那一刻彈一次（帶上那盤常常在畫面外）；新的一輪蓋子合回去才重來 */
+  const [pop, setPop] = useState(false);
+  const wasOpen = useRef(domeOpen);
+  useEffect(() => {
+    if (domeOpen && !wasOpen.current) setPop(true);
+    if (!domeOpen) setPop(false);
+    wasOpen.current = domeOpen;
+  }, [domeOpen]);
   return (
     <div className={styles.counter} aria-hidden>
       <span className={styles.belt} style={{ ["--belt-image" as string]: `url("${SHOP_SRC.belt}")` }} />
@@ -96,6 +105,25 @@ export function ShopBelt({
         <img src={SHOP_SRC.counter} alt="" draggable={false} decoding="sync" />
       </span>
       <span className={styles.shopName}>多多壽司</span>
+      {pop ? (
+        <span
+          className={styles.domePop}
+          data-dome-pop
+          onAnimationEnd={(e) => {
+            if (e.target === e.currentTarget) setPop(false);
+          }}
+        >
+          <span className={styles.domePopPrize}>
+            {sticker ? <DinoSushiStickerFace sticker={sticker} locked={false} /> : <span className={styles.domeStar} />}
+          </span>
+          <span className={styles.domePopLid}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={SHOP_SRC.dome} alt="" draggable={false} decoding="sync" />
+          </span>
+          <span className={styles.domePopSpark} />
+          <span className={styles.domePopSpark} />
+        </span>
+      ) : null}
     </div>
   );
 }

@@ -340,12 +340,13 @@
   pointer-events: none;
 }
 
+/* 客人最愛的料：星星要看得到（12px 時沒人注意到），做對時膠囊上會再亮一次 */
 .favStar {
   position: absolute;
-  top: 0;
-  right: 0;
-  width: 12px;
-  height: 12px;
+  top: -2px;
+  right: -2px;
+  width: 16px;
+  height: 16px;
   pointer-events: none;
 }
 
@@ -565,6 +566,124 @@
     0 8px 18px rgba(90, 60, 30, 0.18);
 }
 
+/*
+ * 朋友收到壽司：多多字卡下面一顆粉色膠囊（頭像＋愛心＋謝謝）。刻意不像點餐泡泡（沒有白底木框、尾巴、料圖列）。
+ * 反應開始後 200ms 彈出、愛心再晚 300ms 跳一下；反應結束（約 1 秒後）跟著收起。
+ * 這單有朋友最愛的料：頭像左上一顆星、旁邊放那樣料，星星彈一下。
+ */
+.thanks {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  margin: 0;
+  padding: 4px 12px 4px 4px;
+  border-radius: 999px;
+  background: #fff4f7;
+  color: var(--ink-warm);
+  box-shadow:
+    0 0 0 2.5px #ffa9c4,
+    0 8px 18px rgba(90, 60, 30, 0.16);
+  transform-origin: 100% 0;
+  animation: popIn 300ms cubic-bezier(0.3, 1.45, 0.5, 1) 200ms both;
+}
+
+.thanksFace {
+  position: relative;
+  flex: none;
+  width: 40px;
+  height: 40px;
+}
+
+.thanksFace > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center 40%;
+  background: #fffdf8;
+  box-shadow: 0 0 0 2px #ffa9c4;
+  pointer-events: none;
+}
+
+.thanksHeart {
+  position: absolute;
+  right: -4px;
+  bottom: -3px;
+  width: 16px;
+  height: 16px;
+  animation: thanksBeat 360ms ease-out 500ms both;
+}
+
+.thanksStar {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  width: 18px;
+  height: 18px;
+  animation: thanksStar 360ms ease-out 500ms both;
+}
+
+.thanksFood {
+  flex: none;
+  width: 24px;
+  height: 24px;
+}
+
+.thanksLine {
+  min-width: 0;
+  font-size: 0.95rem;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+@keyframes thanksBeat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.35);
+  }
+}
+
+@keyframes thanksStar {
+  0% {
+    transform: scale(0.5);
+  }
+  60% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* 矮舞台：只留 28px 頭像＋愛心，不加高 */
+@container duo-stage (max-height: 190px) {
+  .thanks {
+    padding: 2px;
+  }
+
+  .thanksFace {
+    width: 28px;
+    height: 28px;
+  }
+
+  .thanksFood,
+  .thanksLine {
+    display: none;
+  }
+}
+
+@media (min-width: 900px) {
+  .thanksFace {
+    width: 48px;
+    height: 48px;
+  }
+}
+
 /* 矮舞台（320×568）：缺料時泡泡上那一格閃＋「嗯？」就夠，字卡會蓋到多多的嘴，收起 */
 @container duo-stage (max-height: 190px) {
   .caption[data-mood="look"] {
@@ -741,21 +860,67 @@
   }
 }
 
-/* 自由做「多多吃飽了」：右上（自由做沒有泡泡），離「給多多吃」遠 */
+/* 自由做「多多吃飽了」：右上（自由做沒有泡泡），離「給多多吃」遠。
+   實心綠＝跟貼紙書「回去」同一種「結束」鈕；以前白底綠框跟多多的字卡長得一樣，家長找不到出口。 */
 .fullButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   min-height: 64px;
-  padding: 0 18px;
+  padding: 0 18px 0 10px;
   border: none;
   border-radius: 999px;
-  background: #fffdf8;
-  color: #3f7f2a;
+  background: var(--sushi-accent, #3f7f2a);
+  color: var(--sushi-cream, #fff8ea);
   font: inherit;
+  font-size: 1rem;
   font-weight: 900;
   cursor: pointer;
   box-shadow:
-    0 0 0 2px #b7df9b,
-    0 4px 0 #9cc982,
-    0 8px 14px rgba(60, 100, 40, 0.16);
+    inset 0 2px 0 rgba(255, 255, 255, 0.35),
+    0 4px 0 #2b5a1c,
+    0 8px 14px rgba(40, 80, 25, 0.22);
+  transition:
+    transform 120ms ease-out,
+    box-shadow 120ms ease-out;
+}
+
+.fullButton:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.35),
+    0 2px 0 #2b5a1c,
+    0 4px 8px rgba(40, 80, 25, 0.2);
+}
+
+.fullButton:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+/* 左邊兩個錯開的藍盤（吃完疊起來的樣子），白色描邊才不會被深綠吃掉 */
+.fullArt {
+  position: relative;
+  flex: none;
+  width: 32px;
+  height: 20px;
+  filter: drop-shadow(0 0 1px #fff);
+}
+
+.fullArt > img {
+  position: absolute;
+  left: 0;
+  width: 27px;
+  height: 16px;
+}
+
+.fullArt > img:first-child {
+  top: 4px;
+}
+
+.fullArt > img:last-child {
+  top: 0;
+  left: 5px;
 }
 
 /* ── 檜木砧板 ─────────────────────────────────────────── */
@@ -1442,18 +1607,25 @@
     width: 72px;
   }
 
-  /* 選飯的三張皿只佔上面，不要被拉高蓋住「給多多吃」。
-     蓋住的話，選完飯立刻點送出，會被連點防呆當成還在點同一張皿。 */
+  /* 選飯的三張皿往下長到「給多多吃」上緣前 8px（上限 168），用上加料層原本空著的高度；
+     但不能蓋住「給多多吃」：蓋住的話，選完飯立刻點送出，會被連點防呆當成還在點同一張皿。
+     皿和加料層疊在同一格，下面保留 80px（實測格底到「給多多吃」上緣 72px，再留 8px），e2e 量兩個框守住。 */
   .basePicker {
-    align-self: start;
-    height: auto;
+    align-self: stretch;
+    grid-template-rows: minmax(0, 1fr) 80px;
   }
 
   .baseButton {
+    grid-row: 1;
     align-self: start;
-    height: auto;
-    min-height: 96px;
-    max-height: 160px;
+    height: 100%;
+    min-height: min(96px, 100%);
+    max-height: 168px;
+  }
+
+  .baseButton .finger {
+    /* 指尖落在飯圖中間，不壓住下面的字 */
+    --tip-y: 40%;
   }
 }
 
@@ -1507,9 +1679,14 @@
 }
 
 /* 一般直向手機：皿拉滿後多出的高度給圖 */
+/* 皿長高了（K1），飯圖和字也大一階；320 寬與矮直向不動 */
 @media (orientation: portrait) and (min-width: 360px) and (min-height: 641px) and (max-width: 899px) {
   .baseArt {
-    max-width: 84px;
+    max-width: 96px;
+  }
+
+  .baseLabel {
+    font-size: 1rem;
   }
 }
 
@@ -1689,24 +1866,40 @@
     font-size: 1.15rem;
   }
 
+  /* 跟著舞台寬長大，上限 52：三料單 4 格＋分隔線＋內距約 245px，talk 欄約 250px */
   .bubbleItem {
-    --cell: 44px;
+    --cell: clamp(44px, 13cqw, 52px);
   }
 
   .guestFaceWrap {
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
   }
 
   .guestName {
-    font-size: 1rem;
+    font-size: 1.05rem;
+  }
+
+  .favStar {
+    width: 18px;
+    height: 18px;
+  }
+
+  .orderDot {
+    width: 18px;
+    height: 9px;
+  }
+
+  .orderDot[data-state="now"] {
+    width: 24px;
+    height: 12px;
   }
 
   .replayBadge {
-    top: -14px;
-    left: -14px;
-    width: 32px;
-    height: 32px;
+    top: -16px;
+    left: -16px;
+    width: 36px;
+    height: 36px;
   }
 }
 
@@ -1744,9 +1937,16 @@
     animation: none;
   }
 
+  .thanks,
+  .thanksHeart,
+  .thanksStar {
+    animation: none;
+  }
+
   .trayButton,
   .baseButton,
   .serveButton,
+  .fullButton,
   .sushiButton > [data-sushi] > span {
     transition: none;
   }
@@ -1820,13 +2020,23 @@
 
 .kitchen[data-paused="true"] .servingSushi[data-phase="open"],
 .kitchen[data-paused="true"] .plates[data-land],
-.kitchen[data-paused="true"] .evictFly {
+.kitchen[data-paused="true"] .evictFly,
+.kitchen[data-paused="true"] .thanks,
+.kitchen[data-paused="true"] .thanksHeart,
+.kitchen[data-paused="true"] .thanksStar {
   animation-play-state: paused;
+}
+
+.kitchen[data-reduced="true"] .thanks,
+.kitchen[data-reduced="true"] .thanksHeart,
+.kitchen[data-reduced="true"] .thanksStar {
+  animation: none;
 }
 
 .kitchen[data-reduced="true"] .trayButton,
 .kitchen[data-reduced="true"] .baseButton,
 .kitchen[data-reduced="true"] .serveButton,
+.kitchen[data-reduced="true"] .fullButton,
 .kitchen[data-reduced="true"] .sushiButton > [data-sushi] > span {
   transition: none;
 }

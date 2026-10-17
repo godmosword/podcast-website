@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import type { GameAudioBus } from "@/lib/gamekit/adapter";
 import type { SynthVoice } from "@/lib/gamekit/runtime/audio";
-import { orderAnnouncement } from "@/lib/games/dino-sushi/orders";
+import { orderAnnouncement, orderThanksLine } from "@/lib/games/dino-sushi/orders";
 import type { Reaction } from "@/lib/games/dino-sushi/reactions";
 import {
   createRound,
@@ -344,10 +344,13 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
       // 減少動態時咀嚼只有 150ms，嚼嚼聲會跟反應音疊在一起，直接跳過
       if (!reducedMotion) sfx(varied(SUSHI_SFX.chomp));
     });
+    /* 點餐做對時，讀屏接著念朋友的謝謝（畫面上的膠囊是 aria-hidden） */
+    const served = round.mode === "order" ? currentOrder(round) : null;
+    const thanks = served && reaction.match?.ok ? orderThanksLine(served) : "";
     later(t.react, () => {
       setPhase("react");
       setCaption(reaction);
-      setMessage(reaction.line);
+      setMessage(thanks ? `${reaction.line}${thanks}` : reaction.line);
       sfx(MOOD_SFX[reaction.sfx]);
     });
     later(t.done, () => {
