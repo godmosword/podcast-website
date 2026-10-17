@@ -204,7 +204,7 @@ async function layout(page: Page) {
       items,
       nowW: now ? now.getBoundingClientRect().width : 0,
       minWait: Math.min(...items.filter((item) => item.state === "wait").map((item) => item.w), Infinity),
-      /* 橘框／白框是 3px 的陰影，頭像框要連框一起留在舞台和視窗裡 */
+      /* 打勾會伸出約 3px，連這個邊一起留在舞台和視窗裡 */
       ringIn: [...document.querySelectorAll("[data-customer-queue] li")].every((el) => {
         const b = el.getBoundingClientRect();
         const box = { x: b.x - 3, y: b.y - 3, w: b.width + 6, h: b.height + 6 };

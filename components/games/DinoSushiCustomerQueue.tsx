@@ -20,7 +20,7 @@ function QueueCheck() {
 }
 
 /**
- * 門口排隊：雨棚下把今天 5 個位子排成一列小頭像。
+ * 門口排隊：雨棚下把今天 5 個位子排成一列全身貼紙。
  * 只是看的，不是按鈕；點得到的仍是泡泡、砧板和托盤。
  * 自由做沒有客人，不畫這列。
  */
@@ -32,8 +32,10 @@ export function DinoSushiCustomerQueue({ seats, index }: Props) {
         const state = i < index ? "done" : i === index ? "now" : "wait";
         return (
           <li key={`${i}-${id}`} className={styles.queueItem} data-state={state} data-customer={id}>
-            {/* eslint-disable-next-line @next/next/no-img-element -- 現成定裝照圓形裁切，不另生圖 */}
-            <img className={styles.queueFace} src={customer.avatar} alt="" draggable={false} decoding="sync" />
+            <span className={styles.queueSticker}>
+              {/* eslint-disable-next-line @next/next/no-img-element -- 核准的黏土貼紙，只去背不重畫 */}
+              <img className={styles.queueFace} src={customer.sticker} alt="" draggable={false} decoding="sync" />
+            </span>
             {state === "done" ? <QueueCheck /> : null}
           </li>
         );

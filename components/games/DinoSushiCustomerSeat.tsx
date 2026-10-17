@@ -32,8 +32,8 @@ function Star() {
 }
 
 /**
- * 多多吃的時候泡泡收起，這位客人改坐在櫃台旁，愛心（有最愛的料再加星星）表示還在。
- * 只是看的，不是按鈕。
+ * 多多吃的時候泡泡收起，這位客人改站在櫃台旁，愛心（有最愛的料再加星星）表示還在。
+ * 全身貼紙，跟多多同一條站法。只是看的，不是按鈕。
  */
 export function DinoSushiCustomerSeat({ order }: { order: Order }) {
   const customer = customerById(order.customerId);
@@ -41,8 +41,10 @@ export function DinoSushiCustomerSeat({ order }: { order: Order }) {
   return (
     <div className={styles.seat} data-customer-seat data-customer={customer.id} aria-hidden>
       <span className={styles.seatFace}>
-        {/* eslint-disable-next-line @next/next/no-img-element -- 現成定裝照圓形裁切，不另生圖 */}
-        <img src={customer.avatar} alt="" draggable={false} decoding="sync" />
+        <span className={styles.seatSticker}>
+          {/* eslint-disable-next-line @next/next/no-img-element -- 核准的黏土貼紙，只去背不重畫 */}
+          <img src={customer.sticker} alt="" draggable={false} decoding="sync" />
+        </span>
         <Heart />
         {favorite ? <Star /> : null}
       </span>

@@ -40,7 +40,7 @@
 
 2026-10-14 難度審：遊戲年齡合適、略偏簡單。語音朗讀與 4.5 秒無錯提示已隨 `a8ad3f8` 出貨。剩下：
 
-- **重錄 darwin 視覺基準（客人排隊＋座位）**：廚房三張會變（`dino-sushi-kitchen-390x844-light-chromium-darwin.png`、`dino-sushi-kitchen-844x390-light-chromium-darwin.png`、`dino-sushi-kitchen-1280x800-night-chromium-darwin.png`）。標題兩張與結算一張不變。Linux 無法產出 darwin 基準，這次 push 用 `SKIP_VISUAL_GATE=1`。請在 Mac 上重錄並逐張目檢（seed 7）。`ops · S · 使用者 Mac`
+- **重錄 darwin 視覺基準（客人全身貼紙）**：排隊、座位、點餐泡泡改成黏土全身貼紙，廚房三張會變（`dino-sushi-kitchen-390x844-light-chromium-darwin.png`、`dino-sushi-kitchen-844x390-light-chromium-darwin.png`、`dino-sushi-kitchen-1280x800-night-chromium-darwin.png`）。標題兩張與結算一張仍用定裝照，不變。Linux 無法產出 darwin 基準，這次 push 用 `SKIP_VISUAL_GATE=1`。請在 Mac 上重錄並逐張目檢（seed 7）。`ops · S · 使用者 Mac`
 - ✅ **重錄 darwin 視覺基準**：#214、#215、朗讀／版面修正與 #226 之後，在 Mac 上重錄並逐張目檢（廚房三張、結算一張有變，標題兩張不變）。`52102826`（#226）
 - ✅ **#214／#215 的 e2e 紅燈與朗讀問題**（2026-10-14 審查）：料位 42px、844×390 托盤超出、320 疊盤碰泡泡、牙刷被朗讀開關蓋住、三料泡泡被裁、反應句被換單切斷、抬頭音效關不掉朗讀。見本 commit。
 - ✅ **閒置提示改從新訂單出現起算**：原本從按「給多多吃」起算，新訂單出現約 2.35 秒就亮；現在新訂單出現後才算 4.5 秒，暫停後繼續也會重新起算。見本 commit。

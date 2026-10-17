@@ -19,7 +19,7 @@ import {
 import { ROOT } from "./lib/transcribe-core";
 
 const PUBLIC_ROOT = join(ROOT, "public", DINO_SUSHI_ASSET_ROOT);
-const SM_DIRS = ["duoduo", "food", "shop"] as const;
+const SM_DIRS = ["duoduo", "food", "shop", "customers"] as const;
 /** 黏土質感在 86 以下會開始糊；透明邊緣保留滿品質，疊在舞台上才不會有毛邊。 */
 const WEBP_OPTIONS = { quality: 86, alphaQuality: 100, effort: 6 } as const;
 

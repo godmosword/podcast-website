@@ -57,7 +57,7 @@ function Star() {
 }
 
 /**
- * 多多頭上的點餐泡泡：朋友的圓頭像說是誰點的，圖案說想吃什麼，放對一樣就打勾。
+ * 多多頭上的點餐泡泡：朋友的全身貼紙說是誰點的，圖案說想吃什麼，放對一樣就打勾。
  * 客人只點餐；壽司仍是多多吃。整顆泡泡可以點，再聽一次；左上角的小喇叭是提示。
  */
 export function DinoSushiOrderBubble({ order, sushi, flash, index, total, onReplay }: Props) {
@@ -75,8 +75,10 @@ export function DinoSushiOrderBubble({ order, sushi, flash, index, total, onRepl
         <span className={styles.guest} data-ready={ready ? "true" : undefined}>
           <span className={styles.guestName}>{customer.name}想吃</span>
           <span className={styles.guestFaceWrap}>
-            {/* eslint-disable-next-line @next/next/no-img-element -- 現成定裝照圓形裁切，不另生圖 */}
-            <img className={styles.guestFace} src={customer.avatar} alt="" draggable={false} decoding="sync" />
+            <span className={styles.guestSticker}>
+              {/* eslint-disable-next-line @next/next/no-img-element -- 核准的黏土貼紙，只去背不重畫 */}
+              <img className={styles.guestFace} src={customer.sticker} alt="" draggable={false} decoding="sync" />
+            </span>
             {ready ? <Heart /> : null}
           </span>
         </span>

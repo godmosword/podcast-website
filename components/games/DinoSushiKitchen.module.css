@@ -82,12 +82,15 @@
   --serve-w: min(30cqw, 110px);
 }
 
-/* 點餐：雨棚下留一條排隊帶。多多的頭改從這條下面開始，才不會被大頭像蓋住。自由做不設。 */
+/* 點餐：雨棚下留一條排隊帶。多多的頭改從這條下面開始，才不會被貼紙蓋住。自由做不設。
+   --queue-now／wait 是貼紙槽的寬。正方形畫布只露出底下 88%（輪底在 92%，上面的空天切掉）。 */
 .duoArea[data-mode="order"] {
   --queue-top: 8px;
   --queue-now: 52px;
-  --queue-wait: 34px;
-  --queue-clear: calc(var(--queue-top) + var(--queue-now) + 14px);
+  --queue-wait: 36px;
+  --queue-show: 0.88;
+  --queue-row: calc(var(--queue-now) * var(--queue-show));
+  --queue-clear: calc(var(--queue-top) + var(--queue-row) + 12px);
   --duo-w: min(var(--duo-max-w), calc(100cqh - var(--counter-h) - var(--queue-clear)));
 }
 
@@ -215,9 +218,9 @@
 }
 
 /*
- * 門口排隊：今天 5 個位子，排在雨棚下、左燈籠右邊。
- * 現在這位約 52px、橘框；還沒輪到的約 34px（再矮的橫向舞台也不低於 28px）；做完打勾。
- * 尺寸鎖住，不靠縮小去塞進縫裡。整列離舞台上緣與圓角一段，overflow 才不會切到頭。
+ * 門口排隊：今天 5 位的全身貼紙，排在雨棚下、左燈籠右邊，輪子站同一條線。
+ * 現在這位較寬（約 52px），還沒輪到的約 36px；做完打勾。再窄的舞台改兩列，不縮小到看不出車。
+ * 槽是寬、圖往下對齊，只露出畫布底下 88%，空的天不佔高度。
  * pointer-events: none，不搶抬頭按鈕、泡泡、砧板或托盤。
  */
 .queue {
@@ -232,48 +235,68 @@
   align-items: flex-end;
   justify-content: flex-start;
   gap: 4px;
-  height: calc(var(--queue-now, 52px) + 8px);
+  height: calc(var(--queue-now, 52px) * var(--queue-show, 0.88) + 8px);
   margin: 0;
-  /* 內距留給橘框／白框的 box-shadow，陰影才算在這一列裡面 */
-  padding: 4px;
+  padding: 2px 2px 4px;
   list-style: none;
   pointer-events: none;
 }
 
 .queueItem {
   position: relative;
-  flex: 0 0 var(--queue-wait, 34px);
-  width: var(--queue-wait, 34px);
-  min-width: var(--queue-wait, 34px);
-  max-width: var(--queue-wait, 34px);
-  aspect-ratio: 1;
+  flex: 0 0 var(--queue-wait, 36px);
+  width: var(--queue-wait, 36px);
+  min-width: var(--queue-wait, 36px);
+  max-width: var(--queue-wait, 36px);
+  height: calc(var(--queue-wait, 36px) * var(--queue-show, 0.88));
 }
 
 .queueItem[data-state="now"] {
-  flex: 0 0 var(--queue-now, 52px);
+  flex-basis: var(--queue-now, 52px);
   width: var(--queue-now, 52px);
   min-width: var(--queue-now, 52px);
   max-width: var(--queue-now, 52px);
+  height: calc(var(--queue-now, 52px) * var(--queue-show, 0.88));
 }
 
-.queueFace {
-  display: block;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
-  object-position: center 40%;
-  background: #fffdf8;
-  box-shadow: 0 0 0 2px #fff;
+/* 現在這位腳下一條暖橘，其他人是淡的接地影。不是圓框。 */
+.queueItem::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  left: 14%;
+  right: 16%;
+  bottom: 1%;
+  height: 16%;
+  background: radial-gradient(closest-side, rgba(74, 60, 46, 0.22), transparent 74%);
   pointer-events: none;
 }
 
-.queueItem[data-state="now"] .queueFace {
-  box-shadow: 0 0 0 3px #ff8c2b;
+.queueItem[data-state="now"]::after {
+  background: radial-gradient(closest-side, rgba(255, 140, 43, 0.5), transparent 74%);
+}
+
+.queueSticker {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.queueFace {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  display: block;
+  width: 100%;
+  height: auto;
+  background: transparent;
+  pointer-events: none;
 }
 
 .queueCheck {
   position: absolute;
+  z-index: 2;
   right: -3px;
   bottom: -3px;
   width: 14px;
@@ -281,32 +304,25 @@
   pointer-events: none;
 }
 
-/* 點餐時泡泡讓到排隊下面。多留小喇叭徽章（往上 14px），才不會壓到大頭像。 */
+/* 點餐時泡泡讓到排隊下面。多留小喇叭徽章（往上 14px），才不會壓到現在這位。 */
 .duoArea[data-mode="order"] .talk {
-  top: calc(var(--queue-top, 8px) + var(--queue-now, 52px) + 22px);
+  top: calc(var(--queue-top, 8px) + var(--queue-now, 52px) * var(--queue-show, 0.88) + 26px);
 }
 
 /*
- * 吃的時候的客人座位：白椅靠在櫃台、疊盤左邊、多多右邊。
- * 愛心（有最愛的料再加星星）表示還在看多多吃。不能點。
+ * 吃的時候的客人：全身貼紙站在櫃台、疊盤左邊、多多右邊。
+ * 愛心（有最愛的料再加星星）表示還在看多多吃。不能點。縫太窄時整張縮小，不壓到多多或盤子。
  */
 .seat {
   position: absolute;
   z-index: 3;
   box-sizing: border-box;
-  /* 夾在多多右側和疊盤左側，寬度不夠時整張縮小，不壓到臉或盤子 */
   left: calc(var(--duo-left) + var(--duo-w) + 2px);
   right: calc(14px + clamp(54px, 18cqw, 88px) + 6px);
-  bottom: calc(var(--counter-h) * 0.4);
+  bottom: calc(var(--counter-h) * 0.42);
   width: auto;
-  max-width: 56px;
+  max-width: 76px;
   margin-left: auto;
-  padding: 3px 3px 6px;
-  border-radius: 16px 16px 8px 8px;
-  background: #fffdf8;
-  box-shadow:
-    0 0 0 3px #d9a86a,
-    0 4px 0 rgba(180, 130, 70, 0.28);
   pointer-events: none;
 }
 
@@ -314,19 +330,36 @@
   position: relative;
   display: block;
   width: 100%;
-  height: auto;
-  aspect-ratio: 1;
+  aspect-ratio: 1 / 0.88;
 }
 
-.seatFace > img {
+.seatSticker {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.seatSticker > img {
+  position: absolute;
+  left: 0;
+  bottom: 0;
   display: block;
   width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
-  object-position: center 40%;
-  background: #fffdf8;
-  box-shadow: 0 0 0 2px #ff8c2b;
+  height: auto;
+  background: transparent;
+  pointer-events: none;
+}
+
+.seatFace::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  left: 12%;
+  right: 14%;
+  bottom: 1%;
+  height: 14%;
+  background: radial-gradient(closest-side, rgba(74, 60, 46, 0.28), transparent 74%);
   pointer-events: none;
 }
 
@@ -464,7 +497,7 @@
   stroke-linejoin: round;
 }
 
-/* 客人圓頭像靠右，避開左上角的小喇叭。頭像不是另一個按鈕，整顆泡泡仍是再聽一次。 */
+/* 客人全身貼紙靠右，避開左上角的小喇叭。貼紙不是另一個按鈕，整顆泡泡仍是再聽一次。 */
 .guest {
   display: flex;
   align-items: center;
@@ -486,20 +519,26 @@
 .guestFaceWrap {
   position: relative;
   flex: none;
-  /* 原本 32px，孩子看成「只有一個小點」；放大到跟排隊那位一樣清楚 */
+  /* 跟排隊同一種裁法：寬 56，只露出畫布底下 88%，車身才看得清 */
   width: 56px;
-  height: 56px;
+  aspect-ratio: 1 / 0.88;
+}
+
+.guestSticker {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
 }
 
 .guestFace {
+  position: absolute;
+  left: 0;
+  bottom: 0;
   display: block;
   width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
-  object-position: center 40%;
-  background: #fffdf8;
-  box-shadow: 0 0 0 3px #ff8c2b;
+  height: auto;
+  background: transparent;
   pointer-events: none;
 }
 
@@ -568,7 +607,6 @@
 
   .guestFaceWrap {
     width: 40px;
-    height: 40px;
   }
 
   .guestName {
@@ -620,7 +658,6 @@
 
   .guestFaceWrap {
     width: 40px;
-    height: 40px;
   }
 
   .guestHeart,
@@ -629,16 +666,17 @@
     height: 14px;
   }
 
-  /* 矮舞台燈籠收起。頭像仍 ≥32，現在這位更大，整列留在圓角裡，泡泡才讓得開疊盤。 */
-  .queue {
-    left: 8px;
-    top: 6px;
+  /* 矮舞台燈籠收起。貼紙仍 ≥32 寬，現在這位更大。變數要設在子孫上，container 套不到自己。 */
+  .queue,
+  .duoArea[data-mode="order"] .talk {
+    --queue-top: 6px;
     --queue-now: 44px;
     --queue-wait: 32px;
   }
 
-  .duoArea[data-mode="order"] .talk {
-    top: 72px;
+  .queue {
+    left: 8px;
+    top: 6px;
   }
 
   .seat {
@@ -661,7 +699,7 @@
 }
 
 /*
- * 窄舞台（橫向左欄約 260px）：52＋四顆 34 會頂到右緣。
+ * 窄舞台（橫向左欄約 260px）：52＋四張 36 會頂到右緣。
  * 等候收到 30、現在這位 48，仍看得清誰比較大，也不低於 28。
  */
 @container duo-stage (max-width: 270px) {
@@ -670,15 +708,16 @@
     --queue-now: 48px;
     --queue-wait: 30px;
   }
-
-  /* 小喇叭徽章往上 14px，再留一點縫，才不會壓到最後一顆等候頭像 */
-  .duoArea[data-mode="order"] .talk {
-    top: calc(var(--queue-top, 8px) + 48px + 30px);
-  }
 }
 
-/* 很窄的左欄（568×320 舞台約 164px）：一列塞不下 28px 的五顆，改成兩列，不切掉。 */
+/* 很窄的左欄（568×320 舞台約 164px）：一列塞不下五張貼紙，改成兩列，不切掉。 */
 @container duo-stage (max-width: 220px) {
+  .queue,
+  .duoArea[data-mode="order"] .talk {
+    --queue-now: 44px;
+    --queue-wait: 28px;
+  }
+
   .queue {
     left: 8px;
     right: 6px;
@@ -686,13 +725,20 @@
     align-content: flex-start;
     height: auto;
     row-gap: 4px;
-    --queue-now: 44px;
-    --queue-wait: 28px;
+  }
+
+  /* 164px 寬的舞台，多多和疊盤中間沒有縫。貼紙改站在櫃台右上，不壓到輪子。 */
+  .seat {
+    left: auto;
+    width: 44px;
+    max-width: 44px;
+    right: 6px;
+    bottom: calc(var(--counter-h) + 6px);
   }
 
   .duoArea[data-mode="order"] .talk {
-    /* 兩列（44＋4＋28）再加小喇叭徽章 */
-    top: calc(var(--queue-top, 8px) + 44px + 4px + 28px + 8px + 18px);
+    /* 兩列再加小喇叭徽章（往上 14px） */
+    top: calc(var(--queue-top, 8px) + 44px * 0.88 + 4px + 28px * 0.88 + 26px);
   }
 }
 
@@ -2070,7 +2116,6 @@
 
   .guestFaceWrap {
     width: 44px;
-    height: 44px;
   }
 
   .guestName {
@@ -2116,6 +2161,11 @@
     --duo-left: 4cqw;
   }
 
+  /* 桌機舞台約 400px，88% 的多多會佔滿右側，客人貼紙沒有站的地方。點餐時把多多收到約 56%，櫃台旁才站得下一張。 */
+  .duoArea[data-mode="order"] {
+    --duo-max-w: 56cqw;
+  }
+
   .trayButton {
     min-height: 84px;
   }
@@ -2156,7 +2206,6 @@
 
   .guestFaceWrap {
     width: 56px;
-    height: 56px;
   }
 
   .guestName {

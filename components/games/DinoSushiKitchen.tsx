@@ -198,7 +198,7 @@ export function DinoSushiKitchen({
         data-brush={brushShown ? "true" : undefined}
       >
         <ShopWall sky={variety?.sky} lantern={variety?.lantern} />
-        {/* 點餐才排隊。畫在雨棚下、燈籠右邊；頭像在多多頭頂上面，也不能點。 */}
+        {/* 點餐才排隊。全身貼紙畫在雨棚下、燈籠右邊，輪子在多多頭頂上面，也不能點。 */}
         {round.mode === "order" && variety ? (
           <DinoSushiCustomerQueue seats={variety.seats} index={round.index} />
         ) : null}
@@ -215,7 +215,7 @@ export function DinoSushiKitchen({
           domeOpen={domeOpen}
           stickerId={domeOpen && round ? domeStickerId(round.seed, ownedStickers) : null}
         />
-        {/* 吃的時候泡泡收起，客人改坐在櫃台旁，這一單不會從畫面上消失。 */}
+        {/* 吃的時候泡泡收起，客人改站在櫃台旁，這一單不會從畫面上消失。 */}
         {round.mode === "order" && eating && order ? <DinoSushiCustomerSeat order={order} /> : null}
         <DinoSushiPlateStack plates={round.plates} />
         {/* 右上一欄由上往下排：自由做的「多多吃飽了」→ 點餐泡泡 → 多多的字卡，彼此不會疊在一起 */}
