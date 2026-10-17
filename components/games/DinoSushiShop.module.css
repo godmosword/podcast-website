@@ -74,6 +74,8 @@
   position: absolute;
   z-index: 4;
   top: calc(var(--awning-h) - 6px);
+  /* 點餐時父層把 --lantern-display 設成 none，把雨棚下的寬度讓給排隊 */
+  display: var(--lantern-display, block);
   width: clamp(26px, 9cqw, 44px);
   aspect-ratio: 485 / 729;
   filter: drop-shadow(0 0 10px rgba(255, 168, 96, 0.55)) drop-shadow(0 4px 3px rgba(110, 50, 30, 0.2));
@@ -517,7 +519,7 @@
 
 @container duo-stage (min-width: 380px) and (min-height: 300px) {
   .lanternRight {
-    display: block;
+    display: var(--lantern-display, block);
   }
 }
 

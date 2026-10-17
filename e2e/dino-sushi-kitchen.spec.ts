@@ -217,6 +217,8 @@ async function layout(page: Page) {
         );
       }),
       faceW: face ? face.getBoundingClientRect().width : 0,
+      duoH: duo ? duo.getBoundingClientRect().height : 0,
+      seatH: seat ? seat.getBoundingClientRect().height : 0,
       seatPE: seat ? getComputedStyle(seat).pointerEvents : "",
       nowVsDuo: area(rect(now), rect(duo)),
       queueVsDuo: area(rect(queue), rect(duo)),
@@ -236,11 +238,11 @@ async function layout(page: Page) {
 }
 
 for (const vp of [
-  { width: 390, height: 844, now: 48, wait: 32, face: 48 },
-  { width: 320, height: 568, now: 40, wait: 32, face: 36 },
-  { width: 844, height: 390, now: 48, wait: 32, face: 40 },
-  { width: 667, height: 375, now: 44, wait: 28, face: 40 },
-  { width: 568, height: 320, now: 40, wait: 28, face: 36 },
+  { width: 390, height: 844, now: 72, wait: 46, face: 48 },
+  { width: 320, height: 568, now: 46, wait: 34, face: 36 },
+  { width: 844, height: 390, now: 88, wait: 56, face: 40 },
+  { width: 667, height: 375, now: 54, wait: 34, face: 40 },
+  { width: 568, height: 320, now: 50, wait: 36, face: 36 },
 ]) {
   test(`${vp.width}×${vp.height}：門口排隊與吃的時候的座位不搶點、不壓多多`, async ({ page }) => {
     await page.setViewportSize(vp);
@@ -285,6 +287,7 @@ for (const vp of [
     expect(eating.seatPE).toBe("none");
     expect(eating.seatVsDuo).toBe(0);
     expect(eating.seatVsPlates).toBe(0);
+    expect(eating.seatH).toBeGreaterThanOrEqual(eating.duoH * 0.5);
     expect(eating.seatInside).toBe(true);
     expect(eating.nowVsDuo).toBe(0);
     expect(eating.serveHit).not.toBe("");
