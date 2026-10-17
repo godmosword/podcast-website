@@ -20,3 +20,19 @@ describe("CharacterCard.module.css 出場故事釘底", () => {
     expect(css).toMatch(/\.episodeSelect\s*\{[^}]*margin-top:\s*auto/);
   });
 });
+
+describe("CharacterCard.module.css 角色名不截斷", () => {
+  const css = stripComments(
+    readFileSync(join(import.meta.dirname, "CharacterCard.module.css"), "utf8"),
+  );
+  const nameRule = css.match(/\.name\s*\{([^}]*)\}/)?.[1] ?? "";
+
+  it("標題列可換行，車種擠不下時掉到第二行", () => {
+    expect(css).toMatch(/\.cardTitle\s*\{[^}]*flex-wrap:\s*wrap/);
+  });
+
+  it("角色名不用省略號（360 寬時「知…」「小紅豆汽…」看不出是誰）", () => {
+    expect(nameRule).not.toMatch(/text-overflow:\s*ellipsis/);
+    expect(nameRule).not.toMatch(/overflow:\s*hidden/);
+  });
+});

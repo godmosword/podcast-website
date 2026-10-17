@@ -1,3 +1,4 @@
+import { HOST_CHARACTER_IDS } from "@/data/characters";
 import { getStory } from "@/data/content";
 
 export const CATALOG_EPISODE_TITLE_MAX = 10;
@@ -58,4 +59,27 @@ export function catalogEpisodesFor(
       ep: story.ep,
       title: catalogEpisodeTitle(story.title, story.slug),
     }));
+}
+
+
+type CatalogSortable = { id: string; appearsIn: readonly string[] };
+
+function catalogRank(character: CatalogSortable): number {
+  // 圖鑑最前面是主持人，依節目名「Bonbon & 馬米」排。
+  const hostIndex = HOST_CHARACTER_IDS.indexOf(character.id);
+  if (hostIndex >= 0) return hostIndex - HOST_CHARACTER_IDS.length;
+  return catalogEpisodesFor(character.appearsIn)[0]?.ep ?? Infinity;
+}
+
+/**
+ * 圖鑑卡片順序：主持人在前，其他依首次出場集數；同集維持名冊順序。
+ * 回傳新陣列，不改動傳入的名冊。
+ */
+export function sortCatalogCharacters<T extends CatalogSortable>(
+  characters: readonly T[],
+): T[] {
+  return characters
+    .map((character, index) => ({ character, index, rank: catalogRank(character) }))
+    .sort((a, b) => a.rank - b.rank || a.index - b.index)
+    .map(({ character }) => character);
 }

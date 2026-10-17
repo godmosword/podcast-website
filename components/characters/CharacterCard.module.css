@@ -115,8 +115,9 @@
 
 .cardTitle {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.35em;
+  gap: 2px 0.35em;
   margin: 0;
   min-width: 0;
   color: var(--warm-heading);
@@ -124,11 +125,10 @@
   line-height: 1.2;
 }
 
+/* 名字整個露出；車種擠不下就掉到第二行，不用省略號（「知…」認不出是誰） */
 .name {
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 .vehicle {
@@ -177,6 +177,13 @@
 .episodeSelectControl:hover {
   border-color: var(--warm-accent);
   background-color: var(--warm-chip-hover);
+}
+
+.episodeLink {
+  position: relative;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
 }
 
 .episodeSelectArrow {

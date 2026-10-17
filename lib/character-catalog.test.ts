@@ -5,7 +5,9 @@ import {
   catalogEpisodeLabel,
   catalogEpisodeTitle,
   catalogEpisodesFor,
+  sortCatalogCharacters,
 } from "./character-catalog";
+import { getCharacters } from "@/data/characters";
 
 describe("catalogEpisodeTitle", () => {
   it("每集簡述都不超過 10 個字", () => {
@@ -47,5 +49,46 @@ describe("catalogEpisodesFor", () => {
     expect(episodes.map((episode) => episode.slug)).toEqual(["ep-4", "ep-15"]);
     expect(catalogEpisodeLabel(episodes[0])).toBe("EP 4 守信用的鈴鈴清潔車");
     expect(catalogEpisodeLabel(episodes[1])).toBe("EP 15 恐龍車多多洗手故事");
+  });
+});
+
+describe("sortCatalogCharacters", () => {
+  const entry = (id: string, appearsIn: string[]) => ({ id, appearsIn });
+
+  it("主持人排最前，其他依首次出場集數，同集維持原順序", () => {
+    const sorted = sortCatalogCharacters([
+      entry("late", ["ep-24"]),
+      entry("mami", ["ep-1"]),
+      entry("early", ["ep-24", "ep-3"]),
+      entry("tie-a", ["ep-7"]),
+      entry("bong-bong", ["ep-1"]),
+      entry("tie-b", ["ep-7"]),
+      entry("no-story", []),
+    ]);
+    expect(sorted.map((c) => c.id)).toEqual([
+      "bong-bong",
+      "mami",
+      "early",
+      "tie-a",
+      "tie-b",
+      "late",
+      "no-story",
+    ]);
+  });
+
+  it("不改動傳入的陣列", () => {
+    const input = [entry("late", ["ep-24"]), entry("early", ["ep-3"])];
+    sortCatalogCharacters(input);
+    expect(input.map((c) => c.id)).toEqual(["late", "early"]);
+  });
+
+  it("真實名冊：Bonbon、馬米開頭，之後首次出場集數不倒退", () => {
+    const sorted = sortCatalogCharacters(getCharacters());
+    expect(sorted.slice(0, 2).map((c) => c.id)).toEqual(["bong-bong", "mami"]);
+    const firstEps = sorted
+      .slice(2)
+      .map((c) => catalogEpisodesFor(c.appearsIn)[0]?.ep ?? Infinity);
+    expect(firstEps).toEqual([...firstEps].sort((a, b) => a - b));
+    expect(sorted).toHaveLength(getCharacters().length);
   });
 });

@@ -222,7 +222,25 @@
     "vehicle": "child",
     "desc": "a cute claymation boy named Bonbon, thick messy brown curly clay hair, big cheerful dark eyes, rosy cheeks, a wide open smile, white t-shirt printed with little red cars, navy blue shorts, white sneakers, a bright yellow backpack, one hand waving hello, soft hand-sculpted clay texture",
     "ref": "characters/Bonbon.jpg",
-    "firstSeen": "ep-1"
+    "firstSeen": "ep-1",
+    "alsoIn": [
+      "ep-2",
+      "ep-7",
+      "ep-11",
+      "ep-13",
+      "ep-14",
+      "ep-15",
+      "ep-16",
+      "ep-17",
+      "ep-18",
+      "ep-19",
+      "ep-20",
+      "ep-21",
+      "ep-22",
+      "ep-23",
+      "ep-24",
+      "ep-28"
+    ]
   },
   {
     "name": "馬米",
@@ -236,7 +254,20 @@
     "ref": "characters/馬米.jpg",
     "firstSeen": "ep-1",
     "alsoIn": [
-      "ep-11"
+      "ep-7",
+      "ep-11",
+      "ep-13",
+      "ep-14",
+      "ep-15",
+      "ep-16",
+      "ep-17",
+      "ep-18",
+      "ep-19",
+      "ep-20",
+      "ep-21",
+      "ep-22",
+      "ep-23",
+      "ep-24"
     ]
   },
   {
