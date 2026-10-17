@@ -79,12 +79,8 @@ export function DinoSushiStickerFace({
   }
   return (
     <span className={`${styles.pic} ${frame}`} data-kind={art.kind} style={silhouette}>
+      {/* 鎖住只畫剪影；問號只留在格子名稱，不再蓋住剪影的外形 */}
       {image}
-      {locked ? (
-        <span className={styles.mystery} aria-hidden>
-          ？
-        </span>
-      ) : null}
     </span>
   );
 }

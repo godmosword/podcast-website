@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import type { GameAudioBus } from "@/lib/gamekit/adapter";
 import type { SynthVoice } from "@/lib/gamekit/runtime/audio";
-import { orderAnnouncement, orderThanksLine } from "@/lib/games/dino-sushi/orders";
+import { orderAnnouncement, orderThanksLine, type Order } from "@/lib/games/dino-sushi/orders";
 import type { Reaction } from "@/lib/games/dino-sushi/reactions";
 import {
   createRound,
@@ -44,6 +44,11 @@ const CAPTION_LINGER_MS = 1800;
 const BRUSH_MS = 1400;
 /** 閒置這麼久才亮下一個要點的東西（約 4.5 秒；進階檔 7 秒，見 difficulty）。新訂單出現時重新起算，不是從按「給多多吃」那一刻算。 */
 export const IDLE_HINT_MS = BASE_IDLE_HINT_MS;
+
+/** 做對一單時點餐朋友的謝謝：記住剛送出的那張訂單（下一單出來後 currentOrder 會換人）。 */
+export type GuestThanks = { order: Order; line: string; leaving: boolean };
+/** 膠囊收起前的淡出時間。 */
+const THANKS_FADE_MS = 200;
 
 type PlayAction = { type: "init"; mode: Mode; seed: number; tier: OrderTier } | { type: "clear" } | RoundAction;
 
@@ -139,6 +144,8 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
   const [guide, setGuide] = useState(false);
   const [taught, setTaught] = useState(false);
   const [message, setMessage] = useState("");
+  /* 朋友的謝謝：反應開始時出現，下一單出來後再留 CAPTION_LINGER_MS（朗讀先念多多、再念朋友，要等得到） */
+  const [thanks, setThanks] = useState<GuestThanks | null>(null);
   /** 可暫停的排程：暫停時記下剩餘時間、停掉計時器，繼續時再補排（暫停中不會結算或回報）。 */
   const timers = useRef<Map<number, Scheduled>>(new Map());
   const parked = useRef<Scheduled[]>([]);
@@ -229,6 +236,7 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
       setCaption(null);
       setChoosingBase(false);
       setBrushing(false);
+      setThanks(null);
       dispatch({ type: "init", mode, seed: seed ?? nextSeed(), tier: applied });
       touch();
     },
@@ -237,6 +245,7 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
 
   const leave = useCallback(() => {
     clearTimers();
+    setThanks(null);
     if (idleTimer.current !== null) window.clearTimeout(idleTimer.current);
     idleTimer.current = null;
     idleParked.current = false;
@@ -318,6 +327,7 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
     dispatch({ type: "serve" });
     setChoosingBase(false);
     setCaption(null);
+    setThanks(null);
     setBrushing(false);
     clearTimers();
     touch();
@@ -351,6 +361,7 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
       setPhase("react");
       setCaption(reaction);
       setMessage(thanks ? `${reaction.line}${thanks}` : reaction.line);
+      if (served && thanks) setThanks({ order: served, line: thanks, leaving: false });
       sfx(MOOD_SFX[reaction.sfx]);
     });
     later(t.done, () => {
@@ -360,6 +371,12 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
       if (round.mode === "order") setCaption((c) => (c === reaction ? null : c));
     });
     later(t.done + CAPTION_LINGER_MS, () => setCaption((c) => (c === reaction ? null : c)));
+    if (served && thanks) {
+      later(t.done + CAPTION_LINGER_MS - THANKS_FADE_MS, () =>
+        setThanks((g) => (g && g.order === served ? { ...g, leaving: true } : g)),
+      );
+      later(t.done + CAPTION_LINGER_MS, () => setThanks((g) => (g && g.order === served ? null : g)));
+    }
   }, [clearTimers, later, locked, reducedMotion, round, sfx, touch]);
 
   const brush = useCallback(() => {
@@ -434,6 +451,7 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
     message,
     hint,
     /** 首單手指示範（做對第一單才收起）；之後只在閒置時亮。 */
+    thanks,
     teaching: !taught,
     locked,
     actions: { start, leave, pickBase, add, remove, serve, brush, finish, reopenBase, remindBase },

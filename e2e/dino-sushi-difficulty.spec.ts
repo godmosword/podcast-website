@@ -58,6 +58,7 @@ test("自由做不受檔位影響：3 星存檔照樣沒有訂單", async ({ pag
 for (const vp of [
   { width: 320, height: 568 },
   { width: 667, height: 375 },
+  { width: 568, height: 320 },
 ]) {
   test(`${vp.width}×${vp.height}：進階連續三單 3 樣料，泡泡放得下`, async ({ page }, info) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
@@ -77,11 +78,13 @@ for (const vp of [
           const c = cell.getBoundingClientRect();
           const i = cell.querySelector("img")!.getBoundingClientRect();
           if (i.top < c.top - 1 || i.bottom > c.bottom + 1 || i.left < c.left - 1 || i.right > c.right + 1) out.push("圖凸出格子");
+          // 料圖太小（< 24px）孩子分不出小黃瓜和酪梨；手捲本來就瘦長，量格子的寬
+          if (c.width < 24) out.push(`格子只有 ${Math.round(c.width)}px`);
         }
         return out;
       });
       expect(problems, `第 ${n} 單`).toEqual([]);
-      if (n === 4) await page.screenshot({ path: info.outputPath(`advanced-${vp.width}.png`) });
+      if (n === 4) await bubble.screenshot({ path: info.outputPath(`advanced-${vp.width}x${vp.height}.png`) });
       if (n < 5) {
         const label = await bubble.getAttribute("aria-label");
         const [base, ...toppings] = label!.split("想吃：")[1]!.split("、");

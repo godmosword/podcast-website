@@ -175,17 +175,6 @@
   mask-size: cover;
 }
 
-.mystery {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  color: var(--sushi-mystery);
-  font-size: 1.5rem;
-  font-weight: 900;
-  text-shadow: 0 1px 0 rgba(255, 250, 240, 0.6);
-}
-
 .face {
   overflow: hidden;
   border-radius: 50%;

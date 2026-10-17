@@ -579,13 +579,25 @@
   margin: 0;
   padding: 4px 12px 4px 4px;
   border-radius: 999px;
-  background: #fff4f7;
+  /* 比多多「最愛」字卡（框 #ffa9c4）深一階，兩張卡才不會看成同一種 */
+  background: #ffe1ea;
   color: var(--ink-warm);
   box-shadow:
-    0 0 0 2.5px #ffa9c4,
+    0 0 0 2.5px #ff8fb1,
     0 8px 18px rgba(90, 60, 30, 0.16);
   transform-origin: 100% 0;
   animation: popIn 300ms cubic-bezier(0.3, 1.45, 0.5, 1) 200ms both;
+}
+
+.thanks[data-leaving="true"] {
+  animation: thanksOut 200ms ease-in forwards;
+}
+
+@keyframes thanksOut {
+  to {
+    opacity: 0;
+    transform: scale(0.9);
+  }
 }
 
 .thanksFace {
@@ -603,7 +615,7 @@
   object-fit: cover;
   object-position: center 40%;
   background: #fffdf8;
-  box-shadow: 0 0 0 2px #ffa9c4;
+  box-shadow: 0 0 0 2px #ff8fb1;
   pointer-events: none;
 }
 
@@ -920,7 +932,7 @@
 
 .fullArt > img:last-child {
   top: 0;
-  left: 5px;
+  left: 7px;
 }
 
 /* ── 檜木砧板 ─────────────────────────────────────────── */
@@ -1781,8 +1793,9 @@
     max-width: calc(100% - 12px);
   }
 
+  /* 下限 28：進階三料單在 667×375 卡在 20px 時小黃瓜和酪梨分不出來（格內圖約 24px） */
   .bubbleItem {
-    --cell: clamp(20px, 7cqw, 34px);
+    --cell: clamp(28px, 7cqw, 34px);
   }
 
   .guestFaceWrap {
@@ -1938,6 +1951,7 @@
   }
 
   .thanks,
+  .thanks[data-leaving="true"],
   .thanksHeart,
   .thanksStar {
     animation: none;
@@ -2028,6 +2042,7 @@
 }
 
 .kitchen[data-reduced="true"] .thanks,
+.kitchen[data-reduced="true"] .thanks[data-leaving="true"],
 .kitchen[data-reduced="true"] .thanksHeart,
 .kitchen[data-reduced="true"] .thanksStar {
   animation: none;

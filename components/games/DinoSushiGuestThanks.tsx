@@ -34,14 +34,21 @@ function Star() {
 
 /**
  * 做對一單、多多吃下去時，點餐的朋友在多多字卡下面出來說謝謝（關掉「念出來」也看得到）。
+ * 下一單泡泡出來後再留約 1.8 秒（朗讀念完多多才念朋友），最後 200ms 淡出。
  * 長相刻意不像點餐泡泡：沒有白底木框、沒有尾巴、沒有料圖列，只是一顆粉色膠囊。
  * 這單有朋友最愛的料：頭像左上一顆星，旁邊放那樣料。讀屏由 live 區念，這裡 aria-hidden。
  */
-export function DinoSushiGuestThanks({ order, line }: { order: Order; line: string }) {
+export function DinoSushiGuestThanks({ order, line, leaving }: { order: Order; line: string; leaving: boolean }) {
   const customer = customerById(order.customerId);
   const favorite = order.toppings.find((id) => customer.favorites.includes(id));
   return (
-    <p className={styles.thanks} data-customer={customer.id} data-favorite={favorite ? "true" : undefined} aria-hidden>
+    <p
+      className={styles.thanks}
+      data-customer={customer.id}
+      data-favorite={favorite ? "true" : undefined}
+      data-leaving={leaving ? "true" : undefined}
+      aria-hidden
+    >
       <span className={styles.thanksFace}>
         {/* eslint-disable-next-line @next/next/no-img-element -- 現成定裝照圓形裁切，不另生圖 */}
         <img src={customer.avatar} alt="" draggable={false} decoding="sync" />

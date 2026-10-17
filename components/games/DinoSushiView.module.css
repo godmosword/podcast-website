@@ -8,13 +8,12 @@
   --sushi-ink-soft: #7a6550;
   --sushi-accent: #3f7f2a;
   --sushi-cream: #fff8ea;
-  /* 貼紙書：書頁漸層、格子、鎖住的格子底、暖棕剪影與問號（底都不透明，廚房的字才不會透出來） */
+  /* 貼紙書：書頁漸層、格子、鎖住的格子底、暖棕剪影（底都不透明，廚房的字才不會透出來；剪影對格底約 2.1:1） */
   --sushi-book-top: #fffaf0;
   --sushi-book-bottom: #fdf0da;
   --sushi-cell: #fffcf6;
   --sushi-cell-locked: #efe4d2;
-  --sushi-silhouette: #c8ad8a;
-  --sushi-mystery: #5a4128;
+  --sushi-silhouette: #b89870;
   --ink: #34302b;
   --ink-soft: #7a7268;
   --card: #ffffff;
@@ -815,6 +814,13 @@
   }
 }
 
+/* 平板直向（寬 ≥700）：結算欄放寬，新貼紙兩列各 8 張，多半不用「+N」 */
+@media (orientation: portrait) and (min-width: 700px) {
+  .resultOverlay .resultStation {
+    width: min(80%, 560px);
+  }
+}
+
 /* 桌機（寬橫向、不矮）：店面在左、結算在右並排，結算欄放寬到 560，新貼紙兩列各 8 張。
    只改壽司屋自己的 className，共用結算站不動。 */
 @media (min-width: 900px) and (orientation: landscape) and (min-height: 521px) {
@@ -857,6 +863,7 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     grid-auto-flow: row dense;
+    align-content: center;
     align-items: center;
     gap: 4px 20px;
     width: min(100%, 760px);
@@ -866,11 +873,24 @@
     grid-column: 1;
   }
 
+  /* 右欄跨列，跟左欄脫鉤：不然左欄標題會被撐到按鈕列那麼高，新貼紙被擠到卡片外 */
   .resultStation > :has(+ .resultBook),
   .resultStation > .resultBook,
   .resultStation > .resultBook ~ * {
     grid-column: 2;
     justify-self: center;
+  }
+
+  .resultStation > :has(+ .resultBook) {
+    grid-row: 1 / 3;
+  }
+
+  .resultStation > .resultBook {
+    grid-row: 3 / 5;
+  }
+
+  .resultStation > .resultBook ~ * {
+    grid-row: 5;
   }
 
   .resultStation > p:first-of-type {

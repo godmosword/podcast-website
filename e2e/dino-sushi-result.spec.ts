@@ -177,7 +177,7 @@ test.describe("貼紙書", () => {
     expect(look.bookImage).not.toMatch(/rgba\([^)]*,\s*0\.\d+\)/);
     expect(look.barBg).toBe("rgb(255, 248, 234)");
     expect(look.lockedBg).toBe("rgb(239, 228, 210)");
-    expect(look.silhouette).toBe("rgb(200, 173, 138)");
+    expect(look.silhouette).toBe("rgb(184, 152, 112)");
     expect(look.imgHidden).toBe("hidden");
     const gap = await book.evaluate(async (el) => {
       el.scrollTo({ top: el.scrollHeight });

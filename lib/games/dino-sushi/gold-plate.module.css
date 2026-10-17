@@ -2,7 +2,7 @@
  * 一次做對的金盤：濾鏡調成深琥珀，再疊一層用盤子圖當遮罩的斜向高光和兩顆星（程式畫，圖檔不動）。
  * 等金盤素材來了，換掉 PLATE_FILTER.gold 與這一層就好。
  * 光澤層和盤子圖是同一個框（都填滿 wrapper），mask contain 和 object-fit contain 算出同一個盤形。
- * 掛載時高光由左掃到盤中央一次（600ms），之後留一道淡高光；星星在盤緣左上，掃完閃一下。
+ * 掛載時高光由左掃到盤中央一次（600ms），之後留一道淡高光（0.35，太亮盤心會偏卡其）；星星在盤緣左上，掃完閃一下。
  * 疊盤時上面的盤會蓋住下面盤的上緣，所以只有最上面那個金盤看得到星星。
  */
 
@@ -20,7 +20,7 @@
   background: linear-gradient(115deg, transparent 38%, rgba(255, 255, 255, 0.8) 50%, transparent 62%);
   background-size: 300% 100%;
   background-position: 50% 0;
-  opacity: 0.5;
+  opacity: 0.35;
   -webkit-mask-image: var(--plate-mask);
   mask-image: var(--plate-mask);
   -webkit-mask-size: contain;
@@ -40,7 +40,7 @@
   }
   to {
     background-position: 50% 0;
-    opacity: 0.5;
+    opacity: 0.35;
   }
 }
 

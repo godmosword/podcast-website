@@ -84,7 +84,9 @@ test("做對一單：字卡下面出現點餐朋友的謝謝；只送飯不出�
   ]);
   expect(thanksBox!.y, "謝謝在多多字卡下面").toBeGreaterThan(captionBox!.y + captionBox!.height - 1);
   await waitServed(page, 1);
-  await expect(thanks).toHaveCount(0);
+  // 下一單出來後再留一下（朗讀念完多多才念朋友），然後收起
+  await expect(thanks).toBeVisible();
+  await expect(thanks).toHaveCount(0, { timeout: 4000 });
   // 第 2 單只放飯：多多不吃，沒有謝謝
   await serve(page, 2, { skipLast: true });
   await expect(game.locator('p[data-mood="look"]')).toBeVisible();

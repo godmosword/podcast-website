@@ -326,7 +326,8 @@
   position: absolute;
   z-index: 3;
   left: 62%;
-  bottom: calc(100% + 6px);
+  /* 離迴轉帶上的盤頂高一點，不像盤裡的料 */
+  bottom: calc(100% + 18px);
   width: clamp(48px, min(16cqw, 15cqh), 80px);
   aspect-ratio: 1;
   pointer-events: none;

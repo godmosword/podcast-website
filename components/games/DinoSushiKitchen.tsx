@@ -237,9 +237,9 @@ export function DinoSushiKitchen({
               {caption.line}
             </p>
           ) : null}
-          {/* 先多多、再朋友（朗讀也是這個順序）；只在反應那一段，下一單泡泡出來前收起 */}
-          {phase === "react" && thanksLine && orderForSpeech ? (
-            <DinoSushiGuestThanks order={orderForSpeech} line={thanksLine} />
+          {/* 先多多、再朋友（朗讀也是這個順序）；下一單泡泡出來後再留一下才淡出 */}
+          {play.thanks ? (
+            <DinoSushiGuestThanks order={play.thanks.order} line={play.thanks.line} leaving={play.thanks.leaving} />
           ) : null}
         </div>
       </section>
