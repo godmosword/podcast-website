@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import IntroOverlay from "@/components/landing/IntroOverlay";
 import LandingHub from "@/components/landing/LandingHub";
 import { HOME_PAGE_META_DESCRIPTION } from "@/lib/home-geo";
+import { DEFAULT_OG_IMAGE } from "@/lib/site-url";
 import { INTRO_GATE_INERT_SCRIPT, INTRO_PORTAL_ENABLED } from "@/lib/intro-gate";
 import styles from "./page.module.css";
 
@@ -13,6 +14,8 @@ export const metadata: Metadata = {
     title: "車車遊樂園",
     description: HOME_PAGE_META_DESCRIPTION,
     url: "/",
+    // 子頁面的 openGraph 會整段取代版面預設，沒寫 images 時分享預覽就沒有圖。
+    images: [{ url: DEFAULT_OG_IMAGE, alt: "車車遊樂園吉祥物" }],
   },
 };
 

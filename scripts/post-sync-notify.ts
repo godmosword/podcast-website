@@ -11,6 +11,7 @@
  *   SYNC_ISSUE_MENTIONS      — Issue 開頭 @mention（例 @user1 @user2）
  */
 import { readFileSync, writeFileSync } from "node:fs";
+import { CANONICAL_SITE_URL } from "../lib/site-url";
 import type { SyncRunReport } from "./lib/sync-report";
 
 function subtitleLine(
@@ -65,7 +66,7 @@ function siteBase(): string {
   return (
     process.env.NOTIFY_SITE_URL?.trim() ||
     process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
-    "https://podcast-website-mu.vercel.app"
+    CANONICAL_SITE_URL
   ).replace(/\/+$/, "");
 }
 
