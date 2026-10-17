@@ -1,19 +1,21 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { BaseArt, PlateArt, SHOP_SRC, SushiArt, ToppingArt } from "@/lib/games/dino-sushi/art";
 import { matchOrder, orderSpeechLine, orderThanksLine } from "@/lib/games/dino-sushi/orders";
 import { currentOrder } from "@/lib/games/dino-sushi/round";
 import { MAX_TOPPINGS } from "@/lib/games/dino-sushi/sushi";
-import { BASES, baseById, toppingById, type ToppingId } from "@/lib/games/dino-sushi/toppings";
+import { BASES, baseById, toppingById, type BaseId, type ToppingId } from "@/lib/games/dino-sushi/toppings";
 import { DOME_AFTER_PLATES, domeStickerId, orderLead, roundVariety } from "@/lib/games/dino-sushi/variety";
 import { DinoSushiDuoDuo } from "./DinoSushiDuoDuo";
 import { DinoSushiEvictFly, type EvictFly } from "./DinoSushiEvictFly";
+import { DinoSushiGuestThanks } from "./DinoSushiGuestThanks";
 import { DinoSushiOrderBubble } from "./DinoSushiOrderBubble";
 import { TapButton, TapFinger as Finger, type TapPoint } from "./DinoSushiPiece";
 import { DinoSushiPlateStack } from "./DinoSushiPlateStack";
 import { ShopBelt, ShopWall } from "./DinoSushiShop";
 import { DinoSushiTray } from "./DinoSushiTray";
+import { useBaseFly } from "./useBaseFly";
 import type { DinoSushiPlay } from "./useDinoSushiPlay";
 import { useDinoSushiSpeech } from "./useDinoSushiSpeech";
 import styles from "./DinoSushiKitchen.module.css";
@@ -100,6 +102,9 @@ export function DinoSushiKitchen({
   const slotsRef = useRef<HTMLDivElement>(null);
   const flySeq = useRef(0);
   const [flies, setFlies] = useState<EvictFly[]>([]);
+  /** 等選飯時點了托盤：該點的皿跳兩下＋光圈。seq 單雙切 a／b 才會重播；最後一張播完就收掉。 */
+  const [nudge, setNudge] = useState<{ seq: number; ids: readonly BaseId[] } | null>(null);
+  const baseFly = useBaseFly({ rootRef, base: round?.sushi.base ?? null, reducedMotion, inputPaused });
   /** 用鍵盤拿掉第幾格：料位以料當 key，那顆鈕會消失，焦點接到同一格（或最後一格），料位空了就回托盤。 */
   const refocusSlot = useRef<number | null>(null);
   const toppings = round?.sushi.toppings;
@@ -135,6 +140,12 @@ export function DinoSushiKitchen({
   const sushi = round.sushi;
   const flash = caption?.mood === "look" ? (caption.match ?? null) : null;
   const disabled = locked || inputPaused;
+  /** 點餐只亮訂單要的那張（和提示一致）；自由做三張依序亮，像是「這三個選一個」。 */
+  const nudgeBases = () => {
+    actions.remindBase();
+    const ids = order ? [order.base] : BASES.map((b) => b.id);
+    setNudge((n) => ({ seq: (n?.seq ?? 0) + 1, ids }));
+  };
   /* 選飯時加料層整層隱藏，裡面不出現亮框和手指 */
   const layerHint = choosingBase ? null : hint;
   const serveHint = layerHint?.kind === "serve";
@@ -203,6 +214,10 @@ export function DinoSushiKitchen({
         <div className={styles.talk}>
           {round.mode === "free" ? (
             <TapButton className={styles.fullButton} onTap={actions.finish} disabled={disabled}>
+              <span className={styles.fullArt} aria-hidden>
+                <PlateArt />
+                <PlateArt />
+              </span>
               多多吃飽了
             </TapButton>
           ) : null}
@@ -221,6 +236,10 @@ export function DinoSushiKitchen({
             <p className={styles.caption} data-mood={caption.mood} aria-hidden>
               {caption.line}
             </p>
+          ) : null}
+          {/* 先多多、再朋友（朗讀也是這個順序）；下一單泡泡出來後再留一下才淡出 */}
+          {play.thanks ? (
+            <DinoSushiGuestThanks order={play.thanks.order} line={play.thanks.line} leaving={play.thanks.leaving} />
           ) : null}
         </div>
       </section>
@@ -242,6 +261,7 @@ export function DinoSushiKitchen({
               <img className={styles.prepPlate} src={SHOP_SRC.prepplate} alt="" draggable={false} decoding="sync" />
               <TapButton
                 className={styles.sushiButton}
+                data-role="prep-sushi"
                 aria-label={
                   sushi.base
                     ? `換飯：現在是${baseById(sushi.base).label}`
@@ -312,12 +332,19 @@ export function DinoSushiKitchen({
         {/* 選飯時只做選飯這一步：三張皿疊在加料層上面 */}
         {choosingBase ? (
           <div className={styles.basePicker} role="group" aria-label="選飯" data-role="base-picker">
-            {BASES.map((b) => (
+            {BASES.map((b) => {
+              const nudgeAt = nudge ? nudge.ids.indexOf(b.id) : -1;
+              return (
               <TapButton
                 key={b.id}
                 className={styles.baseButton}
                 aria-label={`選${b.label}`}
                 aria-pressed={sushi.base === b.id}
+                data-nudge={nudge && nudgeAt >= 0 ? (nudge.seq % 2 ? "a" : "b") : undefined}
+                style={nudgeAt >= 0 ? ({ "--nudge-delay": `${nudgeAt * 90}ms` } as CSSProperties) : undefined}
+                onAnimationEnd={(e) => {
+                  if (nudge && b.id === nudge.ids.at(-1) && /nudge(Ring|Hold)/.test(e.animationName)) setNudge(null);
+                }}
                 data-hint={
                   hint?.kind === "base" && hint.id === b.id
                     ? "true"
@@ -326,7 +353,8 @@ export function DinoSushiKitchen({
                 disabled={disabled}
                 onTap={(point) => {
                   picked.current = point ? { at: performance.now(), rect: point.rect } : null;
-                  actions.pickBase(b.id);
+                  setNudge(null);
+                  actions.pickBase(b.id, baseFly.prepare(b.id, b.label, sushi.toppings.length > 0));
                 }}
               >
                 <span className={styles.baseArt} aria-hidden>
@@ -339,7 +367,8 @@ export function DinoSushiKitchen({
                   <Finger />
                 ) : null}
               </TapButton>
-            ))}
+              );
+            })}
           </div>
         ) : null}
       </section>
@@ -348,8 +377,9 @@ export function DinoSushiKitchen({
         tray={round.tray}
         theme={variety?.theme.id}
         themeLabel={variety?.theme.label}
-        disabled={disabled || !sushi.base || choosingBase}
-        waitingForBase={!sushi.base || choosingBase}
+        disabled={disabled}
+        waitingForBase={choosingBase}
+        onWaitTap={nudgeBases}
         hint={hint?.kind === "topping" ? hint.id : null}
         teaching={teaching}
         onAdd={(id) => {

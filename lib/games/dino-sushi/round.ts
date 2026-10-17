@@ -4,6 +4,7 @@
  */
 
 import type { CustomerId } from "./customers";
+import type { OrderTier } from "./difficulty";
 import { buildOrders, buildTray, type Order } from "./orders";
 import { favoriteFor, reactionFor, type Mood, type Reaction } from "./reactions";
 import { addTopping, changeBase, EMPTY_SUSHI, isServable, removeTopping, type Sushi } from "./sushi";
@@ -16,6 +17,8 @@ export type Plate = { sushi: Sushi; gold: boolean; mood: Mood; customerId?: Cust
 export type RoundState = {
   mode: Mode;
   seed: number;
+  /** 難度檔位（只影響點餐的料數、提示等待與首單教學）。 */
+  tier: OrderTier;
   tray: readonly ToppingId[];
   orders: readonly Order[];
   /** 目前第幾單（點餐模式）。 */
@@ -44,13 +47,14 @@ export type RoundAction =
   | { type: "brush" }
   | { type: "finish" };
 
-export function createRound(mode: Mode, seed: number): RoundState {
+export function createRound(mode: Mode, seed: number, tier: OrderTier = "normal"): RoundState {
   const tray = buildTray(seed);
   return {
     mode,
     seed,
+    tier,
     tray,
-    orders: mode === "order" ? buildOrders(seed, tray) : [],
+    orders: mode === "order" ? buildOrders(seed, tray, tier) : [],
     index: 0,
     sushi: EMPTY_SUSHI,
     attempts: 0,

@@ -73,7 +73,7 @@
 
 /* 多多與送餐盤共用這組變數，壽司才飛得到嘴裡。
    貼紙是正方形，整張（含四輪）落在雨棚與櫃台之間。
-   嘴心約在畫布寬 0.713、高 0.586（量過 sticker-open）。 */
+   嘴心約在畫布寬 0.706、高 0.596（sticker-open 對齊輪底並縮 0.965 之後量的，見 duoduo-sticker 的 STICKER_FIT）。 */
 .duoArea {
   --duo-max-w: 58cqw;
   --duo-left: 2cqw;
@@ -114,63 +114,6 @@
   overflow: visible;
 }
 
-/* 向量檔的兩頰、白雲、星星。局內貼紙把表情畫在圖裡，這些選擇器留著給動畫守門。 */
-.duoArt [data-part="cheeks"] > g {
-  transform-box: fill-box;
-  transform-origin: 50% 50%;
-  animation: cheekPuff 450ms ease-in-out both;
-}
-
-@keyframes cheekPuff {
-  0%,
-  50%,
-  100% {
-    transform: scale(1);
-  }
-  25%,
-  75% {
-    transform: scale(1.1);
-  }
-}
-
-.duoArt [data-part="puff-cloud"] {
-  transform-box: fill-box;
-  transform-origin: 90% 70%;
-  animation: cloudPuff 340ms cubic-bezier(0.3, 1.4, 0.5, 1) both;
-}
-
-@keyframes cloudPuff {
-  0% {
-    transform: scale(0.2);
-    opacity: 0.4;
-  }
-  60% {
-    transform: scale(1.08);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-.duoArt [data-part="sweet-stars"] > path {
-  transform-box: fill-box;
-  transform-origin: 50% 50%;
-  animation: starPop 480ms cubic-bezier(0.3, 1.4, 0.5, 1) both;
-  animation-delay: var(--d, 0ms);
-}
-
-@keyframes starPop {
-  from {
-    transform: translate(var(--sx, 0px), 16px) scale(0.3);
-    opacity: 0;
-  }
-  to {
-    transform: none;
-    opacity: 1;
-  }
-}
-
 /* 送給多多的那盤：走迴轉帶前排，從右邊滑進來 */
 .servingPlate {
   position: absolute;
@@ -193,9 +136,9 @@
   z-index: 1;
   display: block;
   transform: translateY(-36%);
-  --bite-dx: calc(var(--duo-left) + var(--duo-w) * 0.713 - var(--serve-left) - var(--serve-w) * 0.5);
-  /* 貼紙底在櫃台上方 2px，嘴在畫布底往上 0.414 個寬。盤子底在櫃台的 0.26。 */
-  --bite-dy: calc(var(--counter-h) * -0.74 + 2px - var(--duo-w) * 0.414 + var(--serve-w) * 0.645);
+  --bite-dx: calc(var(--duo-left) + var(--duo-w) * 0.706 - var(--serve-left) - var(--serve-w) * 0.5);
+  /* 貼紙底在櫃台上方 2px，嘴在畫布底往上 0.404 個寬（open 對齊輪底、縮 0.965 之後量的）。盤子底在櫃台的 0.26。 */
+  --bite-dy: calc(var(--counter-h) * -0.74 + 2px - var(--duo-w) * 0.404 + var(--serve-w) * 0.645);
 }
 
 .servingSushi > [data-sushi] {
@@ -397,12 +340,13 @@
   pointer-events: none;
 }
 
+/* 客人最愛的料：星星要看得到（12px 時沒人注意到），做對時膠囊上會再亮一次 */
 .favStar {
   position: absolute;
-  top: 0;
-  right: 0;
-  width: 12px;
-  height: 12px;
+  top: -2px;
+  right: -2px;
+  width: 16px;
+  height: 16px;
   pointer-events: none;
 }
 
@@ -622,6 +566,136 @@
     0 8px 18px rgba(90, 60, 30, 0.18);
 }
 
+/*
+ * 朋友收到壽司：多多字卡下面一顆粉色膠囊（頭像＋愛心＋謝謝）。刻意不像點餐泡泡（沒有白底木框、尾巴、料圖列）。
+ * 反應開始後 200ms 彈出、愛心再晚 300ms 跳一下；反應結束（約 1 秒後）跟著收起。
+ * 這單有朋友最愛的料：頭像左上一顆星、旁邊放那樣料，星星彈一下。
+ */
+.thanks {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  margin: 0;
+  padding: 4px 12px 4px 4px;
+  border-radius: 999px;
+  /* 比多多「最愛」字卡（框 #ffa9c4）深一階，兩張卡才不會看成同一種 */
+  background: #ffe1ea;
+  color: var(--ink-warm);
+  box-shadow:
+    0 0 0 2.5px #ff8fb1,
+    0 8px 18px rgba(90, 60, 30, 0.16);
+  transform-origin: 100% 0;
+  animation: popIn 300ms cubic-bezier(0.3, 1.45, 0.5, 1) 200ms both;
+}
+
+.thanks[data-leaving="true"] {
+  animation: thanksOut 200ms ease-in forwards;
+}
+
+@keyframes thanksOut {
+  to {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+.thanksFace {
+  position: relative;
+  flex: none;
+  width: 40px;
+  height: 40px;
+}
+
+.thanksFace > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center 40%;
+  background: #fffdf8;
+  box-shadow: 0 0 0 2px #ff8fb1;
+  pointer-events: none;
+}
+
+.thanksHeart {
+  position: absolute;
+  right: -4px;
+  bottom: -3px;
+  width: 16px;
+  height: 16px;
+  animation: thanksBeat 360ms ease-out 500ms both;
+}
+
+.thanksStar {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  width: 18px;
+  height: 18px;
+  animation: thanksStar 360ms ease-out 500ms both;
+}
+
+.thanksFood {
+  flex: none;
+  width: 24px;
+  height: 24px;
+}
+
+.thanksLine {
+  min-width: 0;
+  font-size: 0.95rem;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+@keyframes thanksBeat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.35);
+  }
+}
+
+@keyframes thanksStar {
+  0% {
+    transform: scale(0.5);
+  }
+  60% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* 矮舞台：只留 28px 頭像＋愛心，不加高 */
+@container duo-stage (max-height: 190px) {
+  .thanks {
+    padding: 2px;
+  }
+
+  .thanksFace {
+    width: 28px;
+    height: 28px;
+  }
+
+  .thanksFood,
+  .thanksLine {
+    display: none;
+  }
+}
+
+@media (min-width: 900px) {
+  .thanksFace {
+    width: 48px;
+    height: 48px;
+  }
+}
+
 /* 矮舞台（320×568）：缺料時泡泡上那一格閃＋「嗯？」就夠，字卡會蓋到多多的嘴，收起 */
 @container duo-stage (max-height: 190px) {
   .caption[data-mood="look"] {
@@ -798,21 +872,67 @@
   }
 }
 
-/* 自由做「多多吃飽了」：右上（自由做沒有泡泡），離「給多多吃」遠 */
+/* 自由做「多多吃飽了」：右上（自由做沒有泡泡），離「給多多吃」遠。
+   實心綠＝跟貼紙書「回去」同一種「結束」鈕；以前白底綠框跟多多的字卡長得一樣，家長找不到出口。 */
 .fullButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   min-height: 64px;
-  padding: 0 18px;
+  padding: 0 18px 0 10px;
   border: none;
   border-radius: 999px;
-  background: #fffdf8;
-  color: #3f7f2a;
+  background: var(--sushi-accent, #3f7f2a);
+  color: var(--sushi-cream, #fff8ea);
   font: inherit;
+  font-size: 1rem;
   font-weight: 900;
   cursor: pointer;
   box-shadow:
-    0 0 0 2px #b7df9b,
-    0 4px 0 #9cc982,
-    0 8px 14px rgba(60, 100, 40, 0.16);
+    inset 0 2px 0 rgba(255, 255, 255, 0.35),
+    0 4px 0 #2b5a1c,
+    0 8px 14px rgba(40, 80, 25, 0.22);
+  transition:
+    transform 120ms ease-out,
+    box-shadow 120ms ease-out;
+}
+
+.fullButton:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.35),
+    0 2px 0 #2b5a1c,
+    0 4px 8px rgba(40, 80, 25, 0.2);
+}
+
+.fullButton:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+/* 左邊兩個錯開的藍盤（吃完疊起來的樣子），白色描邊才不會被深綠吃掉 */
+.fullArt {
+  position: relative;
+  flex: none;
+  width: 32px;
+  height: 20px;
+  filter: drop-shadow(0 0 1px #fff);
+}
+
+.fullArt > img {
+  position: absolute;
+  left: 0;
+  width: 27px;
+  height: 16px;
+}
+
+.fullArt > img:first-child {
+  top: 4px;
+}
+
+.fullArt > img:last-child {
+  top: 0;
+  left: 7px;
 }
 
 /* ── 檜木砧板 ─────────────────────────────────────────── */
@@ -932,10 +1052,25 @@
 }
 
 /* 新手捲是直筒（511×986）。用盤高收進盤子，避免依盤寬 70% 時整筒高出盤緣、壓到料位。 */
+/* 選飯過場（useBaseFly，WAAPI）飛過的那顆不播落下動畫：過場就是它的進場，飛完也不能再落一次 */
+.sushiButton > [data-sushi][data-flew] {
+  animation: none;
+}
+
 .sushiButton > [data-sushi][data-base="temaki"] {
   width: auto;
   height: 92%;
   max-width: 78%;
+}
+
+/* 料換位置（加第二樣、拿掉一層、擠掉最舊那層）時，留下來的料滑過去，不瞬間跳位。
+   每層的 key 是「第幾個同樣的料」，留下來的不重掛，transition 才接得上 */
+.sushiButton > [data-sushi] > span {
+  transition:
+    left 200ms ease-out,
+    top 200ms ease-out,
+    width 200ms ease-out,
+    transform 200ms ease-out;
 }
 
 @keyframes baseDrop {
@@ -1112,6 +1247,106 @@
   filter: drop-shadow(0 3px 2px rgba(110, 75, 35, 0.16));
 }
 
+/*
+ * 等選飯時點了托盤：該點的皿光圈閃兩下、圖往上跳 6px 兩下（2×220ms），周邊視野也看得到。
+ * 光圈畫在 ::after，不碰提示光暈（[data-hint] 的 sushiGlow）；a／b 輪流才會重播，播完廚房會拿掉 data-nudge。
+ * 自由做三張依序亮（--nudge-delay 0／90／180ms）。減少動態：不跳，光圈靜止亮 900ms。
+ */
+.baseButton[data-nudge]::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  box-shadow:
+    0 0 0 4px #ffd34d,
+    0 0 14px 4px rgba(255, 211, 77, 0.6);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.baseButton[data-nudge="a"]::after {
+  animation: nudgeRingA 440ms ease-in-out var(--nudge-delay, 0ms) both;
+}
+
+.baseButton[data-nudge="b"]::after {
+  animation: nudgeRingB 440ms ease-in-out var(--nudge-delay, 0ms) both;
+}
+
+.baseButton[data-nudge="a"] .baseArt {
+  animation: nudgeHopA 220ms ease-in-out var(--nudge-delay, 0ms) 2;
+}
+
+.baseButton[data-nudge="b"] .baseArt {
+  animation: nudgeHopB 220ms ease-in-out var(--nudge-delay, 0ms) 2;
+}
+
+@keyframes nudgeRingA {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  25%,
+  75% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+@keyframes nudgeRingB {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  25%,
+  75% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+@keyframes nudgeHopA {
+  0%,
+  100% {
+    transform: none;
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes nudgeHopB {
+  0%,
+  100% {
+    transform: none;
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+/* 減少動態：不跳，光圈靜止亮 900ms 再收（step-end：整段停在第一格） */
+@keyframes nudgeHoldA {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes nudgeHoldB {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 .baseLabel {
   font-size: 0.95rem;
   font-weight: 900;
@@ -1224,6 +1459,7 @@
 }
 
 .trayButton:disabled,
+.trayButton[aria-disabled="true"],
 .slot:disabled,
 .sushiButton:disabled,
 .baseButton:disabled {
@@ -1237,7 +1473,7 @@
 }
 
 /* 按下去會沉一下（有厚度的實體感） */
-.trayButton:active:not(:disabled),
+.trayButton:active:not(:disabled):not([aria-disabled="true"]),
 .baseButton:active:not(:disabled) {
   transform: translateY(2px);
 }
@@ -1383,23 +1619,32 @@
     width: 72px;
   }
 
-  /* 選飯的三張皿只佔上面，不要被拉高蓋住「給多多吃」。
-     蓋住的話，選完飯立刻點送出，會被連點防呆當成還在點同一張皿。 */
+  /* 選飯的三張皿往下長到「給多多吃」上緣前 8px（上限 168），用上加料層原本空著的高度；
+     但不能蓋住「給多多吃」：蓋住的話，選完飯立刻點送出，會被連點防呆當成還在點同一張皿。
+     皿和加料層疊在同一格，下面保留 80px（實測格底到「給多多吃」上緣 72px，再留 8px），e2e 量兩個框守住。 */
   .basePicker {
-    align-self: start;
-    height: auto;
+    align-self: stretch;
+    grid-template-rows: minmax(0, 1fr) 80px;
   }
 
   .baseButton {
+    grid-row: 1;
     align-self: start;
-    height: auto;
-    min-height: 96px;
-    max-height: 160px;
+    height: 100%;
+    min-height: min(96px, 100%);
+    max-height: 168px;
+  }
+
+  .baseButton .finger {
+    /* 指尖落在飯圖中間，不壓住下面的字 */
+    --tip-y: 40%;
   }
 }
 
-/* 窄直向（320×568）：舞台收短，但仍要讓泡泡和疊盤上下分開。間距仍至少 8px。 */
-@media (max-width: 420px) and (orientation: portrait) {
+/* 窄直向（320×568）：舞台收短，但仍要讓泡泡和疊盤上下分開。間距仍至少 8px。
+   430 寬的大 iPhone 在 Safari 扣掉工具列（430×664、430×739）也要收，不然廚房超出一屏 85–140px；
+   高的大手機（430×932）不收，砧板維持原本大小。840 以上不收也放得下（430×833 起） */
+@media (max-width: 420px) and (orientation: portrait), (max-width: 559px) and (max-height: 840px) and (orientation: portrait) {
   .kitchen {
     --duo-h: 152px;
     gap: 8px;
@@ -1422,15 +1667,38 @@
   }
 }
 
+/*
+ * 矮的大手機（430 寬、高 ≤840）：
+ * - 托盤圖跟著較寬的格子長高，鈕會變 69px；圖高收到 40px，鈕回到 64px，兩列省 10px。
+ * - 舞台下限跟著螢幕高度走（152–192px），廚房底永遠離螢幕底約 5px：430×739 舞台約 192px，
+ *   超過 190px 才留得住燈籠、櫃台店名與泡泡裡的客人名字（DinoSushiShop、泡泡的矮舞台規則）。
+ * 420.01：小數寬度的 Android 不會掉進 420–421 之間的縫。
+ */
+@media (min-width: 420.01px) and (max-width: 559px) and (max-height: 840px) and (orientation: portrait) {
+  .kitchen {
+    --tray-art: 40px;
+    --duo-h: clamp(152px, calc(100svh - 516px), 192px);
+  }
+
+  .trayArt {
+    width: min(100%, calc(var(--tray-art) * 858 / 480));
+  }
+}
+
 /* 牙刷 80px 要比平常的矮舞台高，出現時才不會被舞台裁掉 */
 .kitchen:has([data-brush="true"]) {
   --duo-brush: 132px;
 }
 
 /* 一般直向手機：皿拉滿後多出的高度給圖 */
+/* 皿長高了（K1），飯圖和字也大一階；320 寬與矮直向不動 */
 @media (orientation: portrait) and (min-width: 360px) and (min-height: 641px) and (max-width: 899px) {
   .baseArt {
-    max-width: 84px;
+    max-width: 96px;
+  }
+
+  .baseLabel {
+    font-size: 1rem;
   }
 }
 
@@ -1525,8 +1793,9 @@
     max-width: calc(100% - 12px);
   }
 
+  /* 下限 28：進階三料單在 667×375 卡在 20px 時小黃瓜和酪梨分不出來（格內圖約 24px） */
   .bubbleItem {
-    --cell: clamp(20px, 7cqw, 34px);
+    --cell: clamp(28px, 7cqw, 34px);
   }
 
   .guestFaceWrap {
@@ -1610,24 +1879,40 @@
     font-size: 1.15rem;
   }
 
+  /* 跟著舞台寬長大，上限 52：三料單 4 格＋分隔線＋內距約 245px，talk 欄約 250px */
   .bubbleItem {
-    --cell: 44px;
+    --cell: clamp(44px, 13cqw, 52px);
   }
 
   .guestFaceWrap {
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
   }
 
   .guestName {
-    font-size: 1rem;
+    font-size: 1.05rem;
+  }
+
+  .favStar {
+    width: 18px;
+    height: 18px;
+  }
+
+  .orderDot {
+    width: 18px;
+    height: 9px;
+  }
+
+  .orderDot[data-state="now"] {
+    width: 24px;
+    height: 12px;
   }
 
   .replayBadge {
-    top: -14px;
-    left: -14px;
-    width: 32px;
-    height: 32px;
+    top: -16px;
+    left: -16px;
+    width: 36px;
+    height: 36px;
   }
 }
 
@@ -1657,9 +1942,6 @@
   .sushiButton > [data-sushi],
   .layerPop,
   .servingSushi[data-phase="open"],
-  .duoArt [data-part="cheeks"] > g,
-  .duoArt [data-part="puff-cloud"],
-  .duoArt [data-part="sweet-stars"] > path,
   .plates[data-land] {
     animation: none;
   }
@@ -1668,9 +1950,18 @@
     animation: none;
   }
 
+  .thanks,
+  .thanks[data-leaving="true"],
+  .thanksHeart,
+  .thanksStar {
+    animation: none;
+  }
+
   .trayButton,
   .baseButton,
-  .serveButton {
+  .serveButton,
+  .fullButton,
+  .sushiButton > [data-sushi] > span {
     transition: none;
   }
 
@@ -1679,7 +1970,39 @@
     animation-name: evictFade;
     animation-duration: 180ms;
   }
+
+  /* 等選飯的皿提示：不跳，光圈靜止亮 900ms */
+  .baseButton[data-nudge] .baseArt {
+    animation: none;
+  }
+
+  .baseButton[data-nudge="a"]::after {
+    animation: nudgeHoldA 900ms step-end var(--nudge-delay, 0ms) both;
+  }
+
+  .baseButton[data-nudge="b"]::after {
+    animation: nudgeHoldB 900ms step-end var(--nudge-delay, 0ms) both;
+  }
 }
+
+/* 等選飯的皿提示（見 .baseButton[data-nudge]）：data-reduced 同減少動態，暫停時停住 */
+.kitchen[data-reduced="true"] .baseButton[data-nudge] .baseArt {
+  animation: none;
+}
+
+.kitchen[data-reduced="true"] .baseButton[data-nudge="a"]::after {
+  animation: nudgeHoldA 900ms step-end var(--nudge-delay, 0ms) both;
+}
+
+.kitchen[data-reduced="true"] .baseButton[data-nudge="b"]::after {
+  animation: nudgeHoldB 900ms step-end var(--nudge-delay, 0ms) both;
+}
+
+.kitchen[data-paused="true"] .baseButton[data-nudge]::after,
+.kitchen[data-paused="true"] .baseButton[data-nudge] .baseArt {
+  animation-play-state: paused;
+}
+
 
 .kitchen[data-reduced="true"] .servingPlate,
 .kitchen[data-reduced="true"] .boardMain,
@@ -1695,9 +2018,6 @@
 .kitchen[data-reduced="true"] .sushiButton > [data-sushi],
 .kitchen[data-reduced="true"] .layerPop,
 .kitchen[data-reduced="true"] .servingSushi[data-phase="open"],
-.kitchen[data-reduced="true"] .duoArt [data-part="cheeks"] > g,
-.kitchen[data-reduced="true"] .duoArt [data-part="puff-cloud"],
-.kitchen[data-reduced="true"] .duoArt [data-part="sweet-stars"] > path,
 .kitchen[data-reduced="true"] .plates[data-land] {
   animation: none;
 }
@@ -1713,17 +2033,26 @@
 }
 
 .kitchen[data-paused="true"] .servingSushi[data-phase="open"],
-.kitchen[data-paused="true"] .duoArt [data-part="cheeks"] > g,
-.kitchen[data-paused="true"] .duoArt [data-part="puff-cloud"],
-.kitchen[data-paused="true"] .duoArt [data-part="sweet-stars"] > path,
 .kitchen[data-paused="true"] .plates[data-land],
-.kitchen[data-paused="true"] .evictFly {
+.kitchen[data-paused="true"] .evictFly,
+.kitchen[data-paused="true"] .thanks,
+.kitchen[data-paused="true"] .thanksHeart,
+.kitchen[data-paused="true"] .thanksStar {
   animation-play-state: paused;
+}
+
+.kitchen[data-reduced="true"] .thanks,
+.kitchen[data-reduced="true"] .thanks[data-leaving="true"],
+.kitchen[data-reduced="true"] .thanksHeart,
+.kitchen[data-reduced="true"] .thanksStar {
+  animation: none;
 }
 
 .kitchen[data-reduced="true"] .trayButton,
 .kitchen[data-reduced="true"] .baseButton,
-.kitchen[data-reduced="true"] .serveButton {
+.kitchen[data-reduced="true"] .serveButton,
+.kitchen[data-reduced="true"] .fullButton,
+.kitchen[data-reduced="true"] .sushiButton > [data-sushi] > span {
   transition: none;
 }
 

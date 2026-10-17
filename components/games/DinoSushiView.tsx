@@ -8,6 +8,7 @@ import { loadPlayerProfile } from "@/lib/gamekit/progress/save";
 import { GAMEKIT_PROGRESS_EVENT } from "@/lib/gamekit/progress/session";
 import { useDinoSushiClayPreload } from "@/lib/games/dino-sushi/art";
 import { useDuoDuoStickerPreload } from "@/lib/games/dino-sushi/duoduo-sticker";
+import { nextTier, startTier, type OrderTier } from "@/lib/games/dino-sushi/difficulty";
 import { DINO_SUSHI_LEVEL_INDEX, roundMedals, type RoundMedals } from "@/lib/games/dino-sushi/medals";
 import { SUSHI_SFX } from "@/lib/games/dino-sushi/sfx";
 import type { Mode, RoundState } from "@/lib/games/dino-sushi/round";
@@ -35,6 +36,11 @@ export type DinoSushiOutcome = {
   seed: number;
 };
 
+/** 直接讀存檔，不等 starsGot state（掛載時 effect 還沒跑完就按開始也對）。 */
+function storedStars(): number {
+  return medalCount(loadPlayerProfile().medals["dino-sushi"]?.[DINO_SUSHI_LEVEL_INDEX] ?? 0);
+}
+
 export function DinoSushiView({
   reducedMotion,
   status,
@@ -54,9 +60,13 @@ export function DinoSushiView({
   const inputPaused = instance.isInputPaused() || status === "paused";
 
   const refreshStars = useCallback(() => {
-    const flags = loadPlayerProfile().medals["dino-sushi"]?.[DINO_SUSHI_LEVEL_INDEX] ?? 0;
-    setStarsGot(medalCount(flags));
+    setStarsGot(storedStars());
   }, []);
+  /**
+   * 點餐難度檔位只放記憶體：第一次開始點餐時看存檔裡的星星定起始檔（3 星＝進階），
+   * 之後每輪結束依一次做對幾單升降；重新整理就回起始檔。不加存檔欄位、不動星星。
+   */
+  const tierRef = useRef<OrderTier | null>(null);
   useEffect(() => {
     refreshStars();
     window.addEventListener(GAMEKIT_PROGRESS_EVENT, refreshStars);
@@ -71,6 +81,7 @@ export function DinoSushiView({
     (round: RoundState) => {
       if (round.mode === "order") {
         const medals = roundMedals(round.firstTries);
+        tierRef.current = nextTier(round.tier, medals.firstTryCount);
         instance.notifyWon(medals);
         setOutcome({ mode: "order", plates: round.plates, medals, seed: round.seed });
       } else {
@@ -103,7 +114,8 @@ export function DinoSushiView({
       setMode(next);
       setOutcome(null);
       const seed = queuedSeed ?? readRoundSeed();
-      actions.start(next, seed);
+      if (next === "order" && tierRef.current === null) tierRef.current = startTier(storedStars());
+      actions.start(next, seed, next === "order" ? (tierRef.current ?? "normal") : "normal");
       setQueuedSeed(readRoundSeed());
       setScreen("kitchen");
       instance.notifyPlaying(next);

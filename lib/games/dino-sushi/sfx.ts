@@ -68,6 +68,8 @@ export const SUSHI_SFX = {
   ],
   /** 點壽司重選飯：輕輕的「嗒」。 */
   tap: [{ wave: "sine", freq: 980, freqEnd: 900, dur: 0.05, vol: 0.05 }],
+  /** 料位滿了，最舊那層被新料擠出去、飛回托盤：比「拿掉」更輕更短的「咻」，接著新料的「啵」。 */
+  evict: [{ wave: "sine", freq: 620, freqEnd: 360, dur: 0.09, vol: 0.05, attack: 0.008 }],
   /** 拿掉一層料：往下滑的「咻」。 */
   remove: [
     { wave: "sine", freq: 820, freqEnd: 340, dur: 0.14, vol: 0.08, attack: 0.01 },
@@ -165,6 +167,14 @@ export function varied(voices: Voices, rand: () => number = Math.random): Voices
   return voices.map((v) =>
     v.wave === "noise" ? v : { ...v, freq: (v.freq ?? 440) * k, ...(v.freqEnd ? { freqEnd: v.freqEnd * k } : {}) },
   );
+}
+
+/** 擠掉最舊那層時「啵」晚多久響（秒）：同時起播的話，輕的「咻」會被蓋掉。料落下的動畫 320ms，晚 80ms 仍對得上。 */
+export const EVICT_POP_DELAY = 0.08;
+
+/** 料位滿了再放料：先「咻」，「啵」整組往後挪 EVICT_POP_DELAY，合成一組送出起播時間才準。 */
+export function evictThenPop(pop: Voices): Voices {
+  return [...SUSHI_SFX.evict, ...pop.map((v) => ({ ...v, at: (v.at ?? 0) + EVICT_POP_DELAY }))];
 }
 
 /** 測試與音量預檢用：所有音效的清單。 */

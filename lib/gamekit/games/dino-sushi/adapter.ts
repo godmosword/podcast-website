@@ -26,6 +26,17 @@ export type DinoSushiController = {
 /** 回到標題後這段時間內的 start() 視為同一次按鍵的連帶觸發。 */
 const TITLE_ENTER_GRACE_MS = 300;
 
+/**
+ * Host 在 ready/won/over 按 Enter 一律呼叫 start()，不看焦點在哪。結算畫面上焦點在按鈕或連結
+ * （放進貼紙書、+N、回標題、貼紙書格子）時，Enter 要交給那顆鈕自己（同方塊轉轉的做法），
+ * 不然會跟按鈕搶，有時直接開了新的一輪。
+ */
+function focusOnControl(): boolean {
+  if (typeof document === "undefined") return false;
+  const el = document.activeElement;
+  return el != null && el !== document.body && el.closest("button, a") !== null;
+}
+
 const NOOP_CONTROLLER: DinoSushiController = {
   startOrder: () => {},
   startFree: () => {},
@@ -47,6 +58,8 @@ class DinoSushiInstance implements GameInstance {
   private sessionReported = false;
   /** 剛回到標題的時間：結算畫面用 Enter 按「回標題」時，Host 會在下一幀補呼叫 start()，要忽略。 */
   private readyAt = 0;
+  /** 剛進結算的時間：用 Enter 按「多多吃飽了」會立刻結算，Host 下一幀又把同一次 Enter 當 start()，要忽略。 */
+  private resultAt = 0;
   private controller: DinoSushiController = NOOP_CONTROLLER;
 
   constructor(private readonly options: GameCreateOptions) {}
@@ -76,6 +89,8 @@ class DinoSushiInstance implements GameInstance {
       this.controller.startOrder();
       return;
     }
+    if (Date.now() - this.resultAt < TITLE_ENTER_GRACE_MS) return;
+    if (focusOnControl()) return;
     this.controller.restart();
   }
 
@@ -137,6 +152,7 @@ class DinoSushiInstance implements GameInstance {
   notifyWon(medals: Pick<RoundMedals, "cleared" | "flawless" | "collectedAll">): void {
     this.screen = "result";
     this.status = "won";
+    this.resultAt = Date.now();
     if (this.sessionReported) return;
     this.sessionReported = true;
     this.options.onSession?.({
@@ -153,6 +169,7 @@ class DinoSushiInstance implements GameInstance {
   notifyFinished(): void {
     this.screen = "result";
     this.status = "won";
+    this.resultAt = Date.now();
   }
 
   isInputPaused(): boolean {

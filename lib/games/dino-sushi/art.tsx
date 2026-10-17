@@ -2,6 +2,7 @@
 
 import { useEffect, type CSSProperties, type ReactNode } from "react";
 import { dinoSushiSrc } from "./asset-src";
+import goldStyles from "./gold-plate.module.css";
 import type { Sushi } from "./sushi";
 import type { BaseId, ToppingId, ToppingKind } from "./toppings";
 
@@ -52,6 +53,15 @@ const TOPPING_SRC: Record<ToppingId, string> = {
   wasabi: dinoSushiSrc("food/wasabi.webp"),
 };
 
+/** 貼紙書的剪影要拿原圖當遮罩，所以讓外面拿得到圖檔路徑。 */
+export function baseSrc(id: BaseId): string {
+  return BASE_SRC[id];
+}
+
+export function toppingSrc(id: ToppingId): string {
+  return TOPPING_SRC[id];
+}
+
 /** 飯圖原生寬高比，組裝舞台跟這張圖同比例，料的百分比才對得準。 */
 const BASE_ASPECT: Record<BaseId, string> = {
   nigiri: "581 / 416",
@@ -83,6 +93,15 @@ const TEMAKI_PLACE: Record<ToppingId, { w: number; y: number }> = {
   strawberry: { w: 68, y: 27 },
   pudding: { w: 90, y: 25 },
   wasabi: { w: 60, y: 25 },
+};
+
+/**
+ * 手捲三樣料時，中間那格（疊在最後面、抬到兩側上方）的個別調整。
+ * 布丁（彩蛋）：照一般抬高會整顆連綠盤冒出來；沉到 y 20%、少斜一點，只露焦糖頂和一截黃色布丁身，
+ * 盤子藏在兩側的料後面。只露焦糖在手機上會被看成巧克力，所以留一截布丁身。
+ */
+const TEMAKI_MIDDLE: Partial<Record<ToppingId, { dy: number; rot: number }>> = {
+  pudding: { dy: -5, rot: -10 },
 };
 
 /** 每種料的圖形差很多：條狀蓋滿、方塊與高的甜點要縮小，才不會蓋過飯。 */
@@ -122,7 +141,8 @@ function layerSpots(base: BaseId, toppings: readonly ToppingId[]): Spot[] {
             ];
     return toppings.map((id, i) => {
       const place = TEMAKI_PLACE[id];
-      const fanSpot = fan[i] ?? fan[0]!;
+      const middle = n === 3 && i === 0 ? TEMAKI_MIDDLE[id] : undefined;
+      const fanSpot = middle ? { ...fan[0]!, ...middle } : (fan[i] ?? fan[0]!);
       return {
         x: fanSpot.x,
         y: place.y + fanSpot.dy,
@@ -308,24 +328,58 @@ const PLATE_FILTER: Record<PlateTone, string | undefined> = {
   blue: "hue-rotate(42deg) saturate(1.2)",
   pink: "hue-rotate(158deg) saturate(1.35) brightness(1.04)",
   lavender: "hue-rotate(96deg) saturate(1.05)",
-  gold: "sepia(0.8) saturate(2.8) hue-rotate(8deg) brightness(1.05)",
+  /* 深琥珀、盤緣偏橙：要跟迴轉帶的粉彩盤和黃色日的托盤底分得開（原本的粉彩黃孩子看不出是金的） */
+  gold: "sepia(1) saturate(5) hue-rotate(-28deg) brightness(0.86)",
 };
 
-/** 迴轉壽司盤。gold＝一次做對的金邊盤；tone 給迴轉帶上的裝飾盤。 */
-export function PlateArt({ gold = false, tone, size, style }: ArtProps & { gold?: boolean; tone?: PlateTone }) {
+type PlateProps = ArtProps & {
+  gold?: boolean;
+  tone?: PlateTone;
+  /** 金盤的小提示章：只換色，不掃光、不放星。 */
+  plain?: boolean;
+};
+
+/**
+ * 迴轉壽司盤。gold＝一次做對的金盤（多一層程式畫的光澤與星星，見 gold-plate.module.css）；
+ * tone 給迴轉帶上的裝飾盤。非金盤的 DOM 就是一張圖，跟原本一樣。
+ */
+export function PlateArt({ gold = false, tone, plain = false, size, style }: PlateProps) {
   const plateTone: PlateTone = tone ?? (gold ? "gold" : "blue");
   const filter = PLATE_FILTER[plateTone];
+  if (plateTone !== "gold") {
+    return (
+      <ClayImg
+        src={SHOP_SRC.plate}
+        style={{
+          display: "block",
+          objectFit: "contain",
+          ...box(size),
+          ...(filter ? { filter } : null),
+          ...style,
+        }}
+      />
+    );
+  }
+  /* 外層填滿容器（容器的尺寸、負 margin、落下動畫都不變），圖與光澤層各自填滿外層 */
   return (
-    <ClayImg
-      src={SHOP_SRC.plate}
-      style={{
-        display: "block",
-        objectFit: "contain",
-        ...box(size),
-        ...(filter ? { filter } : null),
-        ...style,
-      }}
-    />
+    <span className={goldStyles.gold} data-gold-plate style={{ ...box(size), ...style }}>
+      <ClayImg
+        src={SHOP_SRC.plate}
+        style={{ display: "block", width: "100%", height: "100%", objectFit: "contain", filter }}
+      />
+      {plain ? null : (
+        <>
+          <span
+            className={goldStyles.shine}
+            data-gold-shine
+            style={{ ["--plate-mask" as string]: `url("${SHOP_SRC.plate}")` }}
+            aria-hidden
+          />
+          <span className={goldStyles.star} data-gold-star aria-hidden />
+          <span className={goldStyles.star} data-gold-star aria-hidden />
+        </>
+      )}
+    </span>
   );
 }
 

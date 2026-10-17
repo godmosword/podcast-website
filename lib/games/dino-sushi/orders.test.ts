@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { seededRng } from "@/lib/games/candy-match/rng";
 import { customerById } from "./customers";
+import { TIER_SIZES, type OrderTier } from "./difficulty";
 import { roundVariety } from "./variety";
 import {
   buildOrders,
@@ -196,5 +197,47 @@ describe("比對訂單", () => {
     expect(orderThanksLine(order)).toBe("謝謝你，好健康喔！");
     expect(orderThanksLine({ base: "nigiri", toppings: ["shrimp"], customerId: "xiaohong" })).toBe("咻～好快好好吃！");
     expect(orderThanksLine({ base: "nigiri", toppings: ["salmon"], customerId: "xiangxiang" })).not.toMatch(/草莓|布丁|芥末/);
+  });
+});
+
+describe("難度檔位的訂單", () => {
+  /** FNV-1a：一般檔 seed 1–100 的訂單在加檔位之前的指紋。變了＝視覺基準與 e2e 的訂單會跟著變。 */
+  function fingerprint(tier?: OrderTier): string {
+    let h = 0x811c9dc5;
+    const text = Array.from({ length: 100 }, (_, i) =>
+      JSON.stringify(tier ? buildOrders(i + 1, buildTray(i + 1), tier) : buildOrders(i + 1, buildTray(i + 1))),
+    ).join("|");
+    for (let k = 0; k < text.length; k++) {
+      h ^= text.charCodeAt(k);
+      h = Math.imul(h, 0x01000193) >>> 0;
+    }
+    return h.toString(16);
+  }
+
+  it("一般檔（預設）跟加檔位之前一模一樣", () => {
+    expect(fingerprint()).toBe("9662f9d8");
+    expect(fingerprint("normal")).toBe("9662f9d8");
+  });
+
+  /* 三檔各 1000 個 seed（2026-10-17 另外掃過各 5000 個，相鄰重複 0 次） */
+  it.each(["easy", "normal", "advanced"] as const)("%s：料數照檔位、同 seed 決定性、相鄰兩單不同、只點托盤上的家常料", (tier) => {
+    for (let seed = 1; seed <= 1000; seed++) {
+      const tray = buildTray(seed);
+      const orders = buildOrders(seed, tray, tier);
+      expect(orders.map((o) => o.toppings.length)).toEqual(TIER_SIZES[tier]);
+      expect(buildOrders(seed, tray, tier)).toEqual(orders);
+      for (const o of orders) {
+        expect(new Set(o.toppings).size).toBe(o.toppings.length);
+        for (const id of o.toppings) {
+          expect(tray).toContain(id);
+          expect(toppingById(id).kind).toBe("savory");
+        }
+      }
+      for (let i = 1; i < orders.length; i++) {
+        const [a, b] = [orders[i - 1]!, orders[i]!];
+        const same = a.base === b.base && a.toppings.length === b.toppings.length && a.toppings.every((t) => b.toppings.includes(t));
+        expect(same, `seed ${seed} 第 ${i} 單`).toBe(false);
+      }
+    }
   });
 });

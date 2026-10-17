@@ -1,6 +1,8 @@
 // @vitest-environment jsdom
 import { act, cleanup, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import type { SynthVoice } from "@/lib/gamekit/runtime/audio";
+import { EVICT_POP_DELAY, SUSHI_SFX } from "@/lib/games/dino-sushi/sfx";
 import { toppingById, type ToppingId } from "@/lib/games/dino-sushi/toppings";
 import { IDLE_HINT_MS, useDinoSushiPlay } from "./useDinoSushiPlay";
 
@@ -203,5 +205,110 @@ describe("點偏了立刻亮下一步", () => {
     });
     const second = result.current.round!.orders[1]!;
     expect(result.current.hint).toEqual({ kind: "base", id: second.base });
+  });
+});
+
+describe("擠掉最舊那層的音效", () => {
+  it("料位滿了再放：先一聲輕的「咻」，「啵」晚一點才響；沒滿時不咻", () => {
+    vi.useFakeTimers();
+    (window as Window & { __dinoSushiSeed?: number }).__dinoSushiSeed = 7;
+    const audio = { ensureAudio: vi.fn(), tone: vi.fn(), voices: vi.fn() };
+    const { result } = renderHook(() =>
+      useDinoSushiPlay({ audio, reducedMotion: true, inputPaused: false, onServed: vi.fn(), onDone: vi.fn() }),
+    );
+    act(() => result.current.actions.start("free"));
+    act(() => result.current.actions.pickBase("nigiri"));
+    const tray = result.current.round!.tray;
+    for (const id of tray.slice(0, 3)) act(() => result.current.actions.add(id));
+    expect(audio.voices).not.toHaveBeenCalledWith(SUSHI_SFX.evict);
+
+    audio.voices.mockClear();
+    act(() => result.current.actions.add(tray[3]!));
+    // 合成一組送出：同時起播的話輕的「咻」會被「啵」蓋掉，所以「啵」整組晚 EVICT_POP_DELAY
+    expect(audio.voices).toHaveBeenCalledTimes(1);
+    const voices = audio.voices.mock.calls[0]![0] as SynthVoice[];
+    const evict = SUSHI_SFX.evict.length;
+    expect(voices.slice(0, evict)).toEqual(SUSHI_SFX.evict);
+    expect(voices.length).toBeGreaterThan(evict);
+    for (const v of voices.slice(evict)) expect(v.at ?? 0).toBeGreaterThanOrEqual(EVICT_POP_DELAY);
+  });
+});
+
+describe("等選飯與選飯過場", () => {
+  function setupWithAudio() {
+    vi.useFakeTimers();
+    (window as Window & { __dinoSushiSeed?: number }).__dinoSushiSeed = 7;
+    const audio = { ensureAudio: vi.fn(), tone: vi.fn(), voices: vi.fn() };
+    const hook = renderHook(() =>
+      useDinoSushiPlay({ audio, reducedMotion: false, inputPaused: false, onServed: vi.fn(), onDone: vi.fn() }),
+    );
+    return { audio, ...hook };
+  }
+
+  it("等選飯時點托盤：讀屏念「先選飯」；同一次等選飯只念一次，選了飯再等選飯才會再念", () => {
+    const { result } = setupWithAudio();
+    act(() => result.current.actions.start("free"));
+    let said: boolean[] = [];
+    act(() => {
+      said = [result.current.actions.remindBase(), result.current.actions.remindBase()];
+    });
+    expect(said).toEqual([true, false]);
+    expect(result.current.message).toBe("先選飯，再放料");
+    act(() => result.current.actions.pickBase("nigiri"));
+    act(() => result.current.actions.reopenBase());
+    act(() => {
+      said = [result.current.actions.remindBase()];
+    });
+    expect(said).toEqual([true]);
+  });
+
+  it("選飯有過場：「咚」等落地才響；沒有過場就立刻響", () => {
+    const { result, audio } = setupWithAudio();
+    act(() => result.current.actions.start("free"));
+    audio.voices.mockClear();
+    act(() => result.current.actions.pickBase("nigiri", 320));
+    expect(audio.voices).not.toHaveBeenCalledWith(SUSHI_SFX.base);
+    act(() => {
+      vi.advanceTimersByTime(320);
+    });
+    expect(audio.voices).toHaveBeenCalledWith(SUSHI_SFX.base);
+
+    act(() => result.current.actions.reopenBase());
+    audio.voices.mockClear();
+    act(() => result.current.actions.pickBase("gunkan"));
+    expect(audio.voices).toHaveBeenCalledWith(SUSHI_SFX.base);
+  });
+});
+
+describe("難度檔位", () => {
+  it("進階：第 1 單就 2 樣料、不出首單手指，閒置 7 秒才亮提示", () => {
+    const { result } = setup();
+    act(() => result.current.actions.start("order", 7, "advanced"));
+    expect(result.current.round!.tier).toBe("advanced");
+    expect(result.current.round!.orders[0]!.toppings).toHaveLength(2);
+    expect(result.current.teaching).toBe(false);
+    expect(result.current.hint).toBeNull();
+    act(() => {
+      vi.advanceTimersByTime(IDLE_HINT_MS + 100);
+    });
+    expect(result.current.hint).toBeNull();
+    act(() => {
+      vi.advanceTimersByTime(7000 - IDLE_HINT_MS);
+    });
+    expect(result.current.hint).not.toBeNull();
+  });
+
+  it("輕鬆：五單料數 1、1、1、2、2，照樣教第 1 單", () => {
+    const { result } = setup();
+    act(() => result.current.actions.start("order", 7, "easy"));
+    expect(result.current.round!.orders.map((o) => o.toppings.length)).toEqual([1, 1, 1, 2, 2]);
+    expect(result.current.teaching).toBe(true);
+  });
+
+  it("自由做不吃檔位：照一般檔的提示時間、round 記 normal", () => {
+    const { result } = setup();
+    act(() => result.current.actions.start("free", 7, "advanced"));
+    expect(result.current.round!.tier).toBe("normal");
+    expect(result.current.round!.orders).toHaveLength(0);
   });
 });

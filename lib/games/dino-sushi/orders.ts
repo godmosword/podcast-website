@@ -2,6 +2,7 @@
  * 《多多壽司屋》托盤與點餐。決定性：同一個 seed 產生同一盤料與同一串訂單（視覺測試用 window.__dinoSushiSeed）。
  */
 
+import { TIER_SIZES, type OrderTier } from "./difficulty";
 import { pickIndex, seededRng } from "@/lib/games/candy-match/rng";
 import { customerById, type CustomerId } from "./customers";
 import { roundVariety } from "./variety";
@@ -41,7 +42,7 @@ export const TRAY_SIZE = 8;
 const TRAY_SAVORY = 6;
 export const ORDERS_PER_ROUND = 5;
 /** 每單要幾種料：由飯＋1 料漸增到飯＋3 料。 */
-export const ORDER_SIZES: readonly number[] = [1, 1, 2, 2, 3];
+export const ORDER_SIZES: readonly number[] = TIER_SIZES.normal;
 /** 訂單 rng 與托盤 rng 錯開，避免兩者取到相同序列。 */
 const ORDER_SEED_SALT = 0x9e3779b9;
 /** 客人最愛用另一條亂數，才不會改掉飯型（視覺測試的 seed 7 仍要有手捲）。 */
@@ -183,11 +184,11 @@ function sameFood(
 }
 
 /** 飯型沿用主題日之前的托盤亂數，視覺測試的 seed 7 才仍有手捲。 */
-function draftBases(seed: number): BaseId[] {
+function draftBases(seed: number, sizes: readonly number[]): BaseId[] {
   const pool = classicTray(seed).filter((id) => toppingById(id).kind === "savory");
   const rng = seededRng((seed ^ ORDER_SEED_SALT) >>> 0);
   const drafted: { base: BaseId; toppings: ToppingId[] }[] = [];
-  for (const size of ORDER_SIZES) {
+  for (const size of sizes) {
     let next: { base: BaseId; toppings: ToppingId[] };
     let tries = 0;
     do {
@@ -207,14 +208,16 @@ function draftBases(seed: number): BaseId[] {
  * 飯型沿用原本的亂數（難度與 seed 7 的手捲不變）。
  * 料先跟主題日，兩樣以上再放那位客人的最愛。沒有第 6 單，甜點不進訂單。
  */
-export function buildOrders(seed: number, tray: readonly ToppingId[]): Order[] {
+/** tier：難度檔位，只改每單幾樣料。一般檔（預設）的亂數消耗跟原本一樣，同一個 seed 訂單不變。 */
+export function buildOrders(seed: number, tray: readonly ToppingId[], tier: OrderTier = "normal"): Order[] {
+  const sizes = TIER_SIZES[tier];
   const pool = tray.filter((id) => toppingById(id).kind === "savory");
   const variety = roundVariety(seed);
-  const bases = draftBases(seed);
+  const bases = draftBases(seed, sizes);
   const prefRng = seededRng((seed ^ PREFERENCE_SALT) >>> 0);
   const orders: Order[] = [];
-  for (let index = 0; index < ORDER_SIZES.length; index++) {
-    const size = ORDER_SIZES[index]!;
+  for (let index = 0; index < sizes.length; index++) {
+    const size = sizes[index]!;
     const base = bases[index]!;
     const customerId = variety.seats[index]!;
     const favorites = customerById(customerId).favorites;
