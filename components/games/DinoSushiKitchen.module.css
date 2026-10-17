@@ -677,6 +677,14 @@
   .queue {
     left: 8px;
     top: 6px;
+    /* 少留底部空隙，泡泡才抬得起來，不壓到下面的盤子 */
+    height: calc(var(--queue-now, 44px) * var(--queue-show, 0.88) + 2px);
+    padding-bottom: 1px;
+  }
+
+  .duoArea[data-mode="order"] .talk {
+    /* 排隊底下 2px、小喇叭往上 14px、再留 4px，所以是 +20，不是一般舞台的 +26 */
+    top: calc(var(--queue-top, 6px) + var(--queue-now, 44px) * var(--queue-show, 0.88) + 20px);
   }
 
   .seat {
@@ -1107,8 +1115,8 @@
 }
 
 /*
- * 矮舞台（320×568 直向）：小盤、每層露 9px。泡泡底下只剩約 50px，
- * 點餐最多看得到 3 盤（泡泡下還有進度小盤）、自由做 4 盤（上面只有「多多吃飽了」），數字照實。
+ * 矮舞台（320×568 直向）：小盤、每層露 4px。全身貼紙把泡泡往下推之後，
+ * 9px 的盤緣會頂到第 5 單。點餐最多看得到 3 盤、自由做 4 盤，數字照實。
  * 最後一個子元素是數字，所以第 n 盤從後數是 nth-last-child(n + 1)。
  */
 @container duo-stage (max-height: 190px) {
@@ -1117,7 +1125,7 @@
   }
 
   .plate {
-    margin-top: calc(9px - var(--pw) * 403 / 695);
+    margin-top: calc(4px - var(--pw) * 403 / 695);
   }
 
   .plate:nth-last-child(n + 5) {
