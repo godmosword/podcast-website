@@ -15,6 +15,8 @@ const PUBLIC_PAGES = [
   { name: "關於我們", path: "/about" },
   { name: "親子指南", path: "/for-parents" },
   { name: "家庭儀表板", path: "/for-parents/dashboard" },
+  { name: "育兒文章分享", path: "/for-parents/articles" },
+  { name: "育兒文章內頁", path: "/for-parents/articles/vision-care-1" },
   { name: "訂閱", path: "/subscribe" },
   { name: "留言牆", path: "/feedback" },
   { name: "法律頁", path: "/legal" },

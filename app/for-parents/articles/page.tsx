@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
 import SiteFooter from "@/components/SiteFooter";
 import { ParentArticleList } from "@/components/for-parents/ParentArticleList";
+import { ParentArticlesMasthead } from "@/components/for-parents/ParentArticlesMasthead";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbListJsonLd } from "@/lib/json-ld";
-import { listParentArticles } from "@/lib/parent-articles";
+import {
+  listParentArticles,
+  parentArticleReadingMinutes,
+  parentArticlesLayout,
+} from "@/lib/parent-articles";
 import { parentSection } from "@/lib/parent-sections";
 import styles from "./page.module.css";
 
@@ -22,6 +27,10 @@ export const metadata: Metadata = {
 };
 
 export default function ParentArticlesPage() {
+  const articles = listParentArticles();
+  const layout = parentArticlesLayout();
+  const longestMinutes = Math.max(1, ...articles.map(parentArticleReadingMinutes));
+
   return (
     <main className={styles.main}>
       <JsonLd
@@ -31,12 +40,13 @@ export default function ParentArticlesPage() {
           { name: section.label, url: section.href },
         ])}
       />
-      <header className={styles.header}>
-        <p className={styles.eyebrow}>給爸媽</p>
-        <h1 className={styles.title}>{section.label}</h1>
-        <p className={styles.lede}>{section.description}</p>
-      </header>
-      <ParentArticleList articles={listParentArticles()} />
+      <ParentArticlesMasthead
+        title={section.label}
+        count={articles.length}
+        latestPublishedAt={layout.latest?.publishedAt ?? null}
+        longestMinutes={longestMinutes}
+      />
+      <ParentArticleList layout={layout} />
       <SiteFooter compact showPlatformSubscribe={false} />
     </main>
   );

@@ -5,6 +5,8 @@
  * （閱讀順序＝陣列順序；多篇時較早發布的在前）。手動補一篇時也加在最後。
  * 流程、列表 API 與自動合併見 `docs/VOCUS-ARTICLE-SYNC.md`。
  * 列表、上一篇／下一篇與靜態路徑都讀這個陣列，不用改版面元件。
+ * 系列（列表頁照閱讀順序排成一組）另記在 `data/parent-article-series.ts`，
+ * 不要在本檔 `PARENT_ARTICLES` 之後再加陣列（同步腳本用最後一個 `];` 定位）。
  *
  * - `blocks` 保留原文分段：`paragraph` 是作者的一行、`spacer` 是原文空行。
  *   也可使用 `heading`（level 2 或 3）、`list`、`image`。
