@@ -17,7 +17,7 @@
   padding: 8px 8px 12px;
   overflow: auto;
   overscroll-behavior: contain;
-  background: linear-gradient(180deg, #fffaf0, #fdf0da);
+  background: linear-gradient(180deg, var(--sushi-book-top), var(--sushi-book-bottom));
   color: var(--sushi-ink, CanvasText);
 }
 
@@ -32,7 +32,7 @@
   min-height: 72px;
   margin: -8px -8px 8px;
   padding: 8px;
-  background: #fff8ea;
+  background: var(--sushi-cream);
 }
 
 .close {
@@ -123,7 +123,7 @@
   padding: 6px 4px 4px;
   border: none;
   border-radius: 18px;
-  background: #fffcf6;
+  background: var(--sushi-cell);
   box-shadow: 0 0 0 2px rgba(120, 90, 50, 0.14);
   color: inherit;
   font: inherit;
@@ -132,7 +132,7 @@
 }
 
 .cell[data-locked="true"] {
-  background: #efe4d2;
+  background: var(--sushi-cell-locked);
 }
 
 .pic {
@@ -164,7 +164,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: #c8ad8a;
+  background: var(--sushi-silhouette);
   -webkit-mask: var(--sil) center / contain no-repeat;
   mask: var(--sil) center / contain no-repeat;
 }
@@ -180,7 +180,7 @@
   inset: 0;
   display: grid;
   place-items: center;
-  color: #5a4128;
+  color: var(--sushi-mystery);
   font-size: 1.5rem;
   font-weight: 900;
   text-shadow: 0 1px 0 rgba(255, 250, 240, 0.6);

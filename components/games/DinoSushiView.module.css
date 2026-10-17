@@ -8,6 +8,13 @@
   --sushi-ink-soft: #7a6550;
   --sushi-accent: #3f7f2a;
   --sushi-cream: #fff8ea;
+  /* 貼紙書：書頁漸層、格子、鎖住的格子底、暖棕剪影與問號（底都不透明，廚房的字才不會透出來） */
+  --sushi-book-top: #fffaf0;
+  --sushi-book-bottom: #fdf0da;
+  --sushi-cell: #fffcf6;
+  --sushi-cell-locked: #efe4d2;
+  --sushi-silhouette: #c8ad8a;
+  --sushi-mystery: #5a4128;
   --ink: #34302b;
   --ink-soft: #7a7268;
   --card: #ffffff;
