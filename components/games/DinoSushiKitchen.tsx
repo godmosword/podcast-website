@@ -7,6 +7,8 @@ import { currentOrder } from "@/lib/games/dino-sushi/round";
 import { MAX_TOPPINGS } from "@/lib/games/dino-sushi/sushi";
 import { BASES, baseById, toppingById, type BaseId, type ToppingId } from "@/lib/games/dino-sushi/toppings";
 import { DOME_AFTER_PLATES, domeStickerId, orderLead, roundVariety } from "@/lib/games/dino-sushi/variety";
+import { DinoSushiCustomerQueue } from "./DinoSushiCustomerQueue";
+import { DinoSushiCustomerSeat } from "./DinoSushiCustomerSeat";
 import { DinoSushiDuoDuo } from "./DinoSushiDuoDuo";
 import { DinoSushiEvictFly, type EvictFly } from "./DinoSushiEvictFly";
 import { DinoSushiGuestThanks } from "./DinoSushiGuestThanks";
@@ -196,6 +198,10 @@ export function DinoSushiKitchen({
         data-brush={brushShown ? "true" : undefined}
       >
         <ShopWall sky={variety?.sky} lantern={variety?.lantern} />
+        {/* 點餐才排隊。畫在多多前面，但位子讓在多多右側，不會蓋住臉、也不能點。 */}
+        {round.mode === "order" && variety ? (
+          <DinoSushiCustomerQueue seats={variety.seats} index={round.index} />
+        ) : null}
         <DinoSushiDuoDuo
           phase={phase}
           caption={caption}
@@ -209,6 +215,8 @@ export function DinoSushiKitchen({
           domeOpen={domeOpen}
           stickerId={domeOpen && round ? domeStickerId(round.seed, ownedStickers) : null}
         />
+        {/* 吃的時候泡泡收起，客人改坐在櫃台旁，這一單不會從畫面上消失。 */}
+        {round.mode === "order" && eating && order ? <DinoSushiCustomerSeat order={order} /> : null}
         <DinoSushiPlateStack plates={round.plates} />
         {/* 右上一欄由上往下排：自由做的「多多吃飽了」→ 點餐泡泡 → 多多的字卡，彼此不會疊在一起 */}
         <div className={styles.talk}>

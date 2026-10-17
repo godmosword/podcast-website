@@ -206,6 +206,166 @@
 }
 
 /*
+ * 門口排隊：今天 5 個位子，排在雨棚下、多多右側（入口這邊）。
+ * 現在這位約 56px、橘框；還沒輪到的小顆；做完打勾。
+ * 整列 pointer-events: none，不搶砧板、托盤、「給多多吃」或泡泡的點擊。
+ * 窄欄位時小顆會縮小，現在這位仍最大。矮舞台（320 直向）整列收進雨棚，才不會把泡泡壓到疊盤上。
+ */
+.queue {
+  position: absolute;
+  z-index: 4;
+  top: 1px;
+  right: 4px;
+  /* 整列停在多多右側，不壓臉。現在這位固定 56px，小顆才縮小。 */
+  left: calc(var(--duo-left) + var(--duo-w) + 2px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 3px;
+  height: 58px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  pointer-events: none;
+}
+
+.queueItem {
+  position: relative;
+  flex: 1 1 0;
+  width: auto;
+  min-width: 14px;
+  max-width: 26px;
+  aspect-ratio: 1;
+}
+
+.queueItem[data-state="now"] {
+  flex: 0 0 56px;
+  width: 56px;
+  min-width: 40px;
+  max-width: 56px;
+}
+
+.queueFace {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center 40%;
+  background: #fffdf8;
+  box-shadow: 0 0 0 2px #fff;
+  pointer-events: none;
+}
+
+.queueItem[data-state="now"] .queueFace {
+  box-shadow: 0 0 0 3px #ff8c2b;
+}
+
+.queueCheck {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+}
+
+/* 點餐時泡泡讓到排隊下面。多留 14px 給泡泡左上角的小喇叭，才不會壓到大頭像。 */
+.duoArea[data-mode="order"] .talk {
+  top: 74px;
+}
+
+/*
+ * 吃的時候的客人座位：白椅靠在櫃台、疊盤左邊、多多右邊。
+ * 愛心（有最愛的料再加星星）表示還在看多多吃。不能點。
+ */
+.seat {
+  position: absolute;
+  z-index: 3;
+  box-sizing: border-box;
+  /* 夾在多多右側和疊盤左側，寬度不夠時整張縮小，不壓到臉或盤子 */
+  left: calc(var(--duo-left) + var(--duo-w) + 2px);
+  right: calc(14px + clamp(54px, 18cqw, 88px) + 6px);
+  bottom: calc(var(--counter-h) * 0.4);
+  width: auto;
+  max-width: 56px;
+  margin-left: auto;
+  padding: 3px 3px 6px;
+  border-radius: 16px 16px 8px 8px;
+  background: #fffdf8;
+  box-shadow:
+    0 0 0 3px #d9a86a,
+    0 4px 0 rgba(180, 130, 70, 0.28);
+  pointer-events: none;
+}
+
+.seatFace {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+}
+
+.seatFace > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center 40%;
+  background: #fffdf8;
+  box-shadow: 0 0 0 2px #ff8c2b;
+  pointer-events: none;
+}
+
+.seatHeart {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 20px;
+  height: 20px;
+  transform-origin: 50% 80%;
+  animation: seatHeart 360ms ease-out 200ms both;
+  pointer-events: none;
+}
+
+.seatStar {
+  position: absolute;
+  top: -6px;
+  left: -8px;
+  width: 16px;
+  height: 16px;
+  animation: seatStar 360ms ease-out 280ms both;
+  pointer-events: none;
+}
+
+@keyframes seatHeart {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.28);
+  }
+}
+
+@keyframes seatStar {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/*
  * 點餐泡泡外層：整顆泡泡可以點，再聽一次這單。
  * 透明鈕剛好蓋住泡泡，左上角外緣的小喇叭徽章只是提示，不佔泡泡寬度（三料單在窄舞台才放得下）。
  * 彈出動畫掛在外層，徽章跟泡泡一起出來。
@@ -315,8 +475,9 @@
 .guestFaceWrap {
   position: relative;
   flex: none;
-  width: 32px;
-  height: 32px;
+  /* 原本 32px，孩子看成「只有一個小點」；放大到跟排隊那位一樣清楚 */
+  width: 56px;
+  height: 56px;
 }
 
 .guestFace {
@@ -327,7 +488,7 @@
   object-fit: cover;
   object-position: center 40%;
   background: #fffdf8;
-  box-shadow: 0 0 0 2px #d9a86a;
+  box-shadow: 0 0 0 3px #ff8c2b;
   pointer-events: none;
 }
 
@@ -335,8 +496,8 @@
   position: absolute;
   right: -4px;
   bottom: -3px;
-  width: 14px;
-  height: 14px;
+  width: 18px;
+  height: 18px;
   pointer-events: none;
 }
 
@@ -395,8 +556,8 @@
   }
 
   .guestFaceWrap {
-    width: 28px;
-    height: 28px;
+    width: 40px;
+    height: 40px;
   }
 
   .guestName {
@@ -413,7 +574,7 @@
   .bubble {
     box-sizing: border-box;
     min-height: 64px;
-    padding-right: 30px;
+    padding-right: 52px;
   }
 
   .guest {
@@ -438,14 +599,103 @@
   }
 
   .guestFaceWrap {
-    width: 24px;
-    height: 24px;
+    width: 44px;
+    height: 44px;
   }
 
   .guestHeart,
   .favStar {
-    width: 11px;
-    height: 11px;
+    width: 14px;
+    height: 14px;
+  }
+
+  /* 舞台太矮時排隊收進雨棚，泡泡維持靠上，才不會壓到疊盤 */
+  .queue {
+    height: 46px;
+  }
+
+  .queueItem {
+    max-width: 20px;
+    min-width: 12px;
+  }
+
+  .queueItem[data-state="now"] {
+    flex: 0 0 44px;
+    width: 44px;
+    min-width: 44px;
+    max-width: 44px;
+  }
+
+  .queueCheck {
+    width: 12px;
+    height: 12px;
+  }
+
+  .duoArea[data-mode="order"] .talk {
+    top: calc(var(--awning-h) + 30px);
+  }
+
+  .seat {
+    max-width: 44px;
+    bottom: calc(var(--counter-h) * 0.7);
+  }
+
+  .seatHeart,
+  .seatStar {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+/* 窄又矮、頭頂快貼到雨棚時：56px 會壓到多多的臉，先收到 40。又高又窄的橫式左欄由下一條拉回 56。 */
+@container duo-stage (max-width: 270px) {
+  .queueItem {
+    min-width: 12px;
+    max-width: 18px;
+  }
+
+  .queueItem[data-state="now"] {
+    flex: 0 0 40px;
+    width: 40px;
+    min-width: 36px;
+    max-width: 40px;
+  }
+
+  .queue {
+    height: 42px;
+  }
+
+  .duoArea[data-mode="order"] .talk {
+    top: 58px;
+  }
+}
+
+/*
+ * 窄又高的舞台（667×375 的左欄）：多多的頭離雨棚還有一大段，
+ * 排隊可以拉滿整條雨棚，現在這位維持 56px，旁邊的朋友也看得清。
+ */
+@container duo-stage (max-width: 300px) and (min-height: 280px) {
+  .queue {
+    /* 左邊讓給燈籠；雨棚還夠放 56px 的現在這位 */
+    left: 42px;
+    right: 6px;
+    height: 58px;
+  }
+
+  .queueItem {
+    min-width: 18px;
+    max-width: 26px;
+  }
+
+  .queueItem[data-state="now"] {
+    flex: 0 0 56px;
+    width: 56px;
+    min-width: 56px;
+    max-width: 56px;
+  }
+
+  .duoArea[data-mode="order"] .talk {
+    top: 74px;
   }
 }
 
@@ -1799,8 +2049,8 @@
   }
 
   .guestFaceWrap {
-    width: 26px;
-    height: 26px;
+    width: 44px;
+    height: 44px;
   }
 
   .guestName {
@@ -1885,8 +2135,8 @@
   }
 
   .guestFaceWrap {
-    width: 44px;
-    height: 44px;
+    width: 56px;
+    height: 56px;
   }
 
   .guestName {
@@ -1953,7 +2203,9 @@
   .thanks,
   .thanks[data-leaving="true"],
   .thanksHeart,
-  .thanksStar {
+  .thanksStar,
+  .seatHeart,
+  .seatStar {
     animation: none;
   }
 
@@ -2037,14 +2289,18 @@
 .kitchen[data-paused="true"] .evictFly,
 .kitchen[data-paused="true"] .thanks,
 .kitchen[data-paused="true"] .thanksHeart,
-.kitchen[data-paused="true"] .thanksStar {
+.kitchen[data-paused="true"] .thanksStar,
+.kitchen[data-paused="true"] .seatHeart,
+.kitchen[data-paused="true"] .seatStar {
   animation-play-state: paused;
 }
 
 .kitchen[data-reduced="true"] .thanks,
 .kitchen[data-reduced="true"] .thanks[data-leaving="true"],
 .kitchen[data-reduced="true"] .thanksHeart,
-.kitchen[data-reduced="true"] .thanksStar {
+.kitchen[data-reduced="true"] .thanksStar,
+.kitchen[data-reduced="true"] .seatHeart,
+.kitchen[data-reduced="true"] .seatStar {
   animation: none;
 }
 
