@@ -89,6 +89,18 @@
 | `shop/sm/tray-neutral.webp` | 家常料的托盤底（畫面讀的縮小副本） | 由原檔以 `scripts/optimize-dino-sushi-assets.ts` 縮小。不是另一次生圖。 | 同原檔（這張不是另一次生圖） | 2026-10-14 做成副本（原圖日期不確定） | sharp 縮小後轉 webp（quality 86、alphaQuality 100）。 | 不確定（commit `f50202eb` 在 main，GitHub 未關聯 PR） |
 | `shop/sm/tray-sweet.webp` | 甜點的托盤底（畫面讀的縮小副本） | 由原檔以 `scripts/optimize-dino-sushi-assets.ts` 縮小。不是另一次生圖。 | 同原檔（這張不是另一次生圖） | 2026-10-14 做成副本（原圖日期不確定） | sharp 縮小後轉 webp（quality 86、alphaQuality 100）。 | 不確定（commit `f50202eb` 在 main，GitHub 未關聯 PR） |
 | `shop/sm/tray-wasabi.webp` | 芥末的托盤底（畫面讀的縮小副本） | 由原檔以 `scripts/optimize-dino-sushi-assets.ts` 縮小。不是另一次生圖。 | 同原檔（這張不是另一次生圖） | 2026-10-14 做成副本（原圖日期不確定） | sharp 縮小後轉 webp（quality 86、alphaQuality 100）。 | 不確定（commit `f50202eb` 在 main，GitHub 未關聯 PR） |
+| `customers/xiaohong.webp` | 小紅全身貼紙（排隊、座位、點餐泡泡） | 核准草稿去背、去掉地面淡影、縮到 1024，輪底對齊 92%。不重畫。草稿在 `scripts/assets/dino-sushi-customer-drafts/xiaohong.jpg`。車頭本來朝左，號碼 2 不翻。 | 草稿不是這次生的 | 2026-10-17 | `scripts/build-dino-sushi-customer-stickers.ts`（沿用 `scripts/lib/roamer-alpha.ts` 邊界去背）。 | #243 |
+| `customers/anan.webp` | 安安全身貼紙 | 同上。草稿車頭朝右，水平翻轉後朝向多多（舞台左側）。 | 草稿不是這次生的 | 2026-10-17 | 同上，並水平翻轉。 | #243 |
+| `customers/ale.webp` | 阿樂全身貼紙 | 同上。草稿車頭已朝左，不翻。 | 草稿不是這次生的 | 2026-10-17 | 同上。 | #243 |
+| `customers/lingling.webp` | 鈴鈴全身貼紙 | 同上。草稿掃把與臉在右，水平翻轉後朝向多多。 | 草稿不是這次生的 | 2026-10-17 | 同上，並水平翻轉。 | #243 |
+| `customers/dongdong.webp` | 東東全身貼紙 | 同上。铲子已經朝左，不翻。 | 草稿不是這次生的 | 2026-10-17 | 同上。 | #243 |
+| `customers/xiangxiang.webp` | 香香全身貼紙 | 同上。草稿車頭已朝左，不翻。 | 草稿不是這次生的 | 2026-10-17 | 同上。 | #243 |
+| `customers/sm/xiaohong.webp` | 小紅全身貼紙（畫面讀的縮小副本） | 由原檔以 `scripts/optimize-dino-sushi-assets.ts` 縮到 384。不是另一次生圖。 | 同原檔 | 2026-10-17 | sharp 縮小後轉 webp（quality 86、alphaQuality 100）。 | #243 |
+| `customers/sm/anan.webp` | 安安全身貼紙（畫面讀的縮小副本） | 同上。 | 同原檔 | 2026-10-17 | 同上。 | #243 |
+| `customers/sm/ale.webp` | 阿樂全身貼紙（畫面讀的縮小副本） | 同上。 | 同原檔 | 2026-10-17 | 同上。 | #243 |
+| `customers/sm/lingling.webp` | 鈴鈴全身貼紙（畫面讀的縮小副本） | 同上。 | 同原檔 | 2026-10-17 | 同上。 | #243 |
+| `customers/sm/dongdong.webp` | 東東全身貼紙（畫面讀的縮小副本） | 同上。 | 同原檔 | 2026-10-17 | 同上。 | #243 |
+| `customers/sm/xiangxiang.webp` | 香香全身貼紙（畫面讀的縮小副本） | 同上。 | 同原檔 | 2026-10-17 | 同上。 | #243 |
 
 ## 人類創作紀錄
 

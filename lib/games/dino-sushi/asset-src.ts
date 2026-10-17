@@ -24,6 +24,13 @@ export const DINO_SUSHI_SM_WIDTH = {
   "duoduo/sticker-fire.webp": 768,
   "duoduo/sticker-look.webp": 768,
   "duoduo/sticker-toothbrush.webp": 320, // 手機 92px
+  // 客人全身貼紙：排隊現在這位約 52px 寬（手機 3 倍約 156）。384 留餘裕。
+  "customers/xiaohong.webp": 384,
+  "customers/anan.webp": 384,
+  "customers/ale.webp": 384,
+  "customers/lingling.webp": 384,
+  "customers/dongdong.webp": 384,
+  "customers/xiangxiang.webp": 384,
   // 飯：橫放手機（932×430）備料盤上最大 190px；手捲是瘦長的，寬只有 85px
   "food/nigiri.webp": 576,
   "food/gunkan.webp": 576,

@@ -60,6 +60,7 @@
     "generate:page-freshness": "tsx scripts/generate-page-freshness.ts",
     "optimize:roamer-assets": "tsx scripts/optimize-roamer-assets.ts",
     "optimize:adventures": "tsx scripts/optimize-adventure-assets.ts",
+    "build:dino-sushi-customers": "tsx scripts/build-dino-sushi-customer-stickers.ts",
     "optimize:dino-sushi-assets": "tsx scripts/optimize-dino-sushi-assets.ts",
     "optimize:hero-world": "node scripts/optimize-hero-world.mjs",
     "render:hero-posters": "node scripts/render-hero-posters.mjs",

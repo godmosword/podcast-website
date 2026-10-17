@@ -150,3 +150,224 @@ test("1280：點餐泡泡的格子跟著舞台放大（≥44px），泡泡不出
   for (const w of geo.cells) expect(w).toBeGreaterThanOrEqual(44);
   expect(geo.inStage).toBe(true);
 });
+
+/** 排隊與座位都是看的：量框，確認不壓到多多、疊盤，也不把點擊吃掉。 */
+async function layout(page: Page) {
+  return page.evaluate(() => {
+    const rect = (el: Element | null) => {
+      if (!el) return null;
+      const r = el.getBoundingClientRect();
+      return { x: r.x, y: r.y, w: r.width, h: r.height };
+    };
+    const area = (a: { x: number; y: number; w: number; h: number } | null, b: typeof a) => {
+      if (!a || !b) return 0;
+      const x = Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x));
+      const y = Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y));
+      return x * y;
+    };
+    const stage = document.querySelector("section[aria-label='多多']");
+    const queue = document.querySelector("[data-customer-queue]");
+    const items = [...document.querySelectorAll("[data-customer-queue] li")].map((el) => ({
+      state: el.getAttribute("data-state"),
+      id: el.getAttribute("data-customer"),
+      w: el.getBoundingClientRect().width,
+      hasCheck: el.querySelector("svg") !== null,
+    }));
+    const now = document.querySelector("[data-customer-queue] li[data-state='next']");
+    const bubble = document.querySelector("[role='img'][data-customer]");
+    const badge = document.querySelector("[class*='replayBadge']");
+    const face = document.querySelector("[class*='guestFaceWrap']");
+    const seat = document.querySelector("[data-customer-seat]");
+    const duo = document.querySelector("[data-face]");
+    const plates = document.querySelector("[class*='plates']");
+    const stageR = rect(stage);
+    const headerBtns = [...document.querySelectorAll("[class*='playHeader'] button")].map((el) => rect(el));
+    const bubbleR = rect(bubble);
+    const inside = (r: { x: number; y: number; w: number; h: number } | null) =>
+      !!r &&
+      !!stageR &&
+      r.x >= stageR.x - 1 &&
+      r.y >= stageR.y - 1 &&
+      r.x + r.w <= stageR.x + stageR.w + 1 &&
+      r.y + r.h <= stageR.y + stageR.h + 1;
+    const hit = (el: Element | null) => {
+      if (!el) return "";
+      const r = el.getBoundingClientRect();
+      const top = document.elementFromPoint(r.x + r.width / 2, r.y + Math.min(r.height / 2, 24));
+      return top?.getAttribute("aria-label") || top?.tagName || "";
+    };
+    const serve = [...document.querySelectorAll("button")].find((b) => (b.textContent || "").includes("給多多吃")) ?? null;
+    const replay = document.querySelector("button[aria-label='再聽一次']");
+    return {
+      queueHidden: queue?.getAttribute("aria-hidden") ?? "",
+      queuePE: queue ? getComputedStyle(queue).pointerEvents : "",
+      queueButtons: queue?.querySelectorAll("button").length ?? 0,
+      items,
+      nowW: now ? now.getBoundingClientRect().width : 0,
+      minWait: Math.min(...items.filter((item) => item.state === "wait").map((item) => item.w), Infinity),
+      /* 打勾會伸出約 3px，連這個邊一起留在舞台和視窗裡 */
+      ringIn: [...document.querySelectorAll("[data-customer-queue] li")].every((el) => {
+        const b = el.getBoundingClientRect();
+        const box = { x: b.x - 3, y: b.y - 3, w: b.width + 6, h: b.height + 6 };
+        return (
+          inside(box) &&
+          box.y >= -0.5 &&
+          box.x >= -0.5 &&
+          box.y + box.h <= window.innerHeight + 0.5 &&
+          box.x + box.w <= window.innerWidth + 0.5
+        );
+      }),
+      faceW: face ? face.getBoundingClientRect().width : 0,
+      duoH: duo ? duo.getBoundingClientRect().height : 0,
+      seatH: seat ? seat.getBoundingClientRect().height : 0,
+      seatId: seat?.getAttribute("data-customer") ?? "",
+      bubbleId: bubble?.getAttribute("data-customer") ?? "",
+      seatPE: seat ? getComputedStyle(seat).pointerEvents : "",
+      nowVsDuo: area(rect(now), rect(duo)),
+      queueVsDuo: area(rect(queue), rect(duo)),
+      queueVsBubble: area(rect(queue), bubbleR),
+      queueVsBadge: area(rect(queue), rect(badge)),
+      queueVsHeader: headerBtns.reduce((sum, btn) => sum + area(rect(queue), btn), 0),
+      seatVsDuo: area(rect(seat), rect(duo)),
+      seatVsPlates: area(rect(seat), rect(plates)),
+      bubbleVsPlates: area(bubbleR, rect(plates)),
+      queueInside: inside(rect(queue)),
+      bubbleInside: bubble ? inside(bubbleR) : true,
+      seatInside: seat ? inside(rect(seat)) : true,
+      replayHit: hit(replay),
+      serveHit: hit(serve),
+    };
+  });
+}
+
+for (const vp of [
+  { width: 390, height: 844, now: 72, wait: 46, face: 48 },
+  { width: 320, height: 568, now: 46, wait: 34, face: 36 },
+  { width: 844, height: 390, now: 88, wait: 56, face: 40 },
+  { width: 667, height: 375, now: 54, wait: 34, face: 40 },
+  { width: 568, height: 320, now: 50, wait: 36, face: 36 },
+]) {
+  test(`${vp.width}×${vp.height}：門口排隊與吃的時候的座位不搶點、不壓多多`, async ({ page }) => {
+    await page.setViewportSize(vp);
+    await page.goto("/games/dino-sushi");
+    await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+    const queue = page.locator("[data-customer-queue]");
+    await expect(queue).toBeVisible();
+    await expect(queue.locator("li")).toHaveCount(4);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    // 泡泡進場是 340ms 的 scale。量太早會把頭像量小，小喇叭也還在往上落到排隊旁邊。
+    await expect.poll(async () => (await layout(page)).faceW, { timeout: 2000 }).toBeGreaterThanOrEqual(vp.face);
+    await page.waitForFunction(() => {
+      const el = document.querySelector("[class*='bubbleWrap']");
+      return !!el && el.getAnimations().every((anim) => anim.playState === "finished");
+    });
+    const ordering = await layout(page);
+    expect(ordering.queueHidden).toBe("true");
+    expect(ordering.queuePE).toBe("none");
+    expect(ordering.queueButtons).toBe(0);
+    expect(ordering.items[0]?.state).toBe("next");
+    expect(ordering.items.slice(1).every((item) => item.state === "wait")).toBe(true);
+    expect(ordering.items.map((item) => item.id)).not.toContain(ordering.bubbleId);
+    expect(ordering.nowW).toBeGreaterThanOrEqual(vp.now);
+    expect(ordering.minWait).toBeGreaterThanOrEqual(vp.wait);
+    expect(ordering.minWait).toBeLessThan(ordering.nowW);
+    expect(ordering.faceW).toBeGreaterThanOrEqual(vp.face);
+    expect(ordering.ringIn).toBe(true);
+    expect(ordering.nowVsDuo).toBe(0);
+    expect(ordering.queueVsDuo).toBe(0);
+    expect(ordering.queueVsBubble).toBe(0);
+    expect(ordering.queueVsBadge).toBe(0);
+    expect(ordering.queueVsHeader).toBe(0);
+    expect(ordering.bubbleVsPlates).toBe(0);
+    expect(ordering.queueInside).toBe(true);
+    expect(ordering.bubbleInside).toBe(true);
+    expect(ordering.replayHit).toBe("再聽一次");
+
+    await serve(page, 1);
+    await expect(page.locator("[data-customer-seat]")).toBeVisible();
+    await expect(page.getByRole("img", { name: /^第 1 單/ })).toHaveCount(0);
+    await page.getByRole("button", { name: "暫停遊戲" }).click();
+    const eating = await layout(page);
+    expect(eating.seatPE).toBe("none");
+    expect(eating.seatVsDuo).toBe(0);
+    expect(eating.seatVsPlates).toBe(0);
+    expect(eating.seatH).toBeGreaterThanOrEqual(eating.duoH * 0.5);
+    expect(eating.seatInside).toBe(true);
+    expect(eating.nowVsDuo).toBe(0);
+    expect(eating.seatId).toBe(ordering.bubbleId);
+    expect(eating.items.map((item) => item.id)).toEqual(ordering.items.map((item) => item.id));
+    expect(eating.items.map((item) => item.id)).not.toContain(eating.seatId);
+    expect(eating.serveHit).not.toBe("");
+    expect(eating.serveHit).not.toContain("排隊");
+    const serveBtn = page.getByRole("button", { name: "給多多吃" });
+    const serveBox = (await serveBtn.boundingBox())!;
+    const top = await page.evaluate(
+      ({ x, y }) => document.elementFromPoint(x, y)?.closest("button")?.textContent ?? "",
+      { x: serveBox.x + serveBox.width / 2, y: serveBox.y + 24 },
+    );
+    expect(top).toContain("給多多吃");
+
+    await page.getByRole("button", { name: "繼續遊戲" }).click();
+    await waitServed(page, 1);
+    const next = await layout(page);
+    expect(next.items).toHaveLength(3);
+    expect(next.items[0]?.state).toBe("next");
+    expect(next.items.every((item) => item.state !== "done" && !item.hasCheck)).toBe(true);
+    expect(next.items.map((item) => item.id)).not.toContain(eating.seatId);
+    expect(next.items.map((item) => item.id)).not.toContain(next.bubbleId);
+    expect(next.bubbleInside).toBe(true);
+    expect(next.bubbleVsPlates).toBe(0);
+  });
+}
+
+test("自由做沒有排隊，也沒有客人座位", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/games/dino-sushi");
+  await page.getByRole("button", { name: "自由做" }).click();
+  await expect(page.getByRole("button", { name: "多多吃飽了" })).toBeVisible();
+  await expect(page.locator("[data-customer-queue]")).toHaveCount(0);
+  await expect(page.locator("[data-customer-seat]")).toHaveCount(0);
+});
+
+test("減少動態時，座位上的愛心不跳", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/games/dino-sushi");
+  await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+  await serve(page, 1);
+  const heart = page.locator("[data-customer-seat] svg").first();
+  await expect(heart).toBeVisible();
+  await expect(heart).toHaveCSS("animation-name", "none");
+});
+
+for (const vp of [
+  { width: 320, height: 568 },
+  { width: 568, height: 320 },
+  { width: 667, height: 375 },
+  { width: 844, height: 390 },
+]) {
+  test(`${vp.width}×${vp.height}：第 5 單泡泡仍在舞台內、不壓疊盤`, async ({ page }) => {
+    await page.setViewportSize(vp);
+    await page.goto("/games/dino-sushi");
+    await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+    for (let n = 1; n <= 4; n++) {
+      await serve(page, n);
+      await waitServed(page, n);
+    }
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await expect.poll(async () => (await layout(page)).faceW, { timeout: 2000 }).toBeGreaterThanOrEqual(36);
+    const geo = await layout(page);
+    expect(geo.items).toHaveLength(0);
+    expect(geo.bubbleId).not.toBe("");
+    expect(geo.items.map((item) => item.id)).not.toContain(geo.bubbleId);
+    expect(geo.bubbleInside).toBe(true);
+    await serve(page, 5);
+    await expect(page.locator("[data-customer-seat]")).toBeVisible();
+    await page.getByRole("button", { name: "暫停遊戲" }).click();
+    const eating = await layout(page);
+    expect(eating.seatId).toBe(geo.bubbleId);
+    expect(eating.items.map((item) => item.id)).not.toContain(eating.seatId);
+    expect(geo.bubbleVsPlates).toBe(0);
+    expect(geo.faceW).toBeGreaterThanOrEqual(36);
+  });
+}

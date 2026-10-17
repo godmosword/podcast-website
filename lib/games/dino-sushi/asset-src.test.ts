@@ -59,7 +59,7 @@ describe("壽司屋素材縮小副本", () => {
 
   it("sm/ 裡沒有設定表以外的檔", () => {
     const expected = new Set(ASSETS.map(dinoSushiSmPath));
-    const extra = ["duoduo", "food", "shop"].flatMap((dir) => {
+    const extra = ["duoduo", "food", "shop", "customers"].flatMap((dir) => {
       const smDir = join(PUBLIC_ROOT, dir, "sm");
       if (!existsSync(smDir)) return [];
       return readdirSync(smDir)

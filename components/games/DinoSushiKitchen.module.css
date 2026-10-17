@@ -82,6 +82,24 @@
   --serve-w: min(30cqw, 110px);
 }
 
+/* 點餐：雨棚下留一條排隊帶。多多的頭改從這條下面開始，才不會被貼紙蓋住。自由做不設。
+   --queue-now／wait 是貼紙槽的寬，跟著舞台變大，下一位約是後面等候的 1.5 倍。
+   正方形畫布只露出底下 88%（輪底在 92%，上面的空天切掉）。
+   多多收窄，櫃台旁才站得下約六成四寬的客人（看起來超過多多的一半高）。燈籠讓出這條寬度。 */
+.duoArea[data-mode="order"] {
+  --queue-top: 8px;
+  --queue-now: clamp(52px, 23cqw, 104px);
+  --queue-wait: clamp(36px, 15cqw, 70px);
+  --queue-show: 0.88;
+  --queue-row: calc(var(--queue-now) * var(--queue-show));
+  --queue-clear: calc(var(--queue-top) + var(--queue-row) + 18px);
+  --duo-max-w: calc((100cqw - var(--duo-left) - clamp(54px, 18cqw, 88px) - 36px) / 1.68);
+  --duo-w: min(var(--duo-max-w), calc(100cqh - var(--counter-h) - var(--queue-clear)));
+  --lantern-display: none;
+  --serve-left: calc(var(--duo-left) + var(--duo-w) * 0.22);
+  --serve-w: min(24cqw, 92px);
+}
+
 .duoArt {
   position: absolute;
   z-index: 1;
@@ -206,6 +224,195 @@
 }
 
 /*
+ * 門口排隊：還沒輪到的全身貼紙，排在雨棚下，輪子站同一條線。
+ * 正在點餐或坐著吃的這位不在隊伍裡。槽寬跟著舞台走（下一位約 23cqw），再後面的小一號。再窄的舞台改兩列。
+ * 槽是寬、圖往下對齊，只露出畫布底下 88%，空的天不佔高度。
+ * pointer-events: none，不搶抬頭按鈕、泡泡、砧板或托盤。
+ */
+.queue {
+  position: absolute;
+  z-index: 4;
+  box-sizing: border-box;
+  top: var(--queue-top, 8px);
+  /* 點餐時燈籠收起，排隊用到舞台兩側。自由做沒有這條。 */
+  left: calc(4% + clamp(26px, 9cqw, 44px) + 8px);
+  right: 8px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  gap: 6px;
+  height: calc(var(--queue-now, 52px) * var(--queue-show, 0.88) + 8px);
+  margin: 0;
+  padding: 2px 2px 4px;
+  list-style: none;
+  pointer-events: none;
+}
+
+.queueItem {
+  position: relative;
+  flex: 0 0 var(--queue-wait, 36px);
+  width: var(--queue-wait, 36px);
+  min-width: var(--queue-wait, 36px);
+  max-width: var(--queue-wait, 36px);
+  height: calc(var(--queue-wait, 36px) * var(--queue-show, 0.88));
+}
+
+.queueItem[data-state="next"] {
+  flex-basis: var(--queue-now, 52px);
+  width: var(--queue-now, 52px);
+  min-width: var(--queue-now, 52px);
+  max-width: var(--queue-now, 52px);
+  height: calc(var(--queue-now, 52px) * var(--queue-show, 0.88));
+}
+
+/* 下一位腳下一條暖橘，其他人是淡的接地影。不是圓框。 */
+.queueItem::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  left: 14%;
+  right: 16%;
+  bottom: 1%;
+  height: 16%;
+  background: radial-gradient(closest-side, rgba(74, 60, 46, 0.22), transparent 74%);
+  pointer-events: none;
+}
+
+.queueItem[data-state="next"]::after {
+  background: radial-gradient(closest-side, rgba(255, 140, 43, 0.5), transparent 74%);
+}
+
+.queueSticker {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.queueFace {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  display: block;
+  width: 100%;
+  height: auto;
+  background: transparent;
+  pointer-events: none;
+}
+
+/* 點餐時泡泡讓到排隊下面。多留小喇叭徽章（往上 14px），才不會壓到下一位。 */
+.duoArea[data-mode="order"] .talk {
+  top: calc(var(--queue-top, 8px) + var(--queue-now, 52px) * var(--queue-show, 0.88) + 26px);
+}
+
+/* 點餐燈籠已收起，排隊從舞台左側排起。特異性要蓋過「讓燈籠」的 container query。 */
+.duoArea[data-mode="order"] .queue {
+  left: 8px;
+  right: 8px;
+}
+
+/*
+ * 吃的時候的客人：全身貼紙站在多多右邊、疊盤左邊，輪底跟多多同一條。
+ * 寬大約是多多的六成四（看起來超過一半高）。愛心（有最愛再加星星）。不能點。
+ */
+.seat {
+  position: absolute;
+  z-index: 3;
+  box-sizing: border-box;
+  left: calc(var(--duo-left) + var(--duo-w) + 6px);
+  right: calc(14px + clamp(54px, 18cqw, 88px) + 8px);
+  bottom: calc(var(--counter-h) - 2px);
+  width: auto;
+  max-width: calc(var(--duo-w) * 0.64);
+  margin-left: 0;
+  margin-right: auto;
+  pointer-events: none;
+}
+
+.seatFace {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 0.88;
+}
+
+.seatSticker {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.seatSticker > img {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  display: block;
+  width: 100%;
+  height: auto;
+  background: transparent;
+  pointer-events: none;
+}
+
+.seatFace::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  left: 12%;
+  right: 14%;
+  bottom: 1%;
+  height: 14%;
+  background: radial-gradient(closest-side, rgba(74, 60, 46, 0.28), transparent 74%);
+  pointer-events: none;
+}
+
+.seatHeart {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 20px;
+  height: 20px;
+  transform-origin: 50% 80%;
+  animation: seatHeart 360ms ease-out 200ms both;
+  pointer-events: none;
+}
+
+.seatStar {
+  position: absolute;
+  top: -6px;
+  left: -8px;
+  width: 16px;
+  height: 16px;
+  animation: seatStar 360ms ease-out 280ms both;
+  pointer-events: none;
+}
+
+@keyframes seatHeart {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.28);
+  }
+}
+
+@keyframes seatStar {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/*
  * 點餐泡泡外層：整顆泡泡可以點，再聽一次這單。
  * 透明鈕剛好蓋住泡泡，左上角外緣的小喇叭徽章只是提示，不佔泡泡寬度（三料單在窄舞台才放得下）。
  * 彈出動畫掛在外層，徽章跟泡泡一起出來。
@@ -293,7 +500,7 @@
   stroke-linejoin: round;
 }
 
-/* 客人圓頭像靠右，避開左上角的小喇叭。頭像不是另一個按鈕，整顆泡泡仍是再聽一次。 */
+/* 客人全身貼紙靠右，避開左上角的小喇叭。貼紙不是另一個按鈕，整顆泡泡仍是再聽一次。 */
 .guest {
   display: flex;
   align-items: center;
@@ -315,19 +522,26 @@
 .guestFaceWrap {
   position: relative;
   flex: none;
-  width: 32px;
-  height: 32px;
+  /* 跟排隊同一種裁法：寬 56，只露出畫布底下 88%，車身才看得清 */
+  width: 56px;
+  aspect-ratio: 1 / 0.88;
+}
+
+.guestSticker {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
 }
 
 .guestFace {
+  position: absolute;
+  left: 0;
+  bottom: 0;
   display: block;
   width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
-  object-position: center 40%;
-  background: #fffdf8;
-  box-shadow: 0 0 0 2px #d9a86a;
+  height: auto;
+  background: transparent;
   pointer-events: none;
 }
 
@@ -335,8 +549,8 @@
   position: absolute;
   right: -4px;
   bottom: -3px;
-  width: 14px;
-  height: 14px;
+  width: 18px;
+  height: 18px;
   pointer-events: none;
 }
 
@@ -395,8 +609,7 @@
   }
 
   .guestFaceWrap {
-    width: 28px;
-    height: 28px;
+    width: 40px;
   }
 
   .guestName {
@@ -412,8 +625,17 @@
 @container duo-stage (max-height: 190px) {
   .bubble {
     box-sizing: border-box;
-    min-height: 64px;
-    padding-right: 30px;
+    min-height: 0;
+    padding: 4px 48px 4px 6px;
+  }
+
+  .bubbleItem {
+    --cell: 30px;
+  }
+
+  /* 矮舞台收起第幾單的小點，省下一列才不會壓到疊盤。做到哪一單看旁邊疊了幾盤。 */
+  .orderDots {
+    display: none;
   }
 
   .guest {
@@ -438,14 +660,124 @@
   }
 
   .guestFaceWrap {
-    width: 24px;
-    height: 24px;
+    width: 40px;
   }
 
   .guestHeart,
   .favStar {
-    width: 11px;
-    height: 11px;
+    width: 14px;
+    height: 14px;
+  }
+
+  /* 矮舞台（320 直向約 152px）。變數要設在子孫上，container 套不到自己。 */
+  .queue,
+  .duoArea[data-mode="order"] .talk {
+    --queue-top: 6px;
+    --queue-now: 50px;
+    --queue-wait: 36px;
+  }
+
+  .queue {
+    left: 8px;
+    top: 6px;
+    /* 少留底部空隙，泡泡才抬得起來，不壓到下面的盤子 */
+    height: calc(var(--queue-now, 50px) * var(--queue-show, 0.88) + 2px);
+    padding-bottom: 1px;
+  }
+
+  .duoArea[data-mode="order"] .talk {
+    /* 排隊底下 2px、小喇叭往上 14px、再留 4px，所以是 +20，不是一般舞台的 +26 */
+    top: calc(var(--queue-top, 6px) + var(--queue-now, 50px) * var(--queue-show, 0.88) + 20px);
+  }
+
+  .seat {
+    max-width: 48px;
+    bottom: calc(var(--counter-h) - 2px);
+  }
+
+  .seatHeart,
+  .seatStar {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+/* 寬又高的舞台會多掛一盞右燈籠，排隊再往右讓。 */
+@container duo-stage (min-width: 380px) and (min-height: 300px) {
+  .queue {
+    left: calc(4% + 2 * clamp(26px, 9cqw, 44px) + clamp(12px, 4cqw, 24px) + 8px);
+  }
+}
+
+/* 很窄的左欄（568×320 舞台約 164px）：一列塞不下五張大貼紙，改成兩列。 */
+@container duo-stage (max-width: 220px) {
+  .queue,
+  .duoArea[data-mode="order"] .talk {
+    --queue-now: 56px;
+    --queue-wait: 40px;
+  }
+
+  .queue {
+    left: 8px;
+    right: 6px;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    height: auto;
+    row-gap: 4px;
+    gap: 4px;
+  }
+
+  /* 164px 寬：多多、客人、小疊盤並排。客人約 46px，大約是縮小後多多的六成高。
+     盤寬寫在 .plates 定義後面，才不會被預設的 54px 蓋掉。 */
+  .seat {
+    left: calc(var(--duo-left) + var(--duo-w) + 2px);
+    right: auto;
+    width: 46px;
+    max-width: 46px;
+    bottom: calc(var(--counter-h) - 2px);
+  }
+
+  .duoArea[data-mode="order"] .talk {
+    /* 兩列再加小喇叭徽章（往上 14px） */
+    top: calc(var(--queue-top, 8px) + 56px * 0.88 + 4px + 40px * 0.88 + 26px);
+  }
+}
+
+/* 568×320 這種窄橫向：舞台約 164px，父層要預留兩列排隊，多多才不會壓到第二列。
+   多多收到約 88px，右上的客人（64px）才大約是六成高。844 寬的橫向不走這條。 */
+@media (max-width: 600px) and (orientation: landscape) {
+  .duoArea[data-mode="order"] {
+    --queue-now: 56px;
+    --queue-wait: 40px;
+    --queue-clear: calc(8px + 56px * 0.88 + 4px + 40px * 0.88 + 16px);
+    --duo-max-w: 64px;
+  }
+}
+
+/* 320×568：舞台只有約 152px 高，排隊不能跟著 23cqw 長，不然泡泡會壓到疊盤。 */
+@media (max-width: 360px) and (orientation: portrait) {
+  .duoArea[data-mode="order"] {
+    --queue-top: 6px;
+    --queue-now: 50px;
+    --queue-wait: 36px;
+    --queue-clear: calc(6px + 50px * 0.88 + 16px);
+    --duo-max-w: 86px;
+  }
+}
+
+/* 直向舞台還放得下排隊，但第 5 單的小點若再佔一列會壓到疊盤。小點改疊在泡泡底緣。 */
+@container duo-stage (max-height: 300px) and (min-height: 191px) {
+  .bubble {
+    padding-bottom: 12px;
+  }
+
+  .orderDots {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 3px;
+    justify-content: center;
+    margin-top: 0;
   }
 }
 
@@ -528,6 +860,13 @@
   height: 8px;
   background: #5fbf85;
   box-shadow: inset 0 0 0 1.5px #3f7f2a;
+}
+
+/* 寫在 .orderDots 後面，矮舞台才蓋得過 display:flex。 */
+@container duo-stage (max-height: 190px) {
+  .orderDots {
+    display: none;
+  }
 }
 
 /* 多多的字卡：吃的時候在雨棚下（泡泡收起）；缺料時泡泡還在，字卡排在泡泡下面 */
@@ -749,12 +1088,28 @@
   }
 }
 
+/* 窄左欄（568）的疊盤收到 40px，才跟縮小的多多、站著的客人排得下。寫在 .plates 後面。 */
+@container duo-stage (max-width: 220px) {
+  .plates {
+    --pw: 40px;
+    right: 6px;
+  }
+}
+
 .plate {
   display: block;
   width: var(--pw);
   height: calc(var(--pw) * 403 / 695);
   margin-top: calc(var(--pw) * 403 / 695 * -0.48);
   animation: plateDrop 360ms cubic-bezier(0.3, 1.3, 0.5, 1) both;
+}
+
+/* 中等高度（390、844、667、568）：四盤若每層露出一半，會頂到變大的泡泡或站著的客人。盤緣收到 8px。
+   320 直向更矮，下面的 max-height 190 會再收到 4px，所以這條要寫在那條前面。 */
+@container duo-stage (max-height: 360px) and (min-height: 191px) {
+  .plate {
+    margin-top: calc(8px - var(--pw) * 403 / 695);
+  }
 }
 
 @keyframes plateDrop {
@@ -790,9 +1145,17 @@
   box-shadow: 0 0 0 2px #fffdf8, 0 3px 6px rgba(40, 70, 30, 0.25);
 }
 
+/* 窄左欄客人站在疊盤左邊，數字改貼在盤的右下，才不會伸進客人。 */
+@container duo-stage (max-width: 220px) {
+  .plateCount {
+    left: auto;
+    right: 0;
+  }
+}
+
 /*
- * 矮舞台（320×568 直向）：小盤、每層露 9px。泡泡底下只剩約 50px，
- * 點餐最多看得到 3 盤（泡泡下還有進度小盤）、自由做 4 盤（上面只有「多多吃飽了」），數字照實。
+ * 矮舞台（320×568 直向）：小盤、每層露 4px。全身貼紙把泡泡往下推之後，
+ * 9px 的盤緣會頂到第 5 單。點餐最多看得到 3 盤、自由做 4 盤，數字照實。
  * 最後一個子元素是數字，所以第 n 盤從後數是 nth-last-child(n + 1)。
  */
 @container duo-stage (max-height: 190px) {
@@ -801,7 +1164,7 @@
   }
 
   .plate {
-    margin-top: calc(9px - var(--pw) * 403 / 695);
+    margin-top: calc(4px - var(--pw) * 403 / 695);
   }
 
   .plate:nth-last-child(n + 5) {
@@ -1799,8 +2162,7 @@
   }
 
   .guestFaceWrap {
-    width: 26px;
-    height: 26px;
+    width: 44px;
   }
 
   .guestName {
@@ -1846,6 +2208,12 @@
     --duo-left: 4cqw;
   }
 
+  /* 點餐時的多多寬度在 .duoArea[data-mode="order"]，這裡不蓋掉，櫃台旁才留得下客人。
+     七成寬會碰到疊盤左下的數字，桌機收到約六成二，高度仍超過多多的一半。 */
+  .duoArea[data-mode="order"] .seat {
+    max-width: calc(var(--duo-w) * 0.62);
+  }
+
   .trayButton {
     min-height: 84px;
   }
@@ -1885,8 +2253,7 @@
   }
 
   .guestFaceWrap {
-    width: 44px;
-    height: 44px;
+    width: 56px;
   }
 
   .guestName {
@@ -1953,7 +2320,9 @@
   .thanks,
   .thanks[data-leaving="true"],
   .thanksHeart,
-  .thanksStar {
+  .thanksStar,
+  .seatHeart,
+  .seatStar {
     animation: none;
   }
 
@@ -2037,14 +2406,18 @@
 .kitchen[data-paused="true"] .evictFly,
 .kitchen[data-paused="true"] .thanks,
 .kitchen[data-paused="true"] .thanksHeart,
-.kitchen[data-paused="true"] .thanksStar {
+.kitchen[data-paused="true"] .thanksStar,
+.kitchen[data-paused="true"] .seatHeart,
+.kitchen[data-paused="true"] .seatStar {
   animation-play-state: paused;
 }
 
 .kitchen[data-reduced="true"] .thanks,
 .kitchen[data-reduced="true"] .thanks[data-leaving="true"],
 .kitchen[data-reduced="true"] .thanksHeart,
-.kitchen[data-reduced="true"] .thanksStar {
+.kitchen[data-reduced="true"] .thanksStar,
+.kitchen[data-reduced="true"] .seatHeart,
+.kitchen[data-reduced="true"] .seatStar {
   animation: none;
 }
 
