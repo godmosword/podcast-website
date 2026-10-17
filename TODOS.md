@@ -46,7 +46,15 @@
 - ✅ **芥末、甜點不算點偏**：放了不亮提示，也不會收掉點偏留下的光暈。見本 commit。
 - ✅ **手捲凸出泡泡、招牌字被擋**：泡泡格子鎖住格線，手捲縮進格子；店名改刻在櫃台前板左半，拿掉直式招牌（不再預載 `sign.webp`）。見本 commit。
 - ✅ **手捲餡料在備料盤上太小**：料放大、坐在飯口上冒出海苔；三樣料時中間那樣抬到兩側上方。見本 commit。
-- **金盤素材**：金盤是濾鏡調的亮黃色，等使用者提供素材（規格見 SPEC #223 `plans/2026-10-14-dino-sushi-followups.md` 第 3 項）。`art · S · 金盤需美術`
+- **金盤素材**：2026-10-16 先用程式光澤（決策 D1 A）：濾鏡改深琥珀，加盤形遮罩的斜向高光與兩顆星（`lib/games/dino-sushi/gold-plate.module.css`）。使用者提供素材後換掉 `PLATE_FILTER.gold` 與這層光澤（規格見 SPEC #223 `plans/2026-10-14-dino-sushi-followups.md` 第 3 項）。`art · S · 金盤需美術`
+- ✅ **實玩審批次 R（Plan `~/.claude/plans/dino-sushi-review-2026-10-16.md`）**：
+  - R1 結算新貼紙改成換行格子（56px，一列 5 張），放不下時最後一格「+N」打開貼紙書；星星提示帶進度（「5 盤都一次做對（4/5）」）。
+  - R2 「放進貼紙書」留在一屏：直向依高度收店面（≥800 收矮＋兩列、728–799 更矮、641–727 收起），桌機店面與結算並排，矮橫向兩欄。共用 `GameEndStation` 不動。
+  - R3 開書時畫面內的新貼紙閃一次，畫面內沒有才捲到第一張新的；每區標題「新 N」。
+  - R4 貼紙書不透明底、sticky 標題列貼齊書頂、鎖住改原圖遮罩的暖棕剪影；≥800 固定六欄 112–148px 置中。
+  - R5 金盤程式光澤（見上一項）。
+  - 實作審（Codex gpt-6-luna）修正：量到格子寬之前不畫貼紙；拿掉點不到的「+N」擴大點擊區（TapButton 只認按鈕本身範圍）；結算焦點在按鈕／連結上時，Host 的 Enter 不再另外 `restart()`（`lib/gamekit/games/dino-sushi/adapter.ts`，同方塊轉轉）。Opus 實作設計審因額度用完未完成，額度恢復後補。
+  - 驗證：`e2e/dino-sushi-result.spec.ts`（7 個尺寸書鈕在畫面內、「+N」、減少動態、貼紙書、金盤同框）、壽司屋結算 darwin 基準重錄並目檢、Chromium＋WebKit 目檢金盤遮罩。批次 K（廚房）等難度調整上 main 後再做。見本 commit。
 - ✅ **素材瘦身**：`npm run optimize:dino-sushi-assets` 產生 `sm/` 縮小副本（原檔不動），寬度表在 `lib/games/dino-sushi/asset-src.ts`。標題頁預載 3635KB → 1460KB；廚房同畫面解碼約 81MB → 36MB（SPEC 目標 35MB，多出的 1MB 是為 3 倍手機加大的食材）。見本 commit。
 - **沒用到的原檔**：`duoduo/sticker-puff.webp`、`shop/sign.webp` 已沒有程式引用，要不要從 repo 刪掉待使用者決定（核准原檔，不自行刪）。`ops · S · 使用者決定`
 - ✅ **托盤料頂端被切平**：維持現在大小、只置中不裁（`.trayArt > img` 改 `inset: 0`，拿掉 `overflow: hidden`）。見本 commit。
