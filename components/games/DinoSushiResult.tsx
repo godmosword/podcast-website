@@ -39,7 +39,7 @@ type Props = {
 function GoldPlate() {
   return (
     <span className={styles.hintPlate}>
-      <PlateArt gold />
+      <PlateArt gold plain />
     </span>
   );
 }

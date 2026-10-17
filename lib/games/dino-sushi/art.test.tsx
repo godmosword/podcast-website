@@ -49,6 +49,29 @@ describe("壽司黏土圖", () => {
     expect(gold).toContain("/shop/sm/plate.webp");
   });
 
+  it("金盤多一層盤形遮罩的光澤和兩顆星；提示章 plain 只換色；其他盤 DOM 不變", () => {
+    /* React 19 會在最前面插入圖片預載的 <link>，比對元素本身前先拿掉 */
+    const markup = (el: React.ReactElement) => renderToStaticMarkup(el).replace(/^(<link[^>]*>)+/, "");
+    const gold = markup(<PlateArt gold />);
+    expect(gold).toMatch(/^<span[^>]*data-gold-plate/);
+    expect(gold).toContain("data-gold-shine");
+    expect(gold.match(/data-gold-star/g)).toHaveLength(2);
+    expect(gold).toContain("--plate-mask:url(&quot;/games/v2/dino-sushi/shop/sm/plate.webp&quot;)");
+    expect(gold).toContain("width:100%;height:100%");
+
+    const plain = markup(<PlateArt gold plain />);
+    expect(plain).toContain("data-gold-plate");
+    expect(plain).toContain("sepia");
+    expect(plain).not.toContain("data-gold-shine");
+    expect(plain).not.toContain("data-gold-star");
+
+    for (const other of [<PlateArt key="blue" />, <PlateArt key="pink" tone="pink" />]) {
+      const html = markup(other);
+      expect(html).toMatch(/^<img /);
+      expect(html).not.toContain("data-gold");
+    }
+  });
+
   it("托盤依甜鹹芥末換底", () => {
     expect(traySrc("savory")).toContain("tray-neutral.webp");
     expect(traySrc("sweet")).toContain("tray-sweet.webp");

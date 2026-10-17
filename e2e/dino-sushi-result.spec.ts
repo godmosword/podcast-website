@@ -215,3 +215,75 @@ test.describe("貼紙書", () => {
     await expect(page.getByRole("button", { name: "回去" })).toBeFocused();
   });
 });
+
+test.describe("金盤", () => {
+  /** 每個金盤：外層填滿原本的盤框、光澤層跟盤子圖同一個框（遮罩才對得齊）。 */
+  async function goldBoxes(scope: Page | Locator) {
+    return scope.locator("[data-gold-plate]").evaluateAll((plates) =>
+      plates.map((plate) => {
+        const r = (el: Element | null) => el!.getBoundingClientRect();
+        const same = (a: DOMRect, b: DOMRect) =>
+          Math.abs(a.x - b.x) <= 1 && Math.abs(a.y - b.y) <= 1 && Math.abs(a.width - b.width) <= 1 && Math.abs(a.height - b.height) <= 1;
+        const shine = plate.querySelector("[data-gold-shine]");
+        return {
+          fillsContainer: same(r(plate), r(plate.parentElement)),
+          shineOnImage: shine ? same(r(shine), r(plate.querySelector("img"))) : null,
+          width: r(plate).width,
+        };
+      }),
+    );
+  }
+
+  test("疊盤、結算盤列的金盤都填滿原本的盤框，光澤層跟盤子圖同框", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/games/dino-sushi");
+    await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+    for (let n = 1; n <= 2; n++) {
+      await serveOrder(page, n);
+      await waitServed(page, n);
+    }
+    const kitchen = await goldBoxes(page);
+    expect(kitchen).toHaveLength(2);
+    for (const box of kitchen) {
+      expect(box.fillsContainer).toBe(true);
+      expect(box.shineOnImage).toBe(true);
+      expect(box.width).toBeGreaterThanOrEqual(54);
+    }
+    for (let n = 3; n <= 5; n++) {
+      await serveOrder(page, n);
+      await waitServed(page, n);
+    }
+    const overlay = page.getByTestId("dino-sushi-result");
+    await expect(overlay).toBeVisible();
+    await settledResult(overlay);
+    // 結算底下的廚房還掛著，只量結算層：盤子列 5 個（提示章沒有，因為五盤都一次做對）
+    const result = await goldBoxes(overlay);
+    expect(result).toHaveLength(5);
+    for (const box of result) {
+      expect(box.fillsContainer).toBe(true);
+      expect(box.shineOnImage).toBe(true);
+    }
+  });
+
+  test("提示章的金盤只換色：沒有光澤也沒有星星", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/games/dino-sushi");
+    await finishRound(page, { retrySecond: true });
+    const hint = page.getByRole("list", { name: "還能多拿星星" }).locator("[data-gold-plate]");
+    await expect(hint).toHaveCount(1);
+    await expect(hint.locator("[data-gold-shine], [data-gold-star]")).toHaveCount(0);
+  });
+
+  test("減少動態：金盤不掃光、星星不閃", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/games/dino-sushi");
+    await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+    await serveOrder(page, 1);
+    await waitServed(page, 1);
+    const running = await page
+      .locator("[data-gold-plate] [data-gold-shine], [data-gold-plate] [data-gold-star]")
+      .evaluateAll((els) => els.flatMap((el) => el.getAnimations()).length);
+    expect(running).toBe(0);
+  });
+});
