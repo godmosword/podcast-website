@@ -463,9 +463,14 @@ test("家庭儀表板頁面可載入", async ({ page }) => {
   await page.goto("/for-parents/dashboard");
   const main = page.getByRole("main");
   await expect(main.getByRole("heading", { name: "家庭儀表板" })).toBeVisible();
-  await expect(main.getByRole("heading", { name: "小遊戲探索摘要" })).toBeVisible();
-  await expect(main.getByRole("heading", { name: "推薦共讀故事" })).toBeVisible();
-  await expect(main.getByLabel("家長安心資訊")).toBeVisible();
+  // 新裝置：接著聽的位置是「從這裡開始」，主按鈕推最新一集。
+  await expect(main.getByRole("heading", { name: "從這裡開始" })).toBeVisible();
+  await expect(main.getByRole("link", { name: /^聽最新一集：/ })).toBeVisible();
+  await expect(main.getByRole("heading", { name: "小遊戲" })).toBeVisible();
+  await expect(main.getByRole("link", { name: "隱私說明" })).toHaveAttribute(
+    "href",
+    "/legal#privacy",
+  );
 });
 
 test("車車消消樂：標題 → 地圖 → 第 1 關棋盤", async ({ page }) => {

@@ -1,56 +1,127 @@
+/* 家庭儀表板：無影像抬升塊用 --hairline＋--shadow-sm；卡內列表用細線分隔，不做框中框。
+   遊戲長條色比 --c-sky 深，白底對比約 3.5:1（非文字元素 ≥3:1）。 */
 .parentDashboard {
+  --dash-game: color-mix(in srgb, var(--c-sky) 60%, var(--ink));
+
   width: min(920px, 100%);
   margin-inline: auto;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
 }
 
 .grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "week" "next" "progress" "games" "settings";
   gap: var(--space-4);
 }
 
-@media (min-width: 768px) {
-  .grid {
-    grid-template-columns: 1fr 1fr;
-  }
+.areaWeek { grid-area: week; }
+.areaNext { grid-area: next; }
+.areaProgress { grid-area: progress; }
+.areaGames { grid-area: games; }
+.areaSettings { grid-area: settings; }
 
-  .gridWide {
-    grid-column: 1 / -1;
+@media (min-width: 980px) {
+  .grid {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    /* 「接著聽」跨兩列、「故事進度」跨三列：左右兩欄各自往下長，
+       本週摘要下面不會因為右欄較高而留一段空白。 */
+    grid-template-areas:
+      "week next"
+      "progress next"
+      "progress games"
+      "progress settings";
+    align-items: start;
   }
 }
 
+/* ── 卡片 ── */
 .card {
-  padding: 18px;
-  border: 1.5px solid var(--line);
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid var(--hairline);
   border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--card) 94%, var(--mix-base));
+  background: var(--surface-elevated);
   box-shadow: var(--shadow-sm);
 }
 
+.cardHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2px var(--space-3);
+}
+
 .cardTitle {
-  margin: 0 0 12px;
-  font-size: var(--fs-h3-compact);
-  font-weight: 900;
+  margin: 0;
   color: var(--warm-heading);
-}
-
-.cardHint {
-  margin: 0 0 14px;
-  font-size: var(--fs-label);
-  line-height: 1.6;
-  color: var(--ink-soft);
-}
-
-.summaryLine {
-  margin: 0 0 14px;
-  font-size: var(--fs-control);
+  font-size: var(--fs-h3-compact);
   font-weight: 800;
-  line-height: 1.5;
-  color: var(--ink);
 }
+
+.cardMeta {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: var(--fs-label);
+  font-variant-numeric: tabular-nums;
+}
+
+.note {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: var(--fs-label);
+  line-height: 1.7;
+}
+
+.quietLink {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--cta-quiet-fg);
+  font-size: var(--fs-control);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ── 本週摘要 ── */
+.figures {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 22px;
+  margin: 0;
+}
+
+.figure {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  color: var(--ink-soft);
+  font-size: var(--fs-control);
+}
+
+.figureValue {
+  color: var(--ink);
+  font-size: var(--fs-h1);
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.swatch {
+  align-self: center;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.swatchStory { background: var(--accent); }
+.swatchGame { background: var(--dash-game); }
 
 .weekChart {
   display: grid;
@@ -62,11 +133,25 @@
 }
 
 .weekCol {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
+  display: grid;
+  grid-template-rows: 18px 120px auto;
+  justify-items: center;
+  gap: 4px;
   min-width: 0;
+  padding: 6px 2px 4px;
+  border-radius: var(--radius-sm);
+}
+
+.weekToday {
+  background: color-mix(in srgb, var(--c-yellow) 20%, transparent);
+}
+
+.weekTotal {
+  align-self: end;
+  color: var(--ink-soft);
+  font-size: var(--fs-meta);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
 .weekBars {
@@ -75,181 +160,212 @@
   justify-content: center;
   gap: 3px;
   width: 100%;
-  height: 72px;
+  height: 100%;
+  border-bottom: 1px solid var(--hairline);
 }
 
 .weekBar {
   display: block;
-  width: 8px;
-  max-width: 36%;
-  border-radius: var(--radius-pill) var(--radius-pill) 4px 4px;
-  background: var(--line);
+  width: 14px;
+  max-width: 42%;
+  border-radius: 5px 5px 2px 2px;
 }
 
-.weekBarStory {
-  background: var(--accent);
-}
-
-.weekBarGame {
-  background: var(--c-sky);
-}
+.weekBarStory { background: var(--accent); }
+.weekBarGame { background: var(--dash-game); }
 
 .weekLabel {
-  font-size: var(--fs-meta);
-  font-weight: 800;
   color: var(--ink-soft);
-}
-
-.legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin: 12px 0 0;
   font-size: var(--fs-meta);
   font-weight: 700;
-  color: var(--ink-soft);
 }
 
-.legendItem {
+.weekToday .weekLabel {
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.weekChartEmpty .weekCol {
+  grid-template-rows: 0 56px auto;
+}
+
+@media (max-width: 640px) {
+  .weekCol {
+    grid-template-rows: 18px 80px auto;
+  }
+
+  .weekChartEmpty .weekCol {
+    grid-template-rows: 0 40px auto;
+  }
+}
+
+/* ── 接著聽 ── */
+.resume {
+  display: grid;
+  gap: 6px;
+  padding: var(--space-4);
+  border-radius: var(--radius-sm);
+  background: var(--warm-surface);
+}
+
+.resumeLabel {
+  margin: 0;
+  color: var(--warm-highlight);
+  font-size: var(--fs-label);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.resumeTitle {
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--fs-h4);
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.resumeMeta {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: var(--fs-label);
+  font-variant-numeric: tabular-nums;
+}
+
+/* solid 階：整頁唯一主行動 */
+.ctaSolid {
+  justify-self: start;
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  min-height: 44px;
+  margin-top: 4px;
+  padding: 0 22px;
+  border-radius: var(--radius-pill);
+  border: 1px solid color-mix(in srgb, var(--cta-solid-fg) 24%, transparent);
+  background: var(--cta-solid-bg);
+  color: var(--cta-solid-fg);
+  font-size: var(--fs-control);
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: var(--elev-1);
 }
 
-.swatch {
-  width: 10px;
+.subTitle {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: var(--fs-label);
+  font-weight: 700;
+}
+
+/* ── 列表（接著聽、故事進度、小遊戲共用） ── */
+.rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rows > li + li {
+  border-top: 1px solid var(--hairline);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 2px var(--space-3);
+  min-height: 52px;
+  padding: 8px 2px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.rowTitle {
+  min-width: 0;
+  color: var(--ink);
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+/* 副標只是補充（日期、情境句），一行放不下就省略；標題本身永遠完整。 */
+.rowMeta {
+  grid-column: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink-soft);
+  font-size: var(--fs-meta);
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowEp {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  color: var(--accent-ink);
+  font-size: var(--fs-meta);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.rowArrow {
+  grid-row: 1 / span 2;
+  grid-column: 3;
+  color: var(--ink-soft);
+}
+
+.pill {
+  margin-right: 6px;
+  padding: 0 8px;
+  border-radius: var(--radius-pill);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  font-weight: 700;
+}
+
+.groupTitle {
+  margin: 4px 0 0;
+  color: var(--ink-soft);
+  font-size: var(--fs-label);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.meter {
+  display: block;
   height: 10px;
-  border-radius: 2px;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--ink) 8%, var(--surface-elevated));
 }
 
-.swatchStory {
+.meterFill {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-pill);
   background: var(--accent);
 }
 
-.swatchGame {
-  background: var(--c-sky);
-}
-
-.actionButton {
-  min-height: 44px;
-  margin-top: 12px;
-  padding: 8px 14px;
-  border: 1.5px solid var(--line);
-  border-radius: var(--radius-pill);
-  background: var(--card);
-  color: var(--ink);
-  font: inherit;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.actionButton:focus-visible {
-  outline: 2px solid var(--accent-ink);
-  outline-offset: 2px;
-}
-
-.actionButtonStrong {
-  border-color: var(--accent-ink);
-  color: var(--accent-ink);
-}
-
-.confirmBlock {
-  padding-top: 10px;
-}
-
-.confirmActions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.confirmActions .actionButton {
-  margin-top: 8px;
-}
-
-.empty {
-  margin: 0;
-  font-size: var(--fs-control);
-  color: var(--ink-soft);
-}
-
-.stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-
-.stat {
-  flex: 1 1 120px;
-  padding: var(--space-3);
-  border-radius: var(--radius-md);
-  background: linear-gradient(160deg, var(--page-warm-from), var(--page-warm-mid));
-  text-align: center;
-}
-
-.statValue {
-  display: block;
-  font-size: 1.5rem;
-  font-weight: 900;
-  color: var(--accent-ink);
-}
-
-.statLabel {
-  display: block;
-  margin-top: 4px;
-  font-size: var(--fs-meta);
-  font-weight: 700;
-  color: var(--ink-soft);
-}
-
-.gameList {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
+/* ── 小遊戲 ── */
 .gameRow {
-  display: flex;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
   align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: var(--radius-md);
-  background: var(--card-2);
-  border: 1px solid color-mix(in srgb, var(--c-sky) 25%, transparent);
+  gap: 2px var(--space-3);
+  min-height: 52px;
+  padding: 8px 2px;
+}
+
+.gameRow .rowTitle,
+.gameRow .rowMeta {
+  grid-column: 2;
 }
 
 .gameIcon {
-  flex: none;
+  grid-row: 1 / span 2;
+  grid-column: 1;
   width: 28px;
   height: 28px;
   line-height: 0;
-}
-
-.gameMeta {
-  flex: 1;
-  min-width: 0;
-}
-
-.gameTitle {
-  display: block;
-  font-weight: 800;
-  color: var(--ink);
-}
-
-.gameDetail {
-  display: block;
-  margin-top: 2px;
-  font-size: var(--fs-meta);
-  color: var(--ink-soft);
-}
-
-.notPlayed {
-  /* 不用整個區塊降 opacity，避免子文字的對比被再次削弱。 */
-  opacity: 1;
 }
 
 .stickerList {
@@ -265,79 +381,29 @@
   padding: 6px 12px;
   border-radius: var(--radius-pill);
   background: color-mix(in srgb, var(--c-yellow) 35%, var(--mix-base));
-  font-size: var(--fs-meta);
-  font-weight: 800;
   color: var(--cta-warm-fg);
-}
-
-.storyList {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.storyLink {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  padding: 10px 12px;
-  border-radius: var(--radius-md);
-  background: var(--card);
-  border: 1px solid var(--line);
-  text-decoration: none;
-  color: inherit;
-  font-weight: 700;
-}
-
-.storyLink:hover {
-  border-color: var(--c-sky);
-}
-
-.storyEp {
-  flex-shrink: 0;
   font-size: var(--fs-meta);
   font-weight: 800;
-  color: var(--accent-ink);
 }
 
-.reason {
-  display: block;
-  margin-top: 2px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--ink-soft);
-}
-
+/* ── 家長設定 ── */
 .settings {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
+  display: grid;
 }
 
 .settingRow {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  padding: 10px 0;
-  border-bottom: 1px dashed var(--line);
+  min-height: 56px;
+  padding: 8px 0;
 }
 
-.clearRow {
-  flex-wrap: wrap;
-}
-
-.clearRow .actionButton {
-  margin-top: 0;
-  flex-shrink: 0;
-}
-
-.settingRow:last-child {
-  border-bottom: none;
+.settingRow + .settingRow,
+.settingRow + .confirmBlock {
+  border-top: 1px solid var(--hairline);
 }
 
 .settingLabel {
@@ -348,21 +414,28 @@
 .settingHint {
   display: block;
   margin-top: 2px;
+  color: var(--ink-soft);
   font-size: var(--fs-meta);
   font-weight: 600;
-  color: var(--ink-soft);
 }
 
 .toggle {
   position: relative;
+  flex-shrink: 0;
   width: 52px;
   height: 32px;
   border: none;
   border-radius: var(--radius-pill);
   background: color-mix(in srgb, var(--ink-soft) 45%, var(--card));
   cursor: pointer;
-  flex-shrink: 0;
   transition: background 0.2s ease;
+}
+
+/* 開關本體 52×32，::after 往外擴 6px，觸控熱區 64×44 */
+.toggle::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
 }
 
 .toggleOn {
@@ -383,6 +456,59 @@
 
 .toggleOn .toggleKnob {
   transform: translateX(20px);
+}
+
+.actionButton {
+  justify-self: start;
+  flex-shrink: 0;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid var(--cta-soft-line);
+  border-radius: var(--radius-pill);
+  background: var(--cta-soft-bg);
+  color: var(--cta-soft-fg);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.actionButtonStrong {
+  border-color: var(--accent-ink);
+  color: var(--accent-ink);
+}
+
+.confirmBlock {
+  padding-top: 10px;
+}
+
+.confirmActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* ── 互動 ── */
+.row:focus-visible,
+.ctaSolid:focus-visible,
+.quietLink:focus-visible,
+.actionButton:focus-visible,
+.toggle:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
+}
+
+.ctaSolid:focus-visible,
+.actionButton:focus-visible,
+.toggle:focus-visible {
+  border-radius: var(--radius-pill);
+}
+
+@media (hover: hover) {
+  .row:hover .rowTitle {
+    color: var(--accent-ink);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

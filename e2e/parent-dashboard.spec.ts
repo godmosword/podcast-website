@@ -30,9 +30,14 @@ test.describe("家長儀表板活動追蹤", () => {
         },
       },
     };
+    // 另標 9 集聽完，聽過的超過 8 集才會出現「看全部」。
     const progress = {
       ...DEFAULT_PROGRESS,
       favorites: ["ep-15"],
+      engagement: {
+        ...DEFAULT_PROGRESS.engagement,
+        storiesCompleted: ["ep-1", "ep-2", "ep-3", "ep-4", "ep-5", "ep-6", "ep-7", "ep-8", "ep-9"],
+      },
     };
 
     await seedParentGatePassed(page);
@@ -51,14 +56,15 @@ test.describe("家長儀表板活動追蹤", () => {
 
     await page.goto("/for-parents/dashboard");
 
-    await expect(page.getByRole("heading", { name: "本週摘要" })).toBeVisible();
-    await expect(page.getByText("這週聽了 1 集、共 42 分鐘，遊戲 10 分鐘。")).toBeVisible();
-    const progressCard = page.locator("section").filter({
-      has: page.getByRole("heading", { name: "故事進度" }),
-    });
+    const weekly = page.getByRole("region", { name: "本週摘要" });
+    await expect(weekly).toContainText("收聽42分鐘 · 1 集");
+    await expect(weekly).toContainText("遊戲10分鐘");
+    await expect(page.getByRole("heading", { name: "接著聽" })).toBeVisible();
+    const progressCard = page.getByRole("region", { name: "故事進度" });
     await expect(progressCard).toBeVisible();
-    const storyLink = progressCard.getByRole("link", { name: /恐龍車多多洗手故事/ });
-    await expect(storyLink).toContainText("聽完了");
+    const storyLink = progressCard
+      .getByRole("group", { name: /聽完了/ })
+      .getByRole("link", { name: /恐龍車多多洗手故事/ });
     await expect(storyLink).toContainText("聽過 2 次");
     await expect(page.getByText("本週 10 分鐘 · 3 局")).toBeVisible();
 
@@ -68,9 +74,11 @@ test.describe("家長儀表板活動追蹤", () => {
     await page.getByRole("button", { name: "清除活動紀錄" }).click();
     await page.getByRole("button", { name: "確定清除" }).click();
 
-    await expect(page.getByText("這週還沒有收聽或遊戲紀錄。")).toBeVisible();
+    await expect(weekly).toContainText("這週還沒有紀錄");
     await expect(page.getByText("本週 10 分鐘 · 3 局")).toHaveCount(0);
-    await expect(storyLink).toContainText("還沒聽");
+    // 這集的「聽完」來自活動紀錄，清掉後就不再列在故事進度；手動標記的 9 集留著。
+    await expect(progressCard.getByRole("link", { name: /恐龍車多多洗手故事/ })).toHaveCount(0);
+    await expect(progressCard).toContainText("聽過 9 集");
 
     const stored = await page.evaluate((key) => localStorage.getItem(key), ACTIVITY_STORAGE_KEY);
     expect(stored).toBeTruthy();

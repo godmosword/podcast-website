@@ -13,4 +13,11 @@ describe("dashboard parent gate shell", () => {
     expect(source).toContain('title: "家庭儀表板"');
     expect(source).toContain('canonical: "/for-parents/dashboard"');
   });
+
+  it("工具頁不掛 SiteHeader 行銷圖，也不露出內部代號", () => {
+    const source = readFileSync(PAGE, "utf8");
+    expect(source).not.toContain("SiteHeader");
+    expect(source).not.toContain("STEM-P3");
+    expect(source).toContain("給爸媽");
+  });
 });

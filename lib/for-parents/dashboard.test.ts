@@ -1,14 +1,15 @@
 import { describe, expect, it } from "vitest";
+import { getStories, storiesByNewest } from "@/data/content";
 import { emptyActivityLog, localDateKey, type ActivityLogV1 } from "@/lib/activity-log";
 import { DEFAULT_PROGRESS } from "@/lib/progress-store";
 import {
   buildParentDashboardSnapshot,
-  buildRecentStoryRows,
   buildStoryProgressRows,
   buildWeeklySummary,
-  formatWeeklySummaryLine,
+  minutesFromSeconds,
   recommendStoriesForParent,
 } from "./dashboard";
+import { buildNextUp } from "./dashboard-next-up";
 
 const TODAY = new Date(2026, 9, 5, 12, 0, 0).getTime();
 
@@ -27,6 +28,12 @@ function activityWithToday(): ActivityLogV1 {
     },
   };
 }
+
+const NO_ENGAGEMENT = {
+  storiesCompleted: [],
+  reflectionShown: [],
+  platformClicks: {},
+};
 
 describe("buildParentDashboardSnapshot", () => {
   it("彙整遊戲、收聽與偏好為家長儀表板快照", () => {
@@ -64,31 +71,25 @@ describe("buildParentDashboardSnapshot", () => {
       true,
     );
     expect(snap.games.find((g) => g.gameId === "block-drop")).toBeUndefined();
-    expect(snap.recentStories[0]?.slug).toBe("ep-15");
+    expect(snap.nextUp.primary).toMatchObject({ kind: "resume", slug: "ep-15" });
     expect(snap.recommendedStories.length).toBeGreaterThan(0);
     expect(snap.reflectionSlugs).toContain("ep-9");
   });
-});
 
-describe("buildRecentStoryRows", () => {
-  it("continue 優先於收藏與聽完", () => {
-    const rows = buildRecentStoryRows({
-      continue: {
-        slug: "ep-16",
-        page: 1,
-        time: 0,
-        updatedAt: 1,
+  it("故事進度只留聽過的集數，並給總集數", () => {
+    const snap = buildParentDashboardSnapshot(
+      {
+        ...DEFAULT_PROGRESS,
+        engagement: { ...NO_ENGAGEMENT, storiesCompleted: ["ep-3"] },
       },
-      favorites: ["ep-15"],
-      engagement: {
-        storiesCompleted: ["ep-14"],
-        reflectionShown: [],
-        platformClicks: {},
-      },
-    });
-
-    expect(rows[0]?.slug).toBe("ep-16");
-    expect(rows.some((r) => r.slug === "ep-15")).toBe(true);
+      activityWithToday(),
+      TODAY,
+    );
+    expect(snap.listenedStories.map((row) => row.slug).sort()).toEqual([
+      "ep-15",
+      "ep-3",
+    ]);
+    expect(snap.totalStories).toBe(getStories().length);
   });
 });
 
@@ -109,27 +110,40 @@ describe("recommendStoriesForParent", () => {
 });
 
 describe("buildWeeklySummary", () => {
-  it("彙整近 7 天的收聽與遊戲時間", () => {
+  it("彙整近 7 天的收聽與遊戲時間，最後一天是今天", () => {
     const summary = buildWeeklySummary(activityWithToday(), TODAY);
 
     expect(summary.days).toHaveLength(7);
     expect(summary.days[6]?.date).toBe(localDateKey(TODAY));
     expect(summary.days[6]?.weekday).toBe("一");
+    expect(summary.days.map((day) => day.isToday)).toEqual([
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+    ]);
     expect(summary.storiesTouched).toBe(1);
     expect(summary.storySeconds).toBe(2520);
     expect(summary.gameSeconds).toBe(600);
     expect(summary.activeDays).toBe(1);
-    expect(formatWeeklySummaryLine(summary)).toBe(
-      "這週聽了 1 集、共 42 分鐘，遊戲 10 分鐘。",
-    );
-    expect(formatWeeklySummaryLine(buildWeeklySummary(emptyActivityLog(), TODAY))).toBe(
-      "這週還沒有收聽或遊戲紀錄。",
-    );
+  });
+});
+
+describe("minutesFromSeconds", () => {
+  it("四捨五入成分鐘；有紀錄但不到半分鐘也算 1 分鐘", () => {
+    expect(minutesFromSeconds(0)).toBe(0);
+    expect(minutesFromSeconds(-5)).toBe(0);
+    expect(minutesFromSeconds(20)).toBe(1);
+    expect(minutesFromSeconds(2520)).toBe(42);
+    expect(minutesFromSeconds(Number.NaN)).toBe(0);
   });
 });
 
 describe("buildStoryProgressRows", () => {
-  it("完播、續播與還沒聽分成三種狀態，進行中排在前面", () => {
+  it("完播、續播與還沒聽分成三種狀態，進行中排在前面，標題只取主標", () => {
     const rows = buildStoryProgressRows(
       {
         continue: {
@@ -138,11 +152,7 @@ describe("buildStoryProgressRows", () => {
           time: 12,
           updatedAt: 1,
         },
-        engagement: {
-          storiesCompleted: [],
-          reflectionShown: [],
-          platformClicks: {},
-        },
+        engagement: NO_ENGAGEMENT,
       },
       activityWithToday(),
     );
@@ -155,11 +165,118 @@ describe("buildStoryProgressRows", () => {
       plays: 2,
       lastDate: localDateKey(TODAY),
     });
+    expect(ep15?.title).not.toContain("｜");
     expect(ep16?.status).toBe("in-progress");
     expect(untouched?.status).toBe("not-started");
     expect(rows.findIndex((row) => row.slug === "ep-16")).toBeLessThan(
       rows.findIndex((row) => row.slug === "ep-15"),
     );
+  });
+});
+
+describe("buildNextUp", () => {
+  const newest = storiesByNewest()[0]!;
+
+  it("有上次聽到一半的集數時，主按鈕是繼續聽（頁數從 1 算、直接進播放頁）", () => {
+    const progress = {
+      continue: { slug: "ep-16", page: 2, time: 30, updatedAt: 1 },
+      favorites: ["ep-13"],
+      engagement: NO_ENGAGEMENT,
+    };
+    const rows = buildStoryProgressRows(progress, emptyActivityLog());
+    const nextUp = buildNextUp(progress, rows);
+
+    expect(nextUp.firstTime).toBe(false);
+    expect(nextUp.primary).toMatchObject({
+      kind: "resume",
+      slug: "ep-16",
+      page: 3,
+      href: "/story/ep-16/play",
+    });
+    expect(nextUp.more[0]).toMatchObject({ slug: "ep-13", reason: "favorite" });
+    expect(nextUp.more.some((row) => row.slug === "ep-16")).toBe(false);
+    expect(nextUp.more.length).toBeLessThanOrEqual(3);
+  });
+
+  it("存的頁數超出該集頁數（過期或損壞）就不叫繼續聽，改列在聽到一半", () => {
+    const progress = {
+      continue: { slug: "ep-1", page: 30, time: 0, updatedAt: 1 },
+      favorites: [],
+      engagement: NO_ENGAGEMENT,
+    };
+    const nextUp = buildNextUp(
+      progress,
+      buildStoryProgressRows(progress, emptyActivityLog()),
+    );
+    expect(nextUp.primary?.kind).not.toBe("resume");
+    expect(nextUp.more.find((row) => row.slug === "ep-1")?.reason).toBe("in-progress");
+  });
+
+  it("單張封面的集數只有 1 頁，繼續聽不寫第幾頁", () => {
+    const single = getStories().find((story) => story.pageCount <= 1)!;
+    const progress = {
+      continue: { slug: single.slug, page: 0, time: 42, updatedAt: 1 },
+      favorites: [],
+      engagement: NO_ENGAGEMENT,
+    };
+    const nextUp = buildNextUp(
+      progress,
+      buildStoryProgressRows(progress, emptyActivityLog()),
+    );
+    expect(nextUp.primary).toMatchObject({ kind: "resume", slug: single.slug, page: null });
+  });
+
+  it("聽到一半的其他集數排在收藏前面", () => {
+    const progress = {
+      continue: { slug: "ep-16", page: 0, time: 0, updatedAt: 1 },
+      favorites: ["ep-13"],
+      engagement: NO_ENGAGEMENT,
+    };
+    const log: ActivityLogV1 = {
+      ...emptyActivityLog("device-test-2222"),
+      days: {
+        [localDateKey(TODAY)]: {
+          stories: { "ep-21": { seconds: 300, plays: 1, completions: 0 } },
+          games: {},
+        },
+      },
+    };
+    const nextUp = buildNextUp(progress, buildStoryProgressRows(progress, log));
+    expect(nextUp.more.map((row) => [row.slug, row.reason]).slice(0, 2)).toEqual([
+      ["ep-21", "in-progress"],
+      ["ep-13", "favorite"],
+    ]);
+  });
+
+  it("新裝置：主按鈕是最新一集，其他推薦不重複它", () => {
+    const progress = { continue: null, favorites: [], engagement: NO_ENGAGEMENT };
+    const nextUp = buildNextUp(
+      progress,
+      buildStoryProgressRows(progress, emptyActivityLog()),
+    );
+
+    expect(nextUp.firstTime).toBe(true);
+    expect(nextUp.primary).toMatchObject({
+      kind: "latest",
+      slug: newest.slug,
+      href: `/story/${newest.slug}`,
+    });
+    expect(nextUp.more.length).toBeGreaterThan(0);
+    expect(nextUp.more.some((row) => row.slug === newest.slug)).toBe(false);
+  });
+
+  it("上次那集已經聽完就不叫繼續聽；最新一集也聽完時改推其他沒聽完的", () => {
+    const progress = {
+      continue: { slug: newest.slug, page: 5, time: 0, updatedAt: 1 },
+      favorites: [],
+      engagement: { ...NO_ENGAGEMENT, storiesCompleted: [newest.slug] },
+    };
+    const nextUp = buildNextUp(
+      progress,
+      buildStoryProgressRows(progress, emptyActivityLog()),
+    );
+    expect(nextUp.primary?.kind).toBe("recommended");
+    expect(nextUp.primary?.slug).not.toBe(newest.slug);
   });
 });
 

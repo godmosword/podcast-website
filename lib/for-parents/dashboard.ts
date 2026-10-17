@@ -9,6 +9,8 @@ import { medalCount } from "@/lib/gamekit/progress/meta";
 import { stickerLabel } from "@/lib/gamekit/progress/stickers";
 import type { GameKitGameId } from "@/lib/gamekit/types";
 import type { ContinueState, ProgressStore } from "@/lib/progress-store";
+import { storyDisplayTitle } from "@/lib/story-title";
+import { buildNextUp, type NextUp } from "./dashboard-next-up";
 
 const WEEKDAYS = ["日", "一", "二", "三", "四", "五", "六"] as const;
 
@@ -23,14 +25,6 @@ type ParentGameRow = {
   levelsWithMedals: number;
   weekSeconds: number;
   weekSessions: number;
-};
-
-export type ParentStoryRow = {
-  slug: string;
-  title: string;
-  ep: number;
-  href: string;
-  reason: "continue" | "favorite" | "completed" | "reflection";
 };
 
 export type StoryProgressStatus = "completed" | "in-progress" | "not-started";
@@ -49,6 +43,7 @@ type WeeklyDay = {
   date: string;
   weekday: string;
   label: string;
+  isToday: boolean;
   storySeconds: number;
   gameSeconds: number;
 };
@@ -68,9 +63,12 @@ export type ParentDashboardSnapshot = {
   stickerCount: number;
   stickerLabels: string[];
   games: ParentGameRow[];
-  recentStories: ParentStoryRow[];
   recommendedStories: Story[];
   storyProgress: StoryProgressRow[];
+  /** 聽完或聽到一半的集數（順序同 storyProgress）。 */
+  listenedStories: StoryProgressRow[];
+  totalStories: number;
+  nextUp: NextUp;
   weekly: WeeklySummary;
   reflectionSlugs: string[];
   favoritesCount: number;
@@ -118,6 +116,12 @@ export function formatActivityDate(dateKey: string): string {
   return `${Number(match[2])}月${Number(match[3])}日`;
 }
 
+/** 秒數換成分鐘（四捨五入）；有紀錄但不到半分鐘也算 1 分鐘。 */
+export function minutesFromSeconds(seconds: number): number {
+  if (!Number.isFinite(seconds) || seconds <= 0) return 0;
+  return Math.max(1, Math.round(seconds / 60));
+}
+
 export function formatDurationLabel(seconds: number): string {
   if (!Number.isFinite(seconds) || seconds <= 0) return "0 分鐘";
   const minutes = Math.round(seconds / 60);
@@ -145,6 +149,7 @@ export function buildWeeklySummary(
   let storySeconds = 0;
   let gameSeconds = 0;
   let activeDays = 0;
+  const todayKey = localDateKey(today);
   const days = weekDateKeys(today).map((date) => {
     const bucket = log.days[date];
     let dayStory = 0;
@@ -169,6 +174,7 @@ export function buildWeeklySummary(
       date,
       weekday: WEEKDAYS[at.getDay()] ?? "",
       label: formatActivityDate(date),
+      isToday: date === todayKey,
       storySeconds: dayStory,
       gameSeconds: dayGame,
     };
@@ -180,20 +186,6 @@ export function buildWeeklySummary(
     storiesTouched: touched.size,
     activeDays,
   };
-}
-
-export function formatWeeklySummaryLine(summary: WeeklySummary): string {
-  if (summary.storySeconds <= 0 && summary.gameSeconds <= 0) {
-    return "這週還沒有收聽或遊戲紀錄。";
-  }
-  if (summary.storySeconds <= 0) {
-    return `這週還沒有收聽，遊戲 ${formatDurationLabel(summary.gameSeconds)}。`;
-  }
-  const game =
-    summary.gameSeconds > 0
-      ? `，遊戲 ${formatDurationLabel(summary.gameSeconds)}`
-      : "";
-  return `這週聽了 ${summary.storiesTouched} 集、共 ${formatDurationLabel(summary.storySeconds)}${game}。`;
 }
 
 function storyTotals(log: ActivityLogV1, slug: string) {
@@ -243,7 +235,7 @@ export function buildStoryProgressRows(
     }
     return {
       slug: story.slug,
-      title: story.title,
+      title: storyDisplayTitle(story),
       ep: story.ep,
       href: `/story/${story.slug}`,
       status,
@@ -310,62 +302,6 @@ function buildGameRows(
   });
 }
 
-function storyRow(
-  slug: string,
-  reason: ParentStoryRow["reason"],
-): ParentStoryRow | null {
-  const story = getStory(slug);
-  if (!story) return null;
-  return {
-    slug: story.slug,
-    title: story.title,
-    ep: story.ep,
-    href: `/story/${story.slug}`,
-    reason,
-  };
-}
-
-/** 最近收聽／收藏／聽完（去重，continue 優先）。 */
-export function buildRecentStoryRows(
-  progress: Pick<
-    ProgressStore,
-    "continue" | "favorites" | "engagement"
-  >,
-  limit = 5,
-): ParentStoryRow[] {
-  const rows: ParentStoryRow[] = [];
-  const seen = new Set<string>();
-
-  const push = (slug: string, reason: ParentStoryRow["reason"]) => {
-    if (seen.has(slug)) return;
-    const row = storyRow(slug, reason);
-    if (!row) return;
-    seen.add(slug);
-    rows.push(row);
-  };
-
-  if (progress.continue?.slug) {
-    push(progress.continue.slug, "continue");
-  }
-
-  for (const slug of [...progress.favorites].reverse()) {
-    push(slug, "favorite");
-    if (rows.length >= limit) return rows;
-  }
-
-  for (const slug of [...progress.engagement.storiesCompleted].reverse()) {
-    push(slug, "completed");
-    if (rows.length >= limit) return rows;
-  }
-
-  for (const slug of progress.engagement.reflectionShown) {
-    push(slug, "reflection");
-    if (rows.length >= limit) return rows;
-  }
-
-  return rows.slice(0, limit);
-}
-
 /** 推薦尚未標記聽完的集數（收藏優先，再依新到舊）。 */
 export function recommendStoriesForParent(
   progress: Pick<ProgressStore, "favorites" | "engagement">,
@@ -403,6 +339,7 @@ export function buildParentDashboardSnapshot(
   const profile = progress.gameProfile;
   const games = buildGameRows(profile, activity, today);
   const gamesPlayedCount = games.filter((g) => g.played).length;
+  const storyProgress = buildStoryProgressRows(progress, activity);
 
   return {
     gamesPlayedCount,
@@ -411,9 +348,11 @@ export function buildParentDashboardSnapshot(
     stickerCount: profile.stickers.length,
     stickerLabels: profile.stickers.map(stickerLabel),
     games,
-    recentStories: buildRecentStoryRows(progress),
     recommendedStories: recommendStoriesForParent(progress),
-    storyProgress: buildStoryProgressRows(progress, activity),
+    storyProgress,
+    listenedStories: storyProgress.filter((row) => row.status !== "not-started"),
+    totalStories: storyProgress.length,
+    nextUp: buildNextUp(progress, storyProgress),
     weekly: buildWeeklySummary(activity, today),
     reflectionSlugs: progress.engagement.reflectionShown,
     favoritesCount: progress.favorites.length,

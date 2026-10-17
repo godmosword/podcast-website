@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import SiteFooter from "@/components/SiteFooter";
-import SiteHeader from "@/components/SiteHeader";
 import { ParentDashboard } from "@/components/for-parents/ParentDashboard";
 import { ParentGate } from "@/components/for-parents/ParentGate";
 import Icon from "@/components/ui/Icon";
@@ -23,16 +22,20 @@ export const metadata: Metadata = {
 export default function ParentDashboardPage() {
   return (
     <main className={styles.main}>
-      <SiteHeader />
       <header className={styles.header}>
-        <p className={styles.eyebrow}>STEM-P3 家長端</p>
+        <p className={styles.eyebrow}>給爸媽</p>
         <h1 className={styles.title}>家庭儀表板</h1>
         <p className={styles.lede}>
-          在這台裝置上，看看這週聽了多久、哪些故事聽到一半、小遊戲玩了多久。不做成績排名，只幫家長掌握共讀與探索節奏。
+          這台裝置上的收聽與小遊戲紀錄。不排名、不打分，資料只留在這個瀏覽器，不上傳。
         </p>
-        <Link href="/for-parents" className={styles.guideLink}>
-          <Icon name="arrow-left" size={16} className="icon-lead" />回到親子指南
-        </Link>
+        <nav className={styles.links} aria-label="家庭儀表板相關連結">
+          <Link href="/for-parents" className={styles.quietLink}>
+            <Icon name="arrow-left" size={16} className="icon-lead" />回到親子指南
+          </Link>
+          <Link href="/legal#privacy" className={styles.quietLink}>
+            隱私說明
+          </Link>
+        </nav>
       </header>
       <ParentGate>
         <ParentDashboard />
