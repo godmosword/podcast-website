@@ -58,6 +58,8 @@ class DinoSushiInstance implements GameInstance {
   private sessionReported = false;
   /** 剛回到標題的時間：結算畫面用 Enter 按「回標題」時，Host 會在下一幀補呼叫 start()，要忽略。 */
   private readyAt = 0;
+  /** 剛進結算的時間：用 Enter 按「多多吃飽了」會立刻結算，Host 下一幀又把同一次 Enter 當 start()，要忽略。 */
+  private resultAt = 0;
   private controller: DinoSushiController = NOOP_CONTROLLER;
 
   constructor(private readonly options: GameCreateOptions) {}
@@ -87,6 +89,7 @@ class DinoSushiInstance implements GameInstance {
       this.controller.startOrder();
       return;
     }
+    if (Date.now() - this.resultAt < TITLE_ENTER_GRACE_MS) return;
     if (focusOnControl()) return;
     this.controller.restart();
   }
@@ -149,6 +152,7 @@ class DinoSushiInstance implements GameInstance {
   notifyWon(medals: Pick<RoundMedals, "cleared" | "flawless" | "collectedAll">): void {
     this.screen = "result";
     this.status = "won";
+    this.resultAt = Date.now();
     if (this.sessionReported) return;
     this.sessionReported = true;
     this.options.onSession?.({
@@ -165,6 +169,7 @@ class DinoSushiInstance implements GameInstance {
   notifyFinished(): void {
     this.screen = "result";
     this.status = "won";
+    this.resultAt = Date.now();
   }
 
   isInputPaused(): boolean {

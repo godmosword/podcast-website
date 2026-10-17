@@ -53,12 +53,29 @@ describe("dinoSushiAdapter", () => {
     vi.useRealTimers();
   });
 
+  it("用 Enter 按「多多吃飽了」：剛結算時同一次按鍵帶出的 start() 不會馬上再開一輪", () => {
+    vi.useFakeTimers();
+    const ctrl = controller();
+    const inst = new DinoSushiInstance({ kidsMode: true, reducedMotion: false });
+    inst.registerController(ctrl);
+    inst.notifyPlaying("free");
+    inst.notifyFinished();
+    inst.start();
+    expect(ctrl.restart).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(500);
+    inst.start();
+    expect(ctrl.restart).toHaveBeenCalledTimes(1);
+    vi.useRealTimers();
+  });
+
   it("結算時焦點在按鈕或連結上：Enter 交給那顆鈕，Host 的 start() 不另外重開一輪", () => {
     const ctrl = controller();
     const inst = new DinoSushiInstance({ kidsMode: true, reducedMotion: false });
     inst.registerController(ctrl);
     inst.notifyPlaying("order");
+    vi.useFakeTimers();
     inst.notifyWon({ cleared: true, flawless: false, collectedAll: false });
+    vi.advanceTimersByTime(500);
     const body = { closest: () => null };
     const book = { closest: (sel: string) => (sel.includes("button") ? book : null) };
     vi.stubGlobal("document", { body, activeElement: book });
@@ -68,17 +85,21 @@ describe("dinoSushiAdapter", () => {
     inst.start();
     expect(ctrl.restart).toHaveBeenCalledTimes(1);
     vi.unstubAllGlobals();
+    vi.useRealTimers();
   });
 
   it("結算後 start／restart 都是同模式再來一輪", () => {
+    vi.useFakeTimers();
     const ctrl = controller();
     const inst = new DinoSushiInstance({ kidsMode: true, reducedMotion: false });
     inst.registerController(ctrl);
     inst.notifyPlaying("order");
     inst.notifyWon({ cleared: true, flawless: false, collectedAll: false });
+    vi.advanceTimersByTime(500);
     inst.start();
     inst.restart();
     expect(ctrl.restart).toHaveBeenCalledTimes(2);
+    vi.useRealTimers();
   });
 
   it("標題頁 restart 回標題", () => {
