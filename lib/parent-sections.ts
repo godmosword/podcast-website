@@ -10,7 +10,7 @@ export const PARENT_SECTION_ITEMS = [
     href: "/for-parents/articles",
     icon: "notebook",
     description:
-      "車車遊樂園在方格子刊登的育兒文章，依發布先後排列。",
+      "馬米寫給爸媽的育兒心得與日常經驗，同步自方格子，每篇短短幾分鐘就能讀完。",
   },
   {
     id: "parent-travel-abroad",

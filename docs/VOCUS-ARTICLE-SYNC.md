@@ -30,6 +30,10 @@ Lexical HTML 轉成 `ParentArticleBlock[]`，不改寫文字。
 - 發布日用 `publishAt` 轉台北日曆日。`slug` 為 `vocus-<contentId>`，用 `sourceUrl` 去重。
 - 摘要沿用 `lib/parent-articles.test.ts`：第一個 spacer 之前的 paragraph，以換行接起。
 
+## 列表頁怎麼排
+
+`/for-parents/articles` 由 `parentArticlesLayout()` 分三區：發布日最新的一篇當封面故事；`data/parent-article-series.ts` 裡的系列照 `slugs` 順序整組列出；其餘文章依月份新到舊放在「更多文章」。同步進來的新文不用手動處理，會自動成為最新一篇。要把幾篇編成系列時，只改系列檔，不要在 `data/parent-articles.ts` 的 `PARENT_ARTICLES` 之後加陣列：`appendParentArticleSource` 用該檔最後一個 `];` 當插入點（`lib/parent-articles.test.ts` 有守衛）。
+
 ## 手動跑
 
 ```bash

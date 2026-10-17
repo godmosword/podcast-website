@@ -11,33 +11,6 @@
   color: var(--ink);
 }
 
-.header {
-  width: min(720px, 100%);
-  margin-inline: auto;
-}
-
-.eyebrow {
-  margin: 0 0 6px;
-  color: var(--accent-ink);
-  font-size: var(--fs-label);
-  font-weight: 800;
-}
-
-.title {
-  margin: 0;
-  color: var(--ink);
-  font-size: var(--fs-h1);
-  font-weight: 800;
-  line-height: 1.25;
-}
-
-.lede {
-  margin: 10px 0 0;
-  color: var(--ink-soft);
-  font-size: var(--fs-body);
-  line-height: 1.75;
-}
-
 @media (max-width: 720px) {
   .main {
     padding-inline: calc(14px + var(--safe-left)) calc(14px + var(--safe-right));

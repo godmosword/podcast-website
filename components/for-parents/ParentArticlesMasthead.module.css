@@ -1,0 +1,86 @@
+.masthead {
+  display: grid;
+  gap: 6px;
+  width: min(720px, 100%);
+  margin-inline: auto;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--accent-ink);
+  font-size: var(--fs-label);
+  font-weight: 800;
+}
+
+.title {
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--fs-h1);
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.byline {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.avatar {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-circle);
+  object-fit: cover;
+  background: var(--warm-portrait-bg);
+  box-shadow: 0 0 0 3px var(--surface-elevated), var(--shadow-sm);
+}
+
+.bylineText {
+  min-width: 0;
+}
+
+.lede {
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 6px;
+  margin: 2px 0 0;
+  color: var(--ink-soft);
+  font-size: var(--fs-label);
+  font-variant-numeric: tabular-nums;
+}
+
+/* quiet 階：底線文字；min-height 撐出 44px 觸控區，負 margin 讓這一行不被撐高 */
+.vocus {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  min-height: 44px;
+  margin-block: -12px;
+  color: var(--cta-quiet-fg);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* 手機上分隔點會落在行尾、外連獨佔下一行，直接拿掉 */
+@media (max-width: 640px) {
+  .metaSep {
+    display: none;
+  }
+}
+
+.vocus:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
+}
