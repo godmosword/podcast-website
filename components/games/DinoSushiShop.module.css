@@ -500,10 +500,17 @@
 }
 
 /* ── 依舞台大小加減道具 ───────────────────────────────── */
-/* 矮舞台（320×568）：燈籠收起；櫃台前板只剩約 13px，店名也收起 */
+/* 矮舞台（320×568）：燈籠收起；櫃台前板只剩約 13px，店名也收起。 */
 @container duo-stage (max-height: 190px) {
   .lantern,
   .shopName {
+    display: none;
+  }
+}
+
+/* 很窄的左欄：燈籠讓給排隊的五顆頭像。店名仍留在櫃台。 */
+@container duo-stage (max-width: 220px) {
+  .lantern {
     display: none;
   }
 }

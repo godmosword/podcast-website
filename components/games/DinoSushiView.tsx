@@ -138,6 +138,12 @@ export function DinoSushiView({
     setBook(false);
   }, [stickers]);
 
+  /* 標題鈕若在摺線下面，點下去的捲動會留著，雨棚上的排隊就被黏住的抬頭切掉。進廚房回到頂。 */
+  useEffect(() => {
+    if (screen !== "kitchen") return;
+    window.scrollTo(0, 0);
+  }, [screen]);
+
   /* controller 經 ref 轉呼叫、只在 mount 註冊一次（同消消樂 G-C1：避免 paused 連鎖重註冊把狀態打回 ready）。 */
   const controllerRef = useRef({ begin, goToTitle, mode });
   controllerRef.current = { begin, goToTitle, mode };

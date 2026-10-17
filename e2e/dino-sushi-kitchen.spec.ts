@@ -174,11 +174,13 @@ async function layout(page: Page) {
     }));
     const now = document.querySelector("[data-customer-queue] li[data-state='now']");
     const bubble = document.querySelector("[role='img'][data-customer]");
+    const badge = document.querySelector("[class*='replayBadge']");
     const face = document.querySelector("[class*='guestFaceWrap']");
     const seat = document.querySelector("[data-customer-seat]");
     const duo = document.querySelector("[data-face]");
     const plates = document.querySelector("[class*='plates']");
     const stageR = rect(stage);
+    const headerBtns = [...document.querySelectorAll("[class*='playHeader'] button")].map((el) => rect(el));
     const bubbleR = rect(bubble);
     const inside = (r: { x: number; y: number; w: number; h: number } | null) =>
       !!r &&
@@ -201,9 +203,26 @@ async function layout(page: Page) {
       queueButtons: queue?.querySelectorAll("button").length ?? 0,
       items,
       nowW: now ? now.getBoundingClientRect().width : 0,
+      minWait: Math.min(...items.filter((item) => item.state === "wait").map((item) => item.w), Infinity),
+      /* 橘框／白框是 3px 的陰影，頭像框要連框一起留在舞台和視窗裡 */
+      ringIn: [...document.querySelectorAll("[data-customer-queue] li")].every((el) => {
+        const b = el.getBoundingClientRect();
+        const box = { x: b.x - 3, y: b.y - 3, w: b.width + 6, h: b.height + 6 };
+        return (
+          inside(box) &&
+          box.y >= -0.5 &&
+          box.x >= -0.5 &&
+          box.y + box.h <= window.innerHeight + 0.5 &&
+          box.x + box.w <= window.innerWidth + 0.5
+        );
+      }),
       faceW: face ? face.getBoundingClientRect().width : 0,
       seatPE: seat ? getComputedStyle(seat).pointerEvents : "",
       nowVsDuo: area(rect(now), rect(duo)),
+      queueVsDuo: area(rect(queue), rect(duo)),
+      queueVsBubble: area(rect(queue), bubbleR),
+      queueVsBadge: area(rect(queue), rect(badge)),
+      queueVsHeader: headerBtns.reduce((sum, btn) => sum + area(rect(queue), btn), 0),
       seatVsDuo: area(rect(seat), rect(duo)),
       seatVsPlates: area(rect(seat), rect(plates)),
       bubbleVsPlates: area(bubbleR, rect(plates)),
@@ -217,10 +236,11 @@ async function layout(page: Page) {
 }
 
 for (const vp of [
-  { width: 390, height: 844, now: 52, face: 48 },
-  { width: 320, height: 568, now: 40, face: 40 },
-  { width: 844, height: 390, now: 52, face: 40 },
-  { width: 667, height: 375, now: 52, face: 40 },
+  { width: 390, height: 844, now: 48, wait: 32, face: 48 },
+  { width: 320, height: 568, now: 40, wait: 32, face: 36 },
+  { width: 844, height: 390, now: 48, wait: 32, face: 40 },
+  { width: 667, height: 375, now: 44, wait: 28, face: 40 },
+  { width: 568, height: 320, now: 40, wait: 28, face: 36 },
 ]) {
   test(`${vp.width}×${vp.height}：門口排隊與吃的時候的座位不搶點、不壓多多`, async ({ page }) => {
     await page.setViewportSize(vp);
@@ -229,8 +249,13 @@ for (const vp of [
     const queue = page.locator("[data-customer-queue]");
     await expect(queue).toBeVisible();
     await expect(queue.locator("li")).toHaveCount(5);
-    // 泡泡進場是 340ms 的 scale，量太早會把 56px 頭像量成 0.6 倍
+    await page.evaluate(() => window.scrollTo(0, 0));
+    // 泡泡進場是 340ms 的 scale。量太早會把頭像量小，小喇叭也還在往上落到排隊旁邊。
     await expect.poll(async () => (await layout(page)).faceW, { timeout: 2000 }).toBeGreaterThanOrEqual(vp.face);
+    await page.waitForFunction(() => {
+      const el = document.querySelector("[class*='bubbleWrap']");
+      return !!el && el.getAnimations().every((anim) => anim.playState === "finished");
+    });
     const ordering = await layout(page);
     expect(ordering.queueHidden).toBe("true");
     expect(ordering.queuePE).toBe("none");
@@ -238,11 +263,15 @@ for (const vp of [
     expect(ordering.items[0]?.state).toBe("now");
     expect(ordering.items.slice(1).every((item) => item.state === "wait")).toBe(true);
     expect(ordering.nowW).toBeGreaterThanOrEqual(vp.now);
-    expect(Math.min(...ordering.items.filter((item) => item.state === "wait").map((item) => item.w))).toBeLessThan(
-      ordering.nowW,
-    );
+    expect(ordering.minWait).toBeGreaterThanOrEqual(vp.wait);
+    expect(ordering.minWait).toBeLessThan(ordering.nowW);
     expect(ordering.faceW).toBeGreaterThanOrEqual(vp.face);
+    expect(ordering.ringIn).toBe(true);
     expect(ordering.nowVsDuo).toBe(0);
+    expect(ordering.queueVsDuo).toBe(0);
+    expect(ordering.queueVsBubble).toBe(0);
+    expect(ordering.queueVsBadge).toBe(0);
+    expect(ordering.queueVsHeader).toBe(0);
     expect(ordering.bubbleVsPlates).toBe(0);
     expect(ordering.queueInside).toBe(true);
     expect(ordering.bubbleInside).toBe(true);
@@ -301,6 +330,7 @@ test("減少動態時，座位上的愛心不跳", async ({ page }) => {
 
 for (const vp of [
   { width: 320, height: 568 },
+  { width: 568, height: 320 },
   { width: 667, height: 375 },
   { width: 844, height: 390 },
 ]) {
@@ -312,6 +342,7 @@ for (const vp of [
       await serve(page, n);
       await waitServed(page, n);
     }
+    await page.evaluate(() => window.scrollTo(0, 0));
     await expect.poll(async () => (await layout(page)).faceW, { timeout: 2000 }).toBeGreaterThanOrEqual(36);
     const geo = await layout(page);
     expect(geo.items.filter((item) => item.state === "done")).toHaveLength(4);

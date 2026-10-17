@@ -82,6 +82,15 @@
   --serve-w: min(30cqw, 110px);
 }
 
+/* 點餐：雨棚下留一條排隊帶。多多的頭改從這條下面開始，才不會被大頭像蓋住。自由做不設。 */
+.duoArea[data-mode="order"] {
+  --queue-top: 8px;
+  --queue-now: 52px;
+  --queue-wait: 34px;
+  --queue-clear: calc(var(--queue-top) + var(--queue-now) + 14px);
+  --duo-w: min(var(--duo-max-w), calc(100cqh - var(--counter-h) - var(--queue-clear)));
+}
+
 .duoArt {
   position: absolute;
   z-index: 1;
@@ -206,43 +215,45 @@
 }
 
 /*
- * 門口排隊：今天 5 個位子，排在雨棚下、多多右側（入口這邊）。
- * 現在這位約 56px、橘框；還沒輪到的小顆；做完打勾。
- * 整列 pointer-events: none，不搶砧板、托盤、「給多多吃」或泡泡的點擊。
- * 窄欄位時小顆會縮小，現在這位仍最大。矮舞台（320 直向）整列收進雨棚，才不會把泡泡壓到疊盤上。
+ * 門口排隊：今天 5 個位子，排在雨棚下、左燈籠右邊。
+ * 現在這位約 52px、橘框；還沒輪到的約 34px（再矮的橫向舞台也不低於 28px）；做完打勾。
+ * 尺寸鎖住，不靠縮小去塞進縫裡。整列離舞台上緣與圓角一段，overflow 才不會切到頭。
+ * pointer-events: none，不搶抬頭按鈕、泡泡、砧板或托盤。
  */
 .queue {
   position: absolute;
   z-index: 4;
-  top: 1px;
-  right: 4px;
-  /* 整列停在多多右側，不壓臉。現在這位固定 56px，小顆才縮小。 */
-  left: calc(var(--duo-left) + var(--duo-w) + 2px);
+  box-sizing: border-box;
+  top: var(--queue-top, 8px);
+  /* 讓過左燈籠（left 4% ＋ 燈籠寬）。燈籠收起的矮舞台另外把 left 收回。 */
+  left: calc(4% + clamp(26px, 9cqw, 44px) + 8px);
+  right: 8px;
   display: flex;
   align-items: flex-end;
-  justify-content: flex-end;
-  gap: 3px;
-  height: 58px;
+  justify-content: flex-start;
+  gap: 4px;
+  height: calc(var(--queue-now, 52px) + 8px);
   margin: 0;
-  padding: 0;
+  /* 內距留給橘框／白框的 box-shadow，陰影才算在這一列裡面 */
+  padding: 4px;
   list-style: none;
   pointer-events: none;
 }
 
 .queueItem {
   position: relative;
-  flex: 1 1 0;
-  width: auto;
-  min-width: 14px;
-  max-width: 26px;
+  flex: 0 0 var(--queue-wait, 34px);
+  width: var(--queue-wait, 34px);
+  min-width: var(--queue-wait, 34px);
+  max-width: var(--queue-wait, 34px);
   aspect-ratio: 1;
 }
 
 .queueItem[data-state="now"] {
-  flex: 0 0 56px;
-  width: 56px;
-  min-width: 40px;
-  max-width: 56px;
+  flex: 0 0 var(--queue-now, 52px);
+  width: var(--queue-now, 52px);
+  min-width: var(--queue-now, 52px);
+  max-width: var(--queue-now, 52px);
 }
 
 .queueFace {
@@ -270,9 +281,9 @@
   pointer-events: none;
 }
 
-/* 點餐時泡泡讓到排隊下面。多留 14px 給泡泡左上角的小喇叭，才不會壓到大頭像。 */
+/* 點餐時泡泡讓到排隊下面。多留小喇叭徽章（往上 14px），才不會壓到大頭像。 */
 .duoArea[data-mode="order"] .talk {
-  top: 74px;
+  top: calc(var(--queue-top, 8px) + var(--queue-now, 52px) + 22px);
 }
 
 /*
@@ -573,8 +584,17 @@
 @container duo-stage (max-height: 190px) {
   .bubble {
     box-sizing: border-box;
-    min-height: 64px;
-    padding-right: 52px;
+    min-height: 0;
+    padding: 4px 48px 4px 6px;
+  }
+
+  .bubbleItem {
+    --cell: 30px;
+  }
+
+  /* 第幾單的小點改由排隊的打勾表示，省下一列才不會壓到疊盤 */
+  .orderDots {
+    display: none;
   }
 
   .guest {
@@ -599,8 +619,8 @@
   }
 
   .guestFaceWrap {
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
   }
 
   .guestHeart,
@@ -609,30 +629,16 @@
     height: 14px;
   }
 
-  /* 舞台太矮時排隊收進雨棚，泡泡維持靠上，才不會壓到疊盤 */
+  /* 矮舞台燈籠收起。頭像仍 ≥32，現在這位更大，整列留在圓角裡，泡泡才讓得開疊盤。 */
   .queue {
-    height: 46px;
-  }
-
-  .queueItem {
-    max-width: 20px;
-    min-width: 12px;
-  }
-
-  .queueItem[data-state="now"] {
-    flex: 0 0 44px;
-    width: 44px;
-    min-width: 44px;
-    max-width: 44px;
-  }
-
-  .queueCheck {
-    width: 12px;
-    height: 12px;
+    left: 8px;
+    top: 6px;
+    --queue-now: 44px;
+    --queue-wait: 32px;
   }
 
   .duoArea[data-mode="order"] .talk {
-    top: calc(var(--awning-h) + 30px);
+    top: 72px;
   }
 
   .seat {
@@ -647,55 +653,62 @@
   }
 }
 
-/* 窄又矮、頭頂快貼到雨棚時：56px 會壓到多多的臉，先收到 40。又高又窄的橫式左欄由下一條拉回 56。 */
-@container duo-stage (max-width: 270px) {
-  .queueItem {
-    min-width: 12px;
-    max-width: 18px;
-  }
-
-  .queueItem[data-state="now"] {
-    flex: 0 0 40px;
-    width: 40px;
-    min-width: 36px;
-    max-width: 40px;
-  }
-
+/* 寬又高的舞台會多掛一盞右燈籠，排隊再往右讓。 */
+@container duo-stage (min-width: 380px) and (min-height: 300px) {
   .queue {
-    height: 42px;
-  }
-
-  .duoArea[data-mode="order"] .talk {
-    top: 58px;
+    left: calc(4% + 2 * clamp(26px, 9cqw, 44px) + clamp(12px, 4cqw, 24px) + 8px);
   }
 }
 
 /*
- * 窄又高的舞台（667×375 的左欄）：多多的頭離雨棚還有一大段，
- * 排隊可以拉滿整條雨棚，現在這位維持 56px，旁邊的朋友也看得清。
+ * 窄舞台（橫向左欄約 260px）：52＋四顆 34 會頂到右緣。
+ * 等候收到 30、現在這位 48，仍看得清誰比較大，也不低於 28。
  */
-@container duo-stage (max-width: 300px) and (min-height: 280px) {
+@container duo-stage (max-width: 270px) {
+  .queue,
+  .duoArea[data-mode="order"] .talk {
+    --queue-now: 48px;
+    --queue-wait: 30px;
+  }
+
+  /* 小喇叭徽章往上 14px，再留一點縫，才不會壓到最後一顆等候頭像 */
+  .duoArea[data-mode="order"] .talk {
+    top: calc(var(--queue-top, 8px) + 48px + 30px);
+  }
+}
+
+/* 很窄的左欄（568×320 舞台約 164px）：一列塞不下 28px 的五顆，改成兩列，不切掉。 */
+@container duo-stage (max-width: 220px) {
   .queue {
-    /* 左邊讓給燈籠；雨棚還夠放 56px 的現在這位 */
-    left: 42px;
+    left: 8px;
     right: 6px;
-    height: 58px;
-  }
-
-  .queueItem {
-    min-width: 18px;
-    max-width: 26px;
-  }
-
-  .queueItem[data-state="now"] {
-    flex: 0 0 56px;
-    width: 56px;
-    min-width: 56px;
-    max-width: 56px;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    height: auto;
+    row-gap: 4px;
+    --queue-now: 44px;
+    --queue-wait: 28px;
   }
 
   .duoArea[data-mode="order"] .talk {
-    top: 74px;
+    /* 兩列（44＋4＋28）再加小喇叭徽章 */
+    top: calc(var(--queue-top, 8px) + 44px + 4px + 28px + 8px + 18px);
+  }
+}
+
+/* 直向舞台還放得下排隊，但第 5 單的小點若再佔一列會壓到疊盤。小點改疊在泡泡底緣。 */
+@container duo-stage (max-height: 300px) and (min-height: 191px) {
+  .bubble {
+    padding-bottom: 12px;
+  }
+
+  .orderDots {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 3px;
+    justify-content: center;
+    margin-top: 0;
   }
 }
 
@@ -778,6 +791,13 @@
   height: 8px;
   background: #5fbf85;
   box-shadow: inset 0 0 0 1.5px #3f7f2a;
+}
+
+/* 寫在 .orderDots 後面，矮舞台才蓋得過 display:flex。排隊已經表示做到哪一單。 */
+@container duo-stage (max-height: 190px) {
+  .orderDots {
+    display: none;
+  }
 }
 
 /* 多多的字卡：吃的時候在雨棚下（泡泡收起）；缺料時泡泡還在，字卡排在泡泡下面 */
