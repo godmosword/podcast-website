@@ -13,6 +13,7 @@ import {
   type RoundAction,
   type RoundState,
 } from "@/lib/games/dino-sushi/round";
+import { BASE_IDLE_HINT_MS, idleHintMs, teachesFirstOrder, type OrderTier } from "@/lib/games/dino-sushi/difficulty";
 import { addSfx, evictThenPop, MOOD_SFX, plateSfx, SUSHI_SFX, varied } from "@/lib/games/dino-sushi/sfx";
 import { MAX_TOPPINGS } from "@/lib/games/dino-sushi/sushi";
 import { toppingById, type BaseId, type ToppingId } from "@/lib/games/dino-sushi/toppings";
@@ -41,16 +42,16 @@ const LOOK_DONE_MS_REDUCED = 600;
 /** 字卡在反應結束後再留一下，孩子才看得到。 */
 const CAPTION_LINGER_MS = 1800;
 const BRUSH_MS = 1400;
-/** 閒置這麼久才亮下一個要點的東西（約 4.5 秒）。新訂單出現時重新起算，不是從按「給多多吃」那一刻算。 */
-export const IDLE_HINT_MS = 4_500;
+/** 閒置這麼久才亮下一個要點的東西（約 4.5 秒；進階檔 7 秒，見 difficulty）。新訂單出現時重新起算，不是從按「給多多吃」那一刻算。 */
+export const IDLE_HINT_MS = BASE_IDLE_HINT_MS;
 
-type PlayAction = { type: "init"; mode: Mode; seed: number } | { type: "clear" } | RoundAction;
+type PlayAction = { type: "init"; mode: Mode; seed: number; tier: OrderTier } | { type: "clear" } | RoundAction;
 
 /** 排程中的一步；暫停時 due 改存「剩幾毫秒」。 */
 type Scheduled = { due: number; fn: () => void };
 
 function playReducer(state: RoundState | null, action: PlayAction): RoundState | null {
-  if (action.type === "init") return createRound(action.mode, action.seed);
+  if (action.type === "init") return createRound(action.mode, action.seed, action.tier);
   if (action.type === "clear") return null;
   return state ? roundReducer(state, action) : state;
 }
@@ -142,6 +143,8 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
   const timers = useRef<Map<number, Scheduled>>(new Map());
   const parked = useRef<Scheduled[]>([]);
   const idleTimer = useRef<number | null>(null);
+  /** 這一輪閒置多久才亮提示（跟著難度檔位）。 */
+  const idleMs = useRef(IDLE_HINT_MS);
   /** 暫停時閒置計時正在跑：繼續時重新起算（不然暫停過的那一單再也不會亮提示）。 */
   const idleParked = useRef(false);
 
@@ -150,7 +153,7 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
     idleTimer.current = window.setTimeout(() => {
       idleTimer.current = null;
       setIdle(true);
-    }, IDLE_HINT_MS);
+    }, idleMs.current);
   }, []);
 
   const schedule = useCallback((ms: number, fn: () => void) => {
@@ -214,14 +217,19 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
     armIdle();
   }, [armIdle]);
 
+  /** tier：難度檔位（只影響點餐的料數、提示等待與首單教學）；自由做傳什麼都一樣。 */
   const start = useCallback(
-    (mode: Mode, seed?: number) => {
+    (mode: Mode, seed?: number, tier: OrderTier = "normal") => {
       clearTimers();
+      /* 難度只管點餐；自由做一律照一般檔 */
+      const applied: OrderTier = mode === "order" ? tier : "normal";
+      idleMs.current = idleHintMs(applied);
+      if (!teachesFirstOrder(applied)) setTaught(true);
       setPhase("idle");
       setCaption(null);
       setChoosingBase(false);
       setBrushing(false);
-      dispatch({ type: "init", mode, seed: seed ?? nextSeed() });
+      dispatch({ type: "init", mode, seed: seed ?? nextSeed(), tier: applied });
       touch();
     },
     [clearTimers, touch],

@@ -279,3 +279,36 @@ describe("等選飯與選飯過場", () => {
     expect(audio.voices).toHaveBeenCalledWith(SUSHI_SFX.base);
   });
 });
+
+describe("難度檔位", () => {
+  it("進階：第 1 單就 2 樣料、不出首單手指，閒置 7 秒才亮提示", () => {
+    const { result } = setup();
+    act(() => result.current.actions.start("order", 7, "advanced"));
+    expect(result.current.round!.tier).toBe("advanced");
+    expect(result.current.round!.orders[0]!.toppings).toHaveLength(2);
+    expect(result.current.teaching).toBe(false);
+    expect(result.current.hint).toBeNull();
+    act(() => {
+      vi.advanceTimersByTime(IDLE_HINT_MS + 100);
+    });
+    expect(result.current.hint).toBeNull();
+    act(() => {
+      vi.advanceTimersByTime(7000 - IDLE_HINT_MS);
+    });
+    expect(result.current.hint).not.toBeNull();
+  });
+
+  it("輕鬆：五單料數 1、1、1、2、2，照樣教第 1 單", () => {
+    const { result } = setup();
+    act(() => result.current.actions.start("order", 7, "easy"));
+    expect(result.current.round!.orders.map((o) => o.toppings.length)).toEqual([1, 1, 1, 2, 2]);
+    expect(result.current.teaching).toBe(true);
+  });
+
+  it("自由做不吃檔位：照一般檔的提示時間、round 記 normal", () => {
+    const { result } = setup();
+    act(() => result.current.actions.start("free", 7, "advanced"));
+    expect(result.current.round!.tier).toBe("normal");
+    expect(result.current.round!.orders).toHaveLength(0);
+  });
+});
