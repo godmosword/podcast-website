@@ -109,7 +109,8 @@ describe("CandyMatchResult", () => {
 
   it("挑戰沒過：用圖案標出還差幾台，達標的不重複", () => {
     const round = buildRound(2, "challenge", { replay: false, rng: () => 0.5 });
-    const progress: CandyProgress = { ...freshCandyProgress(4), collected: [36, 34, 0, 0] };
+    // 挑戰第 3 關兩色各 18：小紅差 1、計程車差 2，完成章不出現。
+    const progress: CandyProgress = { ...freshCandyProgress(4), collected: [17, 16, 0, 0] };
     render(
       <CandyMatchResult
         round={round}
