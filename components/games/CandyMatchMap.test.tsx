@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { CANDY_MATCH_LEVELS } from "@/lib/games/candy-match/levels";
 import type { CandyMode } from "@/lib/games/candy-match/stages";
@@ -18,7 +18,12 @@ const TWO_COLOR: CandyStationPreview = {
   replay: false,
 };
 
-function renderMap(mode: CandyMode = "easy", onModeChange = vi.fn()) {
+function renderMap(
+  mode: CandyMode = "easy",
+  onModeChange = vi.fn(),
+  challengeUnlocked = false,
+  onChallengeUnlockedChange = vi.fn(),
+) {
   return render(
     <CandyMatchMap
       levels={CANDY_MATCH_LEVELS}
@@ -26,6 +31,8 @@ function renderMap(mode: CandyMode = "easy", onModeChange = vi.fn()) {
       maxCleared={2}
       mode={mode}
       onModeChange={onModeChange}
+      challengeUnlocked={challengeUnlocked}
+      onChallengeUnlockedChange={onChallengeUnlockedChange}
       previewFor={() => TWO_COLOR}
       onStart={vi.fn()}
     />,
@@ -45,7 +52,7 @@ describe("CandyMatchMap", () => {
 
   it("模式只看圖示和兩個字，完整說明留給讀屏", () => {
     const onModeChange = vi.fn();
-    renderMap("easy", onModeChange);
+    renderMap("easy", onModeChange, true);
 
     const easy = screen.getByRole("radio", { name: /輕鬆冒險/ });
     const hard = screen.getByRole("radio", { name: /挑戰冒險/ });
@@ -81,6 +88,60 @@ describe("CandyMatchMap", () => {
     expect(start.getAttribute("data-next")).toBe("true");
     expect(start.textContent).toBe("");
     expect(start.querySelector("svg")).toBeTruthy();
+  });
+
+  it("沒打開時地圖上沒有挑戰，短按齒輪不會開，按住或 Enter 才開", () => {
+    vi.useFakeTimers();
+    try {
+      const onChallengeUnlockedChange = vi.fn();
+      renderMap("challenge", vi.fn(), false, onChallengeUnlockedChange);
+
+      expect(screen.queryByRole("radio")).toBeNull();
+      expect(screen.queryByText("挑戰")).toBeNull();
+      const gate = screen.getByRole("button", { name: "家長工具" });
+      expect(gate.getAttribute("aria-describedby")).toBeTruthy();
+
+      fireEvent.pointerDown(gate);
+      act(() => {
+        vi.advanceTimersByTime(699);
+      });
+      fireEvent.pointerUp(gate);
+      act(() => {
+        vi.advanceTimersByTime(700);
+      });
+      expect(screen.queryByRole("dialog")).toBeNull();
+
+      fireEvent.pointerDown(gate);
+      act(() => {
+        vi.advanceTimersByTime(700);
+      });
+      const dialog = screen.getByRole("dialog", { name: "家長工具" });
+      expect(dialog).toBeTruthy();
+      expect(within(dialog).getByText("星星分開記。關掉之後，挑戰的星星還在。")).toBeTruthy();
+      fireEvent.click(within(dialog).getByRole("button", { name: "挑戰" }));
+      expect(onChallengeUnlockedChange).toHaveBeenCalledWith(true);
+
+      fireEvent.click(screen.getByRole("button", { name: "關閉" }));
+      expect(screen.queryByRole("dialog")).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("打開之後可以切回輕鬆，家長再關掉時不改已選的玩法", () => {
+    const onModeChange = vi.fn();
+    const onChallengeUnlockedChange = vi.fn();
+    renderMap("challenge", onModeChange, true, onChallengeUnlockedChange);
+
+    const easy = screen.getByRole("radio", { name: /輕鬆冒險/ });
+    expect(screen.getByRole("radio", { name: /挑戰冒險/ }).getAttribute("aria-checked")).toBe("true");
+    fireEvent.click(easy);
+    expect(onModeChange).toHaveBeenCalledWith("easy");
+
+    fireEvent.keyDown(screen.getByRole("button", { name: "家長工具" }), { key: "Enter" });
+    fireEvent.click(screen.getByRole("button", { name: "挑戰" }));
+    expect(onChallengeUnlockedChange).toHaveBeenCalledWith(false);
+    expect(onModeChange).not.toHaveBeenCalledWith("challenge");
   });
 
   it("拿掉「怎麼玩？」和給大人看的說明句", () => {

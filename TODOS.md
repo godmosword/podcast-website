@@ -49,6 +49,7 @@
 - ✅ **手捲餡料在備料盤上太小**：料放大、坐在飯口上冒出海苔；三樣料時中間那樣抬到兩側上方。見本 commit。
 - ✅ **金盤素材**：換成核准的黏土金盤 `shop/plate-gold.webp`（去白底、縮進跟薄荷綠盤同一個 695×403 框）。拿掉濾鏡、程式高光與 CSS 星星。視角仍比迴轉帶的盤子更俯視，外框已對齊。見本 commit。
 - **重錄 darwin 視覺基準（遊樂園小修）**：矮橫向廚房的泡泡與托盤、結算金盤會變。請在 Mac 上重錄並逐張目檢：`e2e/visual.spec.ts-snapshots/dino-sushi-kitchen-844x390-light-chromium-darwin.png`、`e2e/visual.spec.ts-snapshots/dino-sushi-result-390-light-chromium-darwin.png`。消消樂與著色本的既有基準這次像素不該變（格子下限只影響放不下 48px 的畫面，那些沒有 darwin 基準）。Linux 產不出 darwin 基準，這次 push 用 `SKIP_VISUAL_GATE=1`。`ops · S · 使用者 Mac`
+- **重錄 darwin 視覺基準（消消樂挑戰改由家長打開）**：地圖預設不再顯示「輕鬆／挑戰」，右上改成齒輪。請在 Mac 上重錄並逐張目檢：`e2e/visual.spec.ts-snapshots/candy-map-390-light-chromium-darwin.png`。標題、局內、著色本與壽司屋基準這次像素不該變。Linux 產不出 darwin 基準，這次 push 用 `SKIP_VISUAL_GATE=1`。`ops · S · 使用者 Mac`
 - ✅ **實玩審批次 R（Plan `~/.claude/plans/dino-sushi-review-2026-10-16.md`）**：
   - R1 結算新貼紙改成換行格子（56px，一列 5 張），放不下時最後一格「+N」打開貼紙書；星星提示帶進度（「5 盤都一次做對（4/5）」）。
   - R2 「放進貼紙書」留在一屏：直向依高度收店面（≥800 收矮＋兩列、728–799 更矮、641–727 收起），桌機店面與結算並排，矮橫向兩欄。共用 `GameEndStation` 不動。

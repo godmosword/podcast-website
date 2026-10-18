@@ -1,5 +1,32 @@
 import { test, expect } from "@playwright/test";
 
+async function unlockCandyChallenge(page: import("@playwright/test").Page) {
+  const gate = page.getByRole("button", { name: "家長工具", exact: true });
+  await gate.click();
+  await expect(page.getByRole("dialog", { name: "家長工具" })).toHaveCount(0);
+  const box = await gate.boundingBox();
+  if (!box || box.width < 48 || box.height < 48) {
+    throw new Error(`家長工具按鈕小於 48px：${box?.width}×${box?.height}`);
+  }
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.waitForTimeout(800);
+  const dialog = page.getByRole("dialog", { name: "家長工具" });
+  await expect(dialog).toBeVisible();
+  await page.mouse.up();
+  const unlock = dialog.getByRole("button", { name: "挑戰", exact: true });
+  const close = page.getByRole("button", { name: "關閉", exact: true });
+  const unlockBox = await unlock.boundingBox();
+  const closeBox = await close.boundingBox();
+  if (!unlockBox || unlockBox.height < 48 || !closeBox || closeBox.width < 48 || closeBox.height < 48) {
+    throw new Error(`家長工具裡的按鈕小於 48px：挑戰 ${unlockBox?.height}、關閉 ${closeBox?.width}×${closeBox?.height}`);
+  }
+  await unlock.click();
+  await expect(dialog.getByRole("button", { name: "挑戰", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: "關閉", exact: true }).click();
+  await expect(page.getByRole("radio", { name: /挑戰冒險/ })).toBeVisible();
+}
+
 async function seed(page: import("@playwright/test").Page, cleared = 0) {
   await page.addInitScript((cleared) => {
     (window as unknown as { __candyMatchSeed: number }).__candyMatchSeed = 11;
@@ -18,6 +45,8 @@ test("消消樂：舊存檔與模式分流、主線與三星規則", async ({ pa
   await page.getByRole("button", { name: "開始冒險" }).click();
   await expect(page.getByRole("button", { name: /^再玩一次：第 10 站/ })).toBeVisible();
   await expect(page.locator('[aria-label*="已完成"]')).toHaveCount(10);
+  await expect(page.getByRole("radio")).toHaveCount(0);
+  await unlockCandyChallenge(page);
   await page.getByRole("radio", { name: /挑戰冒險/ }).click();
   await expect(page.getByRole("button", { name: /^開始：第 1 站/ })).toBeVisible();
   await expect(page.locator('[data-locked="true"]')).toHaveCount(9);
@@ -115,4 +144,65 @@ test("消消樂：完整過關結算與累積獎章一致", async ({ page }, inf
   await result.getByRole("button", { name: "回地圖", exact: true }).click();
   await expect(page.getByRole("button", { name: /^第 1 站.*已完成/ })).toBeVisible();
   await page.screenshot({ path: info.outputPath("completed-map-phone.png"), fullPage: true });
+});
+
+test("消消樂：孩子預設走輕鬆，舊的挑戰星星留著，打開後可以回輕鬆", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.addInitScript(() => {
+    localStorage.setItem("cheche:progress", JSON.stringify({
+      schemaVersion: 2,
+      gameProfile: {
+        version: 5,
+        medals: { "candy-match": [] },
+        candyMatchMedals: { easy: [], challenge: [7, 7, 7] },
+      },
+      preferences: {
+        theme: "light",
+        gameKit: { kidsMode: false, candyMatchMode: "challenge", voiceEnabled: false },
+      },
+    }));
+  });
+  await page.goto("/games/candy-match");
+  await expect(page.getByRole("img", { name: /輕鬆冒險，已經拿到 0 顆星/ })).toBeVisible();
+  await page.getByRole("button", { name: "開始冒險" }).click();
+  await expect(page.getByRole("radio")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /^開始：第 1 站/ })).toBeVisible();
+
+  await unlockCandyChallenge(page);
+  await expect(page.getByRole("radio", { name: /挑戰冒險/ })).toHaveAttribute("aria-checked", "true");
+  await expect(page.getByRole("button", { name: /^開始：第 4 站/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /第 1 站 .*3 顆星/ })).toBeVisible();
+
+  await page.getByRole("radio", { name: /輕鬆冒險/ }).click();
+  await expect(page.getByRole("radio", { name: /輕鬆冒險/ })).toHaveAttribute("aria-checked", "true");
+  await expect(page.getByRole("button", { name: /^開始：第 1 站/ })).toBeVisible();
+  await page.getByRole("radio", { name: /挑戰冒險/ }).click();
+  await expect(page.getByRole("button", { name: /^開始：第 4 站/ })).toBeVisible();
+
+  await page.getByRole("button", { name: "家長工具", exact: true }).focus();
+  await page.keyboard.press("Enter");
+  const dialog = page.getByRole("dialog", { name: "家長工具" });
+  await dialog.getByRole("button", { name: "挑戰", exact: true }).click();
+  await page.getByRole("button", { name: "關閉", exact: true }).click();
+  await expect(page.getByRole("radio")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /^開始：第 1 站/ })).toBeVisible();
+
+  const saved = await page.evaluate(() => {
+    const raw = JSON.parse(localStorage.getItem("cheche:progress") ?? "{}");
+    return {
+      mode: raw.preferences.gameKit.candyMatchMode,
+      unlocked: raw.preferences.gameKit.candyMatchChallengeUnlocked,
+      medals: raw.gameProfile.candyMatchMedals,
+    };
+  });
+  expect(saved.mode).toBe("challenge");
+  expect(saved.unlocked).toBe(false);
+  expect(saved.medals.challenge).toEqual([7, 7, 7]);
+
+  await page.reload();
+  await page.getByRole("button", { name: "開始冒險" }).click();
+  await expect(page.getByRole("radio")).toHaveCount(0);
+  await unlockCandyChallenge(page);
+  await expect(page.getByRole("radio", { name: /挑戰冒險/ })).toHaveAttribute("aria-checked", "true");
+  await expect(page.getByRole("button", { name: /^開始：第 4 站/ })).toBeVisible();
 });

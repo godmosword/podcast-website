@@ -15,24 +15,34 @@ export type { CandyMatchTipId };
 export type CandyMatchPrefs = {
   /** null＝尚未選過 */
   mode: CandyMode | null;
+  /** 家長打開之後，地圖才出現輕鬆／挑戰。關掉不刪 mode。 */
+  challengeUnlocked: boolean;
   tipsSeen: readonly CandyMatchTipId[];
 };
 
-const EMPTY_PREFS: CandyMatchPrefs = { mode: null, tipsSeen: [] };
+const EMPTY_PREFS: CandyMatchPrefs = { mode: null, tipsSeen: [], challengeUnlocked: false };
 
 export function loadCandyMatchPrefs(): CandyMatchPrefs {
   if (typeof window === "undefined") return EMPTY_PREFS;
   try {
     const stored = getGameKitSettingsFromStore();
-    return { mode: stored.candyMatchMode, tipsSeen: stored.candyMatchTips };
+    return {
+      mode: stored.candyMatchMode,
+      challengeUnlocked: stored.candyMatchChallengeUnlocked,
+      tipsSeen: stored.candyMatchTips,
+    };
   } catch {
     return EMPTY_PREFS;
   }
 }
 
-/** 尚未選過玩法時，由既有兒童模式決定：兒童模式＝輕鬆冒險。 */
-export function resolveCandyMode(stored: CandyMode | null, kidsMode: boolean): CandyMode {
-  return stored ?? (kidsMode ? "easy" : "challenge");
+/**
+ * 沒打開挑戰時一律輕鬆，已存的「挑戰」先留著。
+ * 打開之後才沿用選擇；還沒選過也是輕鬆，不再用兒童模式開關猜成挑戰。
+ */
+export function resolveCandyMode(stored: CandyMode | null, challengeUnlocked: boolean): CandyMode {
+  if (!challengeUnlocked) return "easy";
+  return stored ?? "easy";
 }
 
 export function saveCandyMatchMode(mode: CandyMode): void {
@@ -41,6 +51,16 @@ export function saveCandyMatchMode(mode: CandyMode): void {
     saveGameKitSettingsToStore({ candyMatchMode: mode });
   } catch {
     // 儲存失敗時本局仍用選擇的玩法；下次開啟回到預設
+  }
+}
+
+/** 只記家長有沒有打開挑戰，不改玩法、不改獎章。 */
+export function saveCandyMatchChallengeUnlocked(unlocked: boolean): void {
+  if (typeof window === "undefined") return;
+  try {
+    saveGameKitSettingsToStore({ candyMatchChallengeUnlocked: unlocked });
+  } catch {
+    // 儲存失敗時這次畫面仍照按鈕；下次開啟回到關著
   }
 }
 
