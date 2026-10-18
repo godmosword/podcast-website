@@ -3,7 +3,7 @@
 
 /** 靜態頁最後內容編輯時間：來源為各頁原始碼／資料檔的最後已提交 git commit。 */
 export const STATIC_PAGE_MODIFIED_DATES: Record<string, string> = {
-  "/about": "2026-10-18T09:11:56+08:00",
+  "/about": "2026-10-18T05:47:37+00:00",
   "/adventures": "2026-07-28T03:43:28Z",
   "/characters": "2026-10-17T17:02:29+08:00",
   "/for-parents/dashboard": "2026-10-18T09:11:56+08:00",
@@ -18,7 +18,7 @@ export const STATIC_PAGE_MODIFIED_DATES: Record<string, string> = {
 
 /** 對應日期的 git commit 與來源檔，供追溯。 */
 export const STATIC_PAGE_MODIFIED_DATE_SOURCE: Record<string, string> = {
-  "/about": "d218d030 app/about/page.tsx, app/about/page.module.css, components/about/AboutParentFaq.tsx, components/about/AboutParentFaq.module.css, lib/for-parents.ts",
+  "/about": "b19ec0db app/about/page.tsx, app/about/page.module.css, components/about/AboutParentFaq.tsx, components/about/AboutParentFaq.module.css, lib/for-parents.ts",
   "/adventures": "c0401581 app/adventures/page.tsx, app/adventures/page.module.css",
   "/characters": "d6ecbf9c app/characters/page.tsx, app/characters/page.module.css, data/characters.json",
   "/for-parents/dashboard": "d218d030 app/for-parents/dashboard/page.tsx, app/for-parents/dashboard/page.module.css, components/for-parents/ParentDashboard.tsx, components/for-parents/parent-dashboard.module.css, lib/for-parents/dashboard.ts, lib/for-parents/dashboard-next-up.ts",
