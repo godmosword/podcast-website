@@ -132,6 +132,28 @@ test("送完第 3 盤：圓蓋獎品在舞台裡彈出來、不帶「新」，�
   await expect(pop).toHaveCount(0, { timeout: 4000 });
 });
 
+test("844×390：點餐圖至少 40px，托盤底邊在視窗內", async ({ page }) => {
+  await page.setViewportSize({ width: 844, height: 390 });
+  await page.goto("/games/dino-sushi");
+  await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+  // 泡泡進場是 scale，量太早會把格子量小。
+  await page.waitForFunction(() => {
+    const el = document.querySelector("[class*='bubbleWrap']");
+    return !!el && el.getAnimations().every((anim) => anim.playState === "finished");
+  });
+  const geo = await page.evaluate(() => {
+    const cells = [...document.querySelectorAll("[data-order-items] > *")].map((el) => el.getBoundingClientRect().width);
+    const trays = [...document.querySelectorAll("button")].filter((button) =>
+      (button.getAttribute("aria-label") ?? "").startsWith("加"),
+    );
+    const bottoms = trays.map((el) => el.getBoundingClientRect().bottom);
+    return { cells, trayBottom: Math.max(0, ...bottoms), vh: window.innerHeight };
+  });
+  expect(geo.cells.length).toBeGreaterThan(0);
+  for (const width of geo.cells) expect(width).toBeGreaterThanOrEqual(40);
+  expect(geo.trayBottom).toBeLessThanOrEqual(geo.vh + 0.5);
+});
+
 test("1280：點餐泡泡的格子跟著舞台放大（≥44px），泡泡不出舞台", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto("/games/dino-sushi");

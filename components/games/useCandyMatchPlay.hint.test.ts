@@ -77,6 +77,6 @@ describe("消消樂輕鬆提示", () => {
       vi.advanceTimersByTime(HINT_SHOW_MS + 1_000);
     });
     expect(result.current.hint).toBeNull();
-    expect(result.current.speechCue?.text).toBe("收集 92 台車車。");
+    expect(result.current.speechCue?.text).toBe("收集 40 台車車。");
   });
 });

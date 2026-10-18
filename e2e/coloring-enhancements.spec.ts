@@ -74,7 +74,6 @@ test("unfinished paint asks first and is kept when leaving; a confirmed page sta
   await expect(page.getByRole("button", { name: /繼續塗/ })).toHaveCount(0);
   const again = page.getByRole("button", { name: "著色：恐龍車多多", exact: true });
   await again.click();
-  await again.click();
   await expect(
     page.getByRole("button", { name: "蠟筆", exact: true }),
   ).toBeEnabled();
@@ -271,7 +270,6 @@ test("load failure offers retry and unavailable storage never reports success", 
   await expect(page.getByText("選一頁來塗", { exact: true })).toBeVisible();
   await expect(page.getByText(/草稿沒有存起來/)).toHaveCount(0);
   const again = page.getByRole("button", { name: "著色：恐龍車多多", exact: true });
-  await again.click();
   await again.click();
   await expect(
     page.getByRole("button", { name: "蠟筆", exact: true }),

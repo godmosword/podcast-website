@@ -58,6 +58,7 @@ export const DINO_SUSHI_SM_WIDTH = {
   "shop/lantern.webp": 128, // 44px
   "shop/dome.webp": 128, // 43px
   "shop/plate.webp": 384, // 手機 110px
+  "shop/plate-gold.webp": 384, // 跟薄荷綠盤同一個框
   "shop/prepplate.webp": null, // 手機 274px
   "shop/tray-neutral.webp": 256, // 107px
   "shop/tray-sweet.webp": 256, // 105px

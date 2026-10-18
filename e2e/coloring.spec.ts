@@ -14,9 +14,6 @@ async function openColoringPage(page: Page, name: RegExp) {
   await page.getByRole("button", { name: "開始塗", exact: true }).click();
   const card = page.getByRole("button", { name }).first();
   await card.click();
-  await expect(card).toHaveAttribute("data-revealed", "true");
-  await expect(page.locator("canvas")).toHaveCount(0);
-  await card.click();
   await page.waitForSelector("canvas");
   await page.waitForFunction(
     () => !document.body.textContent?.includes("載入線稿中"),
@@ -75,10 +72,10 @@ test.describe("coloring book", () => {
     await page.mouse.up();
 
     expect(await countRedOnRow(page, 0.5, 0.62, 0.55)).toBeGreaterThan(0);
-    await expect(page.getByTestId("coloring-open-hint")).toHaveAttribute(
-      "data-step",
-      "fill",
-    );
+    const hint = page.getByTestId("coloring-open-hint");
+    await expect(hint).toHaveAttribute("data-step", "fill");
+    await expect(hint.locator("svg").first()).toBeVisible();
+    expect(await hint.innerText()).not.toContain("用蠟筆在圖上塗塗看");
     await expect(page.getByRole("button", { name: "我塗好了" })).toBeVisible();
 
     await page.getByRole("button", { name: "復原" }).click();
@@ -437,7 +434,6 @@ test.describe("coloring book 離開提醒與塗過標記", () => {
     await expect(page.getByText("選一頁來塗", { exact: true })).toBeVisible();
 
     const again = page.getByRole("button", { name: "著色：猛猛", exact: true });
-    await again.click();
     await again.click();
     await paintBackground(page);
     await page.getByRole("button", { name: "我塗好了" }).click();

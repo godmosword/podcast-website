@@ -42,6 +42,21 @@ describe("Candy 十關 × 兩種玩法配置", () => {
     }
   });
 
+  it("挑戰前五關放寬到普通三連清得掉，輕鬆第 1 關不動", () => {
+    const easy = CANDY_STAGES.easy[0]!.main;
+    expect(easy.moves).toBe(0);
+    expect(easy.goals).toContainEqual({ kind: "collect-any", count: 50 });
+    const first = CANDY_STAGES.challenge[0]!.main;
+    const any = first.goals.find((goal) => goal.kind === "collect-any");
+    expect(any && any.count / first.moves).toBeLessThanOrEqual(2.5);
+    const second = CANDY_STAGES.challenge[1]!.main.goals[0]!;
+    expect(second.kind).toBe("collect");
+    expect(second.count / CANDY_STAGES.challenge[1]!.main.moves).toBeLessThanOrEqual(1);
+    const third = CANDY_STAGES.challenge[2]!.main;
+    const two = third.goals.filter((goal) => goal.kind === "collect").reduce((sum, goal) => sum + goal.count, 0);
+    expect(two / third.moves).toBeLessThanOrEqual(2);
+  });
+
   it("挑戰模式步數隨關卡不減少；後期挑戰用 5 種圖案", () => {
     const moves = CANDY_STAGES.challenge.map((set) => set.main.moves);
     moves.slice(1).forEach((m, i) => expect(m).toBeGreaterThanOrEqual(moves[i]!));

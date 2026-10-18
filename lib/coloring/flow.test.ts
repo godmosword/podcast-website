@@ -21,7 +21,8 @@ describe("coloring flow", () => {
     expect(COLORING_PICKER_SCENES).toBe("故事畫面");
     expect(COLORING_DONE_CTA).toBe("我塗好了");
     expect(COLORING_GALLERY_HEADING).toBe("我的作品");
-    expect(COLORING_HINT_DRAW).toContain("蠟筆");
+    expect(COLORING_HINT_DRAW).toBe("點色點，再點圖");
+    expect(COLORING_HINT_DRAW).not.toContain("蠟筆");
     expect(COLORING_HINT_FILL).toContain("填滿");
   });
 });

@@ -4,8 +4,8 @@ export const CANDY_MATCH_CELL_GAP = 3;
 /** 棋盤外框內距（px） */
 export const CANDY_MATCH_BOARD_PADDING = 2;
 
-/** 格子是按鈕：觸控下限 44px；寬螢幕上限 80px。 */
-const CANDY_MATCH_CELL_MIN = 44;
+/** 格子是按鈕：觸控下限 48px；寬螢幕上限 80px。不夠寬或高就讓整頁捲動。 */
+const CANDY_MATCH_CELL_MIN = 48;
 const CANDY_MATCH_CELL_MAX = 80;
 
 function fit(available: number, count: number): number {
@@ -15,8 +15,8 @@ function fit(available: number, count: number): number {
 }
 
 /**
- * 依可用寬（與可選的可用高）計算每格像素，夾在 44–80。
- * 高度不夠時先縮格子；縮到 44 仍放不下就讓整頁捲動，不裁切也不再縮。
+ * 依可用寬（與可選的可用高）計算每格像素，夾在 48–80。
+ * 寬或高不夠時先縮格子；縮到 48 仍放不下就讓整頁捲動，不裁切也不再縮。
  */
 export function candyMatchCellPx(
   availableWidth: number,

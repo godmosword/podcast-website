@@ -230,6 +230,29 @@ describe("CandyMatchBoard pointer capture", () => {
     expect(cell.textContent).not.toMatch(/\p{Extended_Pictographic}/u);
   });
 
+  it("特殊糖提示把手指放在那一格，不寫句子", () => {
+    const board = makeBoard();
+    board.specials[0] = "burst";
+    render(
+      <CandyMatchBoard
+        board={board}
+        cellPx={48}
+        selected={null}
+        hint={null}
+        cue="burst"
+        popping={new Set()}
+        shaking={new Set()}
+        disabled={false}
+        onTapCell={vi.fn()}
+        onSwipeCell={vi.fn()}
+      />,
+    );
+    const cell = screen.getByRole("button", { name: /爆炸糖/ });
+    expect(cell.querySelector("[data-teach-hand]")).not.toBeNull();
+    expect(screen.queryByText(/轉個彎排在一起/)).toBeNull();
+    expect(screen.queryByRole("button", { name: "知道了" })).toBeNull();
+  });
+
   it("掃把糖顯示徽章；reduced 不標 data-sweep", () => {
     const board = makeBoard();
     board.specials[0] = "row";

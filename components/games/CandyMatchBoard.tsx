@@ -28,6 +28,7 @@ import { CandyMatchFx } from "@/components/games/CandyMatchFx";
 import { IconBroom, IconConfetti, IconRainbow } from "@/components/games/ClayIcons";
 import { IconPointingHand } from "@/components/games/CandyMatchIcons";
 import type { CandyFxPraise, ClearFx, ParticleSeed } from "@/lib/games/candy-match/effects";
+import type { CandyMatchTipId } from "@/lib/gamekit/progress/candy-match-prefs";
 import styles from "./CandyMatchBoard.module.css";
 
 /** 特殊糖角落徽章：站上黏土圖示（取代 🧹🌈💥，各裝置長相一致、跟棋盤同畫風）。 */
@@ -68,6 +69,8 @@ type CandyMatchBoardProps = {
   hint: { a: number; b: number } | null;
   /** 第一局交換教學，獨立於閒置 hint，點錯不會清掉。 */
   teach?: { a: number; b: number } | null;
+  /** 特殊糖或厚污漬第一次出現：手指點在那一格，不另寫句子。 */
+  cue?: CandyMatchTipId | null;
   /** 正在 pop 消失的格子 */
   popping: ReadonlySet<number>;
   /** 非法交換搖頭中的兩格 */
@@ -92,6 +95,7 @@ export function CandyMatchBoard({
   selected,
   hint,
   teach = null,
+  cue = null,
   popping,
   shaking,
   disabled,
@@ -113,6 +117,12 @@ export function CandyMatchBoard({
   } | null>(null);
   const { cols, rows, pieces, dirt } = board;
   const specials = board.specials ?? emptySpecials(pieces.length);
+  const cueIndex =
+    cue === "thick"
+      ? dirt.findIndex((layer) => layer >= 2)
+      : cue === "row" || cue === "color" || cue === "burst"
+        ? specials.findIndex((kind) => kind === cue)
+        : -1;
   const reduced = Boolean(motion?.reduced);
   const swap = reduced ? null : motion?.swap ?? null;
   const sweep = reduced ? null : motion?.sweep ?? null;
@@ -427,9 +437,9 @@ export function CandyMatchBoard({
                   <span className={styles.giftArrow} aria-hidden>▼</span>
                 ) : null}
               </span>
-              {/* 第一步示範：手指點在要換的那一格，取代「① 先點一個圖案」的文字泡泡 */}
-              {teachOff && teach && i === teach.a ? (
-                <span className={styles.teachHand} data-teach-hand="true" aria-hidden>
+              {/* 交換教學，或特殊糖／厚污漬第一次出現：手指點在那一格 */}
+              {(teachOff && teach && i === teach.a) || i === cueIndex ? (
+                <span className={styles.teachHand} data-teach-hand="true" data-cue={i === cueIndex ? cue ?? undefined : undefined} aria-hidden>
                   <IconPointingHand size={Math.round(cellPx * 0.7)} />
                 </span>
               ) : null}

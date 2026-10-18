@@ -10,8 +10,8 @@ export const COLORING_PICKER_CHARACTERS = "車車朋友";
 export const COLORING_PICKER_SCENES = "故事畫面";
 export const COLORING_DONE_CTA = "我塗好了";
 export const COLORING_GALLERY_HEADING = "我的作品";
-/** 還沒動筆：先讓孩子塗到一塊顏色。 */
-export const COLORING_HINT_DRAW = "點一個顏色，用蠟筆在圖上塗塗看";
+/** 還沒動筆：畫面上是手指先點色點、再點圖。這句只給讀屏。 */
+export const COLORING_HINT_DRAW = "點色點，再點圖";
 /** 已經有顏色、還沒用過填滿。 */
 export const COLORING_HINT_FILL = "再點「填滿」，點一下塗滿一整塊";
 /** 參考彩圖卡。 */
