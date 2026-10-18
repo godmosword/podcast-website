@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { pinClassicSushiDay } from "./helpers/dino-sushi";
 
 /** 走 GamePageShell 的兩款；coloring-book 用 ColoringPageShell，另行驗收。方塊轉轉已下架。 */
 const SHELL_ROUTES = [
@@ -208,6 +209,7 @@ test.describe("多多壽司屋", () => {
     await page.addInitScript(() => {
       (window as Window & { __dinoSushiSeed?: number }).__dinoSushiSeed = 7;
     });
+    await pinClassicSushiDay(page);
   });
 
   test("320×568：廚房（多多、砧板、給多多吃、8 格托盤）不橫向溢出", async ({ page }) => {

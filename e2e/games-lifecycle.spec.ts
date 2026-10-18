@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { dismissCandyIntro } from "./candy-helpers";
+import { pinClassicSushiDay } from "./helpers/dino-sushi";
 
 const MOBILE = { width: 390, height: 844 };
 const NARROW_WIDTHS = [320, 375, 390, 430];
@@ -97,6 +98,7 @@ test.describe("遊戲完整 lifecycle", () => {
     await page.addInitScript(() => {
       (window as Window & { __dinoSushiSeed?: number }).__dinoSushiSeed = 7;
     });
+    await pinClassicSushiDay(page);
     await page.setViewportSize(MOBILE);
     await page.goto("/games/dino-sushi");
     await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
@@ -119,6 +121,7 @@ test.describe("遊戲完整 lifecycle", () => {
     await page.addInitScript(() => {
       (window as Window & { __dinoSushiSeed?: number }).__dinoSushiSeed = 7;
     });
+    await pinClassicSushiDay(page);
     await page.goto("/games/dino-sushi");
     await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
     const toppings = await serveSushiOrder(page, 1, { skipLast: true });
@@ -136,6 +139,7 @@ test.describe("遊戲完整 lifecycle", () => {
     await page.addInitScript(() => {
       (window as Window & { __dinoSushiSeed?: number }).__dinoSushiSeed = 7;
     });
+    await pinClassicSushiDay(page);
     await page.goto("/games/dino-sushi");
     await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
     await serveSushiOrder(page, 1);

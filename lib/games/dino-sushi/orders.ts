@@ -87,9 +87,14 @@ function withTheme(tray: readonly ToppingId[], theme: readonly ToppingId[]): Top
   return sortTray([...nextSavory, sweet, "wasabi"]);
 }
 
+/** 不套主題日的 8 格托盤。第 1 天用這個，才不會被隨機主題日換料。 */
+export function buildTrayWithTheme(seed: number, themeToppings: readonly ToppingId[]): ToppingId[] {
+  return withTheme(classicTray(seed), themeToppings);
+}
+
 /** 每輪托盤 8 格：6 種家常料＋1 種甜點＋芥末，依食材表順序排（甜點、芥末固定在最後）。 */
 export function buildTray(seed: number): ToppingId[] {
-  return withTheme(classicTray(seed), roundVariety(seed).theme.toppings);
+  return buildTrayWithTheme(seed, roundVariety(seed).theme.toppings);
 }
 
 /**
@@ -170,6 +175,26 @@ function ensureTheme(
   return candidates.find((next) => acceptable(next)) ?? candidates[0] ?? [...toppings];
 }
 
+/** 腳本訂單若重試後仍跟前一單一樣，換掉最後一樣料。主題日仍留下至少一種主題料。 */
+function differFromPrev(
+  toppings: readonly ToppingId[],
+  theme: readonly ToppingId[],
+  pool: readonly ToppingId[],
+  prev: { base: BaseId; toppings: readonly ToppingId[] } | undefined,
+  base: BaseId,
+): ToppingId[] {
+  if (!sameFood(prev, base, toppings) || toppings.length === 0) return [...toppings];
+  const themeOn = theme.filter((id) => pool.includes(id) && toppingById(id).kind === "savory");
+  for (const id of pool) {
+    if (toppings.includes(id)) continue;
+    const next = [...toppings.slice(0, -1), id];
+    if (new Set(next).size !== next.length) continue;
+    if (themeOn.length > 0 && !next.some((item) => themeOn.includes(item))) continue;
+    if (!sameFood(prev, base, next)) return next;
+  }
+  return [...toppings];
+}
+
 function sameFood(
   prev: { base: BaseId; toppings: readonly ToppingId[] } | undefined,
   base: BaseId,
@@ -208,6 +233,43 @@ function draftBases(seed: number, sizes: readonly number[]): BaseId[] {
  * 飯型沿用原本的亂數（難度與 seed 7 的手捲不變）。
  * 料先跟主題日，兩樣以上再放那位客人的最愛。沒有第 6 單，甜點不進訂單。
  */
+/**
+ * 給第 1–3 天用的訂單：料數、飯型、位子、主題都由外面指定。
+ * 不走 buildOrders 的亂數，所以第 4 天的 seed 指紋不會被帶動。
+ */
+export function buildScriptedOrders(
+  seed: number,
+  tray: readonly ToppingId[],
+  script: {
+    sizes: readonly number[];
+    bases: readonly BaseId[];
+    seats: readonly CustomerId[];
+    theme: readonly ToppingId[];
+    salt: number;
+  },
+): Order[] {
+  const pool = tray.filter((id) => toppingById(id).kind === "savory");
+  const rng = seededRng((seed ^ script.salt) >>> 0);
+  const orders: Order[] = [];
+  for (let index = 0; index < script.sizes.length; index++) {
+    const size = script.sizes[index]!;
+    const customerId = script.seats[index]!;
+    const favorites = customerById(customerId).favorites;
+    let base = script.bases[pickIndex(script.bases.length, rng)]!;
+    let toppings = chooseToppings(favorites, pool, size, rng, script.theme);
+    let tries = 0;
+    while (sameFood(orders.at(-1), base, toppings) && tries < MAX_REPICK) {
+      base = script.bases[pickIndex(script.bases.length, rng)]!;
+      toppings = chooseToppings(favorites, pool, size, rng, script.theme);
+      tries += 1;
+    }
+    toppings = ensureTheme(toppings, script.theme, pool, orders.at(-1), base, rng);
+    toppings = differFromPrev(toppings, script.theme, pool, orders.at(-1), base);
+    orders.push({ base, toppings, customerId });
+  }
+  return orders;
+}
+
 /** tier：難度檔位，只改每單幾樣料。一般檔（預設）的亂數消耗跟原本一樣，同一個 seed 訂單不變。 */
 export function buildOrders(seed: number, tray: readonly ToppingId[], tier: OrderTier = "normal"): Order[] {
   const sizes = TIER_SIZES[tier];

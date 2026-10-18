@@ -4,11 +4,13 @@
  */
 
 import type { CustomerId } from "./customers";
+import { buildDayRound } from "./days";
 import type { OrderTier } from "./difficulty";
 import { buildOrders, buildTray, type Order } from "./orders";
 import { favoriteFor, reactionFor, type Mood, type Reaction } from "./reactions";
 import { addTopping, changeBase, EMPTY_SUSHI, isServable, removeTopping, type Sushi } from "./sushi";
-import type { BaseId, ToppingId } from "./toppings";
+import { BASES, type BaseId, type ToppingId } from "./toppings";
+import { roundVariety, type RoundVariety } from "./variety";
 
 export type Mode = "order" | "free";
 
@@ -17,8 +19,16 @@ export type Plate = { sushi: Sushi; gold: boolean; mood: Mood; customerId?: Cust
 export type RoundState = {
   mode: Mode;
   seed: number;
-  /** 難度檔位（只影響點餐的料數、提示等待與首單教學）。 */
+  /**
+   * 八天裡的第幾天。0＝沒有指定天（舊的檔位路徑、自由做）。
+   * 第 1–4 天會蓋過 tier，料數跟那天的表走。
+   */
+  day: number;
+  /** 難度檔位。指定了天之後固定 normal；沒指定天才沿用 easy／advanced。 */
   tier: OrderTier;
+  variety: RoundVariety;
+  /** 這一輪選飯看得到的飯型。沒列出的鈕直接不畫。 */
+  allowedBases: readonly BaseId[];
   tray: readonly ToppingId[];
   orders: readonly Order[];
   /** 目前第幾單（點餐模式）。 */
@@ -47,14 +57,21 @@ export type RoundAction =
   | { type: "brush" }
   | { type: "finish" };
 
-export function createRound(mode: Mode, seed: number, tier: OrderTier = "normal"): RoundState {
-  const tray = buildTray(seed);
+const ALL_BASES: readonly BaseId[] = BASES.map((base) => base.id);
+
+export function createRound(mode: Mode, seed: number, tier: OrderTier = "normal", day?: number): RoundState {
+  const scripted = mode === "order" && day !== undefined && day >= 1 && day <= 4;
+  const built = scripted ? buildDayRound(day, seed) : null;
+  const tray = built?.tray ?? buildTray(seed);
   return {
     mode,
     seed,
-    tier,
+    tier: scripted ? "normal" : tier,
+    day: built?.day ?? 0,
+    variety: built?.variety ?? roundVariety(seed),
+    allowedBases: built?.allowedBases ?? ALL_BASES,
     tray,
-    orders: mode === "order" ? buildOrders(seed, tray, tier) : [],
+    orders: built ? built.orders : mode === "order" ? buildOrders(seed, tray, tier) : [],
     index: 0,
     sushi: EMPTY_SUSHI,
     attempts: 0,

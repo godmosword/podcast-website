@@ -1563,6 +1563,15 @@
   width: 100%;
 }
 
+/* 第 1 天只有握壽司、第 2 天沒有手捲：少掉的飯型不留空格，第 4 天仍是三欄。 */
+.basePicker[data-bases="1"] {
+  grid-template-columns: minmax(48px, 1fr);
+}
+
+.basePicker[data-bases="2"] {
+  grid-template-columns: repeat(2, minmax(48px, 1fr));
+}
+
 /* 選飯：三張白瓷長皿 */
 .baseButton {
   position: relative;

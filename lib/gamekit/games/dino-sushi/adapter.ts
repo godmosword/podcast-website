@@ -148,7 +148,25 @@ class DinoSushiInstance implements GameInstance {
     this.options.onSession?.({ gameId: this.id, score: 0 });
   }
 
-  /** 點餐送完 5 單。 */
+  /**
+   * 第 1–3 天送完 5 單。星星只記在壽司屋，不走全站獎牌。
+   * 不帶 levelIndex，Host 就不會把 bit OR 進 medals["dino-sushi"]。
+   */
+  notifyDayCleared(medals: Pick<RoundMedals, "cleared">): void {
+    this.screen = "result";
+    this.status = "won";
+    this.resultAt = Date.now();
+    if (this.sessionReported) return;
+    this.sessionReported = true;
+    this.options.onSession?.({
+      gameId: this.id,
+      score: 0,
+      cleared: medals.cleared,
+      grantMedals: false,
+    });
+  }
+
+  /** 第 4 天（舊的那一關）送完 5 單。仍回報 levelIndex 0，舊星只會 OR、不會再發一次。 */
   notifyWon(medals: Pick<RoundMedals, "cleared" | "flawless" | "collectedAll">): void {
     this.screen = "result";
     this.status = "won";

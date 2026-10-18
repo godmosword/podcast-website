@@ -1,4 +1,5 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
+import { pinClassicSushiDay } from "./helpers/dino-sushi";
 
 /**
  * 多多壽司屋結算與貼紙書（2026-10-16 實玩審 批次 R）。
@@ -9,6 +10,7 @@ test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     (window as Window & { __dinoSushiSeed?: number }).__dinoSushiSeed = 7;
   });
+  await pinClassicSushiDay(page);
 });
 
 /** 照第 n 單的泡泡選飯、放料、送出；skipLast 時少放最後一樣（多多不吃）。 */

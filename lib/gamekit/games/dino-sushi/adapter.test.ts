@@ -143,6 +143,22 @@ describe("dinoSushiAdapter", () => {
     expect(onSession).toHaveBeenCalledTimes(2);
   });
 
+  it("第 1–3 天結算不帶 levelIndex，也不發獎牌", () => {
+    const onSession = vi.fn();
+    const inst = new DinoSushiInstance({ kidsMode: true, reducedMotion: false, onSession });
+    inst.notifyPlaying("order");
+    inst.notifyDayCleared({ cleared: true });
+    inst.notifyDayCleared({ cleared: true });
+    expect(inst.getStatus()).toBe("won");
+    expect(onSession).toHaveBeenCalledTimes(1);
+    expect(onSession).toHaveBeenCalledWith({
+      gameId: "dino-sushi",
+      score: 0,
+      cleared: true,
+      grantMedals: false,
+    });
+  });
+
   it("自由做：第一盤送出時回報一次 played，不給星", () => {
     const onSession = vi.fn();
     const inst = new DinoSushiInstance({ kidsMode: true, reducedMotion: false, onSession });

@@ -3,34 +3,44 @@
 import Image from "next/image";
 import { IconPlay, IconStar } from "@/components/games/ClayIcons";
 import { gameBySlug } from "@/data/games";
-import { customerById } from "@/lib/games/dino-sushi/customers";
 import { duoduoStickerSrc } from "@/lib/games/dino-sushi/duoduo-sticker";
-import { todayAnnouncement, type RoundVariety } from "@/lib/games/dino-sushi/variety";
 import { TapButton } from "./DinoSushiPiece";
 import styles from "./DinoSushiView.module.css";
 
 const TITLE_COVER_SRC = gameBySlug("dino-sushi").art.cover;
 
+export type SushiDayFace = {
+  day: number;
+  name: string;
+  src: string;
+  stars: number;
+  /** 資料上開著（前一天通關，或舊檔已經通關）。 */
+  unlocked: boolean;
+  /** 這一階段玩得到。第 5–8 天先鎖著。 */
+  playable: boolean;
+  /** 大開始鈕會進的那一天。 */
+  current: boolean;
+};
+
 type Props = {
-  starsGot: number;
+  days: readonly SushiDayFace[];
   stickerCount: number;
   stickerTotal: number;
   stickerNew: boolean;
-  /** 這一輪會來的朋友與主題日。種子還沒好時不顯示。 */
-  today: RoundVariety | null;
   onStart: () => void;
+  onPickDay: (day: number) => void;
   onFree: () => void;
   onBook: () => void;
 };
 
-/** 標題：與遊樂園卡片同一張迴轉壽司店封面、星星 x/3、一顆大圓「開始」（＝點餐）；「自由做」旁邊是貼紙書。 */
+/** 標題：封面、八張臉、一顆大圓「開始」。第 5–8 天看得到但還不能玩。 */
 export function DinoSushiTitle({
-  starsGot,
+  days,
   stickerCount,
   stickerTotal,
   stickerNew,
-  today,
   onStart,
+  onPickDay,
   onFree,
   onBook,
 }: Props) {
@@ -52,30 +62,45 @@ export function DinoSushiTitle({
       <div className={styles.titlePanel}>
         {/* 頁面唯一 h1 屬 GamePageShell */}
         <h2 className={styles.titleHeading}>多多肚子餓了！</h2>
-        <p className={styles.titleStars} role="img" aria-label={`已經拿到 ${starsGot} 顆星，全部 3 顆`}>
-          <IconStar size={22} />
-          <b aria-hidden>{starsGot}</b>
-          <span aria-hidden>/ 3</span>
-        </p>
-        {today ? (
-          <p className={styles.today} data-theme={today.theme.id} role="img" aria-label={todayAnnouncement(today)}>
-            <span className={styles.todayTheme} aria-hidden>
-              {today.theme.name}
-            </span>
-            <span className={styles.todayFaces} aria-hidden>
-              {today.visitors.map((id) => (
-                // eslint-disable-next-line @next/next/no-img-element -- 現成定裝照圓形裁切，不另生圖
-                <img
-                  key={id}
-                  className={styles.todayFace}
-                  src={customerById(id).avatar}
-                  alt=""
-                  draggable={false}
-                />
-              ))}
-            </span>
-          </p>
-        ) : null}
+        <div className={styles.dayScroll}>
+          <ul className={styles.dayRow}>
+            {days.map((day) => {
+              const locked = !day.playable || !day.unlocked;
+              const status = locked ? "，還沒開" : day.current ? "，現在要玩" : "";
+              const label = `第 ${day.day} 天，${day.name}，已經拿到 ${day.stars} 顆星，全部 3 顆${status}`;
+              return (
+                <li key={day.day}>
+                  <TapButton
+                    className={styles.dayButton}
+                    aria-label={label}
+                    aria-disabled={locked ? true : undefined}
+                    data-current={day.current ? "true" : undefined}
+                    data-locked={locked ? "true" : undefined}
+                    onTap={() => {
+                      if (locked) return;
+                      onPickDay(day.day);
+                    }}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element -- 現成客人貼紙與多多表情，不另生圖 */}
+                    <img className={styles.dayFace} src={day.src} alt="" draggable={false} />
+                    <span className={styles.dayName} aria-hidden>
+                      {day.name}
+                    </span>
+                    <span className={styles.dayStars} aria-hidden>
+                      {[0, 1, 2].map((index) => (
+                        <IconStar
+                          key={index}
+                          size={12}
+                          color={index < day.stars ? "#ffd34d" : "#e4d3b4"}
+                        />
+                      ))}
+                    </span>
+                  </TapButton>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
         <div className={styles.titleStart}>
           <TapButton className={styles.startButton} onTap={onStart} aria-label="開始幫多多做壽司">
             <IconPlay size={46} />
