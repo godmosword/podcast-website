@@ -25,5 +25,6 @@
   margin: 8px 0 0;
   font-size: var(--fs-control);
   line-height: 1.65;
-  color: var(--ink-soft);
+  /* 這一區預設展開後，ink-soft 疊在淡紫底只有 4.45:1，不到 AA 4.5。改用 --ink。 */
+  color: var(--ink);
 }
