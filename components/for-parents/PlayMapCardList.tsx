@@ -36,11 +36,11 @@ export function PlayMapCardList({
   groupNote,
   showMapAction,
   onOpenMap,
-  coverageLabel,
   editorialPick,
   visibleCount,
   canLoadMore,
   visibleCountLabel,
+  loadMoreLabel,
   onLoadMore,
   topRef,
 }: PlayMapCardListProps) {
@@ -49,27 +49,18 @@ export function PlayMapCardList({
       <div ref={topRef} className={styles.cardListTop} aria-hidden />
       <div className={styles.resultHeader}>
         {/*
-          視覺上拆成「在 X 找 Y」＋放大的結果數；讀屏要讀成一句完整的話，
-          所以 accessible name 由 srText 提供。
+          視覺上是「台北市 · 8 個地方」一行＋條件小字；讀屏要讀成一句完整的話，
+          所以 accessible name 由 srText 提供，內層一律 aria-hidden。
         */}
         <h2 className={results.sentence} aria-label={resultSentence.srText}>
-          <span className={results.sentenceLead} aria-hidden>
-            在 <b className={results.sentenceScope}>{resultSentence.scopeLabel}</b>
-            {resultSentence.facetLabels.length > 0 ? (
-              <>
-                {" 找 "}
-                <b className={results.sentenceFacet}>
-                  {resultSentence.facetLabels.join("・")}
-                </b>
-              </>
-            ) : null}
+          <span className={results.sentenceMain} aria-hidden>
+            {`${resultSentence.scopeLabel} · ${resultSentence.count} 個地方`}
           </span>
-          <span className={results.sentenceResult} aria-hidden>
-            <strong className={results.sentenceCount}>
-              {resultSentence.count}
-            </strong>
-            <span className={results.sentenceUnit}>個地方</span>
-          </span>
+          {resultSentence.facetLabels.length > 0 ? (
+            <span className={results.sentenceFacets} aria-hidden>
+              {`條件：${resultSentence.facetLabels.join("・")}`}
+            </span>
+          ) : null}
         </h2>
         <div className={styles.resultHeaderActions}>
           {viewportSearchActive ? (
@@ -199,21 +190,20 @@ export function PlayMapCardList({
 
       {matchedCount > 0 ? (
         <div className={styles.loadMoreBar}>
-          <p className={styles.loadMoreStatus} role="status" aria-live="polite">
-            {visibleCountLabel}
-          </p>
           {canLoadMore ? (
             <button
               type="button"
               className={styles.loadMore}
               onClick={onLoadMore}
             >
-              載入更多
+              {loadMoreLabel}
             </button>
           ) : null}
+          <p className={styles.loadMoreStatus} role="status" aria-live="polite">
+            {visibleCountLabel}
+          </p>
         </div>
       ) : null}
-      <p className={styles.coverageFootnote}>{coverageLabel}</p>
     </>
   );
 }

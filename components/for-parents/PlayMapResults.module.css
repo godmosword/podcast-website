@@ -1,69 +1,45 @@
 /*
- * 句子式結果列與分組區塊。
+ * 結果列與分組區塊。
  *
- * 與 PlayMapCityWall.module.css 同一組紅線：不借用 --map-chip*（那是 Leaflet
+ * 與 PlayMapLocationPicker.module.css 同一組紅線：不借用 --map-chip*（那是 Leaflet
  * overlay 專屬），不使用 backdrop-filter 與 CSS blur()。
  */
 
 /*
- * 結果列讀成一句話：「在 全台 找 免費 → 12 個地方」。
- * 結果數是家長最先要的資訊，所以獨立放大，不埋在整串字裡。
+ * 結果列一行：「台北市 · 8 個地方」，條件放第二行小字。
+ * 舊版把結果數放大成巨大數字，比地點名稱還搶眼；改回和卡名同一階。
  */
 .sentence {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-2) var(--space-3);
+  display: grid;
+  gap: 2px;
   margin: 0;
-  color: var(--ink);
-  font-size: var(--fs-h4);
-  font-weight: 700;
   line-height: 1.35;
 }
 
-.sentenceLead {
-  color: var(--ink-soft);
-  font-weight: 600;
-}
-
-/* 文字用 --accent-ink（對 --card 5.54:1）；--accent 只出現在邊框與底色。 */
-.sentenceScope,
-.sentenceFacet {
-  color: var(--accent-ink);
-  font-weight: 800;
-}
-
-.sentenceResult {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 4px;
-}
-
-.sentenceCount {
-  font-size: clamp(1.6rem, 6vw, 2.1rem);
-  font-weight: 800;
-  line-height: 1;
+.sentenceMain {
   color: var(--ink);
+  font-size: var(--fs-h3-compact);
+  font-weight: 700;
 }
 
-.sentenceUnit {
-  font-size: var(--fs-control);
-  font-weight: 700;
+.sentenceFacets {
   color: var(--ink-soft);
+  font-size: var(--fs-label);
+  font-weight: 600;
 }
 
 /*
  * 車程免責。刻意放在第一組標題之上而不是頁尾小字：
  * 車程是直線距離粗估，一旦升格成分組骨架就會被拿去排行程。
+ * 不做左緣色條（DESIGN.md「容器不做左緣色條」），用淡底區隔。
  */
 .groupNote {
-  margin: 0 2px var(--space-4);
+  margin: 0 0 var(--space-4);
   padding: var(--space-2) var(--space-3);
-  border-left: 3px solid var(--accent);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  background: color-mix(in srgb, var(--accent) 8%, var(--card));
-  color: var(--ink-soft);
-  font-size: var(--fs-meta);
+  border-radius: var(--radius-sm);
+  background: var(--warm-chip-bg);
+  color: var(--ink);
+  font-size: var(--fs-label);
   line-height: 1.5;
 }
 
@@ -76,9 +52,8 @@
 }
 
 /*
- * 分組結構是這次改版的核心價值，但小字加一條細線會被兩側的卡片牆淹沒。
- * 縣市名放大加粗、數量降成次級，兩者拉開層級；底線改用 --accent-line
- * 讓每一段的起點在快速捲動時掃得到。
+ * 組標題退到次級（--ink-soft、無底線）：全頁只留 sticky 條件列底部一條分隔線，
+ * 分段靠上方 24px 留白與標題本身，不靠彩色底線。
  */
 .groupHeadline {
   /* 讀屏的標題導覽會直接跳到這裡，同樣要避開 sticky 頂欄。 */
@@ -86,20 +61,18 @@
   display: flex;
   align-items: baseline;
   gap: var(--space-2);
-  margin: 0 2px var(--space-3);
-  padding-bottom: var(--space-2);
-  border-bottom: 2px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  margin: 0 0 var(--space-2);
+  color: var(--ink-soft);
+  font-size: var(--fs-control);
+  font-weight: 700;
   line-height: 1.3;
 }
 
 .groupLabel {
-  color: var(--ink);
-  font-size: var(--fs-h3-compact);
-  font-weight: 800;
+  color: inherit;
 }
 
 .groupCount {
-  color: var(--ink-soft);
-  font-size: var(--fs-meta);
-  font-weight: 600;
+  color: inherit;
+  font-weight: 500;
 }

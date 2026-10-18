@@ -21,7 +21,7 @@ const CASES: readonly { file: string; glyphs: readonly string[]; icon: string }[
   { file: "components/games/CandyMatchPropBar.tsx", glyphs: ["✕"], icon: "close" },
   { file: "lib/gamekit/react/TutorialOverlay.tsx", glyphs: ["✕"], icon: "close" },
   { file: "components/universe/UniverseMap.tsx", glyphs: ["✕", "×"], icon: "close" },
-  { file: "components/for-parents/PlayMapCityWall.tsx", glyphs: ["✕"], icon: "close" },
+  { file: "components/for-parents/PlayMapLocationPicker.tsx", glyphs: ["✕"], icon: "close" },
   { file: "components/universe/ZoneSheet.tsx", glyphs: ["↗"], icon: "external" },
   { file: "components/universe/HotspotLayer.tsx", glyphs: ["↗"], icon: "external" },
   { file: "app/for-parents/play-map/[placeId]/page.tsx", glyphs: ["↗"], icon: "external" },

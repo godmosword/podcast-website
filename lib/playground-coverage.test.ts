@@ -19,31 +19,29 @@ describe("playground-coverage", () => {
     expect(DEFAULT_PLAY_MAP_CITY).toBe("台北市");
   });
 
-  it("coverageHeadline 標明可造訪筆數；休園 0 筆不掛括號，有休園則從資料現算", () => {
+  it("coverageHeadline 只寫收錄縣市與休園筆數，不寫地點總數（結果列已有）", () => {
     const rows = listCityCoverage();
     const cityCount = rows.length;
-    const placeCount = rows.reduce((sum, row) => sum + row.count, 0);
     const places = listPlaygrounds();
     const open = places.filter((place) => place.status !== "temporarily-closed");
     const closed = places.filter(
       (place) => place.status === "temporarily-closed",
     );
 
-    expect(coverageHeadline(rows, open)).toBe(
-      `已收錄 ${cityCount} 縣市、共 ${placeCount} 處可造訪`,
-    );
+    expect(coverageHeadline(rows, open)).toBe(`已收錄 ${cityCount} 縣市`);
     expect(coverageHeadline(rows, open)).not.toContain("休園整修中");
+    expect(coverageHeadline(rows, places)).not.toMatch(/共 \d+ 處/);
 
     expect(closed.length).toBeGreaterThan(0);
     expect(coverageHeadline(rows, places)).toBe(
-      `已收錄 ${cityCount} 縣市、共 ${placeCount} 處可造訪（另 ${closed.length} 處休園整修中）`,
+      `已收錄 ${cityCount} 縣市，${closed.length} 處休園整修中`,
     );
 
     const firstClosed = closed[0];
     expect(firstClosed).toBeDefined();
     if (!firstClosed) return;
     const twoClosed = [...open, firstClosed, { ...firstClosed, id: "closed-2" }];
-    expect(coverageHeadline(rows, twoClosed)).toContain("另 2 處休園整修中");
+    expect(coverageHeadline(rows, twoClosed)).toContain("2 處休園整修中");
   });
 
   it("coverageTierForCity 分級正確", () => {

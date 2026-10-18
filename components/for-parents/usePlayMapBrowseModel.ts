@@ -3,10 +3,10 @@
 import { useMemo } from "react";
 import type { PlaygroundType, Playground } from "@/data/playgrounds";
 import {
-  buildPlayMapCityTiles,
+  buildPlayMapRegions,
   listUncataloguedCities,
-  type PlayMapCityTile,
-} from "@/lib/play-map-city-tiles";
+  type PlayMapRegion,
+} from "@/lib/play-map-regions";
 import {
   DRIVE_GROUP_NOTE,
   groupPlayMapResults,
@@ -23,7 +23,7 @@ import type { LatLng } from "@/lib/playground-distance";
 /**
  * 瀏覽層的衍生資料。
  *
- * 這些全是 filter 狀態的純投影（磚牆、分組、結果句），沒有自己的 state。
+ * 這些全是 filter 狀態的純投影（縣市分組、名單分組、結果句），沒有自己的 state。
  * 拆出來是因為 usePlayMapFilters 已經 767 行、逼近 800 行上限，
  * 而且「篩選狀態機」與「怎麼把結果排版」本來就是兩件事。
  */
@@ -45,7 +45,8 @@ export type UsePlayMapBrowseModelOptions = {
 };
 
 export type PlayMapBrowseModel = {
-  cityTiles: readonly PlayMapCityTile[];
+  /** 「在哪裡玩？」的北中南分組，只含已收錄縣市。 */
+  regions: readonly PlayMapRegion[];
   uncataloguedCities: readonly string[];
   groupMode: PlayMapGroupMode;
   groups: readonly PlayMapResultGroup[];
@@ -73,8 +74,8 @@ export function usePlayMapBrowseModel(
     typeFilter,
   } = options;
 
-  const cityTiles = useMemo(
-    () => buildPlayMapCityTiles({ counts: cityCounts }),
+  const regions = useMemo(
+    () => buildPlayMapRegions({ counts: cityCounts }),
     [cityCounts],
   );
 
@@ -128,7 +129,7 @@ export function usePlayMapBrowseModel(
   );
 
   return {
-    cityTiles,
+    regions,
     uncataloguedCities,
     groupMode,
     groups,

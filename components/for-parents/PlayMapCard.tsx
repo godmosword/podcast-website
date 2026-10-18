@@ -2,10 +2,9 @@
 
 import { buildGoogleMapsNavUrl, type Playground } from "@/data/playgrounds";
 import { composeParentBlurb } from "@/lib/playground-parent-voice";
-import { playgroundTypeVisualKey } from "@/lib/playground-type-visual";
+import Icon from "@/components/ui/Icon";
 import type { PlayMapCardProps } from "./PlayMapContract";
-import { PlaygroundTypeMark } from "./PlaygroundTypeMark";
-import styles from "./PlayMap.module.css";
+import styles from "./PlayMapCard.module.css";
 
 type CardBinaryFact = {
   label: string;
@@ -26,9 +25,15 @@ export function listPlayMapCardBinaryFacts(
   ];
 }
 
+/**
+ * 純文字卡：名稱＋車程 → 區 · 類型 · 免費 · 戶外 → 家長筆記，右上一顆導航。
+ * 類型插畫、類型色框已移除（43 張公園卡同一張圖，不帶資訊）；
+ * 事實寫成文字而不是 pill，免得看起來像能點的篩選 chip。
+ *
+ * 導航必須是 cardMain button 的**兄弟節點**，不能包在 button 裡（巢狀互動元素）。
+ */
 export function PlayMapCard({
   place,
-  variant = "default",
   selected,
   hovered,
   hoverCorrelationEnabled,
@@ -39,16 +44,15 @@ export function PlayMapCard({
   onSelect,
   registerCardRef,
 }: PlayMapCardProps) {
-  const mapSheet = variant === "mapSheet";
   const cardFacts = listPlayMapCardBinaryFacts(place);
   const area = place.district ?? place.city;
   const meta = [area, place.type].filter(Boolean).join(" · ");
-  const blurb = composeParentBlurb(place);
+  const blurb = composeParentBlurb(place, undefined, { includeFacilities: false });
+  const closed = place.status === "temporarily-closed";
 
   return (
     <li
-      id={mapSheet ? undefined : place.id}
-      data-place-id={mapSheet ? place.id : undefined}
+      id={place.id}
       ref={(element) => registerCardRef(place.id, element)}
       hidden={hidden}
       data-card-state={selected ? "selected" : hovered ? "hover-correlated" : "default"}
@@ -56,13 +60,11 @@ export function PlayMapCard({
       <article
         className={[
           styles.card,
-          mapSheet ? styles.cardMapSheet : "",
           hovered && !selected ? styles.cardCorrelated : "",
           selected ? styles.cardSelected : "",
         ]
           .filter(Boolean)
           .join(" ")}
-        data-type={playgroundTypeVisualKey(place.type)}
         onPointerEnter={
           hoverCorrelationEnabled ? () => onHover(place.id) : undefined
         }
@@ -91,41 +93,38 @@ export function PlayMapCard({
           aria-label={`${place.name}，查看詳情`}
           onClick={(event) => onSelect(place.id, event.currentTarget)}
         >
-          <PlaygroundTypeMark type={place.type} />
-          <span className={styles.cardBody}>
-            <span className={styles.cardHead}>
-              <span className={styles.cardName}>{place.name}</span>
-              {distanceLabel ? (
-                <span className={styles.cardDistance}>{distanceLabel}</span>
-              ) : null}
-            </span>
-            {place.status === "temporarily-closed" ? (
+          <span className={styles.cardHead}>
+            <span className={styles.cardName}>{place.name}</span>
+            {closed ? (
               <span className={styles.cardClosed}>暫停營業</span>
+            ) : distanceLabel ? (
+              <span className={styles.cardDistance}>{distanceLabel}</span>
             ) : null}
-            <span className={styles.cardMeta}>{meta}</span>
-            <span className={styles.cardFlags}>
-              {cardFacts.map((fact) => (
-                <span key={fact.kind} className={styles.flag}>
-                  {fact.label}
-                </span>
-              ))}
-            </span>
-            <span className={styles.cardBlurb}>{blurb}</span>
           </span>
+          <span className={styles.cardMeta}>
+            {meta}
+            {cardFacts.map((fact) => (
+              <span
+                key={fact.kind}
+                className={styles.cardFact}
+                data-card-fact={fact.kind}
+              >
+                {fact.label}
+              </span>
+            ))}
+          </span>
+          <span className={styles.cardBlurb}>{blurb}</span>
         </button>
-        {!mapSheet ? (
-          <div className={styles.cardActions}>
-            <a
-              className={styles.cardNav}
-              href={buildGoogleMapsNavUrl(place)}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`導航前往 ${place.name}（另開視窗）`}
-            >
-              導航
-            </a>
-          </div>
-        ) : null}
+        <a
+          className={styles.cardNav}
+          href={buildGoogleMapsNavUrl(place)}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`導航前往 ${place.name}（另開視窗）`}
+        >
+          導航
+          <Icon name="external" size={16} />
+        </a>
       </article>
     </li>
   );

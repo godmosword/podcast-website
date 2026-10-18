@@ -10,13 +10,23 @@ export type ParentVoiceFields = Pick<
 
 const CARD_BLURB_MAX = 72;
 
+export type ComposeParentBlurbOptions = {
+  /**
+   * 是否在 tips 後補「有兒童遊戲場、有步道」這類設施句（預設 true）。
+   * 親子遊樂地圖名單卡傳 false：卡片只留兩行，自動拼接的設施句讀起來像機器生成，
+   * 設施清單本來就在 `[placeId]` 詳情頁。
+   */
+  includeFacilities?: boolean;
+};
+
 /** 卡片 1～2 句：先講已核對設施，再摘 tips。 */
 export function composeParentBlurb(
   place: ParentVoiceFields,
   maxChars = CARD_BLURB_MAX,
+  { includeFacilities = true }: ComposeParentBlurbOptions = {},
 ): string {
   const tip = (place.tips ?? "").replace(/\s+/g, " ").trim();
-  const extras = place.facilities
+  const extras = (includeFacilities ? place.facilities : [])
     .filter((item) => item.length > 0 && !tip.includes(item))
     .slice(0, 2)
     .map((item) => `有${item}`);

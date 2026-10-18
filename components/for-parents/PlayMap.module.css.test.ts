@@ -40,9 +40,7 @@ describe("PlayMap.module.css map-chip 用量", () => {
     expect(css).toMatch(/\.intentGrid \.intentChip\s*\{[^}]*flex:\s*0 0 auto/s);
   });
 
-  it("卡片與 marker 的 correlated／selected 狀態有可見且不同的層級", () => {
-    expect(css).toMatch(/\.cardCorrelated\s*\{[^}]*box-shadow:/s);
-    expect(css).toMatch(/\.cardSelected\s*\{[^}]*inset/s);
+  it("marker 的 correlated／selected 狀態有可見且不同的層級（卡片見 PlayMapCard.module.css）", () => {
     expect(css).toMatch(
       /:global\(\.playMapMarkerButton\[data-hovered="true"\]\)\s*\{[^}]*scale\(1\.08\)/s,
     );
@@ -83,13 +81,26 @@ describe("PlayMap.module.css map-chip 用量", () => {
     expect(css).toMatch(
       /@media\s*\(min-width:\s*900px\)[\s\S]*?\.root\[data-split="false"\] \.browse/,
     );
-    expect(css).toMatch(/\.root\[data-split="false"\] \.wallSlot/);
+    expect(css).toMatch(/\.root\[data-split="false"\] \.locationSlot\s*\{[^}]*position:\s*sticky/s);
     expect(css).toMatch(/\.root\[data-split="false"\] \.cardGrid/);
   });
 
-  it("卡片導航只視覺降噪而不移除 DOM", () => {
+  it("手機卡片不再藏導航（D3：名單一下就能導航）", () => {
+    expect(css).not.toMatch(/\.cardActions/);
+    expect(css).not.toMatch(/\.cardNav[^{]*\{[^}]*display:\s*none/s);
+  });
+
+  it("條件列不透明、只留底部一條分隔線，並排時橫跨兩欄", () => {
     expect(css).toMatch(
-      /@media\s*\(max-width:\s*979px\)\s*\{[^}]*\.cardsPanel \.cardActions\s*\{[^}]*display:\s*none/s,
+      /\.controlBar\s*\{[^}]*position:\s*sticky[^}]*background:\s*var\(--bg\)[^}]*border-bottom:/s,
     );
+    expect(css).not.toMatch(/\.controlBar\s*\{[^}]*border-block/s);
+    expect(css).toMatch(
+      /\.root\[data-split="true"\] \.controlBar\s*\{[^}]*grid-column:\s*1 \/ -1/s,
+    );
+  });
+
+  it("條件 chip 是 pill，和位置選擇器的圓角矩形分開", () => {
+    expect(css).toMatch(/\.intentChip\s*\{[^}]*border-radius:\s*var\(--radius-pill\)/s);
   });
 });

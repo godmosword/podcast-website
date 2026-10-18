@@ -1,0 +1,173 @@
+/*
+ * 名單卡片。純文字卡：沒有類型插畫、沒有類型色框（DESIGN.md「裝飾不搶內容」）。
+ *
+ * 層級：名稱（--ink 粗體）＞家長筆記（--ink）＞區 · 類型 · 事實（--ink-soft 小字）。
+ * 導航是卡片上唯一的按鈕，soft 樣式；全頁只有詳情 sheet 的「導航」是實心。
+ */
+
+.card {
+  position: relative;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  background: var(--card);
+  box-shadow: var(--elev-1);
+  transition: transform var(--motion-press), box-shadow var(--motion-press);
+}
+
+/* 夜間 --elev-1 幾乎看不見，邊界只剩 --hairline；加深一階，卡片輪廓才讀得出來。 */
+:global([data-theme="night"]) .card {
+  border-color: color-mix(in srgb, var(--ink) 18%, transparent);
+}
+
+@media (hover: hover) {
+  .card:hover {
+    box-shadow: var(--elev-2);
+    transform: translateY(-2px);
+  }
+}
+
+/*
+ * correlated（地圖 hover 關聯）與 selected 必須是兩個可分的層級：
+ * correlated 是外圈淡 ring＋抬升；selected 是內圈 --accent-ink 實線。
+ * 原本兩者都走類型色 --card-accent，拿掉類型色後改用 accent 系。
+ * 一併寫 :hover，否則 .card:hover 的陰影會在滑過時蓋掉狀態 ring。
+ */
+.cardCorrelated,
+.cardCorrelated:hover {
+  box-shadow:
+    var(--elev-2),
+    0 0 0 2px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+.cardSelected,
+.cardSelected:hover {
+  box-shadow: var(--elev-1), inset 0 0 0 2px var(--accent-ink);
+}
+
+.cardMain {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-4);
+  border: none;
+  border-radius: inherit;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: opacity var(--motion-press);
+}
+
+.cardMain:active {
+  opacity: 0.88;
+}
+
+/* 右上角的導航是絕對定位的兄弟節點；第一行讓出它的寬度，名稱才不會被壓到。 */
+.cardHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px var(--space-2);
+  padding-right: 88px;
+}
+
+.cardName {
+  color: var(--ink);
+  font-size: var(--fs-h3-compact);
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.cardDistance {
+  color: var(--ink);
+  font-size: var(--fs-label);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/*
+ * 卡片上的暫停營業標籤：掃視時就要看得到，不能只藏在詳情裡；取代車程的位置。
+ */
+.cardClosed {
+  padding: 2px 8px;
+  border: 1px solid color-mix(in srgb, var(--status-error) 34%, transparent);
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--status-error) 14%, var(--card));
+  color: var(--status-error);
+  font-size: var(--fs-meta);
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.cardMeta {
+  padding-right: 88px;
+  color: var(--ink-soft);
+  font-size: var(--fs-label);
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+/* 事實是純文字，用中點接在區 · 類型後面，不做成 pill（pill 會被讀成可點的篩選）。 */
+.cardFact::before {
+  content: "·";
+  margin-inline: 0.35em;
+}
+
+.cardBlurb {
+  margin-top: 4px;
+  color: var(--ink);
+  font-size: var(--fs-control);
+  font-weight: 500;
+  line-height: 1.55;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cardNav {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 var(--space-3) 0 14px;
+  border-radius: var(--radius-pill);
+  background: var(--warm-chip-bg);
+  color: var(--accent-ink);
+  font-size: var(--fs-control);
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform var(--motion-press), opacity var(--motion-press);
+}
+
+.cardNav:active {
+  transform: scale(0.98);
+  opacity: 0.94;
+}
+
+.cardMain:focus-visible,
+.cardNav:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .cardMain,
+  .cardNav {
+    transition: none;
+  }
+
+  .card,
+  .card:hover,
+  .cardNav:active {
+    transform: none;
+  }
+}

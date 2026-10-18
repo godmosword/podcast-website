@@ -28,6 +28,14 @@
 - **後續：拿掉 CTA `nowrap`**：把 `LandingSegment.tsx` 的 `" →"` 半形空白改不斷行空白，箭頭才不會孤行；同時避開 <348px Dudu 遮箭頭、文字級 200% 被 `.panel` 裁尾。
 - **後續：勿靜默啟用 `playCta`**：`LandingSegment.tsx` 三元式會讓主 CTA 從 56px／`--fs-h2`／不透明墨板退回 44px／`.subscribeCta`，契約測不會紅。`.subscribeCta` 已脫離玻璃；啟用前仍須處理字級／高度落差，且不得把分區主 CTA 換成橘 `.playCta`。
 
+### 親子遊樂地圖簡化改版（2026-10-18）　`design · L · 無`　✅ 見本 commit
+
+Plan：`~/.claude/plans/play-map-simplify.md`（D1=A 北中南分組、D2=A 純文字卡、D3=A 手機卡片放導航；Codex 工程審＋Opus 設計審）。
+
+- 後續（本輪不做）：`/for-parents/play-map/[placeId]` 詳情頁與 `collections/` 頁沿用新的卡片語彙。
+- 後續（本輪不做）：夜間 `SiteNavBar` 仍是奶油色，和本頁深底的 sticky 條件列形成一亮一暗兩條帶（全站導覽議題）。
+- 後續：`buildGoogleMapsPlaceUrl` 已沒有頁面在用（只剩 `data/playgrounds.test.ts`），要嘛刪、要嘛留給詳情頁。
+
 ### 品牌標誌合規後續（2026-10-12）
 
 主體已落地（官方檔＋同一顆章，見 `lib/BRAND-ASSETS-HARD-RULES.md`），剩下要使用者本人處理或決定的：

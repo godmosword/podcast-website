@@ -45,6 +45,8 @@ export const ICON_NAMES = [
   "chevron-up",
   "flag",
   "bar-chart",
+  // 親子遊樂地圖「篩選」：滑桿，和條件 chip 區分
+  "sliders",
 ] as const;
 
 export type IconName = (typeof ICON_NAMES)[number];

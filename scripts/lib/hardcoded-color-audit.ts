@@ -58,8 +58,6 @@ const HARDCODED_COLOR_ALLOWLIST = [
   // 真實世界地圖：類型剪影 #34302b／「其他」淺沙 #cfcac2 為固定美術色
   // （DESIGN.md §48）；另有遮罩用的 #000 與圖釘白環。
   "components/for-parents/PlayMap.module.css",
-  // 縣市色塊圖白字：註解內已記實測 5.77:1，是刻意的固定前景
-  "components/for-parents/PlayMapCityWall.module.css",
   // Landing／Hero 舞台美術
   "components/landing/LandingSegment.module.css",
   "components/landing/SiteNavBar.module.css",

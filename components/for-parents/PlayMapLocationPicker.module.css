@@ -1,0 +1,236 @@
+/*
+ * 「在哪裡玩？」位置選擇器。取代原本的縣市色塊圖。
+ *
+ * 這裡刻意**不借用 --map-chip***（那組印刷色只屬於 Leaflet overlay：
+ * 縮放鍵、cluster、mapHint）。選擇器是頁面層元件，走 --accent-ink 與 --warm-chip-bg。
+ *
+ * 也**不使用 backdrop-filter 或 CSS blur()**：iOS 合成成本過高，本頁曾因此 OOM。
+ *
+ * 外型分工：位置（單選）是**圓角矩形＋數量**；條件（可疊加）是 ControlBar 的 pill。
+ * 兩種外型必須一眼分得出來，否則家長不知道哪些能疊加。
+ */
+
+.picker {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.headRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+
+.heading {
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--fs-h3-compact);
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.nearMe {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  background: var(--warm-chip-bg);
+  color: var(--accent-ink);
+  font: inherit;
+  font-size: var(--fs-control);
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform var(--motion-press), opacity var(--motion-press);
+}
+
+/* --card 在日間是白、夜間是深底；對 --accent-ink 兩個主題都過 AA（日 5.77:1）。 */
+.nearMe[aria-pressed="true"] {
+  border-color: var(--accent-ink);
+  background: var(--accent-ink);
+  color: var(--card);
+}
+
+.nearMe[aria-busy="true"] {
+  cursor: progress;
+}
+
+.nearMe:active {
+  transform: scale(0.98);
+  opacity: 0.94;
+}
+
+.geoHint {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: var(--fs-label);
+  font-weight: 600;
+}
+
+.collapsedChip {
+  display: none;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-3) 0 var(--space-4);
+  border: 2px solid var(--accent-ink);
+  border-radius: var(--radius-pill);
+  background: var(--warm-chip-bg);
+  /* 文字用 --accent-ink；淡底上日間仍有 5:1 以上。 */
+  color: var(--accent-ink);
+  font: inherit;
+  font-size: var(--fs-control);
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform var(--motion-press);
+}
+
+.collapsedChip:active {
+  transform: scale(0.98);
+}
+
+.regions {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.region {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+}
+
+/* 桌面地圖並排：北中南橫排，整塊只佔兩列高，地圖留在首屏。 */
+.picker[data-layout="row"] .regions {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-3) var(--space-6);
+}
+
+.regionLabel {
+  color: var(--ink-soft);
+  font-size: var(--fs-meta);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.cityGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.city {
+  /*
+   * 數字比縣市名小一階；baseline 對齊才不會看起來像上標。
+   * 用 grid：align-items 管同列 baseline，align-content 讓整列在 44px 內垂直置中
+   * （flex 單列的 baseline 對齊會把文字貼到頂端）。
+   */
+  display: inline-grid;
+  grid-auto-flow: column;
+  align-items: baseline;
+  align-content: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+  min-height: 44px;
+  padding: 6px 4px;
+  border: 1px solid var(--cta-soft-line);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--fs-label);
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform var(--motion-press), border-color var(--motion-press);
+}
+
+/* 命中數是主資訊之一，不降成 --ink-soft；層級靠字級與字重，不靠顏色。 */
+.cityCount {
+  color: var(--ink);
+  font-size: var(--fs-meta);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.city:active {
+  transform: scale(0.98);
+}
+
+.city:focus-visible,
+.collapsedChip:focus-visible,
+.nearMe:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/*
+ * 已收錄但這組條件 0 筆：虛線框＋「0」雙重編碼，仍可點回去。
+ * 刻意**不用 opacity 降階**——透明度會連文字對比一起吃掉。
+ */
+.city[data-status="empty"] {
+  border-style: dashed;
+  color: var(--ink-soft);
+}
+
+.city[data-status="empty"] .cityCount {
+  color: var(--ink-soft);
+}
+
+/* 選中態用實心底，寫在 empty 之後，0 筆的縣市被選中時也是實心。 */
+.city[aria-pressed="true"] {
+  border: 1px solid var(--accent-ink);
+  background: var(--accent-ink);
+  color: var(--card);
+  font-weight: 700;
+}
+
+.city[aria-pressed="true"] .cityCount {
+  color: inherit;
+}
+
+.notice {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: var(--fs-meta);
+  line-height: 1.6;
+}
+
+/* 320 寬的手機放不下四欄「桃園市 10」。 */
+@media (max-width: 359px) {
+  .cityGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* 手機選定縣市後收成一行，把畫面讓給名單（漸進式揭露）。 */
+@media (max-width: 639px) {
+  .picker[data-selected="true"] .regions,
+  .picker[data-selected="true"] .notice {
+    display: none;
+  }
+
+  .picker[data-selected="true"] .collapsedChip {
+    display: inline-flex;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .city,
+  .nearMe,
+  .collapsedChip {
+    transition: none;
+  }
+
+  .city:active,
+  .nearMe:active,
+  .collapsedChip:active {
+    transform: none;
+  }
+}

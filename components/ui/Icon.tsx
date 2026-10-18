@@ -129,6 +129,15 @@ function renderGlyph(name: IconName) {
           <path d="M10 20v-5h4v5" />
         </g>
       );
+    case "sliders":
+      // 兩條橫桿各一顆旋鈕：篩選鈕專用，不跟「設定」齒輪混用
+      return (
+        <g {...STROKE}>
+          <path d="M4 7h9M17 7h3M4 17h3M11 17h9" />
+          <circle cx="15" cy="7" r="2" />
+          <circle cx="9" cy="17" r="2" />
+        </g>
+      );
     case "settings":
       // 齒輪，不用「圓心＋光芒」：那是亮度符號，跟遊戲抬頭的日夜切換並排時會被看成「切白天」
       return (

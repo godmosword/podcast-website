@@ -170,10 +170,10 @@ function volatileMasks(page: Page, pageId: VisualPageId): Locator[] {
     case "play-map":
       // **刻意不遮**，理由與 characters 同一條判準（見檔頭 MASK_DOCTRINE）。
       // 曾遮「共 N 處」註腳與「N 個地方」結果數，複審後撤回：
-      // (a) 買不到穩定性——同一張圖上磚牆 22 塊磚的命中數、名單分組標題、
-      //     「已顯示 24／99 處」全都沒遮，任何會動到結果數的資料變更必然同時動到它們；
-      // (b) 代價卻是塗掉 DESIGN.md 指名的東西——「結果數放大為主資訊」與
-      //     資料誠實紅線的 coverage footnote。
+      // (a) 買不到穩定性——同一張圖上位置選擇器 15 個縣市的命中數、名單分組標題、
+      //     「已看 24／99」全都沒遮，任何會動到結果數的資料變更必然同時動到它們；
+      // (b) 代價卻是塗掉 DESIGN.md 指名的東西——結果列的「N 個地方」與
+      //     資料誠實紅線的頁首收錄摘要。
       return [];
     case "games":
     case "story-ep-3":
@@ -285,21 +285,18 @@ const COMPONENT_SHOTS: {
     locator: (page) => page.locator('a[href="/story/ep-1"]').first(),
   },
   {
-    id: "play-map-wall",
-    name: "縣市磚牆",
+    id: "play-map-location",
+    name: "在哪裡玩？位置選擇器",
     path: "/for-parents/play-map",
-    // DESIGN.md 對磚牆的規範密度最高（三態編碼、未收錄標示、示意排列免責、觸控尺寸）。
-    // 磚上的命中數不遮：景點資料異動是該被看見的內容變更（MASK_DOCTRINE 判準 1）。
-    locator: (page) =>
-      page
-        .locator("section")
-        .filter({ has: page.getByRole("group", { name: "依縣市瀏覽" }) }),
+    // DESIGN.md 對位置選擇器的規範密度最高（北中南分組、0 筆虛線、未收錄聲明、觸控尺寸）。
+    // 縣市上的命中數不遮：景點資料異動是該被看見的內容變更（MASK_DOCTRINE 判準 1）。
+    locator: (page) => page.getByRole("region", { name: "在哪裡玩？" }),
   },
   {
     id: "play-map-filters",
-    name: "意圖快捷列",
+    name: "快速條件列",
     path: "/for-parents/play-map",
-    locator: (page) => page.getByRole("group", { name: "意圖快捷" }),
+    locator: (page) => page.getByRole("group", { name: "快速條件" }),
   },
   {
     id: "play-map-card",

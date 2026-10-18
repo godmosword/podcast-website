@@ -2,10 +2,8 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
-import DuduSprite from "@/components/dudu/DuduSprite";
 import {
   buildGoogleMapsNavUrl,
-  buildGoogleMapsPlaceUrl,
   type Playground,
   type PlaygroundSourceKind,
 } from "@/data/playgrounds";
@@ -98,9 +96,6 @@ export function PlayMapSheet({
         關閉後可繼續瀏覽地圖與列表，不需離開本頁。
       </p>
       <div className={styles.sheetHeader}>
-        <span className={styles.sheetBrand} aria-hidden>
-          <DuduSprite emotion="star" decorative />
-        </span>
         <h2 className={styles.sheetTitle}>{place.name}</h2>
         <button
           type="button"
@@ -126,13 +121,7 @@ export function PlayMapSheet({
       {compact ? (
         <>
           {decisionTags.length > 0 ? (
-            <ul className={styles.sheetTagList} aria-label="關鍵標籤">
-              {decisionTags.map((tag) => (
-                <li key={tag} className={styles.flag}>
-                  {tag}
-                </li>
-              ))}
-            </ul>
+            <p className={styles.sheetFacts}>{decisionTags.join(" · ")}</p>
           ) : null}
           <p className={styles.address}>
             {place.address}
@@ -162,13 +151,10 @@ export function PlayMapSheet({
         </>
       ) : (
         <>
-          <ul className={styles.sheetTagList} aria-label="關鍵資訊">
-            {listFullSheetFacts(place, distanceLabel).map((fact) => (
-              <li key={fact} className={styles.flag}>
-                {fact}
-              </li>
-            ))}
-          </ul>
+          {/* 事實寫成一行文字，不做成 pill：pill 會被讀成可以點的篩選 chip。 */}
+          <p className={styles.sheetFacts}>
+            {listFullSheetFacts(place, distanceLabel).join(" · ")}
+          </p>
 
           {place.tips ? (
             <p className={styles.tips}>
@@ -225,7 +211,8 @@ export function PlayMapSheet({
 
           {/*
             出口分兩層：導航與完整資訊是家長真正要走的路，
-            在地圖看／顯示位置／官網降成文字連結，不跟主要出口搶點擊。
+            在地圖看／官網降成文字連結，不跟主要出口搶點擊。
+            「顯示位置」已移除：它和導航一樣開 Google 地圖，家長分不出差別。
             所有 aria-label 維持原字串（e2e 契約）。
           */}
           <div className={styles.actions}>
@@ -255,15 +242,6 @@ export function PlayMapSheet({
             >
               在地圖看
             </button>
-            <a
-              className={styles.placeLink}
-              href={buildGoogleMapsPlaceUrl(place)}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`在 Google 地圖只顯示 ${place.name} 位置（另開視窗）`}
-            >
-              顯示位置
-            </a>
             {place.officialUrl ? (
               <a
                 className={styles.officialLink}

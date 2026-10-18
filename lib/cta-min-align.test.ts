@@ -132,9 +132,11 @@ const SOFT = [
     file: "components/games/GameLoadOverlay.module.css",
     className: "secondaryBtn",
   },
+  // 2026-10-18 簡化改版刪掉「顯示位置」（.placeLink，和導航一樣開 Google 地圖），
+  // compact sheet 的「更多」仍是 soft。
   {
     file: "components/for-parents/PlayMap.module.css",
-    className: "placeLink",
+    className: "moreButton",
   },
   {
     file: "app/for-parents/play-map/[placeId]/page.module.css",
@@ -206,10 +208,10 @@ describe("CTA 三階（H1 第二刀 soft／quiet）", () => {
   it("full sheet 次要出口維持 quiet 文字連結，不跟 compact 軟鈕同底板", () => {
     const css = readCss("components", "for-parents", "PlayMap.module.css");
     expect(css).toMatch(
-      /\.sheetSecondaryActions \.placeLink[\s\S]*?background:\s*transparent/,
+      /\.sheetSecondaryActions \.officialLink[\s\S]*?background:\s*transparent/,
     );
     expect(css).toMatch(
-      /\.sheetSecondaryActions \.placeLink[\s\S]*?color:\s*var\(--cta-quiet-fg\)/,
+      /\.sheetSecondaryActions \.officialLink[\s\S]*?color:\s*var\(--cta-quiet-fg\)/,
     );
   });
 

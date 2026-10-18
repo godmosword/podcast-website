@@ -9,7 +9,6 @@ import {
   useState,
 } from "react";
 import {
-  listCities,
   listPlaygrounds,
   PLAYGROUND_TYPES,
   type PlaygroundType,
@@ -108,7 +107,6 @@ export function usePlayMapFilters({
   initialView,
   viewportBounds,
 }: UsePlayMapFiltersOptions) {
-  const cities = useMemo(() => listCities(), []);
   const coverage = useMemo(() => listCityCoverage(), []);
   const allPlaces = useMemo(() => listPlaygrounds(), []);
   const reduceMotion = usePrefersReducedMotion();
@@ -156,13 +154,12 @@ export function usePlayMapFilters({
 
   const lastTriggerRef = useRef<HTMLElement | null>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
-  const cityScrollerRef = useRef<HTMLDivElement>(null);
   const cardListTopRef = useRef<HTMLDivElement>(null);
   const userClosedSheetRef = useRef(false);
 
   /*
-   * 類型／條件面板預設收摺（含桌機）。縣市也進同一塊篩選面板，
-   * 不再用 CSS 在 ≥640 常駐——避免首屏被篩選佔滿。
+   * 篩選面板（類型、好停車、推車 OK、戶外）預設收摺（含桌機），避免首屏被篩選佔滿。
+   * 縣市不在面板裡，只在位置選擇器。
    */
 
   const filtered = useMemo(() => {
@@ -296,11 +293,6 @@ export function usePlayMapFilters({
     ],
   );
 
-  const allCityCount = useMemo(
-    () => [...cityCounts.values()].reduce((sum, n) => sum + n, 0),
-    [cityCounts],
-  );
-
   const cityPlaces = useMemo(
     () => filterPlaygrounds({ city: city ?? undefined }),
     [city],
@@ -402,18 +394,7 @@ export function usePlayMapFilters({
     [syncUrl],
   );
 
-  const handleToggleIndoor = useCallback(() => {
-    const next = !indoorOnly;
-    setIndoorOnly(next);
-    syncUrl({ indoorOnly: next });
-  }, [indoorOnly, syncUrl]);
-
-  const handleToggleOutdoor = useCallback(() => {
-    const next = !outdoorOnly;
-    setOutdoorOnly(next);
-    syncUrl({ outdoorOnly: next });
-  }, [outdoorOnly, syncUrl]);
-
+  /** 室內（快捷列）與戶外（篩選面板）互斥：一律走這支，不分開 toggle。 */
   const handleSelectEnvironment = useCallback(
     (next: EnvironmentFilter) => {
       const nextIndoor = next === "indoor";
@@ -666,33 +647,25 @@ export function usePlayMapFilters({
     initialView,
   ]);
 
-  useEffect(() => {
-    if (city === null) return;
-    const chip = cityScrollerRef.current?.querySelector<HTMLElement>(
-      `[data-city-chip="${city}"]`,
-    );
-    chip?.scrollIntoView?.({ block: "nearest", inline: "nearest" });
-  }, [city]);
-
   const shownCount = Math.min(visibleCount, filtered.length);
   const canLoadMore = shownCount < filtered.length;
-  const visibleCountLabel = `已顯示 ${shownCount}／${filtered.length} 處`;
+  const visibleCountLabel = `已看 ${shownCount}／${filtered.length}`;
+  const loadMoreLabel = `再看 ${Math.min(VISIBLE_STEP, filtered.length - shownCount)} 個`;
 
   const visibleTypeOptions = PLAYGROUND_TYPES.filter((item) => {
     const count = typeCounts.get(item) ?? 0;
     return count > 0 || typeFilter === item;
   });
 
-  const activeFilterCount = [
-    city !== null,
+  /**
+   * 「篩選」徽章只數面板裡的條件。快捷列（雨天／免費／室內／放電）本身就看得到
+   * 按下狀態，位置（縣市／附近）有自己的控制，都不算，避免同一件事被數兩次。
+   */
+  const panelFilterCount = [
     typeFilter !== null,
-    indoorOnly,
     outdoorOnly,
-    freeOnly,
-    rainyDayOnly,
     parkingOnly,
     strollerFriendlyOnly,
-    highEnergyOnly,
   ].filter(Boolean).length;
 
   /**
@@ -707,7 +680,6 @@ export function usePlayMapFilters({
     : null;
 
   return {
-    cities,
     coverageLabel: [ageHeadline, coverageHeadline(coverage)]
       .filter(Boolean)
       .join(" · "),
@@ -728,7 +700,7 @@ export function usePlayMapFilters({
     parkingOnly,
     strollerFriendlyOnly,
     highEnergyOnly,
-    activeFilterCount,
+    panelFilterCount,
     selectedId,
     hoveredPlaceId,
     browseView,
@@ -737,7 +709,6 @@ export function usePlayMapFilters({
     userLatLng,
     geoStatus,
     sheetRef,
-    cityScrollerRef,
     cardListTopRef,
     filtered,
     unmatchedPlaces,
@@ -745,19 +716,17 @@ export function usePlayMapFilters({
     points,
     selected,
     cityCounts,
-    allCityCount,
     cityCenter,
     hasExtraFilters,
     ...browse,
     visibleCount,
     canLoadMore,
     visibleCountLabel,
+    loadMoreLabel,
     handleLoadMore,
     visibleTypeOptions,
     handleSelectCity,
     handleSelectType,
-    handleToggleIndoor,
-    handleToggleOutdoor,
     handleSelectEnvironment,
     handleToggleFree,
     handleToggleRainyDay,

@@ -4,13 +4,17 @@
  * 拆檔前先固定這份 contract，之後的 T3／T4／T5 才有辦法分辨
  * 「diff 來自拆檔」還是「diff 來自功能變更」。改這裡等同改契約，
  * 需回到 Plan 重新過審。
+ *
+ * 2026-10-18 簡化改版（Plan：play-map-simplify v2，已過工程／設計審）：
+ * 縣市磚牆換成 LocationPicker（北中南分組＋「我附近」），
+ * ControlBar 只剩條件，徽章改數面板內條件。
  */
 import type { RefObject } from "react";
 import type { Playground, PlaygroundType } from "@/data/playgrounds";
 import type { LatLng } from "@/lib/playground-distance";
-import type { PlayMapCityTile } from "@/lib/play-map-city-tiles";
 import type { PlayMapResultSentenceView } from "@/lib/play-map-copy";
 import type { PlayMapResultGroup } from "@/lib/play-map-groups";
+import type { PlayMapRegion } from "@/lib/play-map-regions";
 import type { PlayMapView } from "@/lib/playgrounds-query";
 
 export type BrowseView = PlayMapView;
@@ -35,7 +39,7 @@ export const NEAR_ME_FIT_COUNT = 8;
 
 /**
  * 桌面並排名單＋地圖（對齊全站 980 導覽斷點）。
- * v2 起**僅在 view=map 生效**：view=cards 是縣市磚牆滿版，任何寬度都不掛 Leaflet。
+ * v2 起**僅在 view=map 生效**：view=cards 是位置選擇器＋名單，任何寬度都不掛 Leaflet。
  */
 export const SPLIT_MIN_WIDTH_PX = 980;
 
@@ -45,26 +49,33 @@ export const MAP_PANEL_ID = "play-map-panel-map";
 export const OPEN_MAP_BUTTON_ID = "play-map-open-map";
 
 /**
- * 縣市磚牆。22 縣市中僅 15 個有資料，其餘必須顯性標示「未收錄」——
- * 把「這組條件 0 筆」與「整個縣市沒收錄」混成同一種灰色會誤導家長。
+ * 「在哪裡玩？」位置選擇器：北中南分組縣市＋「我附近」。
+ * 22 縣市中僅 15 個有資料；未收錄縣市不做成按鈕，改用一行可見文字說明——
+ * 把「這組條件 0 筆」（empty，仍可點）與「整個縣市沒收錄」混在一起會誤導家長。
  */
-export type PlayMapCityWallProps = {
-  tiles: readonly PlayMapCityTile[];
+export type PlayMapLocationPickerProps = {
+  /** "row"：桌面地圖並排時北中南橫排，讓地圖留在首屏；預設 "stack"。 */
+  layout?: "stack" | "row";
+  /** 只含已收錄縣市；count 為套用其他條件、不套用縣市本身的命中數。 */
+  regions: readonly PlayMapRegion[];
   selectedCity: string | null;
-  /** 點同一塊磚兩次＝取消，呼叫端負責傳 null。 */
+  /** 點同一個縣市兩次＝取消，呼叫端負責傳 null。 */
   onToggleCity: (next: string | null) => void;
-  /** 尚未收錄的縣市名，用於磚牆下方的**可見**誠實聲明，不得只放進 aria-label。 */
+  /** 尚未收錄的縣市名，用於選擇器下方的**可見**誠實聲明，不得只放進 aria-label。 */
   uncataloguedCities: readonly string[];
+  nearMeActive: boolean;
+  geoStatus: GeoStatus;
+  onNearMe: () => void;
 };
 
 export type PlayMapToolbarProps = {
-  /** 手機地圖模式隱藏頁首裝飾，把畫面讓給地圖。 */
+  /** 手機地圖模式隱藏頁首摘要，把畫面讓給地圖。 */
   compact?: boolean;
+  /** H1 下的收錄摘要（年齡定位＋收錄縣市與筆數），取代原本的頁尾小字。 */
+  coverageLabel: string;
 };
 
 export type PlayMapControlBarProps = {
-  nearMeActive: boolean;
-  geoStatus: GeoStatus;
   freeOnly: boolean;
   indoorOnly: boolean;
   outdoorOnly: boolean;
@@ -72,11 +83,12 @@ export type PlayMapControlBarProps = {
   parkingOnly: boolean;
   strollerFriendlyOnly: boolean;
   highEnergyOnly: boolean;
-  /** 顯示目前有幾個進階條件已套用；附近不算進階篩選。 */
-  activeFilterCount: number;
-  onNearMe: () => void;
+  /**
+   * 「篩選」徽章：只數面板裡的條件（類型、好停車、推車 OK、戶外）。
+   * 快捷列看得到的條件與位置（縣市／附近）都不算，避免同一件事被數兩次。
+   */
+  panelFilterCount: number;
   onToggleFree: () => void;
-  onToggleIndoor: () => void;
   onSelectEnvironment: (next: EnvironmentFilter) => void;
   onToggleRainyDay: () => void;
   onToggleParking: () => void;
@@ -84,12 +96,6 @@ export type PlayMapControlBarProps = {
   onToggleHighEnergy: () => void;
   filtersOpen: boolean;
   onToggleFilters: () => void;
-  cities: readonly string[];
-  city: string | null;
-  cityCounts: ReadonlyMap<string, number>;
-  allCityCount: number;
-  onSelectCity: (next: string | null) => void;
-  cityScrollerRef: RefObject<HTMLDivElement | null>;
   typeFilter: PlaygroundType | null;
   typeCounts: ReadonlyMap<PlaygroundType, number>;
   visibleTypeOptions: readonly PlaygroundType[];
@@ -98,7 +104,6 @@ export type PlayMapControlBarProps = {
 
 export type PlayMapCardProps = {
   place: Playground;
-  variant?: "default" | "mapSheet";
   selected: boolean;
   hovered: boolean;
   hoverCorrelationEnabled: boolean;
@@ -134,8 +139,6 @@ export type PlayMapCardListProps = {
   /** 手機名單模式：已選縣市或已定位時顯示「看地圖」；桌面並排不需要。 */
   showMapAction: boolean;
   onOpenMap: () => void;
-  /** 低於主要結果摘要顯示的 coverage/editorial 狀態。 */
-  coverageLabel: string;
   editorialPick: {
     place: Playground;
     reason: string;
@@ -144,7 +147,10 @@ export type PlayMapCardListProps = {
   visibleCount: number;
   /** 相對於「篩選後命中數」而非全站 99，否則會出現無效按鈕。 */
   canLoadMore: boolean;
+  /** 「已看 24／99」 */
   visibleCountLabel: string;
+  /** 「再看 24 個」：下一批實際會多出的筆數。 */
+  loadMoreLabel: string;
   onLoadMore: () => void;
   /** 定位重排後捲回此錨點（見 usePlayMapFilters 的 userLatLng effect）。 */
   topRef: RefObject<HTMLDivElement | null>;

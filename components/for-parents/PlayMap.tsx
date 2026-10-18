@@ -10,8 +10,8 @@ import {
   type BrowseView,
 } from "./PlayMapContract";
 import { PlayMapCardList } from "./PlayMapCardList";
-import { PlayMapCityWall } from "./PlayMapCityWall";
 import { PlayMapControlBar } from "./PlayMapControlBar";
+import { PlayMapLocationPicker } from "./PlayMapLocationPicker";
 import { PlayMapSheet } from "./PlayMapSheet";
 import { PlayMapToolbar } from "./PlayMapToolbar";
 import { usePlayMapFilters } from "./usePlayMapFilters";
@@ -175,59 +175,55 @@ export default function PlayMap({
       data-split={map.splitActive ? "true" : "false"}
       data-mobile-map={mobileMap ? "true" : "false"}
     >
-      <PlayMapToolbar compact={mobileMap} />
-
-      <div className={styles.controlSlot} hidden={mobileMap}>
-        <PlayMapControlBar
-          nearMeActive={map.userLatLng !== null}
-          geoStatus={map.geoStatus}
-          freeOnly={map.freeOnly}
-          indoorOnly={map.indoorOnly}
-          outdoorOnly={map.outdoorOnly}
-          rainyDayOnly={map.rainyDayOnly}
-          parkingOnly={map.parkingOnly}
-          strollerFriendlyOnly={map.strollerFriendlyOnly}
-          highEnergyOnly={map.highEnergyOnly}
-          activeFilterCount={map.activeFilterCount}
-          onNearMe={map.handleNearMe}
-          onToggleFree={map.handleToggleFree}
-          onToggleIndoor={map.handleToggleIndoor}
-          onToggleRainyDay={map.handleToggleRainyDay}
-          onToggleParking={map.handleToggleParking}
-          onToggleStrollerFriendly={map.handleToggleStrollerFriendly}
-          onToggleHighEnergy={map.handleToggleHighEnergy}
-          filtersOpen={map.filtersOpen}
-          onToggleFilters={map.handleToggleFilters}
-          onSelectEnvironment={map.handleSelectEnvironment}
-          cities={map.cities}
-          city={map.city}
-          cityCounts={map.cityCounts}
-          allCityCount={map.allCityCount}
-          onSelectCity={handleSelectCity}
-          cityScrollerRef={map.cityScrollerRef}
-          typeFilter={map.typeFilter}
-          typeCounts={map.typeCounts}
-          visibleTypeOptions={map.visibleTypeOptions}
-          onSelectType={map.handleSelectType}
-        />
-      </div>
+      <PlayMapToolbar compact={mobileMap} coverageLabel={map.coverageLabel} />
 
       {/*
-        桌面名單模式把磚牆與結果並排（.browse 兩欄）：磚牆是主要導航器，
-        單獨佔一整條橫幅會在 1100px 內容欄右側留下半欄空白，而且捲到名單後
-        就再也構不到。地圖視圖有自己的 cluster，磚牆整個收起來。
+        ① 在哪裡玩（LocationPicker）→ ② 想要什麼（ControlBar，sticky）→ ③ 名單。
+        桌面名單模式（≥900，.browse 兩欄）：左欄只放位置、sticky；條件列放在右欄頂，
+        和手機同一個元件，篩選面板在右欄展開，不會在左欄造成巢狀捲動。
+        桌面地圖並排（view=map）時位置選擇器改成橫排留在頂端：面板裡已經沒有縣市列，
+        收起來的話家長在地圖分頁就換不了縣市。只有手機全幅地圖才收起來。
       */}
       <div className={styles.browse}>
-        <div className={styles.wallSlot} hidden={map.showMap}>
-          <PlayMapCityWall
-            tiles={map.cityTiles}
+        <div className={styles.locationSlot} hidden={mobileMap}>
+          <PlayMapLocationPicker
+            layout={map.splitActive ? "row" : "stack"}
+            regions={map.regions}
             selectedCity={map.city}
             uncataloguedCities={map.uncataloguedCities}
             onToggleCity={handleSelectCity}
+            nearMeActive={map.userLatLng !== null}
+            geoStatus={map.geoStatus}
+            onNearMe={map.handleNearMe}
           />
         </div>
 
         <div className={styles.content}>
+          <div className={styles.controlSlot} hidden={mobileMap}>
+            <PlayMapControlBar
+              freeOnly={map.freeOnly}
+              indoorOnly={map.indoorOnly}
+              outdoorOnly={map.outdoorOnly}
+              rainyDayOnly={map.rainyDayOnly}
+              parkingOnly={map.parkingOnly}
+              strollerFriendlyOnly={map.strollerFriendlyOnly}
+              highEnergyOnly={map.highEnergyOnly}
+              panelFilterCount={map.panelFilterCount}
+              onToggleFree={map.handleToggleFree}
+              onToggleRainyDay={map.handleToggleRainyDay}
+              onToggleParking={map.handleToggleParking}
+              onToggleStrollerFriendly={map.handleToggleStrollerFriendly}
+              onToggleHighEnergy={map.handleToggleHighEnergy}
+              filtersOpen={map.filtersOpen}
+              onToggleFilters={map.handleToggleFilters}
+              onSelectEnvironment={map.handleSelectEnvironment}
+              typeFilter={map.typeFilter}
+              typeCounts={map.typeCounts}
+              visibleTypeOptions={map.visibleTypeOptions}
+              onSelectType={map.handleSelectType}
+            />
+          </div>
+
           <section
             id={CARDS_PANEL_ID}
             ref={cardPanelRef}
@@ -259,11 +255,11 @@ export default function PlayMap({
                 (map.city !== null || map.userLatLng !== null)
               }
               onOpenMap={() => map.handleSelectView("map")}
-              coverageLabel={map.coverageLabel}
               editorialPick={map.showCards ? map.editorialPick : null}
               visibleCount={map.visibleCount}
               canLoadMore={map.canLoadMore}
               visibleCountLabel={map.visibleCountLabel}
+              loadMoreLabel={map.loadMoreLabel}
               onLoadMore={map.handleLoadMore}
               topRef={map.cardListTopRef}
             />

@@ -55,6 +55,29 @@ describe("composeParentBlurb", () => {
     );
     expect(blurb.length).toBeLessThanOrEqual(40);
   });
+
+  test("includeFacilities: false 只留 tips，不拼設施句", () => {
+    const blurb = composeParentBlurb(
+      {
+        tips: "遊戲場與跑道分開，適合先跑再玩。",
+        facilities: ["兒童遊戲場", "停車場"],
+        free: true,
+        indoor: false,
+      },
+      undefined,
+      { includeFacilities: false },
+    );
+    expect(blurb).toBe("遊戲場與跑道分開，適合先跑再玩。");
+  });
+
+  test("includeFacilities: false 且沒有 tips 時仍有後備句", () => {
+    const blurb = composeParentBlurb(
+      { tips: "", facilities: ["停車場"], free: true, indoor: false },
+      undefined,
+      { includeFacilities: false },
+    );
+    expect(blurb).toBe("免費放電，適合帶小孩出門晃一下。");
+  });
 });
 
 describe("clipParentVoice", () => {

@@ -1,23 +1,20 @@
 "use client";
 
-import Doodle from "@/components/decor/Doodle";
-import Wheel from "@/components/decor/Wheel";
 import type { PlayMapToolbarProps } from "./PlayMapContract";
 import styles from "./PlayMap.module.css";
 
-export function PlayMapToolbar({ compact = false }: PlayMapToolbarProps) {
+/**
+ * 頁首只放 H1 與一行收錄摘要。原本 H1 旁的 blob／輪子／星芒三個裝飾不帶資訊，
+ * 已移除（DESIGN.md「裝飾不搶內容」）；收錄摘要從頁尾小字上移到這裡。
+ */
+export function PlayMapToolbar({
+  compact = false,
+  coverageLabel,
+}: PlayMapToolbarProps) {
   return (
     <header className={styles.toolbar} data-compact={compact ? "true" : "false"}>
-      <div className={styles.titleBlock}>
-        <h1 className={styles.title}>親子遊樂地圖</h1>
-        {compact ? null : (
-          <span className={styles.titleDecor} aria-hidden>
-            <Doodle kind="blob" size={28} color="var(--c-mint)" />
-            <Wheel size={22} color="var(--c-yellow)" />
-            <Doodle kind="burst" size={22} color="var(--c-pink)" />
-          </span>
-        )}
-      </div>
+      <h1 className={styles.title}>親子遊樂地圖</h1>
+      {compact ? null : <p className={styles.coverage}>{coverageLabel}</p>}
     </header>
   );
 }
