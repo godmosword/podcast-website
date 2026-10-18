@@ -13,7 +13,10 @@ import styles from "./parent-dashboard.module.css";
 /** 預設先列幾集聽過的，其餘按「看全部」展開。 */
 const STORY_PROGRESS_PREVIEW = 8;
 
-const GROUPS: { status: Exclude<StoryProgressStatus, "not-started">; title: string }[] = [
+const GROUPS: {
+  status: Exclude<StoryProgressStatus, "not-started">;
+  title: string;
+}[] = [
   { status: "in-progress", title: "聽到一半" },
   { status: "completed", title: "聽完了" },
 ];
@@ -36,9 +39,12 @@ export function ParentDashboardProgress({
   total: number;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const visible = expanded ? listened : listened.slice(0, STORY_PROGRESS_PREVIEW);
+  const visible = expanded
+    ? listened
+    : listened.slice(0, STORY_PROGRESS_PREVIEW);
   const unheard = Math.max(0, total - listened.length);
-  const percent = total > 0 ? Math.round((listened.length / total) * 1000) / 10 : 0;
+  const percent =
+    total > 0 ? Math.round((listened.length / total) * 1000) / 10 : 0;
 
   return (
     <section className={styles.card} aria-labelledby="progress-heading">
@@ -47,7 +53,9 @@ export function ParentDashboardProgress({
           故事進度
         </h2>
         <p className={styles.cardMeta}>
-          {listened.length > 0 ? `聽過 ${listened.length} 集，共 ${total} 集` : `共 ${total} 集`}
+          {listened.length > 0
+            ? `聽過 ${listened.length} 集，共 ${total} 集`
+            : `共 ${total} 集`}
         </p>
       </div>
 
@@ -63,33 +71,48 @@ export function ParentDashboardProgress({
       ) : (
         <>
           <div className={styles.meter} aria-hidden="true">
-            <span className={styles.meterFill} style={{ width: `${percent}%` }} />
+            <span
+              className={styles.meterFill}
+              style={{ width: `${percent}%` }}
+            />
           </div>
-          {GROUPS.map((group) => {
-            const rows = visible.filter((row) => row.status === group.status);
-            if (rows.length === 0) return null;
-            const count = listened.filter((row) => row.status === group.status).length;
-            const headingId = `progress-${group.status}`;
-            return (
-              <div key={group.status} role="group" aria-labelledby={headingId}>
-                <h3 id={headingId} className={styles.groupTitle}>
-                  {group.title} · {count}
-                </h3>
-                <ul className={styles.rows}>
-                  {rows.map((row) => (
-                    <li key={row.slug}>
-                      <Link href={row.href} className={styles.row}>
-                        <span className={styles.rowTitle}>{row.title}</span>
-                        <span className={styles.rowMeta}>{rowMeta(row)}</span>
-                        <span className={styles.rowEp}>EP {row.ep}</span>
-                        <Icon name="chevron-right" size={16} className={styles.rowArrow} />
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            );
-          })}
+          <div className={styles.groups}>
+            {GROUPS.map((group) => {
+              const rows = visible.filter((row) => row.status === group.status);
+              if (rows.length === 0) return null;
+              const count = listened.filter(
+                (row) => row.status === group.status,
+              ).length;
+              const headingId = `progress-${group.status}`;
+              return (
+                <div
+                  key={group.status}
+                  role="group"
+                  aria-labelledby={headingId}
+                >
+                  <h3 id={headingId} className={styles.groupTitle}>
+                    {group.title} · {count}
+                  </h3>
+                  <ul className={styles.rows}>
+                    {rows.map((row) => (
+                      <li key={row.slug}>
+                        <Link href={row.href} className={styles.row}>
+                          <span className={styles.rowTitle}>{row.title}</span>
+                          <span className={styles.rowMeta}>{rowMeta(row)}</span>
+                          <span className={styles.rowEp}>EP {row.ep}</span>
+                          <Icon
+                            name="chevron-right"
+                            size={16}
+                            className={styles.rowArrow}
+                          />
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
+          </div>
           {listened.length > STORY_PROGRESS_PREVIEW ? (
             <button
               type="button"

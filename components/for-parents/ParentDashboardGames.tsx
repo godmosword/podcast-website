@@ -68,7 +68,7 @@ export function ParentDashboardGames({ snap }: { snap: ParentDashboardSnapshot }
           </Link>
         </>
       ) : (
-        <ul className={styles.rows}>
+        <ul className={`${styles.rows} ${styles.gameList}`}>
           {active.map((game) => (
             <li key={game.gameId} className={styles.gameRow}>
               <span className={styles.gameIcon} aria-hidden="true">

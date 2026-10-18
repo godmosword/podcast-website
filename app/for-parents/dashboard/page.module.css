@@ -15,7 +15,7 @@
 .header {
   display: grid;
   gap: 6px;
-  width: min(920px, 100%);
+  width: min(960px, 100%);
   margin: 0 auto var(--space-4);
 }
 
@@ -37,7 +37,7 @@
 .lede {
   max-width: 40em;
   margin: 0;
-  color: var(--ink-soft);
+  color: color-mix(in srgb, var(--ink) 55%, var(--ink-soft));
   font-size: var(--fs-body);
   line-height: 1.7;
 }
@@ -64,4 +64,25 @@
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
   border-radius: var(--radius-xs);
+}
+
+/* 電腦版：連結靠右，與標題、說明同一個頁首帶 */
+@media (min-width: 980px) {
+  .header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    column-gap: var(--space-6);
+  }
+
+  .eyebrow,
+  .title,
+  .lede {
+    grid-column: 1;
+  }
+
+  .links {
+    grid-column: 2;
+    grid-row: 2 / span 2;
+    justify-content: flex-end;
+  }
 }
