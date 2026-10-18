@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { getCharacters } from "@/data/characters";
-import { getStories } from "@/data/content";
+import { getStories, storiesByNewest } from "@/data/content";
 import {
   parentLandingFacts,
   parentLandingFaqs,
@@ -48,6 +48,19 @@ describe("representativeParentStories", () => {
 
     expect(stories.length).toBeGreaterThanOrEqual(3);
     expect(stories.every((story) => allSlugs.has(story.slug))).toBe(true);
+  });
+
+  it("最新四集在前，原本手選接在後面，已出現的不重複", () => {
+    const stories = representativeParentStories();
+    const newest = storiesByNewest().slice(0, 4).map((story) => story.slug);
+    const curated = ["ep-16", "ep-15", "ep-14", "ep-6"];
+    const expected = [...newest];
+    for (const slug of curated) {
+      if (!expected.includes(slug)) expected.push(slug);
+    }
+
+    expect(stories.map((story) => story.slug)).toEqual(expected);
+    expect(new Set(expected).size).toBe(expected.length);
   });
 });
 

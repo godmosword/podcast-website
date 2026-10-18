@@ -25,8 +25,9 @@ type StoryCoListenProps = {
 };
 
 /**
- * 本集的「給爸媽：一起聊聊」：親子小活動、家長指引、聽完提問，預設收合。
- * 原本集中在 /for-parents#co-listen 的總表，2026-10-18 搬回各集頁。
+ * 本集的「給爸媽：一起聊聊」：親子小活動、家長指引、聽完提問。
+ * 預設展開，且這一頁只出現這一次。原本集中在 /for-parents#co-listen 的總表，
+ * 2026-10-18 搬回各集頁。
  */
 export default function StoryCoListen({
   story,
@@ -37,7 +38,7 @@ export default function StoryCoListen({
   if (!hasStoryCoListen(story)) return null;
 
   return (
-    <details id={STORY_CO_LISTEN_ID} className={className}>
+    <details id={STORY_CO_LISTEN_ID} className={className} open>
       <summary className={summaryClassName}>
         <Icon name="chevron-right" size={18} className={`icon-lead icon-disclosure ${iconClassName ?? ""}`} />
         給爸媽：一起聊聊
