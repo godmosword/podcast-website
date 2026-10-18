@@ -38,30 +38,33 @@ describe("壽司黏土圖", () => {
     expect(renderToStaticMarkup(<ToppingArt id="wasabi" />)).toContain("/food/sm/wasabi.webp");
   });
 
-  it("盤子用同一張薄荷綠，金盤與粉盤只差濾鏡", () => {
+  it("裝飾盤用薄荷綠加濾鏡，金盤換成核准的黏土圖、不再套濾鏡", () => {
     const mint = renderToStaticMarkup(<PlateArt tone="mint" />);
     const gold = renderToStaticMarkup(<PlateArt gold />);
     const pink = renderToStaticMarkup(<PlateArt tone="pink" />);
     expect(mint).toContain("/shop/sm/plate.webp");
     expect(mint).not.toContain("filter:");
-    expect(gold).toContain("sepia");
+    expect(mint).not.toContain("plate-gold");
     expect(pink).toContain("hue-rotate");
-    expect(gold).toContain("/shop/sm/plate.webp");
+    expect(gold).toContain("/shop/sm/plate-gold.webp");
+    expect(gold).not.toContain("sepia");
+    expect(gold).not.toContain("filter:");
   });
 
-  it("金盤多一層盤形遮罩的光澤和兩顆星；提示章 plain 只換色；其他盤 DOM 不變", () => {
+  it("金盤是填滿盤框的一張圖；提示章 plain 同一張、沒有程式光澤或星星", () => {
     /* React 19 會在最前面插入圖片預載的 <link>，比對元素本身前先拿掉 */
     const markup = (el: React.ReactElement) => renderToStaticMarkup(el).replace(/^(<link[^>]*>)+/, "");
     const gold = markup(<PlateArt gold />);
-    expect(gold).toMatch(/^<span[^>]*data-gold-plate/);
-    expect(gold).toContain("data-gold-shine");
-    expect(gold.match(/data-gold-star/g)).toHaveLength(2);
-    expect(gold).toContain("--plate-mask:url(&quot;/games/v2/dino-sushi/shop/sm/plate.webp&quot;)");
+    expect(gold).toMatch(/^<img[^>]*data-gold-plate/);
     expect(gold).toContain("width:100%;height:100%");
+    expect(gold).not.toContain("data-gold-shine");
+    expect(gold).not.toContain("data-gold-star");
 
     const plain = markup(<PlateArt gold plain />);
     expect(plain).toContain("data-gold-plate");
-    expect(plain).toContain("sepia");
+    expect(plain).toContain("data-plain=\"true\"");
+    expect(plain).toContain("/shop/sm/plate-gold.webp");
+    expect(plain).not.toContain("sepia");
     expect(plain).not.toContain("data-gold-shine");
     expect(plain).not.toContain("data-gold-star");
 
@@ -90,7 +93,8 @@ describe("壽司黏土圖", () => {
       ]),
     );
     expect(new Set(DINO_SUSHI_CLAY_SRCS).size).toBe(DINO_SUSHI_CLAY_SRCS.length);
-    expect(DINO_SUSHI_CLAY_SRCS).toHaveLength(12 + 3 + 1 + 12);
+    expect(DINO_SUSHI_CLAY_SRCS).toContain("/games/v2/dino-sushi/shop/sm/plate-gold.webp");
+    expect(DINO_SUSHI_CLAY_SRCS).toHaveLength(13 + 3 + 1 + 12);
     // 直式招牌已改成刻在櫃台前板的文字，不再預載
     expect(DINO_SUSHI_CLAY_SRCS.some((src) => src.includes("sign.webp"))).toBe(false);
     // 一律載縮小副本，不載原檔

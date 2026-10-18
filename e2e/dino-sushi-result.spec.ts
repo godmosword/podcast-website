@@ -237,24 +237,25 @@ test.describe("貼紙書", () => {
 });
 
 test.describe("金盤", () => {
-  /** 每個金盤：外層填滿原本的盤框、光澤層跟盤子圖同一個框（遮罩才對得齊）。 */
+  /** 每個金盤：核准的黏土圖填滿原本的盤框，不再疊程式光澤或星星。 */
   async function goldBoxes(scope: Page | Locator) {
     return scope.locator("[data-gold-plate]").evaluateAll((plates) =>
       plates.map((plate) => {
         const r = (el: Element | null) => el!.getBoundingClientRect();
         const same = (a: DOMRect, b: DOMRect) =>
           Math.abs(a.x - b.x) <= 1 && Math.abs(a.y - b.y) <= 1 && Math.abs(a.width - b.width) <= 1 && Math.abs(a.height - b.height) <= 1;
-        const shine = plate.querySelector("[data-gold-shine]");
+        const img = plate instanceof HTMLImageElement ? plate : plate.querySelector("img");
         return {
           fillsContainer: same(r(plate), r(plate.parentElement)),
-          shineOnImage: shine ? same(r(shine), r(plate.querySelector("img"))) : null,
+          src: img?.getAttribute("src") ?? "",
+          extras: plate.querySelectorAll("[data-gold-shine], [data-gold-star]").length,
           width: r(plate).width,
         };
       }),
     );
   }
 
-  test("疊盤、結算盤列的金盤都填滿原本的盤框，光澤層跟盤子圖同框", async ({ page }) => {
+  test("疊盤、結算盤列的金盤都是黏土圖，並填滿原本的盤框", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/games/dino-sushi");
     await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
@@ -266,7 +267,8 @@ test.describe("金盤", () => {
     expect(kitchen).toHaveLength(2);
     for (const box of kitchen) {
       expect(box.fillsContainer).toBe(true);
-      expect(box.shineOnImage).toBe(true);
+      expect(box.src).toContain("plate-gold.webp");
+      expect(box.extras).toBe(0);
       expect(box.width).toBeGreaterThanOrEqual(54);
     }
     for (let n = 3; n <= 5; n++) {
@@ -281,7 +283,8 @@ test.describe("金盤", () => {
     expect(result).toHaveLength(5);
     for (const box of result) {
       expect(box.fillsContainer).toBe(true);
-      expect(box.shineOnImage).toBe(true);
+      expect(box.src).toContain("plate-gold.webp");
+      expect(box.extras).toBe(0);
     }
   });
 
@@ -294,7 +297,7 @@ test.describe("金盤", () => {
     await expect(hint.locator("[data-gold-shine], [data-gold-star]")).toHaveCount(0);
   });
 
-  test("減少動態：金盤不掃光、星星不閃", async ({ page }) => {
+  test("金盤沒有程式光澤或星星可播", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/games/dino-sushi");

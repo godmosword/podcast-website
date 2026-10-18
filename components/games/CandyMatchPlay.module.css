@@ -386,8 +386,7 @@
   text-align: center;
 }
 
-.propCancel,
-.tipDismiss {
+.propCancel {
   min-height: 44px;
   padding: 6px 16px;
   border: 2px solid rgba(93, 74, 103, 0.14);
@@ -398,15 +397,11 @@
   font-family: inherit;
   font-size: 15px;
   font-weight: 800;
-}
-
-.propCancel,
-.tipDismiss {
   flex-shrink: 0;
   white-space: nowrap;
 }
 
-/* 取消要和「知道了」分得出來：粉色底＋關閉圖示 */
+/* 取消：粉色底＋關閉圖示 */
 .propCancel {
   display: inline-flex;
   align-items: center;
@@ -416,32 +411,9 @@
   color: #a5567a;
 }
 
-.propCancel:focus-visible,
-.tipDismiss:focus-visible {
+.propCancel:focus-visible {
   outline: 3px solid var(--focus-ring, #ff9fb7);
   outline-offset: 2px;
-}
-
-.tip {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  max-width: 100%;
-  padding: 4px 6px 4px 12px;
-  border-radius: 999px;
-  background: #fff;
-  color: #5d4a67;
-  box-shadow: 0 6px 14px rgba(150, 110, 130, 0.16);
-}
-
-.tipIcon {
-  font-size: 20px;
-  line-height: 1;
-}
-
-.tipText {
-  font-size: 14px;
-  font-weight: 800;
 }
 
 .resultOverlay {

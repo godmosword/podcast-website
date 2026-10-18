@@ -10,7 +10,6 @@ async function openColoringCanvas(page: Page) {
   await page.getByRole("button", { name: "開始塗", exact: true }).click();
   const card = page.getByRole("button", { name: /^著色：/ }).first();
   await card.click();
-  await card.click();
   await page.waitForSelector("canvas");
   await page.waitForFunction(
     () => !document.body.textContent?.includes("載入線稿中"),

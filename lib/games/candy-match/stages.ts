@@ -169,27 +169,33 @@ const EASY: readonly CandyStageSet[] = [
   ]),
 ];
 
-/** 挑戰第 1–5 關 4 種、第 6 關起 5 種；新車輪進，多多仍在後期出場。 */
+/**
+ * 挑戰第 1–5 關 4 種、第 6 關起 5 種；新車輪進，多多仍在後期出場。
+ * 前五關的顆數按「一次合法交換至少消 3 顆」來放：
+ * 第 1 關任意收集 40／18 步 ≈ 2.2 顆／步，普通三連就清得掉（舊的 92／12 步要每步 7 顆以上）。
+ * 單色約 0.9 顆／步，四種車裡找那一台就夠；雙色合計約 1.6 顆／步，接近隨機一半。
+ * 第 6 關起維持原數字。輕鬆模式完全不動。
+ */
 const CHALLENGE: readonly CandyStageSet[] = [
-  pack([RED, TAXI, BUS, AMB], { id: "c1-any-92", goals: [{ kind: "collect-any", count: 92 }], moves: 12, efficiency: 4, pieceKinds: 4 }, [
-    { id: "c1-red-24", label: "小紅收藏家", goals: [collect(RED, 24)], moves: 12, efficiency: 4, pieceKinds: 4 },
-    { id: "c1-taxi-24", label: "計程車收藏家", goals: [collect(TAXI, 24)], moves: 12, efficiency: 4, pieceKinds: 4 },
+  pack([RED, TAXI, BUS, AMB], { id: "c1-any-40", goals: [{ kind: "collect-any", count: 40 }], moves: 18, efficiency: 6, pieceKinds: 4 }, [
+    { id: "c1-red-12", label: "小紅收藏家", goals: [collect(RED, 12)], moves: 18, efficiency: 6, pieceKinds: 4 },
+    { id: "c1-taxi-12", label: "計程車收藏家", goals: [collect(TAXI, 12)], moves: 18, efficiency: 6, pieceKinds: 4 },
   ]),
-  pack([AMB, TAXI, BUS, BELL], { id: "c2-ambulance-32", goals: [collect(AMB, 32)], moves: 14, efficiency: 4, pieceKinds: 4 }, [
-    { id: "c2-taxi-30", label: "計程車任務", goals: [collect(TAXI, 30)], moves: 14, efficiency: 4, pieceKinds: 4 },
-    { id: "c2-bell-30", label: "鈴鈴任務", goals: [collect(BELL, 30)], moves: 14, efficiency: 4, pieceKinds: 4 },
+  pack([AMB, TAXI, BUS, BELL], { id: "c2-ambulance-18", goals: [collect(AMB, 18)], moves: 20, efficiency: 5, pieceKinds: 4 }, [
+    { id: "c2-taxi-16", label: "計程車任務", goals: [collect(TAXI, 16)], moves: 20, efficiency: 5, pieceKinds: 4 },
+    { id: "c2-bell-16", label: "鈴鈴任務", goals: [collect(BELL, 16)], moves: 20, efficiency: 5, pieceKinds: 4 },
   ]),
-  pack([RED, TAXI, BUS, TRAIN], { id: "c3-red-taxi-36", goals: collectEach([RED, TAXI], 36), moves: 16, efficiency: 4, pieceKinds: 4 }, [
-    { id: "c3-bus-train-36", label: "藍火車雙色", goals: collectEach([BUS, TRAIN], 36), moves: 16, efficiency: 4, pieceKinds: 4 },
-    { id: "c3-red-bus-36", label: "粉藍雙色", goals: collectEach([RED, BUS], 36), moves: 16, efficiency: 4, pieceKinds: 4 },
+  pack([RED, TAXI, BUS, TRAIN], { id: "c3-red-taxi-18", goals: collectEach([RED, TAXI], 18), moves: 22, efficiency: 5, pieceKinds: 4 }, [
+    { id: "c3-bus-train-18", label: "藍火車雙色", goals: collectEach([BUS, TRAIN], 18), moves: 22, efficiency: 5, pieceKinds: 4 },
+    { id: "c3-red-bus-18", label: "粉藍雙色", goals: collectEach([RED, BUS], 18), moves: 22, efficiency: 5, pieceKinds: 4 },
   ]),
-  pack([FIRE, TAXI, BUS, BELL], { id: "c4-bus-50-sp2", goals: [collect(BUS, 50), detonate(2)], moves: 18, efficiency: 4, pieceKinds: 4, requireSpecialMove: true }, [
-    { id: "c4-fire-53-sp2", label: "消防車特殊糖", goals: [collect(FIRE, 53), detonate(2)], moves: 18, efficiency: 4, pieceKinds: 4, requireSpecialMove: true },
-    { id: "c4-bell-47-sp2", label: "鈴鈴特殊糖", goals: [collect(BELL, 47), detonate(2)], moves: 18, efficiency: 4, pieceKinds: 4, requireSpecialMove: true },
+  pack([FIRE, TAXI, BUS, BELL], { id: "c4-bus-18-sp2", goals: [collect(BUS, 18), detonate(2)], moves: 22, efficiency: 4, pieceKinds: 4, requireSpecialMove: true }, [
+    { id: "c4-fire-16-sp2", label: "消防車特殊糖", goals: [collect(FIRE, 16), detonate(2)], moves: 22, efficiency: 4, pieceKinds: 4, requireSpecialMove: true },
+    { id: "c4-bell-14-sp2", label: "鈴鈴特殊糖", goals: [collect(BELL, 14), detonate(2)], moves: 22, efficiency: 4, pieceKinds: 4, requireSpecialMove: true },
   ]),
-  pack([FIRE, TAXI, BUS, BELL], { id: "c5-clean-bottom-12-fire-50", goals: [{ kind: "clean-dirt", count: 12 }, collect(FIRE, 50)], moves: 18, efficiency: 3, pieceKinds: 4, dirtCells: T.bottom12 }, [
-    { id: "c5-clean-corners-12-taxi-43", label: "打掃四個角", goals: [{ kind: "clean-dirt", count: 12 }, collect(TAXI, 43)], moves: 18, efficiency: 3, pieceKinds: 4, dirtCells: T.corners12 },
-    { id: "c5-clean-sides-12-bus-44", label: "打掃兩邊", goals: [{ kind: "clean-dirt", count: 12 }, collect(BUS, 44)], moves: 18, efficiency: 3, pieceKinds: 4, dirtCells: T.sides12 },
+  pack([FIRE, TAXI, BUS, BELL], { id: "c5-clean-bottom-12-fire-18", goals: [{ kind: "clean-dirt", count: 12 }, collect(FIRE, 18)], moves: 24, efficiency: 4, pieceKinds: 4, dirtCells: T.bottom12 }, [
+    { id: "c5-clean-corners-12-taxi-16", label: "打掃四個角", goals: [{ kind: "clean-dirt", count: 12 }, collect(TAXI, 16)], moves: 24, efficiency: 4, pieceKinds: 4, dirtCells: T.corners12 },
+    { id: "c5-clean-sides-12-bus-16", label: "打掃兩邊", goals: [{ kind: "clean-dirt", count: 12 }, collect(BUS, 16)], moves: 24, efficiency: 4, pieceKinds: 4, dirtCells: T.sides12 },
   ]),
   pack([RED, TAXI, BUS, AMB, DUO], { id: "c6-red-ambulance-31", goals: collectEach([RED, AMB], 31), moves: 24, efficiency: 4, pieceKinds: 5 }, [
     { id: "c6-taxi-bus-32", label: "黃藍雙色", goals: collectEach([TAXI, BUS], 32), moves: 24, efficiency: 4, pieceKinds: 5 },

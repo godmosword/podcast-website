@@ -2,7 +2,6 @@
 
 import { useEffect, type CSSProperties, type ReactNode } from "react";
 import { dinoSushiSrc } from "./asset-src";
-import goldStyles from "./gold-plate.module.css";
 import type { Sushi } from "./sushi";
 import type { BaseId, ToppingId, ToppingKind } from "./toppings";
 
@@ -22,6 +21,7 @@ export const SHOP_SRC = {
   counter: dinoSushiSrc("shop/counter.webp"),
   belt: dinoSushiSrc("shop/belt.webp"),
   plate: dinoSushiSrc("shop/plate.webp"),
+  plateGold: dinoSushiSrc("shop/plate-gold.webp"),
   dome: dinoSushiSrc("shop/dome.webp"),
   prepplate: dinoSushiSrc("shop/prepplate.webp"),
   trayNeutral: dinoSushiSrc("shop/tray-neutral.webp"),
@@ -320,16 +320,14 @@ function Layer({ className, children }: { className?: string; children: ReactNod
   return className ? <span className={className} style={{ display: "block" }}>{children}</span> : children;
 }
 
-/** 迴轉壽司盤的釉色。原圖是薄荷綠，其他顏色用濾鏡轉，不另做檔。 */
+/** 迴轉壽司盤的釉色。薄荷綠是原圖，粉、藍、紫用濾鏡轉。金盤是另一張核准的黏土圖。 */
 export type PlateTone = "blue" | "gold" | "pink" | "mint" | "lavender";
 
-const PLATE_FILTER: Record<PlateTone, string | undefined> = {
+const PLATE_FILTER: Record<Exclude<PlateTone, "gold">, string | undefined> = {
   mint: undefined,
   blue: "hue-rotate(42deg) saturate(1.2)",
   pink: "hue-rotate(158deg) saturate(1.35) brightness(1.04)",
   lavender: "hue-rotate(96deg) saturate(1.05)",
-  /* 深琥珀、盤緣偏橙：要跟迴轉帶的粉彩盤和黃色日的托盤底分得開（原本的粉彩黃孩子看不出是金的） */
-  gold: "sepia(1) saturate(5) hue-rotate(-28deg) brightness(0.86)",
 };
 
 type PlateProps = ArtProps & {
@@ -340,46 +338,37 @@ type PlateProps = ArtProps & {
 };
 
 /**
- * 迴轉壽司盤。gold＝一次做對的金盤（多一層程式畫的光澤與星星，見 gold-plate.module.css）；
- * tone 給迴轉帶上的裝飾盤。非金盤的 DOM 就是一張圖，跟原本一樣。
+ * 迴轉壽司盤。gold＝一次做對的金盤（核准的黏土圖，盤緣星星在圖上）；
+ * tone 給迴轉帶上的裝飾盤。每一種盤的 DOM 都是一張圖，填滿同一個盤框。
+ * plain 仍接受：提示章跟疊盤用同一張圖，不再另外畫光澤或星星。
  */
 export function PlateArt({ gold = false, tone, plain = false, size, style }: PlateProps) {
   const plateTone: PlateTone = tone ?? (gold ? "gold" : "blue");
-  const filter = PLATE_FILTER[plateTone];
-  if (plateTone !== "gold") {
+  if (plateTone === "gold") {
     return (
-      <ClayImg
-        src={SHOP_SRC.plate}
-        style={{
-          display: "block",
-          objectFit: "contain",
-          ...box(size),
-          ...(filter ? { filter } : null),
-          ...style,
-        }}
+      <img
+        src={SHOP_SRC.plateGold}
+        alt=""
+        draggable={false}
+        decoding="sync"
+        data-gold-plate=""
+        data-plain={plain ? "true" : undefined}
+        style={{ display: "block", objectFit: "contain", ...box(size), ...style }}
       />
     );
   }
-  /* 外層填滿容器（容器的尺寸、負 margin、落下動畫都不變），圖與光澤層各自填滿外層 */
+  const filter = PLATE_FILTER[plateTone];
   return (
-    <span className={goldStyles.gold} data-gold-plate style={{ ...box(size), ...style }}>
-      <ClayImg
-        src={SHOP_SRC.plate}
-        style={{ display: "block", width: "100%", height: "100%", objectFit: "contain", filter }}
-      />
-      {plain ? null : (
-        <>
-          <span
-            className={goldStyles.shine}
-            data-gold-shine
-            style={{ ["--plate-mask" as string]: `url("${SHOP_SRC.plate}")` }}
-            aria-hidden
-          />
-          <span className={goldStyles.star} data-gold-star aria-hidden />
-          <span className={goldStyles.star} data-gold-star aria-hidden />
-        </>
-      )}
-    </span>
+    <ClayImg
+      src={SHOP_SRC.plate}
+      style={{
+        display: "block",
+        objectFit: "contain",
+        ...box(size),
+        ...(filter ? { filter } : null),
+        ...style,
+      }}
+    />
   );
 }
 

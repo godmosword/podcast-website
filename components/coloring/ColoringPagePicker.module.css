@@ -164,11 +164,7 @@
   pointer-events: none;
 }
 
-.card:hover .thumb,
-.card:focus-visible .thumb,
-.card[data-revealed="true"] .thumb {
-  --coloring-curl: 205%;
-}
+/* 點一下就進畫布。彩圖整張掀開留在畫布旁邊的「照著塗」，選圖這頁只留一個小紙角。 */
 
 /* 塗過的頁：右上角貼一顆星，跟封面「存起來」那格同一顆。 */
 .coloredStar {

@@ -1101,7 +1101,6 @@ test.describe("繪本塗塗鴉：與遊戲頁同款抬頭", () => {
     await check();
     const card = page.getByRole("button", { name: /^著色：/ }).first();
     await card.click();
-    await card.click();
     await page.waitForSelector("canvas");
     await check();
     // 往下捲後抬頭仍在（sticky），出口不消失

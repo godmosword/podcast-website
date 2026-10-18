@@ -23,14 +23,14 @@ test("消消樂：舊存檔與模式分流、主線與三星規則", async ({ pa
   await expect(page.locator('[data-locked="true"]')).toHaveCount(9);
   await expect(page.locator('[data-challenge]')).toHaveCount(0);
   await page.getByText("★ 怎麼拿三星？", { exact: true }).click();
-  await expect(page.getByText("過關時剩 4 步以上")).toBeVisible();
+  await expect(page.getByText("過關時剩 6 步以上")).toBeVisible();
   await expect(page.getByText(/提示不影響星星/)).toBeVisible();
   await page.screenshot({ path: info.outputPath("challenge-rules-phone.png"), fullPage: true });
   await page.reload();
   await page.getByRole("button", { name: "開始冒險" }).click();
   await expect(page.getByRole("radio", { name: /挑戰冒險/ })).toHaveAttribute("aria-checked", "true");
   await page.getByRole("button", { name: /^開始：第 1 站/ }).click();
-  await expect(page.locator('[data-challenge="c1-any-92"]')).toBeVisible();
+  await expect(page.locator('[data-challenge="c1-any-40"]')).toBeVisible();
   await expect(page.getByTestId("candy-match-intro")).toBeVisible();
   await page.getByRole("button", { name: "開始！", exact: true }).click();
   await expect(page.getByTestId("candy-match-board")).toBeVisible();

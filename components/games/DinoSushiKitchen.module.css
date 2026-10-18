@@ -2119,6 +2119,10 @@
   .kitchen {
     --duo-min: 0px;
     --tray-art: 40px;
+    /* 內容比視窗高一點點時，托盤底邊會被裁掉。跟著剩餘高度縮，不把格子壓到 48 以下。 */
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: 100%;
     /* 砧板欄至少 3×64＋兩個 8px 間距＋左右內距，料位才不會被欄寬壓扁 */
     /* 多的寬度給舞台，四格泡泡才放得進；砧板維持三個 64px 料位 */
     grid-template-columns: minmax(96px, 1.6fr) minmax(224px, 0.9fr) minmax(128px, 0.55fr);
@@ -2156,21 +2160,29 @@
     max-width: calc(100% - 12px);
   }
 
-  /* 下限 28：進階三料單在 667×375 卡在 20px 時小黃瓜和酪梨分不出來（格內圖約 24px） */
+  /* 下限 40：28px 時小黃瓜和酪梨在矮橫向分不出來。四格單靠收名字與間距留在舞台裡。 */
   .bubbleItem {
-    --cell: clamp(28px, 7cqw, 34px);
+    --cell: clamp(40px, 11cqw, 48px);
   }
 
   .guestFaceWrap {
-    width: 44px;
+    width: 40px;
   }
 
   .guestName {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
   }
 
   .bubble {
-    padding: 4px 5px;
+    padding: 4px;
+  }
+
+  .tray {
+    gap: 4px;
+  }
+
+  .trayButton {
+    padding-bottom: 2px;
   }
 
   .bubbleItems {
@@ -2429,7 +2441,8 @@
   transition: none;
 }
 
-/* iPhone 橫向扣掉 Safari 工具列只剩約 340px 高：托盤圖再縮小，鈕本身仍 ≥64、間距仍 ≥8 */
+/* iPhone 橫向扣掉 Safari 工具列只剩約 340px 高：托盤圖再縮小，鈕本身仍 ≥64、間距仍 ≥8。
+   844×390 砧板上下內距 6px 時，托盤底邊會落到視窗外約 8px。上下收到 2px，底邊留在視窗裡。 */
 @media (orientation: landscape) and (max-height: 400px) {
   .kitchen {
     --tray-art: 36px;
@@ -2442,6 +2455,6 @@
 
   .board {
     gap: 6px;
-    padding: 6px;
+    padding: 2px 6px;
   }
 }

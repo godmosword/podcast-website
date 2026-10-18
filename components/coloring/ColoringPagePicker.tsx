@@ -37,7 +37,6 @@ export function ColoringPagePicker({
   const [error, setError] = useState("");
   const [hasMore, setHasMore] = useState(false);
   const [colored, setColored] = useState<ReadonlySet<string>>(new Set());
-  const [revealedId, setRevealedId] = useState<string | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
   const artworkUrls = useRef<string[]>([]);
   const returnFocus = useRef<HTMLElement | null>(null);
@@ -174,8 +173,6 @@ export function ColoringPagePicker({
                 key={page.id}
                 page={page}
                 colored={colored.has(page.id)}
-                revealedId={revealedId}
-                onReveal={setRevealedId}
                 onSelect={onSelect}
               />
             ))}
@@ -191,8 +188,6 @@ export function ColoringPagePicker({
                 key={page.id}
                 page={page}
                 colored={colored.has(page.id)}
-                revealedId={revealedId}
-                onReveal={setRevealedId}
                 onSelect={onSelect}
               />
             ))}
@@ -203,35 +198,24 @@ export function ColoringPagePicker({
   );
 }
 
-/** 線稿像一頁紙蓋在參考彩圖上，右下角掀起：一眼看到「塗完會像這樣」。 */
+/** 線稿蓋住彩圖，右下角留一個小紙角。點一下就進畫布；整張彩圖在畫布旁的「照著塗」。 */
 function PageCard({
   page,
   colored,
-  revealedId,
-  onReveal,
   onSelect,
 }: {
   page: ColoringPage;
   colored: boolean;
-  revealedId: string | null;
-  onReveal: (id: string) => void;
   onSelect: (page: ColoringPage) => void;
 }) {
   const coloredId = `colored-${page.id}`;
-  const revealed = revealedId === page.id;
   return (
     <li>
       <button
         type="button"
         className={styles.card}
-        data-revealed={revealed ? "true" : "false"}
-        aria-pressed={revealed}
         onClick={() => {
-          playSfx(revealed ? "tap" : "flip");
-          if (!revealed) {
-            onReveal(page.id);
-            return;
-          }
+          playSfx("tap");
           onSelect(page);
         }}
         aria-label={`著色：${page.title}`}

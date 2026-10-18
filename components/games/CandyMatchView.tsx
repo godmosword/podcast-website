@@ -8,7 +8,6 @@ import { CandyMatchPropBar } from "@/components/games/CandyMatchPropBar";
 import { CandyMatchGoalIntro } from "@/components/games/CandyMatchGoalIntro";
 import { CandyMatchResult } from "@/components/games/CandyMatchResult";
 import { CandyMatchTaskBar } from "@/components/games/CandyMatchTaskBar";
-import { CandyMatchTip } from "@/components/games/CandyMatchTip";
 import { CandyMatchTitleSteps } from "@/components/games/CandyMatchTitleSteps";
 import { IconPlay, IconStar } from "@/components/games/ClayIcons";
 import type { GameAudioBus, OverlayProps } from "@/lib/gamekit/adapter";
@@ -116,6 +115,14 @@ export function CandyMatchView({
     soundOn,
   });
   const { play, actions } = game;
+  const dismissTip = actions.dismissTip;
+
+  useEffect(() => {
+    if (screen !== "play" || !game.tip || game.tip === "swap") return;
+    const dismiss = () => dismissTip();
+    window.addEventListener("pointerdown", dismiss, true);
+    return () => window.removeEventListener("pointerdown", dismiss, true);
+  }, [screen, game.tip, dismissTip]);
   const speech = useCandyMatchSpeech({
     active: screen === "play",
     cue: game.speechCue,
@@ -368,9 +375,11 @@ export function CandyMatchView({
           </div>
 
           <div ref={boardWrapRef} className={styles.boardWrap}>
-            {/* 交換教學只靠棋盤上的手指；特殊糖、厚污漬這些新東西第一次出現時才用小泡泡 */}
+            {/* 特殊糖、厚污漬第一次出現時，手指在棋盤上；點任何地方就收掉。這顆鈕只給讀屏。 */}
             {game.tip && game.tip !== "swap" ? (
-              <CandyMatchTip tip={game.tip} selected={game.selected != null} onDismiss={actions.dismissTip} />
+              <button type="button" className={styles.visuallyHidden} onClick={actions.dismissTip}>
+                知道了
+              </button>
             ) : null}
             <CandyMatchBoard
               board={play.board}
@@ -380,6 +389,7 @@ export function CandyMatchView({
               popping={game.popping}
               shaking={game.shaking}
               teach={game.teachMove}
+              cue={game.tip}
               disabled={game.busy || game.outcome !== null || inputPaused || game.briefing}
               onTapCell={actions.tapCell}
               onSwipeCell={actions.attemptSwap}
