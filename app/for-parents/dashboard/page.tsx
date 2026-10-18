@@ -28,8 +28,8 @@ export default function ParentDashboardPage() {
           這台裝置上的收聽與小遊戲紀錄。不排名、不打分，資料只留在這個瀏覽器，不上傳。
         </p>
         <nav className={styles.links} aria-label="家庭儀表板相關連結">
-          <Link href="/for-parents" className={styles.quietLink}>
-            <Icon name="arrow-left" size={16} className="icon-lead" />回到親子指南
+          <Link href="/" className={styles.quietLink}>
+            <Icon name="arrow-left" size={16} className="icon-lead" />回首頁
           </Link>
           <Link href="/legal#privacy" className={styles.quietLink}>
             隱私說明

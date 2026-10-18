@@ -46,10 +46,6 @@ const PRIMARY = [
     className: "navButton",
   },
   {
-    file: "app/for-parents/page.module.css",
-    className: "toolCta",
-  },
-  {
     file: "app/for-parents/play-map/[placeId]/page.module.css",
     className: "primaryAction",
   },
@@ -147,11 +143,6 @@ const SOFT = [
   {
     file: "app/not-found.module.css",
     className: "ctaSecondary",
-  },
-  // H1 收尾（2026-09-16）：育兒小筆記「另開 Threads」原本是 --warm-accent 描邊
-  {
-    file: "app/for-parents/page.module.css",
-    className: "threadsLink",
   },
 ] as const;
 

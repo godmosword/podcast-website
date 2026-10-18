@@ -1,41 +1,18 @@
 import { expect, test } from "@playwright/test";
+import { getStories } from "../data/content";
 import { expectTouchTarget } from "./touch-target";
 
 /**
- * UX-P1-5：補齊 `/for-parents` 與播放頁的觸控回歸。
+ * UX-P1-5：補齊播放頁的觸控回歸（原本的 `/for-parents` 工具卡已隨頁面移除）。
  * 進度條拇指仍屬 UX-P1-4，本檔不主張 ≥44px。
  */
 const PHONE = { width: 390, height: 844 };
 
-test.describe("UX-P1-5 親子指南與播放頁觸控", () => {
+test.describe("UX-P1-5 播放頁觸控", () => {
   test.use({
     viewport: PHONE,
     isMobile: true,
     hasTouch: true,
-  });
-
-  test("/for-parents 家長工具 CTA ≥44px，可開地圖與儀表板", async ({
-    page,
-  }) => {
-    await page.goto("/for-parents");
-    await expect(
-      page.getByRole("heading", {
-        level: 1,
-        name: "中文車車故事，陪孩子安心聽",
-      }),
-    ).toBeVisible();
-
-    const mapCta = page.getByRole("link", { name: "開啟親子遊樂地圖" });
-    const dashCta = page.getByRole("link", { name: "開啟家庭儀表板" });
-    await expectTouchTarget(mapCta, "親子遊樂地圖 CTA");
-    await expectTouchTarget(dashCta, "家庭儀表板 CTA");
-
-    await mapCta.click();
-    await expect(page).toHaveURL(/\/for-parents\/play-map/);
-
-    await page.goto("/for-parents");
-    await page.getByRole("link", { name: "開啟家庭儀表板" }).click();
-    await expect(page).toHaveURL(/\/for-parents\/dashboard/);
   });
 
   test("播放頁關閉／播放／跳轉鍵 ≥44px", async ({ page }) => {
@@ -190,40 +167,37 @@ test.describe("UX-P1-5 親子指南與播放頁觸控", () => {
 });
 
 /**
- * 每集共讀區的兩個文字型觸控目標。
+ * 故事頁「給爸媽：一起聊聊」的觸控目標。
  *
- * 2026-09-02 稽核實測：`.storyLink`（打開這一集）93×24、ShowNotes 的
- * `<summary>` 298×24，都是純文字沒有 min-height／padding 撐高。這頁是家長
- * 單手滑的主要工具頁，兩個都是主要動作。
- *
- * 逐個檢查而非 `.first()`——每集都有自己的一組，只驗第一個等於沒驗。
+ * 2026-09-02 稽核實測 ShowNotes 的 `<summary>` 只有 298×24（純文字沒撐高）。
+ * 2026-10-18 共讀內容從 /for-parents 總表搬回各集頁：頂部連結跳到 #co-listen 時
+ * 收合區要自動展開，摘要列與內層的「這集可以聊什麼」都要 ≥44px。
  */
-test.describe("每集共讀區觸控目標", () => {
+test.describe("故事頁「給爸媽」觸控目標", () => {
+  const story = getStories().find((entry) => entry.parentGuide && entry.familyActivity);
+  if (!story) throw new Error("需要一集同時有 parentGuide 與 familyActivity");
+
   for (const width of [360, 375, 390] as const) {
-    test(`${width}px：打開這一集／家長共讀指引皆 ≥44px`, async ({ page }) => {
+    test(`${width}px：跳到「給爸媽」自動展開，摘要列與家長共讀指引皆 ≥44px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 800 });
-      await page.goto("/for-parents");
+      await page.goto(`/story/${story.slug}`);
 
-      // 兩個目標都在收合的 <details> 裡，必須先展開每一集
-      const outer = page.locator("#co-listen > ul > li > details");
-      const count = await outer.count();
-      expect(count).toBeGreaterThan(0);
+      const cta = page.getByRole("link", { name: "給爸媽：一起聊聊" });
+      await expectTouchTarget(cta, "頂部「給爸媽」連結");
+      await cta.click();
+      await expect(page).toHaveURL(/#co-listen$/);
 
-      for (let i = 0; i < count; i += 1) {
-        const item = outer.nth(i);
-        await item.locator("> summary").click();
+      const details = page.locator("details#co-listen");
+      await expect(details).toHaveAttribute("open", "");
+      const summary = details.locator("> summary");
+      await expectTouchTarget(summary, "「給爸媽」摘要列");
+      // 跳過來後摘要列不能被 sticky 導覽列蓋住
+      const navBox = await page.locator("header").first().boundingBox();
+      const summaryBox = await summary.boundingBox();
+      expect(summaryBox!.y).toBeGreaterThanOrEqual(navBox!.y + navBox!.height - 1);
 
-        const storyLink = item.getByRole("link", { name: "打開這一集" });
-        await expectTouchTarget(storyLink, `第 ${i + 1} 集「打開這一集」`);
-
-        // ShowNotes 是巢在內層的另一個 <details>，只有 parentGuide 存在時才渲染
-        const guide = item.locator("details > summary", {
-          hasText: "這集可以聊什麼",
-        });
-        if (await guide.count()) {
-          await expectTouchTarget(guide, `第 ${i + 1} 集「家長共讀指引」`);
-        }
-      }
+      const guide = details.locator("details > summary", { hasText: "這集可以聊什麼" });
+      await expectTouchTarget(guide, "家長共讀指引");
     });
   }
 });

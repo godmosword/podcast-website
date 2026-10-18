@@ -88,7 +88,7 @@ export default async function TopicPage({
       <p className={styles.more}>
         <Link href="/topic">瀏覽其他主題<Icon name="arrow-right" size={16} className="icon-trail" /></Link>
         {" · "}
-        <Link href="/for-parents">親子指南</Link>
+        <Link href="/about#parent-faq-heading">給家長的常見問題</Link>
       </p>
 
       <SiteFooter />

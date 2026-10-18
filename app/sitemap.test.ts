@@ -18,7 +18,10 @@ describe("sitemap freshness", () => {
     vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com");
     const urls = sitemap().map((entry) => entry.url);
 
-    expect(urls).toContain("https://example.com/for-parents");
+    // 親子指南已併進關於頁並轉址，不再列進 sitemap；子頁照舊
+    expect(urls).not.toContain("https://example.com/for-parents");
+    expect(urls).toContain("https://example.com/about");
+    expect(urls).toContain("https://example.com/for-parents/dashboard");
     expect(urls).toContain("https://example.com/for-parents/play-map");
     expect(urls).toContain("https://example.com/subscribe");
     expect(urls).toContain("https://example.com/feedback");

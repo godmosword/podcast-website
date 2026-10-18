@@ -872,12 +872,6 @@ async function main(): Promise<void> {
     descriptionNeedle: topicIndexNeedle,
   });
   checkStaticPage({
-    label: "/for-parents",
-    relativePath: "for-parents.html",
-    canonicalPath: "/for-parents",
-    titleNeedle: "家長",
-  });
-  checkStaticPage({
     label: "/characters",
     relativePath: "characters.html",
     canonicalPath: "/characters",

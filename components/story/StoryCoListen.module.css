@@ -1,0 +1,29 @@
+/* 「給爸媽：一起聊聊」展開後的內容；外框與摘要列沿用故事頁 .contentSection／.outline。 */
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+}
+
+.reflection {
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--hairline);
+  background: color-mix(in srgb, var(--c-lilac) 10%, var(--card));
+}
+
+.reflectionChild {
+  margin: 0;
+  font-size: var(--fs-body);
+  font-weight: 700;
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+.reflectionParent {
+  margin: 8px 0 0;
+  font-size: var(--fs-control);
+  line-height: 1.65;
+  color: var(--ink-soft);
+}

@@ -31,7 +31,7 @@ const PAGES: { name: string; path: string; exclude?: string }[] = [
     exclude: "canvas, iframe, [class*=titleScreen], [class*=gameTitle]",
   },
   { name: "宇宙地圖", path: "/adventures" },
-  { name: "親子指南", path: "/for-parents" },
+  { name: "關於我們（含家長常見問題）", path: "/about" },
   { name: "家庭儀表板", path: "/for-parents/dashboard" },
   { name: "故事播放", path: "/story/ep-3/play" },
   { name: "親子遊樂地圖", path: "/for-parents/play-map" },
@@ -251,7 +251,7 @@ test("a11y：親子遊樂地圖（地圖檢視、地點詳情）無 critical/ser
   ).toEqual([]);
 });
 
-test("a11y：桌面抽屜展開態（含親子指南）無 critical/serious 違規", async ({ page }) => {
+test("a11y：桌面抽屜展開態（含家長項）無 critical/serious 違規", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto("/");
   await expect(page).toHaveURL(/\/$/);
@@ -263,9 +263,9 @@ test("a11y：桌面抽屜展開態（含親子指南）無 critical/serious 違�
 
   await page.getByRole("button", { name: "開啟選單" }).click();
   const drawer = page.getByRole("navigation", { name: "網站選單" });
-  const parentGuideLink = drawer.getByRole("link", { name: "親子指南" });
-  await expect(parentGuideLink).toBeVisible();
-  await expect(parentGuideLink).toHaveAttribute("href", /\/for-parents/);
+  const parentProgressLink = drawer.getByRole("link", { name: "親子進度" });
+  await expect(parentProgressLink).toBeVisible();
+  await expect(parentProgressLink).toHaveAttribute("href", "/for-parents/dashboard");
 
   const results = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])

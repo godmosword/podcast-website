@@ -36,12 +36,11 @@ Bonbon & 馬米親子 Podcast《車車遊樂園》的官方 **看圖聽故事** 
 | 車種 | `/vehicles/[vehicle]` | 車種分類頁（SSG + GEO FAQ） |
 | 宇宙地圖 | `/adventures` | 五島滿版海洋、pan/zoom/fly-to（點島飛抵島心、再點同島回全景）、島上探索點 `/adventures/[zone]/[hotspot]`、漫遊 NPC、`?zone=` deep link |
 | 角色圖鑑 | `/characters` | `data/characters.json` 定裝照與出場故事 |
-| 親子指南 | `/for-parents` | answer-first FAQ、代表性集數、Threads 育兒小筆記外連（GEO／STEM-P3） |
 | 親子遊樂地圖 | `/for-parents/play-map` | 靜態殼＋`PlayMapClient` island；主瀏覽為 22 縣市磚牆＋分組名單（首屏不掛 Leaflet），地圖為已選縣市／附近後的 `view=map` 次要分頁；15 縣市景點、可分享篩選 URL、SSR 全台名單＋ItemList |
 | 家庭儀表板 | `/for-parents/dashboard` | 本機 localStorage 收聽／遊戲摘要（不上傳） |
 | 小遊戲 | `/games` | 著色本為第一站，與街機兩款同園；遊戲資產按需預載 |
 | 節目數據 | `/studio` | 製作團隊專用（`noindex`、不在 sitemap）；含待生圖佇列 |
-| 關於／法律 | `/about`、`/legal` | 關於我們、使用條款 |
+| 關於／法律 | `/about`、`/legal` | 關於我們＋給家長的常見問題（FAQPage、代表性集數）、使用條款；舊 `/for-parents` 永久轉址到 `/about` |
 | RSS | `/feed.xml` | Podcast feed（含 Podcasting 2.0 擴充） |
 | PWA | `manifest.json`、`sw.js` | 主畫面圖示；收藏、繼續收聽、遊戲進度、主題偏好（`cheche:progress` localStorage）。CACHE_STORY 只排 current±1 以外的 AVIF idle、不預抓整集 MP3；只快取完整 200（Range 206 不入庫，避免 Landing autoplay 壞掉）。**維持 v6** |
 | GEO | `public/llms.txt`、`llms-full.txt` | AI 引用語料（build 前 `prebuild` 自動生成 `llms-full`）；`robots.ts` 分流檢索／訓練爬蟲 |
@@ -260,7 +259,7 @@ app/
   story/[slug]/               故事詳情 + play 播放器 + transcript.vtt
   adventures/page.tsx         車車宇宙地圖
   characters/page.tsx         角色圖鑑
-  for-parents/                親子指南 + dashboard + play-map（靜態殼）
+  for-parents/                dashboard + play-map + articles（親子指南已併進 about）
   subscribe/page.tsx          新集 email 訂閱
   games/                      街機兩款 + 繪本著色
   topic/、vehicles/           主題／車種索引

@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import { getCharacters } from "@/data/characters";
 import { getStories } from "@/data/content";
 import {
-  parentCoListenStories,
   parentLandingFacts,
   parentLandingFaqs,
   representativeParentStories,
@@ -52,17 +51,15 @@ describe("representativeParentStories", () => {
   });
 });
 
-describe("parentCoListenStories", () => {
-  it("只含有共讀／活動／反思文案的集數", () => {
-    const stories = parentCoListenStories();
-    expect(stories.length).toBeGreaterThan(0);
-    expect(
-      stories.every(
-        (story) =>
-          Boolean(story.familyActivity) ||
-          Boolean(story.parentGuide) ||
-          Boolean(story.reflectionPrompt),
-      ),
-    ).toBe(true);
+describe("parentLandingFaqs 文案", () => {
+  it("給家長看的白話：不出現 RSS、後備排程這類術語，數字前後不夾空格", () => {
+    const faqs = parentLandingFaqs(parentLandingFacts());
+    for (const faq of faqs) {
+      expect(faq.answer, faq.question).not.toMatch(/RSS|後備排程/);
+      expect(faq.answer, faq.question).not.toMatch(/ 約 | 每 /);
+    }
+    expect(faqs.find((faq) => faq.question === "車車遊樂園多久更新？")?.answer).toContain(
+      "15 分鐘",
+    );
   });
 });

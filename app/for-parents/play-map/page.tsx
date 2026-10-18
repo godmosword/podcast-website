@@ -38,7 +38,6 @@ export default function PlayMapPage() {
       <JsonLd
         data={breadcrumbListJsonLd([
           { name: "車車遊樂園", url: "/" },
-          { name: "親子指南", url: "/for-parents" },
           { name: "親子遊樂地圖", url: "/for-parents/play-map" },
         ])}
       />

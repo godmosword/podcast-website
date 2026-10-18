@@ -342,6 +342,11 @@
   color: var(--ink-soft);
 }
 
+/* 「給爸媽」從頂部 CTA 跳過來時停在 sticky 導覽列下方，摘要列不被蓋住 */
+.coListen {
+  scroll-margin-top: calc(var(--nav-h) + var(--space-4));
+}
+
 .outline {
   padding-top: var(--space-3);
 }

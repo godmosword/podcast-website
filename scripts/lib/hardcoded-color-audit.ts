@@ -73,7 +73,7 @@ export { HARDCODED_COLOR_ALLOWLIST };
 /** D3 驗收頁：不得出現裸 hex（須改用 design token）。 */
 const D3_TOKENIZED_CSS_FILES = [
   "app/characters/page.module.css",
-  "app/for-parents/page.module.css",
+  "components/about/AboutParentFaq.module.css",
   "app/for-parents/dashboard/page.module.css",
   "app/stories/page.module.css",
   "app/story/[slug]/page.module.css",

@@ -32,7 +32,6 @@ const BATCH_2: readonly { file: string; glyphs: string; icons: readonly string[]
   { file: "app/about/page.tsx", glyphs: "←", icons: ["arrow-left"] },
   { file: "app/feedback/page.tsx", glyphs: "←", icons: ["arrow-left"] },
   { file: "app/for-parents/dashboard/page.tsx", glyphs: "←", icons: ["arrow-left"] },
-  { file: "app/for-parents/page.tsx", glyphs: "→", icons: ["arrow-right", "external"] },
   { file: "app/for-parents/play-map/page.tsx", glyphs: "→", icons: ["arrow-right"] },
   { file: "app/for-parents/play-map/[placeId]/page.tsx", glyphs: "←→", icons: ["arrow-left", "chevron-right"] },
   { file: "app/for-parents/play-map/[placeId]/page.module.css", glyphs: "→", icons: [] },
@@ -53,8 +52,8 @@ const BATCH_2: readonly { file: string; glyphs: string; icons: readonly string[]
   { file: "components/errors/SegmentNotFound.tsx", glyphs: "←", icons: ["arrow-left"] },
   { file: "components/for-parents/ParentArticleView.tsx", glyphs: "←", icons: ["arrow-left"] },
   { file: "components/for-parents/ParentSectionPage.tsx", glyphs: "←", icons: ["arrow-left"] },
-  { file: "components/for-parents/ParentCoListenSection.tsx", glyphs: "→▸▾", icons: ["arrow-right", "chevron-right"] },
-  { file: "components/for-parents/ParentCoListenSection.module.css", glyphs: "▸▾", icons: [] },
+  { file: "components/story/StoryCoListen.tsx", glyphs: "▸▾", icons: ["chevron-right"] },
+  { file: "components/story/StoryCoListen.module.css", glyphs: "▸▾", icons: [] },
   { file: "components/for-parents/PlayMapCollectionCard.tsx", glyphs: "→", icons: ["arrow-right"] },
   { file: "components/games/GamePlayChromeSlot.tsx", glyphs: "←", icons: ["arrow-left"] },
   { file: "components/landing/LandingSegment.tsx", glyphs: "→", icons: ["arrow-right", "chevron-down"] },
@@ -129,7 +128,7 @@ describe("介面圖示不用文字符號", () => {
     for (const file of [
       "app/story/[slug]/page.tsx",
       "components/story/ShowNotes.tsx",
-      "components/for-parents/ParentCoListenSection.tsx",
+      "components/story/StoryCoListen.tsx",
     ]) {
       expect(read(file), file).toMatch(/<Icon name="chevron-right" size=\{\d+\} className=\{?[`"]icon-lead icon-disclosure/);
     }

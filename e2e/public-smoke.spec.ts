@@ -11,7 +11,6 @@ const PUBLIC_ROUTES = [
   "/topic",
   "/characters",
   "/about",
-  "/for-parents",
   "/for-parents/dashboard",
   "/for-parents/articles",
   "/for-parents/articles/vision-care-1",

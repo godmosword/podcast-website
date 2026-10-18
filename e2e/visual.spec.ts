@@ -52,7 +52,6 @@ const VISUAL_PAGES = [
   { id: "games", name: "遊樂園", path: "/games" },
   { id: "story-ep-3", name: "單集 ep-3", path: "/story/ep-3" },
   { id: "adventures", name: "宇宙地圖", path: "/adventures" },
-  { id: "for-parents", name: "親子指南", path: "/for-parents" },
   { id: "characters", name: "角色圖鑑", path: "/characters" },
   { id: "about", name: "關於", path: "/about" },
   { id: "subscribe", name: "訂閱", path: "/subscribe" },
@@ -105,16 +104,16 @@ const SMOKE_PAGE_IDS = new Set<VisualPageId>([
   "stories",
   "games",
   "adventures",
-  "for-parents",
 ]);
 
 /**
- * 頁高隨新集成長的頁面（stories 每集 +1 張卡、for-parents 共聽清單每集 +1 列）。
+ * 頁高隨新集成長的頁面（stories 每集 +1 張卡；about 的家長常見問題寫著集數與最新一集標題，
+ * 標題長短一變就換行、整頁高度跟著變）。
  * 尺寸本身會變，mask 救不了「snapshot 尺寸不符」，只能改拍 viewport。
  */
 const GROWING_PAGE_IDS = new Set<VisualPageId>([
   "stories",
-  "for-parents",
+  "about",
   // play-map 4448px／place 2387px 的 fullPage 有兩個問題：
   // (a) maxDiffPixelRatio 0.02 在 1280×4448 上等於容許 11.4 萬像素不同，
   //     抓不到任何一種規範回歸——頁面越高，測試越測不到東西；
@@ -150,7 +149,6 @@ const GROWING_PAGE_IDS = new Set<VisualPageId>([
  */
 const NEW_EPISODE_RIBBON = /NEW\s*[·•‧]\s*EP\s*\d+/;
 const EP_LABEL_ONLY = /^EP\s*\d+$/;
-const EPISODE_COUNT_ONLY = /^\d+\s*集$/;
 
 function volatileMasks(page: Page, pageId: VisualPageId): Locator[] {
   switch (pageId) {
@@ -161,11 +159,6 @@ function volatileMasks(page: Page, pageId: VisualPageId): Locator[] {
         page.getByText(NEW_EPISODE_RIBBON),
         page.getByText(EP_LABEL_ONLY),
       ];
-    case "for-parents":
-      // 只遮 stat 卡內的「N 集」數值列；卡片外框、標籤字色、夜間分層都還測得到。
-      // 曾另遮共聽清單的 <summary>，被面積守衛抓出來後移除——它在 y≈2186，
-      // 根本不在 viewport 取樣範圍內，是會誤導後人「共聽清單有被覆蓋」的死碼。
-      return [page.locator("dd").filter({ hasText: EPISODE_COUNT_ONLY })];
     case "characters":
       // **刻意不遮**。曾試遮 62 個角色卡的登場集數連結，實測後撤回：
       // 角色多一顆 EP chip 會讓該卡長高、整個格線往下位移，mask 只遮文字擋不住
@@ -289,15 +282,6 @@ const COMPONENT_SHOTS: {
     // ep-1 的內容永遠不會再變 → 零 mask，StoryCard 的所有視覺屬性都測得到，
     // 包含 .marker pill 與 StoryProgressBadge。
     locator: (page) => page.locator('a[href="/story/ep-1"]').first(),
-  },
-  {
-    id: "for-parents-tools",
-    name: "家長工具雙卡",
-    path: "/for-parents",
-    locator: (page) =>
-      page
-        .locator("section")
-        .filter({ has: page.getByRole("heading", { name: "家長工具" }) }),
   },
   {
     id: "play-map-wall",

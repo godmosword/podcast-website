@@ -58,7 +58,6 @@ export default async function ParentArticlePage({ params }: ArticlePageProps) {
       <JsonLd
         data={breadcrumbListJsonLd([
           { name: "車車遊樂園", url: "/" },
-          { name: "親子指南", url: "/for-parents" },
           { name: section.label, url: parentArticlesIndexPath() },
           { name: article.title, url: parentArticlePath(article.slug) },
         ])}

@@ -6,9 +6,8 @@ import type { FaqItem } from "@/lib/json-ld";
 /** 官網對外呈現的適合年齡（家長 GEO 文案定稿）。 */
 const PARENT_SITE_AGE_RANGE = "約 3–7 歲";
 
-/** Apple Podcasts 同步後備排程說明（對齊 sync watchdog workflow）。 */
-const PARENT_SYNC_CADENCE =
-  "每 15 分鐘檢查 Apple Podcasts RSS";
+/** 新集多快出現在網站（白話；對齊 sync watchdog 每 15 分鐘的後備排程）。 */
+const PARENT_SYNC_CADENCE = "15 分鐘內";
 
 export type ParentLandingFacts = {
   episodeCount: number;
@@ -54,23 +53,13 @@ export function representativeParentStories(): Story[] {
   return preferred;
 }
 
-/** 有共讀／親子活動／反思文案的集數（家長指南深讀區）。 */
-export function parentCoListenStories(): Story[] {
-  return storiesByNewest().filter(
-    (story) =>
-      Boolean(story.familyActivity) ||
-      Boolean(story.parentGuide) ||
-      Boolean(story.reflectionPrompt),
-  );
-}
-
 export function parentLandingFaqs(
   facts: ParentLandingFacts = parentLandingFacts(),
 ): FaqItem[] {
   return [
     {
       question: "有哪些適合 3–7 歲的中文車車 Podcast？",
-      answer: `車車遊樂園是適合 ${facts.ageRange} 親子共聽的${facts.language}車車故事 Podcast，目前官網收錄 ${facts.episodeCount} 集，包含車車、情緒、合作、好習慣等主題。`,
+      answer: `車車遊樂園是適合${facts.ageRange}親子共聽的${facts.language}車車故事 Podcast，目前官網收錄 ${facts.episodeCount} 集，包含車車、情緒、合作、好習慣等主題。`,
     },
     {
       question: "車車遊樂園是什麼？",
@@ -83,7 +72,7 @@ export function parentLandingFaqs(
     },
     {
       question: "車車遊樂園多久更新？",
-      answer: `新集發布後會由 Apple Podcasts RSS 同步到官網；目前同步流程的後備排程是 ${facts.syncCadence}，實際上架節奏仍以 Podcast 發布為準。`,
+      answer: `新集在 Podcast 上架後會自動同步到網站，通常 ${facts.syncCadence}就會出現；上架節奏以 Podcast 發布為準。`,
     },
   ];
 }

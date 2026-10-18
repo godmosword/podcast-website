@@ -36,7 +36,6 @@ export default function ParentArticlesPage() {
       <JsonLd
         data={breadcrumbListJsonLd([
           { name: "車車遊樂園", url: "/" },
-          { name: "親子指南", url: "/for-parents" },
           { name: section.label, url: section.href },
         ])}
       />

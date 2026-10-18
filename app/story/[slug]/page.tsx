@@ -19,6 +19,11 @@ import JsonLd from "@/components/JsonLd";
 import PlayButton from "@/components/PlayButton";
 import ShareButton from "@/components/ShareButton";
 import RelatedStories from "@/components/RelatedStories";
+import OpenDetailsOnHash from "@/components/story/OpenDetailsOnHash";
+import StoryCoListen, {
+  hasStoryCoListen,
+  STORY_CO_LISTEN_ID,
+} from "@/components/story/StoryCoListen";
 import CharacterCastBar from "@/components/characters/CharacterCastBar";
 import ZoneBadge from "@/components/story/ZoneBadge";
 import SiteFooter from "@/components/SiteFooter";
@@ -67,10 +72,7 @@ export default async function StoryDetailPage({
   // GEO：familyActivity 以 Q&A 併入 FAQPage（可見文案改掛家長指南）
   const activityFaq = familyActivityFaq(story);
   const jsonLdFaqs = activityFaq ? [...faqs, activityFaq] : faqs;
-  const hasParentCoListen =
-    Boolean(story.familyActivity) ||
-    Boolean(story.parentGuide) ||
-    Boolean(story.reflectionPrompt);
+  const hasParentCoListen = hasStoryCoListen(story);
 
   const subtitle = storySubtitle(story);
 
@@ -145,7 +147,7 @@ export default async function StoryDetailPage({
 
         {hasParentCoListen ? (
           <p className={styles.parentCta}>
-            <Link href="/for-parents#co-listen">給爸媽：一起聊聊<Icon name="arrow-right" size={16} className="icon-trail" /></Link>
+            <a href={`#${STORY_CO_LISTEN_ID}`}>給爸媽：一起聊聊<Icon name="arrow-right" size={16} className="icon-trail" /></a>
           </p>
         ) : null}
 
@@ -182,6 +184,14 @@ export default async function StoryDetailPage({
             <CharacterCastBar characters={characters} />
           </section>
         ) : null}
+
+        <StoryCoListen
+          story={story}
+          className={`${styles.contentSection} ${styles.outline} ${styles.coListen}`}
+          summaryClassName={styles.outlineSummary}
+          iconClassName={styles.outlineIcon}
+        />
+        {hasParentCoListen ? <OpenDetailsOnHash id={STORY_CO_LISTEN_ID} /> : null}
 
         <RelatedStories
           stories={related}

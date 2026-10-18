@@ -129,11 +129,13 @@ describe("SiteNavBar", () => {
       "/games",
       "/adventures",
       "/about",
-      "/for-parents",
+      "/for-parents/dashboard",
       "/for-parents/play-map",
     ]) {
       expect(html).toContain(`href="${href}"`);
     }
+    // 親子指南（/for-parents）已併進關於頁，選單不再連它
+    expect(html).not.toContain('href="/for-parents"');
     expect(html).not.toContain('href="/games/coloring-book"');
     expect(html).toContain('href="/feedback"');
 
@@ -165,11 +167,11 @@ describe("SiteNavBar", () => {
       "宇宙地圖",
       "關於我們",
       "親子景點",
-      "親子指南",
       "親子進度",
     ]) {
       expect(html).toContain(label);
     }
+    expect(html).not.toContain("親子指南");
     expect(html).not.toContain("繪本塗塗鴉");
     expect(html).not.toContain("主題分類");
     expect(html).not.toContain("指南首頁");
@@ -199,7 +201,7 @@ describe("SiteNavBar", () => {
       "/games",
       "/adventures",
       "/about",
-      "/for-parents",
+      "/for-parents/dashboard",
       "/for-parents/play-map",
       "/characters",
     ]) {
@@ -256,7 +258,6 @@ describe("SiteNavBar", () => {
       "/games",
       "/adventures",
       "/about",
-      "/for-parents",
       "/for-parents/dashboard",
       "/for-parents/play-map",
       "/for-parents/articles",
@@ -269,7 +270,8 @@ describe("SiteNavBar", () => {
     expect(panelHrefs).not.toContain("/");
     expect(panelHrefs).not.toContain("/games/coloring-book");
     expect(panelHrefs.some((h) => h?.startsWith("mailto:"))).toBe(false);
-    expect(panelHrefs.length).toBe(12);
+    expect(panelHrefs).not.toContain("/for-parents");
+    expect(panelHrefs.length).toBe(11);
   });
 
   test("抽屜兩組各為 role=list，家長組以 aria-labelledby 綁小標", async () => {
@@ -318,11 +320,11 @@ describe("SiteNavBar", () => {
       "國內旅遊",
       "故事創作",
       "親子進度",
-      "親子指南",
       "親子景點",
     ]) {
       expect(view.getAllByText(label).length).toBeGreaterThan(0);
     }
+    expect(view.queryByText("親子指南")).toBeNull();
     expect(view.queryByText("繪本塗塗鴉")).toBeNull();
     expect(view.queryByText("主題分類")).toBeNull();
     expect(view.queryByText("育兒專欄")).toBeNull();
@@ -330,9 +332,7 @@ describe("SiteNavBar", () => {
     expect(view.queryByText("指南首頁")).toBeNull();
 
     const mobileNav = view.getByRole("navigation", { name: "網站選單" });
-    const parentLink = mobileNav.querySelector('a[href="/for-parents"]');
-    expect(parentLink).toBeTruthy();
-    expect(parentLink?.textContent).toContain("親子指南");
+    expect(mobileNav.querySelector('a[href="/for-parents"]')).toBeNull();
 
     const playMapLink = mobileNav.querySelector('a[href="/for-parents/play-map"]');
     expect(playMapLink).toBeTruthy();
@@ -348,7 +348,6 @@ describe("SiteNavBar", () => {
       "/for-parents/travel-taiwan",
       "/for-parents/story-making",
       "/for-parents/dashboard",
-      "/for-parents",
       "/for-parents/play-map",
     ]);
     const noteTexts = Array.from(parentList.querySelectorAll("a"))
@@ -410,7 +409,7 @@ describe("SiteNavBar", () => {
     expect(html).toBe("");
   });
 
-  test("Threads 缺席時導覽不受影響（親子指南仍在、無育兒專欄）", async () => {
+  test("Threads 缺席時導覽不受影響（親子景點仍在、無育兒專欄）", async () => {
     vi.resetModules();
     vi.doMock("next/navigation", () => ({
       usePathname: () => "/",
@@ -428,7 +427,7 @@ describe("SiteNavBar", () => {
     );
     expect(html).not.toContain("育兒專欄");
     expect(html).toContain("宇宙地圖");
-    expect(html).toContain("親子指南");
+    expect(html).toContain("親子景點");
     expect(html).toContain("頻道");
     expect(html).not.toContain("社群");
   });
@@ -488,7 +487,7 @@ describe("isInternalPathActive 最長匹配", () => {
     expect(isInternalPathActive("/games", "mailto:a@b.c", hrefs)).toBe(false);
   });
 
-  test("親子指南 pathname 應 active", async () => {
+  test("父路徑本身 active；子路徑也在 siblings 時讓給子路徑", async () => {
     const { isInternalPathActive } = await import("./SiteNavBar");
     expect(isInternalPathActive("/for-parents", "/for-parents", hrefs)).toBe(
       true,
@@ -507,7 +506,7 @@ describe("isInternalPathActive 最長匹配", () => {
     ).toBe(true);
   });
 
-  test("在 /for-parents/play-map 時親子指南不得 active（完整 siblings）", async () => {
+  test("在子路徑頁時父路徑不得 active（完整 siblings）", async () => {
     const { isInternalPathActive } = await import("./SiteNavBar");
     expect(
       isInternalPathActive("/for-parents/play-map", "/for-parents", hrefs),
@@ -539,7 +538,7 @@ describe("isInternalPathActive 最長匹配", () => {
     ).toBe(true);
   });
 
-  test("首頁與 /about 不應標親子指南 active", async () => {
+  test("首頁與 /about 不會誤命中其他前綴", async () => {
     const { isInternalPathActive } = await import("./SiteNavBar");
     expect(isInternalPathActive("/", "/for-parents", hrefs)).toBe(false);
     expect(isInternalPathActive("/about", "/for-parents", hrefs)).toBe(false);
@@ -561,37 +560,26 @@ describe("SiteNavBar active 狀態", () => {
     );
   }
 
-  test("/for-parents 在抽屜標親子指南；進度頁只標親子進度", async () => {
-    const guide = await renderNavBarAt("/for-parents");
-    const guidePanel = guide.container.querySelector('nav[aria-label="網站選單"]')!;
-    expect(
-      guidePanel.querySelector('a[href="/for-parents"]')?.getAttribute("aria-current"),
-    ).toBe("page");
-    expect(
-      guidePanel.querySelector('a[href="/for-parents/dashboard"]')?.hasAttribute("aria-current"),
-    ).toBe(false);
-    cleanup();
-
+  test("進度頁只標親子進度", async () => {
     const progress = await renderNavBarAt("/for-parents/dashboard");
     const progressPanel = progress.container.querySelector('nav[aria-label="網站選單"]')!;
     expect(
       progressPanel.querySelector('a[href="/for-parents/dashboard"]')?.getAttribute("aria-current"),
     ).toBe("page");
     expect(
-      progressPanel.querySelector('a[href="/for-parents"]')?.hasAttribute("aria-current"),
+      progressPanel.querySelector('a[href="/for-parents/play-map"]')?.hasAttribute("aria-current"),
     ).toBe(false);
+    expect(progressPanel.querySelectorAll('[aria-current="page"]')).toHaveLength(1);
     cleanup();
   });
 
-  test("給爸媽小字路徑只標自己，不標親子指南", async () => {
+  test("給爸媽小字路徑只標自己", async () => {
     const view = await renderNavBarAt("/for-parents/articles");
     const panel = view.container.querySelector('nav[aria-label="網站選單"]')!;
     expect(
       panel.querySelector('a[href="/for-parents/articles"]')?.getAttribute("aria-current"),
     ).toBe("page");
-    expect(
-      panel.querySelector('a[href="/for-parents"]')?.hasAttribute("aria-current"),
-    ).toBe(false);
+    expect(panel.querySelectorAll('[aria-current="page"]')).toHaveLength(1);
     expect(
       panel.querySelector('a[href="/for-parents/play-map"]')?.hasAttribute("aria-current"),
     ).toBe(false);
@@ -603,9 +591,9 @@ describe("SiteNavBar active 狀態", () => {
 
     const mobileNav = view.getByRole("navigation", { name: "網站選單" });
     const playMapLink = mobileNav.querySelector('a[href="/for-parents/play-map"]');
-    const parentMobile = mobileNav.querySelector('a[href="/for-parents"]');
+    const progressMobile = mobileNav.querySelector('a[href="/for-parents/dashboard"]');
     expect(playMapLink?.getAttribute("aria-current")).toBe("page");
-    expect(parentMobile?.hasAttribute("aria-current")).toBe(false);
+    expect(progressMobile?.hasAttribute("aria-current")).toBe(false);
   });
 
   test("/feedback 僅頂欄留言 active，抽屜無留言列", async () => {
@@ -629,7 +617,7 @@ describe("SiteNavBar active 狀態", () => {
       panel.querySelector('a[href="/adventures"]')?.hasAttribute("aria-current"),
     ).toBe(false);
     expect(
-      panel.querySelector('a[href="/for-parents"]')?.hasAttribute("aria-current"),
+      panel.querySelector('a[href="/for-parents/dashboard"]')?.hasAttribute("aria-current"),
     ).toBe(false);
   });
 
@@ -642,7 +630,7 @@ describe("SiteNavBar active 狀態", () => {
       panel.querySelector('a[href="/adventures"]')?.getAttribute("aria-current"),
     ).toBe("page");
     expect(
-      panel.querySelector('a[href="/for-parents"]')?.hasAttribute("aria-current"),
+      panel.querySelector('a[href="/for-parents/dashboard"]')?.hasAttribute("aria-current"),
     ).toBe(false);
   });
 
@@ -662,7 +650,7 @@ describe("SiteNavBar active 狀態", () => {
     expect(homePanel.querySelector('a[href="/"]')).toBeNull();
     cleanup();
 
-    for (const pathname of ["/stories", "/about", "/for-parents"]) {
+    for (const pathname of ["/stories", "/about", "/for-parents/dashboard"]) {
       const view = await renderNavBarAt(pathname);
       const actionsGroup = view.getByRole("group", { name: "常用" });
       const link = actionsGroup.querySelector("a[class*='homeAction']");
@@ -676,12 +664,12 @@ describe("SiteNavBar active 狀態", () => {
     }
   });
 
-  test("首頁與 /about 不標親子指南 active", async () => {
+  test("選單裡沒有親子指南（已併進關於頁）", async () => {
     for (const pathname of ["/", "/about"]) {
       const view = await renderNavBarAt(pathname);
       const panel = view.container.querySelector('nav[aria-label="網站選單"]')!;
-      const link = panel.querySelector('a[href="/for-parents"]');
-      expect(link?.hasAttribute("aria-current")).toBe(false);
+      expect(panel.querySelector('a[href="/for-parents"]')).toBeNull();
+      expect(panel.textContent).not.toContain("親子指南");
       cleanup();
     }
   });

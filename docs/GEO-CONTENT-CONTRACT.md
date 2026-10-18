@@ -25,9 +25,9 @@
 
 | 欄位 | 資料來源 | 字數／語氣 | 頁面呈現 | RSS | JSON-LD | llms-full |
 |------|----------|------------|----------|-----|---------|-----------|
-| `familyActivity` | `data/family-activities.ts` | 短：1 題 + 選填 1 個小活動 | `/for-parents#co-listen` 收合；單集頁僅 CTA | show notes 末段 `🏡 聽完聊一聊` | FAQPage **加 1 題**（`familyActivityFaq`） | 有則附問題行 |
-| `reflectionPrompt` | `data/reflection-prompts.ts` | 短：孩子問句 + 家長追問 | 播放結束／`ReflectionPrompt`；家長指南可複述 | **不進** | **不另加 FAQ** | **不進** |
-| `parentGuide` | `data/parent-guides.ts` | 中：2–3 句摘要 + 1–2 延伸提問／小活動 | `/for-parents#co-listen` 收合 ShowNotes；單集頁僅 CTA | 可選 1 段，**不得**複製 `familyActivity` 全文 | 可併入 `description` 衍生句，**不**重複 FAQ 題幹 | 可摘 1 段要點 |
+| `familyActivity` | `data/family-activities.ts` | 短：1 題 + 選填 1 個小活動 | 單集頁 `#co-listen` 收合（頂部 CTA 跳過去自動展開） | show notes 末段 `🏡 聽完聊一聊` | FAQPage **加 1 題**（`familyActivityFaq`） | 有則附問題行 |
+| `reflectionPrompt` | `data/reflection-prompts.ts` | 短：孩子問句 + 家長追問 | 播放結束／`ReflectionPrompt`；單集頁「給爸媽」可複述 | **不進** | **不另加 FAQ** | **不進** |
+| `parentGuide` | `data/parent-guides.ts` | 中：2–3 句摘要 + 1–2 延伸提問／小活動 | 單集頁 `#co-listen` 收合 ShowNotes | 可選 1 段，**不得**複製 `familyActivity` 全文 | 可併入 `description` 衍生句，**不**重複 FAQ 題幹 | 可摘 1 段要點 |
 | `episodeFaq` | `data/episode-faqs.ts` | 短：1 題緊扣該集劇情／主題 | **單集頁不渲染 UI**；FAQPage JSON-LD 第一項 | **不進** | FAQPage 併入 `storyFaqs()`（第一項） | 有則附 1 行 `❓` |
 | `storyParentExtension` | `lib/story-geo.ts` 程式產生 | 通用共聽引導（非逐集手寫） | **不在單集頁渲染**（語意併入家長指南／FAQ） | **不進** | 已含於 `storyFaqs` 通用答案語意 | **不進** |
 | `storyFaqs` | `lib/story-geo.ts` 程式產生 | 3 題模板化 FAQ | **單集頁不渲染 UI**；僅 FAQPage JSON-LD | **不進** | FAQPage 全量 | **不進** |
@@ -38,8 +38,7 @@
 
 **允許通路：**
 
-- 家長指南：`/for-parents#co-listen`（`ParentCoListenSection` + `FamilyActivityCard`）
-- 單集詳情頁：僅「家長共讀與延伸 →」CTA（不堆長文）
+- 單集詳情頁：頂部「給爸媽：一起聊聊」CTA ＋「出場角色」之後的收合區 `#co-listen`（`StoryCoListen` + `FamilyActivityCard` + `ShowNotes`）
 - RSS：`lib/story-geo.ts` → `familyActivityShowNote`
 - JSON-LD：`familyActivityFaq` 併入 FAQPage（固定題幹「聽完這一集可以和孩子聊什麼？」）
 - `llms-full`：`scripts/generate-llms-full.ts`
@@ -57,7 +56,7 @@
 **允許通路：**
 
 - `StoryPlayer`／`StoryEndScreen`／`ReflectionPrompt`（聽完才展開）
-- 家長指南 `/for-parents#co-listen` 可複述兩句供家長預覽
+- 單集頁 `#co-listen` 可複述兩句供家長預覽
 
 **禁止：**
 
@@ -81,7 +80,7 @@ type ParentGuide = {
 };
 ```
 
-**呈現：** `components/story/ShowNotes.tsx` 掛在 `/for-parents#co-listen`（預設收合）；單集頁改為 CTA 連家長指南，不堆長文。與 `FamilyActivityCard` 並存時，卡片維持短鉤子，`parentGuide` 放長文。
+**呈現：** `components/story/ShowNotes.tsx` 掛在單集頁 `#co-listen`（`StoryCoListen`，預設收合，頂部 CTA 跳過去自動展開），不堆在首屏。與 `FamilyActivityCard` 並存時，卡片維持短鉤子，`parentGuide` 放長文。
 
 **與 `familyActivity` 分工：**
 
@@ -139,6 +138,7 @@ type ParentGuide = {
 
 ## 變更紀錄
 
+- **2026-10-18：** `/for-parents` 併進 `/about` 並永久轉址；每集共讀／親子活動／家長指引從 `/for-parents#co-listen` 總表搬回各集故事頁 `#co-listen`（預設收合，頂部 CTA 跳過去自動展開）。家長 FAQ 與代表集數在關於頁「給家長的常見問題」，FAQPage JSON-LD 跟著搬。
 - **2026-07-25：** 開放島 `/adventures/<zone>` 納入 sitemap、`llms-full`「車車宇宙島嶼」、`verify:geo` `checkStaticPage`；路由列舉仍在 verify 腳本，不進本契約常數檔。
 - **2026-07-22：** 單集頁拿掉「常見問題」可見區塊（FAQ 僅留 FAQPage JSON-LD／llms）；角色圖鑑改掛頂欄；共讀／活動／指引遷至 `/for-parents#co-listen`；FAQ 曾短暫收合後改為不渲染 UI。
 - **2026-07-22：** 單集頁精簡：共讀／親子活動／家長指引遷至 `/for-parents#co-listen`；FAQ 預設收合；角色僅一行＋圖鑑連結；接著聽併入 RelatedStories。

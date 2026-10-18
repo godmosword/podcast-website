@@ -7,17 +7,26 @@ import { resolve } from "node:path";
  * 任一來源檔更動即代表該頁內容更新；取所有來源檔中最新的一筆 git commit。
  */
 const ROUTE_SOURCES: Record<string, string[]> = {
-  "/about": ["app/about/page.tsx", "app/about/page.module.css"],
+  "/about": [
+    "app/about/page.tsx",
+    "app/about/page.module.css",
+    "components/about/AboutParentFaq.tsx",
+    "components/about/AboutParentFaq.module.css",
+    "lib/for-parents.ts",
+  ],
   "/adventures": ["app/adventures/page.tsx", "app/adventures/page.module.css"],
   "/characters": [
     "app/characters/page.tsx",
     "app/characters/page.module.css",
     "data/characters.json",
   ],
-  "/for-parents": [
-    "app/for-parents/page.tsx",
-    "app/for-parents/page.module.css",
-    "lib/for-parents.ts",
+  "/for-parents/dashboard": [
+    "app/for-parents/dashboard/page.tsx",
+    "app/for-parents/dashboard/page.module.css",
+    "components/for-parents/ParentDashboard.tsx",
+    "components/for-parents/parent-dashboard.module.css",
+    "lib/for-parents/dashboard.ts",
+    "lib/for-parents/dashboard-next-up.ts",
   ],
   "/for-parents/play-map": [
     "app/for-parents/play-map/page.tsx",

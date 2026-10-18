@@ -11,8 +11,8 @@ export default function PlayMapError(props: {
       {...props}
       scope="for-parents/play-map"
       message="景點地圖一時載不出來，再試一次就會回來。"
-      backHref="/for-parents"
-      backLabel="回親子指南"
+      backHref="/"
+      backLabel="回首頁"
     />
   );
 }

@@ -81,10 +81,6 @@ function Breadcrumbs({ title }: { title: string }) {
           <Icon name="chevron-right" size={14} className={styles.crumbSep} />
         </li>
         <li>
-          <Link href="/for-parents">家長專區</Link>
-          <Icon name="chevron-right" size={14} className={styles.crumbSep} />
-        </li>
-        <li>
           <Link href="/for-parents/play-map">親子遊樂地圖</Link>
           <Icon name="chevron-right" size={14} className={styles.crumbSep} />
         </li>
@@ -141,7 +137,6 @@ export default async function PlaygroundCollectionPage({
       <JsonLd
         data={breadcrumbListJsonLd([
           { name: "首頁", url: "/" },
-          { name: "家長專區", url: "/for-parents" },
           { name: "親子遊樂地圖", url: "/for-parents/play-map" },
           {
             name: "各地親子景點整理",

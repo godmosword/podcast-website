@@ -92,8 +92,8 @@ describe("repository architecture", () => {
     }
   });
 
-  it("角色圖鑑與親子指南不掛 SiteHeader 行銷 hero", () => {
-    for (const file of ["app/characters/page.tsx", "app/for-parents/page.tsx"]) {
+  it("角色圖鑑與關於頁不掛 SiteHeader 行銷 hero", () => {
+    for (const file of ["app/characters/page.tsx", "app/about/page.tsx"]) {
       const src = readFileSync(join(ROOT, file), "utf8");
       expect(src, file).not.toContain("SiteHeader");
       expect(src, file).not.toContain("hero-home");

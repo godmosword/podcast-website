@@ -11,7 +11,7 @@
 .summary {
   cursor: pointer;
   /* 觸控底線：`--fs-control` 行高約 24px，上下各 12px → 48px（DESIGN §206）。
-     範式同外層 ParentCoListenSection 的 `.summary`（本元件就巢在它裡面）。
+     範式同外層故事頁「給爸媽：一起聊聊」的摘要列（本元件就巢在 StoryCoListen 裡面）。
      **刻意不用 `display: flex`**——Safari 對 `<summary>` 改 display 會破壞
      `<details>` 的開合；本檔已用 `list-style: none` ＋ 隱藏 webkit marker
      ＋ 行內共用 chevron 圖示（icon-disclosure），走 padding 是唯一安全解。 */

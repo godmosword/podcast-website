@@ -38,7 +38,6 @@ type NavItemId =
   | "games"
   | "adventures"
   | "about"
-  | "for-parents"
   | "parent-progress"
   | "play-map"
   | "feedback"
@@ -52,13 +51,13 @@ type NavItem = {
 
 /** 抽屜家長組 id（小標「給爸媽」落在實際首個可見項）。 */
 const MOBILE_PARENT_GROUP_IDS = new Set<NavItemId>([
-  "for-parents",
   "parent-progress",
   "play-map",
 ]);
 
 /**
- * 抽屜主列：探索 5 ＋家長 3（著色本在遊樂園內）。給爸媽小字不佔主列。
+ * 抽屜主列：探索 5 ＋家長 2（著色本在遊樂園內）。給爸媽小字不佔主列。
+ * 「親子指南」（/for-parents）2026-10-18 併進關於頁，已不在選單。
  * 圖示用全站線條 Icon（不用 emoji：各裝置長相不同、夜間只能降飽和，和頁面配色對不上）。
  */
 const MENU_ROWS: readonly {
@@ -71,7 +70,6 @@ const MENU_ROWS: readonly {
   { id: "adventures", icon: "map" },
   { id: "about", icon: "heart" },
   { id: "parent-progress", icon: "notebook-check" },
-  { id: "for-parents", icon: "compass" },
   { id: "play-map", icon: "map-pin" },
 ] as const;
 
@@ -87,7 +85,6 @@ function navItems(): NavItem[] {
     { id: "games", label: "遊樂園", href: "/games" },
     { id: "adventures", label: "宇宙地圖", href: "/adventures" },
     { id: "about", label: "關於我們", href: "/about" },
-    { id: "for-parents", label: "親子指南", href: "/for-parents" },
     { id: "parent-progress", label: "親子進度", href: "/for-parents/dashboard" },
     { id: "play-map", label: "親子景點", href: "/for-parents/play-map" },
     ...PARENT_SECTION_ITEMS.map((item) => ({
@@ -104,8 +101,8 @@ function matchesPath(pathname: string, href: string): boolean {
 }
 
 /**
- * 最長匹配獨佔 active。`/for-parents/play-map` 同時被親子指南與景點命中，
- * 若不排除會出現兩個高亮與兩個 `aria-current="page"`。
+ * 最長匹配獨佔 active：同一路徑被兩個導覽項前綴命中時，只標最長那個，
+ * 避免出現兩個高亮與兩個 `aria-current="page"`。
  *
  * `href="/"` 不需特判：`matchesPath("/x", "/")` 比對的是 `"//"`，不會全站誤命中。
  * 著色本是遊樂園子頁，不再佔獨立導覽列，因此 `/games/coloring-book` 歸「遊樂園」。
@@ -171,7 +168,7 @@ export default function SiteNavBar() {
 
   const items = navItems();
   const byId = new Map(items.map((item) => [item.id, item]));
-  // 供 active 判定做最長匹配（如 /for-parents 與 /for-parents/play-map 互斥）
+  // 供 active 判定做最長匹配（巢狀路徑只標最長的那一項）
   const internalHrefs = items
     .filter((item) => item.href.startsWith("/"))
     .map((item) => item.href);
@@ -314,7 +311,7 @@ export default function SiteNavBar() {
     );
   };
 
-  /** 給爸媽四項：與主列同一套圖示格，最長匹配避免跟親子指南搶 active。 */
+  /** 給爸媽四項：與主列同一套圖示格，最長匹配避免跟其他家長項搶 active。 */
   const renderNote = (note: (typeof PARENT_SECTION_ITEMS)[number]) => {
     const item = byId.get(note.id);
     if (!item) return null;
