@@ -26,6 +26,11 @@ export type GameSessionResult = {
   cleared?: boolean;
   flawless?: boolean;
   collectedAll?: boolean;
+  /**
+   * false：這局算玩過、活動紀錄仍記通關，但不寫獎牌、不發全站星星、不解車庫。
+   * 壽司屋第 1–3 天用這個。沒寫＝照舊發星。
+   */
+  grantMedals?: boolean;
 };
 
 function awardSticker(profile: PlayerProfile, stickerId: string): PlayerProfile {
@@ -65,7 +70,7 @@ export function reportGameSession(result: GameSessionResult): PlayerProfile {
     profile = awardSticker(profile, `played-${result.gameId}`);
   }
 
-  if (result.cleared) {
+  if (result.cleared && result.grantMedals !== false) {
     const idx = result.levelIndex ?? 0;
     const candyMode = result.gameId === "candy-match" ? result.candyMode ?? "easy" : null;
     const modeMedals = profile.candyMatchMedals ?? {

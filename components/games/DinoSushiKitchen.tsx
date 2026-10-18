@@ -6,7 +6,7 @@ import { matchOrder, orderSpeechLine, orderThanksLine } from "@/lib/games/dino-s
 import { currentOrder } from "@/lib/games/dino-sushi/round";
 import { MAX_TOPPINGS } from "@/lib/games/dino-sushi/sushi";
 import { BASES, baseById, toppingById, type BaseId, type ToppingId } from "@/lib/games/dino-sushi/toppings";
-import { DOME_AFTER_PLATES, domeStickerId, orderLead, roundVariety } from "@/lib/games/dino-sushi/variety";
+import { DOME_AFTER_PLATES, domeStickerId, orderLead } from "@/lib/games/dino-sushi/variety";
 import { DinoSushiCustomerQueue } from "./DinoSushiCustomerQueue";
 import { DinoSushiCustomerSeat } from "./DinoSushiCustomerSeat";
 import { DinoSushiDuoDuo } from "./DinoSushiDuoDuo";
@@ -121,7 +121,7 @@ export function DinoSushiKitchen({
     target?.focus({ preventScroll: true });
   }, [rootRef, toppings]);
   const orderForSpeech = round ? currentOrder(round) : null;
-  const variety = round ? roundVariety(round.seed) : null;
+  const variety = round?.variety ?? null;
   const domeOpen = round?.mode === "order" && round.plates.length >= DOME_AFTER_PLATES;
   const thanksLine =
     orderForSpeech && caption?.eats && caption.match?.ok ? orderThanksLine(orderForSpeech) : null;
@@ -138,6 +138,7 @@ export function DinoSushiKitchen({
   });
   if (!round) return null;
   const order = currentOrder(round);
+  const bases = round.allowedBases.length > 0 ? BASES.filter((b) => round.allowedBases.includes(b.id)) : [...BASES];
   const eating = round.pending?.eats === true;
   const sushi = round.sushi;
   const flash = caption?.mood === "look" ? (caption.match ?? null) : null;
@@ -339,8 +340,14 @@ export function DinoSushiKitchen({
         </div>
         {/* 選飯時只做選飯這一步：三張皿疊在加料層上面 */}
         {choosingBase ? (
-          <div className={styles.basePicker} role="group" aria-label="選飯" data-role="base-picker">
-            {BASES.map((b) => {
+          <div
+            className={styles.basePicker}
+            role="group"
+            aria-label="選飯"
+            data-role="base-picker"
+            data-bases={String(bases.length)}
+          >
+            {bases.map((b) => {
               const nudgeAt = nudge ? nudge.ids.indexOf(b.id) : -1;
               return (
               <TapButton
@@ -383,8 +390,8 @@ export function DinoSushiKitchen({
 
       <DinoSushiTray
         tray={round.tray}
-        theme={variety?.theme.id}
-        themeLabel={variety?.theme.label}
+        theme={variety && variety.showTheme !== false && variety.theme.toppings.length > 0 ? variety.theme.id : undefined}
+        themeLabel={variety && variety.showTheme !== false && variety.theme.label ? variety.theme.label : undefined}
         disabled={disabled}
         waitingForBase={choosingBase}
         onWaitTap={nudgeBases}

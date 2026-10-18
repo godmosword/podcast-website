@@ -305,6 +305,25 @@ describe("難度檔位", () => {
     expect(result.current.teaching).toBe(true);
   });
 
+  it("第 1 天固定料數 1、1、1、1、2，提示仍是 4.5 秒，要教", () => {
+    const { result } = setup();
+    act(() => result.current.actions.start("order", 7, { day: 1, teach: true }));
+    expect(result.current.round!.day).toBe(1);
+    expect(result.current.round!.tier).toBe("normal");
+    expect(result.current.round!.orders.map((order) => order.toppings.length)).toEqual([1, 1, 1, 1, 2]);
+    expect(result.current.round!.orders.every((order) => order.base === "nigiri")).toBe(true);
+    expect(result.current.teaching).toBe(true);
+    expect(result.current.hint).not.toBeNull();
+  });
+
+  it("第 4 天不因為傳進階就改料數；通關過就不出手指", () => {
+    const { result } = setup();
+    act(() => result.current.actions.start("order", 7, { day: 4, teach: false, tier: "advanced" }));
+    expect(result.current.round!.orders.map((order) => order.toppings.length)).toEqual([1, 1, 2, 2, 3]);
+    expect(result.current.round!.tier).toBe("normal");
+    expect(result.current.teaching).toBe(false);
+  });
+
   it("自由做不吃檔位：照一般檔的提示時間、round 記 normal", () => {
     const { result } = setup();
     act(() => result.current.actions.start("free", 7, "advanced"));

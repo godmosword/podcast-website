@@ -169,7 +169,7 @@ export function DinoSushiResult({
       </>
     );
   const bookLabel = fresh.length > 0 ? "放進貼紙書" : "貼紙書";
-  const mood = roundVariety(outcome.seed);
+  const mood = outcome.variety ?? roundVariety(outcome.seed);
   return (
     <div
       className={styles.resultOverlay}

@@ -78,6 +78,7 @@ describe("每輪小變化", () => {
     expect(line).not.toMatch(/草莓|布丁|芥末/);
     const variety = roundVariety(4);
     expect(orderLead(0, variety)).toBe(`${variety.theme.label}。`);
+    expect(orderLead(0, { ...variety, showTheme: false })).toBe("");
     expect(orderLead(DOME_AFTER_PLATES, variety)).toBe(DOME_SPEECH);
     expect(orderLead(1, variety)).toBe("");
     expect(orderLead(0, variety)).not.toMatch(/草莓|布丁|芥末/);

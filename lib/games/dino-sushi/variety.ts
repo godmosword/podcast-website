@@ -47,6 +47,8 @@ export type RoundVariety = {
   theme: ThemeDay;
   sky: SkyMood;
   lantern: LanternTone;
+  /** false：第 1 單不念主題、托盤也不換色。沒寫＝要念、要換色。 */
+  showTheme?: boolean;
 };
 
 function shuffled<T>(items: readonly T[], rng: () => number): T[] {
@@ -114,7 +116,7 @@ function joinNames(names: readonly string[]): string {
  * 合成進同一句訂單，才不會把訂單從朗讀排隊裡擠掉。
  */
 export function orderLead(index: number, variety: RoundVariety): string {
-  if (index === 0) return `${variety.theme.label}。`;
+  if (index === 0 && variety.showTheme !== false && variety.theme.label) return `${variety.theme.label}。`;
   if (index === DOME_AFTER_PLATES) return DOME_SPEECH;
   return "";
 }

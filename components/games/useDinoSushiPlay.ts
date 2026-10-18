@@ -17,7 +17,7 @@ import { BASE_IDLE_HINT_MS, idleHintMs, teachesFirstOrder, type OrderTier } from
 import { addSfx, evictThenPop, MOOD_SFX, plateSfx, SUSHI_SFX, varied } from "@/lib/games/dino-sushi/sfx";
 import { MAX_TOPPINGS } from "@/lib/games/dino-sushi/sushi";
 import { toppingById, type BaseId, type ToppingId } from "@/lib/games/dino-sushi/toppings";
-import { DOME_AFTER_PLATES, DOME_SPEECH, readRoundSeed, roundVariety } from "@/lib/games/dino-sushi/variety";
+import { DOME_AFTER_PLATES, DOME_SPEECH, orderLead, readRoundSeed } from "@/lib/games/dino-sushi/variety";
 
 /** 送出後的動畫段：盤子滑過去 → 張嘴 → 咀嚼 → 表情＋字卡。 */
 export type ServePhase = "idle" | "slide" | "open" | "chew" | "react";
@@ -50,13 +50,24 @@ export type GuestThanks = { order: Order; line: string; leaving: boolean };
 /** 膠囊收起前的淡出時間。 */
 const THANKS_FADE_MS = 200;
 
-type PlayAction = { type: "init"; mode: Mode; seed: number; tier: OrderTier } | { type: "clear" } | RoundAction;
+type PlayAction =
+  | { type: "init"; mode: Mode; seed: number; tier: OrderTier; day?: number }
+  | { type: "clear" }
+  | RoundAction;
+
+/** 字串＝舊的檔位。物件＝八天裡的某一天（料數跟那天走，提示固定 4.5 秒）。 */
+export type SushiStartOptions = {
+  tier?: OrderTier;
+  day?: number;
+  /** false：這天已經通關過，不再出教學手指。 */
+  teach?: boolean;
+};
 
 /** 排程中的一步；暫停時 due 改存「剩幾毫秒」。 */
 type Scheduled = { due: number; fn: () => void };
 
 function playReducer(state: RoundState | null, action: PlayAction): RoundState | null {
-  if (action.type === "init") return createRound(action.mode, action.seed, action.tier);
+  if (action.type === "init") return createRound(action.mode, action.seed, action.tier, action.day);
   if (action.type === "clear") return null;
   return state ? roundReducer(state, action) : state;
 }
@@ -224,20 +235,31 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
     armIdle();
   }, [armIdle]);
 
-  /** tier：難度檔位（只影響點餐的料數、提示等待與首單教學）；自由做傳什麼都一樣。 */
+  /**
+   * tier 字串：舊的檔位路徑（單元測試仍用）。自由做傳什麼都一樣。
+   * 物件帶 day：八天開店。料數跟那天走，閒置固定 4.5 秒，不升進階。
+   */
   const start = useCallback(
-    (mode: Mode, seed?: number, tier: OrderTier = "normal") => {
+    (mode: Mode, seed?: number, tierOrOptions: OrderTier | SushiStartOptions = "normal") => {
       clearTimers();
-      /* 難度只管點餐；自由做一律照一般檔 */
-      const applied: OrderTier = mode === "order" ? tier : "normal";
-      idleMs.current = idleHintMs(applied);
-      if (!teachesFirstOrder(applied)) setTaught(true);
+      const options: SushiStartOptions =
+        typeof tierOrOptions === "string" ? { tier: tierOrOptions } : tierOrOptions;
+      const day = mode === "order" ? options.day : undefined;
+      /* 難度只管沒指定天的點餐；指定了天就固定一般檔 */
+      const applied: OrderTier = mode === "order" && day == null ? (options.tier ?? "normal") : "normal";
+      if (day != null) {
+        idleMs.current = BASE_IDLE_HINT_MS;
+        setTaught(options.teach === false);
+      } else {
+        idleMs.current = idleHintMs(applied);
+        if (!teachesFirstOrder(applied)) setTaught(true);
+      }
       setPhase("idle");
       setCaption(null);
       setChoosingBase(false);
       setBrushing(false);
       setThanks(null);
-      dispatch({ type: "init", mode, seed: seed ?? nextSeed(), tier: applied });
+      dispatch({ type: "init", mode, seed: seed ?? nextSeed(), tier: applied, day });
       touch();
     },
     [clearTimers, touch],
@@ -423,7 +445,7 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
     if (order && (isNewRound || before.index !== round.index)) {
       // 第一單跟「歡迎光臨」同時出現，不疊兩個聲音
       if (!isNewRound) sfx(SUSHI_SFX.order);
-      const themeLead = round.index === 0 ? `${roundVariety(round.seed).theme.label}。` : "";
+      const themeLead = round.index === 0 ? orderLead(0, round.variety) : "";
       const domeLead =
         round.mode === "order" &&
         round.plates.length >= DOME_AFTER_PLATES &&

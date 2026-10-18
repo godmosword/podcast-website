@@ -7,6 +7,7 @@ import {
 import { dismissCandyIntro } from "./candy-helpers";
 import { INTRO_PORTAL_ENABLED, skipIntroOverlay } from "./intro-gate";
 import { PROGRESS_STORAGE_KEY } from "../lib/progress-store";
+import { pinClassicSushiDay } from "./helpers/dino-sushi";
 
 /**
  * D2 視覺回歸：Phase A smoke（5 頁 × 1280 light）+ Phase B 完整組合。
@@ -482,11 +483,18 @@ test("visual：著色本畫布 390 light", async ({ page }) => {
 });
 
 /** 多多壽司屋固定 seed（只有測試會設）：同一盤托盤、同一串訂單，截圖可重現。 */
-async function openDinoSushi(page: Page, width: number, height: number, theme: VisualTheme) {
+async function openDinoSushi(
+  page: Page,
+  width: number,
+  height: number,
+  theme: VisualTheme,
+  classic = false,
+) {
   await page.setViewportSize({ width, height });
   await page.addInitScript(() => {
     (window as unknown as { __dinoSushiSeed: number }).__dinoSushiSeed = 7;
   });
+  if (classic) await pinClassicSushiDay(page);
   await page.goto("/games/dino-sushi");
   await stabilizeVisualPage(page, { theme });
   await expect(page.getByRole("heading", { name: "多多肚子餓了！" })).toBeVisible();
@@ -526,7 +534,7 @@ for (const [width, height, theme] of [
   [1280, 800, "night"],
 ] as const) {
   test(`visual：多多壽司屋廚房 ${width}×${height} ${theme}（固定 seed）`, async ({ page }) => {
-    await openDinoSushi(page, width, height, theme);
+    await openDinoSushi(page, width, height, theme, true);
     await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
     await makeDinoOrder(page, 1, false);
     await expect(page.getByTestId("dino-sushi")).toHaveScreenshot(
@@ -537,7 +545,7 @@ for (const [width, height, theme] of [
 }
 
 test("visual：多多壽司屋結算 390 light（5 單一次做對、三星）", async ({ page }) => {
-  await openDinoSushi(page, 390, 844, "light");
+  await openDinoSushi(page, 390, 844, "light", true);
   await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
   for (let n = 1; n <= 5; n++) await makeDinoOrder(page, n, true);
   const result = page.getByTestId("dino-sushi-result");

@@ -5,6 +5,7 @@ import { skipIntroOverlay } from "./intro-gate";
 import { expectHitTestable, expectNoOverlap } from "./overlay-geometry";
 import { dismissCandyIntro } from "./candy-helpers";
 import { pinTheme } from "./visual-helpers";
+import { pinClassicSushiDay } from "./helpers/dino-sushi";
 
 test.describe.configure({ mode: "serial" });
 
@@ -507,6 +508,7 @@ test("多多壽司屋：照點餐做一盤，多多吃完疊盤", async ({ page 
   await page.addInitScript(() => {
     (window as Window & { __dinoSushiSeed?: number }).__dinoSushiSeed = 7;
   });
+  await pinClassicSushiDay(page);
   await page.goto("/games/dino-sushi");
   await expect(page.getByRole("heading", { name: "多多肚子餓了！" })).toBeVisible();
   await page.getByRole("button", { name: "開始幫多多做壽司" }).click();

@@ -112,7 +112,7 @@
   flex: none;
   width: 100%;
   aspect-ratio: 4 / 3;
-  max-height: 40vh;
+  max-height: min(28vh, 200px);
   margin: 0;
   padding: 0;
   overflow: hidden;
@@ -238,6 +238,151 @@
   gap: 6px;
 }
 
+/* 八張臉。窄的時候兩排；放不下就在這層橫向滑。每張至少 48px，間距 8px。 */
+.dayScroll {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 4px 2px 6px;
+}
+
+.dayRow {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(48px, 1fr));
+  gap: 8px;
+  width: 100%;
+  min-width: calc(48px * 4 + 8px * 3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dayRow > li {
+  display: flex;
+  min-width: 48px;
+  min-height: 48px;
+}
+
+.dayButton {
+  position: relative;
+  display: flex;
+  flex: 1;
+  align-items: stretch;
+  min-width: 48px;
+  min-height: 48px;
+  padding: 0;
+  border: none;
+  border-radius: 16px;
+  background: transparent;
+  color: var(--sushi-ink);
+  font: inherit;
+  font-weight: 900;
+  line-height: 1.1;
+  cursor: pointer;
+}
+
+.dayBody {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  width: 100%;
+  min-height: 48px;
+  padding: 4px 2px;
+  border-radius: 16px;
+  background: #fffdf8;
+  box-shadow: 0 0 0 2px #f1dfc0;
+}
+
+.dayButton[data-current="true"] .dayBody {
+  box-shadow: 0 0 0 3px #5a360d;
+}
+
+.dayButton[data-locked="true"] {
+  cursor: default;
+}
+
+/* 整張卡變淡，鎖頭留在外面，孩子才看得出這天還沒開。 */
+.dayButton[data-locked="true"] .dayBody {
+  opacity: 0.45;
+}
+
+.dayLock {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  display: inline-flex;
+  padding: 1px;
+  border-radius: 50%;
+  background: #fff;
+  line-height: 0;
+  box-shadow: 0 1px 4px rgba(93, 74, 103, 0.2);
+  pointer-events: none;
+}
+
+/* a／b 用不同動畫名，連點才會重新播；減少動態時兩段都關掉。 */
+.dayLock[data-shake="a"] {
+  animation: dayLockWiggleA 320ms ease-in-out;
+}
+
+.dayLock[data-shake="b"] {
+  animation: dayLockWiggleB 320ms ease-in-out;
+}
+
+@keyframes dayLockWiggleA {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  30% {
+    transform: rotate(-14deg);
+  }
+  70% {
+    transform: rotate(12deg);
+  }
+}
+
+@keyframes dayLockWiggleB {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  30% {
+    transform: rotate(-14deg);
+  }
+  70% {
+    transform: rotate(12deg);
+  }
+}
+
+.dayFace {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.dayName {
+  color: var(--sushi-ink);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.dayStars {
+  display: flex;
+  gap: 1px;
+  height: 12px;
+}
+
+@container sushi-title (min-width: 560px) {
+  .dayRow {
+    grid-template-columns: repeat(8, minmax(48px, 1fr));
+    min-width: calc(48px * 8 + 8px * 7);
+  }
+}
+
 /* 與消消樂、方塊轉轉同一顆大圓「開始」 */
 .startButton {
   display: grid;
@@ -270,6 +415,7 @@
 }
 
 .startButton:focus-visible,
+.dayButton:focus-visible,
 .freeButton:focus-visible,
 .bookButton:focus-visible,
 .resultBook:focus-visible {
@@ -387,7 +533,8 @@
   .freeButton,
   .bookButton,
   .resultBook,
-  .freshThumb {
+  .freshThumb,
+  .dayLock {
     transition: none;
     animation: none;
   }
@@ -396,7 +543,8 @@
 .surface[data-reduced="true"] .startButton,
 .surface[data-reduced="true"] .freeButton,
 .surface[data-reduced="true"] .bookButton,
-.surface[data-reduced="true"] .freshThumb {
+.surface[data-reduced="true"] .freshThumb,
+.surface[data-reduced="true"] .dayLock {
   transition: none;
   animation: none;
 }
@@ -422,7 +570,7 @@
 
 @media (max-height: 760px) and (orientation: portrait) {
   .titleStage {
-    max-height: 30vh;
+    max-height: min(22vh, 160px);
   }
 
   .titlePanel {
@@ -469,6 +617,12 @@
 @media (max-height: 520px) {
   .titleScreen {
     min-height: 0;
+  }
+
+  /* 矮畫面改成一排八張，橫向滑，開始鈕才留得住。 */
+  .dayRow {
+    grid-template-columns: repeat(8, minmax(48px, 1fr));
+    min-width: calc(48px * 8 + 8px * 7);
   }
 
   .titlePanel {

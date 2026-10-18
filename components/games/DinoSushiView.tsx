@@ -3,23 +3,35 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { GameAudioBus, OverlayProps } from "@/lib/gamekit/adapter";
 import type { DinoSushiInstance } from "@/lib/gamekit/games/dino-sushi/adapter";
+import { loadDinoSushiDays, saveDinoSushiDayFlags } from "@/lib/gamekit/progress/dino-sushi-days";
 import { medalCount, medalFlags } from "@/lib/gamekit/progress/meta";
 import { loadPlayerProfile } from "@/lib/gamekit/progress/save";
 import { GAMEKIT_PROGRESS_EVENT } from "@/lib/gamekit/progress/session";
 import { useDinoSushiClayPreload } from "@/lib/games/dino-sushi/art";
-import { useDuoDuoStickerPreload } from "@/lib/games/dino-sushi/duoduo-sticker";
-import { nextTier, startTier, type OrderTier } from "@/lib/games/dino-sushi/difficulty";
+import {
+  dayStarCount,
+  emptyDayFlags,
+  flagsForDay,
+  isDayCleared,
+  isDayPlayable,
+  isDayUnlocked,
+  suggestedDay,
+} from "@/lib/games/dino-sushi/day-progress";
+import { DAY_CARDS } from "@/lib/games/dino-sushi/days";
+import { duoduoStickerSrc, useDuoDuoStickerPreload } from "@/lib/games/dino-sushi/duoduo-sticker";
 import { DINO_SUSHI_LEVEL_INDEX, roundMedals, type RoundMedals } from "@/lib/games/dino-sushi/medals";
 import { SUSHI_SFX } from "@/lib/games/dino-sushi/sfx";
 import type { Mode, RoundState } from "@/lib/games/dino-sushi/round";
+import { PROGRESS_CHANGE_EVENT } from "@/lib/progress-keys";
 import { DinoSushiKitchen } from "./DinoSushiKitchen";
 import { DinoSushiResult } from "./DinoSushiResult";
 import { DinoSushiStickerBook } from "./DinoSushiStickerBook";
-import { DinoSushiTitle } from "./DinoSushiTitle";
+import { DinoSushiTitle, type SushiDayFace } from "./DinoSushiTitle";
 import { playVoices, useDinoSushiPlay } from "./useDinoSushiPlay";
 import { useDinoSushiStickers } from "./useDinoSushiStickers";
 import { DINO_SUSHI_STICKER_TOTAL } from "@/lib/games/dino-sushi/stickers";
-import { readRoundSeed, roundVariety } from "@/lib/games/dino-sushi/variety";
+import { readRoundSeed, type RoundVariety } from "@/lib/games/dino-sushi/variety";
+import { customerById } from "@/lib/games/dino-sushi/customers";
 import styles from "./DinoSushiView.module.css";
 
 type Screen = "title" | "kitchen" | "result";
@@ -34,11 +46,18 @@ export type DinoSushiOutcome = {
   plates: RoundState["plates"];
   medals: RoundMedals | null;
   seed: number;
+  /** 點餐是第幾天；自由做是 0。再做一輪回到同一天。 */
+  day: number;
+  variety: RoundVariety;
 };
 
-/** 直接讀存檔，不等 starsGot state（掛載時 effect 還沒跑完就按開始也對）。 */
-function storedStars(): number {
-  return medalCount(loadPlayerProfile().medals["dino-sushi"]?.[DINO_SUSHI_LEVEL_INDEX] ?? 0);
+function storedClassicFlags(): number {
+  return loadPlayerProfile().medals["dino-sushi"]?.[DINO_SUSHI_LEVEL_INDEX] ?? 0;
+}
+
+function dayFaceSrc(card: (typeof DAY_CARDS)[number]): string {
+  if (card.duoduo) return duoduoStickerSrc(card.duoduo);
+  return customerById(card.customerId!).sticker;
 }
 
 export function DinoSushiView({
@@ -55,23 +74,26 @@ export function DinoSushiView({
   useDinoSushiClayPreload();
   const [screen, setScreen] = useState<Screen>("title");
   const [mode, setMode] = useState<Mode>("order");
-  const [starsGot, setStarsGot] = useState(0);
+  const [dayFlags, setDayFlags] = useState<number[]>(() =>
+    typeof window === "undefined" ? emptyDayFlags() : loadDinoSushiDays(),
+  );
+  const [classicFlags, setClassicFlags] = useState(() => (typeof window === "undefined" ? 0 : storedClassicFlags()));
   const [outcome, setOutcome] = useState<DinoSushiOutcome | null>(null);
   const inputPaused = instance.isInputPaused() || status === "paused";
 
-  const refreshStars = useCallback(() => {
-    setStarsGot(storedStars());
+  const refreshDays = useCallback(() => {
+    setDayFlags(loadDinoSushiDays());
+    setClassicFlags(storedClassicFlags());
   }, []);
-  /**
-   * 點餐難度檔位只放記憶體：第一次開始點餐時看存檔裡的星星定起始檔（3 星＝進階），
-   * 之後每輪結束依一次做對幾單升降；重新整理就回起始檔。不加存檔欄位、不動星星。
-   */
-  const tierRef = useRef<OrderTier | null>(null);
   useEffect(() => {
-    refreshStars();
-    window.addEventListener(GAMEKIT_PROGRESS_EVENT, refreshStars);
-    return () => window.removeEventListener(GAMEKIT_PROGRESS_EVENT, refreshStars);
-  }, [refreshStars]);
+    refreshDays();
+    window.addEventListener(GAMEKIT_PROGRESS_EVENT, refreshDays);
+    window.addEventListener(PROGRESS_CHANGE_EVENT, refreshDays);
+    return () => {
+      window.removeEventListener(GAMEKIT_PROGRESS_EVENT, refreshDays);
+      window.removeEventListener(PROGRESS_CHANGE_EVENT, refreshDays);
+    };
+  }, [refreshDays]);
 
   const onServed = useCallback(() => {
     instance.notifyServed();
@@ -81,12 +103,32 @@ export function DinoSushiView({
     (round: RoundState) => {
       if (round.mode === "order") {
         const medals = roundMedals(round.firstTries);
-        tierRef.current = nextTier(round.tier, medals.firstTryCount);
-        instance.notifyWon(medals);
-        setOutcome({ mode: "order", plates: round.plates, medals, seed: round.seed });
+        const flags = medalFlags(medals.cleared, medals.flawless, medals.collectedAll);
+        /* 第 1–3 天只記在壽司屋。第 4 天仍走舊獎牌，已經有的星不會再發。 */
+        if (round.day >= 1 && round.day <= 3) {
+          setDayFlags(saveDinoSushiDayFlags(round.day, flags));
+          instance.notifyDayCleared(medals);
+        } else {
+          instance.notifyWon(medals);
+        }
+        setOutcome({
+          mode: "order",
+          plates: round.plates,
+          medals,
+          seed: round.seed,
+          day: round.day,
+          variety: round.variety,
+        });
       } else {
         instance.notifyFinished();
-        setOutcome({ mode: "free", plates: round.plates, medals: null, seed: round.seed });
+        setOutcome({
+          mode: "free",
+          plates: round.plates,
+          medals: null,
+          seed: round.seed,
+          day: 0,
+          variety: round.variety,
+        });
       }
       setScreen("result");
       syncHost();
@@ -104,9 +146,20 @@ export function DinoSushiView({
     setQueuedSeed((current) => current ?? readRoundSeed());
   }, []);
   const unseen = stickers.state.unlocked.filter((id) => !stickers.state.seen.includes(id));
+  const nextDay = suggestedDay(dayFlags, classicFlags);
+  const sessionRef = useRef({ mode: "order" as Mode, day: 0 });
+  const titleDays: SushiDayFace[] = DAY_CARDS.map((card) => ({
+    day: card.day,
+    name: card.name,
+    src: dayFaceSrc(card),
+    stars: dayStarCount(flagsForDay(card.day, dayFlags, classicFlags)),
+    unlocked: isDayUnlocked(card.day, dayFlags, classicFlags),
+    playable: isDayPlayable(card.day),
+    current: card.day === nextDay,
+  }));
 
   const begin = useCallback(
-    (next: Mode) => {
+    (next: Mode, explicitDay?: number) => {
       audio?.ensureAudio();
       playVoices(audio, SUSHI_SFX.welcome);
       stickers.beginRound();
@@ -114,14 +167,21 @@ export function DinoSushiView({
       setMode(next);
       setOutcome(null);
       const seed = queuedSeed ?? readRoundSeed();
-      if (next === "order" && tierRef.current === null) tierRef.current = startTier(storedStars());
-      actions.start(next, seed, next === "order" ? (tierRef.current ?? "normal") : "normal");
+      let day = 0;
+      if (next === "order") {
+        day = explicitDay ?? suggestedDay(dayFlags, classicFlags);
+        const teach = !isDayCleared(flagsForDay(day, dayFlags, classicFlags));
+        actions.start(next, seed, { day, teach });
+      } else {
+        actions.start(next, seed, "normal");
+      }
+      sessionRef.current = { mode: next, day };
       setQueuedSeed(readRoundSeed());
       setScreen("kitchen");
       instance.notifyPlaying(next);
       syncHost();
     },
-    [actions, audio, instance, queuedSeed, stickers, syncHost],
+    [actions, audio, classicFlags, dayFlags, instance, queuedSeed, stickers, syncHost],
   );
 
   const goToTitle = useCallback(() => {
@@ -154,7 +214,13 @@ export function DinoSushiView({
     instance.registerController({
       startOrder: () => controllerRef.current.begin("order"),
       startFree: () => controllerRef.current.begin("free"),
-      restart: () => controllerRef.current.begin(controllerRef.current.mode),
+      restart: () => {
+        const playing = sessionRef.current;
+        controllerRef.current.begin(
+          controllerRef.current.mode,
+          playing.mode === "order" && playing.day >= 1 ? playing.day : undefined,
+        );
+      },
       goToTitle: () => controllerRef.current.goToTitle(),
     });
     instance.notifyReady();
@@ -174,12 +240,12 @@ export function DinoSushiView({
       <div className={styles.stage} inert={book} aria-hidden={book ? true : undefined}>
         {screen === "title" ? (
           <DinoSushiTitle
-            starsGot={starsGot}
+            days={titleDays}
             stickerCount={stickers.state.unlocked.length}
             stickerTotal={DINO_SUSHI_STICKER_TOTAL}
             stickerNew={unseen.length > 0}
-            today={queuedSeed === null ? null : roundVariety(queuedSeed)}
             onStart={() => begin("order")}
+            onPickDay={(day) => begin("order", day)}
             onFree={() => begin("free")}
             onBook={() => setBook(true)}
           />
@@ -204,7 +270,7 @@ export function DinoSushiView({
             fresh={stickers.state.fresh}
             gift={stickers.state.gift}
             reducedMotion={reducedMotion}
-            onReplay={() => begin(outcome.mode)}
+            onReplay={() => begin(outcome.mode, outcome.day >= 1 ? outcome.day : undefined)}
             onTitle={goToTitle}
             onBook={() => setBook(true)}
           />

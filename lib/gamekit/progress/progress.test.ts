@@ -169,4 +169,19 @@ describe("gamekit progress session", () => {
     expect(medalCount(cleared.medals["candy-match"]?.[0] ?? 0)).toBeGreaterThan(0);
     expect(cleared.bests["candy-match"]).toBe(500);
   });
+
+  it("grantMedals false 不算獎牌、不發星，但仍記玩過", () => {
+    const before = loadPlayerProfile();
+    const after = reportGameSession({
+      gameId: "dino-sushi",
+      score: 0,
+      cleared: true,
+      flawless: true,
+      collectedAll: true,
+      grantMedals: false,
+    });
+    expect(after.stars).toBe(before.stars);
+    expect(after.medals["dino-sushi"]).toEqual(before.medals["dino-sushi"]);
+    expect(after.gamesPlayed["dino-sushi"]).toBe(true);
+  });
 });

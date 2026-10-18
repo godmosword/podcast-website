@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { pinClassicSushiDay } from "./helpers/dino-sushi";
 
 /** 多多壽司屋廚房（2026-10-16 實玩審 批次 K）：選飯的皿、「多多吃飽了」、朋友收餐、圓蓋獎品、桌機泡泡。 */
 
@@ -6,6 +7,7 @@ test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     (window as Window & { __dinoSushiSeed?: number }).__dinoSushiSeed = 7;
   });
+  await pinClassicSushiDay(page);
 });
 
 async function order(page: Page, n: number) {
