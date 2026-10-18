@@ -3,11 +3,11 @@
 
 /** 靜態頁最後內容編輯時間：來源為各頁原始碼／資料檔的最後已提交 git commit。 */
 export const STATIC_PAGE_MODIFIED_DATES: Record<string, string> = {
-  "/about": "2026-10-10T19:20:51+08:00",
+  "/about": "2026-10-18T09:11:56+08:00",
   "/adventures": "2026-07-28T03:43:28Z",
   "/characters": "2026-10-17T17:02:29+08:00",
-  "/for-parents/dashboard": "2026-10-18T08:18:27+08:00",
-  "/for-parents/play-map": "2026-10-13T04:33:46Z",
+  "/for-parents/dashboard": "2026-10-18T09:11:56+08:00",
+  "/for-parents/play-map": "2026-10-18T09:11:56+08:00",
   "/games": "2026-10-13T04:33:46Z",
   "/games/candy-match": "2026-10-05T21:27:51+08:00",
   "/games/dino-sushi": "2026-10-15T11:38:11+08:00",
@@ -18,11 +18,11 @@ export const STATIC_PAGE_MODIFIED_DATES: Record<string, string> = {
 
 /** 對應日期的 git commit 與來源檔，供追溯。 */
 export const STATIC_PAGE_MODIFIED_DATE_SOURCE: Record<string, string> = {
-  "/about": "fba25703 app/about/page.tsx, app/about/page.module.css, components/about/AboutParentFaq.tsx, components/about/AboutParentFaq.module.css, lib/for-parents.ts",
+  "/about": "d218d030 app/about/page.tsx, app/about/page.module.css, components/about/AboutParentFaq.tsx, components/about/AboutParentFaq.module.css, lib/for-parents.ts",
   "/adventures": "c0401581 app/adventures/page.tsx, app/adventures/page.module.css",
   "/characters": "d6ecbf9c app/characters/page.tsx, app/characters/page.module.css, data/characters.json",
-  "/for-parents/dashboard": "d48232f0 app/for-parents/dashboard/page.tsx, app/for-parents/dashboard/page.module.css, components/for-parents/ParentDashboard.tsx, components/for-parents/parent-dashboard.module.css, lib/for-parents/dashboard.ts, lib/for-parents/dashboard-next-up.ts",
-  "/for-parents/play-map": "1662b376 app/for-parents/play-map/page.tsx, app/for-parents/play-map/page.module.css, components/for-parents/PlayMap.tsx, components/for-parents/PlayMapClient.tsx, components/for-parents/PlayMap.module.css, components/for-parents/PlayMapLeaflet.tsx, lib/playgrounds-query.ts, lib/playground-coverage.ts, data/playgrounds.ts",
+  "/for-parents/dashboard": "d218d030 app/for-parents/dashboard/page.tsx, app/for-parents/dashboard/page.module.css, components/for-parents/ParentDashboard.tsx, components/for-parents/parent-dashboard.module.css, lib/for-parents/dashboard.ts, lib/for-parents/dashboard-next-up.ts",
+  "/for-parents/play-map": "d218d030 app/for-parents/play-map/page.tsx, app/for-parents/play-map/page.module.css, components/for-parents/PlayMap.tsx, components/for-parents/PlayMapClient.tsx, components/for-parents/PlayMap.module.css, components/for-parents/PlayMapLeaflet.tsx, lib/playgrounds-query.ts, lib/playground-coverage.ts, data/playgrounds.ts",
   "/games": "1662b376 app/games/page.tsx, app/games/layout.tsx, app/games/page.module.css",
   "/games/candy-match": "a2fb94f3 app/games/candy-match/page.tsx",
   "/games/dino-sushi": "6e4c991b app/games/dino-sushi/page.tsx",
