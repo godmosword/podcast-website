@@ -1,6 +1,5 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
-import { seedParentGatePassed } from "./parent-gate";
 import { skipIntroOverlay } from "./intro-gate";
 
 // ADR-0004：這支規格測的是 Landing／內容頁本身，先跳過首頁的 3D 開場覆蓋層。
@@ -57,7 +56,6 @@ const MOBILE_VIEWPORT = { width: 390, height: 844 } as const;
 
 for (const pageDef of PAGES) {
   test(`a11y：${pageDef.name} 無 critical/serious 違規`, async ({ page }) => {
-    await seedParentGatePassed(page);
     await page.goto(pageDef.path);
     let builder = new AxeBuilder({ page }).withTags([
       "wcag2a",
@@ -96,7 +94,6 @@ for (const pageDef of PAGES) {
      * 本站對「不要動效」的正式答案，用它掃才是量靜態配色本身。
      */
     await page.emulateMedia({ reducedMotion: "reduce" });
-    await seedParentGatePassed(page);
     await page.goto(pageDef.path);
 
     let builder = new AxeBuilder({ page }).withTags([

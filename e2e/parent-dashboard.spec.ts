@@ -3,7 +3,6 @@ import { getStory } from "../data/content";
 import { ACTIVITY_STORAGE_KEY, localDateKey } from "../lib/activity-log";
 import { PROGRESS_STORAGE_KEY } from "../lib/progress-keys";
 import { DEFAULT_PROGRESS } from "../lib/progress-store";
-import { seedParentGatePassed } from "./parent-gate";
 
 test.describe("家長儀表板活動追蹤", () => {
   test.use({
@@ -40,7 +39,6 @@ test.describe("家長儀表板活動追蹤", () => {
       },
     };
 
-    await seedParentGatePassed(page);
     await page.addInitScript(
       ({ activityKey, progressKey, activityLog, progressLog }) => {
         localStorage.setItem(activityKey, JSON.stringify(activityLog));

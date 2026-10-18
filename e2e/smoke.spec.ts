@@ -1,5 +1,4 @@
 import { test, expect } from "@playwright/test";
-import { seedParentGatePassed } from "./parent-gate";
 import { PROGRESS_STORAGE_KEY } from "../lib/progress-store";
 import sharp from "sharp";
 import { skipIntroOverlay } from "./intro-gate";
@@ -459,7 +458,6 @@ test("角色圖鑑與親子指南不含內頁 hero", async ({ page, request }) =
 });
 
 test("家庭儀表板頁面可載入", async ({ page }) => {
-  await seedParentGatePassed(page);
   await page.goto("/for-parents/dashboard");
   const main = page.getByRole("main");
   await expect(main.getByRole("heading", { name: "家庭儀表板" })).toBeVisible();

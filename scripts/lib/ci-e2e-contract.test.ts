@@ -35,7 +35,6 @@ describe("P3 Playwright E2E CI 契約", () => {
       "e2e/subscribe.spec.ts",
       "e2e/feedback.spec.ts",
       "e2e/child-ux.spec.ts",
-      "e2e/parent-gate.spec.ts",
     ]) {
       expect(script, `test:e2e:ci 缺少 ${file}`).toContain(file);
     }

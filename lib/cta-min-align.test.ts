@@ -42,10 +42,6 @@ const PRIMARY = [
     className: "cta",
   },
   {
-    file: "components/for-parents/ParentGate.module.css",
-    className: "submit",
-  },
-  {
     file: "components/for-parents/PlayMap.module.css",
     className: "navButton",
   },
@@ -214,13 +210,6 @@ describe("CTA 三階（H1 第二刀 soft／quiet）", () => {
       expect(block, file).toMatch(/text-decoration:\s*underline/);
       expect(block, file).toMatch(/min-height:\s*(44|48)px/);
     }
-
-    const retry = readCss(
-      "components",
-      "for-parents",
-      "ParentGate.module.css",
-    );
-    expect(retry).toMatch(/\.retry\s*\{[\s\S]*?color:\s*var\(--cta-quiet-fg\)/);
   });
 
   it("full sheet 次要出口維持 quiet 文字連結，不跟 compact 軟鈕同底板", () => {

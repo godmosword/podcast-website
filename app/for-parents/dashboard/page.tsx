@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import SiteFooter from "@/components/SiteFooter";
 import { ParentDashboard } from "@/components/for-parents/ParentDashboard";
-import { ParentGate } from "@/components/for-parents/ParentGate";
 import Icon from "@/components/ui/Icon";
 import styles from "./page.module.css";
 
@@ -37,9 +36,7 @@ export default function ParentDashboardPage() {
           </Link>
         </nav>
       </header>
-      <ParentGate>
-        <ParentDashboard />
-      </ParentGate>
+      <ParentDashboard />
       <SiteFooter compact showPlatformSubscribe={false} />
     </main>
   );

@@ -4,12 +4,11 @@ import { describe, expect, it } from "vitest";
 
 const PAGE = join(process.cwd(), "app/for-parents/dashboard/page.tsx");
 
-describe("dashboard parent gate shell", () => {
-  it("以 ParentGate 包住 ParentDashboard，metadata 維持可索引", () => {
+describe("dashboard page shell", () => {
+  it("直接顯示儀表板，不用家長算術題擋住；metadata 維持可索引", () => {
     const source = readFileSync(PAGE, "utf8");
-    expect(source).toMatch(
-      /<ParentGate>\s*<ParentDashboard\s*\/>\s*<\/ParentGate>/,
-    );
+    expect(source).not.toContain("ParentGate");
+    expect(source).toMatch(/<ParentDashboard\s*\/>/);
     expect(source).toContain('title: "家庭儀表板"');
     expect(source).toContain('canonical: "/for-parents/dashboard"');
   });
