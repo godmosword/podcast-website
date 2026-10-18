@@ -27,4 +27,12 @@ describe("reflection-prompts", () => {
   it("未知 slug 回傳 undefined", () => {
     expect(getReflectionPrompt("ep-not-exist")).toBeUndefined();
   });
+
+  it("問號或驚嘆號後面不再接句號", () => {
+    for (const story of getStories()) {
+      const prompt = getReflectionPrompt(story.slug);
+      expect(prompt?.child ?? "", story.slug).not.toMatch(/[？！]。/);
+      expect(prompt?.parentFollowUp ?? "", story.slug).not.toMatch(/[？！]。/);
+    }
+  });
 });

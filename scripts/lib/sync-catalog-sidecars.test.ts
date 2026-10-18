@@ -4,6 +4,7 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   buildReflectionStub,
+  ensureTerminalPeriod,
   buildEpisodeFaqStub,
   inferZoneId,
   upsertCatalogSidecars,
@@ -124,13 +125,34 @@ describe("inferZoneId", () => {
   });
 });
 
+describe("ensureTerminalPeriod", () => {
+  it("已以問號、驚嘆號或句號結尾時不再補句號", () => {
+    expect(ensureTerminalPeriod("怎麼辦？")).toBe("怎麼辦？");
+    expect(ensureTerminalPeriod("氣噗噗！")).toBe("氣噗噗！");
+    expect(ensureTerminalPeriod("故事說完了。")).toBe("故事說完了。");
+  });
+
+  it("沒有句末標點時補句號", () => {
+    expect(ensureTerminalPeriod("神奇的油漆車")).toBe("神奇的油漆車。");
+  });
+});
+
 describe("buildReflectionStub", () => {
   it("child 以問號結尾、parentFollowUp 非空", () => {
     const stub = buildReflectionStub(
       "恐龍車多多闖禍了｜不能亂開車門｜安全故事",
     );
     expect(stub.child).toMatch(/[？?]$/);
+    expect(stub.child.startsWith("恐龍車多多闖禍了。")).toBe(true);
     expect(stub.parentFollowUp.trim().length).toBeGreaterThan(0);
+  });
+
+  it("標題已以問號結尾時不再接句號", () => {
+    const stub = buildReflectionStub("小紅賽車好想生氣怎麼辦？｜情緒管理故事");
+    expect(stub.child).toBe(
+      "小紅賽車好想生氣怎麼辦？聽完這個故事，你心裡最先想到什麼？",
+    );
+    expect(stub.child).not.toMatch(/[？！]。/);
   });
 });
 
@@ -146,6 +168,16 @@ describe("buildEpisodeFaqStub", () => {
     expect(stub.question).toContain("恐龍車多多闖禍了");
     expect(Array.from(stub.answer).length).toBeGreaterThanOrEqual(50);
     expect(Array.from(stub.answer).length).toBeLessThanOrEqual(170);
+  });
+
+  it("摘要已以問號結尾時不再接句號", () => {
+    const stub = buildEpisodeFaqStub(
+      "ep-31",
+      "快樂烤肉的中秋節",
+      "究竟是什麼呢？",
+    );
+    expect(stub.answer).toContain("故事摘要是：究竟是什麼呢？聽完可以和孩子聊聊");
+    expect(stub.answer).not.toMatch(/[？！]。/);
   });
 });
 

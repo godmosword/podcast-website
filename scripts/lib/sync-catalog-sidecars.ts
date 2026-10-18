@@ -50,13 +50,22 @@ export function inferZoneId(title: string, summary = ""): ZoneId {
   return "car-park";
 }
 
+/** 句末已是句號、問號或驚嘆號時不再補句號，避免「？。」「！。」。 */
+const TERMINAL_PUNCTUATION = /[。！？!?]$/;
+
+export function ensureTerminalPeriod(text: string): string {
+  const trimmed = text.trim();
+  if (!trimmed || TERMINAL_PUNCTUATION.test(trimmed)) return trimmed;
+  return `${trimmed}。`;
+}
+
 /** 從標題推導可過完備測試的 MVP stub（Phase 2 人工改寫）。 */
 export function buildReflectionStub(title: string): {
   child: string;
   parentFollowUp: string;
 } {
   const stem = titleStem(title);
-  const child = `${stem}。聽完這個故事，你心裡最先想到什麼？`;
+  const child = `${ensureTerminalPeriod(stem)}聽完這個故事，你心裡最先想到什麼？`;
   const parentFollowUp =
     "先接住孩子的感覺，再一起聊聊故事裡學到的一件小事，不必急著給標準答案。";
   return { child, parentFollowUp };
@@ -85,7 +94,7 @@ export function buildEpisodeFaqStub(
   const answer = [
     `本集用「${stem}」帶孩子認識故事裡的任務與心情。`,
     summaryPart
-      ? `故事摘要是：${summaryPart}。`
+      ? `故事摘要是：${ensureTerminalPeriod(summaryPart)}`
       : "故事會陪孩子一起觀察線索、想辦法並照顧身邊的夥伴。",
     "聽完可以和孩子聊聊：哪個選擇最有幫助？如果是你，會怎麼做？",
   ].join("");

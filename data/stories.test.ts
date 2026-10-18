@@ -110,6 +110,20 @@ describe("getStoriesByTag", () => {
   it("未知標籤回傳空陣列", () => {
     expect(getStoriesByTag("不存在")).toEqual([]);
   });
+
+  it("EP10、EP15、EP22 使用決定好的標籤，睡前仍只有 EP8、EP9", () => {
+    expect(getStory("ep-10")?.tags).toEqual(["情緒"]);
+    expect(getStory("ep-15")?.tags).toEqual(["好習慣", "安全"]);
+    expect(getStory("ep-22")?.tags).toEqual(["情緒", "成長"]);
+    expect(getStoriesByTag("情緒").some((story) => story.slug === "ep-10")).toBe(true);
+    expect(getStoriesByTag("情緒").some((story) => story.slug === "ep-22")).toBe(true);
+    expect(getStoriesByTag("好習慣").some((story) => story.slug === "ep-15")).toBe(true);
+    expect(getStoriesByTag("安全").some((story) => story.slug === "ep-15")).toBe(true);
+    expect(getStoriesByTag("睡前").map((story) => story.slug).sort()).toEqual([
+      "ep-8",
+      "ep-9",
+    ]);
+  });
 });
 
 function storyIllustrationCount(slug: string): number {
