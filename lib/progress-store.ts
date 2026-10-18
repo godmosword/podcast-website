@@ -22,7 +22,7 @@ export type GameScoreId = GameKitGameId;
 export type BlockDropDifficultyPreference = "relaxed" | "standard" | "challenge";
 export type BlockDropSpecialModePreference = "classic" | "rainbow";
 export type MotionPreference = "system" | "on" | "off";
-/** 消消樂玩法；null＝尚未選過，由 kidsMode 決定初始玩法。 */
+/** 消消樂玩法；null＝尚未選過。家長沒打開挑戰時，實際遊玩仍是輕鬆，這裡的選擇先留著。 */
 export type CandyMatchModePreference = "easy" | "challenge" | null;
 /** 消消樂首次引導 id（交換、四連、五連、L/T、厚污漬）。道具的說明列本身就是引導，不另記。 */
 export const CANDY_MATCH_TIP_IDS = ["swap", "row", "color", "burst", "thick"] as const;
@@ -42,6 +42,8 @@ export type GameKitPreferenceStore = {
   voiceEnabled: boolean;
   motionPreference: MotionPreference;
   candyMatchMode: CandyMatchModePreference;
+  /** 家長在消消樂地圖打開「挑戰」之後才是 true。舊存檔沒有＝關著，不刪模式與獎章。 */
+  candyMatchChallengeUnlocked: boolean;
   candyMatchTips: CandyMatchTipId[];
   blockDropMode: BlockDropModePreference;
   blockDropTips: BlockDropTipId[];
@@ -141,6 +143,7 @@ export const DEFAULT_PROGRESS: ProgressStore = {
       voiceEnabled: true,
       motionPreference: "system",
       candyMatchMode: null,
+      candyMatchChallengeUnlocked: false,
       candyMatchTips: [],
       blockDropMode: null,
       blockDropTips: [],
@@ -288,6 +291,7 @@ function normalizeGameKitPreferences(
         : DEFAULT_PROGRESS.preferences.gameKit.voiceEnabled,
     motionPreference: normalizeMotionPreference(value?.motionPreference),
     candyMatchMode: normalizeCandyMatchMode(value?.candyMatchMode),
+    candyMatchChallengeUnlocked: value?.candyMatchChallengeUnlocked === true,
     candyMatchTips: normalizeCandyMatchTips(value?.candyMatchTips),
     blockDropMode: normalizeBlockDropMode(value?.blockDropMode),
     blockDropTips: normalizeBlockDropTips(value?.blockDropTips),

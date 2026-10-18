@@ -4,6 +4,17 @@ import { dismissCandyIntro } from "./candy-helpers";
 const MOBILE = { width: 390, height: 844 };
 const NARROW_WIDTHS = [320, 375, 390, 430];
 
+async function unlockCandyChallenge(page: Page) {
+  const gate = page.getByRole("button", { name: "家長工具", exact: true });
+  await gate.focus();
+  await page.keyboard.press("Enter");
+  const dialog = page.getByRole("dialog", { name: "家長工具" });
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("button", { name: "挑戰", exact: true }).click();
+  await page.getByRole("button", { name: "關閉", exact: true }).click();
+  await expect(page.getByRole("radio", { name: /挑戰冒險/ })).toBeVisible();
+}
+
 async function openColoringCanvas(page: Page) {
   await page.goto("/games/coloring-book");
   await page.waitForLoadState("networkidle");
@@ -328,6 +339,8 @@ test.describe("遊戲完整 lifecycle", () => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/games/candy-match");
     await page.getByRole("button", { name: /開始冒險/ }).click();
+    await expect(page.getByRole("radio")).toHaveCount(0);
+    await unlockCandyChallenge(page);
     await page.getByRole("radio", { name: /挑戰冒險/ }).click();
     await expect(page.getByRole("radio", { name: /挑戰冒險/ })).toHaveAttribute("aria-checked", "true");
     // 步數畫成腳印＋數字，「N 步內」整句在任務圖案的 aria-label

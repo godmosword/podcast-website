@@ -16,6 +16,7 @@ import {
   loadCandyMatchPrefs,
   markCandyTipSeen,
   resolveCandyMode,
+  saveCandyMatchChallengeUnlocked,
   saveCandyMatchMode,
   type CandyMatchPrefs,
   type CandyMatchTipId,
@@ -62,14 +63,13 @@ const LAYOUT_GAP = 6;
 /** 卡面底部內距＋邊框＋棋盤框內距的保留量。 */
 const SURFACE_BOTTOM = 12;
 const GIFT_EXIT_ROW = 30;
-const EMPTY_PREFS: CandyMatchPrefs = { mode: null, tipsSeen: [] };
+const EMPTY_PREFS: CandyMatchPrefs = { mode: null, tipsSeen: [], challengeUnlocked: false };
 
 function roundKey(mode: CandyMode, index: number, replay: boolean): string {
   return `${mode}:${index}:${replay ? "replay" : "main"}`;
 }
 
 export function CandyMatchView({
-  kidsMode,
   reducedMotion,
   status,
   syncHost,
@@ -90,7 +90,7 @@ export function CandyMatchView({
   const [prefs, setPrefs] = useState<CandyMatchPrefs>(EMPTY_PREFS);
   const [brandFontsEnabled, setBrandFontsEnabled] = useState(false);
   const [cellPx, setCellPx] = useState(56);
-  const mode = resolveCandyMode(prefs.mode, kidsMode);
+  const mode = resolveCandyMode(prefs.mode, prefs.challengeUnlocked);
   const inputPaused = instance.isInputPaused() || status === "paused";
 
   const pendingRef = useRef<Record<string, CandyMatchRound>>({});
@@ -218,6 +218,11 @@ export function CandyMatchView({
   const changeMode = useCallback((next: CandyMode) => {
     saveCandyMatchMode(next);
     setPrefs((p) => ({ ...p, mode: next }));
+  }, []);
+
+  const changeChallengeUnlocked = useCallback((unlocked: boolean) => {
+    saveCandyMatchChallengeUnlocked(unlocked);
+    setPrefs((p) => ({ ...p, challengeUnlocked: unlocked }));
   }, []);
 
   /*
@@ -353,6 +358,8 @@ export function CandyMatchView({
             maxCleared={maxCleared}
             mode={mode}
             onModeChange={changeMode}
+            challengeUnlocked={prefs.challengeUnlocked}
+            onChallengeUnlockedChange={changeChallengeUnlocked}
             previewFor={previewFor}
             onStart={startLevel}
           />

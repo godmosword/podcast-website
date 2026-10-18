@@ -1,11 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
+import { createPortal } from "react-dom";
 import type { CandyMatchLevel } from "@/lib/games/candy-match/levels";
 import { CANDY_MODES, type CandyMode } from "@/lib/games/candy-match/stages";
 import { IconLock, IconPlay, IconStar } from "@/components/games/ClayIcons";
 import { CandyGoalIcon } from "@/components/games/CandyMatchTaskBar";
 import { IconFootprints, IconLeaf } from "@/components/games/CandyMatchIcons";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
+import Icon from "@/components/ui/Icon";
 import type { CandyGoal } from "@/lib/games/candy-match/tasks";
 import styles from "./CandyMatchMap.module.css";
 
@@ -31,9 +34,15 @@ type CandyMatchMapProps = {
   maxCleared: number;
   mode: CandyMode;
   onModeChange: (mode: CandyMode) => void;
+  /** 家長打開之後才畫出輕鬆／挑戰。關掉時呼叫端仍可能留著上次的 mode。 */
+  challengeUnlocked: boolean;
+  onChallengeUnlockedChange: (unlocked: boolean) => void;
   previewFor: (index: number) => CandyStationPreview;
   onStart: (index: number) => void;
 };
+
+/** 與繪本塗塗鴉的家長工具相同：小孩短按不會打開，按住約 0.7 秒或鍵盤才開。 */
+const ADULT_HOLD_MS = 700;
 
 /** 畫面上只留兩個字＋圖示；完整說明（不限步數…）放在 aria-label。 */
 const MODE_SHORT: Record<CandyMode, string> = { easy: "輕鬆", challenge: "挑戰" };
@@ -89,6 +98,137 @@ function ModeToggle({ mode, onChange }: { mode: CandyMode; onChange: (mode: Cand
   );
 }
 
+function ParentChallengeGate({
+  unlocked,
+  onUnlockedChange,
+}: {
+  unlocked: boolean;
+  onUnlockedChange: (unlocked: boolean) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [holding, setHolding] = useState(false);
+  const hintId = useId();
+  const titleId = useId();
+  const noteId = useId();
+  const trigger = useRef<HTMLButtonElement>(null);
+  const panel = useRef<HTMLDivElement>(null);
+  const holdTimer = useRef<number | null>(null);
+  const suppressClick = useRef(false);
+  useFocusTrap(open, panel, { initialFocus: "container" });
+
+  const clearHold = () => {
+    setHolding(false);
+    if (holdTimer.current !== null) {
+      window.clearTimeout(holdTimer.current);
+      holdTimer.current = null;
+    }
+  };
+
+  useEffect(
+    () => () => {
+      if (holdTimer.current !== null) window.clearTimeout(holdTimer.current);
+    },
+    [],
+  );
+
+  const close = () => {
+    setOpen(false);
+    trigger.current?.focus();
+  };
+
+  return (
+    <>
+      <button
+        ref={trigger}
+        type="button"
+        className={`${styles.adultGate} ${holding ? styles.holding : ""}`}
+        aria-label="家長工具"
+        aria-expanded={open}
+        aria-haspopup="dialog"
+        aria-describedby={hintId}
+        onPointerDown={() => {
+          clearHold();
+          setHolding(true);
+          holdTimer.current = window.setTimeout(() => {
+            holdTimer.current = null;
+            suppressClick.current = true;
+            setOpen(true);
+          }, ADULT_HOLD_MS);
+        }}
+        onPointerUp={clearHold}
+        onPointerCancel={clearHold}
+        onPointerLeave={clearHold}
+        onContextMenu={(event) => event.preventDefault()}
+        onClick={(event) => {
+          if (!suppressClick.current) return;
+          suppressClick.current = false;
+          event.preventDefault();
+        }}
+        onKeyDown={(event) => {
+          if (event.key !== "Enter" && event.key !== " ") return;
+          event.preventDefault();
+          setOpen(true);
+        }}
+      >
+        <Icon name="settings" size={24} />
+        <svg className={styles.holdRing} viewBox="0 0 48 48" aria-hidden focusable="false">
+          <circle cx="24" cy="24" r="20" />
+        </svg>
+        <span id={hintId} className={styles.srOnly}>
+          按住才會打開
+        </span>
+      </button>
+      {open
+        ? createPortal(
+            <div
+              className={styles.backdrop}
+              onPointerDown={(event) => {
+                if (event.target === event.currentTarget) close();
+              }}
+            >
+              <div
+                ref={panel}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby={titleId}
+                tabIndex={-1}
+                className={styles.panel}
+                onKeyDown={(event) => {
+                  if (event.key !== "Escape") return;
+                  event.stopPropagation();
+                  close();
+                }}
+              >
+                <div className={styles.panelHeader}>
+                  <h2 id={titleId} className={styles.panelTitle}>
+                    家長工具
+                  </h2>
+                  <button type="button" className={styles.close} aria-label="關閉" onClick={close}>
+                    <Icon name="close" size={22} />
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  className={styles.unlock}
+                  aria-pressed={unlocked}
+                  aria-describedby={noteId}
+                  onClick={() => onUnlockedChange(!unlocked)}
+                >
+                  <IconFootprints size={24} />
+                  挑戰
+                </button>
+                <p id={noteId} className={styles.note}>
+                  星星分開記。關掉之後，挑戰的星星還在。
+                </p>
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
+    </>
+  );
+}
+
 function goalsLabel(preview: CandyStationPreview, mode: CandyMode): string {
   const moves = mode === "challenge" && preview.moves > 0 ? `，${preview.moves} 步內` : "";
   const replay = preview.replay ? "，換新任務" : "";
@@ -101,6 +241,8 @@ export function CandyMatchMap({
   maxCleared,
   mode,
   onModeChange,
+  challengeUnlocked,
+  onChallengeUnlockedChange,
   previewFor,
   onStart,
 }: CandyMatchMapProps) {
@@ -132,7 +274,10 @@ export function CandyMatchMap({
 
   return (
     <div className={styles.map} data-testid="candy-match-map">
-      <ModeToggle mode={mode} onChange={onModeChange} />
+      <div className={styles.modeRow}>
+        {challengeUnlocked ? <ModeToggle mode={mode} onChange={onModeChange} /> : null}
+        <ParentChallengeGate unlocked={challengeUnlocked} onUnlockedChange={onChallengeUnlockedChange} />
+      </div>
 
       <div ref={heroRef} className={styles.hero}>
         <span className={styles.heroArt} aria-hidden>
