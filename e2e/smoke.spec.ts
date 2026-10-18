@@ -340,7 +340,11 @@ test("沒有場景字幕與角色時不渲染模板大綱", async ({ page }) => 
   await expect(page.getByRole("heading", { name: "出場角色" })).toHaveCount(0);
   await expect(page.getByText(/WebVTT/)).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "本集介紹" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "給爸媽：一起聊聊" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "給爸媽：一起聊聊" })).toHaveCount(0);
+  const coListen = page.locator("details#co-listen");
+  await expect(coListen).toHaveAttribute("open", "");
+  await expect(coListen.locator("summary")).toHaveText("給爸媽：一起聊聊");
+  await expect(page.getByText("給爸媽：一起聊聊")).toHaveCount(1);
   await expect(page.getByRole("link", { name: /車車樂園/ })).toBeVisible();
 });
 
@@ -459,6 +463,25 @@ test("親子指南舊網址永久轉到關於頁，家長常見問題在那裡",
   await expect(
     page.getByRole("heading", { level: 3, name: "有哪些適合 3–7 歲的中文車車 Podcast？" }),
   ).toBeVisible();
+
+  const starters = page
+    .locator("section")
+    .filter({ has: page.getByRole("heading", { name: "可以先從哪幾集開始？" }) });
+  const starterHrefs = await starters.locator("a").evaluateAll((els) =>
+    els.map((el) => el.getAttribute("href")),
+  );
+  expect(starterHrefs.slice(0, 4)).toEqual([
+    "/story/ep-34",
+    "/story/ep-33",
+    "/story/ep-32",
+    "/story/ep-31",
+  ]);
+  expect(starterHrefs.slice(4)).toEqual([
+    "/story/ep-16",
+    "/story/ep-15",
+    "/story/ep-14",
+    "/story/ep-6",
+  ]);
 
   // 子頁不受影響
   const dashboard = await request.get("/for-parents/dashboard", { maxRedirects: 0 });

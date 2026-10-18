@@ -97,26 +97,6 @@
   margin-top: 0;
 }
 
-.parentCta {
-  margin: var(--space-4) 0 0;
-  text-align: center;
-  font-size: var(--fs-control);
-  font-weight: 700;
-}
-
-.parentCta a {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  color: var(--accent-ink);
-  text-decoration-thickness: 0.12em;
-  text-underline-offset: 0.18em;
-}
-
-:global([data-theme="night"]) .parentCta a {
-  color: var(--night-link);
-}
-
 .playWrap {
   margin: 24px 0 8px;
 }
@@ -211,7 +191,7 @@
     max-width: 980px;
   }
 
-  /* 美術審 M1：本集介紹與共讀連結也進左欄（actions → intro → parent），
+  /* 美術審 M1：本集介紹進左欄（actions → intro），
      封面縱貫全部具名列；左欄只剩一個對齊軸＝CTA 的左緣與寬度。 */
   .article {
     display: grid;
@@ -221,8 +201,7 @@
       "subtitle cover"
       "meta     cover"
       "actions  cover"
-      "intro    cover"
-      "parent   cover";
+      "intro    cover";
     column-gap: var(--space-8);
     align-items: start;
   }
@@ -274,14 +253,6 @@
     grid-area: intro;
     max-width: none;
     margin: var(--space-6) 0 var(--space-8);
-  }
-
-  /* 共讀連結接在介紹卡末句之後、離開 CTA 叢集，不再像第二個行動。
-     hasParentCoListen=false 時此列無項目、高 0。 */
-  .article > .parentCta {
-    grid-area: parent;
-    margin: 0;
-    text-align: left;
   }
 }
 

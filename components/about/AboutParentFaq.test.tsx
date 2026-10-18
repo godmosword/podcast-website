@@ -51,9 +51,10 @@ describe("AboutParentFaq", () => {
     expect(anchor?.querySelector("h3")?.textContent).toBe("如何陪孩子一起聽？");
   });
 
-  it("不誇大：小活動只有部分集數有；不提「最新集數」卻放舊集", () => {
+  it("不誇大：小活動只有部分集數有；起手列先放剛上架的故事", () => {
     const { container } = render(<AboutParentFaq />);
     expect(container.textContent).toContain("部分集數");
+    expect(container.textContent).toContain("最前面是剛上架的故事");
     expect(container.textContent).not.toContain("可以先從最新集數");
   });
 });

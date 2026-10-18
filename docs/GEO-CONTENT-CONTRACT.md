@@ -25,9 +25,9 @@
 
 | 欄位 | 資料來源 | 字數／語氣 | 頁面呈現 | RSS | JSON-LD | llms-full |
 |------|----------|------------|----------|-----|---------|-----------|
-| `familyActivity` | `data/family-activities.ts` | 短：1 題 + 選填 1 個小活動 | 單集頁 `#co-listen` 收合（頂部 CTA 跳過去自動展開） | show notes 末段 `🏡 聽完聊一聊` | FAQPage **加 1 題**（`familyActivityFaq`） | 有則附問題行 |
+| `familyActivity` | `data/family-activities.ts` | 短：1 題 + 選填 1 個小活動 | 單集頁 `#co-listen` 預設展開 | show notes 末段 `🏡 聽完聊一聊` | FAQPage **加 1 題**（`familyActivityFaq`） | 有則附問題行 |
 | `reflectionPrompt` | `data/reflection-prompts.ts` | 短：孩子問句 + 家長追問 | 播放結束／`ReflectionPrompt`；單集頁「給爸媽」可複述 | **不進** | **不另加 FAQ** | **不進** |
-| `parentGuide` | `data/parent-guides.ts` | 中：2–3 句摘要 + 1–2 延伸提問／小活動 | 單集頁 `#co-listen` 收合 ShowNotes | 可選 1 段，**不得**複製 `familyActivity` 全文 | 可併入 `description` 衍生句，**不**重複 FAQ 題幹 | 可摘 1 段要點 |
+| `parentGuide` | `data/parent-guides.ts` | 中：2–3 句摘要 + 1–2 延伸提問／小活動 | 單集頁 `#co-listen` 裡的 ShowNotes 仍預設收合 | 可選 1 段，**不得**複製 `familyActivity` 全文 | 可併入 `description` 衍生句，**不**重複 FAQ 題幹 | 可摘 1 段要點 |
 | `episodeFaq` | `data/episode-faqs.ts` | 短：1 題緊扣該集劇情／主題 | **單集頁不渲染 UI**；FAQPage JSON-LD 第一項 | **不進** | FAQPage 併入 `storyFaqs()`（第一項） | 有則附 1 行 `❓` |
 | `storyParentExtension` | `lib/story-geo.ts` 程式產生 | 通用共聽引導（非逐集手寫） | **不在單集頁渲染**（語意併入家長指南／FAQ） | **不進** | 已含於 `storyFaqs` 通用答案語意 | **不進** |
 | `storyFaqs` | `lib/story-geo.ts` 程式產生 | 3 題模板化 FAQ | **單集頁不渲染 UI**；僅 FAQPage JSON-LD | **不進** | FAQPage 全量 | **不進** |
@@ -38,7 +38,7 @@
 
 **允許通路：**
 
-- 單集詳情頁：頂部「給爸媽：一起聊聊」CTA ＋「出場角色」之後的收合區 `#co-listen`（`StoryCoListen` + `FamilyActivityCard` + `ShowNotes`）
+- 單集詳情頁：「出場角色」之後的 `#co-listen`（`StoryCoListen` + `FamilyActivityCard` + `ShowNotes`），預設展開、整頁只出現一次
 - RSS：`lib/story-geo.ts` → `familyActivityShowNote`
 - JSON-LD：`familyActivityFaq` 併入 FAQPage（固定題幹「聽完這一集可以和孩子聊什麼？」）
 - `llms-full`：`scripts/generate-llms-full.ts`
@@ -80,7 +80,7 @@ type ParentGuide = {
 };
 ```
 
-**呈現：** `components/story/ShowNotes.tsx` 掛在單集頁 `#co-listen`（`StoryCoListen`，預設收合，頂部 CTA 跳過去自動展開），不堆在首屏。與 `FamilyActivityCard` 並存時，卡片維持短鉤子，`parentGuide` 放長文。
+**呈現：** `components/story/ShowNotes.tsx` 掛在單集頁 `#co-listen`（`StoryCoListen` 預設展開；長文仍收在 ShowNotes 自己的「這集可以聊什麼」）。與 `FamilyActivityCard` 並存時，卡片維持短鉤子，`parentGuide` 放長文。
 
 **與 `familyActivity` 分工：**
 

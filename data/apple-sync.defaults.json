@@ -106,6 +106,9 @@
       ]
     },
     "ep-10": {
+      "tags": [
+        "情緒"
+      ],
       "color": "#d6336c",
       "pageCount": 20,
       "captionTimes": [
@@ -632,6 +635,10 @@
       ]
     },
     "ep-15": {
+      "tags": [
+        "好習慣",
+        "安全"
+      ],
       "pageCount": 18,
       "captionTimes": [
         60,
@@ -886,6 +893,10 @@
       ]
     },
     "ep-22": {
+      "tags": [
+        "情緒",
+        "成長"
+      ],
       "pageCount": 24,
       "captionTimes": [
         0,

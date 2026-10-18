@@ -14,12 +14,12 @@ describe("StoryCoListen", () => {
     (entry) => entry.familyActivity && entry.parentGuide && entry.reflectionPrompt,
   )!;
 
-  it("收合在本集頁的「給爸媽：一起聊聊」，錨點是 #co-listen", () => {
+  it("預設展開在本集頁的「給爸媽：一起聊聊」，錨點是 #co-listen", () => {
     const { container } = render(<StoryCoListen story={story} />);
     const details = container.querySelector("details#co-listen");
     expect(details).toBeTruthy();
-    expect(details?.hasAttribute("open")).toBe(false);
-    expect(screen.getByText("給爸媽：一起聊聊")).toBeTruthy();
+    expect(details?.hasAttribute("open")).toBe(true);
+    expect(screen.getAllByText("給爸媽：一起聊聊")).toHaveLength(1);
     expect(container.textContent).toContain(story.reflectionPrompt!.child);
     expect(container.textContent).toContain(story.reflectionPrompt!.parentFollowUp);
   });

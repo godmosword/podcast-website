@@ -145,12 +145,6 @@ export default async function StoryDetailPage({
           <p className={styles.definition}>{definitionSummary}</p>
         </section>
 
-        {hasParentCoListen ? (
-          <p className={styles.parentCta}>
-            <a href={`#${STORY_CO_LISTEN_ID}`}>給爸媽：一起聊聊<Icon name="arrow-right" size={16} className="icon-trail" /></a>
-          </p>
-        ) : null}
-
         {sceneCaptions.length > 0 ? (
           <details className={`${styles.contentSection} ${styles.outline}`}>
             <summary className={styles.outlineSummary}>

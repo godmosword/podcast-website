@@ -37,20 +37,45 @@ export function parentLandingFacts(): ParentLandingFacts {
   };
 }
 
+/**
+ * 編輯手選的起手集，順序維持原樣。新集上架不改這份清單，也不依「哪集比較好」重挑。
+ */
+const CURATED_PARENT_STORY_SLUGS = ["ep-16", "ep-15", "ep-14", "ep-6"] as const;
+
+/**
+ * 接在手選前面的最新集數。4 對齊關於頁四欄一列，只依上架順序，不挑內容。
+ */
+const LATEST_PARENT_STORY_COUNT = 4;
+
 export function representativeParentStories(): Story[] {
-  const preferred = ["ep-16", "ep-15", "ep-14", "ep-6"]
-    .map((slug) => getStory(slug))
-    .filter((story): story is Story => Boolean(story));
+  const curated = CURATED_PARENT_STORY_SLUGS.map((slug) => getStory(slug)).filter(
+    (story): story is Story => Boolean(story),
+  );
+  const seen = new Set<string>();
+  const stories: Story[] = [];
 
-  if (preferred.length >= 3) return preferred;
-
-  const seen = new Set(preferred.map((story) => story.slug));
   for (const story of storiesByNewest()) {
-    if (!seen.has(story.slug)) preferred.push(story);
-    if (preferred.length >= 3) break;
+    if (stories.length >= LATEST_PARENT_STORY_COUNT) break;
+    seen.add(story.slug);
+    stories.push(story);
   }
 
-  return preferred;
+  for (const story of curated) {
+    if (seen.has(story.slug)) continue;
+    seen.add(story.slug);
+    stories.push(story);
+  }
+
+  if (stories.length >= 3) return stories;
+
+  for (const story of storiesByNewest()) {
+    if (seen.has(story.slug)) continue;
+    seen.add(story.slug);
+    stories.push(story);
+    if (stories.length >= 3) break;
+  }
+
+  return stories;
 }
 
 export function parentLandingFaqs(

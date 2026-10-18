@@ -31,6 +31,14 @@ describe("episode-faqs sidecar", () => {
     expect(getEpisodeFaq("ep-not-exist")).toBeUndefined();
   });
 
+  it("問號或驚嘆號後面不再接句號", () => {
+    for (const slug of listEpisodeFaqSlugs()) {
+      const faq = getEpisodeFaq(slug)!;
+      expect(faq.question, slug).not.toMatch(/[？！]。/);
+      expect(faq.answer, slug).not.toMatch(/[？！]。/);
+    }
+  });
+
   it("各集問題不是同一句模板（至少大部分互不相同）", () => {
     const questions = listEpisodeFaqSlugs().map(
       (slug) => getEpisodeFaq(slug)!.question,

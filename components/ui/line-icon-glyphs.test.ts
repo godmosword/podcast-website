@@ -39,7 +39,7 @@ const BATCH_2: readonly { file: string; glyphs: string; icons: readonly string[]
   { file: "app/for-parents/play-map/collections/[collectionSlug]/page.tsx", glyphs: "←→", icons: ["arrow-left", "arrow-right"] },
   { file: "app/legal/page.tsx", glyphs: "←", icons: ["arrow-left"] },
   { file: "app/not-found.tsx", glyphs: "←", icons: ["arrow-left"] },
-  { file: "app/story/[slug]/page.tsx", glyphs: "←→▸▾", icons: ["arrow-left", "arrow-right", "chevron-right"] },
+  { file: "app/story/[slug]/page.tsx", glyphs: "←→▸▾", icons: ["arrow-left", "chevron-right"] },
   { file: "app/story/[slug]/page.module.css", glyphs: "▸▾", icons: [] },
   { file: "app/studio/page.tsx", glyphs: "←", icons: ["arrow-left"] },
   { file: "app/studio/feedback/page.tsx", glyphs: "←", icons: ["arrow-left"] },

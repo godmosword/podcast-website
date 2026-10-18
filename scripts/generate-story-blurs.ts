@@ -1,10 +1,11 @@
 #!/usr/bin/env tsx
 /**
  * D1：為各集 01.jpg 封面產生 blurDataURL manifest。
+ * 已有的項目保留，只補缺的封面；封面檔不在就失敗，不靜默略過。
  *
  *   npm run generate:story-blurs
  */
-import { writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import sharp from "sharp";
 import { getStories } from "../data/content";
@@ -24,20 +25,33 @@ async function blurDataUrlForJpg(absPath: string): Promise<string> {
 }
 
 async function main(): Promise<void> {
-  const manifest: Record<string, string> = {};
+  const existing: Record<string, string> = existsSync(OUT_PATH)
+    ? (JSON.parse(readFileSync(OUT_PATH, "utf8")) as Record<string, string>)
+    : {};
+  const added: Record<string, string> = {};
+  const missingFiles: string[] = [];
 
   for (const story of getStories()) {
     const src = storyCoverPath(story.slug);
+    if (existing[src] || added[src]) continue;
     const abs = join(ROOT, "public", src.slice(1));
-    try {
-      manifest[src] = await blurDataUrlForJpg(abs);
-    } catch {
-      console.warn(`⚠ 略過缺檔：${src}`);
+    if (!existsSync(abs)) {
+      missingFiles.push(src);
+      continue;
     }
+    added[src] = await blurDataUrlForJpg(abs);
   }
 
+  if (missingFiles.length > 0) {
+    console.error(`✗ 封面缺檔，無法產生 blur：\n${missingFiles.join("\n")}`);
+    process.exit(1);
+  }
+
+  const manifest = { ...added, ...existing };
   writeFileSync(OUT_PATH, `${JSON.stringify(manifest, null, 2)}\n`);
-  console.log(`✓ 寫入 ${Object.keys(manifest).length} 筆 blur → data/story-image-blurs.json`);
+  console.log(
+    `✓ blur ${Object.keys(manifest).length} 筆（本輪新增 ${Object.keys(added).length}）→ data/story-image-blurs.json`,
+  );
 }
 
 main().catch((err) => {

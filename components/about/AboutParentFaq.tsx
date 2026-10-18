@@ -71,7 +71,7 @@ export default function AboutParentFaq() {
       <div className={styles.answer}>
         <h3>可以先從哪幾集開始？</h3>
         <p>
-          可以先從下面這幾集開始，再依孩子喜歡的車種延伸到更多故事。
+          最前面是剛上架的故事，接著是可以先聽的幾集，再依孩子喜歡的車種延伸到更多故事。
         </p>
         <div className={styles.storyGrid}>
           {stories.map((story) => (
