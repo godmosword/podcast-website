@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
-import { IconPlay, IconStar } from "@/components/games/ClayIcons";
+import { IconLock, IconPlay, IconStar } from "@/components/games/ClayIcons";
 import { gameBySlug } from "@/data/games";
 import { duoduoStickerSrc } from "@/lib/games/dino-sushi/duoduo-sticker";
 import { TapButton } from "./DinoSushiPiece";
@@ -45,6 +46,7 @@ export function DinoSushiTitle({
   onBook,
 }: Props) {
   const bookLabel = `貼紙書，已收集 ${stickerCount} 張，共 ${stickerTotal} 張${stickerNew ? "，有新貼紙" : ""}`;
+  const [wiggle, setWiggle] = useState<{ day: number; seq: number } | null>(null);
   return (
     <div className={styles.titleScreen}>
       {/* 舞台與「開始」重複，對讀屏與鍵盤隱藏；小朋友點最大的圖也能開始 */}
@@ -66,35 +68,54 @@ export function DinoSushiTitle({
           <ul className={styles.dayRow}>
             {days.map((day) => {
               const locked = !day.playable || !day.unlocked;
-              const status = locked ? "，還沒開" : day.current ? "，現在要玩" : "";
+              const status = locked ? "（未解鎖）" : day.current ? "，現在要玩" : "";
               const label = `第 ${day.day} 天，${day.name}，已經拿到 ${day.stars} 顆星，全部 3 顆${status}`;
+              const shaking = locked && wiggle?.day === day.day;
               return (
                 <li key={day.day}>
                   <TapButton
                     className={styles.dayButton}
                     aria-label={label}
                     aria-disabled={locked ? true : undefined}
-                    data-current={day.current ? "true" : undefined}
+                    data-current={!locked && day.current ? "true" : undefined}
                     data-locked={locked ? "true" : undefined}
                     onTap={() => {
-                      if (locked) return;
+                      if (locked) {
+                        setWiggle((current) => ({ day: day.day, seq: (current?.seq ?? 0) + 1 }));
+                        return;
+                      }
                       onPickDay(day.day);
                     }}
                   >
-                    {/* eslint-disable-next-line @next/next/no-img-element -- 現成客人貼紙與多多表情，不另生圖 */}
-                    <img className={styles.dayFace} src={day.src} alt="" draggable={false} />
-                    <span className={styles.dayName} aria-hidden>
-                      {day.name}
+                    <span className={styles.dayBody}>
+                      {/* eslint-disable-next-line @next/next/no-img-element -- 現成客人貼紙與多多表情，不另生圖 */}
+                      <img className={styles.dayFace} src={day.src} alt="" draggable={false} />
+                      <span className={styles.dayName} aria-hidden>
+                        {day.name}
+                      </span>
+                      <span className={styles.dayStars} aria-hidden>
+                        {[0, 1, 2].map((index) => (
+                          <IconStar
+                            key={index}
+                            size={12}
+                            color={index < day.stars ? "#ffd34d" : "#e4d3b4"}
+                          />
+                        ))}
+                      </span>
                     </span>
-                    <span className={styles.dayStars} aria-hidden>
-                      {[0, 1, 2].map((index) => (
-                        <IconStar
-                          key={index}
-                          size={12}
-                          color={index < day.stars ? "#ffd34d" : "#e4d3b4"}
-                        />
-                      ))}
-                    </span>
+                    {locked ? (
+                      <span
+                        className={styles.dayLock}
+                        data-lock
+                        data-shake={shaking && wiggle ? (wiggle.seq % 2 === 0 ? "a" : "b") : undefined}
+                        aria-hidden
+                        onAnimationEnd={() => {
+                          setWiggle((current) => (current?.day === day.day ? null : current));
+                        }}
+                      >
+                        <IconLock size={16} />
+                      </span>
+                    ) : null}
                   </TapButton>
                 </li>
               );

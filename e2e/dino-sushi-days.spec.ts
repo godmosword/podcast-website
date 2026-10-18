@@ -57,13 +57,17 @@ for (const vp of [
   });
 }
 
-test("第 5–8 天看得到但點了不會開始", async ({ page }) => {
+test("沒解開的天有鎖、讀屏說未解鎖，點了不會開始", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/games/dino-sushi");
-  for (const day of [5, 6, 7, 8]) {
+  const open = page.getByRole("button", { name: /^第 1 天/ });
+  await expect(open).not.toHaveAttribute("aria-disabled", "true");
+  await expect(open.locator("[data-lock]")).toHaveCount(0);
+  for (const day of [2, 3, 4, 5, 6, 7, 8]) {
     const button = page.getByRole("button", { name: new RegExp(`^第 ${day} 天`) });
     await expect(button).toHaveAttribute("aria-disabled", "true");
-    await expect(button).toHaveAccessibleName(/還沒開/);
+    await expect(button).toHaveAccessibleName(/（未解鎖）/);
+    await expect(button.locator("[data-lock]")).toBeVisible();
     await button.click({ force: true });
     await expect(page.getByRole("heading", { name: "多多肚子餓了！" })).toBeVisible();
     await expect(page.getByRole("img", { name: /^第 1 單/ })).toHaveCount(0);

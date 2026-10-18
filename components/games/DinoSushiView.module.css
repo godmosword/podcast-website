@@ -264,27 +264,39 @@
 }
 
 .dayButton {
+  position: relative;
+  display: flex;
+  flex: 1;
+  align-items: stretch;
+  min-width: 48px;
+  min-height: 48px;
+  padding: 0;
+  border: none;
+  border-radius: 16px;
+  background: transparent;
+  color: var(--sushi-ink);
+  font: inherit;
+  font-weight: 900;
+  line-height: 1.1;
+  cursor: pointer;
+}
+
+.dayBody {
   display: flex;
   flex: 1;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 1px;
-  min-width: 48px;
+  width: 100%;
   min-height: 48px;
   padding: 4px 2px;
-  border: none;
   border-radius: 16px;
   background: #fffdf8;
-  color: var(--sushi-ink);
-  font: inherit;
-  font-weight: 900;
-  line-height: 1.1;
-  cursor: pointer;
   box-shadow: 0 0 0 2px #f1dfc0;
 }
 
-.dayButton[data-current="true"] {
+.dayButton[data-current="true"] .dayBody {
   box-shadow: 0 0 0 3px #5a360d;
 }
 
@@ -292,8 +304,57 @@
   cursor: default;
 }
 
-.dayButton[data-locked="true"] .dayFace {
+/* 整張卡變淡，鎖頭留在外面，孩子才看得出這天還沒開。 */
+.dayButton[data-locked="true"] .dayBody {
   opacity: 0.45;
+}
+
+.dayLock {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  display: inline-flex;
+  padding: 1px;
+  border-radius: 50%;
+  background: #fff;
+  line-height: 0;
+  box-shadow: 0 1px 4px rgba(93, 74, 103, 0.2);
+  pointer-events: none;
+}
+
+/* a／b 用不同動畫名，連點才會重新播；減少動態時兩段都關掉。 */
+.dayLock[data-shake="a"] {
+  animation: dayLockWiggleA 320ms ease-in-out;
+}
+
+.dayLock[data-shake="b"] {
+  animation: dayLockWiggleB 320ms ease-in-out;
+}
+
+@keyframes dayLockWiggleA {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  30% {
+    transform: rotate(-14deg);
+  }
+  70% {
+    transform: rotate(12deg);
+  }
+}
+
+@keyframes dayLockWiggleB {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  30% {
+    transform: rotate(-14deg);
+  }
+  70% {
+    transform: rotate(12deg);
+  }
 }
 
 .dayFace {
@@ -472,7 +533,8 @@
   .freeButton,
   .bookButton,
   .resultBook,
-  .freshThumb {
+  .freshThumb,
+  .dayLock {
     transition: none;
     animation: none;
   }
@@ -481,7 +543,8 @@
 .surface[data-reduced="true"] .startButton,
 .surface[data-reduced="true"] .freeButton,
 .surface[data-reduced="true"] .bookButton,
-.surface[data-reduced="true"] .freshThumb {
+.surface[data-reduced="true"] .freshThumb,
+.surface[data-reduced="true"] .dayLock {
   transition: none;
   animation: none;
 }
