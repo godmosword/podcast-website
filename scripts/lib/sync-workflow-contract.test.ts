@@ -232,6 +232,9 @@ describe("sync workflow contract", () => {
     expect(commit).toContain("push --no-verify");
     expect(commit).not.toMatch(/^git add -A\b/m);
     expect(commit).toContain("git add -- data public/stories");
+    // 已 stage 的列也會出現在 porcelain。不能把「有東西要 commit」當成殘檔。
+    expect(commit).toContain('substr($0, 2, 1) != " "');
+    expect(commit).not.toContain('if [ -n "$(git status --porcelain)" ]');
   });
 
   it("package.json 必須釘 overrides.browserslist 為 ^4.28.7（修補 GHSA-c83g-rgw3-j3cx）", () => {

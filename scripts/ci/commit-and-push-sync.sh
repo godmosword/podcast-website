@@ -14,12 +14,14 @@ git config user.name "github-actions[bot]"
 git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
 # 只 stage data/ 與 public/stories/，不要把整個工作區一起加進去。
+# porcelain 含已 stage 的列（例如 "M  data/…"），那些可以 commit。
+# 第二欄不是空白，或第一欄是 ?，才是還沒 stage 的殘檔。
 git add -- data public/stories
 git add -u -- data public/stories
 
-if [ -n "$(git status --porcelain)" ]; then
+if [ -n "$(git status --porcelain=v1 --untracked-files=all | awk 'substr($0, 2, 1) != " " || substr($0, 1, 1) == "?" { print }')" ]; then
   sync_ci_error "sync 產生了 data/ 與 public/stories/ 以外的變更，或仍有未 stage 的檔案。"
-  git status --porcelain
+  git status --porcelain=v1 --untracked-files=all
   exit 1
 fi
 
