@@ -20,6 +20,7 @@
     "test:coloring-visual": "VISUAL_BASELINE_TRUSTED=1 playwright test --config=playwright.coloring-visual.config.ts",
     "font:subset": "python3 scripts/subset_font.py",
     "sync:apple": "tsx scripts/sync-apple-podcast.ts",
+    "sync:validate": "tsx scripts/sync-validate.ts",
     "sync:vocus": "tsx scripts/sync-vocus-articles.ts",
     "sync:notify": "tsx scripts/sync-alert.ts notify-live",
     "sync:notify:reconcile": "tsx scripts/sync-alert.ts notify-live --reconcile",

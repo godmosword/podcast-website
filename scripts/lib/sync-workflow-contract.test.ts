@@ -1,8 +1,10 @@
+import { execFileSync } from "node:child_process";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { load as parseYaml } from "js-yaml";
 import { describe, expect, it } from "vitest";
 import { CANONICAL_SITE_URL } from "../../lib/site-url";
+import { isSyncOutputPath } from "./sync-outputs";
 
 const ROOT = process.cwd();
 
@@ -74,35 +76,21 @@ function parsePrebuildScripts(prebuild: string): string[] {
     });
 }
 
-/** 從 sync workflow YAML 抽出 open_sync_pr 函式區塊（source-level 契約用）。 */
-function extractOpenSyncPrBlock(yaml: string): string {
-  const match = yaml.match(/open_sync_pr\(\)\s*\{[\s\S]*?\n          \}/);
+function readCommitScript(): string {
+  return readFileSync(join(ROOT, "scripts/ci/commit-and-push-sync.sh"), "utf8");
+}
+
+/** 從 commit 腳本抽出 open_sync_pr（bash 已搬出 YAML，避免 block scalar 再把 workflow 弄壞）。 */
+function extractOpenSyncPrBlock(script: string): string {
+  const match = script.match(/open_sync_pr\(\) \{[\s\S]*?\n\}/);
   expect(match, "找不到 open_sync_pr 函式").toBeTruthy();
   return match![0];
 }
 
-/** open_sync_pr 函式本體各行（不含外層 `open_sync_pr() {`／`}`）。 */
-function openSyncPrBodyLines(block: string): string[] {
-  const inner = block
-    .replace(/^[^\n]*\{\n?/, "")
-    .replace(/\n[^\n]*\}$/, "");
-  return inner.split("\n");
-}
-
-function gitAddBlock(yaml: string): string {
-  const addBlock = yaml.match(
-    /git add[\s\S]*?(?=\n          if |\n          git )/,
-  )?.[0];
-  expect(addBlock, "找不到 Commit and push 的 git add").toBeDefined();
+function gitAddBlock(script: string): string {
+  const addBlock = script.match(/git add[\s\S]*?(?=\n\nif \[)/)?.[0];
+  expect(addBlock, "找不到 commit 腳本的 git add").toBeDefined();
   return addBlock!;
-}
-
-function productionBuildBlock(yaml: string): string {
-  const buildBlock = yaml.match(
-    /- name: Production build[\s\S]*?(?=\n      - name:)/,
-  )?.[0];
-  expect(buildBlock, "找不到 Production build 步驟").toBeDefined();
-  return buildBlock!;
 }
 
 /**
@@ -164,31 +152,26 @@ describe("workflow YAML 可解析性（語法閘門）", () => {
 });
 
 describe("sync workflow contract", () => {
-  it("sync-apple-podcast.yml 必須保留同步管線關鍵步驟（禁止無意刪改）", () => {
+  it("sync-apple-podcast.yml 只驗證同步產物，不跑全站測試或 build", () => {
     const yaml = readWorkflow("sync-apple-podcast.yml");
 
     expect(yaml).toContain("group: sync-apple-podcast");
     expect(yaml).toContain("npm run sync:apple");
-    expect(yaml).toContain("npm run verify:episodes");
-    expect(yaml).toContain("npm run verify:browse-index");
-    expect(yaml).toContain("npm run generate:story-blurs");
-    expect(yaml).toContain("npm test");
-    expect(yaml).toContain("npm run build");
-    expect(yaml).toContain(
-      "git add data/apple-synced.json data/apple-sync-state.json data/browse-index.json public/stories/ data/subtitles/ \\",
-    );
-    expect(yaml).toContain(
-      "data/story-zones.ts data/reflection-prompts.ts data/story-dates.ts data/episode-faqs.ts data/audio-lengths.json data/story-image-blurs.json",
-    );
-    expect(yaml).toContain("git diff --name-only");
-    expect(yaml).toContain("git ls-files --others --exclude-standard");
+    expect(yaml).toContain("npm run sync:validate");
+    expect(yaml).toContain("bash scripts/ci/generate-derived-assets.sh");
+    expect(yaml).toContain("bash scripts/ci/npm-install.sh");
+    expect(yaml).toContain('HUSKY: "0"');
+    expect(yaml).not.toMatch(/^ {6}run: npm test$/m);
+    expect(yaml).not.toMatch(/^ {6}run: npm run build$/m);
+    expect(yaml).not.toContain("npm run verify:episodes");
+    expect(yaml).not.toContain("npm run verify:browse-index");
     expect(yaml).toContain("pull-requests: write");
     expect(yaml).toContain("actions: write");
     expect(yaml).toContain("statuses: write");
   });
 
   it("Commit and push 遇 GH013 必須改開 PR（個人倉無法給 Actions Integration bypass）", () => {
-    const yaml = readWorkflow("sync-apple-podcast.yml");
+    const yaml = readCommitScript();
     expect(yaml).toContain("GH013");
     expect(yaml).toContain("gh pr create");
     expect(yaml).toContain("gh pr merge");
@@ -199,8 +182,7 @@ describe("sync workflow contract", () => {
   });
 
   it("GH013 open_sync_pr waiter 必須觀測 dispatch CI run 與 Vercel commit status", () => {
-    const yaml = readWorkflow("sync-apple-podcast.yml");
-    const block = extractOpenSyncPrBlock(yaml);
+    const block = extractOpenSyncPrBlock(readCommitScript());
 
     expect(block).toMatch(
       /gh run list[\s\S]*--workflow=ci\.yml[\s\S]*--branch="\$branch"/,
@@ -212,9 +194,9 @@ describe("sync workflow contract", () => {
       /gh api[\s\S]*repos\/\$\{GITHUB_REPOSITORY\}\/commits\/\$\{sha\}\/status/,
     );
     expect(block).toMatch(/context == "Vercel"/);
-    expect(block).toMatch(/::error::CI job 失敗：quality/);
-    expect(block).toMatch(/::error::CI job 失敗：build-and-public-e2e/);
-    expect(block).toMatch(/::error::Vercel commit status 失敗/);
+    expect(block).toMatch(/CI job 失敗：quality/);
+    expect(block).toMatch(/CI job 失敗：build-and-public-e2e/);
+    expect(block).toMatch(/Vercel commit status 失敗/);
     expect(block).toContain("existing_ids");
     expect(block).toMatch(/index\(\$id\)/);
     expect(block).toContain("--limit=20");
@@ -235,18 +217,21 @@ describe("sync workflow contract", () => {
     expect(block).toMatch(/寫入 build-and-public-e2e commit status 失敗/);
   });
 
-  it("open_sync_pr 函式體不得有過淺縮排（SYNC-DEBT-1 source-level）", () => {
-    const yaml = readWorkflow("sync-apple-podcast.yml");
-    const block = extractOpenSyncPrBlock(yaml);
-
-    for (const line of openSyncPrBodyLines(block)) {
-      if (line.trim() === "") {
-        continue;
-      }
-      expect(line, `過淺縮排：${JSON.stringify(line)}`).not.toMatch(
-        /^[ ]{0,9}[^ \n]/,
-      );
+  it("sync 的 shell 腳本可被 bash 解析，且 CI commit 不跑本機 hook", () => {
+    const scriptDir = join(ROOT, "scripts/ci");
+    const names = readdirSync(scriptDir).filter((name) => name.endsWith(".sh"));
+    expect(names.length).toBeGreaterThan(0);
+    for (const name of names) {
+      expect(() => {
+        execFileSync("bash", ["-n", join(scriptDir, name)], { stdio: "pipe" });
+      }, `${name} bash -n 失敗`).not.toThrow();
     }
+    const commit = readCommitScript();
+    expect(commit).toContain("HUSKY=0");
+    expect(commit).toContain("commit --no-verify");
+    expect(commit).toContain("push --no-verify");
+    expect(commit).not.toMatch(/^git add -A\b/m);
+    expect(commit).toContain("git add -- data public/stories");
   });
 
   it("package.json 必須釘 overrides.browserslist 為 ^4.28.7（修補 GHSA-c83g-rgw3-j3cx）", () => {
@@ -269,7 +254,7 @@ describe("sync workflow contract", () => {
   });
 
   it("GH013 fallback 的 rerun 必須可重用既有 sync branch", () => {
-    const yaml = readWorkflow("sync-apple-podcast.yml");
+    const yaml = readCommitScript();
     expect(yaml).toContain('git checkout -B "$branch"');
     expect(yaml).toContain('git fetch origin "$branch"');
     expect(yaml).toContain("--force-with-lease=\"refs/heads/$branch:$remote_branch_sha\"");
@@ -278,20 +263,19 @@ describe("sync workflow contract", () => {
     );
   });
 
-  it("git add 必須含 catalog 完備測試所需的四 sidecar（防 #46／#60 回歸）", () => {
-    const yaml = readWorkflow("sync-apple-podcast.yml");
-    const addBlock = gitAddBlock(yaml);
-    for (const path of CATALOG_SIDECAR_PATHS) {
-      expect(addBlock, `git add 缺少 ${path}`).toContain(path);
+  it("git add 必須涵蓋 catalog sidecar（防 #46／#60 回歸）", () => {
+    const addBlock = gitAddBlock(readCommitScript());
+    expect(addBlock).toContain("git add -- data public/stories");
+    for (const filePath of CATALOG_SIDECAR_PATHS) {
+      expect(isSyncOutputPath(filePath), filePath).toBe(true);
     }
   });
 
   // prebuild（generate:audio-lengths）產物，非 catalog sidecar；漏白名單會讓 #61 類 Commit and push 失敗。
-  it("git add 必須含 data/audio-lengths.json（防 #61 回歸）", () => {
-    const yaml = readWorkflow("sync-apple-podcast.yml");
-    expect(gitAddBlock(yaml), "git add 缺少 data/audio-lengths.json").toContain(
-      "data/audio-lengths.json",
-    );
+  it("git add 必須涵蓋 data/audio-lengths.json（防 #61 回歸）", () => {
+    expect(gitAddBlock(readCommitScript())).toContain("data");
+    expect(isSyncOutputPath("data/audio-lengths.json")).toBe(true);
+    expect(isSyncOutputPath("data/story-image-blurs.json")).toBe(true);
   });
 
   it("prebuild 腳本必須全數登錄於 PREBUILD_OUTPUT_REGISTRY（防漏登再現 #61）", () => {
@@ -302,17 +286,16 @@ describe("sync workflow contract", () => {
     expect(scripts, "prebuild 腳本與 registry 不一致").toEqual(registered);
   });
 
-  it("prebuild 產物必須落在 git add 白名單或 gitignore（或 sync-build-skip）", () => {
-    const yaml = readWorkflow("sync-apple-podcast.yml");
-    const addBlock = gitAddBlock(yaml);
+  it("prebuild 產物必須落在同步路徑、gitignore，或 sync 不產生（sync-build-skip）", () => {
+    const addBlock = gitAddBlock(readCommitScript());
     const gitignore = readFileSync(join(ROOT, ".gitignore"), "utf8");
 
     for (const entry of PREBUILD_OUTPUT_REGISTRY) {
       if (entry.disposition === "git-add") {
         expect(
-          addBlock,
-          `prebuild ${entry.script} 產物 ${entry.path} 未列入 git add`,
-        ).toContain(entry.path);
+          isSyncOutputPath(entry.path) && addBlock.includes("data"),
+          `prebuild ${entry.script} 產物 ${entry.path} 不在同步路徑`,
+        ).toBe(true);
         continue;
       }
       if (entry.disposition === "gitignore") {
@@ -331,17 +314,24 @@ describe("sync workflow contract", () => {
     }
   });
 
-  it("封面 blur 必須在單測前產生，且 git add 含 story-image-blurs.json（防 #251）", () => {
+  it("封面 blur 等衍生資產必須在 sync-validate 之前產生（防 #251）", () => {
     const yaml = readWorkflow("sync-apple-podcast.yml");
+    const derived = readFileSync(
+      join(ROOT, "scripts/ci/generate-derived-assets.sh"),
+      "utf8",
+    );
     const syncAt = yaml.indexOf("npm run sync:apple");
-    const blurAt = yaml.indexOf("npm run generate:story-blurs");
+    const derivedAt = yaml.indexOf("name: Generate derived assets");
+    const validateAt = yaml.indexOf("npm run sync:validate");
     const detectAt = yaml.indexOf("name: Detect changes");
-    const testAt = yaml.indexOf("name: Run unit tests");
     expect(syncAt).toBeGreaterThan(-1);
-    expect(blurAt).toBeGreaterThan(syncAt);
-    expect(detectAt).toBeGreaterThan(blurAt);
-    expect(testAt).toBeGreaterThan(detectAt);
-    expect(gitAddBlock(yaml)).toContain("data/story-image-blurs.json");
+    expect(derivedAt).toBeGreaterThan(syncAt);
+    expect(validateAt).toBeGreaterThan(derivedAt);
+    expect(detectAt).toBeGreaterThan(validateAt);
+    expect(derived).toContain("npm run generate:story-blurs");
+    expect(derived).toContain("npm run generate:audio-lengths");
+    expect(derived).toContain("scripts/ensure-sync-sidecars.ts");
+    expect(isSyncOutputPath("data/story-image-blurs.json")).toBe(true);
 
     const src = readSyncScript();
     expect(src).toContain(
@@ -396,47 +386,40 @@ describe("sync workflow contract", () => {
     expect(dates).toContain("storyModifiedDates");
   });
 
-  it("sync workflow 的 Production build 必須設 NEXT_PUBLIC_SITE_URL（避免 CI fallback localhost 使 build 失敗）", () => {
+  it("sync workflow 不跑 Production build，因此不會在驗證前寫出 IndexNow key file", () => {
     const yaml = readWorkflow("sync-apple-podcast.yml");
-    const buildBlock = productionBuildBlock(yaml);
-
-    expect(buildBlock).toContain("NEXT_PUBLIC_SITE_URL:");
-    expect(buildBlock).toContain(CANONICAL_SITE_URL);
-  });
-
-  // IndexNow key file 檔名＝key、無法 glob ignore；若 Production build 注入 INDEXNOW_KEY，
-  // prebuild 會寫出 public/<key>.txt → 未 stage 守衛失敗（#61 同類）。
-  it("sync Production build 不得設 INDEXNOW_KEY（key file 僅部署產物，防白名單撞車）", () => {
-    const yaml = readWorkflow("sync-apple-podcast.yml");
-    const buildBlock = productionBuildBlock(yaml);
-
-    expect(buildBlock).not.toMatch(/INDEXNOW_KEY\s*:/);
-    // Submit IndexNow 步驟仍應注入（實送），與 build 分離
+    expect(yaml).not.toContain("npm run build");
+    expect(yaml).not.toMatch(/generate:indexnow-key/);
     const indexNowBlock = yaml.match(
       /- name: Submit IndexNow[\s\S]*?(?=\n      - name:)/,
     )?.[0];
     expect(indexNowBlock, "找不到 Submit IndexNow step").toBeDefined();
     expect(indexNowBlock).toContain("INDEXNOW_KEY:");
+    expect(indexNowBlock).toContain(CANONICAL_SITE_URL);
   });
 
   it("sync workflow 失敗必須即時開去重告警，且告警步驟不得掩蓋原始失敗", () => {
     const yaml = readWorkflow("sync-apple-podcast.yml");
+    const report = readFileSync(join(ROOT, "scripts/ci/report-sync-failure.sh"), "utf8");
+    const commit = readCommitScript();
+    const alert = readFileSync(join(ROOT, "scripts/sync-alert.ts"), "utf8");
 
     expect(yaml).toContain("- name: Report sync failure");
     expect(yaml).toContain("if: failure()");
     expect(yaml).toContain("continue-on-error: true");
-    expect(yaml).toContain("scripts/sync-alert.ts failure --kind=sync-job-failure");
-    expect(yaml).toContain("sync-alert-skip");
-    expect(yaml).toContain("pending-merge");
-    expect(yaml).toContain("sync-failure-context.txt");
-    expect(yaml).toContain("sync-pr-url.txt");
-    expect(yaml).toContain("::error::等待 sync PR merge 逾時");
+    expect(report).toContain("scripts/sync-alert.ts failure --kind=sync-job-failure");
+    expect(commit).toContain("sync-alert-skip");
+    expect(commit).toContain("pending-merge");
+    expect(commit).toContain("等待 sync PR merge 逾時");
     expect(yaml).not.toContain("actions/github-script");
     expect(yaml).not.toContain("github.rest.issues.create");
+    expect(alert).toContain("alertAfterConsecutiveFailures");
+    expect(alert).toContain("ALERT_AFTER_CONSECUTIVE");
   });
 
   it("IndexNow 提交必須在 push 之後、main-only、注入 env，且 fail-soft 由 script 保證", () => {
     const yaml = readWorkflow("sync-apple-podcast.yml");
+    const script = readFileSync(join(ROOT, "scripts/ci/submit-indexnow.sh"), "utf8");
 
     const pushIndex = yaml.indexOf("- name: Commit and push");
     const indexNowIndex = yaml.indexOf("- name: Submit IndexNow");
@@ -449,12 +432,10 @@ describe("sync workflow contract", () => {
       /- name: Submit IndexNow[\s\S]*?(?=\n      - name:)/,
     )?.[0];
     expect(indexNowBlock, "找不到 Submit IndexNow step").toBeDefined();
-    expect(indexNowBlock).toContain("scripts/submit-indexnow.ts");
+    expect(script).toContain("scripts/submit-indexnow.ts");
     expect(indexNowBlock).toContain("github.ref == 'refs/heads/main'");
     expect(indexNowBlock).toContain("INDEXNOW_KEY:");
     expect(indexNowBlock).toContain("NEXT_PUBLIC_SITE_URL:");
-    // fail-soft 唯一由 script 內部保證（exit 0 + Job Summary），
-    // 步驟層不得用 continue-on-error 掩蓋其他錯誤。
     expect(indexNowBlock).not.toContain("continue-on-error");
   });
 
@@ -463,6 +444,8 @@ describe("sync workflow contract", () => {
 
     expect(yaml).toContain("group: sync-watchdog");
     expect(yaml).toContain("scripts/check-sync-fresh.ts");
+    expect(yaml).toContain("bash scripts/ci/npm-install.sh");
+    expect(readWorkflow("ci.yml")).toContain("bash scripts/ci/run-actionlint.sh");
   });
 
   it("看門狗以政策決定 stale，不因 yaml STALE_HOURS=3 在第一次 sync 前開單", () => {

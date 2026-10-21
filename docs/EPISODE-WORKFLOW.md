@@ -132,7 +132,7 @@ Apple sync 的工程 CI。
 
 ### CI 行為（每次 sync 一致）
 
-GHA `sync-apple-podcast.yml` 在 `npm run sync:apple` 後**一律**跑 `npm run verify:episodes`：
+GHA `sync-apple-podcast.yml` 在產生 blur、音檔長度與 sidecar 之後**一律**跑 `npm run sync:validate`（含 `verify:episodes` 與 `verify:browse-index`）：
 
 | 結果 | 影響 |
 |------|------|

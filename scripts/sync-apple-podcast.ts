@@ -13,7 +13,7 @@ import { fileURLToPath } from "node:url";
 import { episodeColorForSlug } from "../data/episode-colors";
 import type { Story } from "../data/stories";
 import { manualStories } from "../data/stories";
-import { lookupFeedUrl } from "../lib/podcast-apple";
+import { downloadBytes, fetchRssXml, lookupFeedUrlWithRetry } from "./lib/apple-feed";
 import {
   APPLE_SYNC_PAGE_COUNT,
   applyTagInference,
@@ -284,21 +284,12 @@ function rssToStory(
 }
 
 async function downloadFile(url: string, dest: string): Promise<void> {
-  const res = await fetch(url, {
-    redirect: "follow",
-    signal: AbortSignal.timeout(DOWNLOAD_TIMEOUT_MS),
-  });
-  if (!res.ok) {
-    throw new Error(`Download failed ${res.status}: ${url}`);
-  }
-  const len = res.headers.get("content-length");
-  if (len && parseInt(len, 10) > MAX_AUDIO_BYTES) {
-    throw new Error(`File too large (${len} bytes): ${url}`);
-  }
-  const buf = Buffer.from(await res.arrayBuffer());
-  if (buf.length > MAX_AUDIO_BYTES) {
-    throw new Error(`File too large (${buf.length} bytes): ${url}`);
-  }
+  const buf = await downloadBytes(
+    url,
+    DOWNLOAD_TIMEOUT_MS,
+    MAX_AUDIO_BYTES,
+    "audio download",
+  );
   await fs.writeFile(dest, buf);
 }
 
@@ -698,12 +689,10 @@ async function main(): Promise<void> {
   const eps = existingEps(synced);
   const slugs = existingSlugs(synced);
 
-  const feedUrl = await lookupFeedUrl();
+  const feedUrl = await lookupFeedUrlWithRetry();
   console.log(`Feed: ${feedUrl}`);
 
-  const res = await fetch(feedUrl, { signal: AbortSignal.timeout(60_000) });
-  if (!res.ok) throw new Error(`RSS fetch failed: ${res.status}`);
-  const xml = await res.text();
+  const xml = await fetchRssXml(feedUrl);
   const rssItems = parseRssEpisodes(xml);
   console.log(`RSS items: ${rssItems.length}`);
 
