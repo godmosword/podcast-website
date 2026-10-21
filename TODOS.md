@@ -28,12 +28,13 @@
 - **後續：拿掉 CTA `nowrap`**：把 `LandingSegment.tsx` 的 `" →"` 半形空白改不斷行空白，箭頭才不會孤行；同時避開 <348px Dudu 遮箭頭、文字級 200% 被 `.panel` 裁尾。
 - **後續：勿靜默啟用 `playCta`**：`LandingSegment.tsx` 三元式會讓主 CTA 從 56px／`--fs-h2`／不透明墨板退回 44px／`.subscribeCta`，契約測不會紅。`.subscribeCta` 已脫離玻璃；啟用前仍須處理字級／高度落差，且不得把分區主 CTA 換成橘 `.playCta`。
 
-### 親子遊樂地圖 C 情境先行（2026-10-19）　`design · L · 無`　🔧 worktree `claude/play-map-scenarios`，未 commit
+### 親子遊樂地圖 C 情境先行（2026-10-19）　`design · L · 無`　✅ 4164479e
 
 Plan：`~/.claude/plans/play-map-scenarios.md`（v2；情境卡＋選縣市 dialog＋理由行；插畫改程式畫 SVG，不生圖）。
 
-- 審查：Codex 工程審 Approve with changes，HIGH（面板關閉後焦點返還順序）與 MEDIUM（捲動鎖還原測試、選縣市後捲動的競態）已修；「面板展開時重建黏住判定」未改（IntersectionObserver 本就依幾何變化觸發）。Opus 設計審兩次都因 API 逾時中斷，標缺席——合併前補跑一次。
-- 待辦：真機（iOS Safari）確認選縣市面板的捲動鎖與關閉後回到原位。
+- 審查：Codex 工程審 Approve with changes，HIGH（面板關閉後焦點返還順序）與 MEDIUM（捲動鎖還原測試、選縣市後捲動的競態）已修；「面板展開時重建黏住判定」未改（IntersectionObserver 本就依幾何變化觸發）。Opus 設計審兩次都因 API 逾時中斷，標缺席。
+- 待辦：Opus 設計審補跑（看已上線版本）。
+- 待辦：真機（iOS Safari）確認選縣市面板開著時頁面不會跟著捲、關閉後回到原位。
 - 後續（本輪不做）：`/for-parents/play-map/[placeId]` 與 `collections/` 頁沿用類型圓章與 `--pm-*` 卡片語彙。
 
 ### 親子遊樂地圖簡化改版（2026-10-18）　`design · L · 無`　✅ 見本 commit
