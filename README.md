@@ -204,7 +204,7 @@ Neon／`DATABASE_URL` 為選配。未設定時不需要執行 migration；許願
 | 檔案 | 用途 |
 |------|------|
 | `data/apple-synced.json` | sync 腳本追加的新集 metadata |
-| `data/apple-sync-state.json` | 已處理 RSS `guid` |
+| `data/apple-sync-state.json` | 已處理 RSS `guid`，以及每一集的 metadata／封面／blur／字幕進度 |
 | `data/apple-sync.defaults.json` | 新集預設；`overrides.<slug>` 可覆寫單集 |
 | `data/browse-index.json` | 車種／主題關鍵字推斷（CI 會 commit） |
 
@@ -212,9 +212,9 @@ Neon／`DATABASE_URL` 為選配。未設定時不需要執行 migration；許願
 
 - 資產：`public/stories/ep-N/audio.mp3` + Apple 封面 `01.jpg`
 - 資料：`pageCount: 1`（單圖 MVP）；摘要自動去 SoundOn 尾註
-- CI：**安裝 whisper-cpp + 快取 large-v3**，同步後自動轉錄 → `data/subtitles/`
+- 同步本身不跑 whisper。新集缺字幕也可以先上線；`transcribe-backfill` workflow 之後補，同一集失敗 3 次才開 issue
 - 新集會連同 `story-zones`、`reflection-prompts`、`story-dates`、`episode-faqs` 四個 sidecar 一起補齊；封面 blur 與音檔長度在驗證前寫入。FAQ 先產生可驗證的 MVP stub，之後由人工依劇情改寫
-- 通過 `npm run sync:validate`（schema、slug／guid、封面與 blur、browse index，以及 `verify:episodes`／`verify:browse-index`）後 commit。同步工作不跑全站 `npm test` 或 `npm run build`。同一類失敗連續兩次才開一張 Issue，成功後關閉
+- 同步拆成抓取、`npm run sync:validate`、再推上固定分支 `sync/apple`。驗證只查同步產物，不跑全站 `npm test` 或 `npm run build`。同一類失敗連續兩次才開一張 Issue。job 不等 CI；看門狗盯還沒合入的 PR，以及 RSS 有、站上還沒有的集數
 
 ```bash
 npm run sync:apple -- --dry-run   # 預覽不寫檔
@@ -329,7 +329,7 @@ npm run transcribe -- --all         # 全部有 audio.mp3 的集
 npm run proofread:subtitles -- ep-N --mark
 ```
 
-GHA 同步 workflow 已內建 whisper；本機缺工具或 `SKIP_TRANSCRIBE=1` 會跳過、不中斷。
+字幕轉錄在 `transcribe-backfill` workflow。本機 `npm run sync:apple` 仍可在有 whisper 時順便轉錄；`SKIP_TRANSCRIBE=1` 會跳過、不中斷。
 
 ## 每集劇情插圖（`npm run illustrate`）
 

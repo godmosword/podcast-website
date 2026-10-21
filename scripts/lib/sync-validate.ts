@@ -6,6 +6,7 @@
 import { appendFileSync, existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { z } from "zod";
+import { cleanEpisodeSummary } from "./apple-rss";
 import { getStories, type Story } from "../../data/content";
 import { storyCoverPath } from "../../lib/story-utils";
 import { getStoryBlurDataUrl } from "../../lib/story-image-blur";
@@ -47,13 +48,29 @@ const storyJsonSchema = z
 
 export const appleSyncedSchema = z.array(storyJsonSchema);
 
+const stageStatusSchema = z.enum(["ok", "pending", "failed"]);
+
+const episodeStageSchema = z
+  .object({
+    slug: z.string().min(1),
+    metadata: stageStatusSchema,
+    cover: stageStatusSchema,
+    blur: stageStatusSchema,
+    subtitles: stageStatusSchema,
+    subtitleAttempts: z.number().int().nonnegative(),
+  })
+  .passthrough();
+
 export const appleSyncStateSchema = z
   .object({
     seenGuids: z.array(z.string().min(1)),
     lastRun: z.string().nullable(),
     guidBySlug: z.record(z.string(), z.string().min(1)).optional(),
+    episodes: z.record(z.string(), episodeStageSchema).optional(),
   })
   .passthrough();
+
+const SUMMARY_PROMO = /歡迎留言|五星|linktr|馬米是非專業|也可許願|http/i;
 
 const browseVehicleSchema = z
   .object({
@@ -141,6 +158,25 @@ export function validateParsedSync(input: {
       code: "duplicate-ep",
       message: `集數編號重複：${ep}`,
     });
+  }
+
+  if (synced.success) {
+    for (const story of synced.data) {
+      if (!story.summary) continue;
+      const cleaned = cleanEpisodeSummary(story.summary);
+      if (
+        cleaned !== story.summary ||
+        SUMMARY_PROMO.test(story.summary) ||
+        story.summary.includes("👶")
+      ) {
+        errors.push({
+          level: "error",
+          code: "summary-dirty",
+          slug: story.slug,
+          message: `${story.slug} 的 summary 還沒清乾淨`,
+        });
+      }
+    }
   }
 
   if (state.success) {

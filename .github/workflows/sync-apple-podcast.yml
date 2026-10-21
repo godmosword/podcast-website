@@ -24,9 +24,12 @@ env:
   HUSKY: "0"
 
 jobs:
-  sync:
+  fetch-and-generate:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 45
+    outputs:
+      changed: ${{ steps.changes.outputs.changed }}
+      failure_excerpt: ${{ steps.capture.outputs.excerpt }}
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
 
@@ -41,18 +44,163 @@ jobs:
       - name: Install dependencies
         run: bash scripts/ci/npm-install.sh
 
-      - name: Cache whisper.cpp build + model
-        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
-        with:
-          path: |
-            .cache/whisper-cpp
-            models/ggml-large-v3.bin
-          key: whisper-large-v3-${{ runner.os }}-v1.8.6
-          restore-keys: |
-            whisper-large-v3-${{ runner.os }}-
+      - name: Sync episodes from Apple Podcast
+        env:
+          SKIP_TRANSCRIBE: "1"
+        run: npm run sync:apple
 
-      - name: Setup whisper for subtitle transcription
-        run: bash scripts/setup-whisper-ci.sh
+      # blur、音檔長度、sidecar 先產生，再驗證。不要先驗證再產生。
+      - name: Generate derived assets
+        run: bash scripts/ci/generate-derived-assets.sh
+
+      - name: Detect changes
+        id: changes
+        run: bash scripts/ci/detect-sync-changes.sh
+
+      - name: Prepare commit message
+        if: steps.changes.outputs.changed == 'true'
+        run: npx tsx scripts/post-sync-notify.ts
+
+      - name: Pack sync artifact
+        if: steps.changes.outputs.changed == 'true'
+        run: bash scripts/ci/pack-sync-artifact.sh
+
+      - name: Upload sync artifact
+        if: steps.changes.outputs.changed == 'true'
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+        with:
+          name: sync-outputs
+          path: ${{ runner.temp }}/sync-outputs.tgz
+          retention-days: 1
+          if-no-files-found: error
+
+      - name: Capture failure excerpt
+        if: failure()
+        run: bash scripts/ci/capture-failure-excerpt.sh
+        id: capture
+
+  validate:
+    needs: fetch-and-generate
+    if: needs.fetch-and-generate.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      failure_excerpt: ${{ steps.capture.outputs.excerpt }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Set sync report paths
+        run: bash scripts/ci/sync-report-paths.sh
+
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: bash scripts/ci/npm-install.sh
+
+      - name: Download sync artifact
+        if: needs.fetch-and-generate.outputs.changed == 'true'
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: sync-outputs
+          path: ${{ runner.temp }}
+
+      - name: Apply sync artifact
+        if: needs.fetch-and-generate.outputs.changed == 'true'
+        run: bash scripts/ci/apply-sync-artifact.sh
+
+      - name: Validate sync outputs
+        run: npm run sync:validate
+
+      - name: Capture failure excerpt
+        if: failure()
+        id: capture
+        run: bash scripts/ci/capture-failure-excerpt.sh
+
+  commit:
+    needs: [fetch-and-generate, validate]
+    if: needs.fetch-and-generate.outputs.changed == 'true' && needs.validate.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      failure_excerpt: ${{ steps.capture.outputs.excerpt }}
+      landed_on_main: ${{ steps.push.outputs.landed_on_main }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 0
+
+      - name: Set sync report paths
+        run: bash scripts/ci/sync-report-paths.sh
+
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: bash scripts/ci/npm-install.sh
+
+      - name: Download sync artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: sync-outputs
+          path: ${{ runner.temp }}
+
+      - name: Reset sync branch onto main
+        run: bash scripts/ci/reset-sync-branch.sh
+
+      - name: Apply sync artifact
+        run: bash scripts/ci/apply-sync-artifact.sh
+
+      - name: Commit and push
+        id: push
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash scripts/ci/commit-and-push-sync.sh
+
+      - name: Notify live (open illustrate issues for new episodes)
+        if: success()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SYNC_ISSUE_ASSIGNEES: ${{ secrets.SYNC_ISSUE_ASSIGNEES }}
+          SYNC_ISSUE_MENTIONS: ${{ secrets.SYNC_ISSUE_MENTIONS }}
+          NOTIFY_SITE_URL: ${{ secrets.NOTIFY_SITE_URL }}
+        run: npx tsx scripts/sync-alert.ts notify-live
+
+      - name: Submit IndexNow (best-effort)
+        if: success() && steps.push.outputs.landed_on_main == 'true' && github.ref == 'refs/heads/main'
+        env:
+          INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
+          NEXT_PUBLIC_SITE_URL: https://podcast-website-mu.vercel.app
+        run: bash scripts/ci/submit-indexnow.sh
+
+      - name: Capture failure excerpt
+        if: failure()
+        id: capture
+        run: bash scripts/ci/capture-failure-excerpt.sh
+
+  alert:
+    needs: [fetch-and-generate, validate, commit]
+    if: always() && needs.fetch-and-generate.result != 'cancelled'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Set sync report paths
+        run: bash scripts/ci/sync-report-paths.sh
+
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: bash scripts/ci/npm-install.sh
 
       - name: Restore alert streak
         uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5
@@ -65,53 +213,23 @@ jobs:
       - name: Ensure alert streak file
         run: bash scripts/ci/ensure-streak-file.sh
 
-      - name: Sync episodes from Apple Podcast
-        run: npm run sync:apple
-
-      # blur、音檔長度、sidecar 先產生，再驗證。不要先驗證再產生。
-      - name: Generate derived assets
-        run: bash scripts/ci/generate-derived-assets.sh
-
-      - name: Validate sync outputs
-        run: npm run sync:validate
-
-      - name: Detect changes
-        id: changes
-        run: bash scripts/ci/detect-sync-changes.sh
-
-      - name: Prepare commit message
-        if: steps.changes.outputs.changed == 'true'
-        run: npx tsx scripts/post-sync-notify.ts
-
-      - name: Commit and push
-        if: steps.changes.outputs.changed == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: bash scripts/ci/commit-and-push-sync.sh
-
-      - name: Notify live (open illustrate issues for new episodes)
-        if: success() && steps.changes.outputs.changed == 'true'
+      - name: Report sync failure
+        if: needs.fetch-and-generate.result == 'failure' || needs.validate.result == 'failure' || needs.commit.result == 'failure'
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
           SYNC_ISSUE_ASSIGNEES: ${{ secrets.SYNC_ISSUE_ASSIGNEES }}
           SYNC_ISSUE_MENTIONS: ${{ secrets.SYNC_ISSUE_MENTIONS }}
-          NOTIFY_SITE_URL: ${{ secrets.NOTIFY_SITE_URL }}
-        run: npx tsx scripts/sync-alert.ts notify-live
+          SYNC_FAILURE_CONTEXT: "fetch=${{ needs.fetch-and-generate.result }} validate=${{ needs.validate.result }} commit=${{ needs.commit.result }}"
+          SYNC_ERROR_EXCERPT: ${{ needs.fetch-and-generate.outputs.failure_excerpt }}${{ needs.validate.outputs.failure_excerpt }}${{ needs.commit.outputs.failure_excerpt }}
+        run: bash scripts/ci/report-sync-failure.sh
 
       - name: Resolve sync-failure issue on success
-        if: success()
+        if: needs.fetch-and-generate.result == 'success' && needs.validate.result == 'success' && (needs.commit.result == 'success' || needs.commit.result == 'skipped')
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
         run: bash scripts/ci/resolve-sync-alert.sh
-
-      - name: Submit IndexNow (best-effort)
-        if: success() && steps.changes.outputs.changed == 'true' && github.ref == 'refs/heads/main'
-        env:
-          INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
-          NEXT_PUBLIC_SITE_URL: https://podcast-website-mu.vercel.app
-        run: bash scripts/ci/submit-indexnow.sh
 
       - name: Save alert streak
         if: always()
@@ -119,12 +237,3 @@ jobs:
         with:
           path: .cache/sync-alert-streak.json
           key: sync-alert-streak-${{ github.run_id }}-${{ github.run_attempt }}
-
-      - name: Report sync failure
-        if: failure()
-        continue-on-error: true
-        env:
-          GH_TOKEN: ${{ github.token }}
-          SYNC_ISSUE_ASSIGNEES: ${{ secrets.SYNC_ISSUE_ASSIGNEES }}
-          SYNC_ISSUE_MENTIONS: ${{ secrets.SYNC_ISSUE_MENTIONS }}
-        run: bash scripts/ci/report-sync-failure.sh

@@ -88,15 +88,15 @@ describe("CharacterCard", () => {
     expect(select).toBeTruthy();
     expect(screen.queryByRole("link", { name: /EP / })).toBeNull();
 
-    // 集數標題來自 Apple RSS，sync 會改寫主標。對齊 catalog 輸出，
-    // 避免寫死舊文案（例如 ep-9）讓同步 workflow 的單元測試失敗。
+    // 出場集數跟著目錄走，不寫死 slug。新集加進 appearsIn 時這則測試仍該過。
     const episodes = catalogEpisodesFor(character.appearsIn);
-    expect(episodes.map((episode) => episode.slug)).toEqual([
-      "ep-4",
-      "ep-9",
-      "ep-14",
-      "ep-15",
-    ]);
+    expect(episodes.length).toBeGreaterThan(0);
+    expect(
+      screen
+        .getAllByRole("option")
+        .map((option) => option.getAttribute("value"))
+        .filter((value) => value),
+    ).toEqual(episodes.map((episode) => episode.slug));
     for (const episode of episodes) {
       expect([...episode.title].length).toBeLessThanOrEqual(
         CATALOG_EPISODE_TITLE_MAX,

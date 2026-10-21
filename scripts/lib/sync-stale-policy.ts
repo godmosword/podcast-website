@@ -1,7 +1,9 @@
 /**
  * RSS stale 告警決策：新集等待下次 sync 時不另開單，
  * 只在「真的卡住」時才開 sync-stale-rss，避免與待生圖 Issue 連發兩次。
+ * 固定分支 sync/apple 的 PR 太久沒合入，另外記一筆，不跟 stale 混在同一張單。
  */
+import { isSyncBotBranch } from "./sync-outputs";
 export type SyncWorkflowRun = {
   status?: string;
   conclusion?: string | null;
@@ -55,10 +57,50 @@ export function runsAfterPubDate(
   });
 }
 
+/** sync/apple 開超過這麼久還沒合入，看門狗就記一筆。 */
+export const DEFAULT_UNMERGED_PR_HOURS = 2;
+
+export type SyncLandingPr = {
+  headRefName?: string;
+  createdAt?: string;
+  url?: string;
+  number?: number;
+};
+
 export function hasOpenSyncLandingPr(
   prs: Array<{ headRefName?: string }>,
 ): boolean {
-  return prs.some((pr) => (pr.headRefName ?? "").startsWith("sync/apple-"));
+  return prs.some((pr) => isSyncBotBranch(pr.headRefName ?? ""));
+}
+
+export function decideUnmergedSyncPr(input: {
+  prs: readonly SyncLandingPr[];
+  now?: number;
+  unmergedAfterHours?: number;
+}): { action: "silent" | "open"; reason: string; pr?: SyncLandingPr } {
+  const open = input.prs.filter((pr) => isSyncBotBranch(pr.headRefName ?? ""));
+  if (open.length === 0) {
+    return { action: "silent", reason: "沒有未合入的 sync PR" };
+  }
+  const now = input.now ?? Date.now();
+  const wait = input.unmergedAfterHours ?? DEFAULT_UNMERGED_PR_HOURS;
+  const aged = open
+    .map((pr) => {
+      const created = pr.createdAt ? Date.parse(pr.createdAt) : Number.NaN;
+      const hours = Number.isNaN(created) ? null : (now - created) / 3_600_000;
+      return { pr, hours };
+    })
+    .filter((item): item is { pr: SyncLandingPr; hours: number } => item.hours != null && item.hours >= wait)
+    .sort((a, b) => b.hours - a.hours);
+  if (aged.length === 0) {
+    return { action: "silent", reason: "sync PR 還在等待 checks／auto-merge" };
+  }
+  const oldest = aged[0];
+  return {
+    action: "open",
+    reason: `sync PR 已開 ${oldest.hours.toFixed(1)}h 仍未合入`,
+    pr: oldest.pr,
+  };
 }
 
 export function decideStaleRssAlert(input: {

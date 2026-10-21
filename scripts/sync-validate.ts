@@ -4,6 +4,7 @@
  *
  *   npm run sync:validate
  */
+import { appendFileSync } from "node:fs";
 import {
   appendJobSummary,
   formatSyncValidateReport,
@@ -19,6 +20,14 @@ function main(): void {
   appendJobSummary(jobSummaryMarkdown(report));
 
   if (report.errors.length > 0 || (strict && report.warnings.length > 0)) {
+    const excerpt = report.errors
+      .map((issue) => `##[error]${issue.slug ? `${issue.slug} ` : ""}${issue.message}`)
+      .join("\n");
+    console.error(excerpt);
+    const excerptPath = process.env.SYNC_ERROR_EXCERPT_PATH;
+    if (excerptPath) {
+      appendFileSync(excerptPath, `${excerpt}\n`, "utf8");
+    }
     process.exit(1);
   }
 }

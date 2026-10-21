@@ -30,7 +30,7 @@ Metadata 寫入位置：
 
 ### MVP sync 自動補齊的 catalog sidecar
 
-新集寫入後會進入 `getStories()`，下列三檔必須有該 slug，否則 GHA `npm test` 會擋下 push（見 issue #46）：
+新集寫入後會進入 `getStories()`，下列三檔必須有該 slug，否則完備測試會擋下 sync PR 的 quality check（見 issue #46）：
 
 | Sidecar | 路徑 | sync 行為 |
 |---------|------|-----------|
@@ -40,7 +40,7 @@ Metadata 寫入位置：
 
 只補缺 key、不覆寫人工條目。Phase 2（校對／生圖前）請覆寫反思文案並確認 zone。
 
-封面 blur（`data/story-image-blurs.json`）不是人工 sidecar。sync 在封面 `01.jpg` 落地後呼叫 `ensureStoryCoverBlurs`；GHA 另在 `npm test` 前跑 `npm run generate:story-blurs`，並把該檔列入 commit 白名單。缺 blur 會讓 `lib/story-image-blur.test.ts` 擋下上架（#251）。
+封面 blur（`data/story-image-blurs.json`）不是人工 sidecar。sync 在封面 `01.jpg` 落地後呼叫 `ensureStoryCoverBlurs`；GHA 在驗證前跑 `npm run generate:story-blurs`。缺 blur 會讓 `sync:validate` 擋下上架（#251）。
 
 ## 標準步驟
 
@@ -132,7 +132,7 @@ Apple sync 的工程 CI。
 
 ### CI 行為（每次 sync 一致）
 
-GHA `sync-apple-podcast.yml` 在產生 blur、音檔長度與 sidecar 之後**一律**跑 `npm run sync:validate`（含 `verify:episodes` 與 `verify:browse-index`）：
+GHA `sync-apple-podcast.yml` 先產生 blur、音檔長度與 sidecar，再由 validate job **一律**跑 `npm run sync:validate`（含 `verify:episodes` 與 `verify:browse-index`）。字幕沒好不擋上架：
 
 | 結果 | 影響 |
 |------|------|

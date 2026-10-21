@@ -58,7 +58,7 @@ import {
   type StreakFile,
 } from "./lib/sync-alert-policy";
 
-export type AlertKind = "sync-job-failure" | "sync-stale-rss";
+export type AlertKind = "sync-job-failure" | "sync-stale-rss" | "sync-unmerged-pr";
 export type GhRunner = (args: string[]) => string;
 export type SyncAlertDeps = {
   gh?: GhRunner;
@@ -100,6 +100,7 @@ const RECONCILE_RECENCY_DAYS = 30;
 const KIND_META: Record<AlertKind, { color: string; description: string }> = {
   "sync-job-failure": { color: "d73a4a", description: "Apple 同步 workflow 失敗" },
   "sync-stale-rss": { color: "fbca04", description: "RSS 有新集但未上站" },
+  "sync-unmerged-pr": { color: "b60205", description: "sync PR 開著但還沒合進 main" },
 };
 
 function gh(args: string[]): string {
@@ -928,6 +929,8 @@ export type ConsecutiveAlertInput = {
   title: string;
   body: string;
   excerpt?: string;
+  /** 字幕重試已達上限這類，不必再等第二次 workflow 失敗。 */
+  immediate?: boolean;
 };
 
 /**
@@ -943,8 +946,14 @@ export function alertAfterConsecutiveFailures(
   let count = ALERT_AFTER_CONSECUTIVE;
   if (filePath) {
     const recorded = recordFailure(loadStreak(filePath, deps), opts.category);
-    count = recorded.count;
-    writeText(filePath, serializeStreak(recorded.next), deps);
+    count = opts.immediate
+      ? Math.max(recorded.count, ALERT_AFTER_CONSECUTIVE)
+      : recorded.count;
+    writeText(
+      filePath,
+      serializeStreak({ lastCategory: opts.category, consecutive: count }),
+      deps,
+    );
   }
   if (!shouldOpenAlert(count)) {
     log(

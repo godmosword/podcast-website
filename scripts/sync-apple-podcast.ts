@@ -7,6 +7,7 @@
  *       npm run sync:apple -- --refresh-cover[=ep-11[,ep-12]]
  *         （重抓既有集數封面：Apple 端事後換圖時用）
  */
+import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -40,6 +41,11 @@ import {
   titleStem,
 } from "./lib/episode-match";
 import { downloadAndSaveCover } from "./lib/cover-image";
+import { storyCoverPath } from "../lib/story-utils";
+import {
+  reconcileEpisodeStages,
+  type EpisodeStage,
+} from "./lib/sync-stage";
 import {
   applyVehicleEmojis,
   invalidateBrowseIndexCache,
@@ -78,6 +84,8 @@ type SyncState = {
   lastRun: string | null;
   /** slug → RSS guid，標題變更時仍能對到正確集數 */
   guidBySlug?: Record<string, string>;
+  /** guid → 這一集的 metadata／封面／blur／字幕進度 */
+  episodes?: Record<string, EpisodeStage>;
 };
 
 type SyncDefaults = {
@@ -179,6 +187,59 @@ async function readJson<T>(filePath: string, fallback: T): Promise<T> {
 
 async function writeJson(filePath: string, data: unknown): Promise<void> {
   await fs.writeFile(filePath, `${JSON.stringify(data, null, 2)}\n`, "utf8");
+}
+
+async function fileExists(filePath: string): Promise<boolean> {
+  return fs.stat(filePath).then(() => true).catch(() => false);
+}
+
+function sortedRecord<T>(record: Record<string, T> | undefined): Record<string, T> {
+  return Object.fromEntries(
+    Object.entries(record ?? {}).sort(([a], [b]) => a.localeCompare(b)),
+  );
+}
+
+function stateContent(state: SyncState): string {
+  return JSON.stringify({
+    seenGuids: state.seenGuids,
+    guidBySlug: sortedRecord(state.guidBySlug),
+    episodes: sortedRecord(state.episodes),
+  });
+}
+
+/** 依磁碟上的封面、blur、字幕，把 guid 階段寫進 state。內容沒變就不改 lastRun。 */
+async function persistState(next: SyncState): Promise<void> {
+  if (dryRun) return;
+  const blurRaw = await readJson<Record<string, string>>(
+    path.join(ROOT, "data/story-image-blurs.json"),
+    {},
+  );
+  const present = Object.entries(next.guidBySlug ?? {}).map(([slug, guid]) => {
+    const coverRel = storyCoverPath(slug).replace(/^\//, "");
+    return {
+      slug,
+      guid,
+      cover: existsSync(path.join(ROOT, "public", coverRel)),
+      blur: Boolean(blurRaw[storyCoverPath(slug)]),
+      subtitles: hasSubtitleSidecar(slug),
+    };
+  });
+  const staged: SyncState = {
+    ...next,
+    guidBySlug: sortedRecord(next.guidBySlug),
+    episodes: reconcileEpisodeStages({ episodes: next.episodes, present }),
+  };
+  const current = await readJson<SyncState>(PATHS.state, {
+    seenGuids: [],
+    lastRun: null,
+  });
+  if (stateContent(current) === stateContent(staged)) return;
+  await writeJson(PATHS.state, {
+    seenGuids: staged.seenGuids,
+    lastRun: new Date().toISOString(),
+    guidBySlug: staged.guidBySlug ?? {},
+    episodes: staged.episodes ?? {},
+  });
 }
 
 function existingEps(synced: Story[]): Set<number> {
@@ -733,28 +794,33 @@ async function main(): Promise<void> {
       continue;
     }
 
-    const dirExists = await fs
-      .stat(storyDir)
-      .then(() => true)
-      .catch(() => false);
-    if (dirExists && !force) {
-      console.warn(`Skip ${slug}: directory exists (use --force to overwrite assets)`);
-      continue;
-    }
-
     await fs.mkdir(storyDir, { recursive: true });
 
     const audioPath = path.join(storyDir, "audio.mp3");
     const imagePath = path.join(storyDir, "01.jpg");
+    const audioReady = !force && (await fileExists(audioPath));
+    const coverReady = !force && (await fileExists(imagePath));
 
-    console.log(`  Download audio…`);
-    await downloadFile(item.audioUrl, audioPath);
+    if (audioReady) {
+      console.log("  音檔已在，略過下載");
+    } else {
+      console.log("  Download audio…");
+      await downloadFile(item.audioUrl, audioPath);
+    }
 
-    if (item.imageUrl) {
-      console.log(`  Download cover…`);
+    if (coverReady) {
+      console.log("  封面已在，略過下載");
+    } else if (item.imageUrl) {
+      console.log("  Download cover…");
       await downloadAndSaveCover(item.imageUrl, imagePath);
     } else {
       console.warn(`  No cover image for ${slug}; create 01.jpg manually.`);
+    }
+
+    if (!(await fileExists(imagePath))) {
+      console.warn(`  ${slug} 封面未就緒，這次不上架，下次用同一個 guid 再試。`);
+      await fs.rm(storyDir, { recursive: true, force: true });
+      continue;
     }
 
     maybeTranscribe(slug, audioPath);
@@ -873,22 +939,6 @@ async function main(): Promise<void> {
   ) {
     console.log("No new episodes or metadata changes.");
     const nextSeen = reconcileSeenGuids(rssItems, state, catalog, eps);
-    const seenChanged =
-      nextSeen.length !== state.seenGuids.length ||
-      nextSeen.some((g) => !state.seenGuids.includes(g));
-    const guidChanged =
-      Object.keys(metadataResult.guidBySlug).length !==
-        Object.keys(guidBySlug).length ||
-      Object.entries(metadataResult.guidBySlug).some(
-        ([slug, guid]) => guidBySlug[slug] !== guid,
-      );
-    if (seenChanged || guidChanged) {
-      await writeJson(PATHS.state, {
-        seenGuids: nextSeen,
-        lastRun: new Date().toISOString(),
-        guidBySlug: metadataResult.guidBySlug,
-      });
-    }
     backfillMissingSubtitles(finalCatalog);
     relocalizeCatalogSubtitles(finalCatalog);
     autoProofreadSyncedSubtitles();
@@ -896,6 +946,12 @@ async function main(): Promise<void> {
       finalCatalog.map((s) => s.slug),
     );
     await syncStoryCoverBlurs(storyBlurTargets);
+    await persistState({
+      seenGuids: nextSeen,
+      lastRun: state.lastRun,
+      guidBySlug: metadataResult.guidBySlug,
+      episodes: state.episodes,
+    });
     await finishSync();
     return;
   }
@@ -911,11 +967,6 @@ async function main(): Promise<void> {
   const nextSynced = nextSyncedCatalog;
   await writeJson(PATHS.synced, nextSynced);
   const seenGuids = reconcileSeenGuids(rssItems, state, catalog, eps);
-  await writeJson(PATHS.state, {
-    seenGuids: [...new Set([...seenGuids, ...newGuids])],
-    lastRun: new Date().toISOString(),
-    guidBySlug: metadataResult.guidBySlug,
-  });
 
   if (hasNewEpisodes) {
     console.log(`Synced ${added.length} episode(s): ${added.map((s) => s.slug).join(", ")}`);
@@ -936,6 +987,12 @@ async function main(): Promise<void> {
     finalCatalog.map((s) => s.slug),
   );
   await syncStoryCoverBlurs(storyBlurTargets);
+  await persistState({
+    seenGuids: [...new Set([...seenGuids, ...newGuids])],
+    lastRun: state.lastRun,
+    guidBySlug: metadataResult.guidBySlug,
+    episodes: state.episodes,
+  });
   await finishSync();
 }
 
