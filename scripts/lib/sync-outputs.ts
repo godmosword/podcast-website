@@ -26,3 +26,19 @@ export function isSyncBotBranch(branch: string): boolean {
 export function pathsOutsideSyncOutputs(paths: readonly string[]): string[] {
   return paths.filter((filePath) => !isSyncOutputPath(filePath));
 }
+
+export type SyncPathDecision = {
+  /** sync bot 分支，而且沒有改到允許路徑以外。人開的 PR 一律是 false。 */
+  syncOnly: boolean;
+  outside: string[];
+};
+
+/** 空 diff 的 sync 分支也算路徑有限。超出允許路徑時 syncOnly 為 false，outside 列出那些檔。 */
+export function classifySyncDiff(
+  branch: string,
+  paths: readonly string[],
+): SyncPathDecision {
+  if (!isSyncBotBranch(branch)) return { syncOnly: false, outside: [] };
+  const outside = pathsOutsideSyncOutputs(paths);
+  return { syncOnly: outside.length === 0, outside };
+}

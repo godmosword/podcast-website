@@ -48,6 +48,10 @@ must be part of the ruleset source or owner organization）。把
 `GITHUB_TOKEN` 開的 PR 不會觸發 `pull_request` CI，所以另外
 `workflow_dispatch` 補跑 required jobs。看門狗盯還沒合入的 sync PR，以及 RSS
 有、站上還沒有的集數。無工作樹變更的排程本來就會成功並 resolve sync-failure issue。
+路徑有限的 sync PR 如何只被 `sync-validate` 實質擋下、以及 Kaiyi 要在
+ruleset 網頁上加這個 check 的步驟，見 [docs/SYNC-RULESET.md](./SYNC-RULESET.md)。
+ruleset 不能依路徑拆 required checks，所以不要從 `protect-main-web` 拿掉
+`quality`、`build-and-public-e2e` 或 `Vercel`。
 已 `--mark` 的字幕側車不再跑 OpenCC 簡轉繁（避免「支持」被改成「支援」）。
 
 GitHub ruleset 已可阻止未通過檢查的 merge；但 Vercel dashboard 的 Production

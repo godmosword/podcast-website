@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
+import { execFileSync } from "node:child_process";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import {
   SYNC_OUTPUT_PREFIXES,
+  classifySyncDiff,
   isSyncBotBranch,
   isSyncOutputPath,
   pathsOutsideSyncOutputs,
@@ -52,5 +57,63 @@ describe("sync output paths", () => {
     expect(isSyncBotBranch("sync/apple")).toBe(true);
     expect(isSyncBotBranch("sync/apple-123")).toBe(true);
     expect(isSyncBotBranch("cursor/sync-phase1-validate-38e7")).toBe(false);
+  });
+
+  it("只有 sync 分支、而且路徑都在允許範圍，才算 sync-only", () => {
+    expect(classifySyncDiff("main", ["data/apple-synced.json"]).syncOnly).toBe(false);
+    expect(
+      classifySyncDiff("sync/apple", ["data/apple-synced.json", "public/stories/ep-1/01.jpg"]),
+    ).toEqual({ syncOnly: true, outside: [] });
+    expect(classifySyncDiff("sync/apple", []).syncOnly).toBe(true);
+    expect(classifySyncDiff("sync/apple-9", ["README.md"]).outside).toEqual(["README.md"]);
+  });
+});
+
+describe("sync-path-guard.sh", () => {
+  const script = path.join(process.cwd(), "scripts/ci/sync-path-guard.sh");
+
+  function run(env: NodeJS.ProcessEnv): { status: number; output: string } {
+    const dir = mkdtempSync(path.join(tmpdir(), "sync-guard-"));
+    const output = path.join(dir, "output");
+    try {
+      execFileSync("bash", [script], {
+        env: { ...process.env, GITHUB_OUTPUT: output, ...env },
+        encoding: "utf8",
+        stdio: "pipe",
+      });
+      return { status: 0, output: readFileSync(output, "utf8") };
+    } catch (err) {
+      const error = err as { status?: number };
+      return {
+        status: error.status ?? 1,
+        output: readFileSync(output, "utf8"),
+      };
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  }
+
+  it("人開的分支略過，不標成 sync-only", () => {
+    const result = run({ GITHUB_REF_NAME: "cursor/something" });
+    expect(result.status).toBe(0);
+    expect(result.output).toContain("sync_only=false");
+  });
+
+  it("sync 分支改到允許路徑以外就失敗", () => {
+    const result = run({
+      GITHUB_REF_NAME: "sync/apple",
+      SYNC_PATH_GUARD_PATHS: "data/apple-synced.json\napp/page.tsx",
+    });
+    expect(result.status).toBe(1);
+    expect(result.output).toContain("sync_only=false");
+  });
+
+  it("sync 分支只動 data/ 與 public/stories/ 就標成 sync-only", () => {
+    const result = run({
+      GITHUB_HEAD_REF: "sync/apple",
+      SYNC_PATH_GUARD_PATHS: "data/apple-sync-state.json\npublic/stories/ep-1/audio.mp3",
+    });
+    expect(result.status).toBe(0);
+    expect(result.output).toContain("sync_only=true");
   });
 });
