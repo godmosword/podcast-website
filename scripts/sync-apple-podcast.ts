@@ -59,6 +59,7 @@ import {
   isSubtitleProofreadMarked,
 } from "./lib/subtitle-proofread";
 import { upsertCatalogSidecars } from "./lib/sync-catalog-sidecars";
+import { ensureStoryCoverBlurs } from "./lib/story-cover-blur";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const MAX_NEW_PER_RUN = 3;
@@ -124,6 +125,25 @@ const refreshCover = parseRefreshCover();
 // GHA 設 SYNC_REPORT_PATH（$RUNNER_TEMP/...）優先；本機未設時落地至 ROOT/.cache。
 const SYNC_REPORT_PATH = resolveSyncReportPath(process.env, ROOT);
 const report: SyncRunReport = createEmptyReport(dryRun);
+
+/** 新集封面落地後補 blur。getStories() 在本程序裡是啟動時的快取，所以傳入本輪目錄。 */
+async function syncStoryCoverBlurs(
+  stories: readonly { slug: string }[],
+): Promise<void> {
+  const result = await ensureStoryCoverBlurs({
+    root: ROOT,
+    stories,
+    dryRun: false,
+  });
+  if (result.missingFiles.length > 0) {
+    throw new Error(
+      `封面缺檔，無法產生 blur：\n${result.missingFiles.join("\n")}`,
+    );
+  }
+  if (result.added.length > 0) {
+    console.log(`Story cover blurs: ${result.added.join(", ")}`);
+  }
+}
 
 async function finishSync(): Promise<void> {
   report.illustratePending = report.newEpisodes
@@ -791,6 +811,9 @@ async function main(): Promise<void> {
   }
 
   const nextSyncedCatalog = emojiSync.stories.sort((a, b) => b.ep - a.ep);
+  const storyBlurTargets = [...manualStories, ...nextSyncedCatalog].map(
+    (story) => ({ slug: story.slug }),
+  );
 
   const hasBrowseIndexChanges =
     browseAdded.addedVehicles.length > 0 || browseAdded.addedTopics.length > 0;
@@ -830,6 +853,9 @@ async function main(): Promise<void> {
     if (hasNewEpisodes) {
       console.log(
         `[dry-run] Would add ${added.length} episode(s): ${added.map((s) => s.slug).join(", ")}`,
+      );
+      console.log(
+        "[dry-run] Would generate story cover blurs for new episodes.",
       );
     }
     if (
@@ -880,6 +906,7 @@ async function main(): Promise<void> {
     report.subtitlesMissing = listSlugsMissingSubtitles(
       finalCatalog.map((s) => s.slug),
     );
+    await syncStoryCoverBlurs(storyBlurTargets);
     await finishSync();
     return;
   }
@@ -919,6 +946,7 @@ async function main(): Promise<void> {
   report.subtitlesMissing = listSlugsMissingSubtitles(
     finalCatalog.map((s) => s.slug),
   );
+  await syncStoryCoverBlurs(storyBlurTargets);
   await finishSync();
 }
 

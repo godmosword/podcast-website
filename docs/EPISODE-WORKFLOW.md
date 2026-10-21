@@ -40,6 +40,8 @@ Metadata 寫入位置：
 
 只補缺 key、不覆寫人工條目。Phase 2（校對／生圖前）請覆寫反思文案並確認 zone。
 
+封面 blur（`data/story-image-blurs.json`）不是人工 sidecar。sync 在封面 `01.jpg` 落地後呼叫 `ensureStoryCoverBlurs`；GHA 另在 `npm test` 前跑 `npm run generate:story-blurs`，並把該檔列入 commit 白名單。缺 blur 會讓 `lib/story-image-blur.test.ts` 擋下上架（#251）。
+
 ## 標準步驟
 
 ```bash
