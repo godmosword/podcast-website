@@ -18,14 +18,51 @@
 
 .sentenceMain {
   color: var(--ink);
-  font-size: var(--fs-h3-compact);
+  font-family: var(--font-stack-display);
+  font-size: var(--fs-h3);
   font-weight: 700;
+}
+
+/* 「 · 3 處」不拆行；斷也只斷在情境名和數量之間。 */
+.sentenceCount {
+  white-space: nowrap;
 }
 
 .sentenceFacets {
   color: var(--ink-soft);
   font-size: var(--fs-label);
   font-weight: 600;
+}
+
+/*
+ * 舊分享網址同時帶多個情境：每個條件一顆看得到、可取消的 chip（不亮任何情境卡）。
+ */
+.scenarioChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-4);
+}
+
+.scenarioChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 2px solid var(--pm-selected);
+  border-radius: var(--radius-pill);
+  background: var(--card);
+  color: var(--pm-selected);
+  font: inherit;
+  font-size: var(--fs-control);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.scenarioChip:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 /*

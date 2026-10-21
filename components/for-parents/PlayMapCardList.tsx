@@ -1,7 +1,9 @@
 "use client";
 
 import DuduSprite from "@/components/dudu/DuduSprite";
+import Icon from "@/components/ui/Icon";
 import type { Playground } from "@/data/playgrounds";
+import { scenarioReason } from "@/lib/play-map-scenario-reason";
 import { formatPlaceDistanceLabel, type LatLng } from "@/lib/playground-distance";
 import { PlayMapCard } from "./PlayMapCard";
 import { PlayMapEditorialPick } from "./PlayMapEditorialPick";
@@ -18,6 +20,9 @@ function distanceLabelFor(
 
 export function PlayMapCardList({
   groups,
+  activeScenario,
+  extraScenarioChips,
+  onClearScenario,
   matchedCount,
   unmatched,
   selectedId,
@@ -49,16 +54,17 @@ export function PlayMapCardList({
       <div ref={topRef} className={styles.cardListTop} aria-hidden />
       <div className={styles.resultHeader}>
         {/*
-          視覺上是「台北市 · 8 個地方」一行＋條件小字；讀屏要讀成一句完整的話，
+          視覺上是「台北市下雨也能玩 · 3 處」一行＋更多條件小字；讀屏要讀成一句完整的話，
           所以 accessible name 由 srText 提供，內層一律 aria-hidden。
         */}
         <h2 className={results.sentence} aria-label={resultSentence.srText}>
           <span className={results.sentenceMain} aria-hidden>
-            {`${resultSentence.scopeLabel} · ${resultSentence.count} 個地方`}
+            {resultSentence.mainLead}
+            <span className={results.sentenceCount}>{` · ${resultSentence.countLabel}`}</span>
           </span>
-          {resultSentence.facetLabels.length > 0 ? (
+          {resultSentence.moreFacetLabels.length > 0 ? (
             <span className={results.sentenceFacets} aria-hidden>
-              {`條件：${resultSentence.facetLabels.join("・")}`}
+              {`條件：${resultSentence.moreFacetLabels.join("・")}`}
             </span>
           ) : null}
         </h2>
@@ -92,6 +98,27 @@ export function PlayMapCardList({
           ) : null}
         </div>
       </div>
+      {/*
+        舊分享網址同時帶多個情境參數：不亮任何情境卡、也不偷偷篩選，
+        每個條件都列成看得到、可各自取消的 chip。點任一情境卡就正規化成單一情境。
+      */}
+      {extraScenarioChips.length > 0 ? (
+        <div className={results.scenarioChips} role="group" aria-label="目前套用的情境">
+          {extraScenarioChips.map((chip) => (
+            <button
+              key={chip.id}
+              type="button"
+              className={results.scenarioChip}
+              data-scenario-chip={chip.id}
+              aria-label={`取消「${chip.label}」`}
+              onClick={() => onClearScenario(chip.id)}
+            >
+              {chip.label}
+              <Icon name="close" size={14} />
+            </button>
+          ))}
+        </div>
+      ) : null}
       {editorialPick ? (
         <PlayMapEditorialPick
           place={editorialPick.place}
@@ -107,7 +134,7 @@ export function PlayMapCardList({
           <p className={styles.listEmptyText} role="status">
             {viewportSearchActive
               ? "這個區域目前沒有符合條件的景點"
-              : "目前沒有符合條件的地點，試試改意圖或放寬篩選。"}
+              : "目前沒有符合條件的地點，試試換個情境或放寬更多條件。"}
           </p>
           {viewportSearchActive ? (
             <button
@@ -154,6 +181,7 @@ export function PlayMapCardList({
               <PlayMapCard
                 key={place.id}
                 place={place}
+                reason={activeScenario ? scenarioReason(place, activeScenario) : null}
                 hidden={displayIndex >= visibleCount}
                 distanceLabel={distanceLabelFor(place, userLatLng)}
                 selected={selectedId === place.id}
@@ -175,6 +203,7 @@ export function PlayMapCardList({
           <PlayMapCard
             key={`hidden-${place.id}`}
             place={place}
+            reason={null}
             hidden
             distanceLabel={null}
             selected={false}

@@ -19,6 +19,7 @@ import {
   type PlayMapResultSentenceView,
 } from "@/lib/play-map-copy";
 import type { LatLng } from "@/lib/playground-distance";
+import { deriveActiveScenario, scenarioDef } from "@/lib/play-map-scenarios";
 
 /**
  * 瀏覽層的衍生資料。
@@ -45,8 +46,10 @@ export type UsePlayMapBrowseModelOptions = {
 };
 
 export type PlayMapBrowseModel = {
-  /** 「在哪裡玩？」的北中南分組，只含已收錄縣市。 */
+  /** 選縣市面板的北中南分組，只含已收錄縣市。 */
   regions: readonly PlayMapRegion[];
+  /** 選縣市面板「全台」的數字：目前情境＋更多條件、不套縣市。 */
+  allCount: number;
   uncataloguedCities: readonly string[];
   groupMode: PlayMapGroupMode;
   groups: readonly PlayMapResultGroup[];
@@ -81,6 +84,20 @@ export function usePlayMapBrowseModel(
 
   const uncataloguedCities = useMemo(() => listUncataloguedCities(), []);
 
+  const allCount = useMemo(() => {
+    let total = 0;
+    for (const count of cityCounts.values()) total += count;
+    return total;
+  }, [cityCounts]);
+
+  const activeScenario = deriveActiveScenario({
+    rainyDayOnly,
+    highEnergyOnly,
+    freeOnly,
+    type: typeFilter,
+  });
+  const scenarioLabel = activeScenario ? scenarioDef(activeScenario).label : null;
+
   const groupMode = resolvePlayMapGroupMode({
     hasLocation: userLatLng !== null,
     city,
@@ -111,6 +128,7 @@ export function usePlayMapBrowseModel(
         strollerFriendlyOnly,
         highEnergyOnly,
         type: typeFilter,
+        scenarioLabel,
       }),
     [
       city,
@@ -121,6 +139,7 @@ export function usePlayMapBrowseModel(
       outdoorOnly,
       parkingOnly,
       rainyDayOnly,
+      scenarioLabel,
       strollerFriendlyOnly,
       typeFilter,
       userLatLng,
@@ -130,6 +149,7 @@ export function usePlayMapBrowseModel(
 
   return {
     regions,
+    allCount,
     uncataloguedCities,
     groupMode,
     groups,

@@ -251,6 +251,29 @@ test("a11y：親子遊樂地圖（地圖檢視、地點詳情）無 critical/ser
   ).toEqual([]);
 });
 
+/** 選縣市面板是 modal dialog：開著時只有面板可操作，掃描要在開啟態做。 */
+test("a11y：親子遊樂地圖選縣市面板（開啟態）無 critical/serious 違規", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/for-parents/play-map");
+  await page.getByRole("button", { name: /^下雨也能玩，/ }).click();
+  await page.getByRole("button", { name: /^選擇地點，目前：/ }).click();
+  await expect(page.getByRole("dialog", { name: "去哪裡玩？" })).toBeVisible();
+  await page.waitForTimeout(400);
+
+  const results = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+    .analyze();
+  const blocking = results.violations.filter(
+    (v) => v.impact != null && BLOCKING_IMPACTS.has(v.impact),
+  );
+  expect(
+    blocking,
+    blocking.map((v) => `[${v.impact}] ${v.id}: ${v.help}`).join("\n"),
+  ).toEqual([]);
+});
+
 test("a11y：桌面抽屜展開態（含家長項）無 critical/serious 違規", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto("/");

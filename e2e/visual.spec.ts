@@ -259,6 +259,8 @@ const COMPONENT_SHOTS: {
   path: string;
   locator: (page: Page) => Locator;
   masks?: (page: Page) => Locator[];
+  /** 截圖前的操作（例如打開面板）；在 stabilizeVisualPage 之後執行。 */
+  prepare?: (page: Page) => Promise<void>;
   /** 預設 1280×900。**改動只在某個斷點內生效的元件必須指定**——否則拍到的是
    *  另一套 CSS 分支，快照看似增加覆蓋、實際完全驗不到那個改動。 */
   viewport?: { width: number; height: number };
@@ -285,18 +287,22 @@ const COMPONENT_SHOTS: {
     locator: (page) => page.locator('a[href="/story/ep-1"]').first(),
   },
   {
-    id: "play-map-location",
-    name: "在哪裡玩？位置選擇器",
+    id: "play-map-scenarios",
+    name: "今天想怎麼玩？情境卡",
     path: "/for-parents/play-map",
-    // DESIGN.md 對位置選擇器的規範密度最高（北中南分組、0 筆虛線、未收錄聲明、觸控尺寸）。
-    // 縣市上的命中數不遮：景點資料異動是該被看見的內容變更（MASK_DOCTRINE 判準 1）。
-    locator: (page) => page.getByRole("region", { name: "在哪裡玩？" }),
+    // 四張程式畫的黏土插畫＋卡框底影語彙；卡上筆數不遮（MASK_DOCTRINE 判準 1）。
+    locator: (page) => page.getByRole("group", { name: "今天想怎麼玩" }),
   },
   {
-    id: "play-map-filters",
-    name: "快速條件列",
+    id: "play-map-location-sheet",
+    name: "選縣市面板（手機底部 sheet）",
     path: "/for-parents/play-map",
-    locator: (page) => page.getByRole("group", { name: "快速條件" }),
+    viewport: { width: 390, height: 844 },
+    // DESIGN.md 對位置選擇的規範密度最高（北中南分組、0 筆虛線、未收錄聲明、觸控尺寸）。
+    prepare: async (page) => {
+      await page.getByRole("button", { name: /^選擇地點，目前：/ }).click();
+    },
+    locator: (page) => page.getByRole("dialog", { name: "去哪裡玩？" }),
   },
   {
     id: "play-map-card",
@@ -574,6 +580,7 @@ for (const shot of COMPONENT_SHOTS) {
       await page.setViewportSize(shot.viewport ?? { width: 1280, height: 900 });
       await page.goto(shot.path);
       await stabilizeVisualPage(page, { theme });
+      await shot.prepare?.(page);
       const target = shot.locator(page);
       await expect(
         target,

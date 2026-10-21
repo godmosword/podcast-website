@@ -4,8 +4,8 @@ import type { PlayMapToolbarProps } from "./PlayMapContract";
 import styles from "./PlayMap.module.css";
 
 /**
- * 頁首只放 H1 與一行收錄摘要。原本 H1 旁的 blob／輪子／星芒三個裝飾不帶資訊，
- * 已移除（DESIGN.md「裝飾不搶內容」）；收錄摘要從頁尾小字上移到這裡。
+ * 頁首：h1 固定「親子遊樂地圖」（DESIGN.md 契約，放在上面一行小字），
+ * 視覺主標是下面的「今天想怎麼玩？」，再一行收錄摘要。H1 旁不放裝飾。
  */
 export function PlayMapToolbar({
   compact = false,
@@ -14,7 +14,12 @@ export function PlayMapToolbar({
   return (
     <header className={styles.toolbar} data-compact={compact ? "true" : "false"}>
       <h1 className={styles.title}>親子遊樂地圖</h1>
-      {compact ? null : <p className={styles.coverage}>{coverageLabel}</p>}
+      {compact ? null : (
+        <>
+          <p className={styles.headline}>今天想怎麼玩？</p>
+          <p className={styles.coverage}>{coverageLabel}</p>
+        </>
+      )}
     </header>
   );
 }

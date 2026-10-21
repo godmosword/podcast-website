@@ -16,6 +16,12 @@ type FocusTrapOptions = {
    * "none" 不移焦點，只做 Tab 環繞，讓呼叫端等排版完再移一次。
    */
   initialFocus?: "container" | "first" | "none";
+  /**
+   * 關閉時是否把焦點還給開啟前的元素（預設 true）。
+   * 呼叫端自己有明確的返還目標時傳 false（例如 Safari 點按鈕不會給它焦點，
+   * 「開啟前的 activeElement」可能只是 body）。
+   */
+  returnFocus?: boolean;
 };
 
 /**
@@ -26,7 +32,7 @@ type FocusTrapOptions = {
 export function useFocusTrap(
   active: boolean,
   containerRef: RefObject<HTMLElement | null>,
-  { initialFocus = "first" }: FocusTrapOptions = {},
+  { initialFocus = "first", returnFocus = true }: FocusTrapOptions = {},
 ) {
   useEffect(() => {
     if (!active) return;
@@ -69,7 +75,7 @@ export function useFocusTrap(
     document.addEventListener("keydown", onKeyDown);
     return () => {
       document.removeEventListener("keydown", onKeyDown);
-      previouslyFocused?.focus?.();
+      if (returnFocus) previouslyFocused?.focus?.();
     };
-  }, [active, containerRef, initialFocus]);
+  }, [active, containerRef, initialFocus, returnFocus]);
 }

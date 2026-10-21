@@ -3,9 +3,8 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 /**
- * 位置選擇器是頁面層元件，不是 Leaflet overlay：不得借用 --map-chip*，
+ * 選縣市面板是頁面層元件，不是 Leaflet overlay：不得借用 --map-chip*，
  * 也不得使用 backdrop-filter／CSS blur()（iOS 合成成本過高，本頁曾因此 OOM）。
- * 以下契約由原縣市色塊圖（PlayMapCityWall）逐條移植。
  */
 describe("PlayMapLocationPicker.module.css 契約", () => {
   const css = readFileSync(
@@ -22,30 +21,37 @@ describe("PlayMapLocationPicker.module.css 契約", () => {
     expect(css).not.toMatch(/\bblur\(/);
   });
 
-  it("縣市鈕、收合鍵與「我附近」維持 44px 觸控尺寸", () => {
-    for (const selector of ["city", "collapsedChip", "nearMe"]) {
-      expect(css).toMatch(
-        new RegExp(`\\.${selector}\\s*\\{[^}]*min-height:\\s*44px`, "s"),
-      );
-    }
+  it("縣市鈕、我附近／全台、關閉鈕維持 44px 以上觸控尺寸", () => {
+    expect(css).toMatch(/\.city\s*\{[^}]*min-height:\s*44px/s);
+    expect(css).toMatch(/\.option\s*\{[^}]*min-height:\s*48px/s);
+    expect(css).toMatch(/\.close\s*\{[^}]*height:\s*44px/s);
   });
 
-  it("選中態用實心底，前景用 --card（日夜都過 AA）", () => {
+  it("遮罩疊在導覽列與詳情 sheet 之上", () => {
+    expect(css).toMatch(/\.backdrop\s*\{[^}]*position:\s*fixed[^}]*z-index:\s*1100/s);
+  });
+
+  it("手機是底部 sheet；≥980 改貼在觸發鈕下方", () => {
+    expect(css).toMatch(/\.panel\s*\{[^}]*bottom:\s*0/s);
     expect(css).toMatch(
-      /\.city\[aria-pressed="true"\]\s*\{[^}]*background:\s*var\(--accent-ink\)[^}]*color:\s*var\(--card\)/s,
+      /@media\s*\(min-width:\s*980px\)\s*\{[\s\S]*\.panel\s*\{[^}]*top:\s*var\(--anchor-top/,
+    );
+  });
+
+  it("選中態用實心 --pm-selected，前景用 --card（日夜都過 AA）", () => {
+    expect(css).toMatch(
+      /\.city\[aria-pressed="true"\],\s*\.option\[aria-pressed="true"\]\s*\{[^}]*background:\s*var\(--pm-selected\)[^}]*color:\s*var\(--card\)/s,
     );
   });
 
   it("選中規則寫在 empty 之後，0 筆的縣市被選中時仍是實心", () => {
-    expect(css.indexOf('.city[aria-pressed="true"] {')).toBeGreaterThan(
+    expect(css.indexOf('.city[aria-pressed="true"]')).toBeGreaterThan(
       css.indexOf('.city[data-status="empty"] {'),
     );
   });
 
   it("0 筆狀態用虛線框雙重編碼，不靠 opacity 降階", () => {
-    expect(css).toMatch(
-      /\.city\[data-status="empty"\]\s*\{[^}]*border-style:\s*dashed/s,
-    );
+    expect(css).toMatch(/\.city\[data-status="empty"\]\s*\{[^}]*border-style:\s*dashed/s);
     expect(css).not.toMatch(/\.city\[data-status[^}]*opacity/s);
   });
 
@@ -53,13 +59,13 @@ describe("PlayMapLocationPicker.module.css 契約", () => {
     expect(css).toMatch(/\.cityCount\s*\{[^}]*color:\s*var\(--ink\)/s);
   });
 
-  it("位置鈕是圓角矩形，不是條件列的 pill", () => {
+  it("位置鈕是圓角矩形，不是 pill", () => {
     expect(css).toMatch(/\.city\s*\{[^}]*border-radius:\s*var\(--radius-sm\)/s);
   });
 
-  it("手機選定縣市後收合，桌面不收合", () => {
+  it("reduced-motion 關掉滑入動畫", () => {
     expect(css).toMatch(
-      /@media\s*\(max-width:\s*639px\)\s*\{[\s\S]*\.picker\[data-selected="true"\] \.regions[\s\S]*display:\s*none/,
+      /@media\s*\(prefers-reduced-motion:\s*reduce\)\s*\{[\s\S]*\.panel\s*\{[^}]*animation:\s*none/,
     );
   });
 });

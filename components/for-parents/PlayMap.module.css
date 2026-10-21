@@ -1,9 +1,4 @@
 .root {
-  /*
-   * 桌面左欄（位置選擇器）與右欄頂的條件列並排、各自 sticky，
-   * 兩者都只需要避開置頂導覽列，不再互相疊加高度。
-   */
-  --play-map-sticky-top: calc(var(--nav-h) + var(--space-3));
   position: relative;
   display: grid;
   gap: var(--space-4);
@@ -25,29 +20,35 @@
   box-shadow: var(--shadow-sm);
 }
 
+/*
+ * 頁首：h1「親子遊樂地圖」是 DESIGN.md 固定契約，放成上方一行小字（eyebrow）；
+ * 視覺主標是下面的「今天想怎麼玩？」（display 字），再一行收錄摘要。
+ */
 .toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2) var(--space-3);
-  padding-bottom: var(--space-1);
-}
-
-.toolbar[data-compact="true"] {
-  padding-bottom: 0;
+  display: grid;
+  gap: 4px;
 }
 
 .title {
   margin: 0;
-  color: var(--ink);
-  font-size: var(--fs-h1);
+  color: var(--accent-ink);
+  font-size: var(--fs-label);
   font-weight: 700;
-  line-height: 1.15;
+  letter-spacing: 0.04em;
+  line-height: 1.4;
 }
 
-/* H1 下的收錄摘要：年齡定位＋收錄縣市與筆數（原本是頁尾小字）。 */
+.headline {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--font-stack-display);
+  font-size: var(--fs-h1);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* H1 下的收錄摘要：年齡定位＋收錄縣市與筆數。 */
 .coverage {
-  flex-basis: 100%;
   margin: 0;
   color: var(--ink-soft);
   font-size: var(--fs-label);
@@ -55,81 +56,18 @@
   line-height: 1.5;
 }
 
-.intentSection {
-  display: grid;
-  gap: var(--space-2);
+/* 手機全幅地圖只留 h1（契約），把畫面讓給地圖。 */
+.toolbar[data-compact="true"] .title {
+  color: var(--ink);
+  font-size: var(--fs-h4);
+}
+
+.scenarioSlot[hidden] {
+  display: none;
 }
 
 /*
- * Contextual quick filters stay in one touch-scroll row on narrow screens.
- * The existing filter button remains beside the row and keeps the facet panel.
- */
-/*
- * 意圖列在 ≤360px 裝不下五顆 chip，一定會切邊；契約要求維持 nowrap，
- * 不能改成換行。所以要讓「還有更多」這件事看得見，否則小螢幕的家長
- * 可能永遠不知道「室內」存在。
- *
- * 用經典的 scroll-shadow：local 層跟著內容捲動，捲到底時剛好蓋住
- * 固定在容器邊緣的陰影層——純 CSS，不需要偵測是否溢出，也不用 JS。
- * 陰影用 radial-gradient 而非 blur()（本頁禁用 CSS blur）。
- */
-.intentGrid {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: var(--space-2);
-  min-width: 0;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  padding-inline: 2px;
-  scroll-padding-inline: 12px;
-  scrollbar-width: thin;
-  -webkit-overflow-scrolling: touch;
-  background:
-    linear-gradient(to right, var(--bg) 40%, transparent) 0 0 / 26px 100%
-      no-repeat local,
-    linear-gradient(to left, var(--bg) 40%, transparent) 100% 0 / 26px 100%
-      no-repeat local,
-    radial-gradient(farthest-side at 0 50%, rgba(52, 48, 43, 0.18), transparent)
-      0 0 / 14px 100% no-repeat,
-    radial-gradient(
-        farthest-side at 100% 50%,
-        rgba(52, 48, 43, 0.18),
-        transparent
-      )
-      100% 0 / 14px 100% no-repeat;
-}
-
-/* 夜間底色深，暖黑陰影看不見，改用亮色描出邊緣。 */
-:global([data-theme="night"]) .intentGrid {
-  background:
-    linear-gradient(to right, var(--bg) 40%, transparent) 0 0 / 26px 100%
-      no-repeat local,
-    linear-gradient(to left, var(--bg) 40%, transparent) 100% 0 / 26px 100%
-      no-repeat local,
-    radial-gradient(
-        farthest-side at 0 50%,
-        rgba(255, 255, 255, 0.22),
-        transparent
-      )
-      0 0 / 14px 100% no-repeat,
-    radial-gradient(
-        farthest-side at 100% 50%,
-        rgba(255, 255, 255, 0.22),
-        transparent
-      )
-      100% 0 / 14px 100% no-repeat;
-}
-
-.intentGrid .intentChip {
-  flex: 0 0 auto;
-}
-
-/*
- * 意圖列的 sticky 一直沒生效：包住它的 wrapper 高度剛好等於工具列本身，
- * sticky 沒有任何可移動的空間，捲兩下就跟著內容離開畫面——而它是這頁
- * 主要的篩選控制，家長得整路捲回頂端才改得了條件。
- *
- * display: contents 拿掉 wrapper 的框，讓條件列直接以 .content（名單欄）為定位參考，
+ * display: contents 拿掉 wrapper 的框，讓位置列直接以 .content（名單欄）為 sticky 的定位參考，
  * 捲完整份名單都黏著。隱藏時要明寫 display: none——author 樣式會蓋過 UA 的
  * [hidden]{display:none}。
  */
@@ -141,68 +79,11 @@
   display: none;
 }
 
-.controlBar {
-  position: sticky;
-  /* 貼齊導覽列下緣；留 4px 縫的話名單會從縫裡透出來。 */
-  top: var(--nav-h);
-  z-index: 20;
-  display: grid;
-  gap: var(--space-2);
-  padding: var(--space-2) 0;
-  /* 不透明底：黏住後名單從底下捲過，不能透出來。全頁只留這一條分隔線。 */
-  background: var(--bg);
-  border-bottom: 1px solid var(--hairline);
-}
-
-
-
-.controlRow {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: var(--space-2);
-  align-items: stretch;
-}
-
-/*
- * 條件 chip（可疊加）是 pill，按下加 ✓；位置選擇（單選）是圓角矩形。
- * 兩種外型分開，家長才分得出哪些能疊加。
- */
-.intentChip {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  min-height: 48px;
-  padding: 10px 12px;
-  border: 1px solid var(--cta-soft-line);
-  border-radius: var(--radius-pill);
-  background: transparent;
-  color: var(--ink);
-  font: inherit;
-  font-size: var(--fs-control);
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform var(--motion-press), opacity var(--motion-press);
-}
-
-.intentChip[aria-pressed="true"] {
-  border-color: var(--accent-ink);
-  background: var(--accent-ink);
-  color: var(--card);
-  font-weight: 700;
-  box-shadow: var(--shadow-sm);
-}
-
-.intentChip:active {
-  transform: scale(0.98);
-  opacity: 0.94;
-}
-
 .filters {
   display: grid;
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--hairline);
+  border: 1px solid var(--pm-card-line);
   border-radius: var(--radius-lg);
   background: var(--card);
   box-shadow: var(--shadow-sm);
@@ -273,8 +154,8 @@
 }
 
 .chip[aria-pressed="true"] {
-  border-color: var(--accent-ink);
-  background: var(--accent-ink);
+  border-color: var(--pm-selected);
+  background: var(--pm-selected);
   color: var(--card);
   font-weight: 700;
   box-shadow: var(--shadow-sm);
@@ -285,7 +166,6 @@
   opacity: 0.94;
 }
 
-.filterToggle,
 .clearFilters {
   display: inline-flex;
   align-items: center;
@@ -305,47 +185,6 @@
   transition: transform var(--motion-press), opacity var(--motion-press);
 }
 
-/*
- * 「篩選」是開面板的動作，不是條件：無框、中性淡底＋滑桿圖示，
- * 和旁邊的條件 pill 長得不一樣。
- */
-.controlRow .filterToggle {
-  gap: 6px;
-  min-height: 48px;
-  align-self: stretch;
-  padding-inline: var(--space-3);
-  border-color: transparent;
-  background: color-mix(in srgb, var(--ink) 7%, var(--card));
-  font-size: var(--fs-control);
-}
-
-/*
- * 展開時用淡底＋描邊，不用實心：實心是「條件已套用」的語彙（✓ 室內），
- * 「面板開著」跟它長得一樣會讓家長以為多套了一個條件。
- */
-.filterToggle[aria-expanded="true"] {
-  border-color: var(--accent-ink);
-  background: var(--warm-chip-bg);
-  color: var(--accent-ink);
-  font-weight: 700;
-}
-
-.filterCount {
-  display: inline-grid;
-  place-items: center;
-  min-width: 22px;
-  height: 22px;
-  padding-inline: 5px;
-  border-radius: var(--radius-pill);
-  background: var(--accent-ink);
-  color: var(--card);
-  font-size: 0.74rem;
-  font-weight: 800;
-  line-height: 1;
-}
-
-
-
 .clearFilters:active {
   transform: scale(0.98);
   opacity: 0.94;
@@ -354,6 +193,8 @@
 .content {
   display: grid;
   gap: var(--space-4);
+  /* 選完縣市後捲到這裡：位置列（.content 第一個子元素）回到導覽列下方。 */
+  scroll-margin-top: var(--nav-h);
   min-height: 48dvh;
 }
 
@@ -362,35 +203,22 @@
  * 的節點都要留出 --nav-h 的餘裕，否則結果列／卡片標題會被切掉一半。
  * 補 --space-3 是為了不要剛好貼著頂欄下緣。
  */
-/*
- * 行動版：位置選擇器在條件列與名單之上，單欄堆疊。
- * 桌面名單模式改為兩欄並排；Play Map 是寬工具面，名單模式的局部版型
- * 可在全站導覽 980px 之前開始，規則在檔尾的 local exception 區塊。
- */
-.browse {
-  display: grid;
-  gap: var(--space-6);
-}
-
-.locationSlot {
-  min-width: 0;
-}
-
-.locationSlot[hidden] {
-  display: none;
-}
-
 .cardListTop,
 .resultHeader,
 .cardGrid > li {
   scroll-margin-top: calc(var(--nav-h) + var(--space-3));
 }
 
+/*
+ * 結果句和按鈕（清除條件／看地圖）放不下同一行時，按鈕換到下一行靠右，
+ * 不把「台北市下雨也能玩 · 3 處」擠成兩行。
+ */
 .resultHeader {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
-  gap: var(--space-3);
+  gap: var(--space-2) var(--space-3);
   margin-bottom: var(--space-3);
   padding: 0 2px;
 }
@@ -406,7 +234,12 @@
   text-underline-offset: 3px;
 }
 
+.resultHeader > h2 {
+  flex: 1 1 15rem;
+}
+
 .resultHeaderActions {
+  margin-left: auto;
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -1193,7 +1026,7 @@
 
 @media (min-width: 640px) {
   /* 類型 chip 有空間就 wrap 成多列，橫捲會讓尾端類型被裁掉。 */
-  .filters .facetRow:first-child .chipScroller {
+  .filters .chipScroller {
     flex-wrap: wrap;
     overflow-x: visible;
     mask-image: none;
@@ -1210,29 +1043,6 @@
 
 @media (min-width: 980px) {
   /*
-   * ≥980 的導覽是浮動膠囊、外層 bar 透明：名單捲到黏住的條件列上方時會從膠囊兩側透出來。
-   * 往上補一塊同色底蓋住導覽列高度（導覽列本身 z-index 更高，仍疊在上面）。
-   * 沒黏住時這塊會壓到上方的頁首與位置選擇器，所以兩者要疊在條件列（z-index 20）之上。
-   * 手機導覽列是不透明整條，不需要這塊。
-   */
-  .controlBar::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 100%;
-    height: var(--nav-h);
-    background: var(--bg);
-    pointer-events: none;
-  }
-
-  .toolbar,
-  .locationSlot {
-    position: relative;
-    z-index: 21;
-  }
-
-  /*
    * 並排只在 view=map 生效（data-split="true"）。view=cards 是名單滿版，
    * 若不 scope，.cardsPanel 會被 max-height:64dvh 夾住，名單只剩一小塊可捲——
    * 這個 bug 在 jsdom 測不到，所以 CSS 契約測試把 scope 寫成斷言。
@@ -1243,9 +1053,10 @@
     min-height: 64dvh;
   }
 
-  /* 條件列在 .content 裡（display: contents 的 slot），並排時橫跨名單＋地圖兩欄。 */
-  .root[data-split="true"] .controlBar {
-    grid-column: 1 / -1;
+  /* 名單模式（view=cards）桌面三欄；900–979 維持 ≥640 的兩欄。 */
+  .root[data-split="false"] .cardGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
   }
 
   .root[data-split="true"] .cardsPanel {
@@ -1279,70 +1090,7 @@
   }
 }
 
-/*
- * Play Map 名單模式的局部斷點例外（view=cards only，DESIGN.md 已登記）：
- * 寬工具面在全站 980px 導覽轉換前就改成「左欄位置、右欄條件＋名單」。
- * 只在 data-split="false" 且不是手機地圖模式時成立，view=map 與
- * SPLIT_MIN_WIDTH_PX 契約不受影響。
- */
-@media (min-width: 900px) {
-  .root[data-split="false"] .browse {
-    grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
-    gap: var(--space-8);
-    align-items: start;
-  }
-
-  /*
-   * 左欄只放位置選擇器，自己 sticky；條件列在右欄頂、也 sticky，兩者並排。
-   * 矮螢幕上選擇器可能比剩餘高度還高，讓左欄自己捲，不要把未收錄聲明吃掉。
-   */
-  .root[data-split="false"] .locationSlot {
-    position: sticky;
-    top: var(--play-map-sticky-top);
-    max-height: calc(100dvh - var(--play-map-sticky-top) - var(--space-4));
-    overflow-y: auto;
-    overscroll-behavior-y: contain;
-    padding: 2px 4px 2px 2px;
-  }
-
-  
-
-  /* 手機地圖模式（900–979 的 view=map）位置欄隱藏，名單／地圖要佔滿整欄。 */
-  .root[data-mobile-map="true"] .browse {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  /* 右欄保留家長筆記的可讀寬度，卡片依內容高度排列。 */
-  .root[data-split="false"] .cardGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: start;
-  }
-
-  
-}
-
-@media (min-width: 900px) and (max-width: 979px) {
-  /* 900–979px：側欄啟用但結果卡維持單欄，避免家長筆記被壓成窄條。 */
-  .root[data-split="false"] .cardGrid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
 @media (max-width: 480px) {
-  .intentChip {
-    padding: 10px 12px;
-  }
-
-  .filterToggle {
-    padding-inline: var(--space-3);
-  }
-
-  .toolbar {
-    align-items: stretch;
-  }
-
-  
-
   .resultHeader {
     align-items: center;
   }
@@ -1395,9 +1143,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .chip,
-  .intentChip,
   .clearFilters,
-  .filterToggle,
   .openMapButton,
   .backToListButton,
   .closeButton,

@@ -80,6 +80,36 @@ describe("playMapResultSentence", () => {
     ).toBe("在台北市找免費、室內的地方，共 3 個地方");
   });
 
+  it("單一情境：主句是「範圍＋情境 · N 處」，條件行不重複情境自己的欄位", () => {
+    const view = playMapResultSentence({
+      ...BASE,
+      count: 3,
+      city: "台北市",
+      rainyDayOnly: true,
+      parkingOnly: true,
+      scenarioLabel: "下雨也能玩",
+    });
+    expect(view.mainText).toBe("台北市下雨也能玩 · 3 處");
+    expect(view.moreFacetLabels).toEqual(["好停車"]);
+    expect(view.srText).toBe("在台北市找雨天、好停車的地方，共 3 處");
+  });
+
+  it("沒有情境：主句是「範圍 · N 個地方」", () => {
+    const view = playMapResultSentence({ ...BASE, count: 99 });
+    expect(view.mainText).toBe("全台 · 99 個地方");
+    expect(view.scenarioLabel).toBeNull();
+  });
+
+  it("條件行不列博物館（看展覽情境或多情境 chip 已表達），其他類型照列", () => {
+    expect(playMapResultSentence({ ...BASE, type: "博物館" }).moreFacetLabels).toEqual([]);
+    expect(playMapResultSentence({ ...BASE, type: "農場" }).moreFacetLabels).toEqual(["農場"]);
+    // 多情境（舊網址）：情境欄位改由 chip 顯示，條件行只剩更多條件。
+    expect(
+      playMapResultSentence({ ...BASE, freeOnly: true, rainyDayOnly: true, indoorOnly: true })
+        .moreFacetLabels,
+    ).toEqual(["室內"]);
+  });
+
   it("0 筆也給得出完整句子", () => {
     const view = playMapResultSentence({ ...BASE, count: 0, freeOnly: true });
     expect(view.count).toBe(0);

@@ -8,13 +8,18 @@
  * 2026-10-18 簡化改版（Plan：play-map-simplify v2，已過工程／設計審）：
  * 縣市磚牆換成 LocationPicker（北中南分組＋「我附近」），
  * ControlBar 只剩條件，徽章改數面板內條件。
+ *
+ * 2026-10-19 情境先行改版（Plan：play-map-scenarios v2，已過工程／對抗／設計審）：
+ * 新增 ScenarioGrid（四張情境卡）與 LocationBar（在 全台 ▾ 或 我附近＋更多條件），
+ * LocationPicker 改成 dialog，ControlBar 只剩「更多條件」面板內容。
  */
-import type { RefObject } from "react";
+import type { ReactNode, RefObject } from "react";
 import type { Playground, PlaygroundType } from "@/data/playgrounds";
 import type { LatLng } from "@/lib/playground-distance";
 import type { PlayMapResultSentenceView } from "@/lib/play-map-copy";
 import type { PlayMapResultGroup } from "@/lib/play-map-groups";
 import type { PlayMapRegion } from "@/lib/play-map-regions";
+import type { PlayMapScenarioId } from "@/lib/play-map-scenarios";
 import type { PlayMapView } from "@/lib/playgrounds-query";
 
 export type BrowseView = PlayMapView;
@@ -47,22 +52,73 @@ export const CARDS_PANEL_ID = "play-map-panel-cards";
 export const MAP_PANEL_ID = "play-map-panel-map";
 /** 手機「看地圖」；離開地圖模式時把 focus 還給這個鈕。 */
 export const OPEN_MAP_BUTTON_ID = "play-map-open-map";
+/** 「更多條件」面板（位置列的開關鈕 aria-controls 指向它）。 */
+export const FILTER_PANEL_ID = "play-map-filter-panel";
+/** 選縣市面板（dialog）。 */
+export const LOCATION_DIALOG_ID = "play-map-location-dialog";
+
+/** 情境卡一張的檢視模型。 */
+export type PlayMapScenarioCardView = {
+  id: PlayMapScenarioId;
+  label: string;
+  /** e2e 契約：rain／energy／museum／free。 */
+  quickFilter: string;
+  /** 選了這張之後的結果數。 */
+  count: number;
+  pressed: boolean;
+};
+
+export type PlayMapScenarioGridProps = {
+  /** 桌面地圖並排時縮成一列小鈕（不畫插畫），把高度讓給地圖。 */
+  compact?: boolean;
+  scenarios: readonly PlayMapScenarioCardView[];
+  /** 數量前面的範圍字：「全台」「台北市」「你附近」。 */
+  scopeLabel: string;
+  onSelect: (id: PlayMapScenarioId) => void;
+};
+
+/** 「在［全台 ▾］或［我附近］」＋「更多條件」；捲過之後黏在上方並列出目前情境。 */
+export type PlayMapLocationBarProps = {
+  /** 觸發鈕上的字：「全台」或縣市名。 */
+  locationLabel: string;
+  locationTriggerRef: RefObject<HTMLButtonElement | null>;
+  onOpenLocation: () => void;
+  locationOpen: boolean;
+  nearMeActive: boolean;
+  geoStatus: GeoStatus;
+  onNearMe: () => void;
+  /** 「更多條件」徽章：類型（看展覽情境自己的博物館不算）、室內外、好停車、推車 OK。 */
+  panelFilterCount: number;
+  filtersOpen: boolean;
+  onToggleFilters: () => void;
+  /** 黏住時顯示的目前情境；沒有單一情境時為 null。 */
+  activeScenarioLabel: string | null;
+  onClearActiveScenario: () => void;
+  /** 「更多條件」面板；放在黏住的容器裡，展開時跟著位置列一起黏著。 */
+  children?: ReactNode;
+};
 
 /**
- * 「在哪裡玩？」位置選擇器：北中南分組縣市＋「我附近」。
+ * 選縣市面板（dialog）：我附近、全台、北中南分組縣市、未收錄說明。
  * 22 縣市中僅 15 個有資料；未收錄縣市不做成按鈕，改用一行可見文字說明——
  * 把「這組條件 0 筆」（empty，仍可點）與「整個縣市沒收錄」混在一起會誤導家長。
  */
 export type PlayMapLocationPickerProps = {
-  /** "row"：桌面地圖並排時北中南橫排，讓地圖留在首屏；預設 "stack"。 */
-  layout?: "stack" | "row";
-  /** 只含已收錄縣市；count 為套用其他條件、不套用縣市本身的命中數。 */
+  open: boolean;
+  onClose: () => void;
+  /** 關閉後焦點還給它；它不在畫面上時退回位置列。 */
+  returnFocusRef: RefObject<HTMLButtonElement | null>;
+  /** 只含已收錄縣市；count＝目前情境＋更多條件在該縣市的筆數（不套縣市本身）。 */
   regions: readonly PlayMapRegion[];
+  /** 「全台」那顆的數字。 */
+  allCount: number;
   selectedCity: string | null;
-  /** 點同一個縣市兩次＝取消，呼叫端負責傳 null。 */
-  onToggleCity: (next: string | null) => void;
-  /** 尚未收錄的縣市名，用於選擇器下方的**可見**誠實聲明，不得只放進 aria-label。 */
+  /** 選一個縣市或 null（全台）；選完由呼叫端關閉面板。 */
+  onSelectCity: (next: string | null) => void;
+  /** 尚未收錄的縣市名，用於面板下方的**可見**誠實聲明，不得只放進 aria-label。 */
   uncataloguedCities: readonly string[];
+  /** 面板副標：「數字是『下雨也能玩』的地方數」；沒有情境時為 null。 */
+  scenarioLabel: string | null;
   nearMeActive: boolean;
   geoStatus: GeoStatus;
   onNearMe: () => void;
@@ -75,27 +131,16 @@ export type PlayMapToolbarProps = {
   coverageLabel: string;
 };
 
+/** 「更多條件」面板：類型、好停車、推車 OK、室內／戶外（互斥）。 */
 export type PlayMapControlBarProps = {
-  freeOnly: boolean;
   indoorOnly: boolean;
   outdoorOnly: boolean;
-  rainyDayOnly: boolean;
   parkingOnly: boolean;
   strollerFriendlyOnly: boolean;
-  highEnergyOnly: boolean;
-  /**
-   * 「篩選」徽章：只數面板裡的條件（類型、好停車、推車 OK、戶外）。
-   * 快捷列看得到的條件與位置（縣市／附近）都不算，避免同一件事被數兩次。
-   */
-  panelFilterCount: number;
-  onToggleFree: () => void;
   onSelectEnvironment: (next: EnvironmentFilter) => void;
-  onToggleRainyDay: () => void;
   onToggleParking: () => void;
   onToggleStrollerFriendly: () => void;
-  onToggleHighEnergy: () => void;
   filtersOpen: boolean;
-  onToggleFilters: () => void;
   typeFilter: PlaygroundType | null;
   typeCounts: ReadonlyMap<PlaygroundType, number>;
   visibleTypeOptions: readonly PlaygroundType[];
@@ -104,6 +149,8 @@ export type PlayMapControlBarProps = {
 
 export type PlayMapCardProps = {
   place: Playground;
+  /** 「為什麼適合目前情境」：資料原詞組成；沒有情境或沒命中為 null。 */
+  reason: string | null;
   selected: boolean;
   hovered: boolean;
   hoverCorrelationEnabled: boolean;
@@ -118,6 +165,11 @@ export type PlayMapCardProps = {
 export type PlayMapCardListProps = {
   /** 已分組的命中結果；渲染順序即 displayIndex 順序。 */
   groups: readonly PlayMapResultGroup[];
+  /** 目前唯一的情境（決定結果句與卡片理由行）；沒有或多個時為 null。 */
+  activeScenario: PlayMapScenarioId | null;
+  /** 網址同時帶多個情境參數時，逐項列出的可見條件（各自可取消）。 */
+  extraScenarioChips: readonly { id: PlayMapScenarioId; label: string }[];
+  onClearScenario: (id: PlayMapScenarioId) => void;
   /** 命中總數。「一組都沒有」與「全部被批次遮住」是兩件事，必須分辨。 */
   matchedCount: number;
   unmatched: readonly Playground[];

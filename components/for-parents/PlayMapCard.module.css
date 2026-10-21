@@ -1,22 +1,24 @@
 /*
- * 名單卡片。純文字卡：沒有類型插畫、沒有類型色框（DESIGN.md「裝飾不搶內容」）。
+ * 名單卡片（情境先行改版）。
  *
- * 層級：名稱（--ink 粗體）＞家長筆記（--ink）＞區 · 類型 · 事實（--ink-soft 小字）。
- * 導航是卡片上唯一的按鈕，soft 樣式；全頁只有詳情 sheet 的「導航」是實心。
+ * 層級：類型圓章＋類型（小）→ 名稱（--ink 粗體）→ 理由行（--pm-reason）→ 家長 tips（--ink）
+ * → 區 · 事實（--ink-soft 小字）。卡框一律 --card＋--pm-card-line，不依類型著色；
+ * 類型色只出現在左上的圓章（和地圖針同一組剪影與色相）。
+ * 導航是卡片上唯一的按鈕，soft 樣式＋橘色箭頭；全頁只有詳情 sheet 的「導航」是實心。
  */
 
 .card {
   position: relative;
-  border: 1px solid var(--hairline);
+  border: 1px solid var(--pm-card-line);
   border-radius: var(--radius-md);
   background: var(--card);
   box-shadow: var(--elev-1);
   transition: transform var(--motion-press), box-shadow var(--motion-press);
 }
 
-/* 夜間 --elev-1 幾乎看不見，邊界只剩 --hairline；加深一階，卡片輪廓才讀得出來。 */
+/* 夜間 --elev-1 幾乎看不見，邊界只剩框線；加深一階，卡片輪廓才讀得出來。 */
 :global([data-theme="night"]) .card {
-  border-color: color-mix(in srgb, var(--ink) 18%, transparent);
+  border-color: color-mix(in srgb, var(--ink) 22%, transparent);
 }
 
 @media (hover: hover) {
@@ -29,7 +31,6 @@
 /*
  * correlated（地圖 hover 關聯）與 selected 必須是兩個可分的層級：
  * correlated 是外圈淡 ring＋抬升；selected 是內圈 --accent-ink 實線。
- * 原本兩者都走類型色 --card-accent，拿掉類型色後改用 accent 系。
  * 一併寫 :hover，否則 .card:hover 的陰影會在滑過時蓋掉狀態 ring。
  */
 .cardCorrelated,
@@ -49,7 +50,7 @@
   gap: 4px;
   width: 100%;
   min-height: 44px;
-  padding: var(--space-4);
+  padding: var(--space-4) var(--space-4) var(--space-3);
   border: none;
   border-radius: inherit;
   background: transparent;
@@ -64,23 +65,75 @@
   opacity: 0.88;
 }
 
-/* 右上角的導航是絕對定位的兄弟節點；第一行讓出它的寬度，名稱才不會被壓到。 */
-.cardHead {
+.cardType {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 2px var(--space-2);
-  padding-right: 88px;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
 }
 
-.cardName {
-  color: var(--ink);
-  font-size: var(--fs-h3-compact);
+/*
+ * 類型黏土圓章：左上亮面＋下緣暗邊（純色塊，不用 blur），剪影固定深墨。
+ * 色相與地圖針一致：公園薄荷、室內樂園天藍、主題樂園粉、博物館淡紫、動物園青、農場黃、其他沙。
+ */
+.typeBadge {
+  --type-color: var(--c-mint);
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 7px;
+  border-radius: var(--radius-circle);
+  background:
+    radial-gradient(
+      circle at 34% 28%,
+      color-mix(in srgb, var(--type-color) 55%, white) 0 22%,
+      transparent 52%
+    ),
+    var(--type-color);
+  box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--type-color) 72%, black);
+  color: var(--pm-type-ink);
+}
+
+.typeBadge svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.typeBadge[data-type="indoor-park"] {
+  --type-color: var(--c-sky);
+}
+
+.typeBadge[data-type="theme-park"] {
+  --type-color: var(--c-pink);
+}
+
+.typeBadge[data-type="museum"] {
+  --type-color: var(--c-lilac);
+}
+
+.typeBadge[data-type="zoo"] {
+  --type-color: var(--c-teal);
+}
+
+.typeBadge[data-type="farm"] {
+  --type-color: var(--c-yellow);
+}
+
+.typeBadge[data-type="other"] {
+  --type-color: var(--pm-type-other);
+}
+
+.cardTypeLabel {
+  color: var(--ink-soft);
+  font-size: var(--fs-label);
   font-weight: 700;
-  line-height: 1.3;
 }
 
 .cardDistance {
+  margin-left: auto;
   color: var(--ink);
   font-size: var(--fs-label);
   font-weight: 700;
@@ -92,6 +145,7 @@
  * 卡片上的暫停營業標籤：掃視時就要看得到，不能只藏在詳情裡；取代車程的位置。
  */
 .cardClosed {
+  margin-left: auto;
   padding: 2px 8px;
   border: 1px solid color-mix(in srgb, var(--status-error) 34%, transparent);
   border-radius: var(--radius-pill);
@@ -102,22 +156,24 @@
   white-space: nowrap;
 }
 
-.cardMeta {
-  padding-right: 88px;
-  color: var(--ink-soft);
+.cardName {
+  margin-top: 4px;
+  color: var(--ink);
+  font-family: var(--font-stack-display);
+  font-size: var(--fs-h3-compact);
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+/* 理由行：只有資料原詞（例「放電：運動、溜滑梯」），不是推論。 */
+.cardReason {
+  color: var(--pm-reason);
   font-size: var(--fs-label);
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.45;
 }
 
-/* 事實是純文字，用中點接在區 · 類型後面，不做成 pill（pill 會被讀成可點的篩選）。 */
-.cardFact::before {
-  content: "·";
-  margin-inline: 0.35em;
-}
-
 .cardBlurb {
-  margin-top: 4px;
   color: var(--ink);
   font-size: var(--fs-control);
   font-weight: 500;
@@ -128,23 +184,54 @@
   overflow: hidden;
 }
 
+/* 最後一行和右下的導航同高（44px），右側讓出導航的寬度。 */
+.cardMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  min-height: 44px;
+  padding-right: 104px;
+  color: var(--ink-soft);
+  font-size: var(--fs-label);
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+/* 事實是純文字，用中點接在區名後面，不做成 pill（pill 會被讀成可點的篩選）。 */
+.cardFact::before {
+  content: "·";
+  margin-inline: 0.35em;
+}
+
 .cardNav {
   position: absolute;
-  top: var(--space-3);
   right: var(--space-3);
+  bottom: var(--space-3);
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   min-width: 44px;
   min-height: 44px;
-  padding: 0 var(--space-3) 0 14px;
+  padding: 0 6px 0 14px;
+  border: 1.5px solid var(--cta-soft-line);
   border-radius: var(--radius-pill);
-  background: var(--warm-chip-bg);
-  color: var(--accent-ink);
+  background: var(--cta-soft-bg);
+  color: var(--cta-soft-fg);
   font-size: var(--fs-control);
   font-weight: 700;
   text-decoration: none;
   transition: transform var(--motion-press), opacity var(--motion-press);
+}
+
+/* 橘色只當箭頭的小圓底（品牌點綴），不當按鈕底色。 */
+.cardNavArrow {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-circle);
+  background: var(--landing-brand);
+  color: var(--landing-brand-ink);
 }
 
 .cardNav:active {

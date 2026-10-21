@@ -2,6 +2,8 @@
 
 import { buildGoogleMapsNavUrl, type Playground } from "@/data/playgrounds";
 import { composeParentBlurb } from "@/lib/playground-parent-voice";
+import { playgroundTypeGlyphSvg } from "@/lib/playground-type-glyph";
+import { playgroundTypeVisualKey } from "@/lib/playground-type-visual";
 import Icon from "@/components/ui/Icon";
 import type { PlayMapCardProps } from "./PlayMapContract";
 import styles from "./PlayMapCard.module.css";
@@ -26,14 +28,30 @@ export function listPlayMapCardBinaryFacts(
 }
 
 /**
- * 純文字卡：名稱＋車程 → 區 · 類型 · 免費 · 戶外 → 家長筆記，右上一顆導航。
- * 類型插畫、類型色框已移除（43 張公園卡同一張圖，不帶資訊）；
- * 事實寫成文字而不是 pill，免得看起來像能點的篩選 chip。
+ * 類型黏土圓章：和地圖針同一組剪影與色相（雙重編碼），名單和地圖讀成同一套。
+ * 剪影字串是 lib/playground-type-glyph 的靜態常數，不含外部輸入。
+ */
+function TypeBadge({ type }: { type: Playground["type"] }) {
+  const key = playgroundTypeVisualKey(type);
+  return (
+    <span
+      className={styles.typeBadge}
+      data-type={key}
+      aria-hidden
+      dangerouslySetInnerHTML={{ __html: playgroundTypeGlyphSvg(key) }}
+    />
+  );
+}
+
+/**
+ * 卡片：類型圓章＋類型 → 名稱 → 「為什麼適合」理由（資料原詞）→ 家長 tips 兩行 → 區 · 事實。
+ * 整張卡（cardMain）開詳情 sheet；導航是 soft 鈕＋橘色箭頭，放右下。
  *
  * 導航必須是 cardMain button 的**兄弟節點**，不能包在 button 裡（巢狀互動元素）。
  */
 export function PlayMapCard({
   place,
+  reason,
   selected,
   hovered,
   hoverCorrelationEnabled,
@@ -46,7 +64,6 @@ export function PlayMapCard({
 }: PlayMapCardProps) {
   const cardFacts = listPlayMapCardBinaryFacts(place);
   const area = place.district ?? place.city;
-  const meta = [area, place.type].filter(Boolean).join(" · ");
   const blurb = composeParentBlurb(place, undefined, { includeFacilities: false });
   const closed = place.status === "temporarily-closed";
 
@@ -93,16 +110,24 @@ export function PlayMapCard({
           aria-label={`${place.name}，查看詳情`}
           onClick={(event) => onSelect(place.id, event.currentTarget)}
         >
-          <span className={styles.cardHead}>
-            <span className={styles.cardName}>{place.name}</span>
+          <span className={styles.cardType}>
+            <TypeBadge type={place.type} />
+            <span className={styles.cardTypeLabel}>{place.type}</span>
             {closed ? (
               <span className={styles.cardClosed}>暫停營業</span>
             ) : distanceLabel ? (
               <span className={styles.cardDistance}>{distanceLabel}</span>
             ) : null}
           </span>
+          <span className={styles.cardName}>{place.name}</span>
+          {reason ? (
+            <span className={styles.cardReason} data-card-reason>
+              {reason}
+            </span>
+          ) : null}
+          <span className={styles.cardBlurb}>{blurb}</span>
           <span className={styles.cardMeta}>
-            {meta}
+            {area}
             {cardFacts.map((fact) => (
               <span
                 key={fact.kind}
@@ -113,7 +138,6 @@ export function PlayMapCard({
               </span>
             ))}
           </span>
-          <span className={styles.cardBlurb}>{blurb}</span>
         </button>
         <a
           className={styles.cardNav}
@@ -123,7 +147,9 @@ export function PlayMapCard({
           aria-label={`導航前往 ${place.name}（另開視窗）`}
         >
           導航
-          <Icon name="external" size={16} />
+          <span className={styles.cardNavArrow} aria-hidden>
+            <Icon name="arrow-right" size={14} />
+          </span>
         </a>
       </article>
     </li>

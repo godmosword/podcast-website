@@ -25,19 +25,18 @@ describe("PlayMap.module.css map-chip 用量", () => {
     }
   });
 
-  it("意圖 chip 維持 48px，既有 44px chip 不減", () => {
-    expect(css).toMatch(/\.intentChip\s*\{[^}]*min-height:\s*48px/);
+  it("更多條件 chip 維持 44px 觸控尺寸，選中用 --pm-selected", () => {
     expect(css).toMatch(/\.chip\s*\{[^}]*min-height:\s*44px/);
+    expect(css).toMatch(/\.chip\[aria-pressed="true"\]\s*\{[^}]*background:\s*var\(--pm-selected\)/s);
   });
 
-  it("快捷列維持單列並可在窄螢幕橫向捲動", () => {
-    expect(css).toMatch(
-      /\.intentGrid\s*\{[^}]*display:\s*flex[^}]*flex-wrap:\s*nowrap/s,
-    );
-    expect(css).toMatch(
-      /\.intentGrid\s*\{[^}]*overflow-x:\s*auto/s,
-    );
-    expect(css).toMatch(/\.intentGrid \.intentChip\s*\{[^}]*flex:\s*0 0 auto/s);
+  it("舊快捷列與左欄位置選擇器的版型已移除（改成情境卡＋位置列）", () => {
+    expect(css).not.toMatch(/\.intentChip|\.intentGrid|\.controlBar|\.locationSlot|\.browse\b/);
+  });
+
+  it("頁首：h1 是小字 eyebrow，主標「今天想怎麼玩？」用 display 字", () => {
+    expect(css).toMatch(/\.headline\s*\{[^}]*font-family:\s*var\(--font-stack-display\)/s);
+    expect(css).toMatch(/\.title\s*\{[^}]*font-size:\s*var\(--fs-label\)/s);
   });
 
   it("marker 的 correlated／selected 狀態有可見且不同的層級（卡片見 PlayMapCard.module.css）", () => {
@@ -77,12 +76,11 @@ describe("PlayMap.module.css map-chip 用量", () => {
     expect(css).toMatch(/\.root\[data-split="false"\] \.cardGrid/);
   });
 
-  it("名單模式 900px 起使用 Play Map 區域並排，不改全站 980px 契約", () => {
+  it("名單模式桌面三欄，900–979 維持兩欄（不另開 900 斷點）", () => {
     expect(css).toMatch(
-      /@media\s*\(min-width:\s*900px\)[\s\S]*?\.root\[data-split="false"\] \.browse/,
+      /@media\s*\(min-width:\s*980px\)\s*\{[\s\S]*?\.root\[data-split="false"\] \.cardGrid\s*\{[^}]*repeat\(3/,
     );
-    expect(css).toMatch(/\.root\[data-split="false"\] \.locationSlot\s*\{[^}]*position:\s*sticky/s);
-    expect(css).toMatch(/\.root\[data-split="false"\] \.cardGrid/);
+    expect(css).not.toMatch(/@media\s*\(min-width:\s*900px\)/);
   });
 
   it("手機卡片不再藏導航（D3：名單一下就能導航）", () => {
@@ -90,17 +88,11 @@ describe("PlayMap.module.css map-chip 用量", () => {
     expect(css).not.toMatch(/\.cardNav[^{]*\{[^}]*display:\s*none/s);
   });
 
-  it("條件列不透明、只留底部一條分隔線，並排時橫跨兩欄", () => {
-    expect(css).toMatch(
-      /\.controlBar\s*\{[^}]*position:\s*sticky[^}]*background:\s*var\(--bg\)[^}]*border-bottom:/s,
-    );
-    expect(css).not.toMatch(/\.controlBar\s*\{[^}]*border-block/s);
-    expect(css).toMatch(
-      /\.root\[data-split="true"\] \.controlBar\s*\{[^}]*grid-column:\s*1 \/ -1/s,
-    );
+  it("選完縣市捲到名單欄頂端時避開置頂導覽列", () => {
+    expect(css).toMatch(/\.content\s*\{[^}]*scroll-margin-top:\s*var\(--nav-h\)/s);
   });
 
-  it("條件 chip 是 pill，和位置選擇器的圓角矩形分開", () => {
-    expect(css).toMatch(/\.intentChip\s*\{[^}]*border-radius:\s*var\(--radius-pill\)/s);
+  it("不使用 backdrop-filter 與 CSS blur()", () => {
+    expect(css).not.toMatch(/backdrop-filter|\bblur\(/);
   });
 });

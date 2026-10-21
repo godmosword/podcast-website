@@ -82,6 +82,19 @@ details[open] > summary .icon-disclosure {
   --ink-soft: #7a7268;
   --card: #ffffff;
   --card-2: #fcfdff;
+  /*
+   * 親子遊樂地圖（情境先行）：奶油頁底、情境卡框與底影、選中框、理由行、插畫內緣。
+   * 夜間值寫在夜間主題區塊（字面 hex）；對比門檻見 globals.css.contrast.test.ts。
+   */
+  --pm-page: #fff9ee;
+  --pm-card-line: #eadbc8;
+  --pm-card-base: #e3cdb0;
+  --pm-selected: #3a2410;
+  --pm-reason: #1f5f57;
+  --pm-art-ring: #ffffff;
+  /* 類型圓章的固定美術色（同地圖針，不隨主題翻轉）：深墨剪影對六色 --c-* 日夜都過 3:1。 */
+  --pm-type-ink: #34302b;
+  --pm-type-other: #cfcac2;
   --hairline: rgba(0, 0, 0, 0.08);
   --line: var(--hairline);
 
@@ -368,6 +381,13 @@ body:has(main[data-deferred-brand-font][data-brand-fonts="ready"]) {
   /* 夜間 --accent（#549890）對 --card 3.66:1、--card-2 3.14:1，同樣不過 AA。
      提亮版對四個夜間表面最差 4.94:1。 */
   --accent-ink: #7fbdb5;
+  /* 親子遊樂地圖：深底上深棕選中框看不見，改奶油色；插畫不反轉，只加一圈暗暖內緣。 */
+  --pm-page: #141312;
+  --pm-card-line: #4a443d;
+  --pm-card-base: #0b0a09;
+  --pm-selected: #f0ead8;
+  --pm-reason: #8fd0c6;
+  --pm-art-ring: #4f473e;
   --warm-highlight: #e6a6b6;
   --warm-chip-bg: color-mix(in srgb, var(--c-teal) 18%, var(--card));
   --warm-chip-hover: color-mix(in srgb, var(--c-teal) 28%, var(--card-2));

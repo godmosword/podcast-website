@@ -15,14 +15,23 @@ describe("PlayMapCard.module.css 契約", () => {
     );
   });
 
-  it("不再依類型著色（類型色框沒有圖例，已移除）", () => {
-    expect(css).not.toMatch(/data-type/);
+  it("卡框不依類型著色；類型色只在圓章上，七類都有色", () => {
+    expect(css).not.toMatch(/\.card[^{]*\[data-type/);
     expect(css).not.toMatch(/--card-accent/);
+    for (const key of ["indoor-park", "theme-park", "museum", "zoo", "farm", "other"]) {
+      expect(css).toContain(`.typeBadge[data-type="${key}"]`);
+    }
+    expect(css).toMatch(/\.typeBadge\s*\{[^}]*color:\s*var\(--pm-type-ink\)/s);
   });
 
-  it("導航維持 44px 熱區、soft 樣式，不在任何寬度隱藏", () => {
+  it("理由行走 --pm-reason token（日夜對比由 globals 對比測試把關）", () => {
+    expect(css).toMatch(/\.cardReason\s*\{[^}]*color:\s*var\(--pm-reason\)/s);
+  });
+
+  it("導航維持 44px 熱區、soft 樣式（不用品牌橘當底），不在任何寬度隱藏", () => {
     expect(css).toMatch(/\.cardNav\s*\{[^}]*min-height:\s*44px/s);
-    expect(css).toMatch(/\.cardNav\s*\{[^}]*background:\s*var\(--warm-chip-bg\)/s);
+    expect(css).toMatch(/\.cardNav\s*\{[^}]*background:\s*var\(--cta-soft-bg\)/s);
+    expect(css).not.toMatch(/\.cardNav\s*\{[^}]*--landing-brand\b/s);
     expect(css).not.toMatch(/\.cardNav[^{]*\{[^}]*display:\s*none/s);
   });
 

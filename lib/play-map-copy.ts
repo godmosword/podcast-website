@@ -3,6 +3,7 @@
  * 手機首屏只講一次範圍＋筆數，避免「地點清單／全台資料庫／適合親子出遊」三套說法。
  */
 import type { PlaygroundType } from "@/data/playgrounds";
+import { EXHIBIT_TYPE } from "@/lib/play-map-scenarios";
 
 /**
  * 句子式結果列的檢視模型。結果數是家長最先要的資訊，所以拆成獨立欄位
@@ -11,10 +12,21 @@ import type { PlaygroundType } from "@/data/playgrounds";
 export type PlayMapResultSentenceView = {
   /** 「全台」「桃園市」「你附近」「這個區域」 */
   scopeLabel: string;
-  /** 已套用的條件；空陣列＝不限條件。 */
+  /** 唯一亮著的情境名（「下雨也能玩」）；沒有或多個時為 null。 */
+  scenarioLabel: string | null;
+  /** 所有已套用的條件（讀屏句用）；空陣列＝不限條件。 */
   facetLabels: readonly string[];
+  /**
+   * 視覺上「條件：」那行只列「更多條件」（室內外、好停車、推車、其他類型）。
+   * 情境欄位（雨天／放電／免費／博物館）已由情境卡或多情境 chip 表達，不重複列。
+   */
+  moreFacetLabels: readonly string[];
   count: number;
   countLabel: string;
+  /** 視覺主句：「台北市下雨也能玩 · 3 處」或「全台 · 99 個地方」。 */
+  mainText: string;
+  /** 主句的前半（範圍＋情境）；後半「 · N 處」由消費端包成不換行。 */
+  mainLead: string;
   /** h2 的 accessible name；視覺上拆成多段，讀屏要讀成一句。 */
   srText: string;
 };
@@ -32,6 +44,8 @@ export type PlayMapResultSentenceArgs = {
   strollerFriendlyOnly: boolean;
   highEnergyOnly: boolean;
   type: PlaygroundType | null;
+  /** 唯一亮著的情境名；由 deriveActiveScenario 推導，不另存 state。 */
+  scenarioLabel?: string | null;
 };
 
 function scopeLabelOf(args: PlayMapResultSentenceArgs): string {
@@ -55,20 +69,35 @@ function facetLabelsOf(args: PlayMapResultSentenceArgs): string[] {
   return labels;
 }
 
+function moreFacetLabelsOf(args: PlayMapResultSentenceArgs): string[] {
+  const labels: string[] = [];
+  if (args.indoorOnly) labels.push("室內");
+  if (args.outdoorOnly) labels.push("戶外");
+  if (args.parkingOnly) labels.push("好停車");
+  if (args.strollerFriendlyOnly) labels.push("推車 OK");
+  if (args.type && args.type !== EXHIBIT_TYPE) labels.push(args.type);
+  return labels;
+}
+
 export function playMapResultSentence(
   args: PlayMapResultSentenceArgs,
 ): PlayMapResultSentenceView {
   const scopeLabel = scopeLabelOf(args);
+  const scenarioLabel = args.scenarioLabel ?? null;
   const facetLabels = facetLabelsOf(args);
-  const countLabel = `${args.count} 個地方`;
+  const countLabel = scenarioLabel ? `${args.count} 處` : `${args.count} 個地方`;
   const facetText =
     facetLabels.length > 0 ? `找${facetLabels.join("、")}的地方` : "找地方";
 
   return {
     scopeLabel,
+    scenarioLabel,
     facetLabels,
+    moreFacetLabels: moreFacetLabelsOf(args),
     count: args.count,
     countLabel,
+    mainText: `${scopeLabel}${scenarioLabel ?? ""} · ${countLabel}`,
+    mainLead: `${scopeLabel}${scenarioLabel ?? ""}`,
     srText: `在${scopeLabel}${facetText}，共 ${countLabel}`,
   };
 }

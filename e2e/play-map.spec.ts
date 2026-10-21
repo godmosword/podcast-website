@@ -9,9 +9,9 @@ test.beforeEach(async ({ page }) => {
 const PHONE = { width: 390, height: 844 };
 
 /**
- * 結果列 h2 視覺上是「台北市 · 8 個地方」＋條件小字，內層 span 都 aria-hidden，
- * accessible name 由 srText 提供（「在全台找免費的地方，共 12 個地方」）。
- * 用 role + name 查詢可同時避開位置選擇器的「在哪裡玩？」h2。
+ * 結果列 h2 視覺上是「台北市下雨也能玩 · 3 處」＋條件小字，內層 span 都 aria-hidden，
+ * accessible name 由 srText 提供（「在全台找免費的地方，共 58 處」）。
+ * 用 role + name 查詢可同時避開選縣市面板的「去哪裡玩？」h2。
  */
 function resultSummary(
   page: import("@playwright/test").Page,
@@ -20,12 +20,12 @@ function resultSummary(
   return page.getByRole("heading", {
     level: 2,
     name: scope
-      ? new RegExp(`^在${scope}.*共 \\d+ 個地方$`)
-      : /^在.+，共 \d+ 個地方$/,
+      ? new RegExp(`^在${scope}.*共 \\d+ (個地方|處)$`)
+      : /^在.+，共 \d+ (個地方|處)$/,
   });
 }
 
-/** 等待 PlayMap 意圖列與結果摘要就緒（Leaflet 僅「看地圖」後才載入）。 */
+/** 等待 PlayMap 位置列與結果摘要就緒（Leaflet 僅「看地圖」後才載入）。 */
 async function waitForPlayMapReady(page: import("@playwright/test").Page) {
   await expect(page.getByRole("button", { name: "我附近" })).toBeVisible({
     timeout: 8_000,
@@ -33,14 +33,22 @@ async function waitForPlayMapReady(page: import("@playwright/test").Page) {
   await expect(resultSummary(page)).toBeVisible({ timeout: 5_000 });
 }
 
+/** 位置列「全台 ▾」→ 選縣市面板 → 點縣市（面板選完自動關閉）。 */
 async function selectCoveredCity(
   page: import("@playwright/test").Page,
   city = "台北市",
 ) {
+  await page.getByRole("button", { name: /^選擇地點，目前：/ }).click();
   await page
-    .getByRole("group", { name: "依縣市瀏覽" })
+    .getByRole("dialog", { name: "去哪裡玩？" })
     .getByRole("button", { name: new RegExp(`^${city}，\\d+ 個地點$`) })
     .click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+}
+
+/** 情境卡的 accessible name 是「下雨也能玩，全台 34 處」。 */
+function scenarioCard(page: import("@playwright/test").Page, label: string) {
+  return page.getByRole("button", { name: new RegExp(`^${label}，`) });
 }
 
 async function openMap(page: import("@playwright/test").Page) {
@@ -84,7 +92,7 @@ test.describe("親子遊樂地圖", () => {
     await expect(page.getByRole("button", { name: "看地圖" })).toHaveCount(0);
     await selectCoveredCity(page);
     await expect(page.getByRole("button", { name: "看地圖" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "免費" })).toBeVisible();
+    await expect(scenarioCard(page, "免費就好")).toBeVisible();
     await expect(resultSummary(page, "台北市")).toBeVisible();
 
     const cardsPanel = page.locator("#play-map-panel-cards");
@@ -115,12 +123,12 @@ test.describe("親子遊樂地圖", () => {
     await expect(sheet).toHaveCount(0);
   });
 
-  test("免費 contextual filter 可縮小結果", async ({ page }) => {
+  test("免費就好情境卡可縮小結果", async ({ page }) => {
     test.setTimeout(30_000);
     await page.goto("/for-parents/play-map");
     await waitForPlayMapReady(page);
 
-    await page.getByRole("button", { name: "免費" }).click();
+    await scenarioCard(page, "免費就好").click();
     await expect(resultSummary(page, "全台")).toBeVisible();
     await expect(page).toHaveURL(/free=1/);
   });
@@ -173,7 +181,7 @@ test.describe("親子遊樂地圖", () => {
     ).toBeVisible();
   });
 
-  test("點篩選 chip 不觸發 RSC 往返（P1 回歸）", async ({ page }) => {
+  test("點情境卡不觸發 RSC 往返（P1 回歸）", async ({ page }) => {
     test.setTimeout(30_000);
     const rscRequests: string[] = [];
     page.on("request", (req) => {
@@ -184,21 +192,21 @@ test.describe("親子遊樂地圖", () => {
     await page.goto("/for-parents/play-map");
     await waitForPlayMapReady(page);
 
-    await page.getByRole("button", { name: "免費" }).click();
+    await scenarioCard(page, "免費就好").click();
     await expect(page).toHaveURL(/free=1/);
     await page.waitForTimeout(1_000);
 
     expect(rscRequests).toEqual([]);
   });
 
-  test("contextual quick filters 可組合並寫入網址", async ({ page }) => {
+  test("情境卡＋更多條件可組合並寫入網址", async ({ page }) => {
     test.setTimeout(30_000);
     await page.goto("/for-parents/play-map");
     await waitForPlayMapReady(page);
 
-    const rain = page.getByRole("button", { name: "雨天" });
+    const rain = scenarioCard(page, "下雨也能玩");
     await rain.click();
-    await page.getByRole("button", { name: /篩選/ }).click();
+    await page.getByRole("button", { name: /^更多條件/ }).click();
     const outdoor = page.getByRole("button", { name: "戶外" });
     await outdoor.click();
 
@@ -338,7 +346,7 @@ test.describe("親子遊樂地圖", () => {
 
     await page.goto("/for-parents/play-map");
     await waitForPlayMapReady(page);
-    await expect(page.getByRole("group", { name: "依縣市瀏覽" })).toBeVisible();
+    await expect(page.getByRole("group", { name: "今天想怎麼玩" })).toBeVisible();
     await expect(page.locator(".leaflet-container")).toHaveCount(0);
     expect(mapRequests).toEqual([]);
 
@@ -383,7 +391,7 @@ test.describe("親子遊樂地圖", () => {
       page.getByRole("button", { name: "看全台" }).first(),
     ).toBeVisible();
 
-    await page.getByRole("button", { name: "免費" }).click();
+    await scenarioCard(page, "免費就好").click();
     await expect(resultSummary(page, "這個區域")).toBeVisible();
 
     await page.getByRole("button", { name: "看全台" }).first().click();
@@ -508,93 +516,144 @@ test.describe("親子遊樂地圖", () => {
     ).toHaveCount(0);
   });
 
-  test("意圖列捲動後仍黏在頂欄下方，改條件不必捲回頁頂", async ({ page }) => {
+  test("位置列捲動後黏在頂欄下方、縮成一列並列出目前情境", async ({ page }) => {
     await page.setViewportSize(PHONE);
     await page.goto("/for-parents/play-map");
     await waitForPlayMapReady(page);
+    await scenarioCard(page, "免費就好").click();
 
     await page.evaluate(() => window.scrollTo(0, 1500));
-    const bar = page.locator('[data-quick-filter="free"]');
+    const bar = page.locator("[data-location-bar]");
+    await expect(bar).toHaveAttribute("data-stuck", "true");
     const box = await bar.boundingBox();
-    expect(box, "意圖列應留在畫面內").not.toBeNull();
+    expect(box, "位置列應留在畫面內").not.toBeNull();
     if (!box) return;
-    // 黏住的話 chip 會落在頂欄下方；沒黏住時 boundingBox 會是大負數。
+    // 黏住的話會落在頂欄下方；沒黏住時 boundingBox 會是大負數。
     expect(box.y).toBeGreaterThan(0);
     expect(box.y).toBeLessThan(200);
+    await expect(bar.getByRole("button", { name: "取消「免費就好」" })).toBeVisible();
+    await expect(bar.getByText("在", { exact: true })).toBeHidden();
 
-    // 用真實座標點擊，避開 Playwright 的 actionability 捲動。
-    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-    await expect(bar).toHaveAttribute("aria-pressed", "true");
-    // 條件套用後仍留在原處附近，不會被彈回頁頂。
+    // 用真實座標點「更多條件」，避開 Playwright 的 actionability 捲動。
+    const more = bar.getByRole("button", { name: /^更多條件/ });
+    const moreBox = await more.boundingBox();
+    if (!moreBox) throw new Error("更多條件鈕不在畫面上");
+    await page.mouse.click(moreBox.x + moreBox.width / 2, moreBox.y + moreBox.height / 2);
+    await expect(more).toHaveAttribute("aria-expanded", "true");
+    // 展開後仍留在原處附近，不會被彈回頁頂。
     expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(800);
   });
 
-  test("桌面左欄位置與右欄條件列並排、各自黏在頂欄下方", async ({ page }) => {
+  test("桌面：情境卡一列四張、名單三欄", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto("/for-parents/play-map");
     await waitForPlayMapReady(page);
 
-    await page.evaluate(() => window.scrollTo(0, 1400));
-    const geo = await page.evaluate(() => {
-      const nav = document.querySelector("header, nav")!.getBoundingClientRect();
-      const bar = document
-        .querySelector("[class*=controlBar]")!
-        .getBoundingClientRect();
-      const slot = document
-        .querySelector("[class*=locationSlot]")!
-        .getBoundingClientRect();
-      return {
-        navBottom: nav.bottom,
-        barTop: bar.top,
-        barLeft: bar.left,
-        slotTop: slot.top,
-        slotRight: slot.right,
-      };
-    });
+    const cards = page.getByRole("group", { name: "今天想怎麼玩" }).getByRole("button");
+    await expect(cards).toHaveCount(4);
+    const tops = await cards.evaluateAll((nodes) =>
+      nodes.map((node) => Math.round(node.getBoundingClientRect().top)),
+    );
+    expect(new Set(tops).size).toBe(1);
 
-    // 捲過 1400px 後兩者都還在畫面上緣附近（sticky 生效），而且是左右並排、不互相疊。
-    expect(geo.slotTop).toBeGreaterThanOrEqual(0);
-    expect(geo.slotTop).toBeLessThan(200);
-    expect(geo.barTop).toBeGreaterThanOrEqual(0);
-    expect(geo.barTop).toBeLessThan(200);
-    expect(geo.slotRight).toBeLessThanOrEqual(geo.barLeft);
+    const firstRow = await page
+      .locator("#play-map-panel-cards li:not([hidden])")
+      .evaluateAll((nodes) =>
+        nodes.slice(0, 3).map((node) => Math.round(node.getBoundingClientRect().top)),
+      );
+    expect(new Set(firstRow).size).toBe(1);
   });
 
-  test("手機位置選擇器收合與展開都把焦點交出去", async ({
+  test("選縣市面板：焦點困在面板、Esc 關閉後焦點回觸發鈕、背景不能操作", async ({
     page,
   }) => {
     await page.setViewportSize(PHONE);
     await page.goto("/for-parents/play-map");
     await waitForPlayMapReady(page);
 
-    // 選定：選擇器收合，焦點要落在收合鍵上，不能掉到 body。
-    await page.locator('[data-city="桃園市"]').click();
-    await expect(
-      page.getByRole("button", { name: "取消桃園市，改看全台" }),
-    ).toBeFocused();
+    const trigger = page.getByRole("button", { name: /^選擇地點，目前：/ });
+    await trigger.click();
+    const dialog = page.getByRole("dialog", { name: "去哪裡玩？" });
+    await expect(dialog).toBeVisible();
+    const mainInert = () =>
+      page.evaluate(() => !!document.querySelector("main")?.closest("[inert]"));
+    expect(await mainInert()).toBe(true);
 
-    // 取消：選擇器展開，焦點要還給原本那顆縣市鈕。
-    // 兩個方向都必須等重繪之後才交出去——按下去的當下目標還是 display:none。
-    await page.getByRole("button", { name: "取消桃園市，改看全台" }).click();
-    await expect(page.locator('[data-city="桃園市"]')).toBeFocused();
-    // 「從地圖 cluster 選縣市時焦點留在原地」改由 PlayMapLocationPicker 單元測試覆蓋。
+    for (let i = 0; i < 30; i += 1) {
+      await page.keyboard.press("Tab");
+      const inside = await page.evaluate(
+        () => !!document.activeElement?.closest('[role="dialog"]'),
+      );
+      expect(inside, `第 ${i + 1} 次 Tab 跑出面板`).toBe(true);
+    }
+
+    await page.keyboard.press("Escape");
+    await expect(dialog).toHaveCount(0);
+    await expect(trigger).toBeFocused();
+    expect(await mainInert()).toBe(false);
   });
 
-  test("手機 390×664 首屏看得到完整的「在哪裡玩？」，選縣市後看得到至少兩張卡", async ({
+  test("桌面從黏住的位置列打開面板：面板貼在觸發鈕下方、位置列不脫黏", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto("/for-parents/play-map");
+    await waitForPlayMapReady(page);
+    await page.evaluate(() => window.scrollTo(0, 1400));
+    const bar = page.locator("[data-location-bar]");
+    await expect(bar).toHaveAttribute("data-stuck", "true");
+
+    const trigger = page.getByRole("button", { name: /^選擇地點，目前：/ });
+    const triggerBox = await trigger.boundingBox();
+    if (!triggerBox) throw new Error("觸發鈕不在畫面上");
+    await page.mouse.click(
+      triggerBox.x + triggerBox.width / 2,
+      triggerBox.y + triggerBox.height / 2,
+    );
+    const dialog = page.getByRole("dialog", { name: "去哪裡玩？" });
+    await expect(dialog).toBeVisible();
+    const dialogBox = await dialog.boundingBox();
+    expect(dialogBox?.y ?? -1).toBeGreaterThan(triggerBox.y);
+    expect(dialogBox?.y ?? 9999).toBeLessThan(triggerBox.y + triggerBox.height + 40);
+    await expect(bar).toHaveAttribute("data-stuck", "true");
+    expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(1000);
+  });
+
+  test("網址同時帶多個情境：不亮卡，結果列下方列出每個條件", async ({ page }) => {
+    await page.goto("/for-parents/play-map?free=1&rain=1");
+    await waitForPlayMapReady(page);
+    const pressed = page
+      .getByRole("group", { name: "今天想怎麼玩" })
+      .locator('[aria-pressed="true"]');
+    await expect(pressed).toHaveCount(0);
+    const chips = page.getByRole("group", { name: "目前套用的情境" }).getByRole("button");
+    await expect(chips).toHaveText(["下雨也能玩", "免費就好"]);
+  });
+
+  test("手機 390×664：首屏看得到頁首、四張情境卡與位置列；4 下就能導航", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 390, height: 664 });
     await page.goto("/for-parents/play-map");
     await waitForPlayMapReady(page);
 
-    const notice = page.getByText(/^尚未收錄：/);
-    await expect(notice).toBeInViewport({ ratio: 1 });
+    await expect(page.getByRole("heading", { level: 1, name: "親子遊樂地圖" })).toBeInViewport();
+    await expect(page.getByText("今天想怎麼玩？")).toBeInViewport();
+    const cards = page.getByRole("group", { name: "今天想怎麼玩" }).getByRole("button");
+    for (let i = 0; i < 4; i += 1) {
+      await expect(cards.nth(i)).toBeInViewport({ ratio: 1 });
+    }
+    await expect(page.getByRole("button", { name: /^選擇地點，目前：/ })).toBeInViewport();
 
+    // ① 情境 → ② 全台 ▾ → ③ 縣市 → ④ 導航
+    await scenarioCard(page, "下雨也能玩").click();
     await selectCoveredCity(page, "台北市");
-    await page.evaluate(() => window.scrollTo(0, 0));
-    const names = page.locator("#play-map-panel-cards li:not([hidden]) button[aria-label$='查看詳情']");
-    await expect(names.nth(0)).toBeInViewport();
-    await expect(names.nth(1)).toBeInViewport();
+    await expect(resultSummary(page, "台北市")).toBeInViewport();
+    const nav = page
+      .locator("#play-map-panel-cards li:not([hidden])")
+      .first()
+      .getByRole("link", { name: /^導航前往/ });
+    await expect(nav).toBeInViewport();
+    await expect(nav).toHaveAttribute("href", /google\.com\/maps\/dir/);
+    await expect(nav).toHaveAttribute("target", "_blank");
   });
 
   test("名單卡片明示免費／需購票與室內／戶外", async ({ page }) => {

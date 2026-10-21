@@ -1,17 +1,21 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { PlaygroundType } from "@/data/playgrounds";
+import { PLAY_MAP_SCENARIOS, scenarioDef } from "@/lib/play-map-scenarios";
 import {
   CARDS_PANEL_ID,
   MAP_PANEL_ID,
   OPEN_MAP_BUTTON_ID,
   type BrowseView,
+  type PlayMapScenarioCardView,
 } from "./PlayMapContract";
 import { PlayMapCardList } from "./PlayMapCardList";
 import { PlayMapControlBar } from "./PlayMapControlBar";
+import { PlayMapLocationBar } from "./PlayMapLocationBar";
 import { PlayMapLocationPicker } from "./PlayMapLocationPicker";
+import { PlayMapScenarioGrid } from "./PlayMapScenarioGrid";
 import { PlayMapSheet } from "./PlayMapSheet";
 import { PlayMapToolbar } from "./PlayMapToolbar";
 import { usePlayMapFilters } from "./usePlayMapFilters";
@@ -160,14 +164,92 @@ export default function PlayMap({
     ],
   );
 
+  /* ---- 情境卡與選縣市面板 ---- */
+  const [locationOpen, setLocationOpen] = useState(false);
+  const locationTriggerRef = useRef<HTMLButtonElement>(null);
+  /** .content 的頂端＝位置列的原位；選完縣市捲到這裡，位置列回到導覽列下方、名單緊接在下。 */
+  const locationAnchorRef = useRef<HTMLDivElement>(null);
+
+  const scenarioCards = useMemo(
+    (): PlayMapScenarioCardView[] =>
+      PLAY_MAP_SCENARIOS.map((def) => ({
+        id: def.id,
+        label: def.label,
+        quickFilter: def.quickFilter,
+        count: map.scenarioCounts.get(def.id) ?? 0,
+        pressed: map.activeScenario === def.id,
+      })),
+    [map.activeScenario, map.scenarioCounts],
+  );
+
+  const extraScenarioChips = useMemo(
+    () =>
+      map.activeScenario === null && map.scenarioFlags.length > 1
+        ? map.scenarioFlags.map((id) => ({ id, label: scenarioDef(id).label }))
+        : [],
+    [map.activeScenario, map.scenarioFlags],
+  );
+  const activeScenarioLabel = map.activeScenario
+    ? scenarioDef(map.activeScenario).label
+    : null;
+  const clearScenario = map.handleClearScenario;
+  const activeScenario = map.activeScenario;
+  const handleClearActiveScenario = useCallback(() => {
+    if (activeScenario) clearScenario(activeScenario);
+  }, [activeScenario, clearScenario]);
+
+  const closeLocation = useCallback(() => setLocationOpen(false), []);
+  /**
+   * 選完：關閉 → 等捲動鎖解除後把位置列捲到頂（名單緊接在下）→ 焦點由 dialog 還給觸發鈕。
+   * 刻意用立即捲動：smooth 動畫還在跑時家長接著點「看地圖」，地圖會被捲到導覽列底下。
+   */
+  const pendingScrollFrameRef = useRef<number | null>(null);
+  const cancelPendingScroll = useCallback(() => {
+    if (pendingScrollFrameRef.current === null) return;
+    cancelAnimationFrame(pendingScrollFrameRef.current);
+    pendingScrollFrameRef.current = null;
+  }, []);
+  const scrollLocationBarToTop = useCallback(() => {
+    cancelPendingScroll();
+    pendingScrollFrameRef.current = requestAnimationFrame(() => {
+      pendingScrollFrameRef.current = null;
+      locationAnchorRef.current?.scrollIntoView?.({ block: "start" });
+    });
+  }, [cancelPendingScroll]);
+  useEffect(() => cancelPendingScroll, [cancelPendingScroll]);
+  const handlePickCity = useCallback(
+    (nextCity: string | null) => {
+      handleSelectCity(nextCity);
+      setLocationOpen(false);
+      scrollLocationBarToTop();
+    },
+    [handleSelectCity, scrollLocationBarToTop],
+  );
+  const nearMe = map.handleNearMe;
+  const handlePickNearMe = useCallback(() => {
+    nearMe();
+    setLocationOpen(false);
+    scrollLocationBarToTop();
+  }, [nearMe, scrollLocationBarToTop]);
+
   const mobileMap = !map.splitLayout && map.showMap;
   const wasMobileMapRef = useRef(mobileMap);
   useEffect(() => {
+    const enteredMobileMap = !wasMobileMapRef.current && mobileMap;
     const leftMobileMap = wasMobileMapRef.current && !mobileMap;
     wasMobileMapRef.current = mobileMap;
+    if (enteredMobileMap) {
+      // 選完縣市排程的捲動還沒跑就切進地圖時取消它，免得把地圖捲走。
+      cancelPendingScroll();
+      // 進全幅地圖時情境卡與位置列都收起來、頁面變短；若原本已往下捲，地圖頂端會跑出畫面。
+      document
+        .getElementById(MAP_PANEL_ID)
+        ?.scrollIntoView?.({ block: "start" });
+      return;
+    }
     if (!leftMobileMap) return;
     document.getElementById(OPEN_MAP_BUTTON_ID)?.focus();
-  }, [mobileMap]);
+  }, [cancelPendingScroll, mobileMap]);
 
   return (
     <div
@@ -175,151 +257,171 @@ export default function PlayMap({
       data-split={map.splitActive ? "true" : "false"}
       data-mobile-map={mobileMap ? "true" : "false"}
     >
-      <PlayMapToolbar compact={mobileMap} coverageLabel={map.coverageLabel} />
+      {/* 地圖模式（手機全幅、桌面並排）把高度讓給地圖：頁首只留 h1，情境卡縮成一列。 */}
+      <PlayMapToolbar
+        compact={mobileMap || map.splitActive}
+        coverageLabel={map.coverageLabel}
+      />
+
+      <div className={styles.scenarioSlot} hidden={mobileMap}>
+        <PlayMapScenarioGrid
+          compact={map.splitActive}
+          scenarios={scenarioCards}
+          scopeLabel={map.resultSentence.scopeLabel}
+          onSelect={map.handleSelectScenario}
+        />
+      </div>
 
       {/*
-        ① 在哪裡玩（LocationPicker）→ ② 想要什麼（ControlBar，sticky）→ ③ 名單。
-        桌面名單模式（≥900，.browse 兩欄）：左欄只放位置、sticky；條件列放在右欄頂，
-        和手機同一個元件，篩選面板在右欄展開，不會在左欄造成巢狀捲動。
-        桌面地圖並排（view=map）時位置選擇器改成橫排留在頂端：面板裡已經沒有縣市列，
-        收起來的話家長在地圖分頁就換不了縣市。只有手機全幅地圖才收起來。
+        頁首 → 情境卡 → 位置列（sticky，含更多條件面板）→ 名單。
+        位置列放在 .content 裡（display: contents 的 slot），捲完整份名單都黏著；
+        桌面地圖並排（view=map）時橫跨名單＋地圖兩欄。手機全幅地圖時整列收起。
       */}
-      <div className={styles.browse}>
-        <div className={styles.locationSlot} hidden={mobileMap}>
-          <PlayMapLocationPicker
-            layout={map.splitActive ? "row" : "stack"}
-            regions={map.regions}
-            selectedCity={map.city}
-            uncataloguedCities={map.uncataloguedCities}
-            onToggleCity={handleSelectCity}
+      <div ref={locationAnchorRef} className={styles.content}>
+        <div className={styles.controlSlot} hidden={mobileMap}>
+          <PlayMapLocationBar
+            locationLabel={map.city ?? "全台"}
+            locationTriggerRef={locationTriggerRef}
+            onOpenLocation={() => setLocationOpen(true)}
+            locationOpen={locationOpen}
             nearMeActive={map.userLatLng !== null}
             geoStatus={map.geoStatus}
             onNearMe={map.handleNearMe}
-          />
-        </div>
-
-        <div className={styles.content}>
-          <div className={styles.controlSlot} hidden={mobileMap}>
+            panelFilterCount={map.panelFilterCount}
+            filtersOpen={map.filtersOpen}
+            onToggleFilters={map.handleToggleFilters}
+            activeScenarioLabel={activeScenarioLabel}
+            onClearActiveScenario={handleClearActiveScenario}
+          >
             <PlayMapControlBar
-              freeOnly={map.freeOnly}
               indoorOnly={map.indoorOnly}
               outdoorOnly={map.outdoorOnly}
-              rainyDayOnly={map.rainyDayOnly}
               parkingOnly={map.parkingOnly}
               strollerFriendlyOnly={map.strollerFriendlyOnly}
-              highEnergyOnly={map.highEnergyOnly}
-              panelFilterCount={map.panelFilterCount}
-              onToggleFree={map.handleToggleFree}
-              onToggleRainyDay={map.handleToggleRainyDay}
+              onSelectEnvironment={map.handleSelectEnvironment}
               onToggleParking={map.handleToggleParking}
               onToggleStrollerFriendly={map.handleToggleStrollerFriendly}
-              onToggleHighEnergy={map.handleToggleHighEnergy}
               filtersOpen={map.filtersOpen}
-              onToggleFilters={map.handleToggleFilters}
-              onSelectEnvironment={map.handleSelectEnvironment}
               typeFilter={map.typeFilter}
               typeCounts={map.typeCounts}
               visibleTypeOptions={map.visibleTypeOptions}
               onSelectType={map.handleSelectType}
             />
-          </div>
+          </PlayMapLocationBar>
+        </div>
 
-          <section
-            id={CARDS_PANEL_ID}
-            ref={cardPanelRef}
-            role="region"
-            aria-label="地點名單"
-            hidden={!map.showCards}
-            className={styles.cardsPanel}
-          >
-            <PlayMapCardList
-              groups={map.groups}
-              matchedCount={map.filtered.length}
-              unmatched={map.unmatchedPlaces}
+        <section
+          id={CARDS_PANEL_ID}
+          ref={cardPanelRef}
+          role="region"
+          aria-label="地點名單"
+          hidden={!map.showCards}
+          className={styles.cardsPanel}
+        >
+          <PlayMapCardList
+            groups={map.groups}
+            activeScenario={map.activeScenario}
+            extraScenarioChips={extraScenarioChips}
+            onClearScenario={map.handleClearScenario}
+            matchedCount={map.filtered.length}
+            unmatched={map.unmatchedPlaces}
+            selectedId={map.selectedId}
+            hoveredPlaceId={map.hoveredPlaceId}
+            hoverCorrelationEnabled={map.splitActive}
+            userLatLng={map.userLatLng}
+            hasExtraFilters={map.hasExtraFilters}
+            onClearFilters={map.handleClearFilters}
+            viewportSearchActive={map.viewportSearchActive}
+            onClearViewportSearch={viewport.handleClearViewportSearch}
+            onHover={map.handleHoverPlace}
+            onBlur={map.handleBlurPlace}
+            onSelect={map.handleSelectFromCard}
+            registerCardRef={registerCardRef}
+            resultSentence={map.resultSentence}
+            groupNote={map.groupNote}
+            showMapAction={
+              !map.splitActive && (map.city !== null || map.userLatLng !== null)
+            }
+            onOpenMap={() => map.handleSelectView("map")}
+            editorialPick={map.showCards ? map.editorialPick : null}
+            visibleCount={map.visibleCount}
+            canLoadMore={map.canLoadMore}
+            visibleCountLabel={map.visibleCountLabel}
+            loadMoreLabel={map.loadMoreLabel}
+            onLoadMore={map.handleLoadMore}
+            topRef={map.cardListTopRef}
+          />
+        </section>
+
+        <div
+          id={MAP_PANEL_ID}
+          role="region"
+          aria-label="地點地圖"
+          hidden={!map.showMap}
+          className={styles.mapShell}
+        >
+          {mobileMap ? (
+            <div className={styles.mapChrome}>
+              <button
+                type="button"
+                className={styles.backToListButton}
+                onClick={() => map.handleSelectView("cards")}
+              >
+                返回名單
+              </button>
+            </div>
+          ) : null}
+          {viewport.hasPendingViewportSearch ? (
+            <button
+              type="button"
+              className={styles.viewportSearchButton}
+              onClick={viewport.handleCommitViewportSearch}
+            >
+              搜尋此區域
+            </button>
+          ) : null}
+          {mapMountedRef.current ? (
+            <PlayMapLeaflet
+              places={map.filtered}
+              points={map.points}
+              emptyCenter={map.cityCenter}
               selectedId={map.selectedId}
               hoveredPlaceId={map.hoveredPlaceId}
               hoverCorrelationEnabled={map.splitActive}
-              userLatLng={map.userLatLng}
-              hasExtraFilters={map.hasExtraFilters}
-              onClearFilters={map.handleClearFilters}
-              viewportSearchActive={map.viewportSearchActive}
-              onClearViewportSearch={viewport.handleClearViewportSearch}
               onHover={map.handleHoverPlace}
               onBlur={map.handleBlurPlace}
-              onSelect={map.handleSelectFromCard}
-              registerCardRef={registerCardRef}
-              resultSentence={map.resultSentence}
-              groupNote={map.groupNote}
-              showMapAction={
-                !map.splitActive &&
-                (map.city !== null || map.userLatLng !== null)
+              onSelect={handleSelectFromMap}
+              reduceMotion={map.reduceMotion}
+              active={map.showMap}
+              userLatLng={map.userLatLng}
+              viewportZoom={viewport.zoom}
+              preserveViewport={
+                map.viewportSearchActive &&
+                !(map.city === null && map.userLatLng !== null)
               }
-              onOpenMap={() => map.handleSelectView("map")}
-              editorialPick={map.showCards ? map.editorialPick : null}
-              visibleCount={map.visibleCount}
-              canLoadMore={map.canLoadMore}
-              visibleCountLabel={map.visibleCountLabel}
-              loadMoreLabel={map.loadMoreLabel}
-              onLoadMore={map.handleLoadMore}
-              topRef={map.cardListTopRef}
+              onViewportSettled={viewport.handleViewportSettled}
+              resizeRequest={0}
+              splitLayout={map.splitLayout}
+              nearMeCamera={map.city === null && map.userLatLng !== null}
             />
-          </section>
-
-          <div
-            id={MAP_PANEL_ID}
-            role="region"
-            aria-label="地點地圖"
-            hidden={!map.showMap}
-            className={styles.mapShell}
-          >
-            {mobileMap ? (
-              <div className={styles.mapChrome}>
-                <button
-                  type="button"
-                  className={styles.backToListButton}
-                  onClick={() => map.handleSelectView("cards")}
-                >
-                  返回名單
-                </button>
-              </div>
-            ) : null}
-            {viewport.hasPendingViewportSearch ? (
-              <button
-                type="button"
-                className={styles.viewportSearchButton}
-                onClick={viewport.handleCommitViewportSearch}
-              >
-                搜尋此區域
-              </button>
-            ) : null}
-            {mapMountedRef.current ? (
-              <PlayMapLeaflet
-                places={map.filtered}
-                points={map.points}
-                emptyCenter={map.cityCenter}
-                selectedId={map.selectedId}
-                hoveredPlaceId={map.hoveredPlaceId}
-                hoverCorrelationEnabled={map.splitActive}
-                onHover={map.handleHoverPlace}
-                onBlur={map.handleBlurPlace}
-                onSelect={handleSelectFromMap}
-                reduceMotion={map.reduceMotion}
-                active={map.showMap}
-                userLatLng={map.userLatLng}
-                viewportZoom={viewport.zoom}
-                preserveViewport={
-                  map.viewportSearchActive &&
-                  !(map.city === null && map.userLatLng !== null)
-                }
-                onViewportSettled={viewport.handleViewportSettled}
-                resizeRequest={0}
-                splitLayout={map.splitLayout}
-                nearMeCamera={map.city === null && map.userLatLng !== null}
-              />
-            ) : null}
-          </div>
+          ) : null}
         </div>
       </div>
+
+      <PlayMapLocationPicker
+        open={locationOpen && !mobileMap}
+        onClose={closeLocation}
+        returnFocusRef={locationTriggerRef}
+        regions={map.regions}
+        allCount={map.allCount}
+        selectedCity={map.city}
+        onSelectCity={handlePickCity}
+        uncataloguedCities={map.uncataloguedCities}
+        scenarioLabel={activeScenarioLabel}
+        nearMeActive={map.userLatLng !== null}
+        geoStatus={map.geoStatus}
+        onNearMe={handlePickNearMe}
+      />
 
       {map.selected ? (
         <PlayMapSheet

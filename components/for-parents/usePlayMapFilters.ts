@@ -46,6 +46,8 @@ import {
   type PlayMapEditorialScope,
 } from "@/lib/play-map-editorial";
 import type { PlayMapEditorialIntent } from "@/data/play-map-editorial-picks";
+import { EXHIBIT_TYPE } from "@/lib/play-map-scenarios";
+import { usePlayMapScenarios } from "./usePlayMapScenarios";
 
 function usePrefersReducedMotion(): boolean {
   const [reduce, setReduce] = useState(false);
@@ -378,6 +380,42 @@ export function usePlayMapFilters({
     syncUrl({ view: "cards" });
   }, [initialCity, initialView, syncUrl]);
 
+  /**
+   * 一次改多個篩選欄位：所有 setter 在同一個事件裡排入、再寫一次網址。
+   * 情境切換一定要走這支——連續呼叫 toggle 會用到閉包裡的舊值，網址可能混入前一個情境。
+   */
+  const applyFilterPatch = useCallback(
+    (patch: Partial<Omit<PlayMapQuery, "view">>) => {
+      if ("city" in patch) setCity(patch.city ?? null);
+      if ("type" in patch) setTypeFilter(patch.type ?? null);
+      if (patch.indoorOnly !== undefined) setIndoorOnly(patch.indoorOnly);
+      if (patch.outdoorOnly !== undefined) setOutdoorOnly(patch.outdoorOnly);
+      if (patch.freeOnly !== undefined) setFreeOnly(patch.freeOnly);
+      if (patch.rainyDayOnly !== undefined) setRainyDayOnly(patch.rainyDayOnly);
+      if (patch.parkingOnly !== undefined) setParkingOnly(patch.parkingOnly);
+      if (patch.strollerFriendlyOnly !== undefined) {
+        setStrollerFriendlyOnly(patch.strollerFriendlyOnly);
+      }
+      if (patch.highEnergyOnly !== undefined) setHighEnergyOnly(patch.highEnergyOnly);
+      syncUrl(patch);
+    },
+    [syncUrl],
+  );
+
+  const scenarios = usePlayMapScenarios({
+    city,
+    indoorOnly,
+    outdoorOnly,
+    parkingOnly,
+    strollerFriendlyOnly,
+    viewportBounds,
+    rainyDayOnly,
+    highEnergyOnly,
+    freeOnly,
+    typeFilter,
+    applyFilterPatch,
+  });
+
   const handleSelectCity = useCallback(
     (nextCity: string | null) => {
       setCity(nextCity);
@@ -406,18 +444,6 @@ export function usePlayMapFilters({
     [syncUrl],
   );
 
-  const handleToggleFree = useCallback(() => {
-    const next = !freeOnly;
-    setFreeOnly(next);
-    syncUrl({ freeOnly: next });
-  }, [freeOnly, syncUrl]);
-
-  const handleToggleRainyDay = useCallback(() => {
-    const next = !rainyDayOnly;
-    setRainyDayOnly(next);
-    syncUrl({ rainyDayOnly: next });
-  }, [rainyDayOnly, syncUrl]);
-
   const handleToggleParking = useCallback(() => {
     const next = !parkingOnly;
     setParkingOnly(next);
@@ -429,12 +455,6 @@ export function usePlayMapFilters({
     setStrollerFriendlyOnly(next);
     syncUrl({ strollerFriendlyOnly: next });
   }, [strollerFriendlyOnly, syncUrl]);
-
-  const handleToggleHighEnergy = useCallback(() => {
-    const next = !highEnergyOnly;
-    setHighEnergyOnly(next);
-    syncUrl({ highEnergyOnly: next });
-  }, [highEnergyOnly, syncUrl]);
 
   const handleHoverPlace = useCallback((id: string) => {
     setHoveredPlaceId(id);
@@ -658,11 +678,13 @@ export function usePlayMapFilters({
   });
 
   /**
-   * 「篩選」徽章只數面板裡的條件。快捷列（雨天／免費／室內／放電）本身就看得到
-   * 按下狀態，位置（縣市／附近）有自己的控制，都不算，避免同一件事被數兩次。
+   * 「更多條件」徽章只數面板裡的條件。情境卡（雨天／放電／看展覽／免費）本身就看得到
+   * 選中狀態，位置（縣市／附近）有自己的控制，都不算，避免同一件事被數兩次。
+   * 類型＝博物館是「看展覽」情境的欄位，不算進更多條件。
    */
   const panelFilterCount = [
-    typeFilter !== null,
+    typeFilter !== null && typeFilter !== EXHIBIT_TYPE,
+    indoorOnly,
     outdoorOnly,
     parkingOnly,
     strollerFriendlyOnly,
@@ -726,13 +748,11 @@ export function usePlayMapFilters({
     handleLoadMore,
     visibleTypeOptions,
     handleSelectCity,
+    ...scenarios,
     handleSelectType,
     handleSelectEnvironment,
-    handleToggleFree,
-    handleToggleRainyDay,
     handleToggleParking,
     handleToggleStrollerFriendly,
-    handleToggleHighEnergy,
     handleHoverPlace,
     handleBlurPlace,
     handleNearMe,
