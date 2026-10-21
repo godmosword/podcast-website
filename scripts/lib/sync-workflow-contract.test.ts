@@ -171,13 +171,14 @@ describe("sync workflow contract", () => {
     expect(yaml).toContain("npm run sync:apple");
     expect(yaml).toContain("npm run verify:episodes");
     expect(yaml).toContain("npm run verify:browse-index");
+    expect(yaml).toContain("npm run generate:story-blurs");
     expect(yaml).toContain("npm test");
     expect(yaml).toContain("npm run build");
     expect(yaml).toContain(
       "git add data/apple-synced.json data/apple-sync-state.json data/browse-index.json public/stories/ data/subtitles/ \\",
     );
     expect(yaml).toContain(
-      "data/story-zones.ts data/reflection-prompts.ts data/story-dates.ts data/episode-faqs.ts data/audio-lengths.json",
+      "data/story-zones.ts data/reflection-prompts.ts data/story-dates.ts data/episode-faqs.ts data/audio-lengths.json data/story-image-blurs.json",
     );
     expect(yaml).toContain("git diff --name-only");
     expect(yaml).toContain("git ls-files --others --exclude-standard");
@@ -328,6 +329,28 @@ describe("sync workflow contract", () => {
       // sync-build-skip：由「Production build 不得設 INDEXNOW_KEY」另測保證
       expect(entry.disposition).toBe("sync-build-skip");
     }
+  });
+
+  it("封面 blur 必須在單測前產生，且 git add 含 story-image-blurs.json（防 #251）", () => {
+    const yaml = readWorkflow("sync-apple-podcast.yml");
+    const syncAt = yaml.indexOf("npm run sync:apple");
+    const blurAt = yaml.indexOf("npm run generate:story-blurs");
+    const detectAt = yaml.indexOf("name: Detect changes");
+    const testAt = yaml.indexOf("name: Run unit tests");
+    expect(syncAt).toBeGreaterThan(-1);
+    expect(blurAt).toBeGreaterThan(syncAt);
+    expect(detectAt).toBeGreaterThan(blurAt);
+    expect(testAt).toBeGreaterThan(detectAt);
+    expect(gitAddBlock(yaml)).toContain("data/story-image-blurs.json");
+
+    const src = readSyncScript();
+    expect(src).toContain(
+      'import { ensureStoryCoverBlurs } from "./lib/story-cover-blur"',
+    );
+    expect(src).toMatch(
+      /await writeJson\(PATHS\.synced[\s\S]*?await syncStoryCoverBlurs\s*\(/,
+    );
+    expect(src).toMatch(/syncStoryCoverBlurs\(storyBlurTargets\)/);
   });
 
   it("sync-apple-podcast.ts 必須呼叫 upsertCatalogSidecars（新集自動補 sidecar）", () => {

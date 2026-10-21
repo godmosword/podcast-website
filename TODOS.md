@@ -1956,15 +1956,18 @@ Tiled 關卡管線、6–10 關+世界地圖、檢查點、多敵人類型、視
 | 12 | 字幕 backfill | 缺字幕的舊集補轉 | 同 run 內 |
 | 12b | 簡轉繁 + 幻覺過濾 | `relocalizeSidecars` | 同 run 內 |
 | 12c | **字幕自動 `--fix`** | 本輪新集／新轉錄 `ep-N` 品牌名修正 | 不 `--mark`；report 寫入 `proofreadAutoFixed` |
+| 12d | **封面 blur** | `data/story-image-blurs.json` | 只補缺的封面；GHA 在 `npm test` 前再跑一次（#251） |
 | 13 | `npm test` + `npm run build` | — | 有變更才跑 |
 | 14 | Commit + push `main` | Vercel 部署 MVP | 見下方 commit 範圍 |
 | 15 | **生圖通知** | GitHub Issue | 已實作：push 成功後開 `[illustrate]` Issue（`113680a`） |
 
-**GHA 目前 `git add` 範圍：** `data/apple-synced.json`、`data/apple-sync-state.json`、`data/browse-index.json`、`public/stories/`、`data/subtitles/`、`data/story-zones.ts`、`data/reflection-prompts.ts`、`data/story-dates.ts`、`data/episode-faqs.ts`、`data/audio-lengths.json`。
+**GHA 目前 `git add` 範圍：** `data/apple-synced.json`、`data/apple-sync-state.json`、`data/browse-index.json`、`public/stories/`、`data/subtitles/`、`data/story-zones.ts`、`data/reflection-prompts.ts`、`data/story-dates.ts`、`data/episode-faqs.ts`、`data/audio-lengths.json`、`data/story-image-blurs.json`。
 
 **GHA 不會碰：** `public/.illustrate-staging/`、`data/apple-sync.defaults.json`（approve 寫入 overrides）、`data/characters.json`、`data/scenes/` — 生圖產物需**人工 commit**。
 
 > **根因備註（#46，2026-07-15）：** 先前 sync 已成功下載／轉錄 ep-19，但 `npm test` 因缺 zone／reflection／dates 三 sidecar 失敗而永不 push。現改由 `scripts/lib/sync-catalog-sidecars.ts` 在新集寫入時自動 upsert，並納入上列 `git add`。
+>
+> **根因備註（#251，2026-10-21）：** PR #249 起 `lib/story-image-blur.test.ts` 要求每一集封面都有 blur。新集寫入目錄後尚未產生 blur，`npm test` 在 commit 前失敗，集數永不 push。現由 sync 與 workflow 在單測前補 `data/story-image-blurs.json`，並列入 `git add`。
 
 ### Phase 2 — 同步後人工（生圖前）
 
