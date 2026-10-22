@@ -17,13 +17,17 @@ import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { lookupFeedUrl } from "../lib/podcast-apple";
+import { fetchRssXml, lookupFeedUrlWithRetry } from "./lib/apple-feed";
 import { parseRssEpisodes, type RssEpisode } from "./lib/apple-rss";
 import {
   isRssEpisodeOnSite,
   type CatalogEntry,
 } from "./lib/episode-match";
-import { openOrCommentIssue, resolveIssue } from "./sync-alert";
+import {
+  alertAfterConsecutiveFailures,
+  clearAlertStreak,
+  resolveIssue,
+} from "./sync-alert";
 import {
   decideStaleRssAlert,
   hasOpenSyncLandingPr,
@@ -115,10 +119,8 @@ function findMissingEpisode(
 }
 
 async function main(): Promise<void> {
-  const feedUrl = await lookupFeedUrl();
-  const res = await fetch(feedUrl, { signal: AbortSignal.timeout(60_000) });
-  if (!res.ok) throw new Error(`RSS fetch failed: ${res.status}`);
-  const rss = parseRssEpisodes(await res.text());
+  const feedUrl = await lookupFeedUrlWithRetry();
+  const rss = parseRssEpisodes(await fetchRssXml(feedUrl));
 
   const catalog = readJson<CatalogEntry[]>("data/apple-synced.json", []);
   const state = readJson<SyncState>("data/apple-sync-state.json", {});
@@ -132,6 +134,7 @@ async function main(): Promise<void> {
   const missing = findMissingEpisode(rss, ctx);
   if (!missing) {
     console.log("RSS 最新集皆已上站。");
+    clearAlertStreak();
     resolveIssue({
       kind: "sync-stale-rss",
       comment: "✅ RSS 最新一集已確認上站，看門狗解除告警。",
@@ -157,21 +160,25 @@ async function main(): Promise<void> {
 
   const { item, hours } = missing;
   console.warn(`STALE：「${item.title}」距今 ${hours.toFixed(1)}h 仍未上站`);
-  openOrCommentIssue({
+  const body = [
+    `RSS 已有新集，但站上 \`data/apple-sync-state.json\` 尚未同步到。`,
+    "",
+    `- 集數：**${item.title}**`,
+    `- guid：\`${item.guid}\``,
+    `- 發佈：${item.pubDate}（距今 ${hours.toFixed(1)} 小時）`,
+    `- feed：${feedUrl}`,
+    "",
+    `請檢查 sync-apple-podcast workflow 最近的 run 是否失敗。`,
+    "",
+    `> 若稍後同步成功，\`notify-live\` 會把**本單**改成待生圖 checklist，不會另開第二張 Issue。`,
+  ].join("\n");
+  alertAfterConsecutiveFailures({
+    category: "stale-rss",
+    step: "Check RSS freshness vs site",
     kind: "sync-stale-rss",
     title: "⚠️ RSS 有新集未上站",
-    body: [
-      `RSS 已有新集，但站上 \`data/apple-sync-state.json\` 尚未同步到。`,
-      "",
-      `- 集數：**${item.title}**`,
-      `- guid：\`${item.guid}\``,
-      `- 發佈：${item.pubDate}（距今 ${hours.toFixed(1)} 小時）`,
-      `- feed：${feedUrl}`,
-      "",
-      `請檢查 sync-apple-podcast workflow 最近的 run 是否失敗。`,
-      "",
-      `> 若稍後同步成功，\`notify-live\` 會把**本單**改成待生圖 checklist，不會另開第二張 Issue。`,
-    ].join("\n"),
+    body,
+    excerpt: `##[error]STALE：「${item.title}」距今 ${hours.toFixed(1)}h 仍未上站`,
   });
 }
 

@@ -26,7 +26,8 @@
  *   SYNC_ALERT_SKIP       — 設為 pending-merge 時不開失敗單
  */
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import path from "node:path";
 import { getStories } from "../data/content";
 import {
   createEmptyReport,
@@ -41,6 +42,21 @@ import {
   enqueueFromSyncReport,
   shouldPersistIllustrationQueue,
 } from "./lib/illustration-queue-store";
+import {
+  ALERT_AFTER_CONSECUTIVE,
+  categoryLabel,
+  categoryLabelColor,
+  classifySyncFailure,
+  emptyStreak,
+  extractErrorExcerpt,
+  parseStreak,
+  recordFailure,
+  serializeStreak,
+  shouldOpenAlert,
+  stepLabel,
+  type FailureCategory,
+  type StreakFile,
+} from "./lib/sync-alert-policy";
 
 export type AlertKind = "sync-job-failure" | "sync-stale-rss";
 export type GhRunner = (args: string[]) => string;
@@ -50,6 +66,7 @@ export type SyncAlertDeps = {
   log?: (message: string) => void;
   warn?: (message: string) => void;
   readFile?: (filePath: string) => string;
+  writeFile?: (filePath: string, contents: string) => void;
   /** 測試用：覆寫 catalog 來源（預設 getStories） */
   getStories?: () => Array<{
     slug: string;
@@ -308,6 +325,8 @@ export type SyncFailureExtra = {
   failedSteps?: string[];
   context?: string;
   prUrl?: string;
+  category?: string;
+  excerpt?: string;
 };
 
 /**
@@ -323,6 +342,8 @@ export function buildSyncFailureBody(
   const failedSteps = (extra.failedSteps ?? []).filter((name) => name.trim());
   const context = (extra.context ?? env.SYNC_FAILURE_CONTEXT ?? "").trim();
   const prUrl = (extra.prUrl ?? env.SYNC_PR_URL ?? "").trim();
+  const category = extra.category?.trim();
+  const excerpt = (extra.excerpt ?? "").trim();
   const lines = [
     "## Apple sync workflow 失敗",
     "",
@@ -330,6 +351,9 @@ export function buildSyncFailureBody(
     `- **Commit**：\`${sha}\``,
     `- **Branch**：\`${ref}\``,
   ];
+  if (category) {
+    lines.push(`- **分類**：\`${category}\``);
+  }
   if (failedSteps.length > 0) {
     lines.push(
       `- **失敗步驟**：${failedSteps.map((name) => `\`${name}\``).join("、")}`,
@@ -341,9 +365,12 @@ export function buildSyncFailureBody(
   if (prUrl) {
     lines.push(`- **Sync PR**：${prUrl}`);
   }
+  if (excerpt) {
+    lines.push("", "### 錯誤摘錄", "", "```", excerpt, "```");
+  }
   lines.push(
     "",
-    "這張 Issue 代表這次 job 沒有把結果留在 main。RSS 下載可能已經成功；常見卡點是單元測試、quality，或 protect-main-web（GH013）。",
+    "這張 Issue 代表這次 job 沒有把結果留在 main。RSS 下載可能已經成功；常見卡點是驗證、quality，或 protect-main-web（GH013）。",
     "",
     "請先查看 Run 裡第一個失敗的 step 與錯誤訊息；本 Issue 只負責把失敗即時集中、去重，不以 watchdog 的 stale 判斷取代原始 CI 證據。",
   );
@@ -386,6 +413,7 @@ type GhIssue = {
   number?: number;
   title?: string;
   url?: string;
+  state?: string;
   labels?: Array<{ name?: string }>;
 };
 
@@ -802,6 +830,227 @@ export function notifyLive(
   return result;
 }
 
+function streakFilePath(env: NodeJS.ProcessEnv): string | null {
+  const explicit = env.SYNC_ALERT_STREAK_PATH?.trim();
+  if (explicit) return explicit;
+  if (env.GITHUB_ACTIONS === "true") return ".cache/sync-alert-streak.json";
+  return null;
+}
+
+function readText(filePath: string, deps: SyncAlertDeps): string {
+  return (deps.readFile ?? ((target: string) => readFileSync(target, "utf8")))(filePath);
+}
+
+function writeText(filePath: string, contents: string, deps: SyncAlertDeps): void {
+  if (deps.writeFile) {
+    deps.writeFile(filePath, contents);
+    return;
+  }
+  mkdirSync(path.dirname(filePath), { recursive: true });
+  writeFileSync(filePath, contents, "utf8");
+}
+
+function loadStreak(filePath: string, deps: SyncAlertDeps): StreakFile {
+  try {
+    return parseStreak(readText(filePath, deps));
+  } catch {
+    return emptyStreak();
+  }
+}
+
+/** 成功後把連續失敗歸零。沒有設定路徑（本機單次）就什麼都不寫。 */
+export function clearAlertStreak(deps: SyncAlertDeps = {}): void {
+  const env = deps.env ?? process.env;
+  const filePath = streakFilePath(env);
+  if (!filePath) return;
+  writeText(filePath, serializeStreak(emptyStreak()), deps);
+}
+
+function listAlertIssues(
+  labels: string[],
+  state: "open" | "all",
+  deps: SyncAlertDeps,
+): GhIssue[] {
+  try {
+    const args = [
+      "issue",
+      "list",
+      "--state",
+      state,
+      "--json",
+      "number,title,url,state,labels",
+      "--limit",
+      "10",
+    ];
+    for (const label of labels) {
+      args.push("--label", label);
+    }
+    const out = callGh(args, deps);
+    return JSON.parse(out || "[]") as GhIssue[];
+  } catch {
+    return [];
+  }
+}
+
+function findFailureIssue(
+  kind: AlertKind,
+  category: FailureCategory,
+  deps: SyncAlertDeps,
+): GhIssue | null {
+  const byCategory = listAlertIssues(
+    [BASE_LABEL, categoryLabel(category)],
+    "all",
+    deps,
+  );
+  const open = byCategory.find((issue) => issue.state !== "closed" && issue.number != null);
+  if (open) return open;
+  if (byCategory[0]?.number != null) return byCategory[0];
+  const legacy = listAlertIssues([BASE_LABEL, kind], "open", deps);
+  return legacy.find((issue) => issue.number != null) ?? null;
+}
+
+function readFailureExcerpt(env: NodeJS.ProcessEnv, deps: SyncAlertDeps): string {
+  const inline = env.SYNC_ERROR_EXCERPT?.trim();
+  if (inline) return extractErrorExcerpt(inline);
+  const filePath = env.SYNC_ERROR_EXCERPT_PATH?.trim();
+  if (!filePath) return "";
+  try {
+    return extractErrorExcerpt(readText(filePath, deps));
+  } catch {
+    return "";
+  }
+}
+
+export type ConsecutiveAlertInput = {
+  category: FailureCategory;
+  step: string;
+  kind: AlertKind;
+  title: string;
+  body: string;
+  excerpt?: string;
+};
+
+/**
+ * 連續失敗未滿 2 次只記 streak、不開 Issue。
+ * 滿 2 次後更新同一張分類 Issue（不另開）。之後每次只改內文，不再洗 comment。
+ */
+export function alertAfterConsecutiveFailures(
+  opts: ConsecutiveAlertInput,
+  deps: SyncAlertDeps = {},
+): { alerted: boolean; count: number } {
+  const env = deps.env ?? process.env;
+  const filePath = streakFilePath(env);
+  let count = ALERT_AFTER_CONSECUTIVE;
+  if (filePath) {
+    const recorded = recordFailure(loadStreak(filePath, deps), opts.category);
+    count = recorded.count;
+    writeText(filePath, serializeStreak(recorded.next), deps);
+  }
+  if (!shouldOpenAlert(count)) {
+    log(
+      deps,
+      `連續失敗 ${count}/${ALERT_AFTER_CONSECUTIVE}（${opts.category}／${opts.step}），尚未開 Issue。`,
+    );
+    return { alerted: false, count };
+  }
+
+  const excerpt = (opts.excerpt ?? "").trim();
+  const body = excerpt && !opts.body.includes(excerpt)
+    ? `${opts.body}\n\n### 錯誤摘錄\n\n\`\`\`\n${excerpt}\n\`\`\``
+    : opts.body;
+  const cat = categoryLabel(opts.category);
+  const step = stepLabel(opts.step);
+  ensureLabel(BASE_LABEL, "5319e7", "同步告警", deps);
+  ensureLabel(opts.kind, KIND_META[opts.kind].color, KIND_META[opts.kind].description, deps);
+  ensureLabel(cat, categoryLabelColor(opts.category), `同步根因：${opts.category}`, deps);
+  ensureLabel(step, "ededed", `失敗步驟：${opts.step}`.slice(0, 100), deps);
+
+  const existing = findFailureIssue(opts.kind, opts.category, deps);
+  if (existing?.number != null) {
+    const wasClosed = existing.state === "closed";
+    try {
+      callGh(
+        [
+          "issue",
+          "edit",
+          String(existing.number),
+          "--title",
+          opts.title,
+          "--body",
+          body,
+          "--add-label",
+          BASE_LABEL,
+          "--add-label",
+          opts.kind,
+          "--add-label",
+          cat,
+          "--add-label",
+          step,
+        ],
+        deps,
+      );
+      if (wasClosed) {
+        callGh(["issue", "reopen", String(existing.number)], deps);
+      }
+      if (wasClosed || count === ALERT_AFTER_CONSECUTIVE) {
+        callGh(
+          [
+            "issue",
+            "comment",
+            String(existing.number),
+            "--body",
+            `第 ${count} 次連續失敗（${opts.category}／${opts.step}）。最新摘錄已寫回內文。`,
+          ],
+          deps,
+        );
+      }
+      log(deps, `已更新 #${existing.number}（${opts.category}，連續 ${count} 次）`);
+      return { alerted: true, count };
+    } catch (err) {
+      warn(deps, `更新失敗 Issue 失敗（忽略）：${(err as Error).message}`);
+      return { alerted: false, count };
+    }
+  }
+
+  const fullBody = `${mentionPreamble(env)}${body}`;
+  try {
+    const url = callGh(
+      [
+        "issue",
+        "create",
+        "--title",
+        opts.title,
+        "--body",
+        fullBody,
+        "--label",
+        BASE_LABEL,
+        "--label",
+        opts.kind,
+        "--label",
+        cat,
+        "--label",
+        step,
+        ...assigneeArgs(env),
+      ],
+      deps,
+    );
+    log(deps, `已開 Issue：${url}`);
+  } catch (err) {
+    warn(deps, `開失敗 Issue 失敗（忽略）：${(err as Error).message}`);
+    try {
+      const url = callGh(
+        ["issue", "create", "--title", opts.title, "--body", fullBody],
+        deps,
+      );
+      log(deps, `已開 Issue（無 label）：${url}`);
+    } catch (secondErr) {
+      warn(deps, `開失敗 Issue 再次失敗（忽略）：${(secondErr as Error).message}`);
+      return { alerted: false, count };
+    }
+  }
+  return { alerted: true, count };
+}
+
 export function runSyncAlertMode(
   mode: string | undefined,
   rest: string[],
@@ -819,6 +1068,7 @@ export function runSyncAlertMode(
       notifyLive(deps, { reconcile, strict });
       break;
     case "resolve":
+      clearAlertStreak(deps);
       resolveIssue({
         kind: kindArg ?? "sync-job-failure",
         comment: `✅ 同步已恢復正常。\n\n- Run：${runUrl(env)}`,
@@ -834,11 +1084,29 @@ export function runSyncAlertMode(
         break;
       }
       const failedSteps = failedStepNamesFromRun(env, deps);
-      openOrCommentIssue({
-        kind: kindArg ?? "sync-job-failure",
-        title: "[sync] Apple Podcast workflow 失敗",
-        body: buildSyncFailureBody(env, { failedSteps }),
-      }, deps);
+      const context = (env.SYNC_FAILURE_CONTEXT ?? "").trim();
+      const logExcerpt = readFailureExcerpt(env, deps);
+      const excerpt = logExcerpt || (context ? `##[error]${context}` : "");
+      const classified = classifySyncFailure({
+        steps: failedSteps,
+        context,
+        logExcerpt: excerpt,
+      });
+      alertAfterConsecutiveFailures(
+        {
+          category: classified.category,
+          step: classified.step,
+          kind: kindArg ?? "sync-job-failure",
+          title: `[sync][${classified.category}] Apple Podcast workflow 失敗`,
+          body: buildSyncFailureBody(env, {
+            failedSteps,
+            category: classified.category,
+            excerpt,
+          }),
+          excerpt,
+        },
+        deps,
+      );
       break;
     }
     default:

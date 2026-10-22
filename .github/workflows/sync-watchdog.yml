@@ -1,13 +1,11 @@
 name: Sync Watchdog
 
-# 獨立看門狗：驗證「RSS 最新一集是否已上站」，是 sync workflow 整個壞掉時的最後防線。
-# 輕量（不跑 whisper／build），秒級完成。
+# 獨立看門狗：驗證 RSS 最新一集是否已上站。
 on:
-  # 可靠定時：外部排程打 repository_dispatch；GitHub schedule 為後備。
   repository_dispatch:
     types: [watchdog-now]
   schedule:
-    - cron: "17 * * * *" # 每小時一次（錯開整點，避開高峰）
+    - cron: "17 * * * *"
   workflow_dispatch:
 
 concurrency:
@@ -18,8 +16,11 @@ permissions:
   contents: read
   issues: write
   actions: read
-  # 未合入的 sync/apple-* PR 不算「RSS 卡住」；列 PR 需要這個權限。
   pull-requests: read
+
+env:
+  HUSKY: "0"
+  SYNC_ALERT_STREAK_PATH: .cache/sync-watchdog-streak.json
 
 jobs:
   watchdog:
@@ -31,7 +32,17 @@ jobs:
         with:
           node-version: "22"
           cache: npm
-      - run: npm ci
+      - name: Install dependencies
+        run: bash scripts/ci/npm-install.sh
+      - name: Restore alert streak
+        uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: .cache/sync-watchdog-streak.json
+          key: sync-watchdog-streak-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            sync-watchdog-streak-
+      - name: Ensure alert streak file
+        run: bash scripts/ci/ensure-streak-file.sh
       - name: Check RSS freshness vs site
         env:
           GH_TOKEN: ${{ github.token }}
@@ -39,3 +50,9 @@ jobs:
           SYNC_ISSUE_ASSIGNEES: ${{ secrets.SYNC_ISSUE_ASSIGNEES }}
           SYNC_ISSUE_MENTIONS: ${{ secrets.SYNC_ISSUE_MENTIONS }}
         run: npx tsx scripts/check-sync-fresh.ts
+      - name: Save alert streak
+        if: always()
+        uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: .cache/sync-watchdog-streak.json
+          key: sync-watchdog-streak-${{ github.run_id }}-${{ github.run_attempt }}

@@ -74,7 +74,10 @@ function makeDeps(
       if (args[0] === "issue" && args[1] === "list") return "[]";
       if (
         args[0] === "issue" &&
-        (args[1] === "edit" || args[1] === "comment" || args[1] === "close")
+        (args[1] === "edit" ||
+          args[1] === "comment" ||
+          args[1] === "close" ||
+          args[1] === "reopen")
       ) {
         return "";
       }
@@ -483,18 +486,22 @@ describe("sync-alert notify-live", () => {
 
     runSyncAlertMode("failure", ["--kind=sync-job-failure"], deps);
 
-    expect(calls).toContainEqual([
-      "issue",
-      "create",
-      "--title",
-      "[sync] Apple Podcast workflow 失敗",
-      "--body",
-      expect.stringContaining("Apple sync workflow 失敗"),
-      "--label",
-      "sync-alert",
-      "--label",
-      "sync-job-failure",
-    ]);
+    const create = calls.find((args) => args[0] === "issue" && args[1] === "create");
+    expect(create).toEqual(
+      expect.arrayContaining([
+        "--title",
+        "[sync][unknown] Apple Podcast workflow 失敗",
+        "--label",
+        "sync-alert",
+        "--label",
+        "sync-job-failure",
+        "--label",
+        "sync-cat-unknown",
+        "--label",
+        "sync-step-unknown",
+      ]),
+    );
+    expect(create?.[create.indexOf("--body") + 1]).toContain("Apple sync workflow 失敗");
   });
 
   it("failure issue 的 @mention 只出現一次", () => {
@@ -561,6 +568,59 @@ describe("sync-alert notify-live", () => {
 
     expect(calls.some((args) => args[0] === "issue")).toBe(false);
     expect(logs.some((line) => line.includes("略過同步失敗發報"))).toBe(true);
+  });
+
+  it("第一次連續失敗只記 streak，不開 Issue", () => {
+    let streak = "";
+    const { deps, calls, logs } = makeDeps({});
+    deps.env = { SYNC_ALERT_STREAK_PATH: ".cache/sync-alert-streak.json" };
+    deps.readFile = () => {
+      if (!streak) throw new Error("ENOENT");
+      return streak;
+    };
+    deps.writeFile = (_filePath, contents) => {
+      streak = contents;
+    };
+
+    runSyncAlertMode("failure", ["--kind=sync-job-failure"], deps);
+
+    expect(calls.some((args) => args[1] === "create")).toBe(false);
+    expect(logs.some((line) => line.includes("尚未開 Issue"))).toBe(true);
+    expect(streak).toContain('"consecutive":1');
+  });
+
+  it("已有同一分類的 Issue 時更新內文，不再另開", () => {
+    const listKey =
+      "issue list --state all --json number,title,url,state,labels --limit 10 --label sync-alert --label sync-cat-unknown";
+    const { deps, calls } = makeDeps({
+      [listKey]: JSON.stringify([
+        {
+          number: 12,
+          state: "open",
+          title: "[sync][unknown] Apple Podcast workflow 失敗",
+          url: "https://example/12",
+        },
+      ]),
+    });
+    deps.env = { SYNC_ALERT_STREAK_PATH: ".cache/sync-alert-streak.json" };
+    deps.readFile = () =>
+      JSON.stringify({ lastCategory: "unknown", consecutive: 2 });
+    deps.writeFile = () => {};
+
+    runSyncAlertMode("failure", ["--kind=sync-job-failure"], deps);
+
+    expect(calls.some((args) => args[0] === "issue" && args[1] === "create")).toBe(
+      false,
+    );
+    expect(calls.some((args) => args[0] === "issue" && args[1] === "edit")).toBe(
+      true,
+    );
+    expect(calls.some((args) => args[0] === "issue" && args[1] === "comment")).toBe(
+      false,
+    );
+    expect(calls.some((args) => args.includes("--add-label") && args.includes("sync-cat-unknown"))).toBe(
+      true,
+    );
   });
 });
 

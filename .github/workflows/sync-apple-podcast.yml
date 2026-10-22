@@ -1,18 +1,13 @@
 name: Sync Apple Podcast
 
 on:
-  # 可靠來源：外部排程（cron-job.org 等）打 repository_dispatch API 觸發，
-  # 繞過 GitHub 內建 schedule 的不可靠（best-effort、常延遲數小時甚至跳過）。
-  # 設定步驟見 README「外部排程觸發」。
+  # 可靠來源：外部排程打 repository_dispatch，繞過 GitHub schedule 的延遲。
   repository_dispatch:
     types: [sync-now]
-  # 後備：GitHub 內建 schedule（best-effort，幾小時內會補到；準時性靠上面的外部觸發）。
   schedule:
     - cron: "*/15 * * * *"
-  # 手動：Actions 頁 Run workflow，上架後想立即上站時用。
   workflow_dispatch:
 
-# 同一時間只跑一支，避免兩個排程交疊各自 push 衝突。
 concurrency:
   group: sync-apple-podcast
   cancel-in-progress: false
@@ -20,34 +15,31 @@ concurrency:
 permissions:
   contents: write
   issues: write
-  # GH013 fallback 會以 workflow_dispatch 觸發 PR 分支上的 CI；GITHUB_TOKEN
-  # 需要 actions:write，且 repo Actions 設定也必須允許建立／核准 PR。
   actions: write
   pull-requests: write
-  # workflow_dispatch 的 Check Run 不會進入 PR mergeability；ruleset 認的是
-  # commit status context（與 Vercel 相同）。waiter 在真實 job 成功後鏡射。
   statuses: write
+
+env:
+  # 本機 pre-push 視覺閘門不在 CI 執行。commit／push 另加 --no-verify。
+  HUSKY: "0"
 
 jobs:
   sync:
     runs-on: ubuntu-latest
-    # 首次需下載 ~3GB 模型 + 編譯 whisper + 轉錄，預留較長時間。
     timeout-minutes: 180
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
 
-      # job-level env 不可用 runner context；改用 runner 內建 $RUNNER_TEMP 寫入 GITHUB_ENV
       - name: Set sync report paths
-        run: |
-          echo "SYNC_REPORT_PATH=$RUNNER_TEMP/sync-run-report.json" >> "$GITHUB_ENV"
-          echo "SYNC_COMMIT_MSG_PATH=$RUNNER_TEMP/sync-commit-msg.txt" >> "$GITHUB_ENV"
+        run: bash scripts/ci/sync-report-paths.sh
 
       - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
           node-version: "22"
           cache: npm
 
-      - run: npm ci
+      - name: Install dependencies
+        run: bash scripts/ci/npm-install.sh
 
       - name: Cache whisper.cpp build + model
         uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
@@ -62,53 +54,30 @@ jobs:
       - name: Setup whisper for subtitle transcription
         run: bash scripts/setup-whisper-ci.sh
 
+      - name: Restore alert streak
+        uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: .cache/sync-alert-streak.json
+          key: sync-alert-streak-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            sync-alert-streak-
+
+      - name: Ensure alert streak file
+        run: bash scripts/ci/ensure-streak-file.sh
+
       - name: Sync episodes from Apple Podcast
         run: npm run sync:apple
-      # sync 內建：轉錄新集 → 字幕再處理（簡轉繁 + 過濾）→ 寫 sync-run-report.json
 
-      # 每次 sync 後一律驗證 workflow 框架條件（pageCount／captionTimes／captions／插圖數），
-      # error 會擋下 push；warn（待生圖、legacy）寫進 Job Summary 讓待辦持續可見。
-      - name: Verify episode workflow (ep-9/ep-10 standard)
-        run: |
-          set -o pipefail
-          npm run verify:episodes 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+      # blur、音檔長度、sidecar 先產生，再驗證。不要先驗證再產生。
+      - name: Generate derived assets
+        run: bash scripts/ci/generate-derived-assets.sh
 
-      - name: Verify browse index (vehicles / topics)
-        run: |
-          set -o pipefail
-          npm run verify:browse-index 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Validate sync outputs
+        run: npm run sync:validate
 
-      # 新集進入 getStories() 後，lib/story-image-blur.test.ts 要求每一集封面都有 blur。
-      # 必須在 Detect changes／npm test 之前寫入，並跟 sync 產物一起 commit，否則單測失敗、集數永不 push（#251）。
-      - name: Generate story cover blurs
-        run: npm run generate:story-blurs
-
-      # RSS 與 repo 完全一致時 sync 不動任何檔案，可早退、不浪費 CI 跑 test+build。
       - name: Detect changes
         id: changes
-        run: |
-          if [ -z "$(git status --porcelain)" ]; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "No changes — skipping test/build/push."
-          else
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-            echo "Changes detected — will validate and push."
-          fi
-
-      - name: Run unit tests
-        if: steps.changes.outputs.changed == 'true'
-        run: npm test
-
-      - name: Production build
-        if: steps.changes.outputs.changed == 'true'
-        env:
-          # CI 上無 Vercel 環境變數，未設定時 siteUrl 會 fallback 成 localhost，
-          # 觸發 generate-llms-full 的防呆而使 build 失敗（見 lib/site-url.ts）。
-          NEXT_PUBLIC_SITE_URL: https://podcast-website-mu.vercel.app
-          # 禁止在此注入 INDEXNOW_KEY：prebuild 的 generate:indexnow-key 會寫
-          # public/<key>.txt（檔名無法 glob ignore）→ Commit and push 未 stage 守衛失敗。
-          # INDEXNOW_KEY 只給後面的 Submit IndexNow 步驟（契約見 sync-workflow-contract.test.ts）。
-        run: npm run build
+        run: bash scripts/ci/detect-sync-changes.sh
 
       - name: Prepare commit message
         if: steps.changes.outputs.changed == 'true'
@@ -118,219 +87,13 @@ jobs:
         if: steps.changes.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/apple-synced.json data/apple-sync-state.json data/browse-index.json public/stories/ data/subtitles/ \
-            data/story-zones.ts data/reflection-prompts.ts data/story-dates.ts data/episode-faqs.ts data/audio-lengths.json data/story-image-blurs.json
-          # 防止新增同步產物未列入 git add 時被「成功但未上站」地靜默遺漏。
-          if [ -n "$(git diff --name-only)" ] || [ -n "$(git ls-files --others --exclude-standard)" ]; then
-            echo "::error::sync 產生了未 stage 的檔案；請更新 workflow 的 git add 白名單。"
-            printf '%s\n' "sync 產生了未 stage 的檔案；請更新 workflow 的 git add 白名單。" > "$RUNNER_TEMP/sync-failure-context.txt"
-            git diff --name-only
-            git ls-files --others --exclude-standard
-            exit 1
-          fi
-          if git diff --staged --quiet; then
-            echo "No staged changes to commit."
-            exit 0
-          fi
-          git commit -F "$SYNC_COMMIT_MSG_PATH"
-          # main 在本 run 期間可能被人為 push 推進（sync 跑 2 分鐘以上就有機率撞上），
-          # 直接 push 會被 non-fast-forward 拒絕 → 誤發「同步失敗」告警（見 issue #36）。
-          # sync 只動 data/ 與 public/stories/，與人為 commit 幾乎不重疊，rebase 重試即可。
-          # 個人倉的 GITHUB_TOKEN 另會撞 protect-main-web GH013（required checks）；
-          # 那不是 non-fast-forward，rebase 無效，改推 sync/* 分支並開 PR auto-merge。
-          open_sync_pr() {
-            local branch="sync/apple-${GITHUB_RUN_ID}"
-            echo "::notice::protect-main-web GH013：改開 PR ${branch}"
-            # rerun 會沿用同一個 GITHUB_RUN_ID；若前一次已留下分支，必須
-            # 以 lease 安全更新，不能讓 fetch-first 把整個 sync job 再打成 failure。
-            git checkout -B "$branch"
-            if git ls-remote --exit-code origin "refs/heads/$branch" >/dev/null 2>&1; then
-              git fetch origin "$branch"
-              local remote_branch_sha
-              remote_branch_sha=$(git rev-parse "refs/remotes/origin/$branch")
-              git push --force-with-lease="refs/heads/$branch:$remote_branch_sha" -u origin "$branch"
-            else
-              git push -u origin "$branch"
-            fi
-            local title
-            title=$(head -n 1 "$SYNC_COMMIT_MSG_PATH")
-            local pr
-            pr=$(gh pr list --base main --head "$branch" --state open --json url --jq '.[0].url // ""')
-            if [ -z "$pr" ]; then
-              # body 用 printf 組出換行，**不要**讓 shell 字串跨行：
-            # 這裡是 `run: |` 的 block scalar，任何回到第 0 欄的續行都會提前終止該區塊，
-            # 整支 workflow 就變成無法解析的 YAML（2026-08-27 `01a4047` 即因此讓
-            # sync 停擺三天；GitHub 只回「workflow file issue」且沒有 log）。
-              local body
-              body=$(printf '%s\n\n%s\n' \
-                "Apple sync 因 protect-main-web GH013（required status checks）無法直推 main。個人倉不能把 GitHub Actions Integration 加進 ruleset bypass。此 PR 等 quality／build-and-public-e2e／Vercel 通過後 squash auto-merge。" \
-                "Run：https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}")
-              pr=$(gh pr create --base main --head "$branch" --title "$title" --body "$body")
-            else
-              echo "::notice::沿用既有 sync PR ${pr}"
-            fi
-            printf '%s\n' "$pr" > "$RUNNER_TEMP/sync-pr-url.txt"
-            # GITHUB_TOKEN 產生的 push／PR event 不會再觸發 pull_request CI；
-            # workflow_dispatch 是例外，明確在同一個 sync branch 上只補跑 required checks；
-            # 完整 child-path e2e 仍由正常 push／PR CI 執行，不讓非 required job 阻塞 sync。
-            # waiter 必須觀測「本次 SHA 的 dispatch run」與獨立 Vercel commit status；
-            # 禁止把 PR checks 的 required 過濾當唯一依據（PR #140：quality 已紅仍假綠）。
-            local sha ci_run_id existing_ids list_out wait_i
-            sha=$(git rev-parse HEAD)
-            list_out=$(gh run list --workflow=ci.yml --branch="$branch" --event=workflow_dispatch --limit=20 --json databaseId,headSha,createdAt 2>&1) || {
-              echo "::error::gh run list 失敗（branch=${branch}）"
-              printf '%s\n' "gh run list 失敗（branch=${branch}）" > "$RUNNER_TEMP/sync-failure-context.txt"
-              echo "$list_out"
-              return 1
-            }
-            existing_ids=$(printf '%s' "$list_out" | jq -r --arg sha "$sha" '[.[] | select(.headSha == $sha) | .databaseId | tostring] | join(",")')
-            gh workflow run ci.yml --ref "$branch" -f required_only=true
-            gh pr merge "$pr" --squash --auto
-            ci_run_id=""
-            for wait_i in $(seq 1 12); do
-              list_out=$(gh run list --workflow=ci.yml --branch="$branch" --event=workflow_dispatch --limit=20 --json databaseId,headSha,createdAt 2>&1) || {
-                echo "::error::gh run list 失敗（branch=${branch}）"
-                printf '%s\n' "gh run list 失敗（branch=${branch}）" > "$RUNNER_TEMP/sync-failure-context.txt"
-                echo "$list_out"
-                return 1
-              }
-              ci_run_id=$(printf '%s' "$list_out" | jq -r --arg sha "$sha" --arg ids "$existing_ids" '($ids | split(",") | map(select(length > 0))) as $old | [.[] | select(.headSha == $sha) | select((.databaseId | tostring) as $id | ($old | index($id) | not))] | sort_by(.createdAt) | last | .databaseId // empty')
-              if [ -n "$ci_run_id" ] && [ "$ci_run_id" != "null" ]; then
-                break
-              fi
-              sleep 5
-            done
-            if [ -z "$ci_run_id" ] || [ "$ci_run_id" = "null" ]; then
-              echo "::error::找不到 workflow_dispatch CI run（branch=${branch} sha=${sha}）"
-              printf '%s\n' "找不到 workflow_dispatch CI run（branch=${branch} sha=${sha}）" > "$RUNNER_TEMP/sync-failure-context.txt"
-              return 1
-            fi
-            echo "::notice::GH013 waiter 觀測 CI run ${ci_run_id}（sha=${sha}）"
-            local i state jobs_out quality_conc build_conc status_out vercel_state
-            local quality_ok build_ok vercel_ok quality_mirrored build_mirrored
-            quality_mirrored=false
-            build_mirrored=false
-            for i in $(seq 1 80); do
-              state=$(gh pr view "$pr" --json state --jq .state 2>&1) || {
-                echo "::error::gh pr view 失敗（pr=${pr}）"
-                printf '%s\n' "gh pr view 失敗（pr=${pr}）" > "$RUNNER_TEMP/sync-failure-context.txt"
-                echo "$state"
-                return 1
-              }
-              if [ "$state" = "MERGED" ]; then
-                return 0
-              fi
-              if [ "$state" = "CLOSED" ]; then
-                echo "::error::sync PR 未合併就被關閉：$pr"
-                printf '%s\n' "sync PR 未合併就被關閉：$pr" > "$RUNNER_TEMP/sync-failure-context.txt"
-                return 1
-              fi
-              jobs_out=$(gh run view "$ci_run_id" --json jobs 2>&1) || {
-                echo "::error::gh run view 失敗（run=${ci_run_id}）"
-                printf '%s\n' "gh run view 失敗（run=${ci_run_id}）" > "$RUNNER_TEMP/sync-failure-context.txt"
-                echo "$jobs_out"
-                return 1
-              }
-              quality_conc=$(printf '%s' "$jobs_out" | jq -r '(.jobs[] | select(.name == "quality") | .conclusion // .status // "pending") // "pending"')
-              build_conc=$(printf '%s' "$jobs_out" | jq -r '(.jobs[] | select(.name == "build-and-public-e2e") | .conclusion // .status // "pending") // "pending"')
-              case "$quality_conc" in
-                failure|cancelled)
-                  echo "::error::CI job 失敗：quality（conclusion=${quality_conc}）"
-                  printf '%s\n' "CI job 失敗：quality（conclusion=${quality_conc}）" > "$RUNNER_TEMP/sync-failure-context.txt"
-                  return 1
-                  ;;
-              esac
-              case "$build_conc" in
-                failure|cancelled)
-                  echo "::error::CI job 失敗：build-and-public-e2e（conclusion=${build_conc}）"
-                  printf '%s\n' "CI job 失敗：build-and-public-e2e（conclusion=${build_conc}）" > "$RUNNER_TEMP/sync-failure-context.txt"
-                  return 1
-                  ;;
-              esac
-              quality_ok=false
-              build_ok=false
-              if [ "$quality_conc" = "success" ]; then
-                quality_ok=true
-              fi
-              if [ "$build_conc" = "success" ]; then
-                build_ok=true
-              fi
-              status_out=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${sha}/status" 2>&1) || {
-                echo "::error::commit status API 失敗（sha=${sha}）"
-                printf '%s\n' "commit status API 失敗（sha=${sha}）" > "$RUNNER_TEMP/sync-failure-context.txt"
-                echo "$status_out"
-                return 1
-              }
-              vercel_state=$(printf '%s' "$status_out" | jq -r '[.statuses[]? | select(.context == "Vercel")] | sort_by(.updated_at) | last | .state // empty')
-              vercel_ok=false
-              if [ -z "$vercel_state" ]; then
-                vercel_state="pending"
-              elif [ "$vercel_state" = "failure" ] || [ "$vercel_state" = "error" ]; then
-                echo "::error::Vercel commit status 失敗（state=${vercel_state}）"
-                printf '%s\n' "Vercel commit status 失敗（state=${vercel_state}）" > "$RUNNER_TEMP/sync-failure-context.txt"
-                return 1
-              elif [ "$vercel_state" = "success" ]; then
-                vercel_ok=true
-              fi
-              if [ "$quality_ok" = true ] && [ "$quality_mirrored" != true ]; then
-                gh api "repos/${GITHUB_REPOSITORY}/statuses/${sha}" -f state=success -f context=quality -f description="mirror workflow_dispatch quality" -f target_url="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${ci_run_id}" >/dev/null || {
-                  echo "::error::寫入 quality commit status 失敗（sha=${sha}）"
-                  printf '%s\n' "寫入 quality commit status 失敗（sha=${sha}）" > "$RUNNER_TEMP/sync-failure-context.txt"
-                  return 1
-                }
-                quality_mirrored=true
-                echo "::notice::已鏡射 quality 為 commit status（ruleset context）"
-              fi
-              if [ "$build_ok" = true ] && [ "$build_mirrored" != true ]; then
-                gh api "repos/${GITHUB_REPOSITORY}/statuses/${sha}" -f state=success -f context=build-and-public-e2e -f description="mirror workflow_dispatch build-and-public-e2e" -f target_url="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${ci_run_id}" >/dev/null || {
-                  echo "::error::寫入 build-and-public-e2e commit status 失敗（sha=${sha}）"
-                  printf '%s\n' "寫入 build-and-public-e2e commit status 失敗（sha=${sha}）" > "$RUNNER_TEMP/sync-failure-context.txt"
-                  return 1
-                }
-                build_mirrored=true
-                echo "::notice::已鏡射 build-and-public-e2e 為 commit status（ruleset context）"
-              fi
-              if [ "$quality_ok" = true ] && [ "$build_ok" = true ] && [ "$vercel_ok" = true ]; then
-                echo "::notice::quality、build-and-public-e2e、Vercel 皆成功，等待 auto-merge（${i}/80）"
-              else
-                echo "::notice::等待 checks（${i}/80）：quality=${quality_conc} build-and-public-e2e=${build_conc} Vercel=${vercel_state}"
-              fi
-              sleep 15
-            done
-            printf '%s\n' "pending-merge" > "$RUNNER_TEMP/sync-alert-skip"
-            echo "::notice::sync PR 已設定 auto-merge，checks 尚未完成，這次不開失敗 Issue。"
-            echo "::error::等待 sync PR merge 逾時：$pr（run=${ci_run_id} sha=${sha}）"
-            printf '%s\n' "等待 sync PR merge 逾時：$pr（run=${ci_run_id} sha=${sha}）" > "$RUNNER_TEMP/sync-failure-context.txt"
-            return 1
-          }
-          for attempt in 1 2 3; do
-            set +e
-            push_output=$(git push 2>&1)
-            push_status=$?
-            set -e
-            echo "$push_output"
-            if [ "$push_status" -eq 0 ]; then
-              exit 0
-            fi
-            if echo "$push_output" | grep -q "GH013"; then
-              open_sync_pr
-              exit $?
-            fi
-            echo "push 被拒（remote 有新 commit），rebase 後重試（$attempt/3）"
-            git pull --rebase origin main
-          done
-          git push
+        run: bash scripts/ci/commit-and-push-sync.sh
 
-      # ---- 通知（push 後才送，避免 push 失敗誤報「已上站」）----
       - name: Notify live (open illustrate issues for new episodes)
         if: success() && steps.changes.outputs.changed == 'true'
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
-          # 手機推播：維護者安裝 GitHub App，以下 assign／@mention 會觸發通知
           SYNC_ISSUE_ASSIGNEES: ${{ secrets.SYNC_ISSUE_ASSIGNEES }}
           SYNC_ISSUE_MENTIONS: ${{ secrets.SYNC_ISSUE_MENTIONS }}
           NOTIFY_SITE_URL: ${{ secrets.NOTIFY_SITE_URL }}
@@ -341,23 +104,22 @@ jobs:
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
-        run: npx tsx scripts/sync-alert.ts resolve --kind=sync-job-failure
+        run: bash scripts/ci/resolve-sync-alert.sh
 
-      # ---- IndexNow（best-effort 通知 Bing 等支援引擎；Google 不支援，靠 sitemap）----
-      # fail-soft 由 scripts/submit-indexnow.ts 內部保證（任何錯誤 exit 0 + Job Summary 警示），
-      # 此步驟**不得**加 continue-on-error（契約見 scripts/lib/sync-workflow-contract.test.ts）。
-      # 僅 main 實送；fork 無 secrets，script 會以 no INDEXNOW_KEY 略過。
       - name: Submit IndexNow (best-effort)
         if: success() && steps.changes.outputs.changed == 'true' && github.ref == 'refs/heads/main'
         env:
           INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
           NEXT_PUBLIC_SITE_URL: https://podcast-website-mu.vercel.app
-        run: |
-          # 等待 Vercel 部署（best-effort，不保證完成；限制見 docs/GEO.md）
-          sleep 120
-          npx tsx scripts/submit-indexnow.ts
+        run: bash scripts/ci/submit-indexnow.sh
 
-      # 失敗即時集中告警；通知本身 fail-soft，不得掩蓋原始失敗 step。
+      - name: Save alert streak
+        if: always()
+        uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: .cache/sync-alert-streak.json
+          key: sync-alert-streak-${{ github.run_id }}-${{ github.run_attempt }}
+
       - name: Report sync failure
         if: failure()
         continue-on-error: true
@@ -365,17 +127,4 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           SYNC_ISSUE_ASSIGNEES: ${{ secrets.SYNC_ISSUE_ASSIGNEES }}
           SYNC_ISSUE_MENTIONS: ${{ secrets.SYNC_ISSUE_MENTIONS }}
-        run: |
-          if [ -f "$RUNNER_TEMP/sync-alert-skip" ]; then
-            echo "略過同步失敗發報：$(cat "$RUNNER_TEMP/sync-alert-skip")"
-            exit 0
-          fi
-          if [ -f "$RUNNER_TEMP/sync-failure-context.txt" ]; then
-            SYNC_FAILURE_CONTEXT=$(cat "$RUNNER_TEMP/sync-failure-context.txt")
-            export SYNC_FAILURE_CONTEXT
-          fi
-          if [ -f "$RUNNER_TEMP/sync-pr-url.txt" ]; then
-            SYNC_PR_URL=$(cat "$RUNNER_TEMP/sync-pr-url.txt")
-            export SYNC_PR_URL
-          fi
-          npx tsx scripts/sync-alert.ts failure --kind=sync-job-failure
+        run: bash scripts/ci/report-sync-failure.sh

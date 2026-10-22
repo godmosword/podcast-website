@@ -94,7 +94,7 @@ Skill／Agent 發現只掃描 repository 受版本控制的檔案；排除 `node
 | **視覺回歸（改樣式／版面時）** | `npm run test:visual:trusted`（**本機 pre-push 工具，刻意不進 CI**：baseline 為 `-chromium-darwin`，CI 跑 ubuntu，像素不可能相符）。預設 `npm run test:visual` 會 skip，**skip ≠ 通過**；重產須 `-- --update-snapshots` 並逐張人工目檢。**已加機械閘門**（VIS-DEBT-3）：`.githooks/pre-push` 會在「動到 `components/`／`app/` 的 tsx／css 但零 baseline 變更」時擋下 push，逃生門 `SKIP_VISUAL_GATE=1`；`npm run prepare` 負責把 `core.hooksPath` 指到 `.githooks`，契約測試 `scripts/lib/visual-baseline-gate.test.ts` 守住它不被靜默拿掉 |
 | **Production build** | `npm run build` |
 
-對齊 CI：`.github/workflows/sync-apple-podcast.yml` — sync 有變更時跑 `npm test` + `npm run build`；每次 sync 後跑 `npm run verify:episodes`（error 擋 push，warn 寫 Job Summary），並在單測前跑 `npm run generate:story-blurs`。
+對齊 CI：`.github/workflows/sync-apple-podcast.yml` — 先產生 blur、音檔長度與 sidecar，再跑 `npm run sync:validate`（error 擋 push，warn 寫 Job Summary）。同步工作不跑全站 `npm test` 或 `npm run build`。
 
 ---
 
@@ -107,7 +107,7 @@ Skill／Agent 發現只掃描 repository 受版本控制的檔案；排除 `node
 | `scripts/illustrate.ts`、`scripts/lib/illustrate-core.ts` | Leader 或 Opus；生圖前確認 `--mark`、成本 |
 | `data/apple-synced.json`、`data/apple-sync.defaults.json`、`data/stories.ts` | 改 metadata 必跑 `verify:episodes` |
 | `.github/workflows/sync-apple-podcast.yml`、`.github/workflows/sync-watchdog.yml` | **禁止非同步任務改動**；契約見 `scripts/lib/sync-workflow-contract.test.ts` |
-| `scripts/sync-apple-podcast.ts`、`scripts/lib/sync-catalog-sidecars.ts`、`scripts/lib/story-cover-blur.ts` | 新集必須 `upsertCatalogSidecars`；`git add` 必含四 sidecar（`story-zones`／`reflection-prompts`／`story-dates`／`episode-faqs`）＋ `data/audio-lengths.json`（#46／#60／#61）＋ `data/story-image-blurs.json`（#251）。sync 寫入封面後呼叫 `ensureStoryCoverBlurs`，workflow 在 `npm test` 前跑 `generate:story-blurs` 並把 blur 檔列入 commit。契約見 `sync-workflow-contract.test.ts` |
+| `scripts/sync-apple-podcast.ts`、`scripts/lib/sync-catalog-sidecars.ts`、`scripts/lib/story-cover-blur.ts` | 新集必須 `upsertCatalogSidecars`。commit 只 stage `data/` 與 `public/stories/`（含四 sidecar、`audio-lengths.json`、`story-image-blurs.json`），禁止 `git add -A`。衍生資產在 `sync:validate` 之前產生。契約見 `sync-workflow-contract.test.ts` |
 | `data/story-zones.ts`、`data/reflection-prompts.ts`、`data/story-dates.ts`、`data/episode-faqs.ts` | 完備測試以 `getStories()` 全集覆蓋；勿從 sync `git add` 拿掉；人工 refinement 可覆寫 stub |
 | `package.json` `prebuild` | 新增腳本必先登錄 `PREBUILD_OUTPUT_REGISTRY`（`sync-workflow-contract.test.ts`），並依 disposition 補白名單或 gitignore；sync Production build **不得**設 `INDEXNOW_KEY` |
 | `data/subtitles/`、`data/scenes/`、`data/characters.json` | 中文校對／切場景 → Sonnet 4.6，**不要** Grok |
