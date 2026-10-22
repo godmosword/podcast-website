@@ -94,13 +94,26 @@ describe("sync-path-guard.sh", () => {
   }
 
   it("人開的分支略過，不標成 sync-only", () => {
-    const result = run({ GITHUB_REF_NAME: "cursor/something" });
+    const result = run({
+      GITHUB_ACTIONS: "true",
+      GITHUB_EVENT_NAME: "pull_request",
+      GITHUB_HEAD_REF: "cursor/something",
+      GITHUB_REF: "refs/pull/255/merge",
+      GITHUB_REF_NAME: "255/merge",
+      SYNC_PATH_GUARD_PATHS: "app/page.tsx",
+    });
     expect(result.status).toBe(0);
     expect(result.output).toContain("sync_only=false");
   });
 
   it("sync 分支改到允許路徑以外就失敗", () => {
+    // quality job 的 GITHUB_HEAD_REF 是這支 PR 的分支，測試只把 GITHUB_REF_NAME 設成 sync/apple。
+    // 閘門不能因為環境裡還留著人開的 head ref 就把違規路徑放行。
     const result = run({
+      GITHUB_ACTIONS: "true",
+      GITHUB_EVENT_NAME: "pull_request",
+      GITHUB_HEAD_REF: "cursor/sync-phase3-ruleset-38e7",
+      GITHUB_REF: "refs/pull/255/merge",
       GITHUB_REF_NAME: "sync/apple",
       SYNC_PATH_GUARD_PATHS: "data/apple-synced.json\napp/page.tsx",
     });
@@ -110,7 +123,11 @@ describe("sync-path-guard.sh", () => {
 
   it("sync 分支只動 data/ 與 public/stories/ 就標成 sync-only", () => {
     const result = run({
+      GITHUB_ACTIONS: "true",
+      GITHUB_EVENT_NAME: "pull_request",
       GITHUB_HEAD_REF: "sync/apple",
+      GITHUB_REF: "refs/pull/255/merge",
+      GITHUB_REF_NAME: "255/merge",
       SYNC_PATH_GUARD_PATHS: "data/apple-sync-state.json\npublic/stories/ep-1/audio.mp3",
     });
     expect(result.status).toBe(0);
