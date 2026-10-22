@@ -1,0 +1,69 @@
+name: Transcribe backfill
+
+# 字幕跟同步分開。一輪只補一集，失敗記在 guid 上，滿 N 次才開 issue。
+# 跟 Sync Apple Podcast 共用 concurrency，避免兩邊同時推 sync/apple。
+on:
+  schedule:
+    - cron: "7 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: sync-apple-podcast
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: write
+  actions: write
+  pull-requests: write
+
+env:
+  HUSKY: "0"
+
+jobs:
+  transcribe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 0
+
+      - name: Set sync report paths
+        run: bash scripts/ci/sync-report-paths.sh
+
+      - name: Checkout sync branch base
+        run: bash scripts/ci/checkout-sync-base.sh
+
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: bash scripts/ci/npm-install.sh
+
+      - name: Cache whisper.cpp build + model
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: |
+            .cache/whisper-cpp
+            models/ggml-large-v3.bin
+          key: whisper-large-v3-${{ runner.os }}-v1.8.6
+          restore-keys: |
+            whisper-large-v3-${{ runner.os }}-
+
+      - name: Setup whisper for subtitle transcription
+        run: bash scripts/setup-whisper-ci.sh
+
+      - name: Transcribe one pending episode
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SYNC_ISSUE_ASSIGNEES: ${{ secrets.SYNC_ISSUE_ASSIGNEES }}
+          SYNC_ISSUE_MENTIONS: ${{ secrets.SYNC_ISSUE_MENTIONS }}
+        run: npx tsx scripts/transcribe-backfill.ts
+
+      - name: Commit and push
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash scripts/ci/commit-and-push-sync.sh

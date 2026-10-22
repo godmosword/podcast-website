@@ -7,9 +7,10 @@
  *   1. lookupFeedUrl → fetch → parseRssEpisodes（與 sync 同一 parser）。
  *   2. 以 sync 相同對照（isRssEpisodeOnSite）判斷最新集是否已上站。
  *   3. 已上站 → 關閉 sync-stale-rss Issue。
- *   4. 未上站：sync 正在跑、已有 sync/apple-* PR 尚未合入，或仍在等待第一次 sync
+ *   4. 未上站：sync 正在跑、已有 sync/apple PR 尚未合入，或仍在等待第一次 sync
  *      （WAIT_FOR_SYNC_HOURS，預設至少 8h）→ 靜默，避免與之後的「待生圖」Issue 連開兩張。
  *      超過等待窗且沒有在等合入的 sync PR，才開／補 sync-stale-rss。
+ *   5. sync/apple PR 開超過 2 小時還沒合入 → 另記 sync-unmerged-pr，不跟 stale 混單。
  *
  * 環境變數：STALE_HOURS（yaml 仍可設 3，僅作下限）、WAIT_FOR_SYNC_HOURS、SYNC_ALERT_DRY_RUN=1。
  */
@@ -30,10 +31,12 @@ import {
 } from "./sync-alert";
 import {
   decideStaleRssAlert,
+  decideUnmergedSyncPr,
   hasOpenSyncLandingPr,
   isSyncRunActive,
   runsAfterPubDate,
   waitForFirstSyncHoursFromEnv,
+  type SyncLandingPr,
   type SyncWorkflowRun,
 } from "./lib/sync-stale-policy";
 
@@ -51,8 +54,8 @@ function readJson<T>(file: string, fallback: T): T {
   }
 }
 
-/** gh 失敗時回 false，避免清單失敗把真的卡住靜默掉。 */
-function syncLandingPending(): boolean {
+/** gh 失敗時回空陣列，避免清單失敗把真的卡住靜默掉。 */
+function listOpenPullRequests(): SyncLandingPr[] {
   try {
     const out = execFileSync(
       "gh",
@@ -64,14 +67,13 @@ function syncLandingPending(): boolean {
         "--limit",
         "20",
         "--json",
-        "headRefName,title",
+        "headRefName,createdAt,url,number,title",
       ],
       { encoding: "utf8" },
     );
-    const prs = JSON.parse(out || "[]") as Array<{ headRefName?: string }>;
-    return hasOpenSyncLandingPr(prs);
+    return JSON.parse(out || "[]") as SyncLandingPr[];
   } catch {
-    return false;
+    return [];
   }
 }
 
@@ -131,16 +133,45 @@ async function main(): Promise<void> {
     slugs: new Set(catalog.map((s) => s.slug ?? "").filter(Boolean)),
   };
 
+  const openPrs = listOpenPullRequests();
+  const unmerged = decideUnmergedSyncPr({ prs: openPrs });
   const missing = findMissingEpisode(rss, ctx);
-  if (!missing) {
+  if (!missing && unmerged.action !== "open") {
     console.log("RSS 最新集皆已上站。");
     clearAlertStreak();
     resolveIssue({
       kind: "sync-stale-rss",
       comment: "✅ RSS 最新一集已確認上站，看門狗解除告警。",
     });
+    resolveIssue({
+      kind: "sync-unmerged-pr",
+      comment: "✅ 沒有卡住的 sync PR，看門狗解除告警。",
+    });
     return;
   }
+
+  if (unmerged.action === "open" && unmerged.pr) {
+    const prUrl = unmerged.pr.url ?? "(unknown)";
+    console.warn(`UNMERGED：${prUrl} ${unmerged.reason}`);
+    alertAfterConsecutiveFailures({
+      category: "commit",
+      step: "Unmerged sync PR",
+      kind: "sync-unmerged-pr",
+      title: "[sync][commit] sync PR 尚未合入",
+      body: [
+        "固定分支 `sync/apple` 的 PR 開著，內容還沒進 main。",
+        "",
+        `- PR：${prUrl}`,
+        `- 原因：${unmerged.reason}`,
+        "",
+        "看門狗不等 CI。這張單是在 auto-merge 太久沒完成時才開。",
+      ].join("\n"),
+      excerpt: `##[error]${unmerged.reason} ${prUrl}`,
+    });
+    return;
+  }
+
+  if (!missing) return;
 
   const runs = listSyncRuns();
   const syncActive = runs.some(isSyncRunActive);
@@ -150,7 +181,7 @@ async function main(): Promise<void> {
     syncActive,
     postPublishRuns: runsAfterPubDate(runs, missing.item.pubDate),
     waitForFirstSyncHours: WAIT_FOR_SYNC_HOURS,
-    syncLandingPending: syncLandingPending(),
+    syncLandingPending: hasOpenSyncLandingPr(openPrs),
   });
 
   if (decision.action === "silent") {

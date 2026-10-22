@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   decideStaleRssAlert,
+  decideUnmergedSyncPr,
   hasOpenSyncLandingPr,
   runsAfterPubDate,
   waitForFirstSyncHoursFromEnv,
@@ -118,12 +119,46 @@ describe("decideStaleRssAlert", () => {
 });
 
 describe("hasOpenSyncLandingPr", () => {
-  it("只認 sync/apple- 開頭的 head", () => {
+  it("認固定分支 sync/apple，也認舊的 sync/apple-<run>", () => {
+    expect(hasOpenSyncLandingPr([{ headRefName: "sync/apple" }])).toBe(true);
     expect(hasOpenSyncLandingPr([{ headRefName: "sync/apple-123" }])).toBe(true);
     expect(hasOpenSyncLandingPr([{ headRefName: "cursor/ep32-hero-cover" }])).toBe(
       false,
     );
     expect(hasOpenSyncLandingPr([])).toBe(false);
     expect(hasOpenSyncLandingPr([{ headRefName: "" }])).toBe(false);
+  });
+});
+
+describe("decideUnmergedSyncPr", () => {
+  const now = Date.parse("2026-10-21T12:00:00.000Z");
+
+  it("剛開的 sync/apple PR 先靜默", () => {
+    const decision = decideUnmergedSyncPr({
+      now,
+      prs: [
+        {
+          headRefName: "sync/apple",
+          createdAt: "2026-10-21T11:30:00.000Z",
+          url: "https://example.com/pull/1",
+        },
+      ],
+    });
+    expect(decision.action).toBe("silent");
+  });
+
+  it("超過等待窗仍未合入就記一筆", () => {
+    const decision = decideUnmergedSyncPr({
+      now,
+      prs: [
+        {
+          headRefName: "sync/apple",
+          createdAt: "2026-10-21T08:00:00.000Z",
+          url: "https://example.com/pull/9",
+        },
+      ],
+    });
+    expect(decision.action).toBe("open");
+    expect(decision.pr?.url).toBe("https://example.com/pull/9");
   });
 });

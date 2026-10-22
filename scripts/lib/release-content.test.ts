@@ -1,13 +1,25 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { getStory } from "../../data/content";
+import type { Story } from "../../data/content";
 import { classifyReleaseIssues } from "./release-content";
+
+const fixtureStory: Story = {
+  slug: "ep-fixture",
+  ep: 1,
+  title: "測試集",
+  date: "2026-01-01",
+  vehicle: "其他",
+  emoji: "🚗",
+  color: "#7048e8",
+  audio: "audio.mp3",
+  pageCount: 1,
+  kind: "story",
+};
 
 describe("classifyReleaseIssues", () => {
   it("接受 pageCount=1 的 illustrate-pending，但不接受未校對字幕", () => {
-    const story = getStory("ep-26");
-    if (!story) throw new Error("ep-26 不在目錄中");
+    const story = fixtureStory;
 
     const result = classifyReleaseIssues([story], [
       {
@@ -31,8 +43,7 @@ describe("classifyReleaseIssues", () => {
   });
 
   it("所有 error 與未知 warning 都是 release blocker", () => {
-    const story = getStory("ep-26");
-    if (!story) throw new Error("ep-26 不在目錄中");
+    const story = fixtureStory;
 
     const result = classifyReleaseIssues([story], [
       { slug: story.slug, level: "error", code: "missing-cover", message: "缺圖" },

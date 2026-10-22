@@ -94,7 +94,7 @@ Skill／Agent 發現只掃描 repository 受版本控制的檔案；排除 `node
 | **視覺回歸（改樣式／版面時）** | `npm run test:visual:trusted`（**本機 pre-push 工具，刻意不進 CI**：baseline 為 `-chromium-darwin`，CI 跑 ubuntu，像素不可能相符）。預設 `npm run test:visual` 會 skip，**skip ≠ 通過**；重產須 `-- --update-snapshots` 並逐張人工目檢。**已加機械閘門**（VIS-DEBT-3）：`.githooks/pre-push` 會在「動到 `components/`／`app/` 的 tsx／css 但零 baseline 變更」時擋下 push，逃生門 `SKIP_VISUAL_GATE=1`；`npm run prepare` 負責把 `core.hooksPath` 指到 `.githooks`，契約測試 `scripts/lib/visual-baseline-gate.test.ts` 守住它不被靜默拿掉 |
 | **Production build** | `npm run build` |
 
-對齊 CI：`.github/workflows/sync-apple-podcast.yml` — 先產生 blur、音檔長度與 sidecar，再跑 `npm run sync:validate`（error 擋 push，warn 寫 Job Summary）。同步工作不跑全站 `npm test` 或 `npm run build`。
+對齊 CI：`.github/workflows/sync-apple-podcast.yml` 先抓 RSS 並產生 blur、音檔長度與 sidecar，再由獨立的 validate job 跑 `npm run sync:validate`（error 擋 push，warn 寫 Job Summary），然後才推 `sync/apple`。同步工作不跑全站 `npm test` 或 `npm run build`，也不跑 whisper。
 
 ---
 

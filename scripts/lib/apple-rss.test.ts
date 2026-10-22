@@ -12,23 +12,6 @@ import {
   stripHtml,
 } from "./apple-rss";
 
-const appleSyncedPath = path.join(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "../../data/apple-synced.json",
-);
-
-type AppleSyncedEpisode = { slug: string; summary: string; ep: number; title: string };
-
-function loadAppleSynced(): AppleSyncedEpisode[] {
-  return JSON.parse(fs.readFileSync(appleSyncedPath, "utf8")) as AppleSyncedEpisode[];
-}
-
-function findSummary(slug: string): string {
-  const ep = loadAppleSynced().find((e) => e.slug === slug);
-  if (!ep) throw new Error(`apple-synced.json 找不到 ${slug}`);
-  return ep.summary;
-}
-
 /** 以 Unicode code point 計長度（與 cleanEpisodeSummary 裁切邏輯一致）。 */
 function unicodeLen(text: string): number {
   return Array.from(text).length;
@@ -99,7 +82,8 @@ describe("cleanEpisodeSummary", () => {
   });
 
   it("ep-13：👶Bonbon 家長註切掉、劇情保留", () => {
-    const raw = findSummary("ep-13");
+    const raw =
+      "酷酷的阿酷鑽地車，會幫忙挖地修水管、還會幫忙攪麵糊，做出香噴噴的甜甜圈。小車車們也學會了， 認識一個人不能只有看外表。 👶回想Bonbon看人的方式。";
     const result = cleanEpisodeSummary(raw);
     expect(result).toBe(
       "酷酷的阿酷鑽地車，會幫忙挖地修水管、還會幫忙攪麵糊，做出香噴噴的甜甜圈。小車車們也學會了， 認識一個人不能只有看外表。",
@@ -142,40 +126,11 @@ describe("cleanEpisodeSummary", () => {
   });
 
   it("false-positive：ep-12 劇情 🫶🏻 不得從 emoji 切斷", () => {
-    const raw = findSummary("ep-12");
+    const raw =
+      "6/15是警察節，警察叔叔、阿姨，謝謝你們🫶🏻 小藍巴士載著快生產的媽媽趕往醫院，請亮亮警車幫忙，兩台車一起合作開始救援任務。";
     const result = cleanEpisodeSummary(raw);
     expect(result).toContain("小藍巴士");
     expect(result).not.toContain("👶");
-  });
-
-  it("apple-synced 全量 summary 經 cleaner 後不含 promo、👶、且 ≤上限", () => {
-    for (const ep of loadAppleSynced()) {
-      const result = cleanEpisodeSummary(ep.summary);
-      expect(result, `${ep.slug} 不應為空`).toBeDefined();
-      expect(unicodeLen(result!), `${ep.slug} 超過 ${EPISODE_SUMMARY_MAX_LEN} 字`).toBeLessThanOrEqual(
-        EPISODE_SUMMARY_MAX_LEN,
-      );
-      expect(result, `${ep.slug} 含 promo`).not.toMatch(PROMO_PATTERN);
-      expect(result, `${ep.slug} 含 👶`).not.toContain("👶");
-    }
-  });
-
-  it("apple-synced.json 儲存值本身已是清洗結果，且 slug 唯一、必要欄位完整", () => {
-    const episodes = loadAppleSynced();
-    expect(episodes.length, "apple-synced 至少應有 21 筆歷史集數").toBeGreaterThanOrEqual(21);
-
-    const slugs = episodes.map((ep) => ep.slug);
-    expect(new Set(slugs).size, "slug 不得重複").toBe(slugs.length);
-
-    for (const ep of episodes) {
-      expect(ep.slug, `${ep.slug} slug 不得為空`).toBeTruthy();
-      expect(ep.summary, `${ep.slug} summary 不得為空`).toBeTruthy();
-      expect(ep.ep, `${ep.slug} ep 不得為空`).toBeGreaterThan(0);
-      expect(ep.title, `${ep.slug} title 不得為空`).toBeTruthy();
-      expect(ep.summary, `${ep.slug} 儲存值應冪等`).toBe(cleanEpisodeSummary(ep.summary));
-      expect(ep.summary, `${ep.slug} 儲存值含 promo`).not.toMatch(PROMO_PATTERN);
-      expect(ep.summary, `${ep.slug} 儲存值含 👶`).not.toContain("👶");
-    }
   });
 });
 

@@ -1,4 +1,6 @@
 import { test, expect } from "@playwright/test";
+import { storiesByNewest } from "../data/content";
+import { representativeParentStories } from "../lib/for-parents";
 import { PROGRESS_STORAGE_KEY } from "../lib/progress-store";
 import sharp from "sharp";
 import { skipIntroOverlay } from "./intro-gate";
@@ -470,18 +472,15 @@ test("親子指南舊網址永久轉到關於頁，家長常見問題在那裡",
   const starterHrefs = await starters.locator("a").evaluateAll((els) =>
     els.map((el) => el.getAttribute("href")),
   );
-  expect(starterHrefs.slice(0, 4)).toEqual([
-    "/story/ep-34",
-    "/story/ep-33",
-    "/story/ep-32",
-    "/story/ep-31",
-  ]);
-  expect(starterHrefs.slice(4)).toEqual([
-    "/story/ep-16",
-    "/story/ep-15",
-    "/story/ep-14",
-    "/story/ep-6",
-  ]);
+  // 前四格是目錄由新到舊的最新四集；後面的手選集跟頁面同一份清單，新集上架不必改這支測試。
+  const newestHrefs = storiesByNewest()
+    .slice(0, 4)
+    .map((story) => `/story/${story.slug}`);
+  const expectedHrefs = representativeParentStories().map(
+    (story) => `/story/${story.slug}`,
+  );
+  expect(starterHrefs.slice(0, 4)).toEqual(newestHrefs);
+  expect(starterHrefs).toEqual(expectedHrefs);
 
   // 子頁不受影響
   const dashboard = await request.get("/for-parents/dashboard", { maxRedirects: 0 });

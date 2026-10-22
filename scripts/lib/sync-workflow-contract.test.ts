@@ -80,13 +80,6 @@ function readCommitScript(): string {
   return readFileSync(join(ROOT, "scripts/ci/commit-and-push-sync.sh"), "utf8");
 }
 
-/** 從 commit 腳本抽出 open_sync_pr（bash 已搬出 YAML，避免 block scalar 再把 workflow 弄壞）。 */
-function extractOpenSyncPrBlock(script: string): string {
-  const match = script.match(/open_sync_pr\(\) \{[\s\S]*?\n\}/);
-  expect(match, "找不到 open_sync_pr 函式").toBeTruthy();
-  return match![0];
-}
-
 function gitAddBlock(script: string): string {
   const addBlock = script.match(/git add[\s\S]*?(?=\n\nif \[)/)?.[0];
   expect(addBlock, "找不到 commit 腳本的 git add").toBeDefined();
@@ -167,54 +160,28 @@ describe("sync workflow contract", () => {
     expect(yaml).not.toContain("npm run verify:browse-index");
     expect(yaml).toContain("pull-requests: write");
     expect(yaml).toContain("actions: write");
-    expect(yaml).toContain("statuses: write");
+    expect(yaml).toContain("fetch-and-generate:");
+    expect(yaml).toContain("validate:");
+    expect(yaml).toContain("commit:");
+    expect(yaml).toContain('SKIP_TRANSCRIBE: "1"');
   });
 
-  it("Commit and push 遇 GH013 必須改開 PR（個人倉無法給 Actions Integration bypass）", () => {
-    const yaml = readCommitScript();
-    expect(yaml).toContain("GH013");
-    expect(yaml).toContain("gh pr create");
-    expect(yaml).toContain("gh pr merge");
-    expect(yaml).toContain("--squash --auto");
-    expect(yaml).toContain(
+  it("commit 推固定分支 sync/apple，開或沿用一張 auto-merge PR，不等 CI", () => {
+    const script = readCommitScript();
+    const yaml = readWorkflow("sync-apple-podcast.yml");
+    expect(script).toContain('branch="${SYNC_BRANCH:-sync/apple}"');
+    expect(script).toContain("--force-with-lease=");
+    expect(script).toContain("gh pr create");
+    expect(script).toContain("gh pr merge");
+    expect(script).toContain("--squash --auto");
+    expect(script).toContain(
       'gh workflow run ci.yml --ref "$branch" -f required_only=true',
     );
-  });
-
-  it("GH013 open_sync_pr waiter 必須觀測 dispatch CI run 與 Vercel commit status", () => {
-    const block = extractOpenSyncPrBlock(readCommitScript());
-
-    expect(block).toMatch(
-      /gh run list[\s\S]*--workflow=ci\.yml[\s\S]*--branch="\$branch"/,
-    );
-    expect(block).toMatch(/gh run view[\s\S]*\$ci_run_id[\s\S]*--json jobs/);
-    expect(block).toContain("quality");
-    expect(block).toContain("build-and-public-e2e");
-    expect(block).toMatch(
-      /gh api[\s\S]*repos\/\$\{GITHUB_REPOSITORY\}\/commits\/\$\{sha\}\/status/,
-    );
-    expect(block).toMatch(/context == "Vercel"/);
-    expect(block).toMatch(/CI job 失敗：quality/);
-    expect(block).toMatch(/CI job 失敗：build-and-public-e2e/);
-    expect(block).toMatch(/Vercel commit status 失敗/);
-    expect(block).toContain("existing_ids");
-    expect(block).toMatch(/index\(\$id\)/);
-    expect(block).toContain("--limit=20");
-    expect(block).toMatch(/sort_by\(\.updated_at\)/);
-    // PR #140：`gh pr checks --required` 會漏掉 workflow_dispatch 的 quality
-    expect(block).not.toMatch(/^\s*gh pr checks\b/m);
-    expect(block).toMatch(/gh run list 失敗/);
-    expect(block).toMatch(/gh run view 失敗/);
-    expect(block).toMatch(/commit status API 失敗/);
-    // #145：dispatch Check Run 在 SHA 上是綠的，但 PR mergeability 看不見；
-    // 只在真實 job success 後鏡射同名 commit status（與 Vercel 同一條 Status API）。
-    expect(block).toContain("quality_mirrored");
-    expect(block).toMatch(/\/statuses\/\$\{sha\}/);
-    expect(block).toMatch(/-f context=quality/);
-    expect(block).toMatch(/-f context=build-and-public-e2e/);
-    expect(block).toMatch(/-f state=success/);
-    expect(block).toMatch(/寫入 quality commit status 失敗/);
-    expect(block).toMatch(/寫入 build-and-public-e2e commit status 失敗/);
+    expect(script).not.toContain("seq 1 80");
+    expect(script).not.toContain("等待 sync PR merge 逾時");
+    expect(script).not.toContain("quality_mirrored");
+    expect(yaml).toContain("bash scripts/ci/reset-sync-branch.sh");
+    expect(yaml).not.toContain("setup-whisper-ci.sh");
   });
 
   it("sync 的 shell 腳本可被 bash 解析，且 CI commit 不跑本機 hook", () => {
@@ -256,12 +223,13 @@ describe("sync workflow contract", () => {
     expect(lock).not.toContain("source-map-js-1.2.1.tgz");
   });
 
-  it("GH013 fallback 的 rerun 必須可重用既有 sync branch", () => {
-    const yaml = readCommitScript();
-    expect(yaml).toContain('git checkout -B "$branch"');
-    expect(yaml).toContain('git fetch origin "$branch"');
-    expect(yaml).toContain("--force-with-lease=\"refs/heads/$branch:$remote_branch_sha\"");
-    expect(yaml).toContain(
+  it("重跑時用 force-with-lease 蓋掉同一條 sync/apple，不另開分支", () => {
+    const reset = readFileSync(join(ROOT, "scripts/ci/reset-sync-branch.sh"), "utf8");
+    const commit = readCommitScript();
+    expect(reset).toContain('git checkout -B "$branch" origin/main');
+    expect(reset).toContain('git fetch origin "$branch"');
+    expect(commit).toContain('--force-with-lease="refs/heads/$branch:$lease"');
+    expect(commit).toContain(
       'gh pr list --base main --head "$branch" --state open --json url',
     );
   });
@@ -325,12 +293,14 @@ describe("sync workflow contract", () => {
     );
     const syncAt = yaml.indexOf("npm run sync:apple");
     const derivedAt = yaml.indexOf("name: Generate derived assets");
+    const packAt = yaml.indexOf("name: Pack sync artifact");
     const validateAt = yaml.indexOf("npm run sync:validate");
-    const detectAt = yaml.indexOf("name: Detect changes");
     expect(syncAt).toBeGreaterThan(-1);
     expect(derivedAt).toBeGreaterThan(syncAt);
-    expect(validateAt).toBeGreaterThan(derivedAt);
-    expect(detectAt).toBeGreaterThan(validateAt);
+    expect(packAt).toBeGreaterThan(derivedAt);
+    expect(validateAt).toBeGreaterThan(packAt);
+    expect(yaml).toContain("needs: fetch-and-generate");
+    expect(yaml).toMatch(/commit:[\s\S]*needs: \[fetch-and-generate, validate\]/);
     expect(derived).toContain("npm run generate:story-blurs");
     expect(derived).toContain("npm run generate:audio-lengths");
     expect(derived).toContain("scripts/ensure-sync-sidecars.ts");
@@ -408,12 +378,10 @@ describe("sync workflow contract", () => {
     const alert = readFileSync(join(ROOT, "scripts/sync-alert.ts"), "utf8");
 
     expect(yaml).toContain("- name: Report sync failure");
-    expect(yaml).toContain("if: failure()");
+    expect(yaml).toContain("needs.fetch-and-generate.result == 'failure'");
     expect(yaml).toContain("continue-on-error: true");
     expect(report).toContain("scripts/sync-alert.ts failure --kind=sync-job-failure");
-    expect(commit).toContain("sync-alert-skip");
-    expect(commit).toContain("pending-merge");
-    expect(commit).toContain("等待 sync PR merge 逾時");
+    expect(commit).not.toContain("等待 sync PR merge 逾時");
     expect(yaml).not.toContain("actions/github-script");
     expect(yaml).not.toContain("github.rest.issues.create");
     expect(alert).toContain("alertAfterConsecutiveFailures");
@@ -456,9 +424,9 @@ describe("sync workflow contract", () => {
     const yaml = readWorkflow("sync-watchdog.yml");
 
     expect(src).toContain("decideStaleRssAlert");
+    expect(src).toContain("decideUnmergedSyncPr");
     expect(src).toContain("waitForFirstSyncHoursFromEnv");
     expect(src).toContain("hasOpenSyncLandingPr");
-    expect(src).toContain("syncLandingPending");
     expect(yaml).toContain('STALE_HOURS: "3"');
     expect(yaml).toContain("pull-requests: read");
   });
@@ -480,6 +448,18 @@ describe("sync workflow contract", () => {
     expect(scripts["sync:notify:reconcile"]).toBe(
       "tsx scripts/sync-alert.ts notify-live --reconcile",
     );
+  });
+
+  it("whisper 在獨立的 transcribe-backfill workflow，失敗滿 N 次才開 issue", () => {
+    const yaml = readWorkflow("transcribe-backfill.yml");
+    const src = readFileSync(join(ROOT, "scripts/transcribe-backfill.ts"), "utf8");
+    expect(yaml).toContain("group: sync-apple-podcast");
+    expect(yaml).toContain("npx tsx scripts/transcribe-backfill.ts");
+    expect(yaml).toContain("bash scripts/setup-whisper-ci.sh");
+    expect(yaml).toContain("bash scripts/ci/checkout-sync-base.sh");
+    expect(src).toContain("SUBTITLE_ATTEMPT_LIMIT");
+    expect(src).toContain('category: "whisper"');
+    expect(readWorkflow("sync-apple-podcast.yml")).not.toContain("setup-whisper-ci.sh");
   });
 
   it("預設 sync report 路徑必須落在 .cache 且被 gitignore", () => {
