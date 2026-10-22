@@ -164,6 +164,11 @@ const REFLECTION_PROMPTS: Record<
     parentFollowUp:
       "先接住孩子的感覺，再一起聊聊故事裡學到的一件小事，不必急著給標準答案。",
   },
+  "ep-35": {
+    child: "恐龍車多多問為什麼不能一直吃糖果？聽完這個故事，你心裡最先想到什麼？",
+    parentFollowUp:
+      "先接住孩子的感覺，再一起聊聊故事裡學到的一件小事，不必急著給標準答案。",
+  },
 };
 
 export function getReflectionPrompt(slug: string) {
