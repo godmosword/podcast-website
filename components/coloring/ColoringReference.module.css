@@ -265,7 +265,12 @@
   cursor: pointer;
   color: var(--coloring-accent-fg);
   background: var(--coloring-accent);
-  box-shadow: 0 3px 0 var(--coloring-accent-shadow);
+  box-shadow: 0 4px 0 var(--coloring-accent-shadow);
+}
+
+.peekClose:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 var(--coloring-accent-shadow);
 }
 
 .peekClose svg {
@@ -305,5 +310,9 @@
   .marker,
   .peek {
     animation: none;
+  }
+
+  .peekClose:active {
+    transform: none;
   }
 }

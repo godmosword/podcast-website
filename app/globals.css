@@ -271,6 +271,14 @@ details[open] > summary .icon-disclosure {
   --brand-line-ink: #047a34;
   --surface-game: #fff7ed;
   --surface-game-warm: #fff9ee;
+  /* 遊戲路由夜間鎖奶油頁底時指回這組。夜間區塊不覆寫。 */
+  --game-day-ink: #34302b;
+  --game-day-ink-soft: #7a7268;
+  --game-day-paper: #ffffff;
+  --game-day-paper-2: #fcfdff;
+  --game-day-cta: #3a2410;
+  --game-day-support: #c94a1e;
+  --game-day-support-to: #a93a12;
   --surface-game-sky: #f3fbff;
   --surface-game-pink: #fff0f7;
   --bedtime-veil: #0d0b0a;

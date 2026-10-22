@@ -21,7 +21,7 @@
 
 | 角色 | Token | 日間色碼 | 用在哪 |
 |------|--------|----------|--------|
-| 品牌 | `--landing-brand` | `#FF8C2B` | 頂欄、品牌識別。不是頁面唯一主按鈕 |
+| 品牌 | `--landing-brand` | `#FF8C2B` | 品牌識別。頂欄填色是桃色 `--landing-nav-cta-bg` `#fff8f2`，不是這顆橘的滿版 |
 | 唯一主按鈕 | `--cta-solid-bg`（等於 `--landing-brand-ink`） | `#3A2410` | 每頁一顆主行動，白字 |
 | 互動強調 | `--accent`（日間等於 `--landing-heading`） | `#2A9D8F` | 邊框、底色、裝飾。對白底約 3.3:1，**不能當文字**。文字用 `--accent-ink` `#1F7268` |
 
@@ -31,20 +31,26 @@
 
 這組**不改綁**深墨主按鈕，外觀維持現況。只在 DESIGN、本檔與 token 註解登記為例外。
 
-## 2. 畫風【現況，2026-10-12 讀過程式】
+## 2. 畫風【已拍板，2026-10-22】
 
-上線是三種畫風，彼此不混：
+正式四套，之後新圖只能落在這四套，不開第五套：
 
 | 表面 | 畫風 | 依據 |
 |------|------|------|
-| 故事插畫、Landing、宇宙地圖 | 暖色粉彩黏土（霧面、柔光、低對比） | `DESIGN.md`、`UNIVERSE-ART-BIBLE.md` |
+| 故事插畫、Landing、角色、宇宙、封面、多多與六位客人、壽司食物與店面 | 暖色粉彩黏土照片／貼紙（WebP） | `DESIGN.md`、`lib/games/dino-sushi/art.tsx`（食物與店面是黏土 WebP，不是向量 SVG） |
 | 著色頁 | 純黑粗線稿＋白底 | `scripts/lib/coloring-ai-prompts.ts` |
-| 消消樂、壽司屋的食物與店面 | 黏土語彙的向量 SVG | `CandyMatchPieceArt.tsx`、`lib/games/dino-sushi/art.tsx`；壽司屋店面道具在 `shop-art.tsx`，雨棚、木牆、迴轉帶是 `DinoSushiShop.module.css` 的 CSS 漸層。角色多多是和封面同一套的黏土貼紙，見下方「多多」 |
-| 方塊轉轉 | **不是像素風。** CSS 格子＋圓角色塊，`borderRadius: 7`，色在 `CLAY_BLOCK_COLORS` | `components/games/BlockDropWell.tsx`、`blockDropTheme.ts` |
+| 消消樂棋子、親子遊樂地圖情境 | 向量黏土 SVG | `CandyMatchPieceArt.tsx`、`components/for-parents/scene-art/` |
+| 方塊轉轉（隱藏） | CSS 圓角色塊，`borderRadius: 7`，不是像素風 | `BlockDropWell.tsx`、`blockDropTheme.ts`。路由轉回 `/games`，這輪不改它的程式 |
+
+公開遊樂園是三款：著色本、車車消消樂、多多壽司屋。桌面三欄。方塊轉轉不是第四張公開卡。
 
 方塊轉轉的 adapter 沒有 `fixedUpdate`。`GameHost` 的 `image-rendering: pixelated` 畫布只在有 `fixedUpdate` 時出現，所以上線畫面不會走那條路。`lib/gamekit/runtime/palette.ts` 與 `procedural-sheets.ts` 仍在程式裡，沒有上線遊戲在用。像素規格的適用範圍寫在 Game Kit 美術聖經開頭。
 
-遊戲內字：方塊轉轉 HUD 用 `var(--font-sans)`，這個變數沒有定義，所以落到 PingFang TC／微軟正黑體，不是 8px 點陣字。消消樂與壽司屋按鈕寫 `font-family: inherit`，跟著全站 `--font-stack-body`。
+遊戲內字：公開遊戲用 `--font-stack-body`／`--font-stack-display`（消消樂可以先用 route subset 覆寫這兩個變數）。`--font-sans` 沒有定義；方塊轉轉 HUD 仍寫著它（隱藏、這輪不動），會落到蘋方／微軟正黑體。留言投稿與審核維持系統黑體。字級用 `--fs-*`。
+
+每集色：`data/episode-colors.ts` 用 `--c-pink`／`--c-yellow`／`--c-mint`／`--c-sky`／`--c-teal`／`--c-lilac` 六色輪替，只做淡底與 chip。主按鈕不染色。
+
+夜間：消消樂、壽司屋、著色本的頁底鎖 `--surface-game` 奶油色，字色釘回日間墨色。其他頁面仍是暖炭黑。棋盤、店面、著色紙不改成夜色。
 
 音效：著色等短音在 `lib/sfx.ts`（WebAudio，需手勢）。三款 Game Kit 遊戲在 `playing` 時播程序合成 BGM（`chiptune-bgm.ts`），不是 ogg 檔：方塊轉轉是方波，消消樂與壽司屋是三角波旋律。壽司屋另有合成音效（`lib/games/dino-sushi/sfx.ts`，經 Game Kit `voices()`）與店內環境音（`lib/gamekit/runtime/ambience.ts`，走 music 分軌、只在廚房出現）。真機音量【未確認】。
 
@@ -64,7 +70,7 @@
 
 對應寫在 `lib/games/dino-sushi/duoduo-sticker.tsx`。張嘴、咀嚼比表情優先。芥末用噴火的 `fire`（`sticker-puff.webp` 已不用）。封面是 `public/games/v2/dino-sushi/cover.webp`（主人核准的原檔）。向量版多多已退役（`duoduo-art.tsx` 已刪，2026-10-15）。
 
-**眉毛以暖棕粗眉為準**：遊戲貼紙與封面都是暖棕粗眉；`public/characters/恐龍車多多.jpg` 定裝照是黑眉版，不拿來校正遊戲貼紙。
+**眉毛以暖棕粗眉為準**（2026-10-22 再次確認）：遊戲貼紙與封面都是暖棕粗眉；`public/characters/恐龍車多多.jpg` 定裝照是黑眉版，不拿來校正遊戲貼紙，也不重拍。
 
 **貼紙對齊**：九張貼紙的車身姿勢不一，畫面上每張 `<img>` 掛固定的 `translateY`＋`scale`（常數表在 `duoduo-sticker.tsx`，量法寫在表上），讓輪底都落在畫布 92%（`.figure` 原點與接地影的位置），換表情時不上下沉浮；不做水平平移。fire 的車身刻意偏左、右邊留給火焰，只對齊輪底、不縮放。
 
@@ -103,19 +109,17 @@
 - `plans/2026-10-05-coloring-lineart-prompts.md`
 - `docs/art-prompts/games-hub-hero-desktop.txt` 與 `games-hub-hero-mobile.txt`（原本就有這句例外）
 
-## 5. 按鈕陰影【現況登記，外觀未改】
+## 5. 按鈕陰影【已拍板，2026-10-22】
 
-一般頁面用 `--elev-*` 柔影。遊戲抬頭與著色區有一道短的硬底邊（色票是 `0 2px 0`，遊戲方鈕是 `0 4px 0`，著色主鈕約 3–8px，各檔不盡相同）。
+一般頁面用 `--elev-*` 柔影。唯一主按鈕是深墨 `--cta-solid-bg` `#3A2410`、白字，含故事「開始看故事」、播放結束「再聽一次」、消消樂開始、壽司「給多多吃」。著色主鈕維持磚紅例外。
 
-遊戲／著色的底邊保留為兒童專用語彙、其餘維持柔影。已決定：維持現狀。
-
-**登記的例外（2026-10-19）：親子遊樂地圖的情境卡與位置觸發鈕。** 這兩個是「能按下去的黏土鈕」，用同一套硬底邊：沒選時 `0 4px 0 var(--pm-card-base)`（觸發鈕 `0 3px 0`），選中時往下沉 2px、底邊收成 `0 2px 0` 並換成 `--pm-selected` 3px 框＋✓。只用在這兩處；名單卡片、詳情 sheet 與其他頁面元件仍用 `--elev-*` 柔影。見 [`proposals/2026-10-12-button-shadows.md`](proposals/2026-10-12-button-shadows.md)。
+遊戲、著色、景點情境卡的硬底邊一律 4px，按下收成 2px（往下沉 2px）。親子遊樂地圖的情境卡與位置觸發鈕同一套：沒選 `0 4px 0 var(--pm-card-base)`，按下與選中 `0 2px 0`。名單卡片、詳情 sheet、宇宙地圖與其他頁面仍用柔影。方塊轉轉的底邊這輪不改。
 
 ## 6. 大幅修改的決定
 
 - 著色 12 色粉彩、圖案與色名：已上線（#206，2026-10-12）。見 [`proposals/2026-10-12-coloring-pastel-swatches.md`](proposals/2026-10-12-coloring-pastel-swatches.md)
 - 遊戲畫風：其他遊戲維持現狀。多多壽司屋的角色多多於 2026-10-13 改用和封面同一套的黏土貼紙（主人否決手繪 SVG 改版）。見 [`proposals/2026-10-12-game-art-style.md`](proposals/2026-10-12-game-art-style.md) 與上方「多多」
-- 按鈕陰影：已決定：維持現狀。上一節
+- 按鈕陰影：遊戲、著色、景點卡的硬底邊收成 4px／按下 2px。上一節
 
 ## 7. 仍【未確認】
 

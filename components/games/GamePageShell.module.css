@@ -65,6 +65,38 @@
   line-height: 48px;
 }
 
+/*
+ * 夜間：消消樂、壽司屋、著色本的頁底鎖奶油，字色釘回日間墨色。
+ * 棋盤、店面、著色紙本身不改。方塊轉轉不在這三條路由裡。
+ */
+:global([data-theme="night"]) .main[data-game-id="candy-match"],
+:global([data-theme="night"]) .main[data-game-id="dino-sushi"],
+:global([data-theme="night"]) .main[data-game-id="coloring-book"] {
+  --bg: var(--surface-game);
+  --ink: var(--game-day-ink);
+  --ink-soft: var(--game-day-ink-soft);
+  --card: var(--game-day-paper);
+  --card-2: var(--game-day-paper-2);
+  --landing-brand-ink: var(--game-day-cta);
+  /* --cta-solid-bg 在 :root 已算成夜間墨色後才繼承，這裡要重指一次。 */
+  --cta-solid-bg: var(--game-day-cta);
+  --cta-solid-fg: var(--on-dark);
+  --support-from: var(--game-day-support);
+  --support-to: var(--game-day-support-to);
+  --support-fg: var(--on-dark);
+  color: var(--ink);
+}
+
+:global([data-theme="night"] body:has(main[data-game-id="candy-match"])),
+:global([data-theme="night"] body:has(main[data-game-id="dino-sushi"])),
+:global([data-theme="night"] body:has(main[data-game-id="coloring-book"])) {
+  --bg: var(--surface-game);
+  --ink: var(--game-day-ink);
+  --ink-soft: var(--game-day-ink-soft);
+  background-color: var(--bg);
+  color: var(--ink);
+}
+
 .skip {
   position: absolute;
   left: -9999px;
@@ -437,7 +469,9 @@
 }
 
 /* 320 寬手機局內：返回＋三顆工具＋日夜切換都要 ≥48px。
- * 文字鈕左右內距與字級收一點、間距 4px，整列才留在 296px 裡面；「回遊樂園」文字保留。 */
+ * 文字鈕左右內距與字級收一點、間距 4px，整列才留在 296px 裡面；「回遊樂園」文字保留。
+ * 字級維持 0.82rem，不用 --fs-label（0.85rem）：按鈕會寬約 2px，返回和工具列就塞不進 296px，
+ * 工具列掉到下一列，抬頭從 84px 變成 136px。320×568 的壽司托盤連教學指尖一起掉出視窗外。 */
 @media (max-width: 359.98px) {
   .playHeader {
     gap: 4px;

@@ -48,7 +48,6 @@ export default function StoryCoListen({
           <FamilyActivityCard
             slug={story.slug}
             familyActivity={story.familyActivity}
-            accent={story.color}
           />
         ) : null}
         {story.parentGuide ? (

@@ -80,7 +80,7 @@
     var(--coloring-ui-surface-strong) 92%,
     transparent
   );
-  box-shadow: 0 1px 0 color-mix(in srgb, var(--coloring-ink) 8%, transparent);
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--coloring-ink) 10%, transparent);
   cursor: pointer;
   text-align: left;
   color: inherit;
@@ -89,6 +89,11 @@
 
 .card:hover {
   transform: translateY(-2px);
+}
+
+.card:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 color-mix(in srgb, var(--coloring-ink) 10%, transparent);
 }
 
 .card:focus-visible {
@@ -261,13 +266,14 @@
     transition: none;
   }
 
-  .card:hover {
+  .card:hover,
+  .card:active {
     transform: none;
   }
 }
 .localNote {
   margin: 0;
-  font-size: 12px;
+  font-size: var(--fs-meta);
 }
 .viewerBackdrop {
   position: fixed;

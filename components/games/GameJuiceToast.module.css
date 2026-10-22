@@ -1,7 +1,7 @@
 .toast {
   background: rgba(255, 255, 255, 0.88);
   color: var(--ink);
-  font-size: 14px;
+  font-size: var(--fs-label);
   font-weight: 900;
   padding: 7px 16px;
   border-radius: var(--radius-pill);
@@ -13,7 +13,7 @@
 
 .big {
   color: var(--c-pink);
-  font-size: 18px;
+  font-size: var(--fs-h3-compact);
 }
 
 .static {

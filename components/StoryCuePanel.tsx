@@ -1,5 +1,6 @@
 "use client";
 
+import Icon from "@/components/ui/Icon";
 import styles from "./StoryPlayer.module.css";
 
 type StoryCuePanelProps = {
@@ -56,7 +57,13 @@ export default function StoryCuePanel({
           清除
         </button>
         <button type="button" onClick={onCopy} disabled={cueMarks.length === 0}>
-          {cueCopied ? "已複製 ✓" : "複製"}
+          {cueCopied ? (
+            <>
+              已複製 <Icon name="check" size={16} />
+            </>
+          ) : (
+            "複製"
+          )}
         </button>
       </div>
     </div>

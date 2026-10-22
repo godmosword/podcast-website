@@ -66,7 +66,59 @@ const HARDCODED_COLOR_ALLOWLIST = [
   "components/landing/hero-parallax/HeroParallax.module.css",
 ] as const;
 
-export { HARDCODED_COLOR_ALLOWLIST };
+/**
+ * TS／TSX 裡的固定美術色（SVG 填色、棋子、舞台、宇宙島、著色記號）。
+ * 測試檔不掃。新增前先確認不是可以改吃 token 的介面色。
+ */
+const HARDCODED_COLOR_SOURCE_ALLOWLIST = [
+  "app/global-error.tsx",
+  "components/ShareButton.tsx",
+  "components/StoryPlayer.tsx",
+  "components/TopicIcon.tsx",
+  "components/coloring/ColoringCanvas.tsx",
+  "components/coloring/ColoringDoneSheet.tsx",
+  "components/coloring/ColoringLeaveSheet.tsx",
+  "components/coloring/ColoringPalette.tsx",
+  "components/coloring/ColoringToolbarIcons.tsx",
+  "components/decor/Wheel.tsx",
+  "components/for-parents/scene-art/EnergyScene.tsx",
+  "components/for-parents/scene-art/ExhibitScene.tsx",
+  "components/for-parents/scene-art/FreeScene.tsx",
+  "components/for-parents/scene-art/RainyScene.tsx",
+  "components/games/BlockDropControls.tsx",
+  "components/games/BlockDropHud.tsx",
+  "components/games/BlockDropIcons.tsx",
+  "components/games/BlockDropMap.tsx",
+  "components/games/BlockDropOverlay.tsx",
+  "components/games/BlockDropResult.tsx",
+  "components/games/BlockDropView.tsx",
+  "components/games/BlockDropWell.tsx",
+  "components/games/CandyMatchBoard.tsx",
+  "components/games/CandyMatchFx.tsx",
+  "components/games/CandyMatchIcons.tsx",
+  "components/games/CandyMatchMap.tsx",
+  "components/games/CandyMatchPieceArt.tsx",
+  "components/games/CandyMatchResult.tsx",
+  "components/games/ClayIcons.tsx",
+  "components/games/DinoSushiCustomerSeat.tsx",
+  "components/games/DinoSushiGuestThanks.tsx",
+  "components/games/DinoSushiOrderBubble.tsx",
+  "components/games/DinoSushiTitle.tsx",
+  "components/games/GameEndStation.tsx",
+  "components/games/GamePlayChromeSlot.tsx",
+  "components/games/ResultStars.tsx",
+  "components/games/blockDropTheme.ts",
+  "components/landing/hero-world/art-direction.ts",
+  "components/ui/TapHand.tsx",
+  "components/universe/MapBridgeLayer.tsx",
+  "components/universe/MapDecorLayer.tsx",
+  "components/universe/NightFireworks.tsx",
+  "components/universe/UniverseMap.tsx",
+  "components/universe/ZoneLandmarkArt.tsx",
+  "components/universe/ZoneMotionPart.tsx",
+] as const;
+
+export { HARDCODED_COLOR_ALLOWLIST, HARDCODED_COLOR_SOURCE_ALLOWLIST };
 
 /** D3 驗收頁：不得出現裸 hex（須改用 design token）。 */
 const D3_TOKENIZED_CSS_FILES = [
@@ -106,45 +158,86 @@ function listCssModules(dir: string, root: string, out: string[]): void {
   }
 }
 
+function isScannedSource(name: string): boolean {
+  if (name.endsWith(".d.ts")) return false;
+  if (name.endsWith(".test.ts") || name.endsWith(".test.tsx")) return false;
+  return name.endsWith(".ts") || name.endsWith(".tsx");
+}
+
+function listSources(dir: string, root: string, out: string[]): void {
+  for (const entry of readdirSync(dir)) {
+    const full = join(dir, entry);
+    const stat = statSync(full);
+    if (stat.isDirectory()) {
+      listSources(full, root, out);
+      continue;
+    }
+    if (isScannedSource(entry)) out.push(relative(root, full));
+  }
+}
+
+/** 去掉區塊與行註解，避免註解裡的色碼誤報。`https://` 不會被當成註解。 */
+export function stripSourceNoise(source: string): string {
+  const noBlock = source.replace(/\/\*[\s\S]*?\*\//g, "");
+  return noBlock.replace(/(^|[^:\\])\/\/.*$/gm, "$1");
+}
+
 /** 移除註解與 var() fallback 內的 hex，避免誤報。 */
 export function stripCssNoise(source: string): string {
   const noComments = source.replace(/\/\*[\s\S]*?\*\//g, "");
   return noComments.replace(/var\([^)]*#[0-9a-fA-F]{3,8}[^)]*\)/gi, "var(--fallback)");
 }
 
-export function findHardcodedHex(source: string): HardcodedColorHit[] {
+function findHexInStripped(stripped: string): HardcodedColorHit[] {
   const hits: HardcodedColorHit[] = [];
-  const lines = stripCssNoise(source).split("\n");
-
-  lines.forEach((line, index) => {
+  stripped.split("\n").forEach((line, index) => {
     const matches = line.match(HEX_PATTERN);
     if (!matches) return;
     for (const value of matches) {
       hits.push({ file: "", line: index + 1, value });
     }
   });
-
   return hits;
 }
 
+export function findHardcodedHex(source: string): HardcodedColorHit[] {
+  return findHexInStripped(stripCssNoise(source));
+}
+
+export function findHardcodedHexInSource(source: string): HardcodedColorHit[] {
+  return findHexInStripped(stripSourceNoise(source));
+}
+
 export function auditHardcodedColors(repoRoot: string): HardcodedColorReport {
-  const files: string[] = [];
+  const cssFiles: string[] = [];
+  const sourceFiles: string[] = [];
   for (const scanRoot of SCAN_ROOTS) {
     const abs = join(repoRoot, scanRoot);
-    listCssModules(abs, repoRoot, files);
+    listCssModules(abs, repoRoot, cssFiles);
+    listSources(abs, repoRoot, sourceFiles);
   }
 
-  const allow = new Set<string>(HARDCODED_COLOR_ALLOWLIST);
+  const cssAllow = new Set<string>(HARDCODED_COLOR_ALLOWLIST);
+  const sourceAllow = new Set<string>(HARDCODED_COLOR_SOURCE_ALLOWLIST);
   const hits: HardcodedColorHit[] = [];
   const byFile: Record<string, HardcodedColorHit[]> = {};
 
-  for (const file of files.sort()) {
-    if (allow.has(file)) continue;
-    const content = readFileSync(join(repoRoot, file), "utf8");
-    const fileHits = findHardcodedHex(content).map((hit) => ({ ...hit, file }));
-    if (fileHits.length === 0) continue;
+  const take = (file: string, fileHits: HardcodedColorHit[]) => {
+    if (fileHits.length === 0) return;
     byFile[file] = fileHits;
     hits.push(...fileHits);
+  };
+
+  for (const file of cssFiles.sort()) {
+    if (cssAllow.has(file)) continue;
+    const content = readFileSync(join(repoRoot, file), "utf8");
+    take(file, findHardcodedHex(content).map((hit) => ({ ...hit, file })));
+  }
+
+  for (const file of sourceFiles.sort()) {
+    if (sourceAllow.has(file)) continue;
+    const content = readFileSync(join(repoRoot, file), "utf8");
+    take(file, findHardcodedHexInSource(content).map((hit) => ({ ...hit, file })));
   }
 
   return { hits, byFile };

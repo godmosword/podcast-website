@@ -61,6 +61,8 @@ const BATCH_2: readonly { file: string; glyphs: string; icons: readonly string[]
   { file: "components/story/ShowNotes.tsx", glyphs: "▸▾", icons: ["chevron-right"] },
   { file: "components/story/ShowNotes.module.css", glyphs: "▸▾", icons: [] },
   { file: "components/universe/MapControls.tsx", glyphs: "＋－", icons: ["home", "plus", "minus"] },
+  { file: "components/games/CandyMatchMap.tsx", glyphs: "★✓", icons: ["star", "check"] },
+  { file: "components/StoryCuePanel.tsx", glyphs: "✓", icons: ["check"] },
 ];
 
 /** 原本各自畫一份、現在改用共用 Icon 的地方：那份路徑不再出現在元件裡。 */

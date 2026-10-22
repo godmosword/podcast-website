@@ -263,7 +263,7 @@ function applyDefaults(
     ...base,
     vehicle: override.vehicle ?? defaults.vehicle,
     emoji: override.emoji ?? defaults.emoji,
-    color: override.color ?? episodeColorForSlug(base.slug),
+    color: episodeColorForSlug(base.slug),
     tags: override.tags ?? defaults.tags,
     ...(override.summary !== undefined ? { summary: override.summary } : {}),
     ...(override.captions !== undefined ? { captions: override.captions } : {}),
@@ -739,7 +739,7 @@ async function main(): Promise<void> {
     readJson<SyncDefaults>(PATHS.defaults, {
       vehicle: "其他",
       emoji: "🚗",
-      color: "#7048e8",
+      color: "#f7a8c4",
       tags: [],
       pageCount: APPLE_SYNC_PAGE_COUNT,
       overrides: {},

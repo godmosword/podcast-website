@@ -138,7 +138,7 @@
   cursor: pointer;
   color: var(--coloring-accent-fg);
   background: var(--coloring-accent);
-  box-shadow: 0 3px 0 var(--coloring-accent-shadow);
+  box-shadow: 0 4px 0 var(--coloring-accent-shadow);
   animation: done-invite 1.6s ease-in-out 2;
 }
 
@@ -149,6 +149,11 @@
   height: 40px;
   border-radius: var(--radius-circle);
   background: var(--coloring-canvas-surface);
+}
+
+.doneBtn:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 var(--coloring-accent-shadow);
 }
 
 .doneBtn:disabled {
@@ -324,6 +329,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .doneBtn,
+  .doneBtn:active,
   .fillSpark,
   .fillSpark::before,
   .fillSpark::after {
