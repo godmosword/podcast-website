@@ -40,7 +40,8 @@ jobs:
       - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         if: steps.scope.outputs.sync_only != 'true'
         with:
-          node-version: "22"
+          node-version-file: .nvmrc
+          check-latest: true
           cache: npm
       - if: steps.scope.outputs.sync_only != 'true'
         run: npm ci
@@ -68,7 +69,8 @@ jobs:
       - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         if: steps.scope.outputs.sync_only != 'true'
         with:
-          node-version: "22"
+          node-version-file: .nvmrc
+          check-latest: true
           cache: npm
       - if: steps.scope.outputs.sync_only != 'true'
         run: npm ci
@@ -95,7 +97,8 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
-          node-version: "22"
+          node-version-file: .nvmrc
+          check-latest: true
           cache: npm
       - run: npm ci
       - run: npm run build
@@ -119,7 +122,8 @@ jobs:
         run: bash scripts/ci/sync-path-guard.sh
       - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
-          node-version: "22"
+          node-version-file: .nvmrc
+          check-latest: true
           cache: npm
       - run: npm ci
       - name: Validate sync outputs
