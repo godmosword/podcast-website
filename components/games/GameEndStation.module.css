@@ -80,8 +80,8 @@
   color: var(--cta-solid-fg);
   background: var(--cta-solid-bg);
   box-shadow:
-    0 5px 0 color-mix(in srgb, var(--cta-warm-to) 70%, #4a2e14),
-    inset 0 2px 0 color-mix(in srgb, #fff 70%, transparent);
+    0 4px 0 #2a180c,
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
 }
 
 .sideBtn {
@@ -161,11 +161,16 @@
   transform: translateY(-2px);
 }
 
-/* DESIGN.md §互動：按壓用 scale(0.98)，不用厚底影下沉。 */
-.mainBtn:active,
 .sideBtn:active,
 .nextThumb:active {
   transform: scale(0.98);
+}
+
+.mainBtn:active {
+  transform: translateY(2px);
+  box-shadow:
+    0 2px 0 #2a180c,
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
 }
 
 .hubLink {

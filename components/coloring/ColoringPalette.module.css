@@ -39,6 +39,11 @@
   min-height: 48px;
   border-radius: var(--radius-circle);
   border: 3px solid color-mix(in srgb, var(--coloring-ink) 18%, transparent);
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--coloring-ink) 12%, transparent);
+}
+
+.item:active .swatch {
+  transform: translateY(2px);
   box-shadow: 0 2px 0 color-mix(in srgb, var(--coloring-ink) 12%, transparent);
 }
 
@@ -137,6 +142,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .item:hover .swatch,
+  .item:active .swatch,
   .pop {
     animation: none;
     transform: none;

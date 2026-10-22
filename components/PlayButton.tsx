@@ -4,7 +4,6 @@ import styles from "./PlayButton.module.css";
 
 type PlayButtonProps = {
   href: string;
-  color: string;
   children?: React.ReactNode;
   inline?: boolean;
   className?: string;
@@ -14,7 +13,6 @@ type PlayButtonProps = {
 
 export default function PlayButton({
   href,
-  color,
   children,
   inline = false,
   className = "",
@@ -25,7 +23,6 @@ export default function PlayButton({
       href={href}
       aria-label={label}
       className={`${styles.button} press-squash ${inline ? styles.inline : ""} ${className}`.trim()}
-      style={{ ["--play-bg" as string]: color }}
     >
       {children ?? (
         <>

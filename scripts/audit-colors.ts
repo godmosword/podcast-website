@@ -8,6 +8,7 @@
  * allowlist 已對齊 DESIGN.md 的「固定美術色」政策（見
  * scripts/lib/hardcoded-color-audit.ts 的清單註解），所以清單外出現裸 hex
  * 就是真的漂移——本腳本因此會 exit 1，可以直接當閘門用。
+ * CSS Modules 之外，`app/` 與 `components/` 的 TS／TSX（不含測試）也掃裸 hex。
  */
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";

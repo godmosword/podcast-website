@@ -6,20 +6,15 @@
   width: 100%;
   min-height: 48px;
   text-align: center;
-  color: var(--on-dark);
+  color: var(--cta-solid-fg);
   font-size: var(--fs-h3);
   font-weight: 700;
   letter-spacing: 0.02em;
   padding: var(--space-4);
   border-radius: var(--radius-lg);
-  /* 單集色壓暗後再疊光澤：淺色票（#f59f00 / #0ea5e9）白字才能過 AA。 */
-  background-color: color-mix(in srgb, var(--play-bg, var(--accent)) 56%, black);
-  background-image: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.18),
-    rgba(0, 0, 0, 0.08)
-  );
-  box-shadow: var(--shadow-md), var(--gloss);
+  /* 全站唯一主按鈕：深墨底、白字。每集色只做墊色，不進這顆鈕。 */
+  background-color: var(--cta-solid-bg);
+  box-shadow: var(--elev-1);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.14);
   transition: transform var(--motion-press), box-shadow var(--motion-press),
     opacity var(--motion-press);

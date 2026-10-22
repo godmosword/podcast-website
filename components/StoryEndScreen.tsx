@@ -25,7 +25,6 @@ export type StoryEndReflectionComponentProps = {
 export type StoryEndScreenProps = {
   slug: string;
   title: string;
-  color: string;
   backHref: string;
   nextStorySlug?: string;
   nextStoryTitle?: string;
@@ -38,7 +37,6 @@ export type StoryEndScreenProps = {
 export default function StoryEndScreen({
   slug,
   title,
-  color,
   backHref,
   nextStorySlug,
   nextStoryTitle,
@@ -80,7 +78,6 @@ export default function StoryEndScreen({
         <button
           type="button"
           className={styles.endBtn}
-          style={{ ["--play-bg" as string]: color }}
           onClick={onReplay}
         >
           再聽一次
@@ -118,7 +115,6 @@ export default function StoryEndScreen({
                 slug={slug}
                 child={reflectionPrompt.child}
                 parentFollowUp={reflectionPrompt.parentFollowUp}
-                accent={color}
                 compact
               />
             </div>

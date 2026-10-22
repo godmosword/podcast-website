@@ -42,7 +42,7 @@ function renderMap(
 describe("CandyMatchMap", () => {
   it("選關即可查看當次三星條件，並說明提示與累積方式", () => {
     renderMap("challenge");
-    expect(screen.getByText("★ 怎麼拿三星？")).toBeTruthy();
+    expect(screen.getByText("怎麼拿三星？")).toBeTruthy();
     expect(screen.getByText("過關時剩 4 步以上")).toBeTruthy();
     expect(screen.getByText(/提示不影響星星/)).toBeTruthy();
     cleanup();

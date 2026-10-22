@@ -320,7 +320,10 @@ export function CandyMatchMap({
       </div>
 
       <details className={styles.starRules}>
-        <summary>★ 怎麼拿三星？</summary>
+        <summary>
+          <Icon name="star" size={16} />
+          怎麼拿三星？
+        </summary>
         <ul>
           <li>完成本關任務</li>
           <li>不用消除道具過關</li>
@@ -389,7 +392,11 @@ export function CandyMatchMap({
                 <span className={styles.nodeNumber} aria-hidden>
                   {i + 1}
                 </span>
-                {got > 0 ? <span className={styles.stationStamp} aria-hidden>✓</span> : null}
+                {got > 0 ? (
+                  <span className={styles.stationStamp} aria-hidden>
+                    <Icon name="check" size={14} />
+                  </span>
+                ) : null}
                 {locked ? (
                   <span className={styles.lock} aria-hidden>
                     <IconLock size={22} />

@@ -15,7 +15,7 @@ export default function Ribbon({ children, color, className, style }: RibbonProp
       className={`${styles.ribbon} ${className ?? ""}`}
       style={color ? { background: color, color, ...style } : style}
     >
-      <span style={{ color: "#fff" }}>{children}</span>
+      <span style={{ color: "var(--marker-ink)" }}>{children}</span>
     </span>
   );
 }

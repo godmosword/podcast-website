@@ -96,7 +96,7 @@ export default async function StoryDetailPage({
           <h1 className={styles.title}>{storyDisplayTitle(story)}</h1>
           {subtitle ? <p className={styles.subtitle}>{subtitle}</p> : null}
 
-          <div className={styles.coverWrap} style={{ borderColor: story.color }}>
+          <div className={styles.coverWrap}>
             <StoryCoverMorph slug={story.slug}>
               <StoryImage
                 src={storyCoverPath(story.slug)}
@@ -114,7 +114,6 @@ export default async function StoryDetailPage({
         <div className={styles.actions}>
           <PlayButton
             href={`/story/${story.slug}/play`}
-            color={story.color}
             className={styles.playMain}
             label={`開始看故事：${storyDisplayTitle(story)}`}
           />

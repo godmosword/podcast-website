@@ -209,7 +209,7 @@ function buildStoryOgMarkup({
               fontSize: 72,
               fontWeight: 800,
               lineHeight: 1,
-              boxShadow: `0 6px 0 ${accent}aa`,
+              boxShadow: "0 4px 0 #3a2410",
             }}
           >
             EP {story.ep}

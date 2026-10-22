@@ -88,9 +88,8 @@ export default function StoryCard({
 
       <span className={`${styles.body} ${isGrid ? styles.bodyGrid : ""}`}>
         <span className={styles.meta}>
-          {/* 美術審 L3：EP chip 固定淡紫（與 LatestHero「NEW · EP」ribbon 同色），
-              不再隨 story.color 變——列表裡一片淡紫冒一顆黃會讀成錯誤而不是意義。
-              story.color 留給進度條／CTA 淡底。 */}
+          {/* EP chip 固定淡紫。story.color 是六色粉彩之一，只做縮圖與標籤的淡底，
+              不當「開始看故事」的按鈕底。 */}
           <span className={`${styles.ep} marker marker-lilac`}>EP {story.ep}</span>
           {!hideMeta && (
             <>

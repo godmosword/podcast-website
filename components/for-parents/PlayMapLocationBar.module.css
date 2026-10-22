@@ -1,7 +1,7 @@
 /*
  * 位置列：「在［全台 ▾］或［我附近］」＋「更多條件」，捲過之後黏在導覽列下方。
  *
- * 觸發鈕沿用情境卡的黏土鈕語彙（白底＋--pm-card-line 框＋0 3px 0 底影），一眼看得出能按；
+ * 觸發鈕沿用情境卡的黏土鈕語彙（白底＋--pm-card-line 框＋0 4px 0 底影），一眼看得出能按；
  * 我附近、更多條件是 soft 樣式。不用 backdrop-filter 與 CSS blur()；頁面層不借 --map-chip*。
  */
 
@@ -68,7 +68,7 @@
   font: inherit;
   font-size: var(--fs-body);
   font-weight: 700;
-  box-shadow: 0 3px 0 var(--pm-card-base);
+  box-shadow: 0 4px 0 var(--pm-card-base);
   cursor: pointer;
   transition: transform var(--motion-press), box-shadow var(--motion-press);
 }
@@ -76,7 +76,7 @@
 .trigger:active,
 .trigger[aria-expanded="true"] {
   transform: translateY(2px);
-  box-shadow: 0 1px 0 var(--pm-card-base);
+  box-shadow: 0 2px 0 var(--pm-card-base);
 }
 
 .triggerLabel {

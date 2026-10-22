@@ -22,7 +22,6 @@ function FakeReflectionPrompt({ child, parentFollowUp }: ReflectionProps) {
 const baseProps = {
   slug: "quiet-story",
   title: "安靜聽故事",
-  color: "#2f7d58",
   backHref: "/stories",
   onReplay: () => undefined,
   reflectionPrompt: {

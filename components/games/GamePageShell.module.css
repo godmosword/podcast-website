@@ -65,6 +65,38 @@
   line-height: 48px;
 }
 
+/*
+ * 夜間：消消樂、壽司屋、著色本的頁底鎖奶油，字色釘回日間墨色。
+ * 棋盤、店面、著色紙本身不改。方塊轉轉不在這三條路由裡。
+ */
+:global([data-theme="night"]) .main[data-game-id="candy-match"],
+:global([data-theme="night"]) .main[data-game-id="dino-sushi"],
+:global([data-theme="night"]) .main[data-game-id="coloring-book"] {
+  --bg: var(--surface-game);
+  --ink: var(--game-day-ink);
+  --ink-soft: var(--game-day-ink-soft);
+  --card: var(--game-day-paper);
+  --card-2: var(--game-day-paper-2);
+  --landing-brand-ink: var(--game-day-cta);
+  /* --cta-solid-bg 在 :root 已算成夜間墨色後才繼承，這裡要重指一次。 */
+  --cta-solid-bg: var(--game-day-cta);
+  --cta-solid-fg: var(--on-dark);
+  --support-from: var(--game-day-support);
+  --support-to: var(--game-day-support-to);
+  --support-fg: var(--on-dark);
+  color: var(--ink);
+}
+
+:global([data-theme="night"] body:has(main[data-game-id="candy-match"])),
+:global([data-theme="night"] body:has(main[data-game-id="dino-sushi"])),
+:global([data-theme="night"] body:has(main[data-game-id="coloring-book"])) {
+  --bg: var(--surface-game);
+  --ink: var(--game-day-ink);
+  --ink-soft: var(--game-day-ink-soft);
+  background-color: var(--bg);
+  color: var(--ink);
+}
+
 .skip {
   position: absolute;
   left: -9999px;
@@ -461,7 +493,7 @@
     gap: 2px;
     min-height: 48px;
     padding: 0 6px;
-    font-size: 0.82rem;
+    font-size: var(--fs-label);
   }
 }
 

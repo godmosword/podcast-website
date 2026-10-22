@@ -15,7 +15,7 @@
   border-radius: 28px;
   box-shadow: 0 22px 46px rgba(144, 116, 128, 0.22), inset 0 2px 0 rgba(255, 255, 255, 0.96);
   overflow: hidden;
-  font-family: var(--font-sans, "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif);
+  font-family: var(--font-stack-body);
   user-select: none;
 }
 
@@ -157,7 +157,7 @@
   background: rgba(255, 255, 255, 0.92);
   box-shadow: 0 3px 10px rgba(150, 110, 130, 0.14);
   color: var(--candy-ink);
-  font-size: 18px;
+  font-size: var(--fs-h3-compact);
   line-height: 1;
 }
 
@@ -185,10 +185,20 @@
   padding: 0 0 0 6px;
   border: none;
   border-radius: 50%;
-  background: linear-gradient(180deg, #ffe889, #ffbd6f);
-  color: #614018;
+  background: var(--cta-solid-bg);
+  color: var(--cta-solid-fg);
   cursor: pointer;
-  box-shadow: 0 8px 0 rgba(203, 128, 52, 0.42), 0 16px 24px rgba(164, 103, 61, 0.18), inset 0 2px 0 rgba(255, 255, 255, 0.72);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    0 4px 0 #2a180c;
+  transition: transform var(--motion-press), box-shadow var(--motion-press);
+}
+
+.startButton:active {
+  transform: translateY(2px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    0 2px 0 #2a180c;
 }
 
 .startButton:focus-visible {
@@ -376,7 +386,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mapScreen button:hover {
+  .mapScreen button:hover,
+  .startButton:active {
     transform: none;
   }
 }

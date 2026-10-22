@@ -513,7 +513,7 @@
 
 .guestName {
   color: var(--ink-warm);
-  font-size: 0.85rem;
+  font-size: var(--fs-label);
   font-weight: 900;
   line-height: 1.1;
   white-space: nowrap;
@@ -613,7 +613,7 @@
   }
 
   .guestName {
-    font-size: 0.78rem;
+    font-size: var(--fs-meta);
   }
 }
 
@@ -877,7 +877,7 @@
   border-radius: 16px;
   background: #fffdf8;
   color: var(--ink-warm);
-  font-size: 1rem;
+  font-size: var(--fs-body);
   font-weight: 900;
   line-height: 1.3;
   box-shadow:
@@ -984,7 +984,7 @@
 
 .thanksLine {
   min-width: 0;
-  font-size: 0.95rem;
+  font-size: var(--fs-control);
   font-weight: 900;
   line-height: 1.25;
 }
@@ -1140,7 +1140,7 @@
   border-radius: 999px;
   background: #3f7f2a;
   color: #fff;
-  font-size: 0.75rem;
+  font-size: var(--fs-meta);
   text-align: center;
   box-shadow: 0 0 0 2px #fffdf8, 0 3px 6px rgba(40, 70, 30, 0.25);
 }
@@ -1209,7 +1209,7 @@
   background: #fff;
   cursor: pointer;
   box-shadow:
-    0 5px 0 rgba(61, 127, 214, 0.25),
+    0 4px 0 rgba(61, 127, 214, 0.25),
     0 0 0 4px #ffd34d,
     0 0 16px 6px rgba(255, 211, 77, 0.6);
   animation: sushiWiggle 1.2s ease-in-out 3;
@@ -1248,7 +1248,7 @@
   background: var(--sushi-accent, #3f7f2a);
   color: var(--sushi-cream, #fff8ea);
   font: inherit;
-  font-size: 1rem;
+  font-size: var(--fs-body);
   font-weight: 900;
   cursor: pointer;
   box-shadow:
@@ -1494,7 +1494,7 @@
   box-shadow:
     inset 0 0 0 2px #fffefa,
     inset 0 0 0 3.5px #4fa9c9,
-    0 3px 0 rgba(160, 115, 60, 0.3),
+    0 4px 0 rgba(160, 115, 60, 0.3),
     0 5px 8px rgba(110, 75, 35, 0.14);
 }
 
@@ -1720,11 +1720,11 @@
 }
 
 .baseLabel {
-  font-size: 0.95rem;
+  font-size: var(--fs-control);
   font-weight: 900;
 }
 
-/* 「給多多吃」：暖色大鈕，有厚度、按下會沉 */
+/* 「給多多吃」：深墨主鈕，按下沉 2px、底邊收到 2px */
 .serveButton {
   position: relative;
   display: grid;
@@ -1740,20 +1740,16 @@
   padding: 8px 8px 10px;
   border: none;
   border-radius: 24px;
-  background:
-    radial-gradient(90% 60% at 50% 0%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 70%),
-    linear-gradient(180deg, #ffe58a, #ffb558);
-  color: #5a360d;
+  background: var(--cta-solid-bg);
+  color: var(--cta-solid-fg);
   font: inherit;
-  font-size: 1.05rem;
+  font-size: var(--fs-h4);
   font-weight: 900;
   line-height: 1.2;
   cursor: pointer;
   box-shadow:
-    inset 0 2px 0 rgba(255, 255, 255, 0.8),
-    inset 0 -3px 0 rgba(214, 120, 30, 0.22),
-    0 6px 0 #d98a34,
-    0 12px 18px rgba(164, 90, 30, 0.22);
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    0 4px 0 #2a180c;
   transition:
     transform 120ms ease-out,
     box-shadow 120ms ease-out,
@@ -1769,8 +1765,8 @@
   opacity: 0.55;
   cursor: default;
   box-shadow:
-    inset 0 2px 0 rgba(255, 255, 255, 0.8),
-    0 3px 0 rgba(217, 138, 52, 0.4);
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    0 4px 0 #2a180c;
 }
 
 .serveArt {
@@ -1851,12 +1847,10 @@
 }
 
 .serveButton:active:not(:disabled) {
-  transform: translateY(3px);
+  transform: translateY(2px);
   box-shadow:
-    inset 0 2px 0 rgba(255, 255, 255, 0.8),
-    inset 0 -3px 0 rgba(214, 120, 30, 0.22),
-    0 3px 0 #d98a34,
-    0 6px 10px rgba(164, 90, 30, 0.2);
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    0 2px 0 #2a180c;
 }
 
 /* 圖跟著格子寬；矮橫向用 --tray-art（圖高）設上限，四列托盤才放得進一屏 */
@@ -1877,7 +1871,7 @@
 }
 
 .trayLabel {
-  font-size: 0.8rem;
+  font-size: var(--fs-meta);
   font-weight: 900;
   line-height: 1.1;
   white-space: nowrap;
@@ -1891,8 +1885,8 @@
 
 .serveButton[data-hint="true"] {
   box-shadow:
-    inset 0 2px 0 rgba(255, 255, 255, 0.8),
-    0 6px 0 #d98a34,
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    0 4px 0 #2a180c,
     0 0 0 4px #ffd34d,
     0 0 14px 4px rgba(255, 211, 77, 0.6);
 }
@@ -2070,7 +2064,7 @@
   }
 
   .baseLabel {
-    font-size: 1rem;
+    font-size: var(--fs-body);
   }
 }
 
@@ -2240,7 +2234,7 @@
   }
 
   .trayLabel {
-    font-size: 0.95rem;
+    font-size: var(--fs-control);
   }
 
   .prep {
@@ -2265,7 +2259,7 @@
   }
 
   .caption {
-    font-size: 1.15rem;
+    font-size: var(--fs-h3-compact);
   }
 
   /* 跟著舞台寬長大，上限 52：三料單 4 格＋分隔線＋內距約 245px，talk 欄約 250px */
@@ -2278,7 +2272,7 @@
   }
 
   .guestName {
-    font-size: 1.05rem;
+    font-size: var(--fs-h4);
   }
 
   .favStar {

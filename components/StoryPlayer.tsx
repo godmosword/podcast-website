@@ -911,7 +911,6 @@ export default function StoryPlayer({
         <StoryEndScreen
           slug={slug}
           title={title}
-          color={color}
           backHref={backHref}
           nextStorySlug={nextStorySlug}
           nextStoryTitle={nextStoryTitle}

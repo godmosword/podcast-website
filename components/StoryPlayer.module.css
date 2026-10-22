@@ -239,17 +239,12 @@
   min-height: 48px;
   padding: 15px 20px;
   border-radius: var(--radius-lg);
-  color: #fff;
+  color: var(--cta-solid-fg);
   font-size: var(--fs-h4);
   font-weight: 700;
   z-index: 2;
-  background-color: color-mix(in srgb, var(--play-bg, #888) 56%, black);
-  background-image: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.22),
-    rgba(0, 0, 0, 0.12)
-  );
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45), var(--gloss);
+  background-color: var(--cta-solid-bg);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45);
 }
 
 .endBtnSecondary {

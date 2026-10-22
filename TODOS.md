@@ -22,6 +22,7 @@
 
 ### pending
 
+- **重錄 darwin 視覺基準（美術統一 2026-10-22）**：這輪在 Linux 改了主按鈕深墨、六色墊色、遊戲／著色／景點卡 4px 硬底邊、遊戲夜間奶油頁底。基準檔名都是 `-chromium-darwin`，這台機器產不出同名快照，沒有覆寫。請在 Mac 上重錄並逐張目檢會變的畫面：首頁、`/stories`、`/story/ep-3`（日間與夜間）、`/games`、著色本、消消樂、多多壽司屋、親子遊樂地圖情境卡。跑法：`npm run test:visual:trusted -- --update-snapshots`。`ops · S · 使用者 Mac`
 - **重錄 darwin 視覺基準（給爸媽預設展開）**：單集頁拿掉頂部「給爸媽：一起聊聊」連結，共讀區改成預設展開，整頁高度與第一屏以下的內容會變。請在 Mac 上重錄並逐張目檢：`e2e/visual.spec.ts-snapshots/story-ep-3-390-light-chromium-darwin.png`、`e2e/visual.spec.ts-snapshots/story-ep-3-390-night-chromium-darwin.png`、`e2e/visual.spec.ts-snapshots/story-ep-3-1280-light-chromium-darwin.png`、`e2e/visual.spec.ts-snapshots/story-ep-3-1280-night-chromium-darwin.png`、`e2e/visual.spec.ts-snapshots/story-ep-3-768-light-chromium-darwin.png`。關於頁精選改成最新 4 集加原本手選，但視覺測試只拍第一屏，那四張 about 基準不該變。Linux 產不出 darwin 基準，這次 push 用 `SKIP_VISUAL_GATE=1`。`ops · S · 使用者 Mac`
 - **後續（本輪不做）**：`.scrim` 左下 0.52 可調淡。
 - **Hero 橫向 2.5D 改版（規格已定；Phase 1／2／3／3b／4 已落地，視差帶已是預設、3D 只剩回滾）**：等距 diorama → 橫向視差帶；規格見 [Hero 橫向 2.5D 視差帶](./docs/specs/HERO-PARALLAX-SPEC.md)。四個 Phase、阻擋項與跨角色眼位決策（A/B/C）見該文 §5／§6／§2.5。`design · L · 需先決 §2.5`

@@ -5,6 +5,7 @@ import {
   assertD3PagesTokenized,
   auditHardcodedColors,
   findHardcodedHex,
+  findHardcodedHexInSource,
   stripCssNoise,
 } from "./hardcoded-color-audit";
 
@@ -14,6 +15,17 @@ describe("hardcoded-color-audit", () => {
   it("stripCssNoise 忽略 var fallback 內 hex", () => {
     const css = ".x { color: var(--accent, #0f766e); }";
     expect(findHardcodedHex(stripCssNoise(css))).toHaveLength(0);
+  });
+
+  it("程式註解裡的 hex 不算", () => {
+    const source = "// 舊色 #fff\nconst x = 1; /* #000 */\n";
+    expect(findHardcodedHexInSource(source)).toHaveLength(0);
+  });
+
+  it("程式字串裡的裸 hex 要抓到", () => {
+    const hits = findHardcodedHexInSource('const fill = "#fff9eb";');
+    expect(hits).toHaveLength(1);
+    expect(hits[0]?.value).toBe("#fff9eb");
   });
 
   it("findHardcodedHex 抓出裸 hex", () => {
