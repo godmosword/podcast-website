@@ -417,6 +417,9 @@ describe("sync workflow contract", () => {
     expect(yaml).toContain("scripts/check-sync-fresh.ts");
     expect(yaml).toContain("bash scripts/ci/npm-install.sh");
     expect(readWorkflow("ci.yml")).toContain("bash scripts/ci/run-actionlint.sh");
+    expect(readWorkflow("ci.yml")).toMatch(/^  sync-validate:/m);
+    expect(readWorkflow("ci.yml")).toContain("bash scripts/ci/sync-path-guard.sh");
+    expect(readWorkflow("ci.yml")).toContain("steps.scope.outputs.sync_only != 'true'");
   });
 
   it("看門狗以政策決定 stale，不因 yaml STALE_HOURS=3 在第一次 sync 前開單", () => {
