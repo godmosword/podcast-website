@@ -6,6 +6,9 @@
 
 ### Fixed
 
+- **Apple sync PR 不再卡在 required check**：sync PR 只能靠 `workflow_dispatch` 補跑 CI，那種 run 的 check run 不會掛到 PR 上，`quality`／`build-and-public-e2e` 永遠等不到，#257 卡了一天半。`ci.yml` 新增 `mirror-sync-status`，把這兩個和 `sync-validate` 的結果寫成同名 commit status（失敗也寫）。
+- **字幕格式不再來回改**：轉錄、同步再處理和校稿以前各寫一種縮排，同步每輪把沒校對的字幕改成單行，開出整檔假 diff（#257 的 ep-35 字幕 939 行，內容一字不差）。三處改走 `scripts/lib/subtitle-file.ts`，同一格式、內容沒變就不寫；現有 20 個單行字幕檔一次轉成同一格式，內容不變。
+- **sync PR 路徑白名單收窄**：原本整個 `data/` 都放行，包含手寫的 `content.ts`、`games.ts` 和測試，而 sync PR 會跳過 lint／typecheck／單元測試。改回明確清單 `scripts/ci/sync-output-paths.txt`（shell 與 TS 共用），寫到清單外會在打包或 commit 時失敗。同步 workflow 的權限也改成每個 job 各自宣告，抓 RSS 的 job 只讀。
 - **Apple sync 新集封面 blur**：同步寫入 `data/story-image-blurs.json`，workflow 在單測前跑 `generate:story-blurs`，commit 白名單一併帶上。新集不再因為缺 blur 讓 `npm test` 擋下上架（#251）。
 
 ### Added

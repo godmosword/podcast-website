@@ -12,11 +12,12 @@ GitHub 的 ruleset 沒有「sync PR 只要 `sync-validate`，人開的 PR 仍要
 
 ## 這個 repo 已經補上的行為
 
-路徑有限是指：head 分支是 `sync/apple` 或舊的 `sync/apple-<run>`，而且 diff 只在 `data/` 與 `public/stories/`。
+路徑有限是指：head 分支是 `sync/apple` 或舊的 `sync/apple-<run>`，而且 diff 只動到白名單 [`scripts/ci/sync-output-paths.txt`](../scripts/ci/sync-output-paths.txt) 裡的路徑（同步產物的檔名，加上 `data/subtitles/`、`public/stories/` 兩個目錄）。`data/` 底下手寫的 `content.ts`、`games.ts`、測試等不在裡面：sync PR 會跳過全站檢查，放行它們等於讓手寫程式不經 lint／typecheck 進 main。
 
 - `ci.yml` 有一個 job，名字就是 **`sync-validate`**。`workflow_dispatch` 就算只跑 required checks，這個 job 也會跑。
-- 同一個 job 先跑路徑閘門。sync 分支若改到那兩個目錄以外，job 失敗。
-- `quality` 和 `build-and-public-e2e` 在確認「這是路徑有限的 sync PR」之後立刻成功，不再跑全站測試、build、Playwright。job 名字不變，ruleset 還是看得到這兩個 context。
+- 同一個 job 先跑路徑閘門。sync 分支若改到白名單以外，job 失敗。
+- `quality` 和 `build-and-public-e2e` 在確認「這是路徑有限的 sync PR」之後立刻成功，不再跑全站測試、build、Playwright。job 名字不變。
+- sync PR 是 `GITHUB_TOKEN` 開的，不會觸發 `pull_request`，CI 只能靠 `workflow_dispatch` 補跑。**那種 run 的 check run 不會掛到 PR 上**，ruleset 看不到 `quality`、`build-and-public-e2e`，auto-merge 會一直卡著（#257）。所以 `ci.yml` 最後有 `mirror-sync-status` job，把這兩個加上 `sync-validate` 的結果寫成同名 commit status。成功寫 success、失敗寫 failure；cancelled／skipped 不寫。
 - 人開的 PR 不會走這條捷徑，三個 job 都照舊跑完。
 - `Vercel` 是 Vercel 自己寫上 commit 的 status，不是這個 repo 的 job。路徑閘門管不到它。sync PR 仍然會等 Vercel 部署成功，ruleset 才放行。
 

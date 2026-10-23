@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
-# 只打包這次同步改到的 data/ 與 public/stories/，外加 report／commit message。
-# 不要把整個音檔庫再傳一遍。
+# 只打包這次同步改到的白名單路徑（scripts/ci/sync-output-paths.txt），外加 report／commit message。
+# 不要把整個音檔庫再傳一遍。寫到白名單以外就在這裡失敗，不會被靜默丟掉。
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+# shellcheck disable=SC1091
+source "$ROOT/scripts/ci/lib.sh"
 dest="${SYNC_ARTIFACT_DIR:-${RUNNER_TEMP:-/tmp}/sync-artifact}"
 tgz="${SYNC_ARTIFACT_TGZ:-${RUNNER_TEMP:-/tmp}/sync-outputs.tgz}"
 
@@ -11,8 +13,7 @@ rm -rf "$dest"
 mkdir -p "$dest/files"
 cd "$ROOT"
 
-git add -- data public/stories
-git add -u -- data public/stories
+sync_stage_outputs
 
 git diff --cached --name-only -z | while IFS= read -r -d '' file; do
   if [ -f "$file" ]; then

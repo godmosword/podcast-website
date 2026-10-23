@@ -80,10 +80,21 @@ function readCommitScript(): string {
   return readFileSync(join(ROOT, "scripts/ci/commit-and-push-sync.sh"), "utf8");
 }
 
-function gitAddBlock(script: string): string {
-  const addBlock = script.match(/git add[\s\S]*?(?=\n\nif \[)/)?.[0];
-  expect(addBlock, "找不到 commit 腳本的 git add").toBeDefined();
-  return addBlock!;
+function readCiLib(): string {
+  return readFileSync(join(ROOT, "scripts/ci/lib.sh"), "utf8");
+}
+
+/** commit 與 pack 都必須經 lib.sh 的 sync_stage_outputs，只 stage 白名單（sync-output-paths.txt）。 */
+function expectStagesSyncOutputs(): void {
+  const pack = readFileSync(join(ROOT, "scripts/ci/pack-sync-artifact.sh"), "utf8");
+  for (const [name, script] of [
+    ["commit-and-push-sync.sh", readCommitScript()],
+    ["pack-sync-artifact.sh", pack],
+  ] as const) {
+    expect(script, `${name} 必須呼叫 sync_stage_outputs`).toMatch(/^sync_stage_outputs$/m);
+    expect(script, `${name} 不能自己 git add`).not.toMatch(/^git add\b/m);
+  }
+  expect(readCiLib()).toContain("done < <(sync_output_paths)");
 }
 
 /**
@@ -197,10 +208,18 @@ describe("sync workflow contract", () => {
     expect(commit).toContain("HUSKY=0");
     expect(commit).toContain("commit --no-verify");
     expect(commit).toContain("push --no-verify");
+    const lib = readCiLib();
     expect(commit).not.toMatch(/^git add -A\b/m);
-    expect(commit).toContain("git add -- data public/stories");
+    expect(lib).not.toMatch(/git add -A\b/);
+    expectStagesSyncOutputs();
+    expect(lib).toContain('git add -- "${present[@]}"');
+    // 改名會讓舊路徑消失在 diff 裡；兩處都要看得到被刪的手寫檔。
+    expect(lib).toContain("git diff --cached --name-only --no-renames");
+    expect(readFileSync(join(ROOT, "scripts/ci/sync-path-guard.sh"), "utf8")).toContain(
+      "git diff --name-only --no-renames",
+    );
     // 已 stage 的列也會出現在 porcelain。不能把「有東西要 commit」當成殘檔。
-    expect(commit).toContain('substr($0, 2, 1) != " "');
+    expect(lib).toContain('substr($0, 2, 1) != " "');
     expect(commit).not.toContain('if [ -n "$(git status --porcelain)" ]');
   });
 
@@ -235,8 +254,7 @@ describe("sync workflow contract", () => {
   });
 
   it("git add 必須涵蓋 catalog sidecar（防 #46／#60 回歸）", () => {
-    const addBlock = gitAddBlock(readCommitScript());
-    expect(addBlock).toContain("git add -- data public/stories");
+    expectStagesSyncOutputs();
     for (const filePath of CATALOG_SIDECAR_PATHS) {
       expect(isSyncOutputPath(filePath), filePath).toBe(true);
     }
@@ -244,7 +262,7 @@ describe("sync workflow contract", () => {
 
   // prebuild（generate:audio-lengths）產物，非 catalog sidecar；漏白名單會讓 #61 類 Commit and push 失敗。
   it("git add 必須涵蓋 data/audio-lengths.json（防 #61 回歸）", () => {
-    expect(gitAddBlock(readCommitScript())).toContain("data");
+    expectStagesSyncOutputs();
     expect(isSyncOutputPath("data/audio-lengths.json")).toBe(true);
     expect(isSyncOutputPath("data/story-image-blurs.json")).toBe(true);
   });
@@ -258,14 +276,14 @@ describe("sync workflow contract", () => {
   });
 
   it("prebuild 產物必須落在同步路徑、gitignore，或 sync 不產生（sync-build-skip）", () => {
-    const addBlock = gitAddBlock(readCommitScript());
+    expectStagesSyncOutputs();
     const gitignore = readFileSync(join(ROOT, ".gitignore"), "utf8");
 
     for (const entry of PREBUILD_OUTPUT_REGISTRY) {
       if (entry.disposition === "git-add") {
         expect(
-          isSyncOutputPath(entry.path) && addBlock.includes("data"),
-          `prebuild ${entry.script} 產物 ${entry.path} 不在同步路徑`,
+          isSyncOutputPath(entry.path),
+          `prebuild ${entry.script} 產物 ${entry.path} 不在同步白名單`,
         ).toBe(true);
         continue;
       }

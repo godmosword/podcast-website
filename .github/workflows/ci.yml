@@ -128,3 +128,23 @@ jobs:
       - run: npm ci
       - name: Validate sync outputs
         run: npm run sync:validate
+
+  # workflow_dispatch 的 check run 不會掛到 sync PR 上，required check 等不到、auto-merge 卡死（#257）。
+  # 這裡把三個 job 的結果寫成同名 commit status。失敗也照寫；cancelled／skipped 不寫。
+  mirror-sync-status:
+    needs: [quality, build-and-public-e2e, sync-validate]
+    if: ${{ always() && github.event_name == 'workflow_dispatch' && (github.ref_name == 'sync/apple' || startsWith(github.ref_name, 'sync/apple-')) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      statuses: write
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - name: Mirror required checks as commit statuses
+        env:
+          GH_TOKEN: ${{ github.token }}
+          QUALITY_RESULT: ${{ needs.quality.result }}
+          BUILD_RESULT: ${{ needs.build-and-public-e2e.result }}
+          SYNC_VALIDATE_RESULT: ${{ needs.sync-validate.result }}
+        run: bash scripts/ci/mirror-sync-status.sh

@@ -1,0 +1,20 @@
+# Apple sync 允許寫回 git 的路徑。唯一來源，四個地方都讀這份：
+#   scripts/lib/sync-outputs.ts、scripts/ci/sync-path-guard.sh、
+#   scripts/ci/pack-sync-artifact.sh、scripts/ci/commit-and-push-sync.sh（後兩支經 lib.sh）
+#
+# 每行一個路徑。結尾是 / 的是目錄前綴，其餘要一字不差。# 開頭是註解。
+#
+# sync PR 會跳過 lint／typecheck／單元測試（只跑 sync-validate），
+# 所以 data/ 底下手寫的檔案（content.ts、games.ts、stories.ts、測試……）絕不能列進來。
+# 同步多了一種產物時，在這裡補一行；漏了會在 pack／commit 時大聲失敗，不會靜默進 main。
+data/apple-synced.json
+data/apple-sync-state.json
+data/browse-index.json
+data/audio-lengths.json
+data/story-image-blurs.json
+data/story-zones.ts
+data/reflection-prompts.ts
+data/story-dates.ts
+data/episode-faqs.ts
+data/subtitles/
+public/stories/

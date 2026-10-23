@@ -12,8 +12,9 @@ import {
   ROOT,
   subtitleSidecarPath,
 } from "./transcribe-core";
+import { writeSubtitlesIfChanged, type SubtitleSegment } from "./subtitle-file";
 
-export type SubtitleSegment = { t: number; text: string };
+export type { SubtitleSegment };
 
 type ProofreadIssue = {
   index: number;
@@ -226,7 +227,7 @@ export function applySafeAutoFixes(segments: SubtitleSegment[]): {
 
 export function writeSubtitleSegments(slug: string, segments: SubtitleSegment[]): string {
   const p = subtitleSidecarPath(slug);
-  writeFileSync(p, `${JSON.stringify(segments, null, 2)}\n`, "utf8");
+  writeSubtitlesIfChanged(p, segments);
   return p;
 }
 

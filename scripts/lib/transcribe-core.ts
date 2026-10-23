@@ -13,14 +13,14 @@ import {
   readdirSync,
   readFileSync,
   rmSync,
-  writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import * as OpenCC from "opencc-js";
+import { writeSubtitlesIfChanged, type SubtitleSegment } from "./subtitle-file";
 
-type Subtitle = { t: number; text: string };
+type Subtitle = SubtitleSegment;
 
 // Whisper 中文常輸出簡體；本站為繁中（台灣），統一簡轉繁（含台灣用語）。
 const toTraditional = OpenCC.Converter({ from: "cn", to: "twp" });
@@ -196,11 +196,11 @@ function transcribeAudio(
   }
 }
 
-/** 寫入 data/subtitles/<slug>.json（即時字幕側車檔）。 */
+/** 寫入 data/subtitles/<slug>.json（即時字幕側車檔）；內容沒變就不碰。 */
 function writeSubtitles(slug: string, segments: Subtitle[]): string {
   if (!existsSync(SUBTITLES_DIR)) mkdirSync(SUBTITLES_DIR, { recursive: true });
   const file = join(SUBTITLES_DIR, `${slug}.json`);
-  writeFileSync(file, `${JSON.stringify(segments)}\n`, "utf-8");
+  writeSubtitlesIfChanged(file, segments);
   return file;
 }
 

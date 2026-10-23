@@ -1,11 +1,27 @@
 /**
- * Apple sync 允許寫回 git 的路徑。
- * 實際產物都在 data/（目錄、字幕、sidecar、blur、音檔長度）與 public/stories/。
- * commit 用這兩個前綴 stage，不再維護一份會漏檔的檔名白名單。
+ * Apple sync 允許寫回 git 的路徑，清單在 scripts/ci/sync-output-paths.txt（shell 與 TS 共用）。
+ * 不能整個放行 data/：那裡有手寫的 content.ts、games.ts 和測試，
+ * sync PR 又會跳過 lint／typecheck／單元測試，放行等於讓它們不經檢查進 main。
  * 禁止 git add -A：那會把無關的工作區變更一起捲進去。
  */
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 
-export const SYNC_OUTPUT_PREFIXES = ["data/", "public/stories/"] as const;
+const SYNC_OUTPUT_PATHS_FILE = fileURLToPath(
+  new URL("../ci/sync-output-paths.txt", import.meta.url),
+);
+
+/** 去掉註解與空行。結尾是 / 的是目錄前綴，其餘要一字不差。 */
+export function parseSyncOutputPaths(text: string): string[] {
+  return text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0 && !line.startsWith("#"));
+}
+
+export const SYNC_OUTPUT_PATHS: readonly string[] = parseSyncOutputPaths(
+  readFileSync(SYNC_OUTPUT_PATHS_FILE, "utf8"),
+);
 
 export const SYNC_BRANCH = "sync/apple";
 
@@ -15,7 +31,9 @@ export function normalizeRepoPath(filePath: string): string {
 
 export function isSyncOutputPath(filePath: string): boolean {
   const normalized = normalizeRepoPath(filePath);
-  return SYNC_OUTPUT_PREFIXES.some((prefix) => normalized.startsWith(prefix));
+  return SYNC_OUTPUT_PATHS.some((entry) =>
+    entry.endsWith("/") ? normalized.startsWith(entry) : normalized === entry,
+  );
 }
 
 /** sync bot 的固定分支，以及第一階段仍可能留下的 sync/apple-<run-id>。 */
