@@ -4,6 +4,12 @@
 
 ## [Unreleased]
 
+### Security
+
+- **Next.js 16.3.8 → 16.4.3**：修補 2026-10 公布的 GHSA-2464-fhr4-w9xw（圖片優化 API 處理 SVG 時遠端執行程式碼，critical）、GHSA-673q-mjm6-r5xr（`use cache` 遠端執行，critical；本站未使用）、GHSA-p3m5-59mp-jv5r（Server Actions 服務中斷；留言牆有用）。`eslint-config-next` 同步 16.4.3。16.4 新增的都是要主動開啟的功能，本站沒用到改名的 `unstable_prefetch`／`unstable_navigation`。
+- **zod ≥ 4.6.6**（GHSA-mrhx-c7xc-m3w5，超大集合驗證耗盡記憶體）：`@vercel/cli-config` 把 zod 釘死在 4.1.11，加 `overrides.zod: "$zod"` 統一整棵相依樹。
+- **@sentry/nextjs 10.76.2**（GHSA-mchm-gjx6-7h55，tunnel route 繞過 middleware；本站未設 `tunnelRoute`）與 **fast-uri 3.1.9**：版本範圍內更新。`npm audit --omit=dev` 回到 0 個漏洞，CI 的 `audit:production` 恢復通過。
+
 ### Fixed
 
 - **Apple sync PR 不再卡在 required check**：sync PR 只能靠 `workflow_dispatch` 補跑 CI，那種 run 的 check run 不會掛到 PR 上，`quality`／`build-and-public-e2e` 永遠等不到，#257 卡了一天半。`ci.yml` 新增 `mirror-sync-status`，把這兩個和 `sync-validate` 的結果寫成同名 commit status（失敗也寫）。

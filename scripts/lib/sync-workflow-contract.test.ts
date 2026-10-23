@@ -231,6 +231,39 @@ describe("sync workflow contract", () => {
     expect(pkg.overrides?.browserslist).toBe("^4.28.7");
   });
 
+  it("next 與 eslint-config-next 必須釘 16.4.3（修補 GHSA-2464-fhr4-w9xw、GHSA-673q-mjm6-r5xr、GHSA-p3m5-59mp-jv5r）", () => {
+    const pkg = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")) as {
+      dependencies?: Record<string, string>;
+      devDependencies?: Record<string, string>;
+    };
+    const lock = readFileSync(join(ROOT, "package-lock.json"), "utf8");
+
+    expect(pkg.dependencies?.next).toBe("16.4.3");
+    expect(pkg.devDependencies?.["eslint-config-next"]).toBe("16.4.3");
+    expect(lock).toContain("next-16.4.3.tgz");
+    expect(lock).not.toContain("next-16.3.8.tgz");
+  });
+
+  it("zod 必須 ≥ 4.6.6，並用 overrides 統一巢狀版本（修補 GHSA-mrhx-c7xc-m3w5）", () => {
+    const pkg = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")) as {
+      dependencies?: Record<string, string>;
+      overrides?: Record<string, string>;
+    };
+    const lock = readFileSync(join(ROOT, "package-lock.json"), "utf8");
+
+    // @vercel/cli-config（經 @vercel/functions → @vercel/oidc）把 zod 釘死在 4.1.11，只能靠 overrides。
+    expect(pkg.dependencies?.zod).toBe("^4.6.6");
+    expect(pkg.overrides?.zod).toBe("$zod");
+    const zodVersions = [...lock.matchAll(/zod-(\d+\.\d+\.\d+)\.tgz/g)].map((m) => m[1]);
+    expect(zodVersions.length).toBeGreaterThan(0);
+    for (const version of zodVersions) {
+      const [major, minor, patch] = version.split(".").map(Number);
+      expect(major === 4 && (minor > 6 || (minor === 6 && patch >= 6)), `lock 仍有 zod ${version}`).toBe(
+        true,
+      );
+    }
+  });
+
   it("package.json 必須釘 overrides.source-map-js 為 1.2.2（修補 GHSA-68fv-2mgg-jv7q）", () => {
     const pkg = JSON.parse(
       readFileSync(join(ROOT, "package.json"), "utf8"),
