@@ -52,6 +52,8 @@
 | 設計／UX 審 | `claude-opus-5-thinking-high` | Agent tool `model: "opus"`（Opus 5.5；effort high 為目標，工具無法指定） |
 | 命令與本機驗證 | `shell` | Bash |
 
+Claude Code 跑上表三個 CLI 審查一律經 [`scripts/agent-review.sh`](../scripts/agent-review.sh)（`engineering`／`adversarial`／`adversarial-grok`），不要直接下命令：它用 `caffeinate -i` 讓 Mac 在審查期間不閒置睡眠、`timeout --foreground` 設上限（預設 900 秒，逾時寫 124；不加 `--foreground` 時審查者會被放進背景程序群組，一讀終端就被 SIGTTIN 停住，輸出是空的）、grok 用非互動的 `-p`（`--single`）並加 `--max-turns`、`--disable-web-search`、`--output-format plain`；背景跑用 `--detach`（stdin 接 `/dev/null`、輸出寫進檔，等 `<out>.done`），session 重啟也不會被砍。prompt 寫成檔案，diff 另存一檔，並列出審查者**只准讀**的檔案；不要叫它「需要時自己讀相關檔案」，grok 基底已約 5 萬 token，自由探索會衝到上下文上限。
+
 Claude Code 審查者一律 readonly（Codex 必加 `-s read-only`；cursor-agent 用 `--mode ask`，不用 `--yolo`／`-f`），由 Leader 落檔；同一檔案不讓多個 agent 同時修改。送給外部模型（OpenAI、xAI）的 prompt 不得含個資、使用者資料或金鑰。Codex 模型名不加 `openai/` 前綴。模型 slug 變更時先更新本表，再同步 adapter 與契約測試。
 
 ## `/agent-plan` 合約
@@ -197,5 +199,6 @@ Claude Code 審查者一律 readonly（Codex 必加 `-s read-only`；cursor-agen
 
 | 日期 | 說明 |
 |------|------|
+| 2026-10-24 | Claude Code 的 CLI 審查改經 `scripts/agent-review.sh`（caffeinate、`timeout --foreground`、grok 非互動 `-p`、`--detach`），prompt 限定可讀檔案。起因是 2026-10-23 grok 在 Mac 閒置睡眠與上下文爆量下空轉 8 小時；背景程序群組讀終端會被 SIGTTIN 停住，輸出是空的直到逾時 |
 | 2026-09-24 | Claude Code 審查路由改為 Codex `gpt-6-luna`（`-s read-only`）、cursor-agent `grok-4.7-high-fast`、備援 grok CLI `grok-4.7`、設計審 Opus 5.5；審查一律 readonly、外部 prompt 不含個資；移除 Fable 5 禁用條目與 Cursor `block-fable` hook |
 | 2026-09-06 | 依 Astra 成本審計改為風險分級、按需 Bootstrap、短規則與 active/archive 失敗記錄；保留 AUQ、Fable、付費生圖與 Protected path 紅線 |

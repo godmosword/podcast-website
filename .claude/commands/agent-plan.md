@@ -24,6 +24,7 @@ Claude Code 模型適配：
 - 工程審：`codex exec -m gpt-6-luna -s read-only -c model_reasoning_effort="medium" "<prompt>" </dev/null`。
 - 對抗審：`cursor-agent -p --trust --mode ask --model grok-4.7-high-fast "<prompt>"`；cursor-agent 失敗時備援 `grok -m grok-4.7 --permission-mode plan -p "<prompt>"`。
 - 設計審：Agent tool `model: "opus"`（Opus 5.5），readonly。
+- 以上三個 CLI 一律經 `scripts/agent-review.sh <engineering|adversarial|adversarial-grok> <prompt-file> <out-file>` 跑（背景加 `--detach`，等 `<out-file>.done`）；prompt 寫成檔案、diff 另存，列出只准讀的檔案，不叫審查者自己探索 repo。
 - 審查者一律 readonly，由 Leader 落檔；送給 OpenAI、xAI 的 prompt 不得含個資、使用者資料或金鑰。
 
 Leader 綜合實際審查意見，標記 Approved 或待決策，列出最小驗證命令並提示 `/agent-action`。收尾只列實際派出的角色；L2 不建立固定空白委員表，L3 列所有實際委員和缺席原因。

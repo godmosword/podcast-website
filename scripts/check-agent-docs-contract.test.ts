@@ -71,6 +71,20 @@ describe("agent docs routing contract", () => {
     }
   });
 
+  // 2026-10-23 grok 對抗審在 Mac 閒置睡眠＋上下文爆量下空轉 8 小時；CLI 審查一律走 wrapper。
+  it("Claude Code CLI reviews run through scripts/agent-review.sh", () => {
+    expect(existsSync(join(ROOT, "scripts/agent-review.sh"))).toBe(true);
+    for (const file of [WORKFLOW, ".claude/commands/agent-plan.md", ".claude/commands/agent-action.md"]) {
+      expect(activeSection(file), `${file} 須要求經 scripts/agent-review.sh 跑審查`).toContain(
+        "scripts/agent-review.sh",
+      );
+    }
+    const wrapper = readRepoFile("scripts/agent-review.sh");
+    for (const guard of ["caffeinate -i", "timeout", "--foreground", "--max-turns", "--disable-web-search", "--detach"]) {
+      expect(wrapper, `agent-review.sh 須含 ${guard}`).toContain(guard);
+    }
+  });
+
   it("CLAUDE.md uses conditional routing", () => {
     const claude = readRepoFile("CLAUDE.md");
     expect(claude).toContain("docs/AGENT-WORKFLOW.md");

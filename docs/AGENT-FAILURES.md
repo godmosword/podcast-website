@@ -20,7 +20,7 @@
 | Composer 2.5（Cursor Task） | 首次使用派最小 readonly Task 或 `cursor-agent -p --model composer-2.5-fast --mode ask "回覆 OK"`；拒收即對抗審缺席，L1/L2 由 Leader 接手 |
 | Opus 設計審 | Agent tool `model: "opus"` 或 Cursor `claude-opus-5-thinking-high`；失敗記錄後依分級降級 |
 
-探活輸出必須含預期回覆，且 stderr 不得有 spawn／auth 錯誤；不可只看 exit code。
+探活輸出必須含預期回覆，且 stderr 不得有 spawn／auth 錯誤；不可只看 exit code。實際審查（非探活）經 `scripts/agent-review.sh` 跑，見 [`AGENT-WORKFLOW.md`](AGENT-WORKFLOW.md) 模型路由；探活也可用同一支，例如 `AGENT_REVIEW_TIMEOUT=120 scripts/agent-review.sh adversarial-grok <寫著 Reply with exactly: OK 的檔> <out>`。
 
 ## Active 模型狀態
 

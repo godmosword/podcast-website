@@ -16,7 +16,7 @@ description: podcast-website Agent Action；依 canonical workflow 風險分級�
 
 每個子任務 prompt 必須包含 Goal、Context paths、Constraints、Do NOT、Verification、Deliverable；送給 OpenAI、xAI 的 prompt 不得含個資、使用者資料或金鑰。
 
-Claude Code 顧問適配：工程審使用 `codex exec -m gpt-6-luna -s read-only -c model_reasoning_effort="medium" "<prompt>" </dev/null`；對抗審使用 `cursor-agent -p --trust --mode ask --model grok-4.7-high-fast "<prompt>"`，失敗時備援 `grok -m grok-4.7 --permission-mode plan -p "<prompt>"`；設計審使用 Agent tool `model: "opus"`（Opus 5.5），全部 readonly。
+Claude Code 顧問適配：工程審使用 `codex exec -m gpt-6-luna -s read-only -c model_reasoning_effort="medium" "<prompt>" </dev/null`；對抗審使用 `cursor-agent -p --trust --mode ask --model grok-4.7-high-fast "<prompt>"`，失敗時備援 `grok -m grok-4.7 --permission-mode plan -p "<prompt>"`；設計審使用 Agent tool `model: "opus"`（Opus 5.5），全部 readonly。三個 CLI 一律經 `scripts/agent-review.sh` 跑（背景加 `--detach`，等 `<out-file>.done`），prompt 寫成檔案並列出只准讀的檔案。
 
 ## Verify、收尾與 Ship
 
