@@ -36,11 +36,8 @@
     "4e073130-63fd-43e2-bf3d-d0a655bec671",
     "590071f9-75fe-4abb-b394-f9073b449777"
   ],
-  "lastRun": "2026-10-21T23:59:18.787Z",
+  "lastRun": "2026-10-24T01:36:34.043Z",
   "guidBySlug": {
-    "ep-8": "a26a07c2-a311-4237-be8e-931cb4a043e0",
-    "ep-7": "1cdd1d5b-f42e-4e6d-a68c-4fa059785576",
-    "ep-9": "c0213111-6d31-48a5-a584-9ca72156382f",
     "ep-10": "3ccfc2c9-c8e3-4a44-b0b5-e20644b8fbbe",
     "ep-11": "42c09026-1f99-4fe9-aa4d-a97ce5161d2a",
     "ep-12": "efcf7da0-a421-4fe5-94a2-eb692181bf8d",
@@ -66,6 +63,243 @@
     "ep-32": "a453300e-e1f2-47cb-9e36-0e9a6f9b67ea",
     "ep-33": "9e2f8d23-a42f-48ac-81ce-240359e22989",
     "ep-34": "4e073130-63fd-43e2-bf3d-d0a655bec671",
-    "ep-35": "590071f9-75fe-4abb-b394-f9073b449777"
+    "ep-35": "590071f9-75fe-4abb-b394-f9073b449777",
+    "ep-7": "1cdd1d5b-f42e-4e6d-a68c-4fa059785576",
+    "ep-8": "a26a07c2-a311-4237-be8e-931cb4a043e0",
+    "ep-9": "c0213111-6d31-48a5-a584-9ca72156382f"
+  },
+  "episodes": {
+    "137ceb85-d0c7-45e8-97b9-1d09ce046cb9": {
+      "slug": "ep-19",
+      "metadata": "ok",
+      "cover": "ok",
+      "blur": "ok",
+      "subtitles": "ok",
+      "subtitleAttempts": 0
+    },
+    "14efac58-351e-4f11-8e41-2e2c14b1d0a8": {
+      "slug": "ep-15",
+      "metadata": "ok",
+      "cover": "ok",
+      "blur": "ok",
+      "subtitles": "ok",
+      "subtitleAttempts": 0
+    },
+    "1c3940e5-db65-4690-8520-1e2fd3e7c9e1": {
+      "slug": "ep-21",
+      "metadata": "ok",
+      "cover": "ok",
+      "blur": "ok",
+      "subtitles": "ok",
+      "subtitleAttempts": 0
+    },
+    "1cdd1d5b-f42e-4e6d-a68c-4fa059785576": {
+      "slug": "ep-7",
+      "metadata": "ok",
+      "cover": "ok",
+      "blur": "ok",
+      "subtitles": "ok",
+      "subtitleAttempts": 0
+    },
+    "249d0cb1-6df7-4d57-ad85-aeda395acfd4": {
+      "slug": "ep-31",
+      "metadata": "ok",
+      "cover": "ok",
+      "blur": "ok",
+      "subtitles": "ok",
+      "subtitleAttempts": 0
+    },
+    "2855f6ed-2efa-413f-9dd5-2fb747e3bd31": {
+      "slug": "ep-24",
+      "metadata": "ok",
+      "cover": "ok",
+      "blur": "ok",
+      "subtitles": "ok",
+      "subtitleAttempts": 0
+    },
+    "295bcd95-7a64-4638-86ad-0e651e6d7341": {
+      "slug": "ep-22",
+      "metadata": "ok",
+      "cover": "ok",
+      "blur": "ok",
+      "subtitles": "ok",
+      "subtitleAttempts": 0
+    },
+    "374a80d9-d654-4688-a694-1128f0a2739c": {
+      "slug": "ep-16",
+      "metadata": "ok",
+      "cover": "ok",
+      "blur": "ok",
+      "subtitles": "ok",
+      "subtitleAttempts": 0
+    },
+    "3ccfc2c9-c8e3-4a44-b0b5-e20644b8fbbe": {
+      "slug": "ep-10",
+      "metadata": "ok",
+      "cover": "ok",
+      "blur": "ok",
+      "subtitles": "ok",
+      "subtitleAttempts": 0
+    },
+    "42c09026-1f99-4fe9-aa4d-a97ce5161d2a": {
+      "slug": "ep-11",
+      "metadata": "ok",
+      "cover": "ok",
+      "blur": "ok",
+      "subtitles": "ok",
+      "subtitleAttempts": 0
+    },
+    "4e073130-63fd-43e2-bf3d-d0a655bec671": {
+      "slug": "ep-34",
+      "metadata": "ok",
+      "cover": "ok",
+      "blur": "ok",
+      "subtitles": "ok",
+      "subtitleAttempts": 0
+    },
+    "5519c874-1e5f-407f-9304-637ba87e73af": {
+      "slug": "ep-13",
+      "metadata": "ok",
+      "cover": "ok",
+      "blur": "ok",
+      "subtitles": "ok",
+      "subtitleAttempts": 0
+    },
+    "58c036dd-7662-457d-9b60-7633b0570b79": {
+      "slug": "ep-17",
+      "metadata": "ok",
+      "cover": "ok",
+      "blur": "ok",
+      "subtitles": "ok",
+      "subtitleAttempts": 0
+    },
+    "590071f9-75fe-4abb-b394-f9073b449777": {
+      "slug": "ep-35",
+      "metadata": "ok",
+      "cover": "ok",
+      "blur": "ok",
+      "subtitles": "ok",
+      "subtitleAttempts": 0
+    },
+    "6be26dac-7c4f-40ee-a031-2a1691f81b77": {
+      "slug": "ep-28",
+      "metadata": "ok",
+      "cover": "ok",
+      "blur": "ok",
+      "subtitles": "ok",
+      "subtitleAttempts": 0
+    },
+    "6f811a08-76bc-4364-babb-ae1d90e8d3cf": {
+      "slug": "ep-18",
+      "metadata": "ok",
+      "cover": "ok",
+      "blur": "ok",
+      "subtitles": "ok",
+      "subtitleAttempts": 0
+    },
+    "86be6f0f-2c56-4b35-8c0c-974b3143561f": {
+      "slug": "ep-26",
+      "metadata": "ok",
+      "cover": "ok",
+      "blur": "ok",
+      "subtitles": "ok",
+      "subtitleAttempts": 0
+    },
+    "9bb4c056-068d-45b7-8b67-695072be13c9": {
+      "slug": "ep-14",
+      "metadata": "ok",
+      "cover": "ok",
+      "blur": "ok",
+      "subtitles": "ok",
+      "subtitleAttempts": 0
+    },
+    "9e2f8d23-a42f-48ac-81ce-240359e22989": {
+      "slug": "ep-33",
+      "metadata": "ok",
+      "cover": "ok",
+      "blur": "ok",
+      "subtitles": "ok",
+      "subtitleAttempts": 0
+    },
+    "a105f616-8d32-4f31-8fa6-2d198dcc1e62": {
+      "slug": "ep-23",
+      "metadata": "ok",
+      "cover": "ok",
+      "blur": "ok",
+      "subtitles": "ok",
+      "subtitleAttempts": 0
+    },
+    "a199f2af-6f47-4e0a-9837-7b5b48af51af": {
+      "slug": "ep-30",
+      "metadata": "ok",
+      "cover": "ok",
+      "blur": "ok",
+      "subtitles": "ok",
+      "subtitleAttempts": 0
+    },
+    "a26a07c2-a311-4237-be8e-931cb4a043e0": {
+      "slug": "ep-8",
+      "metadata": "ok",
+      "cover": "ok",
+      "blur": "ok",
+      "subtitles": "ok",
+      "subtitleAttempts": 0
+    },
+    "a453300e-e1f2-47cb-9e36-0e9a6f9b67ea": {
+      "slug": "ep-32",
+      "metadata": "ok",
+      "cover": "ok",
+      "blur": "ok",
+      "subtitles": "ok",
+      "subtitleAttempts": 0
+    },
+    "c0213111-6d31-48a5-a584-9ca72156382f": {
+      "slug": "ep-9",
+      "metadata": "ok",
+      "cover": "ok",
+      "blur": "ok",
+      "subtitles": "ok",
+      "subtitleAttempts": 0
+    },
+    "cc3abc78-bd21-4075-8e67-82d3807289b2": {
+      "slug": "ep-29",
+      "metadata": "ok",
+      "cover": "ok",
+      "blur": "ok",
+      "subtitles": "ok",
+      "subtitleAttempts": 0
+    },
+    "d2c3c220-a8ed-4728-920e-6a39fa931f67": {
+      "slug": "ep-20",
+      "metadata": "ok",
+      "cover": "ok",
+      "blur": "ok",
+      "subtitles": "ok",
+      "subtitleAttempts": 0
+    },
+    "d570ca95-9067-402c-b4ad-08b79ad9effe": {
+      "slug": "ep-27",
+      "metadata": "ok",
+      "cover": "ok",
+      "blur": "ok",
+      "subtitles": "ok",
+      "subtitleAttempts": 0
+    },
+    "e5ec36f8-097b-4ba7-b53c-6ea721f4fdf8": {
+      "slug": "ep-25",
+      "metadata": "ok",
+      "cover": "ok",
+      "blur": "ok",
+      "subtitles": "ok",
+      "subtitleAttempts": 0
+    },
+    "efcf7da0-a421-4fe5-94a2-eb692181bf8d": {
+      "slug": "ep-12",
+      "metadata": "ok",
+      "cover": "ok",
+      "blur": "ok",
+      "subtitles": "ok",
+      "subtitleAttempts": 0
+    }
   }
 }
