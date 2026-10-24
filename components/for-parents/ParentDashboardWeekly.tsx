@@ -31,7 +31,7 @@ export function ParentDashboardWeekly({ weekly }: { weekly: WeeklySummary }) {
         <h2 id="weekly-heading" className={styles.cardTitle}>
           本週摘要
         </h2>
-        {first && last ? (
+        {first?.label && last?.label ? (
           <p className={styles.cardMeta}>
             {first.label} – {last.label}
           </p>
@@ -90,7 +90,8 @@ export function ParentDashboardWeekly({ weekly }: { weekly: WeeklySummary }) {
                 ) : null}
               </span>
               <span className={styles.weekLabel} aria-hidden="true">
-                {day.isToday ? "今天" : day.weekday}
+                {/* 掛載前的空軸沒有星期，留一格空白撐住列高，補上星期時長條不跳。 */}
+                {day.isToday ? "今天" : day.weekday || " "}
               </span>
             </li>
           );

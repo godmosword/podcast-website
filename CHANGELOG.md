@@ -12,6 +12,7 @@
 
 ### Fixed
 
+- **家庭儀表板隔天打開不再水合失敗**：`/for-parents/dashboard` 是靜態預產的頁面，本週摘要的 7 天日期在 build 時就寫進 HTML。隔天或在別的時區打開，瀏覽器算出的日期不同，React #418 整棵重畫（2026-10-24 CI 在 UTC 午夜前後 build／測試時撞到）。現在伺服器與第一次 client render 都放沒有日期的空軸，掛載後才換成這台裝置的 7 天。`/for-parents/articles` 那次也紅，是 smoke 測試把儀表板晚到的錯誤記到下一頁，文章頁本身沒有問題。
 - **Apple sync PR 不再卡在 required check**：sync PR 只能靠 `workflow_dispatch` 補跑 CI，那種 run 的 check run 不會掛到 PR 上，`quality`／`build-and-public-e2e` 永遠等不到，#257 卡了一天半。`ci.yml` 新增 `mirror-sync-status`，把這兩個和 `sync-validate` 的結果寫成同名 commit status（失敗也寫）。
 - **字幕格式不再來回改**：轉錄、同步再處理和校稿以前各寫一種縮排，同步每輪把沒校對的字幕改成單行，開出整檔假 diff（#257 的 ep-35 字幕 939 行，內容一字不差）。三處改走 `scripts/lib/subtitle-file.ts`，同一格式、內容沒變就不寫；現有 20 個單行字幕檔一次轉成同一格式，內容不變。
 - **sync PR 路徑白名單收窄**：原本整個 `data/` 都放行，包含手寫的 `content.ts`、`games.ts` 和測試，而 sync PR 會跳過 lint／typecheck／單元測試。改回明確清單 `scripts/ci/sync-output-paths.txt`（shell 與 TS 共用），寫到清單外會在打包或 commit 時失敗。同步 workflow 的權限也改成每個 job 各自宣告，抓 RSS 的 job 只讀。

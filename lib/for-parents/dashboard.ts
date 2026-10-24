@@ -141,6 +141,28 @@ function dayHasActivity(bucket: ActivityLogV1["days"][string] | undefined): bool
   return false;
 }
 
+/**
+ * 還沒讀到這台裝置的時鐘前用的 7 天空軸：沒有日期、沒有星期。
+ * 儀表板頁是靜態預產的，build 那天算出的日期，隔天或在別的時區打開就跟瀏覽器算的不同，
+ * 水合時 React #418 整棵重畫。伺服器與第一次 client render 都用這組，掛載後才換成真的 7 天。
+ */
+export function pendingWeeklySummary(): WeeklySummary {
+  return {
+    days: Array.from({ length: 7 }, (_, index) => ({
+      date: `pending-${index}`,
+      weekday: "",
+      label: "",
+      isToday: false,
+      storySeconds: 0,
+      gameSeconds: 0,
+    })),
+    storySeconds: 0,
+    gameSeconds: 0,
+    storiesTouched: 0,
+    activeDays: 0,
+  };
+}
+
 export function buildWeeklySummary(
   log: ActivityLogV1,
   today = Date.now(),
