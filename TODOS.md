@@ -22,8 +22,8 @@
 
 ### pending
 
-- **重錄 darwin 視覺基準（美術統一 2026-10-22）**：這輪在 Linux 改了主按鈕深墨、六色墊色、遊戲／著色／景點卡 4px 硬底邊、遊戲夜間奶油頁底。基準檔名都是 `-chromium-darwin`，這台機器產不出同名快照，沒有覆寫。請在 Mac 上重錄並逐張目檢會變的畫面：首頁、`/stories`、`/story/ep-3`（日間與夜間）、`/games`、著色本、消消樂、多多壽司屋、親子遊樂地圖情境卡。跑法：`npm run test:visual:trusted -- --update-snapshots`。`ops · S · 使用者 Mac`
-- **重錄 darwin 視覺基準（給爸媽預設展開）**：單集頁拿掉頂部「給爸媽：一起聊聊」連結，共讀區改成預設展開，整頁高度與第一屏以下的內容會變。請在 Mac 上重錄並逐張目檢：`e2e/visual.spec.ts-snapshots/story-ep-3-390-light-chromium-darwin.png`、`e2e/visual.spec.ts-snapshots/story-ep-3-390-night-chromium-darwin.png`、`e2e/visual.spec.ts-snapshots/story-ep-3-1280-light-chromium-darwin.png`、`e2e/visual.spec.ts-snapshots/story-ep-3-1280-night-chromium-darwin.png`、`e2e/visual.spec.ts-snapshots/story-ep-3-768-light-chromium-darwin.png`。關於頁精選改成最新 4 集加原本手選，但視覺測試只拍第一屏，那四張 about 基準不該變。Linux 產不出 darwin 基準，這次 push 用 `SKIP_VISUAL_GATE=1`。`ops · S · 使用者 Mac`
+- ✅ **重錄 darwin 視覺基準（美術統一 2026-10-22）**：2026-10-24 在 Mac 跑 `npm run test:visual:trusted -- --update-snapshots`（79 passed／2 skipped），改寫 15 張：`/stories`、`/story/ep-3`、`/subscribe`、消消樂地圖與標題、壽司屋標題與兩張廚房。首頁、`/games`、著色本、親子地圖沒有改寫：差異在 `maxDiffPixelRatio` 門檻內，基準仍是 #260 之前的樣子，之後想吃掉這段差異要用 `--update-snapshots=all`。`612aa62a`
+- ✅ **重錄 darwin 視覺基準（給爸媽預設展開）**：五張 ep-3 基準都已重錄。抽看 390 日間：頂部連結已拿掉，共讀區預設展開。`612aa62a`
 - **後續（本輪不做）**：`.scrim` 左下 0.52 可調淡。
 - **Hero 橫向 2.5D 改版（規格已定；Phase 1／2／3／3b／4 已落地，視差帶已是預設、3D 只剩回滾）**：等距 diorama → 橫向視差帶；規格見 [Hero 橫向 2.5D 視差帶](./docs/specs/HERO-PARALLAX-SPEC.md)。四個 Phase、阻擋項與跨角色眼位決策（A/B/C）見該文 §5／§6／§2.5。`design · L · 需先決 §2.5`
 - **後續：拿掉 CTA `nowrap`**：把 `LandingSegment.tsx` 的 `" →"` 半形空白改不斷行空白，箭頭才不會孤行；同時避開 <348px Dudu 遮箭頭、文字級 200% 被 `.panel` 裁尾。
@@ -59,7 +59,7 @@ Plan：`~/.claude/plans/play-map-simplify.md`（D1=A 北中南分組、D2=A 純�
 
 2026-10-14 難度審：遊戲年齡合適、略偏簡單。語音朗讀與 4.5 秒無錯提示已隨 `a8ad3f8` 出貨。剩下：
 
-- **重錄 darwin 視覺基準（#243 落地後，seed 7）**：客人改成全身貼紙，而且雨棚下的排隊不再同時出現正在點餐或坐著吃的那位（只留還在等的人）。請在 Mac 上重錄並逐張目檢這三張廚房基準：`e2e/visual.spec.ts-snapshots/dino-sushi-kitchen-390x844-light-chromium-darwin.png`、`e2e/visual.spec.ts-snapshots/dino-sushi-kitchen-844x390-light-chromium-darwin.png`、`e2e/visual.spec.ts-snapshots/dino-sushi-kitchen-1280x800-night-chromium-darwin.png`。標題兩張（`dino-sushi-title-390-light-chromium-darwin.png`、`dino-sushi-title-1280-night-chromium-darwin.png`）與結算一張（`dino-sushi-result-390-light-chromium-darwin.png`）沒有排隊，不變。Linux 產不出 darwin 基準，這次 push 用 `SKIP_VISUAL_GATE=1`。`ops · S · 使用者 Mac`
+- ✅ **重錄 darwin 視覺基準（#243 落地後，seed 7）**：390×844、844×390 兩張廚房已重錄；1280×800 夜間在門檻內，沒有改寫。抽看 844×390：排隊四台都是全身貼紙，正在點餐的香香不在排隊裡。`612aa62a`
 - ✅ **重錄 darwin 視覺基準**：#214、#215、朗讀／版面修正與 #226 之後，在 Mac 上重錄並逐張目檢（廚房三張、結算一張有變，標題兩張不變）。`52102826`（#226）
 - ✅ **#214／#215 的 e2e 紅燈與朗讀問題**（2026-10-14 審查）：料位 42px、844×390 托盤超出、320 疊盤碰泡泡、牙刷被朗讀開關蓋住、三料泡泡被裁、反應句被換單切斷、抬頭音效關不掉朗讀。見本 commit。
 - ✅ **閒置提示改從新訂單出現起算**：原本從按「給多多吃」起算，新訂單出現約 2.35 秒就亮；現在新訂單出現後才算 4.5 秒，暫停後繼續也會重新起算。見本 commit。
@@ -67,9 +67,9 @@ Plan：`~/.claude/plans/play-map-simplify.md`（D1=A 北中南分組、D2=A 純�
 - ✅ **手捲凸出泡泡、招牌字被擋**：泡泡格子鎖住格線，手捲縮進格子；店名改刻在櫃台前板左半，拿掉直式招牌（不再預載 `sign.webp`）。見本 commit。
 - ✅ **手捲餡料在備料盤上太小**：料放大、坐在飯口上冒出海苔；三樣料時中間那樣抬到兩側上方。見本 commit。
 - ✅ **金盤素材**：換成核准的黏土金盤 `shop/plate-gold.webp`（去白底、縮進跟薄荷綠盤同一個 695×403 框）。拿掉濾鏡、程式高光與 CSS 星星。視角仍比迴轉帶的盤子更俯視，外框已對齊。見本 commit。
-- **重錄 darwin 視覺基準（遊樂園小修）**：矮橫向廚房的泡泡與托盤、結算金盤會變。請在 Mac 上重錄並逐張目檢：`e2e/visual.spec.ts-snapshots/dino-sushi-kitchen-844x390-light-chromium-darwin.png`、`e2e/visual.spec.ts-snapshots/dino-sushi-result-390-light-chromium-darwin.png`。消消樂與著色本的既有基準這次像素不該變（格子下限只影響放不下 48px 的畫面，那些沒有 darwin 基準）。Linux 產不出 darwin 基準，這次 push 用 `SKIP_VISUAL_GATE=1`。`ops · S · 使用者 Mac`
-- **重錄 darwin 視覺基準（壽司屋八天開店，標題）**：標題改成八張臉加大開始鈕，封面收矮。還沒解開的天整張變淡，右下角有消消樂同款鎖頭。請在 Mac 上重錄並逐張目檢：`e2e/visual.spec.ts-snapshots/dino-sushi-title-390-light-chromium-darwin.png`、`e2e/visual.spec.ts-snapshots/dino-sushi-title-1280-night-chromium-darwin.png`。廚房三張（`dino-sushi-kitchen-390x844-light-chromium-darwin.png`、`dino-sushi-kitchen-844x390-light-chromium-darwin.png`、`dino-sushi-kitchen-1280x800-night-chromium-darwin.png`）與結算（`dino-sushi-result-390-light-chromium-darwin.png`）仍走第 4 天、seed 7，像素不該變。Linux 產不出 darwin 基準，這次 push 用 `SKIP_VISUAL_GATE=1`。`ops · S · 使用者 Mac`
-- **重錄 darwin 視覺基準（消消樂挑戰改由家長打開）**：地圖預設不再顯示「輕鬆／挑戰」，右上改成齒輪。請在 Mac 上重錄並逐張目檢：`e2e/visual.spec.ts-snapshots/candy-map-390-light-chromium-darwin.png`。標題、局內、著色本與壽司屋基準這次像素不該變。Linux 產不出 darwin 基準，這次 push 用 `SKIP_VISUAL_GATE=1`。`ops · S · 使用者 Mac`
+- ✅ **重錄 darwin 視覺基準（遊樂園小修）**：844×390 廚房已重錄；結算 390 在門檻內，沒有改寫。`612aa62a`
+- ✅ **重錄 darwin 視覺基準（壽司屋八天開店，標題）**：兩張標題已重錄。抽看 390 日間：八張臉、大開始鈕，還沒解開的天變淡並帶鎖頭。`612aa62a`
+- ✅ **重錄 darwin 視覺基準（消消樂挑戰改由家長打開）**：`candy-map-390` 已重錄，`candy-title-390` 也一起更新。抽看地圖：不再顯示輕鬆／挑戰，右上是齒輪。`612aa62a`
 - ✅ **實玩審批次 R（Plan `~/.claude/plans/dino-sushi-review-2026-10-16.md`）**：
   - R1 結算新貼紙改成換行格子（56px，一列 5 張），放不下時最後一格「+N」打開貼紙書；星星提示帶進度（「5 盤都一次做對（4/5）」）。
   - R2 「放進貼紙書」留在一屏：直向依高度收店面（≥800 收矮＋兩列、728–799 更矮、641–727 收起），桌機店面與結算並排，矮橫向兩欄。共用 `GameEndStation` 不動。
