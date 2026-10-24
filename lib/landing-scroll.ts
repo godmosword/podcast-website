@@ -337,6 +337,36 @@ export function bindLandingWheel(
   };
 }
 
+/** 捲動區中段帶子的上下緣比例（＝原本 IntersectionObserver 的 rootMargin -40%）。 */
+const ACTIVE_BAND_TOP = 0.4;
+const ACTIVE_BAND_BOTTOM = 0.6;
+
+/**
+ * 落在捲動區中段 20% 帶子裡、露出比例最高的段落；都碰不到時回 null。
+ * 每次都用 id 重找節點：段落在串流／hydration 時會被換成新節點，抓舊節點的 observer 會永遠不回報。
+ */
+export function activeLandingAnchor(
+  root: Element | null,
+  anchorIds: readonly string[],
+): string | null {
+  if (typeof document === "undefined") return null;
+  const frame = root?.getBoundingClientRect();
+  const top = frame?.top ?? 0;
+  const height = frame?.height ?? window.innerHeight;
+  const bandTop = top + height * ACTIVE_BAND_TOP;
+  const bandBottom = top + height * ACTIVE_BAND_BOTTOM;
+
+  let best: { id: string; ratio: number } | null = null;
+  for (const id of anchorIds) {
+    const rect = document.getElementById(id)?.getBoundingClientRect();
+    if (!rect || rect.height <= 0) continue;
+    const overlap = Math.min(rect.bottom, bandBottom) - Math.max(rect.top, bandTop);
+    const ratio = overlap / rect.height;
+    if (ratio > 0 && (!best || ratio > best.ratio)) best = { id, ratio };
+  }
+  return best?.id ?? null;
+}
+
 /** 測試用：把進行中的轉場世代歸零。 */
 export function resetLandingScrollTransition(): void {
   landingTransitionGen = 0;

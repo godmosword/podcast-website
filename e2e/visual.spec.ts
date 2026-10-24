@@ -7,6 +7,7 @@ import {
 import { dismissCandyIntro } from "./candy-helpers";
 import { INTRO_PORTAL_ENABLED, skipIntroOverlay } from "./intro-gate";
 import { PROGRESS_STORAGE_KEY } from "../lib/progress-store";
+import { DUDU_EMOTION_BY_SEGMENT, DUDU_EMOTION_LABEL } from "../data/dudu-emotions";
 import { pinClassicSushiDay } from "./helpers/dino-sushi";
 
 /**
@@ -616,6 +617,15 @@ for (const viewportId of Object.keys(VIEWPORTS) as VisualViewportId[]) {
       for (const segment of LANDING_SEGMENTS) {
         await page.locator(`#${segment.anchorId}`).scrollIntoViewIfNeeded();
         await page.waitForTimeout(80);
+        // 夜色遮罩與嘟嘟表情跟著捲到的段落切換；等兩者都換好再截，
+        // 不然平行跑時會截到前一段的狀態（2026-10-25：landing-health-390-night 錄成冷色遮罩）。
+        await expect(
+          page.locator(`[data-active-segment="${segment.anchorId}"]`),
+        ).toBeAttached();
+        const emotion = DUDU_EMOTION_LABEL[DUDU_EMOTION_BY_SEGMENT[segment.id]];
+        await expect(
+          page.getByRole("button", { name: `小紅豆金龜車：${emotion}` }),
+        ).toBeVisible();
         await expect(page).toHaveScreenshot(
           `landing-${segment.id}-${viewport.label}-${theme}.png`,
           {

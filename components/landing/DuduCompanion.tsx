@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import DuduMoment from "@/components/dudu/DuduMoment";
 import { useLandingScroll } from "./LandingScrollContext";
+import { useActiveLandingAnchor } from "./useActiveLandingAnchor";
 import {
   DUDU_EMOTIONS,
   type DuduEmotion,
@@ -27,10 +28,17 @@ type DuduCompanionProps = {
  */
 export default function DuduCompanion({ items, footerId }: DuduCompanionProps) {
   const landingScroll = useLandingScroll();
-  const [baseEmotion, setBaseEmotion] = useState<DuduEmotion>(
-    items[0]?.emotion ?? "happy",
+  const anchorIds = useMemo(() => items.map((it) => it.anchorId), [items]);
+  const activeAnchorId = useActiveLandingAnchor(anchorIds);
+  const baseEmotion: DuduEmotion =
+    items.find((it) => it.anchorId === activeAnchorId)?.emotion ??
+    items[0]?.emotion ??
+    "happy";
+  // 點出來的表情只留在點的那一段；換段就回到該段的表情。
+  const [tap, setTap] = useState<{ anchorId: string | null; emotion: DuduEmotion } | null>(
+    null,
   );
-  const [tapEmotion, setTapEmotion] = useState<DuduEmotion | null>(null);
+  const tapEmotion = tap && tap.anchorId === activeAnchorId ? tap.emotion : null;
   const [atFooter, setAtFooter] = useState(false);
 
   // 預載全部 sprite，點擊切換時不會閃白。
@@ -42,44 +50,15 @@ export default function DuduCompanion({ items, footerId }: DuduCompanionProps) {
   }, []);
 
   useEffect(() => {
-    if (items.length === 0) return;
-    const emotionByAnchor = new Map(items.map((it) => [it.anchorId, it.emotion]));
-    const sections = items
-      .map((it) => document.getElementById(it.anchorId))
-      .filter((el): el is HTMLElement => el !== null);
-    if (sections.length === 0) return;
-
-    const root = landingScroll?.scrollRootRef.current ?? null;
-
-    const segmentObserver = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-        const emotion = visible ? emotionByAnchor.get(visible.target.id) : undefined;
-        if (emotion) {
-          setBaseEmotion(emotion);
-          setTapEmotion(null);
-        }
-      },
-      { root, rootMargin: "-40% 0px -40% 0px", threshold: [0, 0.5, 1] },
-    );
-    sections.forEach((el) => segmentObserver.observe(el));
-
     const footer = footerId ? document.getElementById(footerId) : null;
-    const footerObserver = footer
-      ? new IntersectionObserver(
-          (entries) => setAtFooter(entries.some((e) => e.isIntersecting)),
-          { root, threshold: 0.01 },
-        )
-      : null;
-    if (footer && footerObserver) footerObserver.observe(footer);
-
-    return () => {
-      segmentObserver.disconnect();
-      footerObserver?.disconnect();
-    };
-  }, [items, footerId, landingScroll]);
+    if (!footer) return;
+    const footerObserver = new IntersectionObserver(
+      (entries) => setAtFooter(entries.some((e) => e.isIntersecting)),
+      { root: landingScroll?.scrollRootRef.current ?? null, threshold: 0.01 },
+    );
+    footerObserver.observe(footer);
+    return () => footerObserver.disconnect();
+  }, [footerId, landingScroll]);
 
   if (items.length === 0) return null;
 
@@ -94,7 +73,9 @@ export default function DuduCompanion({ items, footerId }: DuduCompanionProps) {
         interactive
         hidden={atFooter}
         className={styles.companion}
-        onInteract={() => setTapEmotion((prev) => nextEmotion(prev ?? baseEmotion))}
+        onInteract={() =>
+          setTap({ anchorId: activeAnchorId, emotion: nextEmotion(tapEmotion ?? baseEmotion) })
+        }
       />
     </div>
   );

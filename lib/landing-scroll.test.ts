@@ -8,6 +8,7 @@ import {
   LANDING_WHEEL_IDLE_MS,
   LANDING_WHEEL_LINE_PX,
   LANDING_WHEEL_THRESHOLD_PX,
+  activeLandingAnchor,
   bindLandingWheel,
   isLandingScrollTransitionPending,
   normalizeLandingWheelDelta,
@@ -392,5 +393,63 @@ describe("bindLandingWheel", () => {
 
     await vi.advanceTimersByTimeAsync(LANDING_WHEEL_IDLE_MS);
     unbind();
+  });
+});
+
+describe("activeLandingAnchor", () => {
+  afterEach(() => {
+    document.body.replaceChildren();
+    vi.restoreAllMocks();
+  });
+
+  function box(el: Element, top: number, height: number) {
+    vi.spyOn(el, "getBoundingClientRect").mockReturnValue({
+      top,
+      bottom: top + height,
+      height,
+    } as DOMRect);
+  }
+
+  function segments(ids: string[]): HTMLElement[] {
+    return ids.map((id) => {
+      const el = document.createElement("section");
+      el.id = id;
+      document.body.append(el);
+      return el;
+    });
+  }
+
+  it("挑落在捲動區中段 20% 帶子裡、露出比例最高的段", () => {
+    const root = document.createElement("div");
+    document.body.append(root);
+    box(root, 64, 780);
+    const [stories, bedtime] = segments(["segment-stories", "segment-bedtime"]);
+    box(stories!, 64 - 780, 780);
+    box(bedtime!, 64, 780);
+    expect(activeLandingAnchor(root, ["segment-stories", "segment-bedtime"])).toBe(
+      "segment-bedtime",
+    );
+  });
+
+  it("兩段都碰不到中段帶子時回 null", () => {
+    const root = document.createElement("div");
+    document.body.append(root);
+    box(root, 0, 1000);
+    const [a, b] = segments(["a", "b"]);
+    box(a!, -900, 300);
+    box(b!, 700, 300);
+    expect(activeLandingAnchor(root, ["a", "b"])).toBeNull();
+  });
+
+  it("每次都用 id 重找節點：段落被換成新節點也算得到", () => {
+    const root = document.createElement("div");
+    document.body.append(root);
+    box(root, 0, 1000);
+    const [old] = segments(["segment-bedtime"]);
+    box(old!, 2000, 1000);
+    old!.remove();
+    const [fresh] = segments(["segment-bedtime"]);
+    box(fresh!, 0, 1000);
+    expect(activeLandingAnchor(root, ["segment-bedtime"])).toBe("segment-bedtime");
   });
 });

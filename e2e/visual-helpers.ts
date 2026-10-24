@@ -82,12 +82,58 @@ export async function stabilizeVisualPage(
   // Run the sweep first so every image has its final candidate, then lock each
   // one to that URL and make it eager for the test capture; pixels and source
   // art remain unchanged.
+  //
+  // 有 srcset 的圖不信 currentSrc，照 sizes＋srcset 的標準規則自己挑：平行跑時
+  // hydration 可能還沒做完，currentSrc 停在別的候選。2026-10-25 實測消消樂封面
+  // 平行 8 次有 1 次鎖到 w=384（其餘 w=640），縮放結果不同，基準每次重錄都會閃。
   await page.evaluate(() => {
+    const probe = document.createElement("div");
+    probe.style.cssText = "position:absolute;visibility:hidden;height:0";
+    document.body.appendChild(probe);
+    const lengthPx = (length: string): number => {
+      probe.style.width = length;
+      return probe.getBoundingClientRect().width;
+    };
+    const slotWidth = (sizes: string): number => {
+      for (const raw of sizes.split(/,(?![^(]*\))/)) {
+        const part = raw.trim();
+        const match = /^(\(.+\))\s+(\S.*)$/.exec(part);
+        if (!match) return lengthPx(part);
+        if (window.matchMedia(match[1]!).matches) return lengthPx(match[2]!);
+      }
+      return window.innerWidth;
+    };
+    const pickCandidate = (image: HTMLImageElement): string | null => {
+      const srcset = image.getAttribute("srcset");
+      if (!srcset) return null;
+      const candidates = srcset
+        .split(/,\s+/)
+        .map((entry) => entry.trim().split(/\s+/))
+        .map(([url, descriptor = "1x"]) => ({
+          url: url!,
+          unit: descriptor.slice(-1),
+          value: Number.parseFloat(descriptor),
+        }))
+        .sort((a, b) => a.value - b.value);
+      const unit = candidates[0]?.unit;
+      if (!unit || candidates.some((c) => c.unit !== unit)) return null;
+      const dpr = window.devicePixelRatio || 1;
+      const want =
+        unit === "w" ? slotWidth(image.getAttribute("sizes") || "100vw") * dpr : dpr;
+      const chosen =
+        candidates.find((c) => c.value >= want) ?? candidates[candidates.length - 1];
+      return chosen ? new URL(chosen.url, document.baseURI).href : null;
+    };
+    const picked = new Map(
+      [...document.images].map((image) => [image, pickCandidate(image)]),
+    );
+    probe.remove();
+
     for (const source of document.querySelectorAll("picture source[srcset]")) {
       source.removeAttribute("srcset");
     }
     for (const image of document.images) {
-      const source = image.currentSrc || image.src;
+      const source = picked.get(image) || image.currentSrc || image.src;
       image.removeAttribute("srcset");
       image.loading = "eager";
       if (source) image.src = source;

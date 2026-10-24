@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { moonPath, moonWebpPath } from "@/lib/universe/map-art-src";
 import decor from "@/components/decor/decor.module.css";
-import { useLandingScroll } from "./LandingScrollContext";
 import styles from "./LandingBedtimeLayer.module.css";
+import { useActiveLandingAnchor } from "./useActiveLandingAnchor";
 
 type LandingBedtimeLayerProps = {
   segmentEffects: {
@@ -21,35 +21,12 @@ type LandingBedtimeLayerProps = {
 export default function LandingBedtimeLayer({
   segmentEffects,
 }: LandingBedtimeLayerProps) {
-  const landingScroll = useLandingScroll();
-  const [activeAnchorId, setActiveAnchorId] = useState(
-    segmentEffects[0]?.anchorId ?? "",
+  const anchorIds = useMemo(
+    () => segmentEffects.map((effect) => effect.anchorId),
+    [segmentEffects],
   );
-
-  useEffect(() => {
-    const targets = segmentEffects
-      .map((effect) => document.getElementById(effect.anchorId))
-      .filter((el): el is HTMLElement => Boolean(el));
-    if (targets.length === 0) return;
-
-    const ratios = new Map<Element, number>();
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          ratios.set(entry.target, entry.isIntersecting ? entry.intersectionRatio : 0);
-        }
-        const active = [...ratios.entries()].sort((a, b) => b[1] - a[1])[0];
-        if (active?.[1] > 0) setActiveAnchorId((active[0] as HTMLElement).id);
-      },
-      {
-        root: landingScroll?.scrollRootRef.current ?? null,
-        rootMargin: "-40% 0px -40% 0px",
-        threshold: [0, 0.5, 1],
-      },
-    );
-    for (const el of targets) observer.observe(el);
-    return () => observer.disconnect();
-  }, [landingScroll, segmentEffects]);
+  const activeAnchorId =
+    useActiveLandingAnchor(anchorIds) ?? segmentEffects[0]?.anchorId ?? "";
 
   const activeEffect = segmentEffects.find(
     (effect) => effect.anchorId === activeAnchorId,
@@ -58,7 +35,8 @@ export default function LandingBedtimeLayer({
   const warmVeil = activeEffect?.veil === "warm-bottom";
 
   return (
-    <div className={styles.layer} aria-hidden>
+    // data-active-segment：視覺測試等夜色切到該段才截圖（平行跑時 observer 回呼會晚到）。
+    <div className={styles.layer} aria-hidden data-active-segment={activeAnchorId}>
       <div className={`${styles.veil} ${warmVeil ? styles.veilWarm : ""}`} />
       <picture>
         <source srcSet={moonWebpPath()} type="image/webp" />
