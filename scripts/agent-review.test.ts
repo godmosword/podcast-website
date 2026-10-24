@@ -156,9 +156,15 @@ describe("scripts/agent-review.sh", () => {
     expect(readFileSync(`${out}.done`, "utf8").trim()).toBe("0");
   });
 
-  it.each(["timeout", "perl"])("讀 /dev/tty 不會被 SIGTTIN 停住（%s）", (impl) => {
+  it.each([
+    ["timeout", "script"],
+    ["perl", "script"],
+    ["timeout", "interactive"],
+  ])("讀 /dev/tty 不會被 SIGTTIN 停住（%s，%s）", (impl, mode) => {
     // 假審查者直接開控制終端。timeout 若把命令放進背景程序群組，read 會被 SIGTTIN
     // 停住（ps stat 為 T），輸出停在 before-tty，結束碼 124。
+    // interactive：從有 job control 的互動式 bash 下指令。wrapper 本身是非互動 bash，
+    // 裡面的 & 不另開程序群組，審查者仍在終端的前景群組（2026-10-25 Codex 審查疑慮）。
     writeFileSync(
       path.join(dir, "codex"),
       [
@@ -172,8 +178,8 @@ describe("scripts/agent-review.sh", () => {
     writeFileSync(
       py,
       [
-        "import os, sys, time, fcntl, termios",
-        "script, prompt, out = sys.argv[1:4]",
+        "import os, sys, time, fcntl, termios, shlex, select",
+        "script, prompt, out, mode = sys.argv[1:5]",
         "master, slave = os.openpty()",
         "pid = os.fork()",
         "if pid == 0:",
@@ -191,8 +197,14 @@ describe("scripts/agent-review.sh", () => {
         "    os.dup2(fd, 2)",
         "    if fd > 2:",
         "        os.close(fd)",
+        "    if mode == 'interactive':",
+        "        os.execvpe('bash', ['bash', '--norc', '--noprofile', '-i'], dict(os.environ, PS1='$ '))",
         "    os.execvpe('bash', ['bash', script, 'engineering', prompt, out], os.environ)",
         "os.close(slave)",
+        "if mode == 'interactive':",
+        "    time.sleep(0.5)",
+        "    line = 'bash %s engineering %s %s; exit $?\\n' % (shlex.quote(script), shlex.quote(prompt), shlex.quote(out))",
+        "    os.write(master, line.encode())",
         "deadline = time.time() + 15",
         "while time.time() < deadline:",
         "    wpid, status = os.waitpid(pid, os.WNOHANG)",
@@ -200,14 +212,20 @@ describe("scripts/agent-review.sh", () => {
         "        if os.WIFEXITED(status):",
         "            sys.exit(os.WEXITSTATUS(status))",
         "        sys.exit(128 + os.WTERMSIG(status))",
-        "    time.sleep(0.05)",
+        // 互動式 bash 會回顯指令與提示字元，要邊讀邊丟，不然它可能卡在寫終端。
+        "    ready, _, _ = select.select([master], [], [], 0.05)",
+        "    if ready:",
+        "        try:",
+        "            os.read(master, 4096)",
+        "        except OSError:",
+        "            pass",
         "os.kill(pid, 9)",
         "os.waitpid(pid, 0)",
         "sys.exit(99)",
       ].join("\n"),
     );
     const started = Date.now();
-    const result = spawnSync("python3", [py, SCRIPT, prompt, out], {
+    const result = spawnSync("python3", [py, SCRIPT, prompt, out, mode], {
       encoding: "utf8",
       timeout: 20_000,
       env: {
