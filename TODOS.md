@@ -22,7 +22,7 @@
 
 ### pending
 
-- **重錄 darwin 視覺基準（小橘特快車第一版）**：Linux 不能改 `-chromium-darwin`。請在 Mac 跑 `npm run test:visual:trusted -- --update-snapshots`。遊樂園改成兩欄四張卡，`games-390-light-chromium-darwin.png`、`games-390-night-chromium-darwin.png`、`games-chromium-darwin.png`、`games-1280-night-chromium-darwin.png` 都會變。新遊戲請補：標題 390／1280 日間與夜間、速度珠貼旗的駕駛中（390 日間、1280 日間、390 夜間）、門可以開的進站（390 日間）、結算 390 日間與夜間，以及一張減少動態的靜止畫面。用 `window.__orangeExpress` 停在該畫面再錄，不要錄行進中的前窗。`design · S · 需 Mac`
+- **重錄 darwin 視覺基準（小橘特快車第一版）**：Linux 不能改 `-chromium-darwin`。請在 Mac 跑 `npm run test:visual:trusted -- --update-snapshots`。遊樂園改成兩欄四張卡，`games-390-light-chromium-darwin.png`、`games-390-night-chromium-darwin.png`、`games-chromium-darwin.png`、`games-1280-night-chromium-darwin.png` 都會變。新遊戲請補（以 2026-10-26 第二輪駕駛台升級後的畫面為準：圓形速度表、P0–P4／B0–B4＋緊急、停車目標條）：標題 390／1280 日間與夜間；加速中（指針在綠區、P3 亮，390 日間、1280 日間、390 夜間）；接近車站含停車目標條（390 日間、1280 日間、390 夜間）；停好開門（390 日間）；結算含各站星等（390 日間與夜間）；家長開「速度表數字」的儀表特寫（390 日間）；以及一張減少動態的靜止畫面。用 `window.__orangeExpressJump` 帶 `freeze: true` 定格再錄，不要錄行進中的前窗或晃動中的畫面。`design · S · 需 Mac`
 - **重錄 darwin 視覺基準（2026-10 稽核修正）**：Linux 不能改 `-chromium-darwin`。請在 Mac 跑 `npm run test:visual:trusted -- --update-snapshots`，只接受下面這些有意的差異後再更新。320 沒有基準。
   - 睡前 390 日間／夜間：`landing-bedtime-390-light-chromium-darwin.png`、`landing-bedtime-390-night-chromium-darwin.png`（只縮小「數綿羊123．睡前故事」。1280 與其他段不動）。
   - 遊樂園 390：`games-390-light-chromium-darwin.png`、`games-390-night-chromium-darwin.png`（手機海報改 16:9。桌面 `games-chromium-darwin.png`、`games-1280-night-chromium-darwin.png` 不該變）。
