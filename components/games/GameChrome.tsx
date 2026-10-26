@@ -167,7 +167,7 @@ function SettingsDialog({
   if (!open) return null;
 
   const showBlockDrop = gameId === "block-drop";
-  const showVoice = gameId === "candy-match" || gameId === "dino-sushi";
+  const showVoice = gameId === "candy-match" || gameId === "dino-sushi" || gameId === "orange-express";
 
   return (
     <div className={styles.overlay} role="presentation" onClick={onClose}>
@@ -238,7 +238,11 @@ function SettingsDialog({
           <label className={styles.settingRow}>
             <span>
               <strong>念出來</strong>
-              <small>訂單、提示和多多的話用聲音念出來；關掉後音效照常。</small>
+              <small>
+                {gameId === "orange-express"
+                  ? "車內廣播「下一站」用聲音念出來；關掉後音效照常。"
+                  : "訂單、提示和多多的話用聲音念出來；關掉後音效照常。"}
+              </small>
             </span>
             <input
               type="checkbox"
@@ -249,7 +253,17 @@ function SettingsDialog({
           </label>
         ) : null}
         {gameId === "orange-express" ? (
-          <OrangeExpressSettings rowClassName={styles.settingRow} checkboxClassName={styles.checkbox} />
+          <OrangeExpressSettings
+            kidsMode={kidsMode}
+            classes={{
+              row: styles.settingRow,
+              checkbox: styles.checkbox,
+              block: styles.settingBlock,
+              heading: styles.settingHeading,
+              segmented: styles.segmented,
+              segment: styles.segmentBtn,
+            }}
+          />
         ) : null}
         <div className={styles.settingBlock}>
           <div className={styles.settingHeading}>

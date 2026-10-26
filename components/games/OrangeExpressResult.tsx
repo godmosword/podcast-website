@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ResultStars } from "@/components/games/ResultStars";
 import { IconTrain } from "@/components/games/ClayIcons";
-import { COPY, GRADE_TEXT } from "@/lib/games/orange-express/copy";
+import { COPY, GRADE_TEXT, bridgeResultText, pointsResultText } from "@/lib/games/orange-express/copy";
 import type { Station, StopGrade } from "@/lib/games/orange-express/types";
 import { getNextGame } from "@/data/games";
 import styles from "./orange-express.module.css";
@@ -14,6 +14,9 @@ export function OrangeExpressResult({
   reduced,
   stations,
   grades,
+  pointsDone,
+  pointsTotal,
+  bridgeGreets,
   onReplay,
   onTitle,
 }: {
@@ -22,6 +25,9 @@ export function OrangeExpressResult({
   reduced: boolean;
   stations: readonly Station[];
   grades: readonly StopGrade[];
+  pointsDone: number;
+  pointsTotal: number;
+  bridgeGreets: number;
   onReplay: () => void;
   onTitle: () => void;
 }) {
@@ -52,6 +58,12 @@ export function OrangeExpressResult({
           );
         })}
       </ol>
+      {pointsTotal > 0 || bridgeGreets > 0 ? (
+        <ul className={styles.extras} data-testid="orange-express-extras">
+          {pointsTotal > 0 ? <li>{pointsResultText(pointsDone, pointsTotal)}</li> : null}
+          {bridgeGreets > 0 ? <li>{bridgeResultText(bridgeGreets)}</li> : null}
+        </ul>
+      ) : null}
       <div className={styles.resultActions}>
         <button type="button" className={styles.primary} onClick={onReplay}>
           {COPY.again}

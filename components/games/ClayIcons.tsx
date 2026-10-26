@@ -142,6 +142,34 @@ export function IconChevronRight({ size, color = "currentColor", style }: IconPr
   );
 }
 
+/** 上移（↑） */
+export function IconChevronUp({ size, color = "currentColor", style }: IconProps) {
+  return (
+    <Svg size={size} style={style}>
+      <path d="M6.5 14.5 12 8.5l5.5 6" {...stroke(color)} />
+    </Svg>
+  );
+}
+
+/** 下移（↓） */
+export function IconChevronDown({ size, color = "currentColor", style }: IconProps) {
+  return (
+    <Svg size={size} style={style}>
+      <path d="M6.5 9.5 12 15.5l5.5-6" {...stroke(color)} />
+    </Svg>
+  );
+}
+
+/** 空白鍵 */
+export function IconSpaceKey({ size, color = "currentColor", style }: IconProps) {
+  return (
+    <Svg size={size} style={style}>
+      <rect x="2.5" y="7" width="19" height="10" rx="2.6" {...stroke(color)} />
+      <path d="M7 11.5v2h10v-2" {...stroke(color)} />
+    </Svg>
+  );
+}
+
 /** 下滑 */
 export function IconSwipeDown({ size, color = "currentColor", style }: IconProps) {
   return (

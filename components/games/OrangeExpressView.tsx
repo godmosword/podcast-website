@@ -6,6 +6,7 @@ import type { GameAction } from "@/lib/gamekit/types";
 import { useGameLoop } from "@/lib/gamekit/react/useGameLoop";
 import {
   loadOrangeExpressLevel,
+  resolveOrangeExpressDriver,
   resolveOrangeExpressLevel,
   saveOrangeExpressLevel,
 } from "@/lib/gamekit/progress/orange-express-prefs";
@@ -14,21 +15,30 @@ import { OrangeExpressResult } from "@/components/games/OrangeExpressResult";
 import { useOrangeExpressDisplay } from "@/components/games/OrangeExpressSettings";
 import { OrangeExpressWindshield } from "@/components/games/OrangeExpressWindshield";
 import type { OrangeExpressInstance } from "@/lib/gamekit/games/orange-express/adapter";
+import { announce, nextStationAnnouncement } from "@/lib/games/orange-express/announce";
 import {
+  ANNOUNCE_CHIME,
+  ARRIVAL_MELODY,
   ARRIVE_CHIME,
+  AUTO_BRAKE_DING,
   DOOR_CHIME,
   EMERGENCY_CLICK,
   HORN,
   NOTCH_CLICK,
+  PASS_WHOOSH,
+  POINT_OK,
   jointClack,
 } from "@/lib/games/orange-express/chime";
-import { COPY, GRADE_TEXT } from "@/lib/games/orange-express/copy";
+import { COPY, DRIVER_HINT, DRIVER_NAME, GRADE_TEXT } from "@/lib/games/orange-express/copy";
 import { medalsFor } from "@/lib/games/orange-express/medals";
 import {
   clampBrake,
   clampPower,
   createRun,
-  honk,
+  currentStation,
+  inTunnel,
+  onBridge,
+  pointTotal,
   powerCap,
   step,
   withHook,
@@ -42,15 +52,22 @@ type Screen = "title" | "drive" | "result";
 
 const LEVELS: readonly LevelId[] = ["look", "drive", "captain"];
 const SOUND_RETRY_MS = 1000;
+/** 「叮咚」之後再念站名。 */
+const ANNOUNCE_DELAY_MS = 650;
+/** 對向列車擦身時「咻」的時間點（秒）。 */
+const WHOOSH_AT = 1.45;
 
 function liveText(run: RunState): string {
   if (run.phase === "reversing") return COPY.reversing;
+  if (run.autoBrake) return COPY.autoBrakeOn;
   if (run.phase === "doors-open") return COPY.boarding;
   if (run.phase === "stopped") {
     const grade = run.grades[run.stationIndex];
     return grade ? `${COPY.atStation}，${GRADE_TEXT[grade]}` : COPY.atStation;
   }
   if (run.misses > 0 && run.phase === "running" && run.speed === 0) return COPY.tryStopAgain;
+  if (onBridge(run)) return run.bridgeGreeted ? COPY.bridgeGreeted : COPY.bridge;
+  if (inTunnel(run)) return COPY.tunnel;
   return "";
 }
 
@@ -58,6 +75,9 @@ export function OrangeExpressView({
   status,
   kidsMode,
   reducedMotion,
+  soundOn,
+  voiceEnabled,
+  gameVolume,
   audio,
   instance,
   onStart,
@@ -85,8 +105,16 @@ export function OrangeExpressView({
   const bump = useRef(0);
   const sound = useRef<DriveSound | null>(null);
   const soundTriedAt = useRef(0);
+  const announceTimer = useRef<number | null>(null);
+  const driver = resolveOrangeExpressDriver(display.driver, kidsMode);
+  const driverRef = useRef(driver);
+  const voiceRef = useRef(false);
   levelRef.current = level;
   screenRef.current = screen;
+  driverRef.current = driver;
+  voiceRef.current = soundOn && voiceEnabled && gameVolume > 0;
+  const volumeRef = useRef(gameVolume);
+  volumeRef.current = gameVolume;
 
   const swayOn = display.sway && !reducedMotion;
 
@@ -100,18 +128,40 @@ export function OrangeExpressView({
     sound.current = null;
   }, []);
 
+  const clearAnnounce = useCallback(() => {
+    if (announceTimer.current !== null) window.clearTimeout(announceTimer.current);
+    announceTimer.current = null;
+  }, []);
+
+  /** 「叮咚」＋「下一站，○○站」。音效關著就整段不出聲。 */
+  const announceNext = useCallback(
+    (state: RunState) => {
+      clearAnnounce();
+      audio?.voices?.(ANNOUNCE_CHIME);
+      const item = nextStationAnnouncement(currentStation(state));
+      announceTimer.current = window.setTimeout(() => {
+        announceTimer.current = null;
+        if (!voiceRef.current) return;
+        announce(item, volumeRef.current);
+      }, ANNOUNCE_DELAY_MS);
+    },
+    [audio, clearAnnounce],
+  );
+
   const begin = useCallback(() => {
     const nextLevel = levelRef.current;
     saveOrangeExpressLevel(nextLevel);
     const hook = typeof window === "undefined" ? undefined : window.__orangeExpress;
     frozen.current = hook?.freeze === true;
-    const next = withHook(createRun(nextLevel), hook);
+    const nextDriver = hook?.driver ?? driverRef.current;
+    const next = withHook(createRun(nextLevel, nextDriver), hook);
     phaseRef.current = next.phase;
     apply(next);
+    announceNext(next);
     setScreen("drive");
     instance.notifyPlaying(nextLevel);
     syncHost();
-  }, [apply, instance, syncHost]);
+  }, [announceNext, apply, instance, syncHost]);
 
   const goTitle = useCallback(() => {
     runRef.current = null;
@@ -119,16 +169,19 @@ export function OrangeExpressView({
     setRun(null);
     setScreen("title");
     stopSound();
+    clearAnnounce();
     instance.notifyReady();
     syncHost();
-  }, [instance, stopSound, syncHost]);
+  }, [clearAnnounce, instance, stopSound, syncHost]);
 
   const tryDoors = useCallback(() => {
     const cur = runRef.current;
     if (!cur) return;
     if (cur.phase === "doors-open") {
       const next = step(cur, { type: "close-doors" });
-      if (next !== cur) apply(next);
+      if (next === cur) return;
+      apply(next);
+      if (next.phase === "running") announceNext(next);
       return;
     }
     const next = step(cur, { type: "open-doors" });
@@ -140,7 +193,7 @@ export function OrangeExpressView({
       return;
     }
     apply(next);
-  }, [apply, instance]);
+  }, [announceNext, apply, instance]);
 
   const setPower = useCallback(
     (notch: number) => {
@@ -173,11 +226,25 @@ export function OrangeExpressView({
   );
 
   const pressHorn = useCallback(() => {
-    if (runRef.current) honk(runRef.current);
+    const cur = runRef.current;
+    if (cur) {
+      const next = step(cur, { type: "honk" });
+      if (next !== cur) apply(next);
+    }
     audio?.ensureAudio();
     audio?.voices?.(HORN);
     setHonked((count) => count + 1);
-  }, [audio]);
+  }, [apply, audio]);
+
+  const pointCheck = useCallback(() => {
+    const cur = runRef.current;
+    if (!cur || instance.isInputPaused()) return;
+    const next = step(cur, { type: "point" });
+    if (next === cur) return;
+    audio?.ensureAudio();
+    audio?.voices?.(POINT_OK);
+    apply(next);
+  }, [apply, audio, instance]);
 
   const onAction = useCallback(
     (action: GameAction) => {
@@ -243,6 +310,19 @@ export function OrangeExpressView({
   }, [apply]);
 
   useEffect(() => {
+    if (screen !== "drive") return;
+    // 空白鍵是開門；門還沒亮時共用輸入層不攔，頁面會被捲走。焦點在按鈕上時留給按鈕自己。
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== " ") return;
+      const target = e.target as HTMLElement | null;
+      if (target?.closest("button, input, select, textarea, [role='slider'], [role='radio']")) return;
+      e.preventDefault();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [screen]);
+
+  useEffect(() => {
     if (!shake) return;
     const timer = window.setTimeout(() => setShake(false), 280);
     return () => window.clearTimeout(timer);
@@ -254,6 +334,7 @@ export function OrangeExpressView({
     if (prev !== "in-window" && prev !== "stopped" && run.phase === "in-window") {
       audio?.voices?.(ARRIVE_CHIME);
     }
+    if (prev !== "stopped" && run.phase === "stopped") audio?.voices?.(ARRIVAL_MELODY);
     if (prev !== "doors-open" && run.phase === "doors-open") audio?.voices?.(DOOR_CHIME);
     phaseRef.current = run.phase;
     if (run.phase === "route-done") {
@@ -271,6 +352,7 @@ export function OrangeExpressView({
   }, [driving, stopSound]);
 
   useEffect(() => stopSound, [stopSound]);
+  useEffect(() => clearAnnounce, [clearAnnounce]);
 
   useEffect(() => {
     if (swayOn || !swayRef.current) return;
@@ -297,9 +379,17 @@ export function OrangeExpressView({
           }
         }
       }
-      sound.current?.update(driveMix(next.speed, next.power, next.brake));
+      sound.current?.update(driveMix(next.speed, next.power, next.brake, inTunnel(next)));
 
       const sameStation = next.stationIndex === cur.stationIndex;
+      if (next.autoBrakeCount > cur.autoBrakeCount) audio?.voices?.(AUTO_BRAKE_DING);
+      if (
+        next.passing !== null &&
+        next.passing >= WHOOSH_AT &&
+        (cur.passing === null || cur.passing < WHOOSH_AT)
+      ) {
+        audio?.voices?.(PASS_WHOOSH);
+      }
       if (sameStation && jointsCrossed(cur.progress, next.progress) > 0 && next.speed > 0.02) {
         audio?.voices?.(jointClack(next.speed));
         bump.current = 1;
@@ -336,9 +426,21 @@ export function OrangeExpressView({
             >
               <strong>{COPY.levels[id]}</strong>
               <small>{COPY.levelHints[id]}</small>
+              {id === "drive" ? (
+                <em className={styles.driverChip} data-driver={driver}>
+                  {COPY.driverLabel}：{DRIVER_NAME[driver]}
+                </em>
+              ) : null}
             </button>
           ))}
         </div>
+        {level === "drive" ? (
+          <p className={styles.driverNote} data-testid="orange-express-driver-note">
+            <strong>{DRIVER_NAME[driver]}</strong>
+            {DRIVER_HINT[driver]}
+            <small>{COPY.driverHow}</small>
+          </p>
+        ) : null}
         <button type="button" className={styles.primary} onClick={onStart}>
           {COPY.start}
         </button>
@@ -359,6 +461,9 @@ export function OrangeExpressView({
           reduced={reducedMotion}
           stations={run.stations}
           grades={run.grades}
+          pointsDone={run.pointsDone.length}
+          pointsTotal={pointTotal(run)}
+          bridgeGreets={run.bridgeGreets}
           onReplay={begin}
           onTitle={goTitle}
         />
@@ -376,12 +481,20 @@ export function OrangeExpressView({
       data-phase={run.phase}
       data-reduced={reducedMotion ? "true" : "false"}
       data-sway={swayOn ? "true" : "false"}
+      data-course={run.course}
+      data-tunnel={inTunnel(run) ? "true" : "false"}
+      data-auto-brake={run.autoBrake ? "true" : "false"}
+      data-auto-brake-count={run.autoBrakeCount}
+      data-points={run.pointsDone.length}
+      data-bridge-greets={run.bridgeGreets}
+      data-misses={run.misses}
     >
       <OrangeExpressWindshield
         run={run}
         reduced={reducedMotion}
         numbers={display.gaugeNumbers}
         swayRef={swayRef}
+        onPoint={pointCheck}
       />
       <p className={styles.live} aria-live="polite">
         {liveText(run)}

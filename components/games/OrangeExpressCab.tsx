@@ -12,7 +12,7 @@ import {
   powerWord,
 } from "@/lib/games/orange-express/copy";
 import { gaugeZone } from "@/lib/games/orange-express/gauge";
-import { currentLimit, powerCap } from "@/lib/games/orange-express/reducer";
+import { currentLimit, inTunnel, onBridge, powerCap } from "@/lib/games/orange-express/reducer";
 import {
   BRAKE_MAX,
   EMERGENCY,
@@ -236,6 +236,21 @@ function StopIcon() {
   );
 }
 
+function LightIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden>
+      <path
+        d="M8 14a6 6 0 1 1 8 0c-1 1-1.5 2-1.5 3h-5c0-1-.5-2-1.5-3z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinejoin="round"
+      />
+      <path d="M9.5 20.5h5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 type LampState = "off" | "green" | "yellow" | "orange";
 
 function Lamp({
@@ -290,9 +305,23 @@ export function OrangeExpressCab({
   const doorReady =
     run.phase === "stopped" || (run.phase === "doors-open" && !waiting);
   const atStation = run.phase === "stopped" || run.phase === "doors-open";
+  const tunnel = inTunnel(run);
+  const hornHint = onBridge(run) && !run.bridgeGreeted && run.phase === "running";
+  const flagLamp: LampState = run.autoBrake
+    ? "orange"
+    : run.speed <= 0.001
+      ? "off"
+      : zone === "green"
+        ? "green"
+        : "yellow";
 
   return (
-    <div className={styles.cab}>
+    <div
+      className={styles.cab}
+      data-testid="orange-express-cab"
+      data-tunnel={tunnel ? "true" : "false"}
+      data-auto-brake={run.autoBrake ? "true" : "false"}
+    >
       <div className={styles.cabTop}>
         <OrangeBadge />
         <p className={styles.stationName}>
@@ -306,9 +335,7 @@ export function OrangeExpressCab({
         <ul className={styles.lamps} aria-label={COPY.lampsLabel}>
           <Lamp
             label={COPY.lampFlag}
-            state={
-              run.speed <= 0.001 ? "off" : zone === "green" ? "green" : "yellow"
-            }
+            state={flagLamp}
             icon={<FlagIcon />}
           />
           <Lamp
@@ -320,6 +347,11 @@ export function OrangeExpressCab({
             label={COPY.lampStop}
             state={atStation ? "green" : "off"}
             icon={<StopIcon />}
+          />
+          <Lamp
+            label={COPY.lampLight}
+            state={tunnel ? "yellow" : "off"}
+            icon={<LightIcon />}
           />
         </ul>
       </div>
@@ -345,6 +377,8 @@ export function OrangeExpressCab({
           type="button"
           className={styles.horn}
           aria-label={COPY.horn}
+          data-hint={hornHint ? "true" : "false"}
+          data-testid="orange-express-horn"
           onClick={onHorn}
         >
           <svg viewBox="0 0 24 24" aria-hidden>
