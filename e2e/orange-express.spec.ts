@@ -47,7 +47,7 @@ test.describe("小橘特快車", () => {
 
   test("自己開：還在跑時開門沒反應，停好才進下一站，速度表不超過旗", async ({ page }) => {
     await page.addInitScript(() => {
-      window.__orangeExpress = {};
+      window.__orangeExpress = { driver: "big" };
     });
     await page.goto("/games/orange-express");
     await startLevel(page, "自己開");
@@ -96,7 +96,7 @@ test.describe("小橘特快車", () => {
 
   test("進站：停車目標條出現，停在綠區三顆星、黃區兩顆星", async ({ page }) => {
     await page.addInitScript(() => {
-      window.__orangeExpress = { freeze: true };
+      window.__orangeExpress = { freeze: true, driver: "big" };
     });
     await page.goto("/games/orange-express");
     await startLevel(page, "自己開");
@@ -119,7 +119,7 @@ test.describe("小橘特快車", () => {
 
   test("開過頭：小橘慢慢倒回去再試，不會失敗", async ({ page }) => {
     await page.addInitScript(() => {
-      window.__orangeExpress = {};
+      window.__orangeExpress = { driver: "big" };
     });
     await page.goto("/games/orange-express");
     await startLevel(page, "自己開");
@@ -227,6 +227,161 @@ test.describe("小橘特快車", () => {
     await page.getByRole("checkbox", { name: /畫面晃動/ }).uncheck();
     await page.getByRole("button", { name: "完成" }).click();
     await expect(drive).toHaveAttribute("data-sway", "false");
+  });
+
+  test("司機：預設小小司機；家長在遊戲設定切成大司機", async ({ page }) => {
+    await page.goto("/games/orange-express");
+    await page.getByRole("radio", { name: /自己開/ }).click();
+    await expect(page.getByTestId("orange-express-driver-note")).toContainText("小小司機");
+    await page.getByRole("button", { name: "遊戲設定" }).click();
+    await page.getByRole("radio", { name: "大司機" }).click();
+    await page.getByRole("button", { name: "完成" }).click();
+    await expect(page.getByTestId("orange-express-driver-note")).toContainText("大司機");
+    await page.getByRole("button", { name: "開始開車" }).click();
+    await expect(page.getByTestId("orange-express-drive")).toHaveAttribute("data-course", "big");
+  });
+
+  test("小小司機：沒有速限牌也沒有指差確認，桿子自動限速", async ({ page }) => {
+    await page.addInitScript(() => {
+      window.__orangeExpress = { freeze: true, driver: "little" };
+    });
+    await page.goto("/games/orange-express");
+    await startLevel(page, "自己開");
+    const drive = page.getByTestId("orange-express-drive");
+    await expect(drive).toHaveAttribute("data-course", "little");
+    await jump(page, { progress: 0.03, speed: 0.4 });
+    await expect(page.getByTestId("orange-express-point")).toHaveCount(0);
+    await expect(page.getByTestId("orange-express-notice")).toHaveCount(0);
+    await jump(page, { progress: 0.1, speed: 5, freeze: false });
+    await expect(page.getByRole("meter", { name: "速度表" })).toHaveAttribute("aria-valuetext", "到速度旗了");
+    await expect(drive).toHaveAttribute("data-auto-brake-count", "0");
+  });
+
+  test("大司機：速限牌出現，超速時小橘輕輕煞車，不扣分", async ({ page }) => {
+    await page.addInitScript(() => {
+      window.__orangeExpress = { freeze: true, driver: "big" };
+    });
+    await page.goto("/games/orange-express");
+    await startLevel(page, "自己開");
+    await jump(page, { progress: 0.045, speed: 0.4 });
+    await expect(page.getByTestId("orange-express-notice")).toHaveAttribute("data-kind", "sign");
+    await expect(page.getByTestId("orange-express-notice")).toContainText("速限牌");
+
+    const drive = page.getByTestId("orange-express-drive");
+    await jump(page, { progress: 0.065, speed: 0.75, power: 3, freeze: false });
+    await expect(drive).toHaveAttribute("data-auto-brake-count", "1");
+    await expect(drive).toHaveAttribute("data-auto-brake", "false", { timeout: 4000 });
+    await expect(drive).toHaveAttribute("data-misses", "0");
+  });
+
+  test("隧道：前窗變暗、車內燈亮；鐵橋：喇叭提示，按了算打招呼", async ({ page }) => {
+    await page.addInitScript(() => {
+      window.__orangeExpress = { freeze: true, driver: "big" };
+    });
+    await page.goto("/games/orange-express");
+    await startLevel(page, "自己開");
+    const drive = page.getByTestId("orange-express-drive");
+    await jump(page, { progress: 0.14, speed: 0.4 });
+    await expect(drive).toHaveAttribute("data-tunnel", "true");
+    await expect(page.getByTestId("orange-express-cab")).toHaveAttribute("data-tunnel", "true");
+
+    await jump(page, { stationIndex: 1, progress: 0.14, speed: 0.4 });
+    await expect(drive).toHaveAttribute("data-tunnel", "false");
+    await expect(page.getByTestId("orange-express-notice")).toHaveAttribute("data-kind", "bridge");
+    const horn = page.getByTestId("orange-express-horn");
+    await expect(horn).toHaveAttribute("data-hint", "true");
+    await horn.click();
+    await expect(drive).toHaveAttribute("data-bridge-greets", "1");
+    await expect(horn).toHaveAttribute("data-hint", "false");
+    await expect(page.getByTestId("orange-express-notice")).toHaveAttribute("data-kind", "greeted");
+  });
+
+  test("對向列車擦身：前窗提示揮揮手", async ({ page }) => {
+    await page.addInitScript(() => {
+      window.__orangeExpress = { freeze: true, driver: "big" };
+    });
+    await page.goto("/games/orange-express");
+    await startLevel(page, "自己開");
+    await jump(page, { stationIndex: 2, progress: 0.035, speed: 0.4, passing: 1.8 });
+    await expect(page.getByTestId("orange-express-windshield")).toHaveAttribute("data-scene", "sea");
+    await expect(page.getByTestId("orange-express-notice")).toHaveAttribute("data-kind", "passing");
+  });
+
+  test("指差確認：按一下記一次，按鈕收起來", async ({ page }) => {
+    await page.addInitScript(() => {
+      window.__orangeExpress = { freeze: true, driver: "big" };
+    });
+    await page.goto("/games/orange-express");
+    await startLevel(page, "自己開");
+    const point = page.getByTestId("orange-express-point");
+    await expect(point).toHaveAttribute("data-kind", "signal");
+    await point.click();
+    await expect(page.getByTestId("orange-express-drive")).toHaveAttribute("data-points", "1");
+    await expect(point).toHaveCount(0);
+  });
+
+  test("手機煞車格每格至少 48px；底部提示是方向鍵與空白鍵", async ({ page }) => {
+    await page.goto("/games/orange-express");
+    await startLevel(page, "自己開");
+    const brake = page.getByRole("slider", { name: "煞車" });
+    const box = (await brake.boundingBox())!;
+    expect(box.height / 6).toBeGreaterThanOrEqual(48);
+    const tops: number[] = [];
+    for (let i = 0; i <= 5; i += 1) {
+      const notch = (await brake.locator(`[data-notch="${i}"]`).boundingBox())!;
+      tops.push(notch.y);
+    }
+    for (let i = 1; i < tops.length; i += 1) {
+      expect(Math.abs(tops[i]! - tops[i - 1]!)).toBeGreaterThanOrEqual(48);
+    }
+    const hints = page.getByRole("list", { name: "操作提示" }).getByRole("listitem");
+    await expect(hints.filter({ hasText: "左邊推，車會走" }).locator("svg")).toHaveCount(2);
+    await expect(hints.filter({ hasText: "右邊拉，車會停" }).locator("svg")).toHaveCount(2);
+    await expect(hints.filter({ hasText: "門亮了就按" }).locator("svg")).toHaveCount(1);
+  });
+
+  test("車內廣播：音效開著念「下一站」，關掉音效就不念", async ({ page }) => {
+    await page.addInitScript(() => {
+      const spoken: string[] = [];
+      (window as unknown as { __spoken: string[] }).__spoken = spoken;
+      class FakeUtterance {
+        text: string;
+        lang = "";
+        rate = 1;
+        pitch = 1;
+        volume = 1;
+        onend: (() => void) | null = null;
+        onerror: (() => void) | null = null;
+        constructor(text: string) {
+          this.text = text;
+        }
+      }
+      Object.defineProperty(window, "SpeechSynthesisUtterance", { value: FakeUtterance, configurable: true });
+      Object.defineProperty(window, "speechSynthesis", {
+        value: {
+          speaking: false,
+          pending: false,
+          speak: (u: FakeUtterance) => spoken.push(u.text),
+          cancel: () => undefined,
+          getVoices: () => [],
+          addEventListener: () => undefined,
+          removeEventListener: () => undefined,
+        },
+        configurable: true,
+      });
+      window.__orangeExpress = { freeze: true, driver: "big" };
+    });
+    await page.goto("/games/orange-express");
+    await startLevel(page, "自己開");
+    await expect
+      .poll(() => page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken))
+      .toContain("下一站，遊樂園站");
+
+    await page.goto("/games/orange-express");
+    await page.getByRole("button", { name: "關閉音效" }).click();
+    await startLevel(page, "自己開");
+    await page.waitForTimeout(1200);
+    expect(await page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken)).toEqual([]);
   });
 
   test("系統減少動態時不晃", async ({ page }) => {
