@@ -46,6 +46,9 @@ const HARDCODED_COLOR_ALLOWLIST = [
   // 卡面夜間不反轉，墨色、CTA 與焦點環都釘在日間值，改吃主題 token 會在夜間變成淺字疊淺底
   "components/games/DinoSushiView.module.css",
   "components/games/DinoSushiKitchen.module.css",
+  // 遊戲共用外框的主鈕（教學「開始玩」、設定「完成」）：和壽司屋「給多多吃」同一個深墨硬底邊
+  // （#2a180c，硬底邊 4px、按下 2px，#264），卡面日夜不反轉，跟著主題 token 走會在夜間不見
+  "components/games/GameChrome.module.css",
   // 壽司屋店面（雨棚、木牆、燈籠、迴轉帶）：舞台美術色，同一張卡面日夜不反轉
   "components/games/DinoSushiShop.module.css",
   // 結算星星與小籤：消消樂、方塊轉轉共用，疊在固定淺色的結算卡面上（日夜不反轉）
