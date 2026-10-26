@@ -79,7 +79,7 @@ test.describe("遊樂園 hub", () => {
     }
   });
 
-  test("不同寬度與視窗高度都保留首圖原始比例，角色不裁切", async ({ page }) => {
+  test("窄螢幕海報改 16:9，寬螢幕仍保留原圖比例", async ({ page }) => {
     for (const viewport of [
       { width: 320, height: 568 },
       { width: 390, height: 700 },
@@ -96,15 +96,32 @@ test.describe("遊樂園 hub", () => {
         el.complete && el.naturalWidth > 0,
       )).toBe(true);
       const geometry = await image.evaluate((el: HTMLImageElement) => {
-        const box = el.getBoundingClientRect();
+        const hero = el.closest("header");
         return {
-          ratio: box.width / box.height,
-          sourceRatio: el.naturalWidth / el.naturalHeight,
+          aspect: hero ? getComputedStyle(hero).aspectRatio : "",
           fit: getComputedStyle(el).objectFit,
         };
       });
-      expect(geometry.ratio).toBeCloseTo(geometry.sourceRatio, 2);
-      expect(geometry.fit).toBe("contain");
+      if (viewport.width <= 640) {
+        expect(geometry.aspect, `${viewport.width}`).toBe("16 / 9");
+        expect(geometry.fit, `${viewport.width}`).toBe("cover");
+      } else {
+        expect(geometry.aspect, `${viewport.width}`).toBe("1672 / 941");
+        expect(geometry.fit, `${viewport.width}`).toBe("contain");
+      }
+    }
+  });
+
+  test("320 與 390 第一屏看得到三款標題", async ({ page }) => {
+    for (const viewport of [
+      { width: 320, height: 568 },
+      { width: 390, height: 844 },
+    ]) {
+      await page.setViewportSize(viewport);
+      await page.goto("/games");
+      for (const name of ["繪本塗塗鴉", "車車消消樂", "多多壽司屋"]) {
+        await expect(page.getByText(name, { exact: true }), `${viewport.width} ${name}`).toBeInViewport();
+      }
     }
   });
 
