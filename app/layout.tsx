@@ -15,6 +15,7 @@ import { siteIdentityJsonLd } from "@/lib/json-ld";
 import { DEFAULT_OG_IMAGE, getSiteUrl } from "@/lib/site-url";
 import { STORIES_VIEW_INIT_SCRIPT } from "@/lib/stories-view";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
+import { isVisualFixtureBuild } from "@/lib/visual-fixture";
 
 // 童趣圓潤字型，避免使用 Inter/Arial 等通用字型。
 const fredoka = Fredoka({
@@ -118,6 +119,8 @@ export default function RootLayout({
     <html
       lang="zh-Hant"
       suppressHydrationWarning
+      // 視覺回歸用凍結資料的 build 才有；e2e 截圖前用它確認伺服器真的是那份 build
+      data-visual-fixture={isVisualFixtureBuild() ? "1" : undefined}
       className={`${fredoka.variable} ${huninn.variable} ${gensenRounded.variable} ${gochi.variable}`}
     >
       <head>

@@ -4,10 +4,27 @@ import { retiredGameRedirects } from "./lib/retired-game-redirects";
 import { retiredPageRedirects } from "./lib/retired-page-redirects";
 import { legacyStoryRedirects } from "./lib/story-slug-aliases";
 
+/**
+ * 視覺回歸用的凍結資料（見 lib/visual-fixture.ts）。這份產物只給本機截圖用：
+ * 放 .next-visual，`next start` 與 Vercel 用的 .next 永遠是全集；CI 與 Vercel 上開了直接拒絕。
+ */
+const visualFixture = process.env.VISUAL_FIXTURE === "1";
+if (visualFixture && (process.env.CI || process.env.VERCEL)) {
+  throw new Error("VISUAL_FIXTURE=1 只能在本機跑視覺回歸，CI／Vercel 的 build 不得開啟。");
+}
+// VISUAL_FIXTURE_BUILD 只由下面的 env 寫進 bundle；環境裡先有它，代表有人繞過 VISUAL_FIXTURE 直接設，
+// prebuild 腳本會讀到它產出 6 集版，正式 bundle 卻寫成 0，兩邊對不上。
+if (process.env.VISUAL_FIXTURE_BUILD !== undefined) {
+  throw new Error("不要直接設 VISUAL_FIXTURE_BUILD；視覺回歸請用 VISUAL_FIXTURE=1（npm run test:visual:trusted）。");
+}
+
 const nextConfig: NextConfig = {
   // 全站靜態預渲染 (SSG)，零後端、零外部依賴。
   // Vercel 會自動辨識 Next.js，無需額外設定。
   reactStrictMode: true,
+  ...(visualFixture ? { distDir: ".next-visual" } : {}),
+  // build 時寫死進 server 與 client 兩邊；用另一個名字，prebuild 的 tsx 腳本讀不到，照樣產全集。
+  env: { VISUAL_FIXTURE_BUILD: visualFixture ? "1" : "0" },
   turbopack: {
     resolveAlias: {
       // 官方套件含動態 worker URL，Turbopack 無法打包。執行期改載 public/vendor。

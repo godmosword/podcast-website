@@ -11,6 +11,7 @@ import { getStoryZoneId } from "./story-zones";
 import { manualStories, type ManualStory } from "./stories";
 import { canonicalStorySlug } from "@/lib/story-slug-aliases";
 import { storyCoverPath } from "@/lib/story-utils";
+import { isVisualFixtureBuild, pickVisualFixture, VISUAL_FIXTURE_STORY_SLUGS } from "@/lib/visual-fixture";
 import type { ZoneId } from "./universe-zones";
 
 const DEFAULT_STORY_AGE_RANGE = "約 3–7 歲";
@@ -124,10 +125,15 @@ function sortByEp(list: Story[]): Story[] {
   return [...list].sort((a, b) => b.ep - a.ep);
 }
 
-const storyList: Story[] = sortByEp([
+const allStories: Story[] = sortByEp([
   ...manualStories.map(enrichStory),
   ...(appleSynced as RawStory[]).map(enrichStory),
 ]);
+
+/** 所有查詢都從這裡出發；視覺回歸的 fixture build 只看得到固定幾集（見 lib/visual-fixture.ts）。 */
+const storyList: Story[] = isVisualFixtureBuild()
+  ? pickVisualFixture(allStories, VISUAL_FIXTURE_STORY_SLUGS, (story) => story.slug)
+  : allStories;
 
 export function getStories(): Story[] {
   return storyList;

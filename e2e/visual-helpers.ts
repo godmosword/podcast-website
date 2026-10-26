@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 import { PROGRESS_STORAGE_KEY } from "../lib/progress-store";
 
 export type VisualTheme = "light" | "night";
@@ -47,6 +47,10 @@ export async function stabilizeVisualPage(
 ): Promise<void> {
   const theme = options.theme ?? "light";
   await pinTheme(page, theme);
+  if (process.env.VISUAL_FIXTURE === "1") {
+    // 凍結資料的基準只能拿凍結資料的 build 比；server 是一般 build（例如 start 時沒帶旗標、讀到 .next）就立刻停。
+    await expect(page.locator("html"), "伺服器不是 VISUAL_FIXTURE build").toHaveAttribute("data-visual-fixture", "1");
+  }
 
   // addInitScript 只會在下一次 navigation 執行；呼叫端通常已先 goto，
   // reload 讓 ThemeProvider 在 mount 前讀到固定主題，避免當地 bedtime 污染截圖。
@@ -59,6 +63,9 @@ export async function stabilizeVisualPage(
         animation-delay: 0s !important;
         transition-duration: 0s !important;
         caret-color: transparent !important;
+        /* 故事卡、單集頁段落與頁尾用 content-visibility: auto；整頁截圖時不在視窗裡的不會畫，
+           截出來是一片空白（ep-3 單集頁的頁尾一直是空的）。截圖一律全部畫出來。 */
+        content-visibility: visible !important;
       }
     `,
   });

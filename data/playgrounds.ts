@@ -6,6 +6,8 @@
  * Zod 契約在 `playgrounds.schema.ts`，不進 client bundle。
  */
 
+import { isVisualFixtureBuild, pickVisualFixture, VISUAL_FIXTURE_PLACE_IDS } from "@/lib/visual-fixture";
+
 /** 類型 chip 的顯示順序；同時作為 URL `type` 參數的合法值白名單。 */
 export const PLAYGROUND_TYPES = [
   "公園",
@@ -3182,12 +3184,17 @@ const PLAYGROUNDS: readonly Playground[] = [
   },
 ];
 
+/** 所有查詢都從這裡出發；視覺回歸的 fixture build 只看得到固定幾個景點（見 lib/visual-fixture.ts）。 */
+const ACTIVE_PLAYGROUNDS: readonly Playground[] = isVisualFixtureBuild()
+  ? pickVisualFixture(PLAYGROUNDS, VISUAL_FIXTURE_PLACE_IDS, (item) => item.id)
+  : PLAYGROUNDS;
+
 export function getPlayground(id: string): Playground | undefined {
-  return PLAYGROUNDS.find((item) => item.id === id);
+  return ACTIVE_PLAYGROUNDS.find((item) => item.id === id);
 }
 
 export function listPlaygrounds(): readonly Playground[] {
-  return PLAYGROUNDS;
+  return ACTIVE_PLAYGROUNDS;
 }
 
 /**
@@ -3221,7 +3228,7 @@ export const CITY_DISPLAY_ORDER: readonly string[] = [
 ];
 
 export function listCities(): string[] {
-  return [...new Set(PLAYGROUNDS.map((item) => item.city))].sort((a, b) => {
+  return [...new Set(ACTIVE_PLAYGROUNDS.map((item) => item.city))].sort((a, b) => {
     const ai = CITY_DISPLAY_ORDER.indexOf(a);
     const bi = CITY_DISPLAY_ORDER.indexOf(b);
     if (ai !== -1 && bi !== -1) return ai - bi;

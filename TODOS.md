@@ -962,7 +962,9 @@ Plan 經 Codex 工程審 + Grok 對抗審 + Opus 設計審**三審退回修訂**
 
 Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫寫的 $0.2）、卡片塞 `reflection-prompts`（違反 `DESIGN.md:147`，且已用於 `StoryEndScreen`）、新增 stagger（已存在）、全域紙紋 noise（iOS 合成風險 + 污染宇宙地圖）、重生 filter icon（已存在）、獎項 badge（無素材來源）。
 
-### VIS-DEBT-2　視覺測試跑在活資料上（mask 兩難的上游）　`eng · L · VIS-DEBT-1`　待做
+### VIS-DEBT-2　視覺測試跑在活資料上（mask 兩難的上游）　`eng · L · VIS-DEBT-1`　✅ 見本 commit
+
+> **2026-10-26 結案：** `npm run test:visual:trusted` 改帶 `VISUAL_FIXTURE=1`。`next.config.ts` 在 build 時把 `VISUAL_FIXTURE_BUILD` 寫死進 server 與 client（client 元件也呼叫 `getStories()`／`listPlaygrounds()`），產物放 `.next-visual`、Playwright 走 3200 埠；`data/content.ts` 的 `storyList` 與 `data/playgrounds.ts` 的 `ACTIVE_PLAYGROUNDS` 依旗標挑固定子集（故事 ep-1／3／5／6／18／22，景點 12 個跨北中南、七類都有）。`data/stories.ts` 沒動。防呆：CI／Vercel 開旗標 build 失敗；直接設 `VISUAL_FIXTURE_BUILD` 也拒絕；凍結資料模組在 CI／Vercel 載入就丟錯；截圖前斷言 `<html data-visual-fixture="1">`（伺服器讀到一般 `.next` 就停）。prebuild 的 tsx 讀不到這個旗標，照樣產全集。拿掉 stories 的 NEW·EP／EP 標與「N 則故事」mask，stories、about 回整頁截圖；play-map／place 仍拍 viewport（頁太高稀釋容差的理由與資料無關）。順手修掉舊漏洞：`content-visibility: auto` 讓整頁截圖的頁尾一直是空白（ep-3 單集頁最明顯），截圖前強制 visible。合集完整性檢查在 fixture build 跳過（12 個景點湊不滿每集 5 個）。Codex 工程審＋cursor 對抗審 Request changes 已修（直接設 BUILD 旗標、執行期驗證伺服器）；Opus 設計審見下。
 
 只要資料會長，mask 就只能在「盲掉內容」與「每月紅一次」之間二選一，兩邊都輸。
 正解是**釘住資料**：加一個 `VISUAL_FIXTURE=1`（與 `VISUAL_BASELINE_TRUSTED` 同層的本機 env），
@@ -974,7 +976,14 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 
 ⚠️ `data/stories.ts` 在 AGENT-DOMAIN Protected paths 內，改動必跑 `verify:episodes`，且只能 Leader／Opus 處理。
 
-### VIS-GAP-1　兒童主路徑至今無視覺 baseline　`eng · M · 無`　待做
+### VIS-GAP-1　兒童主路徑至今無視覺 baseline　`eng · M · 無`　部分完成
+
+> **2026-10-26：** 補上 `StoryPlayer` 四張（390／1280 × 日／夜），停在 ep-3 第 21 秒（暫停、第 2 張插圖、字幕開），讀到 metadata 就 seek，不靠播放時機。另補播放完成兩張（390／1280，從最後 0.2 秒靜音播到結束）。著色本 `coloring-visual.spec.ts` 已有多尺寸日夜快照。單集頁 `story-ep-3` 原本就有。見本 commit。
+> Opus 設計審（2026-10-26，Approve with changes）另列的後續（本輪不做）：
+> - **播放器控制列被裁**（MAJOR，既有）：390 寬最外側「重複」「停止」圓鈕外緣壓在面板框線上，面板底部在畫面底上方約 9px 斷掉、沒有框線圓角；1280 也一樣（y≈708）。新基準會把現況鎖住，修時一起重錄。`ui · S · 無`
+> - 播放器 DESIGN 第 1 態寫「dots 不可點」，但畫面上看不到 dots：查清楚改 DESIGN 或補回。`design · S · 無`
+> - `StoryProgressBadge`（已聽完星章）不在任何基準裡：視覺測試預先寫一筆收聽進度，讓一張卡帶章。`eng · S · 無`
+> - 全部故事精選卡「NEW · EP」標籤與標題之間空約 140px，標籤像飄著；頁尾法務列最後一個分隔點間距不一。`design · S · 無`
 
 `/story/[slug]` 單集頁與 `StoryPlayer`（DESIGN.md §播放器狀態 四態）、`/games/coloring-book`
 到現在都沒有任何視覺 baseline。這是既存債，但 2026-08-24 那輪花預算加的兩頁

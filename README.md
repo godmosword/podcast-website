@@ -80,7 +80,7 @@ npm run dev
 | `npm run test:e2e:public` | 上線 gate：public smoke + public axe（CI `build-and-public-e2e`） |
 | `npm run test:e2e:ci` | 兒童主路徑 e2e（smoke／a11y／地圖／遊戲／訂閱／UX-P1-5 觸控；CI `e2e-child-path`；不含 visual） |
 | `npm run test:visual` | D2 視覺回歸（**預設 skip**；本機 pre-push 工具，刻意不進 CI。見 `test:visual:trusted`） |
-| `npm run test:visual:trusted` | 設 `VISUAL_BASELINE_TRUSTED=1` 後跑 visual spec。基準於 **2026-08-30 全面重錄**（59 張；前一次 2026-08-24）。重產再加 `-- --update-snapshots`，並**逐張人工目檢**後才提交。**有 pre-push 閘門**（VIS-DEBT-3）：動到 `components/`／`app/` 的 tsx／css 但零 baseline 變更會擋下 push；確認視覺真的沒動時用 `SKIP_VISUAL_GATE=1 git push`。`npm install` 會經由 `prepare` 自動把 `core.hooksPath` 指到 `.githooks` |
+| `npm run test:visual:trusted` | 設 `VISUAL_BASELINE_TRUSTED=1`＋`VISUAL_FIXTURE=1` 後跑 visual spec：用**凍結資料**（固定 6 集、12 個景點，見 `lib/visual-fixture.ts`）另外 build 到 `.next-visual`、跑在 3200 埠，上新集不會讓基準失效；伺服器不是 fixture build 時會直接停（`<html data-visual-fixture>`）。CI／Vercel 上開這個旗標會 build 失敗。基準於 **2026-08-30 全面重錄**（59 張；前一次 2026-08-24）。重產再加 `-- --update-snapshots`，並**逐張人工目檢**後才提交。**有 pre-push 閘門**（VIS-DEBT-3）：動到 `components/`／`app/` 的 tsx／css 但零 baseline 變更會擋下 push；確認視覺真的沒動時用 `SKIP_VISUAL_GATE=1 git push`。`npm install` 會經由 `prepare` 自動把 `core.hooksPath` 指到 `.githooks` |
 | `npm run check` | 品質閘門：test + verify:episodes + verify:zone-art + verify:map-art + build |
 | `npm run font:subset` | 重新子集化中文字型（新增文案後） |
 

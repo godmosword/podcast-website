@@ -9,6 +9,7 @@ import {
   type PlayMapQuery,
 } from "@/lib/playgrounds-query";
 import { isHighEnergy } from "@/lib/playground-context";
+import { isVisualFixtureBuild } from "@/lib/visual-fixture";
 
 export const MIN_INDEXABLE_COLLECTION_SIZE = 5;
 
@@ -505,6 +506,8 @@ export function validateCollectionDefinitions(
 }
 
 export function assertCollectionDefinitions(): void {
+  // 視覺回歸的凍結資料只有 12 個景點，合集一定湊不滿；資料完整性交給正式 build 與單元測試。
+  if (isVisualFixtureBuild()) return;
   const issues = validateCollectionDefinitions();
   if (issues.length > 0) {
     throw new Error(`Invalid Play Map collection registry:\n- ${issues.join("\n- ")}`);

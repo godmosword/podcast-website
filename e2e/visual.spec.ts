@@ -46,6 +46,11 @@ const VISUAL_SKIP_REASON =
 
 test.beforeEach(() => {
   test.skip(process.env.VISUAL_BASELINE_TRUSTED !== "1", VISUAL_SKIP_REASON);
+  // 基準是用凍結資料錄的（VIS-DEBT-2，見 lib/visual-fixture.ts）；拿活資料比只會整片紅，
+  // 拿活資料重錄更糟——下個月又全部失效。一律走 npm run test:visual:trusted。
+  if (process.env.VISUAL_FIXTURE !== "1") {
+    throw new Error("視覺回歸要用凍結資料：請跑 npm run test:visual:trusted（會帶 VISUAL_FIXTURE=1）。");
+  }
 });
 
 const VISUAL_PAGES = [
@@ -109,13 +114,10 @@ const SMOKE_PAGE_IDS = new Set<VisualPageId>([
 ]);
 
 /**
- * 頁高隨新集成長的頁面（stories 每集 +1 張卡；about 的家長常見問題寫著集數與最新一集標題，
- * 標題長短一變就換行、整頁高度跟著變）。
- * 尺寸本身會變，mask 救不了「snapshot 尺寸不符」，只能改拍 viewport。
+ * 只拍 viewport、不拍整頁的頁面。
+ * stories、about 以前也在這裡（每出一集就長高）；改用凍結資料（VIS-DEBT-2）後頁高固定，回到整頁。
  */
 const GROWING_PAGE_IDS = new Set<VisualPageId>([
-  "stories",
-  "about",
   // play-map 4448px／place 2387px 的 fullPage 有兩個問題：
   // (a) maxDiffPixelRatio 0.02 在 1280×4448 上等於容許 11.4 萬像素不同，
   //     抓不到任何一種規範回歸——頁面越高，測試越測不到東西；
@@ -149,18 +151,13 @@ const GROWING_PAGE_IDS = new Set<VisualPageId>([
  * 錨定 `^…$` 是為了避免整張卡片被吞進 mask：`getByRole("link", { name: /EP/ })`
  * 會命中整張故事卡，把封面與標題一起塗掉，那就等於關掉這頁的視覺測試。
  */
-const NEW_EPISODE_RIBBON = /NEW\s*[·•‧]\s*EP\s*\d+/;
-const EP_LABEL_ONLY = /^EP\s*\d+$/;
-
 function volatileMasks(page: Page, pageId: VisualPageId): Locator[] {
   switch (pageId) {
     case "home":
       return [];
     case "stories":
-      return [
-        page.getByText(NEW_EPISODE_RIBBON),
-        page.getByText(EP_LABEL_ONLY),
-      ];
+      // 凍結資料（VIS-DEBT-2）：最新一集固定是 fixture 裡的 ep-22，「NEW · EP」與集數不再隨上新集變，不必遮。
+      return [];
     case "characters":
       // **刻意不遮**。曾試遮 62 個角色卡的登場集數連結，實測後撤回：
       // 角色多一顆 EP chip 會讓該卡長高、整個格線往下位移，mask 只遮文字擋不住
@@ -275,9 +272,7 @@ const COMPONENT_SHOTS: {
       page
         .locator('section[aria-label="找故事"] > div')
         .filter({ has: page.getByRole("heading", { name: "找故事" }) }),
-    // 「N 則故事」是這塊裡唯一隨集數變的字，且它變動不會改變版面高度，
-    // 也沒有同源數字散落在同一張圖裡——符合 MASK_DOCTRINE 判準 3，遮它真的買得到穩定性。
-    masks: (page) => [page.getByText(/^\d+\s*則故事$/)],
+    // 「N 則故事」以前要遮；凍結資料下固定是 6 則，不遮。
   },
   {
     id: "stories-card",
@@ -573,6 +568,96 @@ test("visual：單集 ep-3 768 light", async ({ page }) => {
     mask: masks,
   });
 });
+
+/**
+ * 播放器（DESIGN.md §播放器狀態、VIS-GAP-1）：停在 ep-3 第 21 秒，畫面固定是第 2 張插圖＋那一句字幕。
+ * 不按播放、不等音檔跑：讀到 metadata 就暫停、seek，`seeked` 之後才截，跟播放時機無關。
+ */
+for (const viewportId of Object.keys(VIEWPORTS) as VisualViewportId[]) {
+  for (const theme of THEMES) {
+    const viewport = VIEWPORTS[viewportId];
+    test(`visual：播放器 ep-3 ${viewport.label} ${theme}（暫停在第 21 秒）`, async ({ page }) => {
+      await page.setViewportSize({ width: viewport.width, height: viewport.height });
+      await page.goto("/story/ep-3/play");
+      await stabilizeVisualPage(page, { theme });
+      await page.locator("audio").evaluate(async (el) => {
+        const media = el as HTMLAudioElement;
+        media.muted = true;
+        media.pause();
+        if (media.readyState < HTMLMediaElement.HAVE_METADATA) {
+          await new Promise<void>((resolve, reject) => {
+            media.addEventListener("loadedmetadata", () => resolve(), { once: true });
+            media.addEventListener("error", () => reject(new Error("audio error")), { once: true });
+            media.load();
+          });
+        }
+        await new Promise<void>((resolve, reject) => {
+          const timeout = window.setTimeout(() => reject(new Error("seek timeout")), 10_000);
+          media.addEventListener(
+            "seeked",
+            () => {
+              window.clearTimeout(timeout);
+              resolve();
+            },
+            { once: true },
+          );
+          media.currentTime = 21;
+        });
+        media.pause();
+      });
+      await expect(page.getByRole("button", { name: "播放", exact: true })).toBeVisible();
+      await expect.poll(() => page.locator('[aria-hidden="false"] img').getAttribute("alt")).toMatch(/第 2 頁/);
+      await expect(page.locator('[aria-hidden="false"] img')).toHaveJSProperty("complete", true);
+      await expect(page).toHaveScreenshot(`story-player-${viewport.label}-${theme}.png`, {
+        maxDiffPixelRatio: theme === "night" ? 0.03 : 0.02,
+        animations: "disabled",
+      });
+    });
+  }
+}
+
+/**
+ * 播放完成（DESIGN.md §播放器狀態 第 3 態）：唯一有自己版面、三顆按鈕的狀態，主次與 390 寬換行只能靠截圖守。
+ * 從最後 0.2 秒靜音播到結束，等「再聽一次」出現；下一集在凍結資料下固定是 ep-1。
+ */
+for (const viewportId of Object.keys(VIEWPORTS) as VisualViewportId[]) {
+  const viewport = VIEWPORTS[viewportId];
+  test(`visual：播放器 ep-3 播放完成 ${viewport.label} light`, async ({ page }) => {
+    await page.setViewportSize({ width: viewport.width, height: viewport.height });
+    await page.goto("/story/ep-3/play");
+    await stabilizeVisualPage(page, { theme: "light" });
+    await page.locator("audio").evaluate(async (el) => {
+      const media = el as HTMLAudioElement;
+      media.muted = true;
+      if (media.readyState < HTMLMediaElement.HAVE_METADATA) {
+        await new Promise<void>((resolve, reject) => {
+          media.addEventListener("loadedmetadata", () => resolve(), { once: true });
+          media.addEventListener("error", () => reject(new Error("audio error")), { once: true });
+          media.load();
+        });
+      }
+      await new Promise<void>((resolve, reject) => {
+        const timeout = window.setTimeout(() => reject(new Error("ended timeout")), 10_000);
+        media.addEventListener(
+          "ended",
+          () => {
+            window.clearTimeout(timeout);
+            resolve();
+          },
+          { once: true },
+        );
+        media.currentTime = Math.max(0, media.duration - 0.2);
+        void media.play();
+      });
+    });
+    await expect(page.getByRole("button", { name: "再聽一次" })).toBeVisible();
+    await expect(page.getByText(/^下一集：/)).toBeVisible();
+    await expect(page).toHaveScreenshot(`story-player-ended-${viewport.label}-light.png`, {
+      maxDiffPixelRatio: 0.02,
+      animations: "disabled",
+    });
+  });
+}
 
 // 元件級 baseline：高度不隨資料變動，圖小且真的看得完，容差不會被面積稀釋。
 for (const shot of COMPONENT_SHOTS) {
