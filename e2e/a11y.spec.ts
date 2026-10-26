@@ -284,7 +284,7 @@ test("a11y：桌面抽屜展開態（含家長項）無 critical/serious 違規"
   await expect(page.getByRole("navigation", { name: "主要分區" })).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "去玩" })).toHaveCount(0);
 
-  await page.getByRole("button", { name: "開啟選單" }).click();
+  await page.getByRole("button", { name: "選單", exact: true }).click();
   const drawer = page.getByRole("navigation", { name: "網站選單" });
   const parentProgressLink = drawer.getByRole("link", { name: "親子進度" });
   await expect(parentProgressLink).toBeVisible();

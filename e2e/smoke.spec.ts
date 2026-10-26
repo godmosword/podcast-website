@@ -56,7 +56,7 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
   await expect(topFeedback).toBeVisible();
   await expect(topFeedback).toHaveAttribute("href", "/feedback");
 
-  const menuBtn = page.getByRole("button", { name: "開啟選單" });
+  const menuBtn = page.getByRole("button", { name: "選單", exact: true });
   await expect(menuBtn).toBeVisible();
   await expect(menuBtn).not.toContainText("選單");
   const feedbackBox = await topFeedback.boundingBox();
@@ -170,7 +170,7 @@ test("夜間桌面開抽屜：微暗只套膠囊，外層 .bar 不因開闔改�
   const barClosed = await bg(bar);
   const capsuleClosed = await bg(capsule);
 
-  await page.getByRole("button", { name: "開啟選單" }).click();
+  await page.getByRole("button", { name: "選單", exact: true }).click();
 
   // 外層必須不隨開闔改變——否則膠囊外會多出一條橫貫視窗的色帶。
   // （註：landing 桌面的 .bar 本來就不是透明的，見 SiteNavBar.module.css 的
@@ -180,7 +180,7 @@ test("夜間桌面開抽屜：微暗只套膠囊，外層 .bar 不因開闔改�
   // 微暗確實套在膠囊本體上（背景走 transition，需輪詢等它到位）
   await expect.poll(() => bg(capsule)).not.toBe(capsuleClosed);
 
-  await page.getByRole("button", { name: "關閉選單" }).click();
+  await page.getByRole("button", { name: "選單", exact: true, expanded: true }).click();
   await expect.poll(() => bg(capsule)).toBe(capsuleClosed);
 });
 
@@ -188,7 +188,7 @@ test("Landing Hub 在手機尺寸維持四段可見", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   // 行動版漢堡選單；主題分類與桌面一致不進導覽（頁面仍可直達 /topic）
-  await expect(page.getByRole("button", { name: "開啟選單" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "選單", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "首頁" })).toBeVisible();
   await expect(page.getByRole("button", { name: "頻道" })).toBeVisible();
   await expect(page.getByRole("button", { name: "社群" })).toBeVisible();
@@ -211,7 +211,7 @@ test("Landing Hub 在手機尺寸維持四段可見", async ({ page }) => {
     ).toBeLessThanOrEqual(headerOverflow.clientWidth + 1);
   }
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.getByRole("button", { name: "開啟選單" }).click();
+  await page.getByRole("button", { name: "選單", exact: true }).click();
   const drawerNav = page.getByRole("navigation", { name: "網站選單" });
   await expect(drawerNav.getByRole("button", { name: "搜尋" })).toHaveCount(0);
   await expect(drawerNav.getByRole("link", { name: "主題分類" })).toHaveCount(0);
@@ -684,7 +684,7 @@ test.describe("夜間漢堡抽屜", () => {
       await page.evaluate(() =>
         document.documentElement.setAttribute("data-theme", "night"),
       );
-      await page.getByRole("button", { name: "開啟選單" }).click();
+      await page.getByRole("button", { name: "選單", exact: true }).click();
       await page.waitForTimeout(600);
 
       // **真的**取合成後像素：頂欄是半透明毛玻璃（backdrop-filter + alpha 0.87），
@@ -773,7 +773,7 @@ test.describe("日間漢堡抽屜選中底", () => {
     if (width < 980) {
       await page.evaluate(() => window.scrollTo(0, 420));
     }
-    await page.getByRole("button", { name: "開啟選單" }).click();
+    await page.getByRole("button", { name: "選單", exact: true }).click();
     const current = page.getByRole("link", { name: "角色圖鑑" });
     await expect(current).toHaveAttribute("aria-current", "page");
     const other = page.getByRole("link", { name: "全部故事" });

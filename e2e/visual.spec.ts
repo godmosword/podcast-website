@@ -315,6 +315,16 @@ const COMPONENT_SHOTS: {
     locator: (page) => page.locator('section[aria-labelledby="nearby-heading"]'),
   },
   {
+    id: "site-nav-drawer",
+    name: "全站選單抽屜（開啟，390）",
+    path: "/stories",
+    viewport: { width: 390, height: 844 },
+    prepare: async (page) => {
+      await page.getByRole("button", { name: "選單", exact: true }).click();
+    },
+    locator: (page) => page.getByRole("navigation", { name: "網站選單" }),
+  },
+  {
     id: "landing-cta-row",
     name: "Landing 首段 CTA 文字塊",
     path: "/",

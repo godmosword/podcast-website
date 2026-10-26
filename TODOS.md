@@ -36,7 +36,7 @@ Plan：`~/.claude/plans/play-map-scenarios.md`（v2；情境卡＋選縣市 dial
 
 - 審查：Codex 工程審 Approve with changes，HIGH（面板關閉後焦點返還順序）與 MEDIUM（捲動鎖還原測試、選縣市後捲動的競態）已修；「面板展開時重建黏住判定」未改（IntersectionObserver 本就依幾何變化觸發）。Opus 設計審兩次都因 API 逾時中斷，標缺席。
 - 待辦：Opus 設計審補跑（看已上線版本）。
-- 待辦：真機（iOS Safari）確認選縣市面板開著時頁面不會跟著捲、關閉後回到原位。
+- 待辦（使用者）：真機（iOS Safari）確認選縣市面板與全站選單抽屜開著時頁面不會跟著捲、關閉後回到原位與原本的焦點。兩者 2026-10-26 起共用 `hooks/useModalLayer.ts`，桌機 Chromium／WebKit e2e（`e2e/site-nav-modal.spec.ts`）已過。
 - ✅ 後續：`/for-parents/play-map/[placeId]` 與 `collections/` 頁沿用類型圓章與 `--pm-*` 卡片語彙。類型黏土圓章抽成共用 `PlaygroundTypeBadge`（名單卡、詳情、各地整理共用）；詳情頁與各地整理頁頁底改 `--pm-page`、區塊與卡片改 `--card`＋`--pm-card-line`＋`--elev-1`（夜間框線加深）；詳情頁頁首＝圓章＋類型 · 縣市 · 區 → 名稱 → 一行純文字事實（「先看今天適不適合」那張只放三個 pill 的卡拿掉，事實不再是 pill）；附近景點卡＝圓章＋類型＋右側距離 → 名稱＋箭頭 → 縣市 · 區，外層不再包卡框；各地整理卡同名單卡層級、事實行貼齊卡底、只寫區（整頁同縣市）。清單都補 `role="list"`（Safari／VoiceOver）。Codex 工程審兩輪、Opus 設計審（Approve with changes）已修。見本 commit。
 - 後續（本輪不做，Opus 設計審 T4 提出）：**夜間實心主鈕看不見**——`--cta-solid-bg` 夜間仍是 `--landing-brand-ink`（#2a1808），壓在深色頁底上對比約 1.2:1，旁邊有框的次鈕反而更醒目；全站 7 處主鈕共用，要改 token 而不是單頁補。`design · M · 無`
 
@@ -45,7 +45,7 @@ Plan：`~/.claude/plans/play-map-scenarios.md`（v2；情境卡＋選縣市 dial
 Plan：`~/.claude/plans/play-map-simplify.md`（D1=A 北中南分組、D2=A 純文字卡、D3=A 手機卡片放導航；Codex 工程審＋Opus 設計審）。
 
 - 後續（本輪不做）：`/for-parents/play-map/[placeId]` 詳情頁與 `collections/` 頁沿用新的卡片語彙。
-- 後續（本輪不做）：夜間 `SiteNavBar` 仍是奶油色，和本頁深底的 sticky 條件列形成一亮一暗兩條帶（全站導覽議題）。
+- ✅ 後續：夜間 `SiteNavBar` 改用 `--nav-panel-bg`（與抽屜同一個表面），不再一亮一暗兩條帶；只在 `.bar` 裡覆寫 `--landing-nav-*`，夜間拿掉白描邊與高光。DESIGN 改寫「頂欄不反轉」。見本 commit。
 - ✅ 後續：`buildGoogleMapsPlaceUrl` 已刪（只剩測試在用）；同一 `it` 裡混測導航的只刪搜尋那幾行，`buildGoogleMapsNavUrl`／`playgroundMapsSearchQuery` 保留。見本 commit。
 
 ### 品牌標誌合規後續（2026-10-12）
@@ -357,8 +357,8 @@ clip 快照在不同 macOS／Chromium 版本上的自然噪音底線。
 - [ ] **PR2 後續（設計審建議）**　`nav · S · PR2`
   - **(1) 觸發器文字「選單」— ✅ 已覆寫（2026-08-30）**：改最右 icon-only（`aria-label` 仍為開啟／關閉選單）。兒童主路徑改走內頁 `KidsPlayDock`／漢堡抽屜，抽屜 7 列仍保留兒童項。`91dfb25`。
   - **(2) 「留言」移入抽屜 — ✅ 已完成**（使用者裁決 B，見 `b9de774`）。決策關鍵是實測首頁曾同時有三個指向同一信箱的入口。**2026-08-30 CRITICAL-2=A 覆寫，留言回到頂欄**（接受與頁尾／ConnectHub 可能同信箱）。
-  - (3) 觸發器 `aria-label` 隨開闔改寫可及名稱，與 `aria-expanded` 重複播報；建議固定為「選單」（會動到四支 e2e 契約）。
-  - (4) 抽屜是半模態（有 focus trap 但無 scroll lock／背景 `inert`）；建議改為非模態 popover 或補齊模態語意，二擇一並寫進 DESIGN。
+  - ✅ (3) 觸發器 `aria-label` 固定「選單」，開關只靠 `aria-expanded`；e2e 契約一併改（2026-10-26）。
+  - ✅ (4) 改成完整模態（兩個斷點都是，2026-10-26）：背景 inert（共用 `hooks/useModalLayer.ts`，抽屜留在膠囊裡、從抽屜往上把每層兄弟設 inert，計數避免巢狀互相解除）、`html` 與首頁 `[data-landing-scroll]` 鎖捲動、暖褐遮罩（`.bar` 內 `.inner` 外，`.bar::before` 在遮罩上重鋪頂欄底色）、頂欄其他項目淡到 45%、Tab 在抽屜與觸發器之間環繞（`useFocusTrap` 的 `include`，且 Tab 一律由 trap 決定，Safari 預設 Tab 跳過連結時也圈得住）、Esc／遮罩／換頁（含上一頁）／跨 980 都關並把焦點還觸發器。Chromium＋WebKit e2e 守。
   - (5) ~~睡前模式 veil 可能蓋掉磁貼標題對比~~ **已實測排除（2026-08-30）**：線上正式站 `data-theme=night`＋`data-bedtime=true`，並把探索區推到視窗頂端 60px（veil 漸層最深的 36–38% 正下方）量測合成像素——磁貼標籤 **7.22:1**、地圖大卡標籤 **6.94:1**、區塊標題 **6.25:1**（正常捲動位置），門檻 4.5:1，最低仍有 1.6 倍餘裕。
 - [x] **PR3 Footer／效能／文件**　`perf · M · PR2`　footer 不補 7 連結（D8=B，標 N/A）；`.env.example` 修正 `NEXT_PUBLIC_FEEDBACK_FORM_URL` 的雙消費點契約；Lighthouse baseline 實測入帳；既有 17 處裸 `<img>` 維持（D9=A）  `99e5739`
   - **ConnectHub Email 與頁尾「聯絡我們」不是漏洞**：DESIGN 首頁 IA 已明文登記「關於我們／聯絡我們在頁尾 meta（聯絡另有 ConnectHub Email icon）」——這是刻意的雙管道。PR2 移除的是**第三個**（頂欄留言），非既有兩個。前一版待辦寫「建議擇一」是我讀規範不全，已撤回。
@@ -1259,7 +1259,7 @@ Draft 的 LatestHero full-bleed 16:9（需 20 集 ×2 版新資產，非計畫�
 | UX-P1-1 | P1 | 部分完成 | **補齊 &lt;44px 按鈕**（只改 CSS）：~~ZoneSheet 關閉／wishToggle~~ → MAP-UX-P1a；~~Landing 箭頭~~ → 44×44（本輪 Design Review）；StoryPlayer 定時待做 | 各 `*.module.css` | 手動＋e2e |
 | UX-P1-2 | P1 | ✅ `42a9d38` | **詳情頁反思收合**：比照 `StoryEndScreen`，家長句不預設露出 | `StoryDetailReflection.tsx`、`app/story/[slug]/page.tsx` | `npm test` |
 | UX-P1-3 | P1 | 待做 | **共讀 sidecar 擴至全集**：`parent-guides`／`family-activities` 從 ep-1/ep-5 擴充（內容營運，可分批） | `data/parent-guides.ts`、`data/family-activities.ts` | 同名 `*.test.ts` |
-| UX-P1-4 | P1 | 待做 | **播放進度條拇指加大**（CSS 變數，不動控制列 layout） | `StoryPlayer.module.css` | 手動播放頁 |
+| UX-P1-4 | P1 | ✅ 2026-10-26 | **播放進度條拇指加大**（CSS 變數，不動控制列 layout）：`--seek-hit` 一律 44px、控制點 28/30/32px、軌道 8/9/10px，`--controls-block` 同步 +16px 讓插圖與字幕不被壓到；`e2e/child-ux.spec.ts` 守觸控區與控制列順序 | `StoryPlayer.module.css` | 手動播放頁 |
 | UX-P1-5 | P1 | ✅ `99cf197` | **e2e 兒童 UX 回歸**：`/adventures` a11y + 地圖觸控；遊樂園 hub；`/for-parents` 與播放頁觸控 ≥44px；CI `e2e-child-path` | `e2e/a11y.spec.ts`、`e2e/universe-map.spec.ts`、`e2e/games.spec.ts`、`e2e/child-ux.spec.ts` | `npm run test:e2e:ci` |
 | UX-P2-1 | P2 | ✅ `eb19c86` | 方塊／卡丁車接 `kidsMode` 或標「挑戰模式」：kidsMode 預設＝relaxed 耦合鎖定（回歸測試）；GameIntro 統一 challenge 家長提示 | `BlockDropGame.tsx`、`GameIntro.tsx`、`settings.ts` | test + 手動 |
 | UX-P2-2 | P2 | 待做 | 儀表板「最佳分數」改低壓文案（「探索紀錄」等） | `ParentDashboard.tsx` | 手動 |

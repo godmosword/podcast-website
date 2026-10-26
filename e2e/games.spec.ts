@@ -41,7 +41,7 @@ test.describe("遊戲頁：兒童主路徑優先", () => {
       await expect(page.getByRole("navigation", { name: "主要分區" })).toHaveCount(0);
       await expect(page.getByRole("navigation", { name: "去玩" })).toHaveCount(0);
       await expect(page.getByRole("navigation", { name: "網站選單" })).toHaveCount(0);
-      await expect(page.getByRole("button", { name: "開啟選單" })).toHaveCount(0);
+      await expect(page.getByRole("button", { name: "選單", exact: true })).toHaveCount(0);
       await expect(page.getByRole("link", { name: /遊樂園/ }).first()).toBeVisible();
     });
   }
@@ -144,7 +144,7 @@ test.describe("遊樂園 hub", () => {
     await expect(hubFeedback).toBeVisible();
     await expect(hubFeedback).toHaveAttribute("href", "/feedback");
     // 漢堡是家長項的唯一入口，必須可開
-    const menuBtn = page.getByRole("button", { name: "開啟選單" });
+    const menuBtn = page.getByRole("button", { name: "選單", exact: true });
     await expect(menuBtn).toBeVisible();
     await menuBtn.click();
     await expect(
@@ -1131,7 +1131,7 @@ test.describe("繪本塗塗鴉：與遊戲頁同款抬頭", () => {
     await page.goto("/games/coloring-book");
     await page.waitForLoadState("networkidle");
     await expect(page.getByRole("navigation", { name: "主要分區" })).toHaveCount(0);
-    await expect(page.getByRole("button", { name: "開啟選單" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "選單", exact: true })).toHaveCount(0);
 
     const check = async () => {
       await expect(page.locator("h1")).toHaveCount(1);

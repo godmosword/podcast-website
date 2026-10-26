@@ -1015,7 +1015,7 @@ test.describe("Intro Portal · home overlay (ADR-0004)", () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/", { waitUntil: "domcontentloaded" });
     await expect(page.locator("[data-intro-overlay]")).toBeVisible();
-    const menuBtn = page.getByRole("button", { name: "開啟選單" });
+    const menuBtn = page.getByRole("button", { name: "選單", exact: true });
     await expect(menuBtn).toBeVisible();
     await menuBtn.click();
     const drawer = page.getByRole("navigation", { name: "網站選單" });

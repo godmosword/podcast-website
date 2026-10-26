@@ -124,7 +124,7 @@ test.describe("站內留言牆 /feedback", () => {
     await expect(topFeedback).toHaveAttribute("href", "/feedback");
     await expect(topFeedback).toHaveAttribute("aria-current", "page");
 
-    await page.getByRole("button", { name: "開啟選單" }).click();
+    await page.getByRole("button", { name: "選單", exact: true }).click();
     const drawer = page.getByRole("navigation", { name: "網站選單" });
     await expect(drawer.getByRole("link", { name: "留言", exact: true })).toHaveCount(0);
   });

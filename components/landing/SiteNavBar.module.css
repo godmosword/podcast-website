@@ -23,6 +23,19 @@
  *   --edge-ramp，讓字落在模糊帶下面（見 globals.css）。
  */
 
+/*
+ * 夜間頂欄改用深色表面（2026-10-26，覆寫舊的「頂欄不反轉」）：奶油色頂欄壓在深底頁面上是一亮一暗兩條帶
+ * （親子遊樂地圖的 sticky 條件列最明顯）。頂欄與抽屜同用 --nav-panel-bg，開抽屜也不斷層。
+ * token 只在頂欄裡覆寫，品牌、常用組、膠囊都沿用同一組變數；白色高光線在深底上會變成亮線，一併拿掉。
+ */
+:global(html[data-theme="night"]) .bar {
+  --landing-nav-cta-bg: var(--nav-panel-bg);
+  --landing-nav-cta-fg: var(--ink);
+  --landing-nav-ink: var(--ink);
+  --landing-nav-border: var(--hairline);
+  box-shadow: none;
+}
+
 /* 首頁 landing 與 footer snap：同樣不透明。權重高於 ≥980 的透明外層，所以首頁桌機是整條桃色底＋膠囊 */
 :global(html:has([data-landing-root])) .bar,
 .bar[data-nav-solid="true"] {
@@ -123,6 +136,40 @@
 
 :global(html[data-theme="night"]) .menuBtn:hover {
   background: color-mix(in srgb, var(--c-teal) 14%, transparent);
+}
+
+/*
+ * 選單抽屜的遮罩：蓋住整個畫面、壓暗背景，點一下關閉。
+ * 放在 .bar 的堆疊脈絡裡（.bar 自己 z-index 40，已在頁面之上），用負 z-index 排在膠囊與抽屜底下。
+ * 首頁桌機 .bar 是 pointer-events: none（透明外層不攔截 hero 點擊），遮罩要自己打開。
+ */
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  /* 暖深褐壓暗（純黑會把奶油頁面壓成灰米色） */
+  background: color-mix(in srgb, var(--landing-brand-ink) 36%, transparent);
+  pointer-events: auto;
+}
+
+/* 抽屜開著時頂欄其他項目是 inert（點下去等於點遮罩、關抽屜），淡下來，看起來就不像能點 */
+.bar[data-menu-open="true"] .brand,
+.bar[data-menu-open="true"] .actions {
+  opacity: 0.45;
+  transition: opacity var(--motion-press);
+}
+
+/*
+ * 負 z-index 的遮罩會畫在 .bar 自己的底色「上面」（堆疊脈絡的根背景最先畫），頂欄會被壓暗、
+ * 跟抽屜之間出現色帶。開著時用 ::before 在遮罩之上再鋪一層同樣的底；≥980 外層透明，鋪的也是透明。
+ */
+.bar[data-menu-open="true"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: inherit;
+  pointer-events: none;
 }
 
 .panel[data-open="false"] {
@@ -373,6 +420,14 @@
   }
 }
 
+/* 褐色 hover 底在深色頂欄上看不見，夜間改淡白。 */
+@media (hover: hover) {
+  :global(html[data-theme="night"]) .navLink:hover,
+  :global(html[data-theme="night"]) .menuBtn:hover {
+    background: color-mix(in srgb, var(--on-dark) 8%, transparent);
+  }
+}
+
 .navLink:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
@@ -496,5 +551,14 @@
 
   .bar[data-nav-solid="true"] .inner {
     background: color-mix(in srgb, var(--landing-nav-cta-bg) 96%, transparent);
+  }
+}
+
+/* ≥980 夜間膠囊：白色描邊與頂緣高光在深色膠囊上是亮線，改 hairline、拿掉高光。 */
+@media (min-width: 980px) {
+  :global(html[data-theme="night"]) .inner,
+  :global(html[data-theme="night"]:has([data-landing-root])) .bar[data-nav-solid="true"] .inner {
+    border-color: var(--hairline);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
   }
 }

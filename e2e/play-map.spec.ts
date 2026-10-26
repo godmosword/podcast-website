@@ -694,7 +694,7 @@ test.describe("親子遊樂地圖", () => {
     test.setTimeout(30_000);
     await page.setViewportSize(PHONE);
     await page.goto("/");
-    await page.getByRole("button", { name: "開啟選單" }).click();
+    await page.getByRole("button", { name: "選單", exact: true }).click();
 
     const drawerNav = page.getByRole("navigation", { name: "網站選單" });
     const playMapLink = drawerNav.getByRole("link", { name: "親子景點" });

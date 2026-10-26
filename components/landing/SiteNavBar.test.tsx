@@ -2,17 +2,21 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { cleanup, fireEvent, render } from "@testing-library/react";
-import { afterEach, describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 vi.stubGlobal("React", React);
 
+const nav = vi.hoisted(() => ({ pathname: "/" }));
+
 vi.mock("next/navigation", () => ({
-  usePathname: () => "/",
+  usePathname: () => nav.pathname,
 }));
 
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
+  nav.pathname = "/";
+  document.documentElement.style.overflow = "";
 });
 
 async function renderNavBarHtml() {
@@ -42,7 +46,7 @@ describe("SiteNavBar", () => {
     expect(html).toContain("頻道");
     expect(html).toContain("社群");
     expect(html).not.toContain(">訂閱<");
-    expect(html).toContain("開啟選單");
+    expect(html).toContain('aria-label="選單"');
     expect(html).toContain("首頁");
     expect(html).toContain("留言");
 
@@ -50,7 +54,7 @@ describe("SiteNavBar", () => {
     const brand = view.container.querySelector('header > div > a[href="/"]');
     expect(brand?.textContent).toContain("車車遊樂園");
 
-    const menuBtn = view.getByRole("button", { name: "開啟選單" });
+    const menuBtn = view.getByRole("button", { name: "選單" });
     expect(menuBtn.textContent).not.toContain("選單");
 
     const actions = view.getByRole("group", { name: "常用" });
@@ -145,7 +149,7 @@ describe("SiteNavBar", () => {
     expect(panel?.getAttribute("data-open")).toBe("false");
     expect(panel?.hasAttribute("inert")).toBe(true);
 
-    fireEvent.click(view.getByRole("button", { name: "開啟選單" }));
+    fireEvent.click(view.getByRole("button", { name: "選單" }));
     expect(panel?.getAttribute("data-open")).toBe("true");
     expect(panel?.hasAttribute("inert")).toBe(false);
   });
@@ -212,8 +216,8 @@ describe("SiteNavBar", () => {
     // 兩斷點同構：品牌＋常用組＋最右漢堡（含可見首頁 homeAction）
     const brand = topRow.querySelector('a[href="/"]');
     expect(brand?.textContent).toContain("車車遊樂園");
-    expect(view.getByRole("button", { name: "開啟選單" })).toBeTruthy();
-    expect(view.getByRole("button", { name: "開啟選單" }).textContent).not.toContain(
+    expect(view.getByRole("button", { name: "選單" })).toBeTruthy();
+    expect(view.getByRole("button", { name: "選單" }).textContent).not.toContain(
       "選單",
     );
 
@@ -238,7 +242,7 @@ describe("SiteNavBar", () => {
 
   test("抽屜家長組有小標「給爸媽」；探索組無標題", async () => {
     const view = await renderNavBar();
-    fireEvent.click(view.getByRole("button", { name: "開啟選單" }));
+    fireEvent.click(view.getByRole("button", { name: "選單" }));
     const panel = view.container.querySelector('nav[aria-label="網站選單"]')!;
     const labels = Array.from(panel.querySelectorAll("p")).map(
       (el) => el.textContent,
@@ -307,7 +311,7 @@ describe("SiteNavBar", () => {
 
   test("行動版選單提供單欄清單連結，不含搜尋列", async () => {
     const view = await renderNavBar();
-    fireEvent.click(view.getByRole("button", { name: "開啟選單" }));
+    fireEvent.click(view.getByRole("button", { name: "選單" }));
 
     for (const label of [
       "全部故事",
@@ -372,12 +376,12 @@ describe("SiteNavBar", () => {
 
   test("Esc 可關閉行動選單", async () => {
     const view = await renderNavBar();
-    const menuBtn = view.getByRole("button", { name: "開啟選單" });
+    const menuBtn = view.getByRole("button", { name: "選單" });
     fireEvent.click(menuBtn);
-    expect(view.getByRole("button", { name: "關閉選單" })).toBeTruthy();
+    expect(menuBtn.getAttribute("aria-expanded")).toBe("true");
 
     fireEvent.keyDown(window, { key: "Escape" });
-    expect(view.getByRole("button", { name: "開啟選單" })).toBeTruthy();
+    expect(menuBtn.getAttribute("aria-expanded")).toBe("false");
   });
 
   test("開啟／關閉行動選單時 header 標記 data-menu-open", async () => {
@@ -386,10 +390,10 @@ describe("SiteNavBar", () => {
     expect(header).toBeTruthy();
     expect(header?.hasAttribute("data-menu-open")).toBe(false);
 
-    fireEvent.click(view.getByRole("button", { name: "開啟選單" }));
+    fireEvent.click(view.getByRole("button", { name: "選單" }));
     expect(header?.getAttribute("data-menu-open")).toBe("true");
 
-    fireEvent.click(view.getByRole("button", { name: "關閉選單" }));
+    fireEvent.click(view.getByRole("button", { name: "選單" }));
     expect(header?.hasAttribute("data-menu-open")).toBe(false);
   });
 
@@ -587,7 +591,7 @@ describe("SiteNavBar active 狀態", () => {
 
   test("/for-parents/play-map 僅親子景點 active", async () => {
     const view = await renderNavBarAt("/for-parents/play-map");
-    fireEvent.click(view.getByRole("button", { name: "開啟選單" }));
+    fireEvent.click(view.getByRole("button", { name: "選單" }));
 
     const mobileNav = view.getByRole("navigation", { name: "網站選單" });
     const playMapLink = mobileNav.querySelector('a[href="/for-parents/play-map"]');
@@ -672,5 +676,89 @@ describe("SiteNavBar active 狀態", () => {
       expect(panel.textContent).not.toContain("親子指南");
       cleanup();
     }
+  });
+});
+
+
+describe("SiteNavBar：選單是完整模態抽屜", () => {
+  // 前面幾組用 vi.doMock 把 usePathname 換成常數；這組要能換頁，重新掛回讀 nav.pathname 的版本。
+  beforeEach(() => {
+    vi.resetModules();
+    vi.doMock("next/navigation", () => ({ usePathname: () => nav.pathname }));
+  });
+
+  async function renderPage() {
+    const { default: SiteNavBar } = await import("./SiteNavBar");
+    const { ThemeProvider } = await import("@/components/ThemeProvider");
+    const view = render(
+      <ThemeProvider>
+        <SiteNavBar />
+        <main data-testid="main" data-landing-scroll="">
+          <button type="button">背景按鈕</button>
+        </main>
+        <footer data-testid="footer" />
+      </ThemeProvider>,
+    );
+    const trigger = view.getByRole("button", { name: "選單" });
+    const panel = view.container.querySelector<HTMLElement>('nav[aria-label="網站選單"]')!;
+    return { view, trigger, panel };
+  }
+
+  test("觸發器名稱固定是「選單」，開關只改 aria-expanded", async () => {
+    const { view, trigger } = await renderPage();
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+    fireEvent.click(trigger);
+    expect(view.getByRole("button", { name: "選單", expanded: true })).toBe(trigger);
+  });
+
+  test("開著：背景（main、footer、頂欄其他按鈕）都 inert，觸發器與抽屜可操作；html 與首頁捲動區都鎖住", async () => {
+    const { view, trigger, panel } = await renderPage();
+    fireEvent.click(trigger);
+    expect(view.getByTestId("main").hasAttribute("inert")).toBe(true);
+    expect(view.getByTestId("footer").hasAttribute("inert")).toBe(true);
+    expect(view.getByRole("group", { name: "常用", hidden: true }).closest("[inert]")).not.toBeNull();
+    expect(trigger.closest("[inert]")).toBeNull();
+    expect(panel.closest("[inert]")).toBeNull();
+    expect(document.documentElement.style.overflow).toBe("hidden");
+    expect(view.getByTestId("main").style.overflow).toBe("hidden");
+  });
+
+  test("Esc 關閉：背景與捲動還原，焦點回到觸發器", async () => {
+    const { view, trigger, panel } = await renderPage();
+    fireEvent.click(trigger);
+    panel.querySelector<HTMLElement>("a")!.focus();
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+    expect(view.getByTestId("main").hasAttribute("inert")).toBe(false);
+    expect(document.documentElement.style.overflow).toBe("");
+    expect(document.activeElement).toBe(trigger);
+  });
+
+  test("點遮罩關閉，焦點回到觸發器", async () => {
+    const { view, trigger } = await renderPage();
+    fireEvent.click(trigger);
+    const scrim = view.container.querySelector<HTMLElement>("[data-nav-scrim]");
+    expect(scrim).not.toBeNull();
+    fireEvent.click(scrim!);
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+    expect(view.container.querySelector("[data-nav-scrim]")).toBeNull();
+    expect(document.activeElement).toBe(trigger);
+  });
+
+  test("換頁就關閉", async () => {
+    const { view, trigger } = await renderPage();
+    fireEvent.click(trigger);
+    nav.pathname = "/stories";
+    const { default: SiteNavBar } = await import("./SiteNavBar");
+    const { ThemeProvider } = await import("@/components/ThemeProvider");
+    view.rerender(
+      <ThemeProvider>
+        <SiteNavBar />
+        <main data-testid="main" data-landing-scroll="" />
+        <footer data-testid="footer" />
+      </ThemeProvider>,
+    );
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+    expect(view.getByTestId("main").hasAttribute("inert")).toBe(false);
   });
 });

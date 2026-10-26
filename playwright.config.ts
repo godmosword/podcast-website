@@ -40,7 +40,15 @@ export default defineConfig({
     reuseExistingServer: process.env.PW_REUSE_SERVER === "1",
     timeout: 120_000,
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    { name: "chromium", use: { ...devices["Desktop Chrome"] } },
+    // Safari 行為（inert、overflow 捲動鎖、焦點）另外驗：只挑明確列出的 spec，CI 只裝 Chromium 也不受影響。
+    {
+      name: "webkit",
+      use: { ...devices["Desktop Safari"] },
+      testMatch: ["site-nav-modal.spec.ts"],
+    },
+  ],
   expect: {
     toHaveScreenshot: {
       maxDiffPixelRatio: 0.02,

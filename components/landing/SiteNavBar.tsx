@@ -15,6 +15,7 @@ import ConnectMenu from "@/components/landing/SubscribeMenu";
 import Icon from "@/components/ui/Icon";
 import type { IconName } from "@/data/icons";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { useModalLayer } from "@/hooks/useModalLayer";
 import { useLandingFooterNavSolid } from "@/hooks/useLandingFooterNavSolid";
 import { feedbackHref, isContactExternal } from "@/lib/contact";
 import { isImmersiveRoute } from "@/lib/is-story-play-route";
@@ -164,6 +165,7 @@ export default function SiteNavBar() {
   const panelRef = useRef<HTMLElement>(null);
   const barRef = useRef<HTMLElement>(null);
   const menuBtnRef = useRef<HTMLButtonElement>(null);
+  const scrimRef = useRef<HTMLDivElement>(null);
   const open = openMenu === "nav";
 
   const items = navItems();
@@ -174,7 +176,8 @@ export default function SiteNavBar() {
     .map((item) => item.href);
   const feedbackItem = byId.get("feedback");
 
-  useFocusTrap(open, panelRef, { initialFocus: "first" });
+  // 開著時觸發器就是關閉鈕，Tab 環繞要繞得到它；焦點返還交給 useModalLayer（一律回觸發器）。
+  useFocusTrap(open, panelRef, { initialFocus: "first", returnFocus: false, include: [menuBtnRef] });
 
   const onLandingHome = pathname === "/";
   const navSolid = useLandingFooterNavSolid(onLandingHome);
@@ -184,6 +187,27 @@ export default function SiteNavBar() {
     // 開場期間點頂欄連結＝離開開場；否則閘門屬性會留在下一頁。
     if (isIntroGateOpen()) dismissIntroGate();
   }, []);
+
+  /*
+   * 選單抽屜是完整模態（兩個斷點都是）：背景 inert、讀屏讀不到，html 與首頁自己的捲動區都鎖住，
+   * Esc／點遮罩／換頁／跨 980 斷點都會關，關了焦點回觸發器。抽屜留在膠囊裡（錨定要用），
+   * 所以不 portal，由 useModalLayer 從抽屜往上把每一層的兄弟設 inert。
+   */
+  useModalLayer({
+    open,
+    onClose: closeAll,
+    keepRefs: [panelRef, menuBtnRef, scrimRef],
+    returnFocusRef: menuBtnRef,
+    extraScrollLockSelector: `[${LANDING_SCROLL_ROOT_ATTR}]`,
+  });
+
+  // 換頁就關（抽屜裡的連結、瀏覽器上一頁都算）；首次掛載不算換頁。
+  const lastPathname = useRef(pathname);
+  useEffect(() => {
+    if (lastPathname.current === pathname) return;
+    lastPathname.current = pathname;
+    setOpenMenu("none");
+  }, [pathname]);
 
   /** 品牌／首頁：關浮層，並把 Landing 內部 snap 捲回第一屏。
    *  已在 `/` 時必須 preventDefault——`href="/"` 會被 Next 當成導航並還原
@@ -389,7 +413,8 @@ export default function SiteNavBar() {
           className={styles.menuBtn}
           aria-expanded={open}
           aria-controls={menuId}
-          aria-label={open ? "關閉選單" : "開啟選單"}
+          // 名稱固定，開關狀態只靠 aria-expanded；開關各換一個名稱會跟 expanded 重複播報
+          aria-label="選單"
           onClick={() => setOpenMenu(open ? "none" : "nav")}
         >
           <Icon name={open ? "menu-close" : "menu"} size={20} />
@@ -436,6 +461,11 @@ export default function SiteNavBar() {
           </div>
         </nav>
       </div>
+      {/* 遮罩不能放進 .inner：.inner 是 container（含 layout containment），fixed 會被關在膠囊裡。
+          排在 .inner 後面（負 z-index，順序不影響畫面），header 的第一個子節點仍是膠囊。 */}
+      {open ? (
+        <div ref={scrimRef} className={styles.scrim} data-nav-scrim="" aria-hidden onClick={closeAll} />
+      ) : null}
     </header>
   );
 }
