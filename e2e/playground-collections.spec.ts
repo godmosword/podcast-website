@@ -258,7 +258,7 @@ test.describe("親子景點 curated collections", () => {
     await expect(page.getByText("6 個可以去的景點")).toBeVisible();
     await expect(page.getByText("免費 6")).toBeVisible();
     await expect(page.getByText("室內 0")).toBeVisible();
-    await expect(page.getByText("放電 4")).toBeVisible();
+    await expect(page.getByText("放電 3")).toBeVisible();
     await expect(
       page.getByText(
         "新竹目前 8 個親子景點中，有 6 個不用門票。目前這 6 個免費選擇都是戶外景點。",
