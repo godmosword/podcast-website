@@ -4,7 +4,7 @@ import { expectTouchTarget } from "./touch-target";
 
 /**
  * UX-P1-5：補齊播放頁的觸控回歸（原本的 `/for-parents` 工具卡已隨頁面移除）。
- * 進度條拇指仍屬 UX-P1-4，本檔不主張 ≥44px。
+ * 進度條（UX-P1-4，2026-10-26）：觸控區 44px、控制點放大，見下方「進度條」那一則。
  */
 const PHONE = { width: 390, height: 844 };
 
@@ -35,6 +35,22 @@ test.describe("UX-P1-5 播放頁觸控", () => {
       page.getByRole("button", { name: /字幕/ }).first(),
       "字幕",
     );
+  });
+
+  test("進度條觸控區 ≥44px、控制點 ≥28px，控制列順序不變", async ({ page }) => {
+    await page.goto("/story/ep-3/play");
+    const seek = page.getByRole("slider");
+    await expect(seek).toBeVisible({ timeout: 10_000 });
+    const box = (await seek.boundingBox())!;
+    expect(box.height, "進度條觸控區").toBeGreaterThanOrEqual(44);
+    const thumb = await seek.evaluate((el) => parseFloat(getComputedStyle(el).getPropertyValue("--seek-thumb")));
+    expect(thumb, "控制點直徑").toBeGreaterThanOrEqual(28);
+    const order = await page.locator("button").evaluateAll((els) =>
+      els
+        .map((el) => el.getAttribute("aria-label") ?? el.textContent?.trim() ?? "")
+        .filter((name) => ["重複播放", "上一張插圖", "播放", "暫停", "下一張插圖", "停止"].some((n) => name.startsWith(n))),
+    );
+    expect(order.filter((n) => !n.startsWith("重複"))).toEqual(["上一張插圖", "播放", "下一張插圖", "停止"]);
   });
 
   test("播放器方向鍵不攔截互動控制，頁面區域仍可跳轉", async ({ page }) => {

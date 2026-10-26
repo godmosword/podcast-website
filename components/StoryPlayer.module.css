@@ -1,12 +1,13 @@
 .player {
-  --controls-block: 168px;
+  /* 進度條觸控區 44px（DESIGN 觸控下限）後控制列高 16px，插圖與字幕的保留高度跟著加 */
+  --controls-block: 184px;
   --ctrl-size: 60px;
   /* 美術審 L2：主播放鈕比鄰鈕大一階（+12px），不再只靠底色分主次。 */
   --play-size: 72px;
   --time-size: 0.88rem;
-  --seek-track: 7px;
-  --seek-thumb: 22px;
-  --seek-hit: 28px;
+  --seek-track: 8px;
+  --seek-thumb: 28px;
+  --seek-hit: 44px;
   --transport-gap: 14px;
   --top-tool-size: 48px;
   --top-tool-gap: 8px;
@@ -39,13 +40,13 @@
 
 @media (min-width: 480px) {
   .player {
-    --controls-block: 180px;
+    --controls-block: 196px;
     --ctrl-size: 64px;
     --play-size: 76px;
     --time-size: 0.95rem;
-    --seek-track: 8px;
-    --seek-thumb: 24px;
-    --seek-hit: 30px;
+    --seek-track: 9px;
+    --seek-thumb: 30px;
+    --seek-hit: 44px;
     --transport-gap: 18px;
     --top-tool-size: 52px;
     --top-tool-gap: 10px;
@@ -55,13 +56,13 @@
 
 @media (min-width: 768px) {
   .player {
-    --controls-block: 188px;
+    --controls-block: 204px;
     --ctrl-size: 68px;
     --play-size: 80px;
     --time-size: 1.02rem;
-    --seek-track: 8px;
-    --seek-thumb: 26px;
-    --seek-hit: 32px;
+    --seek-track: 10px;
+    --seek-thumb: 32px;
+    --seek-hit: 44px;
     --transport-gap: 22px;
   }
 }
