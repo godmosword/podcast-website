@@ -28,6 +28,11 @@ export type GameAudioBus = {
   ): void;
   /** 合成音色（噪音、滑音、濾波）；只用 tone 的遊戲不必理會。 */
   voices?(voices: readonly SynthVoice[]): void;
+  /**
+   * 持續音（引擎、環境）的接點：music 分軌，跟著靜音與遊戲音量。
+   * 音效關著或沒有 WebAudio 時回傳 null；只播短音的遊戲不必理會。
+   */
+  bedOutput?(): { ctx: AudioContext; out: AudioNode } | null;
 };
 
 export type GameCreateOptions = {

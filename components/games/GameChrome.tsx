@@ -18,6 +18,7 @@ import {
 import type { GameKitGameId } from "@/lib/gamekit/types";
 import Icon from "@/components/ui/Icon";
 import styles from "./GameChrome.module.css";
+import { OrangeExpressSettings } from "./OrangeExpressSettings";
 
 type ChromeContextValue = {
   openSettings: () => void;
@@ -246,6 +247,9 @@ function SettingsDialog({
               className={styles.checkbox}
             />
           </label>
+        ) : null}
+        {gameId === "orange-express" ? (
+          <OrangeExpressSettings rowClassName={styles.settingRow} checkboxClassName={styles.checkbox} />
         ) : null}
         <div className={styles.settingBlock}>
           <div className={styles.settingHeading}>

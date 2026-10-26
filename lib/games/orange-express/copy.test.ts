@@ -25,6 +25,11 @@ const BANNED = [
   "320",
 ];
 
+/** 家長在遊戲設定打開數字刻度時才畫出來的單位，只准出現在速度表的常數檔。 */
+const PARENT_ONLY: Record<string, string> = {
+  "km/h": "lib/games/orange-express/gauge.ts",
+};
+
 function filesIn(dir: string): string[] {
   const out: string[] = [];
   for (const name of readdirSync(dir)) {
@@ -56,15 +61,20 @@ describe("小橘特快車文案", () => {
       join(import.meta.dirname, "../../../app/games/orange-express"),
       join(import.meta.dirname, "../../../public/games/v2/orange-express"),
     ];
-    const chunks = [Object.values(COPY).join("\n")];
+    const files: { path: string; text: string }[] = [{ path: "COPY", text: Object.values(COPY).join("\n") }];
     for (const root of roots) {
       for (const file of filesIn(root)) {
         if (!file.includes("orange-express") && !file.includes("OrangeExpress")) continue;
-        chunks.push(readFileSync(file, "utf8"));
+        files.push({ path: file, text: readFileSync(file, "utf8") });
       }
     }
-    const haystack = chunks.join("\n").toLowerCase();
     for (const word of BANNED) {
+      const allowed = PARENT_ONLY[word];
+      const haystack = files
+        .filter((file) => !allowed || !file.path.endsWith(allowed))
+        .map((file) => file.text)
+        .join("\n")
+        .toLowerCase();
       const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       const pattern = /[a-z0-9]/i.test(word)
         ? new RegExp(`(^|[^a-z0-9])${escaped}([^a-z0-9]|$)`, "i")

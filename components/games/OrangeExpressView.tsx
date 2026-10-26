@@ -11,30 +11,46 @@ import {
 } from "@/lib/gamekit/progress/orange-express-prefs";
 import { OrangeExpressCab } from "@/components/games/OrangeExpressCab";
 import { OrangeExpressResult } from "@/components/games/OrangeExpressResult";
+import { useOrangeExpressDisplay } from "@/components/games/OrangeExpressSettings";
 import { OrangeExpressWindshield } from "@/components/games/OrangeExpressWindshield";
 import type { OrangeExpressInstance } from "@/lib/gamekit/games/orange-express/adapter";
-import { ARRIVE_CHIME, DOOR_CHIME, HORN } from "@/lib/games/orange-express/chime";
-import { COPY } from "@/lib/games/orange-express/copy";
+import {
+  ARRIVE_CHIME,
+  DOOR_CHIME,
+  EMERGENCY_CLICK,
+  HORN,
+  NOTCH_CLICK,
+  jointClack,
+} from "@/lib/games/orange-express/chime";
+import { COPY, GRADE_TEXT } from "@/lib/games/orange-express/copy";
 import { medalsFor } from "@/lib/games/orange-express/medals";
 import {
-  clampNotch,
+  clampBrake,
+  clampPower,
   createRun,
   honk,
   powerCap,
   step,
   withHook,
 } from "@/lib/games/orange-express/reducer";
-import type { LevelId, Notch, RunState } from "@/lib/games/orange-express/types";
+import { DriveSound, driveMix, jointsCrossed } from "@/lib/games/orange-express/sound";
+import { NO_SWAY, decayBump, swayAt } from "@/lib/games/orange-express/sway";
+import { EMERGENCY, type LevelId, type RunState } from "@/lib/games/orange-express/types";
 import styles from "./orange-express.module.css";
 
 type Screen = "title" | "drive" | "result";
 
 const LEVELS: readonly LevelId[] = ["look", "drive", "captain"];
+const SOUND_RETRY_MS = 1000;
 
 function liveText(run: RunState): string {
+  if (run.phase === "reversing") return COPY.reversing;
   if (run.phase === "doors-open") return COPY.boarding;
-  if (run.phase === "stopped") return COPY.atStation;
-  if (run.misses > 0 && run.phase === "running" && run.progress < 0.4) return COPY.tryStopAgain;
+  if (run.phase === "stopped") {
+    const grade = run.grades[run.stationIndex];
+    return grade ? `${COPY.atStation}，${GRADE_TEXT[grade]}` : COPY.atStation;
+  }
+  if (run.misses > 0 && run.phase === "running" && run.speed === 0) return COPY.tryStopAgain;
   return "";
 }
 
@@ -57,23 +73,38 @@ export function OrangeExpressView({
   const [run, setRun] = useState<RunState | null>(null);
   const [shake, setShake] = useState(false);
   const [honked, setHonked] = useState(0);
+  const [display] = useOrangeExpressDisplay();
   const runRef = useRef<RunState | null>(null);
   const levelRef = useRef(level);
   const screenRef = useRef(screen);
   const phaseRef = useRef<RunState["phase"] | null>(null);
   const picked = useRef(false);
+  const frozen = useRef(false);
+  const swayRef = useRef<HTMLDivElement | null>(null);
+  const swayClock = useRef(0);
+  const bump = useRef(0);
+  const sound = useRef<DriveSound | null>(null);
+  const soundTriedAt = useRef(0);
   levelRef.current = level;
   screenRef.current = screen;
+
+  const swayOn = display.sway && !reducedMotion;
 
   const apply = useCallback((next: RunState) => {
     runRef.current = next;
     setRun(next);
   }, []);
 
+  const stopSound = useCallback(() => {
+    sound.current?.stop();
+    sound.current = null;
+  }, []);
+
   const begin = useCallback(() => {
     const nextLevel = levelRef.current;
     saveOrangeExpressLevel(nextLevel);
     const hook = typeof window === "undefined" ? undefined : window.__orangeExpress;
+    frozen.current = hook?.freeze === true;
     const next = withHook(createRun(nextLevel), hook);
     phaseRef.current = next.phase;
     apply(next);
@@ -87,9 +118,10 @@ export function OrangeExpressView({
     phaseRef.current = null;
     setRun(null);
     setScreen("title");
+    stopSound();
     instance.notifyReady();
     syncHost();
-  }, [instance, syncHost]);
+  }, [instance, stopSound, syncHost]);
 
   const tryDoors = useCallback(() => {
     const cur = runRef.current;
@@ -101,7 +133,7 @@ export function OrangeExpressView({
     }
     const next = step(cur, { type: "open-doors" });
     if (next === cur) {
-      if (cur.phase === "running" || cur.phase === "in-window") {
+      if (cur.phase === "running" || cur.phase === "in-window" || cur.phase === "reversing") {
         instance.noteEarlyDoor();
         setShake(true);
       }
@@ -110,32 +142,62 @@ export function OrangeExpressView({
     apply(next);
   }, [apply, instance]);
 
+  const setPower = useCallback(
+    (notch: number) => {
+      const cur = runRef.current;
+      if (!cur) return;
+      const target = clampPower(notch);
+      const next = step(cur, { type: "set-power", notch: target });
+      if (next === cur) {
+        if (target > cur.power) setShake(true);
+        return;
+      }
+      audio?.ensureAudio();
+      audio?.voices?.(NOTCH_CLICK);
+      apply(next);
+    },
+    [apply, audio],
+  );
+
+  const setBrake = useCallback(
+    (notch: number) => {
+      const cur = runRef.current;
+      if (!cur) return;
+      const next = step(cur, { type: "set-brake", notch: clampBrake(notch) });
+      if (next === cur) return;
+      audio?.ensureAudio();
+      audio?.voices?.(next.brake === EMERGENCY ? EMERGENCY_CLICK : NOTCH_CLICK);
+      apply(next);
+    },
+    [apply, audio],
+  );
+
+  const pressHorn = useCallback(() => {
+    if (runRef.current) honk(runRef.current);
+    audio?.ensureAudio();
+    audio?.voices?.(HORN);
+    setHonked((count) => count + 1);
+  }, [audio]);
+
   const onAction = useCallback(
     (action: GameAction) => {
       const cur = runRef.current;
       if (!cur || instance.isInputPaused()) return;
       if (action === "move-up" || action === "move-down") {
-        const max = powerCap(cur.level);
-        const notch = clampNotch(cur.power + (action === "move-up" ? 1 : -1), max);
-        const next = step(cur, { type: "set-power", notch });
-        if (next !== cur) apply(next);
+        setPower(Math.min(powerCap(cur.level), cur.power + (action === "move-up" ? 1 : -1)));
         return;
       }
       if (action === "move-left" || action === "move-right") {
-        const notch = clampNotch(cur.brake + (action === "move-left" ? 1 : -1), 2);
-        const next = step(cur, { type: "set-brake", notch });
-        if (next !== cur) apply(next);
+        setBrake(cur.brake + (action === "move-left" ? 1 : -1));
         return;
       }
       if (action === "dash") {
-        honk(cur);
-        audio?.voices?.(HORN);
-        setHonked((count) => count + 1);
+        pressHorn();
         return;
       }
       if (action === "action") tryDoors();
     },
-    [apply, audio, instance, tryDoors],
+    [instance, pressHorn, setBrake, setPower, tryDoors],
   );
 
   const beginRef = useRef(begin);
@@ -172,6 +234,7 @@ export function OrangeExpressView({
     window.__orangeExpressJump = (patch) => {
       const cur = runRef.current;
       if (!cur) return;
+      if (typeof patch.freeze === "boolean") frozen.current = patch.freeze;
       apply(withHook(cur, patch));
     };
     return () => {
@@ -188,23 +251,66 @@ export function OrangeExpressView({
   useEffect(() => {
     if (!run || screen !== "drive") return;
     const prev = phaseRef.current;
-    if (prev !== "in-window" && run.phase === "in-window") audio?.voices?.(ARRIVE_CHIME);
+    if (prev !== "in-window" && prev !== "stopped" && run.phase === "in-window") {
+      audio?.voices?.(ARRIVE_CHIME);
+    }
     if (prev !== "doors-open" && run.phase === "doors-open") audio?.voices?.(DOOR_CHIME);
     phaseRef.current = run.phase;
     if (run.phase === "route-done") {
+      stopSound();
       instance.notifyWon(run);
       setScreen("result");
       syncHost();
     }
-  }, [audio, instance, run, screen, syncHost]);
+  }, [audio, instance, run, screen, stopSound, syncHost]);
+
+  const driving = status === "playing" && screen === "drive" && run?.phase !== "route-done";
+
+  useEffect(() => {
+    if (!driving) stopSound();
+  }, [driving, stopSound]);
+
+  useEffect(() => stopSound, [stopSound]);
+
+  useEffect(() => {
+    if (swayOn || !swayRef.current) return;
+    swayRef.current.style.transform = "";
+  }, [swayOn, screen]);
 
   useGameLoop({
-    enabled: status === "playing" && screen === "drive" && run?.phase !== "route-done",
+    enabled: driving,
     onFrame: (dtMs) => {
       const cur = runRef.current;
       if (!cur || instance.isInputPaused() || cur.phase === "route-done") return;
-      const next = step(cur, { type: "tick", dt: dtMs / 1000 });
+      const dt = dtMs / 1000;
+      const next = frozen.current ? cur : step(cur, { type: "tick", dt });
       if (next !== cur) apply(next);
+
+      if (!sound.current) {
+        const now = performance.now();
+        if (now - soundTriedAt.current > SOUND_RETRY_MS) {
+          soundTriedAt.current = now;
+          const bed = audio?.bedOutput?.();
+          if (bed) {
+            sound.current = new DriveSound(bed.ctx, bed.out);
+            sound.current.start();
+          }
+        }
+      }
+      sound.current?.update(driveMix(next.speed, next.power, next.brake));
+
+      const sameStation = next.stationIndex === cur.stationIndex;
+      if (sameStation && jointsCrossed(cur.progress, next.progress) > 0 && next.speed > 0.02) {
+        audio?.voices?.(jointClack(next.speed));
+        bump.current = 1;
+      }
+
+      const el = swayRef.current;
+      if (!el || !swayOn) return;
+      swayClock.current += dt;
+      bump.current = decayBump(bump.current, dt);
+      const sway = next.phase === "reversing" ? NO_SWAY : swayAt(swayClock.current, next.speed, bump.current);
+      el.style.transform = `translate3d(${sway.x}px, ${sway.y}px, 0) rotate(${sway.rot}deg) scale(1.03)`;
     },
   });
 
@@ -212,28 +318,6 @@ export function OrangeExpressView({
     picked.current = true;
     setLevel(next);
     saveOrangeExpressLevel(next);
-  };
-
-  const setPower = (notch: Notch) => {
-    const cur = runRef.current;
-    if (!cur) return;
-    const next = step(cur, { type: "set-power", notch });
-    if (next === cur && notch > cur.power) setShake(true);
-    else if (next !== cur) apply(next);
-  };
-
-  const setBrake = (notch: Notch) => {
-    const cur = runRef.current;
-    if (!cur) return;
-    const next = step(cur, { type: "set-brake", notch });
-    if (next !== cur) apply(next);
-  };
-
-  const pressHorn = () => {
-    if (runRef.current) honk(runRef.current);
-    audio?.ensureAudio();
-    audio?.voices?.(HORN);
-    setHonked((count) => count + 1);
   };
 
   if (screen === "title" || !run) {
@@ -273,6 +357,8 @@ export function OrangeExpressView({
           stars={medals.stars}
           flawless={medals.flawless}
           reduced={reducedMotion}
+          stations={run.stations}
+          grades={run.grades}
           onReplay={begin}
           onTitle={goTitle}
         />
@@ -287,15 +373,23 @@ export function OrangeExpressView({
       data-testid="orange-express-drive"
       data-honked={honked}
       data-station-index={run.stationIndex}
+      data-phase={run.phase}
       data-reduced={reducedMotion ? "true" : "false"}
+      data-sway={swayOn ? "true" : "false"}
     >
-      <OrangeExpressWindshield run={run} reduced={reducedMotion} />
+      <OrangeExpressWindshield
+        run={run}
+        reduced={reducedMotion}
+        numbers={display.gaugeNumbers}
+        swayRef={swayRef}
+      />
       <p className={styles.live} aria-live="polite">
         {liveText(run)}
       </p>
       <OrangeExpressCab
         run={run}
         shake={shake}
+        numbers={display.gaugeNumbers}
         onPower={setPower}
         onBrake={setBrake}
         onHorn={pressHorn}

@@ -88,14 +88,15 @@ export default function GameHost({
     pauseBgm,
     tone,
     voices,
+    bedOutput,
   } = useGameAudio(adapter.id);
 
   /**
    * adapter 只在建立時拿一次 audio；經 ref 轉呼叫最新的函式，
    * 否則家長在設定改了遊戲音量，下一次點擊又會被建立當下的舊音量蓋回去。
    */
-  const audioRef = useRef({ ensureAudio, tone, voices });
-  audioRef.current = { ensureAudio, tone, voices };
+  const audioRef = useRef({ ensureAudio, tone, voices, bedOutput });
+  audioRef.current = { ensureAudio, tone, voices, bedOutput };
 
   const syncHost = useCallback(() => {
     const g = instanceRef.current;
@@ -113,6 +114,7 @@ export default function GameHost({
         ensureAudio: () => audioRef.current.ensureAudio(),
         tone: (freq, dur, type, vol) => audioRef.current.tone(freq, dur, type, vol),
         voices: (list) => audioRef.current.voices(list),
+        bedOutput: () => audioRef.current.bedOutput(),
       },
       onSession: (result) => {
         // 每次 onSession 都寫入（中關／多賽道）；去重由各 adapter 負責。

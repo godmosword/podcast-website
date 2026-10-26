@@ -67,6 +67,10 @@ export type GameKitPreferenceStore = {
   dinoSushiDays: number[];
   /** 小橘特快車上次選的檔。null＝還沒選過，由兒童模式決定慢慢看或自己開。 */
   orangeExpressLevel: LevelId | null;
+  /** 家長在遊戲設定打開後，速度表才畫數字刻度。舊存檔沒有＝不畫。 */
+  orangeExpressGaugeNumbers: boolean;
+  /** 駕駛中前窗隨速度輕晃。舊存檔沒有＝開著；減少動態時一律不晃。 */
+  orangeExpressSway: boolean;
 };
 
 export type ContinueState = {
@@ -164,6 +168,8 @@ export const DEFAULT_PROGRESS: ProgressStore = {
       dinoSushiStickerGift: "",
       dinoSushiDays: emptyDayFlags(),
       orangeExpressLevel: null,
+      orangeExpressGaugeNumbers: false,
+      orangeExpressSway: true,
     },
     theme: "system",
     nightPromptDismissed: false,
@@ -317,6 +323,8 @@ function normalizeGameKitPreferences(
         : "",
     dinoSushiDays: normalizeDayFlags(value?.dinoSushiDays),
     orangeExpressLevel: normalizeOrangeExpressLevel(value?.orangeExpressLevel),
+    orangeExpressGaugeNumbers: value?.orangeExpressGaugeNumbers === true,
+    orangeExpressSway: value?.orangeExpressSway !== false,
   };
 }
 

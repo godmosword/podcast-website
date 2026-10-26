@@ -5,26 +5,29 @@ const MAMI: Passenger = { id: "mami", name: "馬米" };
 const XIAONAN: Passenger = { id: "xiaonan", name: "小南" };
 const DOT: Passenger = { id: "dot", name: "色塊" };
 
-type WindowSpec = {
-  window: { start: number; end: number };
-  approachAt: number;
-  approachLimit: number;
-};
+type WindowSpec = Pick<Station, "window" | "target" | "greenHalf" | "approachAt" | "approachLimit">;
 
+/** 三檔只改窗寬、綠區寬、進站點與進站速度旗。目標點都在 0.65。 */
 const WINDOWS: Record<LevelId, WindowSpec> = {
   look: {
     window: { start: 0.36, end: 0.92 },
+    target: 0.65,
+    greenHalf: 0.1,
     approachAt: 0.22,
     approachLimit: 0.5,
   },
   drive: {
     window: { start: 0.5, end: 0.8 },
+    target: 0.65,
+    greenHalf: 0.05,
     approachAt: 0.34,
     approachLimit: 0.4,
   },
   captain: {
     window: { start: 0.58, end: 0.72 },
-    approachAt: 0.5,
+    target: 0.65,
+    greenHalf: 0.025,
+    approachAt: 0.4,
     approachLimit: 0.35,
   },
 };

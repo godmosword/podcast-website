@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { drawWindshield } from "@/lib/games/orange-express/windshield";
-import { windshieldFrame } from "@/lib/games/orange-express/windshield";
+import { useEffect, useRef, type Ref } from "react";
+import { OrangeExpressStopBar } from "@/components/games/OrangeExpressStopBar";
+import { currentStation } from "@/lib/games/orange-express/reducer";
+import { drawWindshield, windshieldFrame } from "@/lib/games/orange-express/windshield";
 import type { PassengerId, RunState } from "@/lib/games/orange-express/types";
 import styles from "./orange-express.module.css";
 
@@ -60,14 +61,19 @@ function RiderFace({ id }: RiderProps) {
 export function OrangeExpressWindshield({
   run,
   reduced,
+  numbers,
+  swayRef,
 }: {
   run: RunState;
   reduced: boolean;
+  numbers: boolean;
+  swayRef: Ref<HTMLDivElement>;
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const frame = windshieldFrame(run.progress, run.phase);
   const station = run.stations[run.stationIndex];
-  const showRiders = frame >= 1 && station != null;
+  const target = currentStation(run).target;
+  const showRiders = frame === 2 && station != null;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -94,17 +100,24 @@ export function OrangeExpressWindshield({
         progress: run.progress,
         phase: run.phase,
         reduced,
+        target,
       });
     };
     draw();
     const observer = new ResizeObserver(draw);
     observer.observe(canvas);
     return () => observer.disconnect();
-  }, [reduced, run.phase, run.progress]);
+  }, [reduced, run.phase, run.progress, target]);
 
   return (
-    <div className={styles.windshield}>
-      <canvas ref={canvasRef} className={styles.glass} aria-hidden />
+    <div className={styles.windshield} data-testid="orange-express-windshield">
+      <div ref={swayRef} className={styles.glassWrap}>
+        <canvas ref={canvasRef} className={styles.glass} aria-hidden />
+      </div>
+      <span className={styles.pillarLeft} aria-hidden />
+      <span className={styles.pillarRight} aria-hidden />
+      <span className={styles.wiper} aria-hidden />
+      <OrangeExpressStopBar run={run} numbers={numbers} />
       {showRiders ? (
         <ul className={styles.riders} aria-label="月台上的朋友">
           {station.passengers.map((rider, index) => (

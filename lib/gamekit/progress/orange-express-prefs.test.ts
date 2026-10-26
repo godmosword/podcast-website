@@ -1,7 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  ORANGE_EXPRESS_DISPLAY_EVENT,
+  loadOrangeExpressDisplay,
   loadOrangeExpressLevel,
   resolveOrangeExpressLevel,
+  saveOrangeExpressDisplay,
   saveOrangeExpressLevel,
 } from "@/lib/gamekit/progress/orange-express-prefs";
 import {
@@ -60,5 +63,24 @@ describe("小橘特快車難度偏好", () => {
     expect(loadOrangeExpressLevel()).toBe("captain");
     expect(resolveOrangeExpressLevel("captain", true)).toBe("captain");
     expect(getGameKitSettingsFromStore().candyMatchMode).toBe("easy");
+  });
+
+  it("舊存檔沒有顯示設定：不畫數字、會晃；改了會存起來並通知駕駛台", () => {
+    saveGameKitSettingsToStore({ candyMatchMode: "easy" });
+    const raw = JSON.parse(localStorage.getItem(PROGRESS_STORAGE_KEY) ?? "{}") as {
+      preferences: { gameKit: Record<string, unknown> };
+    };
+    delete raw.preferences.gameKit.orangeExpressGaugeNumbers;
+    delete raw.preferences.gameKit.orangeExpressSway;
+    localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(raw));
+    expect(loadOrangeExpressDisplay()).toEqual({ gaugeNumbers: false, sway: true });
+
+    const next = saveOrangeExpressDisplay({ gaugeNumbers: true, sway: false });
+    expect(next).toEqual({ gaugeNumbers: true, sway: false });
+    expect(loadOrangeExpressDisplay()).toEqual({ gaugeNumbers: true, sway: false });
+    expect(getGameKitSettingsFromStore().candyMatchMode).toBe("easy");
+    const dispatch = window.dispatchEvent as unknown as ReturnType<typeof vi.fn>;
+    const types = dispatch.mock.calls.map(([event]) => (event as Event).type);
+    expect(types).toContain(ORANGE_EXPRESS_DISPLAY_EVENT);
   });
 });
