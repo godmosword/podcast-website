@@ -6,8 +6,8 @@ import Icon from "@/components/ui/Icon";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { uncataloguedNotice } from "@/lib/play-map-regions";
 import { LOCATION_DIALOG_ID, type PlayMapLocationPickerProps } from "./PlayMapContract";
-import { usePlayMapModal } from "./usePlayMapModal";
 import styles from "./PlayMapLocationPicker.module.css";
+import { useModalLayer } from "@/hooks/useModalLayer";
 
 const HEADING_ID = "play-map-location-heading";
 
@@ -34,7 +34,7 @@ function useAnchor(open: boolean, triggerRef: PlayMapLocationPickerProps["return
 /**
  * 選縣市面板（dialog）：我附近、全台、北中南分組縣市、未收錄說明。
  * 數字＝目前情境＋更多條件在該縣市的筆數（不套縣市本身）；0 筆虛線、仍可點。
- * 選完由呼叫端關閉、把位置列捲到頂；焦點回觸發鈕（usePlayMapModal）。
+ * 選完由呼叫端關閉、把位置列捲到頂；焦點回觸發鈕（useModalLayer）。
  */
 export function PlayMapLocationPicker({
   open,
@@ -52,7 +52,7 @@ export function PlayMapLocationPicker({
 }: PlayMapLocationPickerProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
-  usePlayMapModal({ open, onClose, rootRef, returnFocusRef });
+  useModalLayer({ open, onClose, keepRefs: [rootRef], returnFocusRef });
   useFocusTrap(open, panelRef, { returnFocus: false });
   const anchor = useAnchor(open, returnFocusRef);
 

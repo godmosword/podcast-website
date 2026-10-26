@@ -44,3 +44,61 @@ describe("useFocusTrap", () => {
     outside.remove();
   });
 });
+
+function TrapWithTrigger() {
+  const ref = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  useFocusTrap(true, ref, { include: [triggerRef] });
+  return (
+    <>
+      <button type="button" ref={triggerRef}>
+        trigger
+      </button>
+      <div ref={ref}>
+        <button type="button">first</button>
+        <button type="button">last</button>
+      </div>
+      <button type="button">background</button>
+    </>
+  );
+}
+
+describe("useFocusTrap：include 把容器外的觸發器一起算進 Tab 環繞", () => {
+  it("初始焦點仍在容器第一項；Tab 從最後一項繞到觸發器，Shift+Tab 從觸發器繞回最後一項", () => {
+    // jsdom 沒有版面：讓每個元素都算「看得到」
+    const spy = vi.spyOn(HTMLElement.prototype, "offsetParent", "get").mockReturnValue(document.body);
+    const view = render(<TrapWithTrigger />);
+    const trigger = view.getByRole("button", { name: "trigger" });
+    const first = view.getByRole("button", { name: "first" });
+    const last = view.getByRole("button", { name: "last" });
+    expect(document.activeElement).toBe(first);
+
+    last.focus();
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", bubbles: true, cancelable: true }));
+    expect(document.activeElement).toBe(trigger);
+
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", shiftKey: true, bubbles: true, cancelable: true }));
+    expect(document.activeElement).toBe(last);
+    spy.mockRestore();
+  });
+});
+
+describe("useFocusTrap：Tab 一律由 trap 自己移（Safari 預設 Tab 不停在連結上）", () => {
+  it("中間的項目按 Tab 也由 trap 決定下一個，不交給瀏覽器（攔下預設行為）", () => {
+    const spy = vi.spyOn(HTMLElement.prototype, "offsetParent", "get").mockReturnValue(document.body);
+    const view = render(<TrapWithTrigger />);
+    const trigger = view.getByRole("button", { name: "trigger" });
+    const first = view.getByRole("button", { name: "first" });
+    const last = view.getByRole("button", { name: "last" });
+    first.focus();
+    const tab = new KeyboardEvent("keydown", { key: "Tab", bubbles: true, cancelable: true });
+    document.dispatchEvent(tab);
+    expect(tab.defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(last);
+    // 焦點掉到 body（例如 Safari 把連結跳過）時，下一次 Tab 回到環繞的第一個
+    (document.activeElement as HTMLElement).blur();
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", bubbles: true, cancelable: true }));
+    expect(document.activeElement).toBe(trigger);
+    spy.mockRestore();
+  });
+});

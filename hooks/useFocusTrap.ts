@@ -1,4 +1,4 @@
-import { useEffect, type RefObject } from "react";
+import { useEffect, useRef, type RefObject } from "react";
 
 const FOCUSABLE_SELECTOR = [
   "a[href]",
@@ -22,18 +22,28 @@ type FocusTrapOptions = {
    * 「開啟前的 activeElement」可能只是 body）。
    */
   returnFocus?: boolean;
+  /**
+   * 容器外、但也要算進 Tab 環繞的元素（例如開著時兼當關閉鈕的觸發器）。
+   * 依 DOM 順序和容器裡的可聚焦元素排在一起；初始焦點仍只看容器。
+   */
+  include?: readonly RefObject<HTMLElement | null>[];
 };
 
 /**
- * 當 active 時，把鍵盤焦點移入 container 並以 Tab 環繞其中；
+ * 當 active 時，把鍵盤焦點移入 container 並以 Tab 環繞其中（Tab／Shift+Tab 一律由這裡決定下一個）；
  * 關閉（active 轉 false 或卸載）時把焦點還給開啟前的元素。
  * Escape 仍由呼叫端各自處理（多數選單已有自己的關閉邏輯）。
  */
 export function useFocusTrap(
   active: boolean,
   containerRef: RefObject<HTMLElement | null>,
-  { initialFocus = "first", returnFocus = true }: FocusTrapOptions = {},
+  { initialFocus = "first", returnFocus = true, include }: FocusTrapOptions = {},
 ) {
+  const includeRef = useRef(include);
+  useEffect(() => {
+    includeRef.current = include;
+  });
+
   useEffect(() => {
     if (!active) return;
     const container = containerRef.current;
@@ -41,15 +51,28 @@ export function useFocusTrap(
 
     const previouslyFocused = document.activeElement as HTMLElement | null;
 
+    // 看得到、也沒被藏起來（aria-hidden、inert、visibility: hidden）才算 Tab 得到
+    const visible = (el: HTMLElement) =>
+      (el.offsetParent !== null || el === document.activeElement) &&
+      !el.closest('[aria-hidden="true"], [inert]') &&
+      getComputedStyle(el).visibility !== "hidden";
+    const inContainer = () =>
+      Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(visible);
+    const extras = () =>
+      (includeRef.current ?? [])
+        .map((ref) => ref.current)
+        .filter((el): el is HTMLElement => el !== null && !container.contains(el) && visible(el));
     const focusables = () =>
-      Array.from(
-        container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
-      ).filter((el) => el.offsetParent !== null || el === document.activeElement);
+      [...extras(), ...inContainer()].sort((a, b) =>
+        a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1,
+      );
+    const insideTrap = (el: Element | null) =>
+      el !== null && (container.contains(el) || extras().includes(el as HTMLElement));
 
     if (initialFocus === "container") {
       container.focus();
     } else if (initialFocus === "first") {
-      focusables()[0]?.focus();
+      inContainer()[0]?.focus();
     }
 
     function onKeyDown(e: KeyboardEvent) {
@@ -57,19 +80,17 @@ export function useFocusTrap(
       if (!container) return;
       const items = focusables();
       if (items.length === 0) return;
-      const first = items[0]!;
-      const last = items[items.length - 1]!;
+      // 一律自己算下一個：Safari 預設 Tab 不停在連結上，交給瀏覽器的話焦點會從中間掉到 body。
+      e.preventDefault();
       const activeEl = document.activeElement;
-
-      if (e.shiftKey) {
-        if (activeEl === first || !container.contains(activeEl)) {
-          e.preventDefault();
-          last.focus();
-        }
-      } else if (activeEl === last || !container.contains(activeEl)) {
-        e.preventDefault();
-        first.focus();
-      }
+      const index = insideTrap(activeEl) ? items.indexOf(activeEl as HTMLElement) : -1;
+      const next =
+        index === -1
+          ? e.shiftKey
+            ? items[items.length - 1]
+            : items[0]
+          : items[(index + (e.shiftKey ? -1 : 1) + items.length) % items.length];
+      next?.focus();
     }
 
     document.addEventListener("keydown", onKeyDown);
