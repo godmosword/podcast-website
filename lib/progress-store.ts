@@ -5,8 +5,8 @@ import {
 import type { GameKitGameId } from "@/lib/gamekit/types";
 import type { PlayerProfile } from "@/lib/gamekit/types";
 import { emptyDayFlags, normalizeDayFlags } from "@/lib/games/dino-sushi/day-progress";
-import { normalizeOrangeExpressLevel } from "@/lib/games/orange-express/level";
-import type { LevelId } from "@/lib/games/orange-express/types";
+import { normalizeOrangeExpressDriver, normalizeOrangeExpressLevel } from "@/lib/games/orange-express/level";
+import type { DriverId, LevelId } from "@/lib/games/orange-express/types";
 import { isDinoSushiStickerId } from "@/lib/games/dino-sushi/stickers";
 import { canonicalStorySlug } from "@/lib/story-slug-aliases";
 import { normalizeThemeMode, type ThemeMode } from "@/lib/theme";
@@ -71,6 +71,8 @@ export type GameKitPreferenceStore = {
   orangeExpressGaugeNumbers: boolean;
   /** 駕駛中前窗隨速度輕晃。舊存檔沒有＝開著；減少動態時一律不晃。 */
   orangeExpressSway: boolean;
+  /** 「自己開」用哪一種司機。null＝家長還沒切過，由兒童模式決定小小司機或大司機。 */
+  orangeExpressDriver: DriverId | null;
 };
 
 export type ContinueState = {
@@ -170,6 +172,7 @@ export const DEFAULT_PROGRESS: ProgressStore = {
       orangeExpressLevel: null,
       orangeExpressGaugeNumbers: false,
       orangeExpressSway: true,
+      orangeExpressDriver: null,
     },
     theme: "system",
     nightPromptDismissed: false,
@@ -325,6 +328,7 @@ function normalizeGameKitPreferences(
     orangeExpressLevel: normalizeOrangeExpressLevel(value?.orangeExpressLevel),
     orangeExpressGaugeNumbers: value?.orangeExpressGaugeNumbers === true,
     orangeExpressSway: value?.orangeExpressSway !== false,
+    orangeExpressDriver: normalizeOrangeExpressDriver(value?.orangeExpressDriver),
   };
 }
 

@@ -2,7 +2,7 @@ import { noiseBuffer } from "@/lib/gamekit/runtime/synth";
 import type { BrakeNotch, PowerNotch } from "@/lib/games/orange-express/types";
 
 /**
- * 駕駛中持續的聲音：馬達低鳴、加速時的高音、煞車嘶聲。
+ * 駕駛中持續的聲音：馬達低鳴、加速時的高音、煞車嘶聲、隧道轟聲。
  * 全部即時合成，接在 music 分軌（跟店內環境音同一條），跟著抬頭音效一起靜音。
  * 每一層音量都壓在 0.14 以下，再乘分軌音量。
  */
@@ -13,13 +13,20 @@ export type DriveMix = {
   whineFreq: number;
   whineVol: number;
   hissVol: number;
+  /** 隧道裡的低沉轟聲。 */
+  rumbleVol: number;
 };
 
 export const MIX_CEILING = 0.14;
 /** 這一站的 0–1 走多少就壓過一次接縫。 */
 export const JOINT_SPACING = 0.05;
 
-export function driveMix(speed: number, power: PowerNotch, brake: BrakeNotch): DriveMix {
+export function driveMix(
+  speed: number,
+  power: PowerNotch,
+  brake: BrakeNotch,
+  tunnel = false,
+): DriveMix {
   const s = Math.min(1, Math.max(0, Number.isFinite(speed) ? speed : 0));
   const moving = s > 0.005;
   const traction = brake === 0 && power > 0;
@@ -33,6 +40,7 @@ export function driveMix(speed: number, power: PowerNotch, brake: BrakeNotch): D
     whineFreq: Math.round(380 + s * 1100),
     whineVol: round(whineVol),
     hissVol: round(hissVol),
+    rumbleVol: tunnel ? round(Math.min(0.11, 0.03 + s * 0.09)) : 0,
   };
 }
 
@@ -53,6 +61,7 @@ export class DriveSound {
   private hum: (Layer & { osc: OscillatorNode; sub: OscillatorNode }) | null = null;
   private whine: (Layer & { osc: OscillatorNode }) | null = null;
   private hiss: Layer | null = null;
+  private rumble: Layer | null = null;
 
   constructor(
     private readonly ctx: AudioContext,
@@ -116,6 +125,20 @@ export class DriveSound {
     hissGain.connect(out);
     noise.start(now, Math.random() * 0.5);
     this.hiss = { gain: hissGain, src: noise };
+
+    const rumbleGain = ctx.createGain();
+    rumbleGain.gain.value = 0;
+    const low = ctx.createBiquadFilter();
+    low.type = "lowpass";
+    low.frequency.value = 170;
+    const rumbleNoise = ctx.createBufferSource();
+    rumbleNoise.buffer = noiseBuffer(ctx);
+    rumbleNoise.loop = true;
+    rumbleNoise.connect(low);
+    low.connect(rumbleGain);
+    rumbleGain.connect(out);
+    rumbleNoise.start(now, Math.random() * 0.5);
+    this.rumble = { gain: rumbleGain, src: rumbleNoise };
   }
 
   update(mix: DriveMix): void {
@@ -133,6 +156,7 @@ export class DriveSound {
         this.whine.gain.gain.setTargetAtTime(Math.min(MIX_CEILING, mix.whineVol), now, ease);
       }
       if (this.hiss) this.hiss.gain.gain.setTargetAtTime(Math.min(MIX_CEILING, mix.hissVol), now, 0.05);
+      if (this.rumble) this.rumble.gain.gain.setTargetAtTime(Math.min(MIX_CEILING, mix.rumbleVol), now, 0.25);
     } catch {
       // 參數排程失敗時這一幀沒有變化，下一幀再試
     }
@@ -147,6 +171,8 @@ export class DriveSound {
     if (this.hum) sources.push(this.hum.osc, this.hum.sub);
     if (this.whine) sources.push(this.whine.osc);
     if (this.hiss) sources.push(this.hiss.src);
+    if (this.rumble) sources.push(this.rumble.src);
+    this.rumble = null;
     this.hum = null;
     this.whine = null;
     this.hiss = null;

@@ -1,11 +1,13 @@
-import { stationsFor, stopEpsilon } from "@/lib/games/orange-express/routes";
+import { COURSE_RULES, courseFor, stationsFor, stopEpsilon } from "@/lib/games/orange-express/routes";
 import {
   BRAKE_MAX,
   EMERGENCY,
   POWER_MAX,
   type BrakeNotch,
+  type DriverId,
   type LevelId,
   type OrangeExpressHook,
+  type PointTask,
   type PowerNotch,
   type RunAction,
   type RunState,
@@ -19,6 +21,7 @@ export const POWER_ACCEL = [0, 0.16, 0.28, 0.4, 0.52] as const;
 export const BRAKE_ACCEL = [0, 0.22, 0.4, 0.6, 0.8, 1.6] as const;
 /** 什麼都不推時，車自己慢慢變慢。 */
 export const COAST_DRAG = 0.03;
+/** 沒有自動輕煞的規則組：高出速度旗的部分用這個速率收回。 */
 export const BLEED = 0.8;
 export const CRUISE_LIMIT = 0.82;
 export const PROGRESS_RATE = 0.18;
@@ -30,6 +33,12 @@ export const REVERSE_RATE = 0.16;
 export const REVERSE_TO = 0.08;
 /** 慢慢看在進站後至少保持這個速度，不會停在月台前面。 */
 export const LOOK_CREEP = 0.08;
+/** 自動輕煞的減速度，約等於 B2。 */
+export const AUTO_BRAKE_DECEL = 0.4;
+/** 超過速度旗這麼多才算超速，避免在旗子上下抖。 */
+export const AUTO_BRAKE_MARGIN = 0.01;
+/** 對向列車從遠方出現到車尾過去的秒數。 */
+export const PASS_DURATION = 2.9;
 const GRADE_EPSILON = 1e-6;
 
 function quant(n: number): number {
@@ -60,15 +69,60 @@ export function currentStation(state: RunState): Station {
   return state.stations[state.stationIndex] ?? state.stations[0]!;
 }
 
-export function currentLimit(state: RunState): number {
-  const station = currentStation(state);
-  return state.progress >= station.approachAt ? station.approachLimit : CRUISE_LIMIT;
+/** 速度旗：路上看最後經過的速限牌，進站後不高於進站旗。 */
+export function limitAt(station: Station, progress: number): number {
+  let limit = CRUISE_LIMIT;
+  for (const sign of station.signs) {
+    if (progress >= sign.at) limit = sign.limit;
+  }
+  if (progress >= station.approachAt) limit = Math.min(limit, station.approachLimit);
+  return limit;
 }
 
-export function createRun(level: LevelId): RunState {
+export function currentLimit(state: RunState): number {
+  return limitAt(currentStation(state), state.progress);
+}
+
+/** 前面最近、還沒經過的速限牌（給前窗的提示用）。 */
+export function nextSign(state: RunState, ahead = 0.08): { at: number; limit: number } | null {
+  const station = currentStation(state);
+  for (const sign of station.signs) {
+    if (sign.at > state.progress && sign.at - state.progress <= ahead) return sign;
+  }
+  return null;
+}
+
+export function inTunnel(state: RunState): boolean {
+  const tunnel = currentStation(state).tunnel;
+  return tunnel !== null && state.progress >= tunnel.from && state.progress <= tunnel.to;
+}
+
+export function onBridge(state: RunState): boolean {
+  const bridge = currentStation(state).bridge;
+  return bridge !== null && state.progress >= bridge.from && state.progress <= bridge.to;
+}
+
+/** 現在可以做的指差確認。倒車、開門、到終點時不出題。 */
+export function pendingPoint(state: RunState): PointTask | null {
+  if (state.phase === "reversing" || state.phase === "doors-open" || state.phase === "route-done") {
+    return null;
+  }
+  for (const task of currentStation(state).points) {
+    if (state.pointsDone.includes(task.id)) continue;
+    if (state.progress >= task.at && state.progress <= task.until) return task;
+  }
+  return null;
+}
+
+export function pointTotal(state: RunState): number {
+  return state.stations.reduce((sum, station) => sum + station.points.length, 0);
+}
+
+export function createRun(level: LevelId, driver: DriverId = "big"): RunState {
   return {
     level,
-    stations: stationsFor(level),
+    course: courseFor(level, driver),
+    stations: stationsFor(level, driver),
     stationIndex: 0,
     phase: "running",
     power: level === "look" ? 1 : 0,
@@ -79,6 +133,13 @@ export function createRun(level: LevelId): RunState {
     boardTimer: 0,
     misses: 0,
     grades: [],
+    autoBrake: false,
+    autoBrakeCount: 0,
+    passing: null,
+    passedTrain: false,
+    bridgeGreeted: false,
+    bridgeGreets: 0,
+    pointsDone: [],
   };
 }
 
@@ -98,7 +159,7 @@ function withGrade(state: RunState, progress: number): readonly StopGrade[] {
 }
 
 function stopHere(state: RunState, progress: number): RunState {
-  return { ...state, progress, speed: 0, phase: "stopped", grades: withGrade(state, progress) };
+  return { ...state, progress, speed: 0, autoBrake: false, phase: "stopped", grades: withGrade(state, progress) };
 }
 
 /** 慢慢看進站後由小橘自己算煞車，目標是綠區中心。 */
@@ -110,11 +171,12 @@ function lookAssist(state: RunState, station: Station): number | null {
   return -Math.min(BRAKE_ACCEL[4], needed);
 }
 
-/** 目前這一秒的加速度。煞車一拉，動力就斷開。 */
+/** 目前這一秒的加速度。煞車一拉，動力就斷開；自動輕煞時動力也斷開。 */
 export function accelFor(state: RunState): number {
   const station = currentStation(state);
   const assist = lookAssist(state, station);
   if (assist !== null) return Math.min(assist, -BRAKE_ACCEL[state.brake]);
+  if (state.autoBrake) return -Math.max(AUTO_BRAKE_DECEL, BRAKE_ACCEL[state.brake]);
   if (state.brake > 0) return -BRAKE_ACCEL[state.brake];
   if (state.power > 0) return POWER_ACCEL[state.power];
   return -COAST_DRAG;
@@ -140,7 +202,7 @@ export function normalizePhase(state: RunState): RunState {
     return state;
   }
   const station = currentStation(state);
-  const epsilon = stopEpsilon(state.level);
+  const epsilon = stopEpsilon(state.course);
   if (inWindow(station, state.progress) && state.speed <= epsilon) {
     if (state.phase === "stopped" && state.speed === 0) return state;
     return stopHere(state, state.progress);
@@ -169,7 +231,14 @@ export function withHook(state: RunState, hook: OrangeExpressHook | null | undef
   const misses = Math.max(0, Math.floor(finiteOr(hook.misses, state.misses)));
   const power = clampPower(finiteOr(hook.power, state.power), powerCap(state.level));
   const brake = clampBrake(finiteOr(hook.brake, state.brake));
-  const grades = stationIndex === state.stationIndex ? state.grades : state.grades.slice(0, stationIndex);
+  const sameStation = stationIndex === state.stationIndex;
+  const grades = sameStation ? state.grades : state.grades.slice(0, stationIndex);
+  const passing =
+    typeof hook.passing === "number" && Number.isFinite(hook.passing)
+      ? quant(Math.min(PASS_DURATION, Math.max(0, hook.passing)))
+      : sameStation
+        ? state.passing
+        : null;
   return normalizePhase({
     ...state,
     stationIndex,
@@ -179,24 +248,45 @@ export function withHook(state: RunState, hook: OrangeExpressHook | null | undef
     power,
     brake,
     grades,
+    passing,
+    passedTrain: passing !== null || (sameStation && state.passedTrain),
+    bridgeGreeted: sameStation && state.bridgeGreeted,
+    autoBrake: false,
     boarded: 0,
     boardTimer: 0,
     phase: "running",
   });
 }
 
-/** 喇叭不改狀態。回傳同一個物件，畫面才知道不用重畫邏輯。 */
+/** 喇叭只有在鐵橋上第一次按才記一筆「打招呼」；其他時候回傳同一個物件。 */
 export function honk(state: RunState): RunState {
-  return state;
+  if (state.bridgeGreeted || !onBridge(state)) return state;
+  return { ...state, bridgeGreeted: true, bridgeGreets: state.bridgeGreets + 1 };
 }
 
 function applyMotion(state: RunState, dt: number): RunState {
   const station = currentStation(state);
-  const epsilon = stopEpsilon(state.level);
+  const rules = COURSE_RULES[state.course];
+  const epsilon = stopEpsilon(state.course);
   const limit = currentLimit(state);
 
-  let speed = state.speed + accelFor(state) * dt;
-  if (speed > limit) speed = Math.max(limit, speed - BLEED * dt);
+  let autoBrake = state.autoBrake;
+  let autoBrakeCount = state.autoBrakeCount;
+  if (rules.autoBrake && !autoBrake && state.speed > limit + AUTO_BRAKE_MARGIN) {
+    autoBrake = true;
+    autoBrakeCount += 1;
+  }
+
+  let speed = state.speed + accelFor({ ...state, autoBrake }) * dt;
+  if (autoBrake) {
+    if (speed <= limit) {
+      autoBrake = false;
+      speed = Math.min(speed, limit);
+    }
+  } else if (speed > limit) {
+    // 桿子推不過速度旗；沒有自動輕煞的規則組，旗子降下來時也安靜地收回。
+    speed = state.speed <= limit + AUTO_BRAKE_MARGIN ? limit : Math.max(limit, speed - BLEED * dt);
+  }
   if (
     state.level === "look" &&
     state.progress >= station.approachAt &&
@@ -211,13 +301,26 @@ function applyMotion(state: RunState, dt: number): RunState {
 
   const progress = quant(state.progress + ((state.speed + speed) / 2) * PROGRESS_RATE * dt);
 
+  let passing = state.passing;
+  let passedTrain = state.passedTrain;
+  if (passing !== null) {
+    passing = quant(passing + dt);
+    if (passing >= PASS_DURATION) passing = null;
+  } else if (!passedTrain && station.passAt !== null && progress >= station.passAt) {
+    passing = 0;
+    passedTrain = true;
+  }
+
+  const moved = { ...state, autoBrake, autoBrakeCount, passing, passedTrain };
+
   if (progress > station.window.end) {
-    if (speed <= epsilon) return stopHere(state, station.window.end);
+    if (speed <= epsilon) return stopHere(moved, station.window.end);
     return {
-      ...state,
+      ...moved,
       progress: station.window.end,
       speed: 0,
       power: 0,
+      autoBrake: false,
       phase: "reversing",
       misses: state.misses + 1,
       boarded: 0,
@@ -225,9 +328,9 @@ function applyMotion(state: RunState, dt: number): RunState {
     };
   }
 
-  if (inWindow(station, progress) && speed <= epsilon) return stopHere(state, progress);
-  if (inWindow(station, progress)) return { ...state, progress, speed, phase: "in-window" };
-  return { ...state, progress, speed, phase: "running" };
+  if (inWindow(station, progress) && speed <= epsilon) return stopHere(moved, progress);
+  if (inWindow(station, progress)) return { ...moved, progress, speed, phase: "in-window" };
+  return { ...moved, progress, speed, phase: "running" };
 }
 
 function applyReverse(state: RunState, dt: number): RunState {
@@ -249,7 +352,11 @@ function unchanged(state: RunState, next: RunState): boolean {
     next.boardTimer === state.boardTimer &&
     next.misses === state.misses &&
     next.stationIndex === state.stationIndex &&
-    next.grades === state.grades
+    next.grades === state.grades &&
+    next.autoBrake === state.autoBrake &&
+    next.autoBrakeCount === state.autoBrakeCount &&
+    next.passing === state.passing &&
+    next.passedTrain === state.passedTrain
   );
 }
 
@@ -266,6 +373,14 @@ export function step(state: RunState, action: RunAction): RunState {
     const notch = clampBrake(action.notch);
     if (notch === state.brake || state.phase === "route-done") return state;
     return { ...state, brake: notch };
+  }
+
+  if (action.type === "honk") return honk(state);
+
+  if (action.type === "point") {
+    const task = pendingPoint(state);
+    if (!task) return state;
+    return { ...state, pointsDone: [...state.pointsDone, task.id] };
   }
 
   if (action.type === "open-doors") {
@@ -294,6 +409,10 @@ export function step(state: RunState, action: RunAction): RunState {
       speed: 0,
       boarded: 0,
       boardTimer: 0,
+      autoBrake: false,
+      passing: null,
+      passedTrain: false,
+      bridgeGreeted: false,
     };
   }
 

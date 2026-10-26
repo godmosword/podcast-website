@@ -1,6 +1,6 @@
 /** 孩子看得到的句子。禁詞測試掃這一包，也掃遊戲原始碼。 */
 
-import type { BrakeNotch, PowerNotch, StopGrade } from "@/lib/games/orange-express/types";
+import type { BrakeNotch, DriverId, PointKind, PowerNotch, StopGrade } from "@/lib/games/orange-express/types";
 
 export const COPY = {
   routeName: "橘色小線",
@@ -51,7 +51,52 @@ export const COPY = {
   lampOn: "燈亮了",
   lampOff: "燈沒亮",
   lampsLabel: "駕駛台的燈",
+  lampLight: "車內燈",
+  driverLabel: "司機",
+  driverHow: "家長在遊戲設定切換",
+  autoBrakeOn: "超過速度旗了，小橘幫你輕輕煞車",
+  signAhead: "速限牌",
+  signFast: "可以開快",
+  signMid: "開中速",
+  signSlow: "要慢慢開",
+  tunnel: "進隧道了，車內燈亮了",
+  bridge: "鐵橋！按喇叭打招呼",
+  bridgeGreeted: "叭叭！跟鐵橋打招呼了",
+  passing: "對向列車來了，揮揮手",
+  point: "指差確認",
+  pointDone: "確認好了",
 } as const;
+
+export const DRIVER_NAME: Record<DriverId, string> = {
+  little: "小小司機",
+  big: "大司機",
+};
+
+export const DRIVER_HINT: Record<DriverId, string> = {
+  little: "3–4 歲：桿子自動限速，只學開和停",
+  big: "5–7 歲：速限牌、停準拿星星、指差確認",
+};
+
+/** 指差確認時說的話。 */
+export const POINT_CALL: Record<PointKind, string> = {
+  signal: "號誌，綠燈！",
+  sign: "速限牌，確認！",
+  platform: "月台，確認！",
+};
+
+export function signWord(bars: 1 | 2 | 3): string {
+  if (bars === 3) return COPY.signFast;
+  if (bars === 2) return COPY.signMid;
+  return COPY.signSlow;
+}
+
+export function pointsResultText(done: number, total: number): string {
+  return `${COPY.point} ${done}/${total}`;
+}
+
+export function bridgeResultText(count: number): string {
+  return `鐵橋打招呼 ${count} 次`;
+}
 
 export const GRADE_TEXT: Record<StopGrade, string> = {
   green: "停在綠區，三顆星",

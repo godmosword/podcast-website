@@ -3,24 +3,34 @@ import {
   saveGameKitSettingsToStore,
 } from "@/lib/progress-store";
 import {
+  normalizeOrangeExpressDriver,
   normalizeOrangeExpressLevel,
+  resolveOrangeExpressDriver,
   resolveOrangeExpressLevel,
 } from "@/lib/games/orange-express/level";
-import type { LevelId } from "@/lib/games/orange-express/types";
+import type { DriverId, LevelId } from "@/lib/games/orange-express/types";
 
-export { normalizeOrangeExpressLevel, resolveOrangeExpressLevel };
+export {
+  normalizeOrangeExpressDriver,
+  normalizeOrangeExpressLevel,
+  resolveOrangeExpressDriver,
+  resolveOrangeExpressLevel,
+};
 
-/** 遊戲設定裡改了這兩個開關，駕駛台馬上跟著變。 */
+/** 遊戲設定裡改了顯示開關或司機，駕駛台與標題馬上跟著變。 */
 export const ORANGE_EXPRESS_DISPLAY_EVENT = "cheche:orange-express-display";
 
 export type OrangeExpressDisplay = {
   gaugeNumbers: boolean;
   sway: boolean;
+  /** null＝家長沒切過，畫面再依兒童模式決定。 */
+  driver: DriverId | null;
 };
 
 export const DEFAULT_ORANGE_EXPRESS_DISPLAY: OrangeExpressDisplay = {
   gaugeNumbers: false,
   sway: true,
+  driver: null,
 };
 
 export function loadOrangeExpressLevel(): LevelId | null {
@@ -48,6 +58,7 @@ export function loadOrangeExpressDisplay(): OrangeExpressDisplay {
     return {
       gaugeNumbers: stored.orangeExpressGaugeNumbers === true,
       sway: stored.orangeExpressSway !== false,
+      driver: normalizeOrangeExpressDriver(stored.orangeExpressDriver),
     };
   } catch {
     return { ...DEFAULT_ORANGE_EXPRESS_DISPLAY };
@@ -61,6 +72,7 @@ export function saveOrangeExpressDisplay(patch: Partial<OrangeExpressDisplay>): 
     saveGameKitSettingsToStore({
       orangeExpressGaugeNumbers: next.gaugeNumbers,
       orangeExpressSway: next.sway,
+      orangeExpressDriver: next.driver,
     });
   } catch {
     // 存不進去時只影響這一頁

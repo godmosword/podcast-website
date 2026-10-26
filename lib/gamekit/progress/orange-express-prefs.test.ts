@@ -3,6 +3,7 @@ import {
   ORANGE_EXPRESS_DISPLAY_EVENT,
   loadOrangeExpressDisplay,
   loadOrangeExpressLevel,
+  resolveOrangeExpressDriver,
   resolveOrangeExpressLevel,
   saveOrangeExpressDisplay,
   saveOrangeExpressLevel,
@@ -73,14 +74,43 @@ describe("小橘特快車難度偏好", () => {
     delete raw.preferences.gameKit.orangeExpressGaugeNumbers;
     delete raw.preferences.gameKit.orangeExpressSway;
     localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(raw));
-    expect(loadOrangeExpressDisplay()).toEqual({ gaugeNumbers: false, sway: true });
+    expect(loadOrangeExpressDisplay()).toEqual({ gaugeNumbers: false, sway: true, driver: null });
 
     const next = saveOrangeExpressDisplay({ gaugeNumbers: true, sway: false });
-    expect(next).toEqual({ gaugeNumbers: true, sway: false });
-    expect(loadOrangeExpressDisplay()).toEqual({ gaugeNumbers: true, sway: false });
+    expect(next).toEqual({ gaugeNumbers: true, sway: false, driver: null });
+    expect(loadOrangeExpressDisplay()).toEqual({ gaugeNumbers: true, sway: false, driver: null });
     expect(getGameKitSettingsFromStore().candyMatchMode).toBe("easy");
     const dispatch = window.dispatchEvent as unknown as ReturnType<typeof vi.fn>;
     const types = dispatch.mock.calls.map(([event]) => (event as Event).type);
     expect(types).toContain(ORANGE_EXPRESS_DISPLAY_EVENT);
+  });
+
+  it("司機：舊存檔沒有＝依兒童模式；家長切了就照存的，不動其他設定", () => {
+    saveGameKitSettingsToStore({ candyMatchMode: "easy", orangeExpressLevel: "drive" });
+    const raw = JSON.parse(localStorage.getItem(PROGRESS_STORAGE_KEY) ?? "{}") as {
+      preferences: { gameKit: Record<string, unknown> };
+    };
+    delete raw.preferences.gameKit.orangeExpressDriver;
+    localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(raw));
+    expect(loadOrangeExpressDisplay().driver).toBeNull();
+    expect(resolveOrangeExpressDriver(null, true)).toBe("little");
+    expect(resolveOrangeExpressDriver(null, false)).toBe("big");
+
+    saveOrangeExpressDisplay({ driver: "big" });
+    expect(loadOrangeExpressDisplay().driver).toBe("big");
+    expect(resolveOrangeExpressDriver("big", true)).toBe("big");
+    expect(getGameKitSettingsFromStore().orangeExpressLevel).toBe("drive");
+    expect(getGameKitSettingsFromStore().candyMatchMode).toBe("easy");
+    expect(loadOrangeExpressDisplay().sway).toBe(true);
+  });
+
+  it("司機欄位亂掉時回到未設定", () => {
+    saveGameKitSettingsToStore({ candyMatchMode: "easy" });
+    const raw = JSON.parse(localStorage.getItem(PROGRESS_STORAGE_KEY) ?? "{}") as {
+      preferences: { gameKit: Record<string, unknown> };
+    };
+    raw.preferences.gameKit.orangeExpressDriver = "rocket";
+    localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(raw));
+    expect(loadOrangeExpressDisplay().driver).toBeNull();
   });
 });

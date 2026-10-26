@@ -8,6 +8,14 @@ describe("駕駛聲音", () => {
     expect(driveMix(0, 0, 0)).toMatchObject({ humVol: 0, whineVol: 0, hissVol: 0 });
   });
 
+  it("隧道裡多一層低沉轟聲，出了隧道就沒有；也不超過上限", () => {
+    expect(driveMix(0.6, 2, 0).rumbleVol).toBe(0);
+    const inside = driveMix(0.6, 2, 0, true);
+    expect(inside.rumbleVol).toBeGreaterThan(0);
+    expect(driveMix(1, 4, 0, true).rumbleVol).toBeLessThanOrEqual(MIX_CEILING);
+    expect(driveMix(0.9, 2, 0, true).rumbleVol).toBeGreaterThan(driveMix(0.2, 2, 0, true).rumbleVol);
+  });
+
   it("馬達聲隨速度變高", () => {
     const slow = driveMix(0.2, 2, 0);
     const fast = driveMix(0.8, 2, 0);

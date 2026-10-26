@@ -41,12 +41,49 @@ export function jointClack(speed: number): readonly SynthVoice[] {
   ];
 }
 
+/** 超過速度旗：溫柔的「叮叮」，不是警報。 */
+export const AUTO_BRAKE_DING: readonly SynthVoice[] = [
+  { wave: "sine", freq: 1175, dur: 0.12, vol: 0.07, attack: 0.005 },
+  { wave: "sine", freq: 1175, dur: 0.14, vol: 0.06, at: 0.2, attack: 0.005 },
+];
+
+/** 停好時的原創到站短旋律：上行三音。 */
+export const ARRIVAL_MELODY: readonly SynthVoice[] = [
+  { wave: "triangle", freq: 659, dur: 0.18, vol: 0.09, attack: 0.01 },
+  { wave: "triangle", freq: 784, dur: 0.18, vol: 0.09, at: 0.2, attack: 0.01 },
+  { wave: "triangle", freq: 1047, dur: 0.25, vol: 0.08, at: 0.4, attack: 0.01 },
+];
+
+/** 廣播前的「叮咚」。 */
+export const ANNOUNCE_CHIME: readonly SynthVoice[] = [
+  { wave: "sine", freq: 880, dur: 0.22, vol: 0.08, attack: 0.01 },
+  { wave: "sine", freq: 698, dur: 0.25, vol: 0.08, at: 0.26, attack: 0.01 },
+];
+
+/** 對向列車擦身的「咻」：一段濾過的噪音由高往低。 */
+export const PASS_WHOOSH: readonly SynthVoice[] = [
+  { wave: "noise", dur: 0.25, vol: 0.1, attack: 0.08, filter: { type: "bandpass", freq: 1800, q: 0.8 } },
+  { wave: "noise", dur: 0.25, vol: 0.09, at: 0.22, attack: 0.02, filter: { type: "bandpass", freq: 900, q: 0.8 } },
+  { wave: "sine", freq: 330, freqEnd: 260, dur: 0.24, vol: 0.05, at: 0.12, attack: 0.03 },
+];
+
+/** 指差確認完成的「嗶」。 */
+export const POINT_OK: readonly SynthVoice[] = [
+  { wave: "triangle", freq: 988, dur: 0.08, vol: 0.08, attack: 0.004 },
+  { wave: "triangle", freq: 1319, dur: 0.12, vol: 0.07, at: 0.09, attack: 0.004 },
+];
+
 export const CHIME_SETS = [
   HORN,
   ARRIVE_CHIME,
   DOOR_CHIME,
   NOTCH_CLICK,
   EMERGENCY_CLICK,
+  AUTO_BRAKE_DING,
+  ARRIVAL_MELODY,
+  ANNOUNCE_CHIME,
+  PASS_WHOOSH,
+  POINT_OK,
   jointClack(0),
   jointClack(1),
 ] as const;
