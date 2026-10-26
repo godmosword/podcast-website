@@ -6,8 +6,9 @@ import { expect, test } from "@playwright/test";
  */
 const SLUGS = ["coloring-book", "candy-match", "dino-sushi"] as const;
 
-test("1280：三張依序各播一次，同一時間最多一段，播完都收掉；播放中首張呼吸暫停", async ({ page }) => {
-  await page.setViewportSize({ width: 1280, height: 1100 });
+test("1280（四張同時在畫面內）：有示範的三張依序各播一次，同一時間最多一段，播完都收掉；播放中首張呼吸暫停", async ({ page }) => {
+  // 桌機兩欄（#264）：視窗要夠高，四張卡同時在畫面內，才測得到「同時進畫面時依序播」
+  await page.setViewportSize({ width: 1280, height: 2200 });
   await page.goto("/games");
   const seen: string[] = [];
   let maxConcurrent = 0;
@@ -41,7 +42,8 @@ test("1280：三張依序各播一次，同一時間最多一段，播完都收�
 });
 
 test("滑鼠停在卡上才重播；只是掃過不會播", async ({ page }) => {
-  await page.setViewportSize({ width: 1280, height: 1100 });
+  // 桌機兩欄（#264）：視窗要夠高，四張卡同時在畫面內，才測得到「同時進畫面時依序播」
+  await page.setViewportSize({ width: 1280, height: 2200 });
   await page.goto("/games");
   // 等第一輪三段播完
   await expect(page.locator('a[href="/games/dino-sushi"] [data-demo]')).toHaveCount(1, { timeout: 10_000 });
@@ -74,7 +76,8 @@ test("減少動態：完全不播示範", async ({ page }) => {
 });
 
 test("播到一半切成減少動態：示範收掉、卡片不殘留 data-demo-playing", async ({ page }) => {
-  await page.setViewportSize({ width: 1280, height: 1100 });
+  // 桌機兩欄（#264）：視窗要夠高，四張卡同時在畫面內，才測得到「同時進畫面時依序播」
+  await page.setViewportSize({ width: 1280, height: 2200 });
   await page.goto("/games");
   await expect(page.locator('a[href="/games/coloring-book"] [data-demo]')).toHaveCount(1, { timeout: 5_000 });
   await page.emulateMedia({ reducedMotion: "reduce" });
