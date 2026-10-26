@@ -8,6 +8,8 @@ const GAME_PRELOAD_SHEETS: Record<GameKitGameId, SheetId[]> = {
   "candy-match": [],
   // dino-sushi 同樣全 SVG/DOM 繪製
   "dino-sushi": [],
+  // 前窗是這一頁自己的畫布，沒有程序生成 sheet
+  "orange-express": [],
 };
 
 const warmed = new Set<string>();

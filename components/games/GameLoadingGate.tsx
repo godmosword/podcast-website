@@ -11,6 +11,7 @@ const LABELS: Record<GameKitGameId, string> = {
   "block-drop": "方塊轉轉",
   "candy-match": "車車消消樂",
   "dino-sushi": "多多壽司屋",
+  "orange-express": "小橘特快車",
 };
 
 type GameLoadingGateProps = {
@@ -52,7 +53,7 @@ export function GameLoadingGate({
           onStart={manualStart ? start : undefined}
           onRetry={retry}
           staticLayout
-          artSrc={game?.art.cover}
+          artSrc={game?.art.cover.endsWith(".svg") ? undefined : game?.art.cover}
           artAlt={game?.art.alt}
         />
       </div>

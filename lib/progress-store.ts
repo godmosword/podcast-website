@@ -5,6 +5,8 @@ import {
 import type { GameKitGameId } from "@/lib/gamekit/types";
 import type { PlayerProfile } from "@/lib/gamekit/types";
 import { emptyDayFlags, normalizeDayFlags } from "@/lib/games/dino-sushi/day-progress";
+import { normalizeOrangeExpressLevel } from "@/lib/games/orange-express/level";
+import type { LevelId } from "@/lib/games/orange-express/types";
 import { isDinoSushiStickerId } from "@/lib/games/dino-sushi/stickers";
 import { canonicalStorySlug } from "@/lib/story-slug-aliases";
 import { normalizeThemeMode, type ThemeMode } from "@/lib/theme";
@@ -63,6 +65,8 @@ export type GameKitPreferenceStore = {
    * 第 4 天不記在這裡，仍讀 medals["dino-sushi"][0]，避免跟舊星重複發。
    */
   dinoSushiDays: number[];
+  /** 小橘特快車上次選的檔。null＝還沒選過，由兒童模式決定慢慢看或自己開。 */
+  orangeExpressLevel: LevelId | null;
 };
 
 export type ContinueState = {
@@ -159,6 +163,7 @@ export const DEFAULT_PROGRESS: ProgressStore = {
       dinoSushiStickerRoundKey: "",
       dinoSushiStickerGift: "",
       dinoSushiDays: emptyDayFlags(),
+      orangeExpressLevel: null,
     },
     theme: "system",
     nightPromptDismissed: false,
@@ -311,6 +316,7 @@ function normalizeGameKitPreferences(
         ? value.dinoSushiStickerGift
         : "",
     dinoSushiDays: normalizeDayFlags(value?.dinoSushiDays),
+    orangeExpressLevel: normalizeOrangeExpressLevel(value?.orangeExpressLevel),
   };
 }
 

@@ -1,0 +1,380 @@
+.screen {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 8px;
+  width: min(100%, 880px);
+  min-height: 0;
+  margin-inline: auto;
+  color: var(--ink);
+}
+
+.screen[data-screen="drive"] {
+  height: 100%;
+}
+
+.route {
+  margin: 0;
+  font-size: var(--fs-h3);
+  font-weight: 900;
+}
+
+.levels {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+@media (min-width: 720px) {
+  .levels {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.level,
+.levelOn,
+.primary,
+.secondary,
+.horn,
+.door,
+.lever {
+  font: inherit;
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  border-radius: 16px;
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.level,
+.levelOn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-height: 48px;
+  padding: 8px 12px;
+  background: var(--card);
+  text-align: left;
+}
+
+.levelOn {
+  background: color-mix(in srgb, var(--c-yellow) 55%, var(--card));
+}
+
+.level small,
+.levelOn small {
+  color: var(--ink-soft);
+}
+
+.primary,
+.secondary {
+  min-height: 48px;
+  padding: 8px 16px;
+  font-weight: 900;
+}
+
+.primary {
+  background: color-mix(in srgb, var(--c-yellow) 70%, var(--c-pink));
+}
+
+.secondary {
+  background: var(--card);
+}
+
+.level:active,
+.levelOn:active,
+.primary:active,
+.secondary:active,
+.horn:active,
+.door:active,
+.lever:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.windshield {
+  position: relative;
+  flex: 1 1 45%;
+  min-height: 140px;
+  overflow: hidden;
+  border: 2px solid var(--ink);
+  border-radius: 18px;
+  background: rgb(186, 220, 245);
+}
+
+.glass {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.riders {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  display: flex;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.riders li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 48px;
+  color: var(--ink);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.riders svg {
+  width: 48px;
+  height: 48px;
+}
+
+.riders li[data-boarded="true"] {
+  transform: translateY(6px);
+}
+
+.live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.cab {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--c-yellow) 18%, var(--card));
+}
+
+.cabTop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.badge {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 auto;
+  color: var(--ink);
+}
+
+.stationName {
+  margin: 0;
+  font-size: var(--fs-body);
+  font-weight: 900;
+}
+
+.meter {
+  position: relative;
+  height: 28px;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: var(--c-mint);
+}
+
+.meter[data-hot="true"] {
+  background: var(--c-yellow);
+}
+
+.flag {
+  position: absolute;
+  top: -6px;
+  width: 4px;
+  height: 36px;
+  margin-left: -2px;
+  background: var(--ink);
+}
+
+.bead {
+  position: absolute;
+  top: 2px;
+  width: 20px;
+  height: 20px;
+  margin-left: -10px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: var(--card);
+}
+
+.meterWords {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: 1fr 48px 1fr;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.lever {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-height: 140px;
+  min-width: 48px;
+  padding: 8px 4px;
+  background: var(--card);
+  touch-action: none;
+}
+
+.leverTrack {
+  position: relative;
+  flex: 1 1 auto;
+  width: 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 18%, var(--card));
+}
+
+.leverKnob {
+  position: absolute;
+  left: 50%;
+  width: 28px;
+  height: 28px;
+  margin-left: -14px;
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--c-yellow) 65%, var(--card));
+  transform: translateY(-50%);
+}
+
+.leverWord {
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.horn {
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  background: color-mix(in srgb, var(--c-pink) 70%, var(--card));
+  font-weight: 900;
+}
+
+.door {
+  grid-column: 1 / -1;
+  min-height: 48px;
+  background: color-mix(in srgb, var(--c-mint) 70%, var(--card));
+  font-weight: 900;
+}
+
+.door[aria-disabled="true"] {
+  opacity: 0.7;
+}
+
+.door[data-shake="true"] {
+  animation: cabShake 0.28s linear;
+}
+
+.result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 8px 8px;
+}
+
+.result h2 {
+  margin: 0;
+  font-size: var(--fs-h2);
+}
+
+.resultActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.nextLink {
+  min-height: 48px;
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.paused {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--card) 88%, transparent);
+}
+
+.paused p {
+  margin: 0;
+  font-size: var(--fs-h3);
+  font-weight: 900;
+}
+
+@media (orientation: landscape) {
+  .windshield {
+    flex: 1 1 auto;
+  }
+
+  .cab {
+    flex: 0 0 auto;
+  }
+}
+
+@media (max-width: 359px) {
+  .controls {
+    grid-template-columns: 1fr 48px;
+  }
+
+  .brake {
+    grid-column: 1 / -1;
+  }
+
+  .door {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .level:active,
+  .levelOn:active,
+  .primary:active,
+  .secondary:active,
+  .horn:active,
+  .door:active,
+  .lever:active,
+  .riders li[data-boarded="true"] {
+    transform: none;
+  }
+
+  .door[data-shake="true"] {
+    animation: none;
+  }
+}
+
+@keyframes cabShake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-3px);
+  }
+  75% {
+    transform: translateX(3px);
+  }
+}

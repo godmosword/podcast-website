@@ -15,6 +15,7 @@ import {
   IconSushi,
   IconSwipeDown,
   IconTap,
+  IconTrain,
 } from "@/components/games/ClayIcons";
 import styles from "./GamePageShell.module.css";
 
@@ -34,6 +35,14 @@ const CONTROL_ICONS: Record<string, ReactNode> = {
   ),
   點飯和料做壽司: <IconTap size={22} />,
   "按「給多多吃」送出": <IconSushi size={22} />,
+  "左邊推，車會走": (
+    <>
+      <IconChevronLeft size={22} />
+      <IconChevronRight size={22} />
+    </>
+  ),
+  "右邊拉，車會停": <IconTrain size={22} />,
+  "門亮了就按": <IconTap size={22} />,
   旋轉與落下: (
     <>
       <IconRotate size={22} />

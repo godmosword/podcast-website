@@ -299,7 +299,7 @@ function buildGameRows(
   log: ActivityLogV1,
   today: number,
 ): ParentGameRow[] {
-  const ids: GameKitGameId[] = ["candy-match", "dino-sushi"];
+  const ids: GameKitGameId[] = ["candy-match", "dino-sushi", "orange-express"];
   return ids.map((gameId) => {
     const meta = gameMeta(gameId);
     const levelFlags = profile.medals[gameId] ?? [];

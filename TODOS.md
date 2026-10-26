@@ -11,7 +11,7 @@
 > **出圖落後：** 多頁插圖至 **`ep-29`（15 頁，`77429838`）**；`ep-25`／`ep-26`／`ep-27`／`ep-28`／`ep-30`／`ep-31` 仍為 `pageCount=1` MVP。最新全幕含 **`ep-21`（18 頁）**／**`ep-22`（24 頁）**／**`ep-23`（26 頁）**／**`ep-24`（19 頁）**／**`ep-29`（15 頁）**。
 > 完整逐字稿覆蓋至 `ep-31`（ep-1–30 已 `--mark`；`ep-31` 中秋烤肉已校對；`ep-30` 已手切 18 幕，待出圖 `8ad9df05`）。`data/games.ts` 見下表。
 >
-> **現役遊戲（canon，對齊 `data/games.ts`）：** `candy-match` 車車消消樂 · `dino-sushi` 多多壽司屋 · `coloring-book` 繪本塗塗鴉。`block-drop` 方塊轉轉已下架，`/games/block-drop` 永久導向 `/games`。
+> **現役遊戲（canon，對齊 `data/games.ts`）：** `candy-match` 車車消消樂 · `dino-sushi` 多多壽司屋 · `coloring-book` 繪本塗塗鴉 · `orange-express` 小橘特快車。`block-drop` 方塊轉轉已下架，`/games/block-drop` 永久導向 `/games`。
 > **歷史 slug：** `kart`／`pirate-kart`／`car-star`／`car-mission` 已退役，見 [archive](./docs/archive/TODOS-completed-2026-07-11.md)。
 
 > **商業化切割（2026-07-17）：** 本輪先完成不依賴會員身份的資產、通知、量測與依賴穩定化；家長會員帳號、會員 entitlement、訂閱付款與 Stripe 明確保留在 [STEM-P4 商業化](#stem-p4--商業化) 待辦，不在本輪誤做半套付費牆。
@@ -22,6 +22,7 @@
 
 ### pending
 
+- **重錄 darwin 視覺基準（小橘特快車第一版）**：Linux 不能改 `-chromium-darwin`。請在 Mac 跑 `npm run test:visual:trusted -- --update-snapshots`。遊樂園改成兩欄四張卡，`games-390-light-chromium-darwin.png`、`games-390-night-chromium-darwin.png`、`games-chromium-darwin.png`、`games-1280-night-chromium-darwin.png` 都會變。新遊戲請補：標題 390／1280 日間與夜間、速度珠貼旗的駕駛中（390 日間、1280 日間、390 夜間）、門可以開的進站（390 日間）、結算 390 日間與夜間，以及一張減少動態的靜止畫面。用 `window.__orangeExpress` 停在該畫面再錄，不要錄行進中的前窗。`design · S · 需 Mac`
 - **重錄 darwin 視覺基準（2026-10 稽核修正）**：Linux 不能改 `-chromium-darwin`。請在 Mac 跑 `npm run test:visual:trusted -- --update-snapshots`，只接受下面這些有意的差異後再更新。320 沒有基準。
   - 睡前 390 日間／夜間：`landing-bedtime-390-light-chromium-darwin.png`、`landing-bedtime-390-night-chromium-darwin.png`（只縮小「數綿羊123．睡前故事」。1280 與其他段不動）。
   - 遊樂園 390：`games-390-light-chromium-darwin.png`、`games-390-night-chromium-darwin.png`（手機海報改 16:9。桌面 `games-chromium-darwin.png`、`games-1280-night-chromium-darwin.png` 不該變）。

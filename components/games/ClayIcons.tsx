@@ -357,6 +357,19 @@ export function IconArrowRight({ size, color = "currentColor", style }: IconProp
   );
 }
 
+/** 小橘：奶油車身、橘色條紋、圓眼睛，沒有手腳。只吃 currentColor 與呼叫端的填色。 */
+export function IconTrain({ size, color = "currentColor", style }: IconProps) {
+  return (
+    <Svg size={size} style={style}>
+      <rect x="2" y="7" width="20" height="11" rx="5.5" stroke={color} strokeWidth={2} />
+      <rect x="2" y="11.5" width="20" height="2.4" fill={color} />
+      <circle cx="8" cy="10" r="1.1" fill={color} />
+      <circle cx="13" cy="10" r="1.1" fill={color} />
+      <path d="M8 15.2c1.2 1.2 4.2 1.2 5.4 0" stroke={color} strokeWidth={1.6} strokeLinecap="round" />
+    </Svg>
+  );
+}
+
 /** 握壽司（壽司站玩法：做一個壽司） */
 export function IconSushi({ size, style }: IconProps) {
   return (
