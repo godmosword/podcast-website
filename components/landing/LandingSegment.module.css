@@ -534,3 +534,20 @@
     gap: 6px;
   }
 }
+
+/* 睡前那句最長。只縮這顆，嘟嘟槽維持全站尺寸。 */
+@media (max-width: 420px) {
+  .cta[data-long="true"] {
+    font-size: 0.95rem;
+    padding-inline: 10px;
+    letter-spacing: 0;
+  }
+}
+
+@media (max-width: 360px) {
+  .cta[data-long="true"] {
+    font-size: 0.78rem;
+    padding-inline: 6px;
+    letter-spacing: 0;
+  }
+}

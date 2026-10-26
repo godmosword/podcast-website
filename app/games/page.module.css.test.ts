@@ -24,6 +24,16 @@ describe("games hub 三張卡的網格", () => {
   it("不再有手機置頂全寬大卡", () => {
     expect(css).not.toMatch(/\.lead\b/);
   });
+
+  it("手機海報改 3/2，第一屏才看得到三款標題", () => {
+    expect(css).toMatch(
+      /@media \(max-width: 640px\)\s*\{[\s\S]*?\.hero\s*\{[^}]*aspect-ratio:\s*16\s*\/\s*9/,
+    );
+    expect(css).toMatch(
+      /@media \(max-width: 640px\)\s*\{[\s\S]*?\.heroImage\s*\{[^}]*object-fit:\s*cover/,
+    );
+    expect(css).not.toMatch(/940\s*\/\s*1410/);
+  });
 });
 
 describe("games hub 站序", () => {

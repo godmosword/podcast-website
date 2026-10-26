@@ -73,7 +73,7 @@ export default function HotspotLayer({
         // 連結熱點多半是站內頁；只有離站（http 開頭）才用「外部連結」圖示
         const icon =
           hotspot.action.type === "story" ? (
-            "✦"
+            <Icon name="star" size={13} />
           ) : hotspot.action.type === "link" ? (
             <Icon
               name={/^https?:/.test(hotspot.action.href) ? "external" : "chevron-right"}

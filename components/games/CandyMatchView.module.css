@@ -1,10 +1,10 @@
 .surface {
-  --candy-ink: #5d4a67;
-  --candy-ink-soft: #7c6886;
+  --candy-ink: var(--ink);
+  --candy-ink-soft: var(--ink-soft);
   --candy-accent: #a5567a;
   --candy-blush: #fde7ef;
-  /* 卡面夜間仍是淺色：焦點環改用深墨色，否則夜間金色焦點環在淺底上看不到 */
-  --focus-ring: var(--candy-ink);
+  /* 卡面夜間仍是淺色（GamePageShell 把 --ink 固定成日間墨色）。站上夜間焦點環是金色，在淺底上看不到。 */
+  --focus-ring: var(--ink);
   position: relative;
   width: 100%;
   max-width: none;

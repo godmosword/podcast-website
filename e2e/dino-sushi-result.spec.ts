@@ -119,7 +119,7 @@ test("844×390：按鈕列、「放進貼紙書」、回遊樂園在右欄，書
 test("放不下的收成「+N」：露出的張數＋N＝貼紙書裡的新貼紙；點「+N」打開貼紙書", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/games/dino-sushi");
-  // 標題頁進來就先拿到「天天來」：先開一次書看過，書裡的「新」才只剩這一輪的
+  // 標題頁進來就先拿到「第一次來」：先開一次書看過，書裡的「新」才只剩這一輪的
   await page.getByRole("button", { name: /^貼紙書，已收集/ }).click();
   await page.getByRole("button", { name: "回去" }).click();
   await finishRound(page);

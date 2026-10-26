@@ -922,9 +922,9 @@ test.describe("多多壽司屋", () => {
 
     await page.goto("/games/dino-sushi");
     await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
-    // 第一次進標題會先領「天天來」並念出來，接著才念第 1 單。
+    // 第一次進標題會先領「第一次來」並念出來，接著才念第 1 單。
     await expect.poll(spoken).toEqual([
-      "新貼紙！天天來！",
+      "新貼紙！第一次來！",
       expect.stringMatching(/^今天是.+我想要/),
     ]);
     const firstOrder = (await spoken()).at(-1)!;
@@ -960,7 +960,7 @@ test.describe("多多壽司屋", () => {
     await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
     // 正向對照：預設開著。第一次進標題先念新貼紙，接著第 1 單有念。
     await expect.poll(spoken).toEqual([
-      "新貼紙！天天來！",
+      "新貼紙！第一次來！",
       expect.stringMatching(/^今天是.+我想要/),
     ]);
     await finish();

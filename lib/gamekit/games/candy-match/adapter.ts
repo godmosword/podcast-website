@@ -138,8 +138,27 @@ class CandyMatchInstance implements GameInstance {
     }
   }
 
-  notifyRetry(): void {
+  /**
+   * 沒過關也算玩過一局：寫進 gamesPlayed、發「玩過」貼紙，不發星、不寫獎牌。
+   * 同一局只回報一次；下一局要先 notifyPlaying 才會再記。
+   */
+  notifyRetry(payload: {
+    score: number;
+    levelIndex: number;
+    candyMode?: "easy" | "challenge";
+  }): void {
     this.status = "over";
+    this.score = payload.score;
+    if (this.sessionReported) return;
+    this.sessionReported = true;
+    this.options.onSession?.({
+      gameId: "candy-match",
+      score: payload.score,
+      levelIndex: payload.levelIndex,
+      candyMode: payload.candyMode,
+      cleared: false,
+      grantMedals: false,
+    });
   }
 
   isInputPaused(): boolean {

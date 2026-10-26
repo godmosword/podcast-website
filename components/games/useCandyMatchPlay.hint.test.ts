@@ -12,18 +12,20 @@ const instance = {
   isInputPaused: () => false,
 } as unknown as CandyMatchInstance;
 
-function render() {
-  return renderHook(() =>
-    useCandyMatchPlay({
-      instance,
-      ensureAudio: () => {},
-      tone: () => {},
-      reducedMotion: true,
-      inputPaused: false,
-      syncHost: () => {},
-      tipsSeen: ["swap"],
-      onTipSeen: () => {},
-    }),
+function render(inputPaused = false) {
+  return renderHook(
+    ({ paused }: { paused: boolean }) =>
+      useCandyMatchPlay({
+        instance,
+        ensureAudio: () => {},
+        tone: () => {},
+        reducedMotion: true,
+        inputPaused: paused,
+        syncHost: () => {},
+        tipsSeen: ["swap"],
+        onTipSeen: () => {},
+      }),
+    { initialProps: { paused: inputPaused } },
   );
 }
 
@@ -78,5 +80,37 @@ describe("消消樂輕鬆提示", () => {
     });
     expect(result.current.hint).toBeNull();
     expect(result.current.speechCue?.text).toBe("收集 40 台車車。");
+  });
+
+  it("暫停結束後才重新排閒置提示", () => {
+    const { result, rerender } = render();
+    act(() => {
+      result.current.actions.start(buildRound(0, "easy", { replay: false, rng: () => 0.2 }));
+    });
+    act(() => {
+      result.current.actions.beginPlay();
+    });
+    act(() => {
+      rerender({ paused: true });
+    });
+    act(() => {
+      vi.advanceTimersByTime(HINT_SHOW_MS + 1_000);
+    });
+    expect(result.current.hint).toBeNull();
+    expect(result.current.message).not.toBe("看看發光的地方！");
+
+    act(() => {
+      rerender({ paused: false });
+    });
+    act(() => {
+      vi.advanceTimersByTime(HINT_SOFT_MS);
+    });
+    expect(result.current.message).toBe("找找三個一樣的圖案！");
+    expect(result.current.hint).toBeNull();
+    act(() => {
+      vi.advanceTimersByTime(HINT_SHOW_MS - HINT_SOFT_MS);
+    });
+    expect(result.current.hint).not.toBeNull();
+    expect(result.current.message).toBe("看看發光的地方！");
   });
 });

@@ -54,7 +54,16 @@ jobs:
       - if: steps.scope.outputs.sync_only != 'true'
         run: npm run verify:service-worker
       - if: steps.scope.outputs.sync_only != 'true'
-        run: npm test
+        run: |
+          set +e
+          npm test
+          status=$?
+          {
+            echo "### 單元測試範圍"
+            echo ""
+            echo "\`npm test\` 不含 \`components/for-parents/PlayMap.test.tsx\`（約 53 項）。這支在全庫 runner 會讓 Vitest \`onTaskUpdate\` RPC 逾時，請另跑 \`npm run test:play-map\`。見 \`docs/PRODUCTION-RELEASE-GATE.md\`。"
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit "$status"
 
   build-and-public-e2e:
     runs-on: ubuntu-latest
