@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   // 「車車遊樂園 · 車車遊樂園」。用導覽列同一個詞「遊樂園」。
   title: "遊樂園",
   description:
-    "和故事裡的車車朋友一起玩小遊戲：繪本塗塗鴉、車車消消樂與多多壽司屋，適合 3–7 歲親子。",
+    "和故事裡的車車朋友一起玩小遊戲：繪本塗塗鴉、車車消消樂、多多壽司屋與小橘特快車，適合 3–7 歲親子。",
   alternates: { canonical: "/games" },
   openGraph: {
     title: "車車遊樂園 · 小遊戲",
@@ -27,6 +27,7 @@ const GAME_TYPE_LABEL: Record<GameMeta["gameType"], string> = {
   blocks: "堆疊挑戰",
   coloring: "塗顏色",
   cooking: "做壽司",
+  driving: "開車",
 };
 
 /** 封面圓鈕用玩法圖示（GamePlayIcon），卡片不再印動作詞。 */
@@ -56,19 +57,31 @@ function GameCard({ game, eager }: { game: GameMeta; eager: boolean }) {
         }}
       >
         <div className={styles.thumb}>
-          <Image
-            src={game.art.thumbnail ?? game.art.cover}
-            alt={game.art.alt}
-            fill
-            /* 每張卡同寬（<980 兩欄、≥980 三欄），sizes 必須貼齊實際渲染寬度，否則會下載到過小的檔再放大。 */
-            sizes="(max-width: 979px) calc(50vw - 24px), 300px"
-            className={styles.thumbImage}
-            style={{ objectPosition: game.art.position ?? "50% 50%" }}
-            /* 三張卡：首張 preload（LCP），其餘 eager 但不佔 preload 預算。
-               卡片本身由 .scrollEnter 淡入，圖若還在 lazy 佇列會再疊一層延遲。 */
-            priority={eager}
-            {...(eager ? {} : { loading: "eager" as const })}
-          />
+          {(game.art.thumbnail ?? game.art.cover).endsWith(".svg") ? (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element -- SVG 不走 next/image，避免優化器處理向量圖 */}
+              <img
+                src={game.art.thumbnail ?? game.art.cover}
+                alt={game.art.alt}
+                className={styles.thumbSvg}
+                data-art="placeholder"
+              />
+            </>
+          ) : (
+            <Image
+              src={game.art.thumbnail ?? game.art.cover}
+              alt={game.art.alt}
+              fill
+              /* 每張卡同寬（兩欄），sizes 必須貼齊實際渲染寬度，否則會下載到過小的檔再放大。 */
+              sizes="(max-width: 979px) calc(50vw - 24px), 480px"
+              className={styles.thumbImage}
+              style={{ objectPosition: game.art.position ?? "50% 50%" }}
+              /* 首張 preload（LCP），其餘 eager 但不佔 preload 預算。
+                 卡片本身由 .scrollEnter 淡入，圖若還在 lazy 佇列會再疊一層延遲。 */
+              priority={eager}
+              {...(eager ? {} : { loading: "eager" as const })}
+            />
+          )}
           {/* 封面只留玩法鈕：56px、依遊戲換圖示；首張卡輕微呼吸。副標與年齡不印在卡上。 */}
           <span
             className={`${styles.playFab}${eager ? ` ${styles.playFabLead}` : ""}`}
@@ -87,11 +100,12 @@ function GameCard({ game, eager }: { game: GameMeta; eager: boolean }) {
   );
 }
 
-/** 著色本第一站，接著消消樂、壽司屋。 */
+/** 著色本第一站，接著消消樂、壽司屋、小橘特快車。桌面也維持兩欄。 */
 const HUB_STATION_ORDER: readonly GameMeta["slug"][] = [
   "coloring-book",
   "candy-match",
   "dino-sushi",
+  "orange-express",
 ];
 
 const ORDERED_GAMES: GameMeta[] = HUB_STATION_ORDER.map((slug) => {

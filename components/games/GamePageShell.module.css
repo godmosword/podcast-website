@@ -66,12 +66,13 @@
 }
 
 /*
- * 夜間：消消樂、壽司屋、著色本的頁底鎖奶油，字色釘回日間墨色。
+ * 夜間：消消樂、壽司屋、著色本、小橘特快車的頁底鎖奶油，字色釘回日間墨色。
  * 棋盤、店面、著色紙本身不改。方塊轉轉不在這三條路由裡。
  */
 :global([data-theme="night"]) .main[data-game-id="candy-match"],
 :global([data-theme="night"]) .main[data-game-id="dino-sushi"],
-:global([data-theme="night"]) .main[data-game-id="coloring-book"] {
+:global([data-theme="night"]) .main[data-game-id="coloring-book"],
+:global([data-theme="night"]) .main[data-game-id="orange-express"] {
   --bg: var(--surface-game);
   --ink: var(--game-day-ink);
   --ink-soft: var(--game-day-ink-soft);
@@ -89,7 +90,8 @@
 
 :global([data-theme="night"] body:has(main[data-game-id="candy-match"])),
 :global([data-theme="night"] body:has(main[data-game-id="dino-sushi"])),
-:global([data-theme="night"] body:has(main[data-game-id="coloring-book"])) {
+:global([data-theme="night"] body:has(main[data-game-id="coloring-book"])),
+:global([data-theme="night"] body:has(main[data-game-id="orange-express"])) {
   --bg: var(--surface-game);
   --ink: var(--game-day-ink);
   --ink-soft: var(--game-day-ink-soft);
@@ -276,7 +278,8 @@
 
 /* 消消樂、壽司屋卡片跟著剩餘視窗長高、拉寬。外框是 GameChrome，遊戲面在它裡面。 */
 .main[data-game-id="candy-match"] .playArea > *,
-.main[data-game-id="dino-sushi"] .playArea > * {
+.main[data-game-id="dino-sushi"] .playArea > *,
+.main[data-game-id="orange-express"] .playArea > * {
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
@@ -286,7 +289,8 @@
 
 /* GameHost 在外框裡多包一層，這層也要跟著拉高，卡片才會吃滿。 */
 .main[data-game-id="candy-match"] .playArea > * > div:not(:global(.sr-only)),
-.main[data-game-id="dino-sushi"] .playArea > * > div:not(:global(.sr-only)) {
+.main[data-game-id="dino-sushi"] .playArea > * > div:not(:global(.sr-only)),
+.main[data-game-id="orange-express"] .playArea > * > div:not(:global(.sr-only)) {
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
@@ -295,7 +299,8 @@
 }
 
 .main[data-game-id="candy-match"] .playArea [data-screen],
-.main[data-game-id="dino-sushi"] .playArea [data-screen] {
+.main[data-game-id="dino-sushi"] .playArea [data-screen],
+.main[data-game-id="orange-express"] .playArea [data-screen] {
   flex: 1 1 auto;
   width: 100%;
 }
@@ -330,7 +335,8 @@
 }
 
 /* 壽司屋：夜間外框 12px 內距會讓 320 寬只剩 272px，托盤四欄塞不下。卡片自己有邊。 */
-:global([data-theme="night"]) .main[data-game-id="dino-sushi"] .playArea {
+:global([data-theme="night"]) .main[data-game-id="dino-sushi"] .playArea,
+:global([data-theme="night"]) .main[data-game-id="orange-express"] .playArea {
   padding: 0;
 }
 

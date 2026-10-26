@@ -75,6 +75,10 @@ export class GameKitAudioBus {
     return this.nodes?.sfx ?? null;
   }
 
+  get musicBus(): GainNode | null {
+    return this.nodes?.music ?? null;
+  }
+
   ensureContext(): AudioContext | null {
     if (typeof window === "undefined") return null;
     if (!this.ctx) {

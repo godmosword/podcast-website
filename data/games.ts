@@ -1,6 +1,6 @@
 type AgeBand = "explore" | "challenge";
 
-export type GameType = "match" | "blocks" | "coloring" | "cooking";
+export type GameType = "match" | "blocks" | "coloring" | "cooking" | "driving";
 
 type GameArt = {
   cover: string;
@@ -123,6 +123,32 @@ export const GAMES: GameMeta[] = [
       { text: "點填滿，整塊上色", gesture: "tap" },
     ],
   },
+  {
+    slug: "orange-express",
+    title: "小橘特快車",
+    desc: "坐上小橘的駕駛台，推左邊讓車走、拉右邊讓車停，到站開門接朋友。",
+    teaser: "開開車",
+    href: "/games/orange-express",
+    emoji: "🍊",
+    accent: "color-mix(in srgb, var(--c-yellow) 62%, var(--c-pink))",
+    ageBand: "explore",
+    ageRange: "3–7 歲",
+    estMinutes: 4,
+    hasScore: false,
+    hasTimer: false,
+    gameType: "driving",
+    controls: ["左邊推，車會走", "右邊拉，車會停", "門亮了就按"],
+    art: {
+      cover: "/games/v2/orange-express/cover.svg",
+      thumbnail: "/games/v2/orange-express/cover.svg",
+      alt: "奶油色圓臉、橘色條紋的小橘徽章",
+    },
+    tutorial: [
+      { text: "左邊讓車走", gesture: "arrows" },
+      { text: "右邊讓車停", gesture: "arrows" },
+      { text: "門亮了就開", gesture: "tap" },
+    ],
+  },
 ];
 
 /** 遊樂園動線：玩完 A 建議去 B。 */
@@ -130,7 +156,8 @@ export const GAMES: GameMeta[] = [
 export const GAME_NEXT: Record<string, string> = {
   "candy-match": "dino-sushi",
   "dino-sushi": "coloring-book",
-  "coloring-book": "candy-match",
+  "coloring-book": "orange-express",
+  "orange-express": "candy-match",
 };
 
 /**

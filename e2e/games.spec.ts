@@ -183,7 +183,7 @@ test.describe("遊樂園 hub", () => {
   test("卡片只留遊戲名稱，不顯示動作詞、年齡、時長與時間壓力", async ({ page }) => {
     await page.goto("/games");
     const cards = page.locator('main a[href^="/games/"]');
-    await expect(cards).toHaveCount(3);
+    await expect(cards).toHaveCount(4);
     for (const card of await cards.all()) {
       await expect(card).not.toContainText(/塗一塗|找一樣|做壽司|排一排/);
       await expect(card).not.toContainText(/\d+–\d+ 歲/);
@@ -196,20 +196,25 @@ test.describe("遊樂園 hub", () => {
     expect(box!.width).toBeGreaterThanOrEqual(52);
   });
 
-  test("hub 只留三張遊戲卡，不顯示車庫進度", async ({ page }) => {
+  test("hub 只留四張遊戲卡，不顯示車庫進度", async ({ page }) => {
     await page.goto("/games");
     await expect(page.getByRole("heading", { name: "園裡的站" })).toHaveCount(0);
     await expect(page.getByText(/收集了 \d+ 顆星星/)).toHaveCount(0);
     await expect(page.getByRole("list", { name: "車庫" })).toHaveCount(0);
     await expect(page.getByRole("list", { name: "小遊戲" })).toBeVisible();
-    await expect(page.locator('main a[href^="/games/"]')).toHaveCount(3);
+    await expect(page.locator('main a[href^="/games/"]')).toHaveCount(4);
   });
 
-  test("手機兩欄、桌面一排三欄，站序著色 → 消消樂 → 壽司", async ({ page }) => {
-    const order = ["/games/coloring-book", "/games/candy-match", "/games/dino-sushi"];
+  test("手機與桌面都是兩欄，站序著色 → 消消樂 → 壽司 → 小橘", async ({ page }) => {
+    const order = [
+      "/games/coloring-book",
+      "/games/candy-match",
+      "/games/dino-sushi",
+      "/games/orange-express",
+    ];
     for (const [viewport, cols] of [
       [{ width: 390, height: 844 }, 2],
-      [{ width: 1280, height: 800 }, 3],
+      [{ width: 1280, height: 800 }, 2],
     ] as const) {
       await page.setViewportSize(viewport);
       await page.goto("/games");

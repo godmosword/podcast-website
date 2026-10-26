@@ -45,6 +45,23 @@ const BGM_THEMES: Partial<Record<GameKitGameId, BgmTheme>> = {
       [C3, R, R, R, E3, R, R, R, D3, R, R, R, G3, R, R, R],
     ],
   },
+  // 小橘特快車：自己的三角波小調，音量維持很低
+  "orange-express": {
+    bpm: 96,
+    stepsPerBeat: 4,
+    melodyWave: "triangle",
+    bassWave: "triangle",
+    melodyVol: 0.06,
+    bassVol: 0.045,
+    melody: [
+      [E5, R, G5, R, A5, R, G5, E5, D5, R, E5, R, G5, R, R, R],
+      [C5, R, D5, R, E5, R, G5, E5, D5, R, C5, R, D5, R, R, R],
+    ],
+    bass: [
+      [A3, R, R, R, E3, R, R, R, G3, R, R, R, A3, R, R, R],
+      [C3, R, R, R, G3, R, R, R, E3, R, R, R, C3, R, R, R],
+    ],
+  },
   // 多多壽司屋：迴轉壽司店的輕快小調，比消消樂稍快但同樣柔和
   "dino-sushi": {
     bpm: 100,

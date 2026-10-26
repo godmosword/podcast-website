@@ -17,6 +17,11 @@ const KEY_MAP: Record<string, GameAction> = {
   p: "pause",
 };
 
+/** 這顆鍵對應的 Game Kit 動作；沒有對應回 null。 */
+export function keyAction(key: string): GameAction | null {
+  return KEY_MAP[key.toLowerCase()] ?? null;
+}
+
 const GAMEPAD_BUTTON_MAP: Partial<Record<number, GameAction>> = {
   0: "action",
   1: "cancel",

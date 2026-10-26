@@ -1,0 +1,203 @@
+"use client";
+
+import { useEffect, useRef, type Ref } from "react";
+import { OrangeExpressStopBar } from "@/components/games/OrangeExpressStopBar";
+import { COPY, POINT_CALL } from "@/lib/games/orange-express/copy";
+import { windowNotice } from "@/lib/games/orange-express/notice";
+import { currentStation, pendingPoint } from "@/lib/games/orange-express/reducer";
+import { drawWindshield, windshieldFrame } from "@/lib/games/orange-express/windshield";
+import type { PassengerId, RunState } from "@/lib/games/orange-express/types";
+import styles from "./orange-express.module.css";
+
+type RiderProps = { id: PassengerId };
+
+function RiderFace({ id }: RiderProps) {
+  if (id === "mami") {
+    return (
+      <svg viewBox="0 0 48 48" aria-hidden>
+        <circle cx="24" cy="26" r="14" fill="rgb(255, 224, 196)" />
+        <path d="M10 24c2-12 26-12 28 0" fill="rgb(120, 78, 52)" />
+        <rect x="8" y="20" width="6" height="10" rx="3" fill="rgb(255, 150, 80)" />
+        <rect x="34" y="20" width="6" height="10" rx="3" fill="rgb(255, 150, 80)" />
+        <circle cx="19" cy="26" r="2" fill="rgb(50, 42, 36)" />
+        <circle cx="29" cy="26" r="2" fill="rgb(50, 42, 36)" />
+        <path d="M20 32c2 2 6 2 8 0" fill="none" stroke="rgb(50, 42, 36)" strokeWidth="1.6" />
+      </svg>
+    );
+  }
+  if (id === "xiaonan") {
+    return (
+      <svg viewBox="0 0 48 48" aria-hidden>
+        <rect x="8" y="16" width="32" height="20" rx="8" fill="rgb(236, 240, 244)" />
+        <rect x="8" y="24" width="32" height="5" fill="rgb(90, 160, 210)" />
+        <rect x="8" y="29" width="32" height="3" fill="rgb(120, 190, 140)" />
+        <circle cx="18" cy="22" r="2" fill="rgb(50, 42, 36)" />
+        <circle cx="30" cy="22" r="2" fill="rgb(50, 42, 36)" />
+        <path d="M20 31c2 2 6 2 8 0" fill="none" stroke="rgb(50, 42, 36)" strokeWidth="1.6" />
+      </svg>
+    );
+  }
+  if (id === "dot") {
+    return (
+      <svg viewBox="0 0 48 48" aria-hidden>
+        <rect x="10" y="12" width="28" height="28" rx="8" fill="rgb(190, 160, 230)" />
+        <circle cx="19" cy="24" r="2" fill="rgb(50, 42, 36)" />
+        <circle cx="29" cy="24" r="2" fill="rgb(50, 42, 36)" />
+        <path d="M20 30c2 2 6 2 8 0" fill="none" stroke="rgb(50, 42, 36)" strokeWidth="1.6" />
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 48 48" aria-hidden>
+      <circle cx="24" cy="28" r="13" fill="rgb(255, 224, 196)" />
+      <circle cx="24" cy="16" r="10" fill="rgb(140, 96, 64)" />
+      <circle cx="19" cy="28" r="2" fill="rgb(50, 42, 36)" />
+      <circle cx="29" cy="28" r="2" fill="rgb(50, 42, 36)" />
+      <circle cx="15" cy="32" r="2.4" fill="rgb(255, 170, 180)" />
+      <circle cx="33" cy="32" r="2.4" fill="rgb(255, 170, 180)" />
+      <path d="M20 33c2 3 6 3 8 0" fill="none" stroke="rgb(50, 42, 36)" strokeWidth="1.6" />
+    </svg>
+  );
+}
+
+/** 速限牌的小圖：跟前窗畫的一樣，紅圈白底、幾條直槓，不寫數字。 */
+export function SignGlyph({ bars }: { bars: 1 | 2 | 3 }) {
+  return (
+    <svg viewBox="0 0 32 32" aria-hidden className={styles.signGlyph}>
+      <circle cx="16" cy="16" r="15" fill="rgb(232, 106, 74)" />
+      <circle cx="16" cy="16" r="11" fill="rgb(255, 252, 244)" />
+      {[0, 1, 2].map((i) =>
+        i < bars ? (
+          <rect key={i} x={9.5 + i * 5} y={21 - (4 + i * 3.5)} width="3.4" height={4 + i * 3.5} rx="1" fill="rgb(58, 46, 40)" />
+        ) : null,
+      )}
+    </svg>
+  );
+}
+
+function PointIcon() {
+  return (
+    <svg viewBox="0 0 32 32" aria-hidden className={styles.pointIcon}>
+      <path
+        d="M4 15h13a3 3 0 0 1 0 6h-2v1a3 3 0 0 1-3 3H8a4 4 0 0 1-4-4z"
+        fill="rgb(255, 224, 196)"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <path d="M12 15h16a2.5 2.5 0 0 1 0 5H17" fill="rgb(255, 224, 196)" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function OrangeExpressWindshield({
+  run,
+  reduced,
+  numbers,
+  swayRef,
+  onPoint,
+}: {
+  run: RunState;
+  reduced: boolean;
+  numbers: boolean;
+  swayRef: Ref<HTMLDivElement>;
+  onPoint: () => void;
+}) {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const frame = windshieldFrame(run.progress, run.phase);
+  const station = run.stations[run.stationIndex];
+  const here = currentStation(run);
+  const target = here.target;
+  const showRiders = frame === 2 && station != null;
+  const notice = windowNotice(run, numbers);
+  const task = pendingPoint(run);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const draw = () => {
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+      const cssW = canvas.clientWidth;
+      const cssH = canvas.clientHeight;
+      if (cssW < 2 || cssH < 2) return;
+      const nav = navigator as Navigator & { connection?: { saveData?: boolean } };
+      const dpr =
+        cssW < 360 || nav.connection?.saveData === true
+          ? 1
+          : Math.min(window.devicePixelRatio || 1, 1.5);
+      const nextW = Math.round(cssW * dpr);
+      const nextH = Math.round(cssH * dpr);
+      if (canvas.width !== nextW || canvas.height !== nextH) {
+        canvas.width = nextW;
+        canvas.height = nextH;
+      }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      drawWindshield(ctx, cssW, cssH, {
+        progress: run.progress,
+        phase: run.phase,
+        reduced,
+        target,
+        scene: here.scene,
+        tunnel: here.tunnel,
+        bridge: here.bridge,
+        signs: here.signs,
+        passing: run.passing,
+      });
+    };
+    draw();
+    const observer = new ResizeObserver(draw);
+    observer.observe(canvas);
+    return () => observer.disconnect();
+  }, [reduced, run.phase, run.progress, run.passing, here, target]);
+
+  return (
+    <div
+      className={styles.windshield}
+      data-testid="orange-express-windshield"
+      data-scene={here.scene}
+      data-notice={notice?.kind ?? "none"}
+    >
+      <div ref={swayRef} className={styles.glassWrap}>
+        <canvas ref={canvasRef} className={styles.glass} aria-hidden />
+      </div>
+      <span className={styles.pillarLeft} aria-hidden />
+      <span className={styles.pillarRight} aria-hidden />
+      <OrangeExpressStopBar run={run} numbers={numbers} />
+      {notice && !showRiders ? (
+        <p className={styles.notice} data-kind={notice.kind} data-testid="orange-express-notice">
+          {notice.bars ? <SignGlyph bars={notice.bars} /> : null}
+          {notice.text}
+        </p>
+      ) : null}
+      {task ? (
+        <button
+          type="button"
+          className={styles.pointTask}
+          data-kind={task.kind}
+          data-testid="orange-express-point"
+          onClick={onPoint}
+        >
+          <PointIcon />
+          <span>
+            <small>{COPY.point}</small>
+            {POINT_CALL[task.kind]}
+          </span>
+        </button>
+      ) : null}
+      {showRiders ? (
+        <ul className={styles.riders} aria-label="月台上的朋友">
+          {station.passengers.map((rider, index) => (
+            <li
+              key={rider.id}
+              data-boarded={run.phase === "doors-open" && index < run.boarded ? "true" : "false"}
+            >
+              <RiderFace id={rider.id} />
+              <span>{rider.name}</span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  );
+}

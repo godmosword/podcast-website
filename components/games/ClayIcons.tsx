@@ -142,6 +142,34 @@ export function IconChevronRight({ size, color = "currentColor", style }: IconPr
   );
 }
 
+/** 上移（↑） */
+export function IconChevronUp({ size, color = "currentColor", style }: IconProps) {
+  return (
+    <Svg size={size} style={style}>
+      <path d="M6.5 14.5 12 8.5l5.5 6" {...stroke(color)} />
+    </Svg>
+  );
+}
+
+/** 下移（↓） */
+export function IconChevronDown({ size, color = "currentColor", style }: IconProps) {
+  return (
+    <Svg size={size} style={style}>
+      <path d="M6.5 9.5 12 15.5l5.5-6" {...stroke(color)} />
+    </Svg>
+  );
+}
+
+/** 空白鍵 */
+export function IconSpaceKey({ size, color = "currentColor", style }: IconProps) {
+  return (
+    <Svg size={size} style={style}>
+      <rect x="2.5" y="7" width="19" height="10" rx="2.6" {...stroke(color)} />
+      <path d="M7 11.5v2h10v-2" {...stroke(color)} />
+    </Svg>
+  );
+}
+
 /** 下滑 */
 export function IconSwipeDown({ size, color = "currentColor", style }: IconProps) {
   return (
@@ -353,6 +381,19 @@ export function IconArrowRight({ size, color = "currentColor", style }: IconProp
     <Svg size={size} style={style}>
       <path d="M4.5 12h14" {...stroke(color)} strokeWidth={2.6} />
       <path d="M12.5 6l6 6-6 6" {...stroke(color)} strokeWidth={2.6} />
+    </Svg>
+  );
+}
+
+/** 小橘：奶油車身、橘色條紋、圓眼睛，沒有手腳。只吃 currentColor 與呼叫端的填色。 */
+export function IconTrain({ size, color = "currentColor", style }: IconProps) {
+  return (
+    <Svg size={size} style={style}>
+      <rect x="2" y="7" width="20" height="11" rx="5.5" stroke={color} strokeWidth={2} />
+      <rect x="2" y="11.5" width="20" height="2.4" fill={color} />
+      <circle cx="8" cy="10" r="1.1" fill={color} />
+      <circle cx="13" cy="10" r="1.1" fill={color} />
+      <path d="M8 15.2c1.2 1.2 4.2 1.2 5.4 0" stroke={color} strokeWidth={1.6} strokeLinecap="round" />
     </Svg>
   );
 }

@@ -21,6 +21,8 @@ export type GameSessionResult = {
   gameId: GameScoreId;
   score: number;
   candyMode?: "easy" | "challenge";
+  /** 小橘特快車這一輪的檔。只做紀錄，不另開存檔欄位。 */
+  orangeExpressLevel?: "look" | "drive" | "captain";
   /** 關卡索引。 */
   levelIndex?: number;
   cleared?: boolean;
