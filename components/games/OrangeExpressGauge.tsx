@@ -33,7 +33,8 @@ export function OrangeExpressGauge({
   const zone = gaugeZone(speed, limit);
   const angle = speedToAngle(speed);
   const flagAngle = speedToAngle(limit);
-  const flagTip = polar(C, C, BAND_R + 14, flagAngle);
+  const flagFoot = polar(C, C, BAND_R + 6, flagAngle);
+  const flagTip = polar(C, C, BAND_R + 22, flagAngle);
   const now = Math.round(Math.min(100, Math.max(0, (speed / (limit > 0 ? limit : 1)) * 100)));
   const ticks = gaugeTicks();
 
@@ -92,11 +93,20 @@ export function OrangeExpressGauge({
                 );
               })
           : null}
-        <path
-          d={`M${flagTip.x.toFixed(1)} ${flagTip.y.toFixed(1)}l0 -14l11 4.5l-11 4.5`}
-          transform={`rotate(${flagAngle} ${flagTip.x.toFixed(1)} ${flagTip.y.toFixed(1)})`}
-          className={styles.gaugeFlag}
-        />
+        <g data-testid="orange-express-gauge-flag">
+          <line
+            x1={flagFoot.x}
+            y1={flagFoot.y}
+            x2={flagTip.x}
+            y2={flagTip.y}
+            className={styles.gaugeFlagPole}
+          />
+          <path
+            d={`M${flagTip.x.toFixed(1)} ${flagTip.y.toFixed(1)}l13 4l-13 6z`}
+            transform={`rotate(${flagAngle} ${flagTip.x.toFixed(1)} ${flagTip.y.toFixed(1)})`}
+            className={styles.gaugeFlag}
+          />
+        </g>
         <g className={styles.needle} style={{ transform: `rotate(${angle}deg)` }}>
           <path d="M96 104L100 26L104 104Z" className={styles.needleBody} />
         </g>

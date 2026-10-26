@@ -174,8 +174,8 @@ function drawPortals(ctx: CanvasRenderingContext2D, view: View, travel: number):
     ctx.fillRect(left.x, left.y - width / 2, right.x - left.x, width);
   }
   const wireWidth = Math.max(1, view.w / 420);
-  line(ctx, view, 0, 5.4, Z_NEAR, Z_FAR, WIRE, wireWidth);
-  line(ctx, view, 4.6, 5.4, Z_NEAR, Z_FAR, WIRE, wireWidth);
+  line(ctx, view, 0, 5.4, 9, Z_FAR, WIRE, wireWidth);
+  line(ctx, view, 4.6, 5.4, 9, Z_FAR, WIRE, wireWidth);
 }
 
 function drawPlatform(ctx: CanvasRenderingContext2D, view: View, travel: number, targetWorld: number): void {

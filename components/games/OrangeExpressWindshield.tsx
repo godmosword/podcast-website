@@ -116,7 +116,6 @@ export function OrangeExpressWindshield({
       </div>
       <span className={styles.pillarLeft} aria-hidden />
       <span className={styles.pillarRight} aria-hidden />
-      <span className={styles.wiper} aria-hidden />
       <OrangeExpressStopBar run={run} numbers={numbers} />
       {showRiders ? (
         <ul className={styles.riders} aria-label="月台上的朋友">
