@@ -128,7 +128,7 @@ function applyMotion(state: RunState, dt: number): RunState {
   if (speed < 0) speed = 0;
   speed = quant(speed);
 
-  let progress = quant(state.progress + state.speed * PROGRESS_RATE * dt);
+  const progress = quant(state.progress + state.speed * PROGRESS_RATE * dt);
 
   if (progress > station.window.end) {
     if (speed <= epsilon) {

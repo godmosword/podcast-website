@@ -58,12 +58,15 @@ function GameCard({ game, eager }: { game: GameMeta; eager: boolean }) {
       >
         <div className={styles.thumb}>
           {(game.art.thumbnail ?? game.art.cover).endsWith(".svg") ? (
-            <img
-              src={game.art.thumbnail ?? game.art.cover}
-              alt={game.art.alt}
-              className={styles.thumbSvg}
-              data-art="placeholder"
-            />
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element -- SVG 不走 next/image，避免優化器處理向量圖 */}
+              <img
+                src={game.art.thumbnail ?? game.art.cover}
+                alt={game.art.alt}
+                className={styles.thumbSvg}
+                data-art="placeholder"
+              />
+            </>
           ) : (
             <Image
               src={game.art.thumbnail ?? game.art.cover}
