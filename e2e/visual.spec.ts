@@ -307,6 +307,14 @@ const COMPONENT_SHOTS: {
     locator: (page) => page.locator("li#ty-kids-museum"),
   },
   {
+    id: "place-nearby",
+    name: "景點詳情：附近還能去哪裡（地圖卡語彙）",
+    path: "/for-parents/play-map/ty-kids-museum",
+    viewport: { width: 390, height: 844 },
+    // 凍結資料下附近景點固定是同一批（桃園三個 fixture 景點），類型圓章與卡框都在這張裡。
+    locator: (page) => page.locator('section[aria-labelledby="nearby-heading"]'),
+  },
+  {
     id: "landing-cta-row",
     name: "Landing 首段 CTA 文字塊",
     path: "/",

@@ -32,6 +32,11 @@ test.describe("親子景點 detail pages", () => {
     await expect(
       page.getByRole("heading", { level: 1, name: "桃園市立兒童美術館" }),
     ).toBeVisible();
+    // 事實是名稱下面一行純文字（和地圖詳情 sheet 一樣），不是 pill，也不再是獨立的一張卡
+    const facts = page.locator("header").getByRole("list", { name: "地點重點" });
+    await expect(facts.getByRole("listitem")).toHaveText(["免費", "室內", /^適合/]);
+    await expect(facts.getByRole("listitem").first()).toHaveCSS("border-top-width", "0px");
+    await expect(page.getByRole("heading", { name: "先看今天適不適合" })).toHaveCount(0);
     await expect(page.getByRole("heading", { name: "媽米帶孩子時會注意" })).toBeVisible();
     await expect(page.getByRole("link", { name: /開始導航前往/ })).toBeVisible();
     await expect(page.getByRole("link", { name: /官方網站/ })).toBeVisible();

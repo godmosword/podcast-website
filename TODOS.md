@@ -37,7 +37,8 @@ Plan：`~/.claude/plans/play-map-scenarios.md`（v2；情境卡＋選縣市 dial
 - 審查：Codex 工程審 Approve with changes，HIGH（面板關閉後焦點返還順序）與 MEDIUM（捲動鎖還原測試、選縣市後捲動的競態）已修；「面板展開時重建黏住判定」未改（IntersectionObserver 本就依幾何變化觸發）。Opus 設計審兩次都因 API 逾時中斷，標缺席。
 - 待辦：Opus 設計審補跑（看已上線版本）。
 - 待辦：真機（iOS Safari）確認選縣市面板開著時頁面不會跟著捲、關閉後回到原位。
-- 後續（本輪不做）：`/for-parents/play-map/[placeId]` 與 `collections/` 頁沿用類型圓章與 `--pm-*` 卡片語彙。
+- ✅ 後續：`/for-parents/play-map/[placeId]` 與 `collections/` 頁沿用類型圓章與 `--pm-*` 卡片語彙。類型黏土圓章抽成共用 `PlaygroundTypeBadge`（名單卡、詳情、各地整理共用）；詳情頁與各地整理頁頁底改 `--pm-page`、區塊與卡片改 `--card`＋`--pm-card-line`＋`--elev-1`（夜間框線加深）；詳情頁頁首＝圓章＋類型 · 縣市 · 區 → 名稱 → 一行純文字事實（「先看今天適不適合」那張只放三個 pill 的卡拿掉，事實不再是 pill）；附近景點卡＝圓章＋類型＋右側距離 → 名稱＋箭頭 → 縣市 · 區，外層不再包卡框；各地整理卡同名單卡層級、事實行貼齊卡底、只寫區（整頁同縣市）。清單都補 `role="list"`（Safari／VoiceOver）。Codex 工程審兩輪、Opus 設計審（Approve with changes）已修。見本 commit。
+- 後續（本輪不做，Opus 設計審 T4 提出）：**夜間實心主鈕看不見**——`--cta-solid-bg` 夜間仍是 `--landing-brand-ink`（#2a1808），壓在深色頁底上對比約 1.2:1，旁邊有框的次鈕反而更醒目；全站 7 處主鈕共用，要改 token 而不是單頁補。`design · M · 無`
 
 ### 親子遊樂地圖簡化改版（2026-10-18）　`design · L · 無`　✅ 見本 commit
 

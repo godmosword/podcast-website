@@ -72,60 +72,6 @@
   min-width: 0;
 }
 
-/*
- * 類型黏土圓章：左上亮面＋下緣暗邊（純色塊，不用 blur），剪影固定深墨。
- * 色相與地圖針一致：公園薄荷、室內樂園天藍、主題樂園粉、博物館淡紫、動物園青、農場黃、其他沙。
- */
-.typeBadge {
-  --type-color: var(--c-mint);
-  display: grid;
-  flex: none;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  padding: 7px;
-  border-radius: var(--radius-circle);
-  background:
-    radial-gradient(
-      circle at 34% 28%,
-      color-mix(in srgb, var(--type-color) 55%, white) 0 22%,
-      transparent 52%
-    ),
-    var(--type-color);
-  box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--type-color) 72%, black);
-  color: var(--pm-type-ink);
-}
-
-.typeBadge svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.typeBadge[data-type="indoor-park"] {
-  --type-color: var(--c-sky);
-}
-
-.typeBadge[data-type="theme-park"] {
-  --type-color: var(--c-pink);
-}
-
-.typeBadge[data-type="museum"] {
-  --type-color: var(--c-lilac);
-}
-
-.typeBadge[data-type="zoo"] {
-  --type-color: var(--c-teal);
-}
-
-.typeBadge[data-type="farm"] {
-  --type-color: var(--c-yellow);
-}
-
-.typeBadge[data-type="other"] {
-  --type-color: var(--pm-type-other);
-}
-
 .cardTypeLabel {
   color: var(--ink-soft);
   font-size: var(--fs-label);

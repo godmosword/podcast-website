@@ -32,6 +32,7 @@ import { formatVerifiedMonthLabel } from "@/lib/playground-parent-voice";
 import Icon from "@/components/ui/Icon";
 import styles from "./page.module.css";
 import { storyDisplayTitle } from "@/lib/story-title";
+import { PlaygroundTypeBadge } from "@/components/for-parents/PlaygroundTypeBadge";
 
 type PlaceDetailPageProps = {
   params: Promise<{ placeId: string }>;
@@ -112,7 +113,7 @@ function DecisionFlags({
   ];
 
   return (
-    <ul className={styles.flags} aria-label="地點重點">
+    <ul className={styles.headerFacts} role="list" aria-label="地點重點">
       {flags.map((flag) => (
         <li key={flag}>{flag}</li>
       ))}
@@ -154,11 +155,14 @@ export default async function PlaygroundDetailPage({
         <article className={styles.article}>
           <header className={styles.header}>
             <p className={styles.eyebrow}>
-              {place.city}
-              {place.district ? ` · ${place.district}` : ""}
-              {` · ${place.type}`}
+              <PlaygroundTypeBadge type={place.type} />
+              <span className={styles.eyebrowType}>{place.type}</span>
+              <span className={styles.dotted}>{place.city}</span>
+              {place.district ? <span className={styles.dotted}>{place.district}</span> : null}
             </p>
             <h1 className={styles.title}>{place.name}</h1>
+            {/* 事實是一行純文字（和地圖詳情 sheet 一樣），不做成 pill：pill 會被讀成可點的篩選 */}
+            <DecisionFlags place={place} />
           </header>
 
           {place.status === "temporarily-closed" ? (
@@ -169,16 +173,6 @@ export default async function PlaygroundDetailPage({
               </span>
             </p>
           ) : null}
-
-          <section
-            className={styles.decisionSection}
-            aria-labelledby="decision-heading"
-          >
-            <h2 id="decision-heading" className={styles.sectionTitle}>
-              先看今天適不適合
-            </h2>
-            <DecisionFlags place={place} />
-          </section>
 
           <section
             className={styles.parentNote}
@@ -278,7 +272,7 @@ export default async function PlaygroundDetailPage({
 
           {nearby.length > 0 ? (
             <section
-              className={styles.infoSection}
+              className={styles.nearbySection}
               aria-labelledby="nearby-heading"
             >
               <h2 id="nearby-heading" className={styles.sectionTitle}>
@@ -288,18 +282,22 @@ export default async function PlaygroundDetailPage({
                 {nearby.map(({ place: nearbyPlace, distanceKm }) => (
                   <li key={nearbyPlace.id}>
                     <Link href={playgroundDetailPath(nearbyPlace.id)}>
+                      <span className={styles.nearbyType}>
+                        <PlaygroundTypeBadge type={nearbyPlace.type} />
+                        {nearbyPlace.type}
+                        <span className={styles.nearbyDistance}>
+                          {formatNearbyDistanceLabel(distanceKm)}
+                        </span>
+                      </span>
                       <span className={styles.nearbyName}>
                         {nearbyPlace.name}
+                        <Icon name="arrow-right" size={20} className={styles.nearbyArrow} />
                       </span>
                       <span className={styles.nearbyMeta}>
-                        {nearbyPlace.city}
-                        {nearbyPlace.district
-                          ? ` · ${nearbyPlace.district}`
-                          : ""}
-                        {` · ${nearbyPlace.type}`}
-                      </span>
-                      <span className={styles.nearbyDistance}>
-                        {formatNearbyDistanceLabel(distanceKm)}
+                        <span>{nearbyPlace.city}</span>
+                        {nearbyPlace.district ? (
+                          <span className={styles.dotted}>{nearbyPlace.district}</span>
+                        ) : null}
                       </span>
                     </Link>
                   </li>

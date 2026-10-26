@@ -3,7 +3,8 @@
   padding: calc(20px + var(--safe-top)) calc(16px + var(--safe-right))
     calc(40px + var(--safe-bottom)) calc(16px + var(--safe-left));
   color: var(--ink);
-  background: linear-gradient(145deg, var(--page-warm-from), var(--bg));
+  /* 和地圖頁同一張奶油頁底（夜間 --pm-page 等於 --bg）。 */
+  background: var(--pm-page);
 }
 
 .shell {

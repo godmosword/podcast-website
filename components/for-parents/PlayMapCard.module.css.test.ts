@@ -15,13 +15,14 @@ describe("PlayMapCard.module.css 契約", () => {
     );
   });
 
-  it("卡框不依類型著色；類型色只在圓章上，七類都有色", () => {
+  it("卡框不依類型著色；類型色只在圓章上（共用 PlaygroundTypeBadge），七類都有色", () => {
     expect(css).not.toMatch(/\.card[^{]*\[data-type/);
     expect(css).not.toMatch(/--card-accent/);
+    const badge = readFileSync(join(import.meta.dirname, "PlaygroundTypeBadge.module.css"), "utf8");
     for (const key of ["indoor-park", "theme-park", "museum", "zoo", "farm", "other"]) {
-      expect(css).toContain(`.typeBadge[data-type="${key}"]`);
+      expect(badge).toContain(`.badge[data-type="${key}"]`);
     }
-    expect(css).toMatch(/\.typeBadge\s*\{[^}]*color:\s*var\(--pm-type-ink\)/s);
+    expect(badge).toMatch(/\.badge\s*\{[^}]*color:\s*var\(--pm-type-ink\)/s);
   });
 
   it("理由行走 --pm-reason token（日夜對比由 globals 對比測試把關）", () => {

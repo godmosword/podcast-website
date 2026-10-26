@@ -1,23 +1,40 @@
+/*
+ * 各地整理的景點卡：和地圖名單卡（PlayMapCard）同一套語彙。
+ * 卡框 --card＋--pm-card-line＋--elev-1，不依類型著色；類型色只在左上圓章。
+ */
 .card {
-  display: block;
+  display: flex;
+  flex-direction: column;
   height: 100%;
-  padding: 20px;
+  padding: var(--space-4);
   color: var(--ink);
   text-decoration: none;
   background: var(--card);
-  border: 1px solid var(--line);
+  border: 1px solid var(--pm-card-line);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--elev-1);
   transition:
     transform var(--motion-press),
-    box-shadow var(--motion-press),
-    border-color var(--motion-press);
+    box-shadow var(--motion-press);
 }
 
-.card:hover {
-  border-color: var(--accent);
-  box-shadow: var(--elev-2);
-  transform: translateY(-2px);
+/* 夜間 --elev-1 幾乎看不見，邊界只剩框線；加深一階，卡片輪廓才讀得出來。 */
+:global([data-theme="night"]) .card {
+  border-color: color-mix(in srgb, var(--ink) 22%, transparent);
+}
+
+@media (hover: hover) {
+  .card:hover {
+    box-shadow: var(--elev-2);
+    transform: translateY(-2px);
+  }
+}
+
+/* 同一列的卡 tips 行數不同時，事實行仍貼齊卡底。 */
+.card > article {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
 }
 
 .card:focus-visible {
@@ -25,17 +42,31 @@
   outline-offset: 3px;
 }
 
+.type {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: var(--fs-label);
+  font-weight: 700;
+}
+
 .heading {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-3);
+  margin-top: 8px;
 }
 
 .heading h3 {
   margin: 0;
-  font-size: var(--fs-h3);
-  line-height: 1.35;
+  color: var(--ink);
+  font-family: var(--font-stack-display);
+  font-size: var(--fs-h3-compact);
+  font-weight: 700;
+  line-height: 1.3;
 }
 
 .arrow {
@@ -44,42 +75,43 @@
   color: var(--accent-ink);
 }
 
-.meta {
+.excerpt {
   margin: 8px 0 0;
+  color: var(--ink);
+  font-size: var(--fs-control);
+  font-weight: 500;
+  line-height: 1.55;
+}
+
+/* 區 · 事實：小字純文字，和地圖名單卡的最後一行一樣。 */
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 10px;
   color: var(--ink-soft);
   font-size: var(--fs-label);
-  line-height: 1.5;
+  font-weight: 600;
+  line-height: 1.45;
 }
 
 .flags {
-  display: flex;
+  display: inline-flex;
   flex-wrap: wrap;
-  gap: 6px;
+  margin: 0;
   padding: 0;
-  margin: 14px 0 0;
   list-style: none;
 }
 
-.flags li {
-  padding: 4px 8px;
-  color: var(--ink);
-  font-size: var(--fs-meta);
-  line-height: 1.3;
-  background: var(--warm-chip-bg);
-  border-radius: var(--radius-pill);
+.flags li::before {
+  content: "·";
+  margin-inline: 0.35em;
 }
 
+/* 「免費」整理頁的每一張都免費，這一格放輕，不搶其他事實（顏色不變，對比照舊）。 */
 .flags li[data-redundant-flag="true"] {
-  color: var(--ink-soft);
-  background: transparent;
-  border: 1px solid var(--line);
-}
-
-.excerpt {
-  margin: 14px 0 0;
-  color: var(--ink);
-  font-size: var(--fs-control);
-  line-height: 1.7;
+  font-weight: 400;
 }
 
 @media (prefers-reduced-motion: reduce) {

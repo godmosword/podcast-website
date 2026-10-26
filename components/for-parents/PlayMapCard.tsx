@@ -2,10 +2,9 @@
 
 import { buildGoogleMapsNavUrl, type Playground } from "@/data/playgrounds";
 import { composeParentBlurb } from "@/lib/playground-parent-voice";
-import { playgroundTypeGlyphSvg } from "@/lib/playground-type-glyph";
-import { playgroundTypeVisualKey } from "@/lib/playground-type-visual";
 import Icon from "@/components/ui/Icon";
 import type { PlayMapCardProps } from "./PlayMapContract";
+import { PlaygroundTypeBadge } from "./PlaygroundTypeBadge";
 import styles from "./PlayMapCard.module.css";
 
 type CardBinaryFact = {
@@ -25,22 +24,6 @@ export function listPlayMapCardBinaryFacts(
     { label: place.free ? "免費" : "需購票", kind: "fee" },
     { label: place.indoor ? "室內" : "戶外", kind: "environment" },
   ];
-}
-
-/**
- * 類型黏土圓章：和地圖針同一組剪影與色相（雙重編碼），名單和地圖讀成同一套。
- * 剪影字串是 lib/playground-type-glyph 的靜態常數，不含外部輸入。
- */
-function TypeBadge({ type }: { type: Playground["type"] }) {
-  const key = playgroundTypeVisualKey(type);
-  return (
-    <span
-      className={styles.typeBadge}
-      data-type={key}
-      aria-hidden
-      dangerouslySetInnerHTML={{ __html: playgroundTypeGlyphSvg(key) }}
-    />
-  );
 }
 
 /**
@@ -111,7 +94,7 @@ export function PlayMapCard({
           onClick={(event) => onSelect(place.id, event.currentTarget)}
         >
           <span className={styles.cardType}>
-            <TypeBadge type={place.type} />
+            <PlaygroundTypeBadge type={place.type} />
             <span className={styles.cardTypeLabel}>{place.type}</span>
             {closed ? (
               <span className={styles.cardClosed}>暫停營業</span>
