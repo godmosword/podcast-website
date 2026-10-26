@@ -65,7 +65,7 @@ export type GameEndStationProps = {
 
 const MOOD_TITLES: Record<GameEndMood, readonly string[]> = {
   win: ["好厲害！", "太棒了！", "你做到了！"],
-  retry: ["差一點！再來一次", "沒關係，再玩就好"],
+  retry: ["沒關係，再玩就好"],
   over: ["這局好玩！再衝一次", "玩得開心！再來一次"],
 };
 

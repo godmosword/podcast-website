@@ -210,6 +210,16 @@ describe("LandingSegment.module.css touch targets", () => {
     }
   });
 
+  it("睡前長句在窄螢幕縮小字級，嘟嘟槽維持原尺寸", () => {
+    expect(css).toMatch(
+      /@media \(max-width: 420px\)[\s\S]*\.cta\[data-long="true"\]\s*\{[^}]*font-size:\s*0\.95rem/,
+    );
+    expect(css).toMatch(
+      /@media \(max-width: 360px\)[\s\S]*\.cta\[data-long="true"\]\s*\{[^}]*font-size:\s*0\.78rem/,
+    );
+    expect(css).toMatch(/--landing-dudu-slot:\s*clamp\(80px,\s*11vw,\s*118px\)/);
+  });
+
   it("不得用 #segment-stories 解除 titleHidden 或 siteIntro sr-only", () => {
     expect(css).not.toMatch(/:global\(#segment-stories\)\s+\.titleHidden/);
     expect(css).not.toMatch(/:global\(#segment-stories\)\s+:global\(\.sr-only\)/);

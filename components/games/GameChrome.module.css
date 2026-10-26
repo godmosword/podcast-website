@@ -68,7 +68,7 @@
   border-radius: var(--radius-lg);
   border: 1.5px solid var(--line);
   background: linear-gradient(160deg, var(--card), var(--card-2));
-  box-shadow: var(--shadow-md), 0 8px 0 color-mix(in srgb, var(--ink) 8%, transparent);
+  box-shadow: var(--shadow-md), 0 4px 0 color-mix(in srgb, var(--ink) 8%, transparent);
   outline: none;
 }
 
@@ -101,20 +101,14 @@
 }
 
 .primaryBtn {
-  background: linear-gradient(
-    135deg,
-    var(--c-sky),
-    color-mix(in srgb, var(--c-lilac) 70%, var(--c-sky))
-  );
-  /* UX-T6：日間 --chip-active-fg（白）在此淺藍／淺紫漸層上僅約 1.8:1，
-     遠低於 WCAG AA；改用 --ink 取得 ~7:1。夜間漸層較深，原本的
-     --chip-active-fg（暖炭黑 #141312）約 5.4–5.8:1，維持不變。 */
-  color: var(--ink);
-  box-shadow: 0 4px 0 color-mix(in srgb, var(--c-lilac) 45%, transparent);
+  background: var(--cta-solid-bg);
+  color: var(--cta-solid-fg);
+  box-shadow: 0 4px 0 #2a180c;
 }
 
-:global([data-theme="night"]) .primaryBtn {
-  color: var(--chip-active-fg);
+.primaryBtn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #2a180c;
 }
 
 .secondaryBtn {

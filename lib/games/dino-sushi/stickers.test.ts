@@ -64,6 +64,10 @@ describe("多多壽司屋貼紙目錄", () => {
       "surprise-daily",
     ]);
     expect(ids.slice(24)).toEqual(CUSTOMERS.map((customer) => `customer-${customer.id}`));
+    expect(stickerById("surprise-daily")).toMatchObject({
+      name: "第一次來",
+      rule: "第一次來玩",
+    });
     expect(stickerById("customer-xiaohong")).toMatchObject({
       name: "小紅",
       group: "customer",
@@ -145,7 +149,7 @@ describe("貼紙解鎖", () => {
     ]);
   });
 
-  it("點餐送完一輪、連續 5 盤一次做對、自由做吃飽、每天第一次來", () => {
+  it("點餐送完一輪、連續 5 盤一次做對、自由做吃飽、第一次來", () => {
     const perfect = collectStickers(
       [],
       factsFromRound(

@@ -27,7 +27,10 @@ describe("PlayMap.module.css map-chip 用量", () => {
 
   it("更多條件 chip 維持 44px 觸控尺寸，選中用 --pm-selected", () => {
     expect(css).toMatch(/\.chip\s*\{[^}]*min-height:\s*44px/);
+    expect(css).toMatch(/\.chipCompact\s*\{[^}]*min-height:\s*44px/);
+    expect(css).not.toMatch(/\.chipCompact\s*\{[^}]*min-height:\s*36px/);
     expect(css).toMatch(/\.chip\[aria-pressed="true"\]\s*\{[^}]*background:\s*var\(--pm-selected\)/s);
+    expect(css).toMatch(/@media \(min-width: 640px\)[\s\S]*\.chipMore\s*\{[^}]*display:\s*none/);
   });
 
   it("舊快捷列與左欄位置選擇器的版型已移除（改成情境卡＋位置列）", () => {

@@ -95,6 +95,39 @@
   white-space: nowrap;
 }
 
+.saveError {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 0 8px;
+  padding: 4px 8px 4px 12px;
+  border-radius: 16px;
+  background: #fff;
+  color: var(--ink, #34302b);
+  font-weight: 800;
+  box-shadow: 0 4px 0 #2a180c;
+}
+
+.saveRetry {
+  flex: none;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 12px;
+  background: var(--cta-solid-bg, #3a2410);
+  color: var(--cta-solid-fg, #fff);
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #2a180c;
+}
+
+.saveRetry:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #2a180c;
+}
+
 /* ── 標題 ─────────────────────────────────────────────── */
 .titleScreen {
   display: flex;

@@ -77,8 +77,17 @@ function awardBookIfComplete(unlocked: readonly string[]): void {
   });
 }
 
-export function saveDinoSushiStickerState(next: DinoSushiStickerState): DinoSushiStickerState {
-  if (typeof window === "undefined") return next;
+export type DinoSushiStickerWrite = {
+  ok: boolean;
+  state: DinoSushiStickerState;
+};
+
+/**
+ * 寫進 localStorage。失敗時 ok 為 false，state 仍是磁碟上的舊檔，
+ * 呼叫端不要把這一輪算成已經存好。
+ */
+export function saveDinoSushiStickerState(next: DinoSushiStickerState): DinoSushiStickerWrite {
+  if (typeof window === "undefined") return { ok: true, state: next };
   const unlocked = keepKnown(next.unlocked);
   const allowed = new Set(unlocked);
   const seen = keepKnown(next.seen, allowed);
@@ -94,30 +103,33 @@ export function saveDinoSushiStickerState(next: DinoSushiStickerState): DinoSush
     });
     awardBookIfComplete(unlocked);
   } catch {
-    return loadDinoSushiStickers();
+    return { ok: false, state: loadDinoSushiStickers() };
   }
-  return loadDinoSushiStickers();
+  return { ok: true, state: loadDinoSushiStickers() };
 }
 
 /** 加上這幾張。已經有的略過，其他遊戲的進度不動。 */
 export function addDinoSushiStickers(ids: readonly string[]): {
   state: DinoSushiStickerState;
   added: DinoSushiStickerId[];
+  ok: boolean;
 } {
   const current = loadDinoSushiStickers();
   const added = keepKnown(ids).filter((id) => !current.unlocked.includes(id));
-  if (added.length === 0) return { state: current, added: [] };
-  const state = saveDinoSushiStickerState({
+  if (added.length === 0) return { state: current, added: [], ok: true };
+  const saved = saveDinoSushiStickerState({
     ...current,
     unlocked: [...current.unlocked, ...added],
   });
-  return { state, added };
+  if (!saved.ok) return { state: current, added: [], ok: false };
+  return { state: saved.state, added, ok: true };
 }
 
 export function markDinoSushiStickersSeen(): DinoSushiStickerState {
   const current = loadDinoSushiStickers();
   if (current.seen.length === current.unlocked.length) return current;
-  return saveDinoSushiStickerState({ ...current, seen: [...current.unlocked] });
+  const saved = saveDinoSushiStickerState({ ...current, seen: [...current.unlocked] });
+  return saved.ok ? saved.state : current;
 }
 
 /** 給測試確認儀表板看得到中文名，不會露出英文 id。 */

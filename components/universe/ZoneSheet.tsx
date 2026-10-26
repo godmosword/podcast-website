@@ -325,7 +325,7 @@ export default function ZoneSheet({
                         const icon = locked ? (
                           "·"
                         ) : action.type === "story" ? (
-                          "✦"
+                          <Icon name="star" size={15} />
                         ) : (
                           <Icon
                             name={/^https?:/.test(action.href) ? "external" : "chevron-right"}

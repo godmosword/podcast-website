@@ -1,5 +1,5 @@
 import type { GameType } from "@/data/games";
-import { IconBlockFall, IconCrayon, IconSushi, IconSwap } from "./ClayIcons";
+import { IconBlockFall, IconCrayon, IconSushi, IconSwap, IconTrain } from "./ClayIcons";
 
 /**
  * 兒童減法審（2026-09-20）：不識字的孩子靠「玩法圖示」認站——
@@ -15,6 +15,8 @@ export function GamePlayIcon({ gameType, size }: { gameType: GameType; size: num
       return <IconBlockFall size={size} />;
     case "cooking":
       return <IconSushi size={size} />;
+    case "driving":
+      return <IconTrain size={size} />;
     default:
       return null;
   }

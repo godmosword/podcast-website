@@ -287,6 +287,15 @@ export function DinoSushiView({
         />
       ) : null}
 
+      {stickers.saveError ? (
+        <p className={styles.saveError} role="alert">
+          <span>{stickers.saveError}</span>
+          <button type="button" className={styles.saveRetry} onClick={stickers.retrySave}>
+            再存一次
+          </button>
+        </p>
+      ) : null}
+
       {/* 單一常駐 live 區：新訂單、多多的字卡 */}
       <p className={styles.visuallyHidden} aria-live="polite">
         {play.message}

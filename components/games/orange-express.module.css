@@ -1,0 +1,1121 @@
+.screen {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 8px;
+  width: min(100%, 960px);
+  min-height: 0;
+  margin-inline: auto;
+  color: var(--ink);
+}
+
+.screen[data-screen="drive"] {
+  height: 100%;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.route {
+  margin: 0;
+  font-size: var(--fs-h3);
+  font-weight: 900;
+}
+
+.levels {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+@media (min-width: 720px) {
+  .levels {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.level,
+.levelOn,
+.primary,
+.secondary,
+.horn,
+.door {
+  font: inherit;
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  border-radius: 16px;
+  box-shadow: 0 4px 0 var(--ink);
+}
+
+.level,
+.levelOn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-height: 48px;
+  padding: 8px 12px;
+  background: var(--card);
+  text-align: left;
+}
+
+.levelOn {
+  background: color-mix(in srgb, var(--c-yellow) 55%, var(--card));
+}
+
+.level small,
+.levelOn small {
+  color: var(--ink-soft);
+}
+
+.driverChip {
+  margin-top: 4px;
+  padding: 1px 8px;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-pill);
+  background: var(--card);
+  font-size: var(--fs-meta);
+  font-style: normal;
+  font-weight: 900;
+}
+
+.driverNote {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 8px 12px;
+  border: 2px dashed color-mix(in srgb, var(--ink) 40%, transparent);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--card) 70%, transparent);
+  font-size: var(--fs-label);
+}
+
+.driverNote small {
+  color: var(--ink-soft);
+  font-size: var(--fs-meta);
+}
+
+.primary,
+.secondary {
+  min-height: 48px;
+  padding: 8px 16px;
+  font-weight: 900;
+}
+
+.primary {
+  color: var(--cta-solid-fg);
+  background: var(--cta-solid-bg);
+}
+
+.secondary {
+  background: var(--card);
+}
+
+.level:active,
+.levelOn:active,
+.primary:active,
+.secondary:active,
+.horn:active,
+.door:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 var(--ink);
+}
+
+:where(.level, .levelOn, .primary, .secondary, .horn, .door, .lever):focus-visible {
+  outline: 3px solid var(--accent-ink);
+  outline-offset: 3px;
+}
+
+/* ── 前窗 ───────────────────────────────────────────── */
+
+.windshield {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 180px;
+  overflow: hidden;
+  border: 6px solid color-mix(in srgb, var(--ink) 82%, var(--landing-brand));
+  border-radius: 26px 26px 14px 14px;
+  background: rgb(186, 220, 245);
+  box-shadow:
+    0 4px 0 var(--ink),
+    inset 0 0 0 2px color-mix(in srgb, var(--card) 35%, transparent);
+}
+
+.glassWrap {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 60%;
+}
+
+.screen[data-sway="true"] .glassWrap {
+  will-change: transform;
+}
+
+.glass {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.pillarLeft,
+.pillarRight {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 7%;
+  background: color-mix(in srgb, var(--ink) 82%, var(--landing-brand));
+  pointer-events: none;
+}
+
+.pillarLeft {
+  left: 0;
+  clip-path: polygon(0 0, 100% 0, 18% 100%, 0 100%);
+}
+
+.pillarRight {
+  right: 0;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 82% 100%);
+}
+
+.riders {
+  position: absolute;
+  left: 9%;
+  bottom: 10px;
+  display: flex;
+  gap: 8px;
+  margin: 0;
+  padding: 4px 8px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--card) 70%, transparent);
+  list-style: none;
+}
+
+.riders li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 48px;
+  color: var(--ink);
+  font-size: var(--fs-meta);
+  font-weight: 800;
+}
+
+.riders svg {
+  width: 44px;
+  height: 44px;
+}
+
+.riders li[data-boarded="true"] {
+  opacity: 0.45;
+  transform: translateX(8px);
+}
+
+/* ── 前窗提示與指差確認 ─────────────────────────────── */
+
+.notice {
+  position: absolute;
+  right: 9%;
+  top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 82%;
+  margin: 0;
+  padding: 4px 12px 4px 6px;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--card) 94%, transparent);
+  box-shadow: 0 3px 0 color-mix(in srgb, var(--ink) 55%, transparent);
+  font-size: var(--fs-label);
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.notice[data-kind="bridge"] {
+  background: color-mix(in srgb, var(--c-yellow) 60%, var(--card));
+}
+
+.notice[data-kind="tunnel"] {
+  background: color-mix(in srgb, var(--c-yellow) 30%, var(--card));
+}
+
+.signGlyph {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+}
+
+.pointTask {
+  position: absolute;
+  right: 9%;
+  bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 52px;
+  padding: 4px 12px 4px 8px;
+  font: inherit;
+  font-weight: 900;
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--c-mint) 70%, var(--card));
+  box-shadow: 0 4px 0 var(--ink);
+  text-align: left;
+}
+
+.pointTask span {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.pointTask small {
+  font-size: var(--fs-meta);
+  color: var(--ink-soft);
+}
+
+.pointTask:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 var(--ink);
+}
+
+.pointTask:focus-visible {
+  outline: 3px solid var(--accent-ink);
+  outline-offset: 3px;
+}
+
+.pointIcon {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+}
+
+/* ── 停車目標條 ─────────────────────────────────────── */
+
+.stopBar {
+  position: absolute;
+  top: 8px;
+  left: 9%;
+  right: 9%;
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 12px;
+  border: 2px solid var(--ink);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--card) 94%, transparent);
+  box-shadow: 0 3px 0 color-mix(in srgb, var(--ink) 55%, transparent);
+}
+
+.stopTrack {
+  position: relative;
+  flex: 1 1 auto;
+  height: 16px;
+  margin-block: 10px 6px;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--ink) 10%, var(--card));
+}
+
+.stopYellow,
+.stopGreen {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+
+.stopYellow {
+  background: var(--c-yellow);
+}
+
+.stopGreen {
+  background: var(--c-mint);
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent 0 5px,
+    color-mix(in srgb, var(--card) 45%, transparent) 5px 7px
+  );
+}
+
+.stopTargetLine {
+  position: absolute;
+  top: -8px;
+  bottom: -4px;
+  width: 4px;
+  margin-left: -2px;
+  border-radius: 2px;
+  background: var(--ink);
+}
+
+.stopPredicted {
+  position: absolute;
+  top: -11px;
+  width: 0;
+  height: 0;
+  margin-left: -8px;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 10px solid var(--accent-ink);
+}
+
+.stopPredicted[data-grade="none"] {
+  border-top-color: var(--ink-soft);
+}
+
+.stopTrain {
+  position: absolute;
+  top: 50%;
+  width: 22px;
+  height: 14px;
+  margin-left: -11px;
+  border: 2px solid var(--ink);
+  border-radius: 8px 10px 4px 4px;
+  background: linear-gradient(
+    to bottom,
+    var(--card) 0 45%,
+    var(--landing-brand) 45% 70%,
+    var(--card) 70%
+  );
+  transform: translateY(-50%);
+}
+
+.stopWords {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: flex-start;
+  margin: 0;
+  max-width: 42%;
+  font-size: var(--fs-label);
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.stopBar[data-grade="none"] .stopWords {
+  min-width: 4.5em;
+}
+
+.gradeStars {
+  color: color-mix(in srgb, var(--landing-brand) 80%, var(--ink));
+  letter-spacing: 1px;
+}
+
+.live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+/* ── 駕駛台 ─────────────────────────────────────────── */
+
+.cab {
+  --console: color-mix(in srgb, var(--c-yellow) 10%, var(--surface-game));
+  --panel: color-mix(in srgb, var(--ink) 9%, var(--surface-game));
+  /* 煞車六格（B0–B4＋緊急），每格至少 48px 才點得到。 */
+  --lever-h: 312px;
+  display: grid;
+  grid-template-columns: minmax(84px, 1fr) minmax(136px, 1.35fr) minmax(84px, 1fr);
+  grid-template-areas:
+    "top top top"
+    "power dash brake"
+    "bottom bottom bottom";
+  gap: 8px;
+  padding: 10px 10px 12px;
+  border: 2px solid var(--ink);
+  border-radius: 24px 24px 18px 18px;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--card) 55%, var(--console)) 0%,
+    var(--console) 40%,
+    color-mix(in srgb, var(--ink) 6%, var(--console)) 100%
+  );
+  box-shadow:
+    0 4px 0 var(--ink),
+    inset 0 3px 0 color-mix(in srgb, var(--card) 80%, transparent),
+    inset 0 -6px 0 color-mix(in srgb, var(--ink) 10%, transparent);
+}
+
+/* 隧道裡車內燈亮：台面上緣一條暖光。 */
+.cab[data-tunnel="true"] {
+  box-shadow:
+    0 4px 0 var(--ink),
+    inset 0 6px 0 color-mix(in srgb, var(--c-yellow) 75%, var(--card)),
+    inset 0 -6px 0 color-mix(in srgb, var(--ink) 10%, transparent),
+    0 -6px 18px color-mix(in srgb, var(--c-yellow) 55%, transparent);
+}
+
+.cabTop {
+  grid-area: top;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.badge {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  color: var(--ink);
+}
+
+.stationName {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  margin: 0;
+  font-weight: 900;
+}
+
+.stationLead {
+  font-size: var(--fs-meta);
+  color: var(--ink-soft);
+}
+
+.stationPlate {
+  align-self: flex-start;
+  padding: 2px 10px;
+  border-radius: var(--radius-xs);
+  color: var(--cta-solid-fg);
+  background: var(--cta-solid-bg);
+  font-size: var(--fs-body);
+  box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--ink) 30%, transparent);
+}
+
+.lamps {
+  display: flex;
+  gap: 6px;
+  margin: 0 0 0 auto;
+  padding: 4px 6px;
+  border: 2px solid var(--ink);
+  border-radius: 14px;
+  background: var(--panel);
+  box-shadow: inset 0 2px 0 color-mix(in srgb, var(--ink) 12%, transparent);
+  list-style: none;
+}
+
+.lamp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  min-width: 36px;
+}
+
+.lampBulb {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  color: var(--ink-soft);
+  background: color-mix(in srgb, var(--ink) 14%, var(--card));
+  box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--ink) 14%, transparent);
+}
+
+.lampBulb svg {
+  width: 16px;
+  height: 16px;
+}
+
+.lamp[data-lamp="green"] .lampBulb {
+  color: var(--ink);
+  background: var(--c-mint);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--c-mint) 45%, transparent),
+    inset 0 2px 0 color-mix(in srgb, var(--card) 70%, transparent);
+}
+
+.lamp[data-lamp="yellow"] .lampBulb {
+  color: var(--ink);
+  background: var(--c-yellow);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--c-yellow) 45%, transparent),
+    inset 0 2px 0 color-mix(in srgb, var(--card) 70%, transparent);
+}
+
+.lamp[data-lamp="orange"] .lampBulb {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--landing-brand) 70%, var(--card));
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--landing-brand) 35%, transparent),
+    inset 0 2px 0 color-mix(in srgb, var(--card) 70%, transparent);
+}
+
+.lampText {
+  font-size: 0.7rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+/* ── 桿 ─────────────────────────────────────────────── */
+
+.leverColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  min-width: 0;
+}
+
+.leverColumn[data-kind="power"] {
+  grid-area: power;
+}
+
+.leverColumn[data-kind="brake"] {
+  grid-area: brake;
+}
+
+.leverTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  font-size: var(--fs-label);
+  font-weight: 900;
+}
+
+.leverWord {
+  min-width: 2.6em;
+  padding: 1px 6px;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-pill);
+  background: var(--card);
+  font-size: var(--fs-meta);
+  text-align: center;
+}
+
+.lever {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 48px;
+  height: var(--lever-h);
+  min-height: var(--lever-h);
+  border: 2px solid var(--ink);
+  border-radius: 18px;
+  background: var(--panel);
+  box-shadow:
+    inset 0 3px 0 color-mix(in srgb, var(--ink) 12%, transparent),
+    inset 0 -2px 0 color-mix(in srgb, var(--card) 60%, transparent);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.lever:active {
+  cursor: grabbing;
+}
+
+.leverSlot {
+  position: absolute;
+  top: 12px;
+  bottom: 12px;
+  left: calc(27% - 6px);
+  width: 12px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--ink) 55%, var(--panel));
+  box-shadow: inset 0 3px 0 color-mix(in srgb, var(--ink) 40%, transparent);
+}
+
+.leverHandle {
+  position: absolute;
+  top: 6px;
+  left: 4px;
+  width: calc(54% - 8px);
+  height: calc((100% - 12px) / var(--notches));
+  display: grid;
+  place-items: center;
+  transform: translateY(calc(100% * var(--at)));
+  transition: transform 90ms cubic-bezier(0.2, 0.9, 0.3, 1.3);
+  pointer-events: none;
+}
+
+.leverGrip {
+  width: 100%;
+  height: min(30px, 80%);
+  border: 2px solid var(--ink);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--landing-brand) 85%, var(--card));
+  box-shadow:
+    0 3px 0 var(--ink),
+    inset 0 3px 0 color-mix(in srgb, var(--card) 55%, transparent),
+    inset 0 -4px 0 color-mix(in srgb, var(--ink) 18%, transparent);
+}
+
+.lever[data-kind="brake"] .leverGrip {
+  background: color-mix(in srgb, var(--c-teal) 85%, var(--card));
+}
+
+.notchPlate {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  bottom: 6px;
+  display: flex;
+  flex-direction: column;
+  width: calc(46% - 6px);
+  pointer-events: none;
+}
+
+.notchLamp {
+  display: grid;
+  flex: 1 1 0;
+  place-items: center;
+  min-height: 0;
+  margin: 2px 0;
+  border: 2px solid color-mix(in srgb, var(--ink) 30%, transparent);
+  border-radius: 9px;
+  color: var(--ink-soft);
+  background: color-mix(in srgb, var(--ink) 6%, var(--card));
+  font-size: var(--fs-meta);
+  font-weight: 900;
+  line-height: 1;
+  pointer-events: auto;
+}
+
+.notchLamp[data-notch="0"] {
+  border-style: dashed;
+}
+
+.notchLamp[data-emergency="true"] {
+  border-color: var(--support-from);
+  color: var(--support-from);
+}
+
+.notchLamp[data-on="true"] {
+  border-color: var(--ink);
+  color: var(--ink);
+  background: color-mix(in srgb, var(--landing-brand) 72%, var(--card));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--landing-brand) 30%, transparent);
+}
+
+.lever[data-kind="brake"] .notchLamp[data-on="true"] {
+  background: color-mix(in srgb, var(--c-sky) 80%, var(--card));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-sky) 40%, transparent);
+}
+
+.lever[data-kind="brake"] .notchLamp[data-emergency="true"][data-on="true"] {
+  color: var(--support-fg);
+  border-color: var(--ink);
+  background: var(--support-from);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--support-from) 35%, transparent);
+}
+
+.notchLamp[data-locked="true"] {
+  opacity: 0.35;
+}
+
+/* ── 速度表 ─────────────────────────────────────────── */
+
+.dash {
+  grid-area: dash;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 8px 6px;
+  border: 2px solid color-mix(in srgb, var(--ink) 35%, transparent);
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--card) 35%, var(--panel));
+  box-shadow:
+    inset 0 4px 0 color-mix(in srgb, var(--ink) 10%, transparent),
+    inset 0 -3px 0 color-mix(in srgb, var(--card) 70%, transparent);
+}
+
+.gauge {
+  width: 100%;
+  max-width: 240px;
+  aspect-ratio: 1;
+  filter: drop-shadow(0 4px 0 var(--ink));
+}
+
+.gaugeSvg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.gaugeBezel {
+  fill: color-mix(in srgb, var(--ink) 20%, var(--surface-game));
+  stroke: var(--ink);
+  stroke-width: 3;
+}
+
+.gaugeFace {
+  fill: var(--card);
+  stroke: color-mix(in srgb, var(--ink) 25%, transparent);
+  stroke-width: 2;
+}
+
+.bandGreen,
+.bandYellow,
+.bandRed {
+  fill: none;
+  stroke-width: 13;
+}
+
+.bandGreen {
+  stroke: var(--c-mint);
+}
+
+.bandYellow {
+  stroke: var(--c-yellow);
+}
+
+.bandRed {
+  stroke: color-mix(in srgb, var(--support-from) 75%, var(--card));
+}
+
+.tickMajor,
+.tickMinor {
+  stroke: var(--ink);
+  stroke-linecap: round;
+}
+
+.tickMajor {
+  stroke-width: 3;
+}
+
+.tickMinor {
+  stroke-width: 1.5;
+  opacity: 0.6;
+}
+
+.gaugeNumber {
+  fill: var(--ink);
+  font-size: 12px;
+  font-weight: 800;
+  text-anchor: middle;
+}
+
+.gaugeReadout {
+  fill: var(--ink);
+  font-size: 20px;
+  font-weight: 900;
+  text-anchor: middle;
+}
+
+.gaugeUnit {
+  fill: var(--ink-soft);
+  font-size: 10px;
+  font-weight: 800;
+  text-anchor: middle;
+}
+
+.gaugeFlag {
+  fill: var(--c-yellow);
+  stroke: var(--ink);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.gaugeFlagPole {
+  stroke: var(--ink);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.needle {
+  transform-box: view-box;
+  transform-origin: 100px 100px;
+  transition: transform 120ms linear;
+}
+
+.needleBody {
+  fill: var(--landing-brand);
+  stroke: var(--ink);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.needleCap {
+  fill: var(--ink);
+}
+
+.needleShine {
+  fill: var(--card);
+  opacity: 0.7;
+}
+
+/* ── 喇叭與車門 ─────────────────────────────────────── */
+
+.cabBottom {
+  grid-area: bottom;
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.horn {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border-radius: 50%;
+  color: var(--support-fg);
+  background: var(--support-from);
+  box-shadow:
+    0 4px 0 var(--ink),
+    inset 0 4px 0 color-mix(in srgb, var(--card) 35%, transparent);
+}
+
+.horn[data-hint="true"] {
+  box-shadow:
+    0 4px 0 var(--ink),
+    0 0 0 5px var(--c-yellow),
+    inset 0 4px 0 color-mix(in srgb, var(--card) 35%, transparent);
+  animation: hornHint 1.2s ease-in-out infinite;
+}
+
+.horn svg {
+  width: 26px;
+  height: 26px;
+}
+
+.door {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 56px;
+  padding: 8px 12px;
+  background: var(--card);
+  font-size: var(--fs-h4);
+  font-weight: 900;
+}
+
+.door svg {
+  width: 24px;
+  height: 24px;
+}
+
+.door[data-ready="true"] {
+  background: var(--c-mint);
+  box-shadow:
+    0 4px 0 var(--ink),
+    0 0 0 4px color-mix(in srgb, var(--c-mint) 45%, transparent);
+}
+
+.door[aria-disabled="true"] {
+  color: var(--ink-soft);
+}
+
+.door[data-shake="true"] {
+  animation: cabShake 0.28s linear;
+}
+
+/* ── 結算與暫停 ─────────────────────────────────────── */
+
+.result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 8px 8px;
+}
+
+.result h2 {
+  margin: 0;
+  font-size: var(--fs-h2);
+}
+
+.stationGrades {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stationGrades li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 4px 12px;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-pill);
+  background: var(--card);
+  font-weight: 800;
+}
+
+.stationGrades li[data-grade="green"] {
+  background: color-mix(in srgb, var(--c-mint) 45%, var(--card));
+}
+
+.stationGrades li[data-grade="yellow"] {
+  background: color-mix(in srgb, var(--c-yellow) 45%, var(--card));
+}
+
+.extras {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-label);
+  font-weight: 800;
+}
+
+.extras li {
+  padding: 2px 10px;
+  border: 2px dashed color-mix(in srgb, var(--ink) 40%, transparent);
+  border-radius: var(--radius-pill);
+}
+
+.stationGradeName {
+  font-size: var(--fs-label);
+}
+
+.resultActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.nextLink {
+  min-height: 48px;
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.paused {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--card) 88%, transparent);
+}
+
+.paused p {
+  margin: 0;
+  font-size: var(--fs-h3);
+  font-weight: 900;
+}
+
+/* 寬螢幕：前窗在上，喇叭與車門收到速度表下面，桿子拉長到兩列。 */
+@media (min-width: 720px) {
+  .cab {
+    grid-template-columns: minmax(150px, 200px) minmax(220px, 1fr) minmax(150px, 200px);
+    grid-template-areas:
+      "top top top"
+      "power dash brake"
+      "power bottom brake";
+    padding: 12px 16px 14px;
+  }
+
+  .lever {
+    height: auto;
+  }
+
+  .gauge {
+    max-width: 230px;
+  }
+}
+
+@media (max-width: 359px) {
+  .cab {
+    grid-template-columns: minmax(76px, 1fr) minmax(120px, 1.2fr) minmax(76px, 1fr);
+    padding: 8px;
+  }
+
+  .lamps {
+    gap: 4px;
+  }
+
+  .lampText {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .level:active,
+  .levelOn:active,
+  .primary:active,
+  .secondary:active,
+  .horn:active,
+  .door:active,
+  .riders li[data-boarded="true"] {
+    transform: none;
+  }
+
+  .leverHandle,
+  .needle {
+    transition: none;
+  }
+
+  .door[data-shake="true"],
+  .horn[data-hint="true"] {
+    animation: none;
+  }
+
+  .pointTask:active {
+    transform: none;
+  }
+}
+
+.screen[data-reduced="true"] .horn[data-hint="true"] {
+  animation: none;
+}
+
+.screen[data-reduced="true"] .leverHandle,
+.screen[data-reduced="true"] .needle {
+  transition: none;
+}
+
+@keyframes hornHint {
+  0%,
+  100% {
+    box-shadow:
+      0 4px 0 var(--ink),
+      0 0 0 5px var(--c-yellow),
+      inset 0 4px 0 color-mix(in srgb, var(--card) 35%, transparent);
+  }
+  50% {
+    box-shadow:
+      0 4px 0 var(--ink),
+      0 0 0 9px color-mix(in srgb, var(--c-yellow) 70%, transparent),
+      inset 0 4px 0 color-mix(in srgb, var(--card) 35%, transparent);
+  }
+}
+
+@keyframes cabShake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-3px);
+  }
+  75% {
+    transform: translateX(3px);
+  }
+}

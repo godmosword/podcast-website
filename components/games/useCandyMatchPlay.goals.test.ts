@@ -99,6 +99,54 @@ describe("消消樂關前與結算朗讀", () => {
     });
     expect(result.current.outcome?.kind).toBe("retry");
     expect(result.current.speechCue?.text).toMatch(/^再差 \d+ 台小紅！再試一次！$/);
-    expect(instance.notifyRetry).toHaveBeenCalled();
+    expect(instance.notifyRetry).toHaveBeenCalledWith(
+      expect.objectContaining({ candyMode: "challenge", levelIndex: 1 }),
+    );
+  });
+
+  it("離開局內會取消還沒響的過關音", async () => {
+    const tone = vi.fn();
+    const { result } = renderHook(() =>
+      useCandyMatchPlay({
+        instance,
+        ensureAudio: () => {},
+        tone,
+        reducedMotion: true,
+        inputPaused: false,
+        syncHost: () => {},
+        tipsSeen: ["swap"],
+        onTipSeen: () => {},
+      }),
+    );
+    const round = buildRound(0, "challenge", { replay: false, rng: () => 0.2 });
+    act(() =>
+      result.current.actions.start({
+        ...round,
+        stage: { ...round.stage, goals: [{ kind: "collect-any", count: 1 }] },
+      }),
+    );
+    act(() => result.current.actions.beginPlay());
+    const board = result.current.play!.board;
+    const move = findHintMove(board.pieces, board.cols, board.rows, board.specials)!;
+    act(() => {
+      result.current.actions.attemptSwap(move.a, move.b);
+    });
+    for (let step = 0; step < 400 && result.current.outcome?.kind !== "win"; step += 1) {
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(50);
+      });
+    }
+    expect(result.current.outcome?.kind).toBe("win");
+    const beforeLeave = tone.mock.calls.length;
+    act(() => {
+      result.current.actions.leave();
+    });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(800);
+    });
+    const later = tone.mock.calls.slice(beforeLeave).map((call) => call[0]);
+    expect(later).not.toContain(659);
+    expect(later).not.toContain(784);
+    expect(later).not.toContain(1046);
   });
 });

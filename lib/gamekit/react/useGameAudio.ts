@@ -61,6 +61,15 @@ export function useGameAudio(gameId?: GameKitGameId) {
     [getBus],
   );
 
+  const bedOutput = useCallback((): { ctx: AudioContext; out: AudioNode } | null => {
+    if (!isSfxEnabled()) return null;
+    const bus = getBus();
+    const ctx = bus.ensureContext();
+    const out = bus.musicBus;
+    if (!ctx || !out) return null;
+    return { ctx, out };
+  }, [getBus]);
+
   const playBgm = useCallback(() => {
     if (!gameId) return;
     bgmWanted.current = true;
@@ -130,6 +139,7 @@ export function useGameAudio(gameId?: GameKitGameId) {
     ensureAudio,
     tone,
     voices,
+    bedOutput,
     soundUi,
     toggleSound,
     playBgm,

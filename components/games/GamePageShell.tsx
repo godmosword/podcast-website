@@ -8,9 +8,12 @@ import {
 } from "@/components/games/GamePlayChromeSlot";
 import { GAMES } from "@/data/games";
 import {
+  IconChevronDown,
   IconChevronLeft,
   IconChevronRight,
+  IconChevronUp,
   IconRotate,
+  IconSpaceKey,
   IconSwipe,
   IconSushi,
   IconSwipeDown,
@@ -34,6 +37,19 @@ const CONTROL_ICONS: Record<string, ReactNode> = {
   ),
   點飯和料做壽司: <IconTap size={22} />,
   "按「給多多吃」送出": <IconSushi size={22} />,
+  "左邊推，車會走": (
+    <>
+      <IconChevronUp size={22} />
+      <IconChevronDown size={22} />
+    </>
+  ),
+  "右邊拉，車會停": (
+    <>
+      <IconChevronLeft size={22} />
+      <IconChevronRight size={22} />
+    </>
+  ),
+  "門亮了就按": <IconSpaceKey size={22} />,
   旋轉與落下: (
     <>
       <IconRotate size={22} />

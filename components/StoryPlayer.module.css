@@ -265,6 +265,7 @@
 }
 
 .endPromptToggle {
+  min-height: 44px;
   padding: 8px 12px;
   border: 1.5px solid rgba(255, 255, 255, 0.22);
   border-radius: var(--radius-xs);

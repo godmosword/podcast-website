@@ -74,9 +74,9 @@ const SURPRISE_STICKERS: DinoSushiSticker[] = [
   { id: "surprise-free", name: "自由做", group: "surprise", rule: "自由做，按到多多吃飽", art: { kind: "duoduo", state: "closed" } },
   {
     id: "surprise-daily",
-    name: "天天來",
+    name: "第一次來",
     group: "surprise",
-    rule: "每天第一次來玩",
+    rule: "第一次來玩",
     art: { kind: "medal", state: "laugh", frame: "sun" },
   },
 ];

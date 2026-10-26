@@ -64,7 +64,7 @@
 }
 
 /*
- * 三張卡：<980 排兩欄、≥980 一排三欄。固定欄數而非 auto-fit：auto-fit 會摺疊空軌道，
+ * 四張卡：手機與桌面都排兩欄兩列。固定欄數而非 auto-fit：auto-fit 會摺疊空軌道，
  * 單卡分類時那張卡會撐成整條寬，跟同頁其他卡差好幾倍。
  * 不再做手機置頂全寬大卡。
  */
@@ -75,12 +75,6 @@
   margin: 0;
   padding: 0;
   list-style: none;
-}
-
-@media (min-width: 980px) {
-  .cardGrid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
 }
 
 .gridItem {
@@ -136,6 +130,14 @@
 .thumbImage {
   object-fit: cover;
   transition: transform 0.3s var(--ease-spring);
+}
+
+.thumbSvg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .gameCard:hover .thumbImage {
@@ -212,10 +214,15 @@
     padding-top: calc(14px + var(--safe-top));
   }
 
-  /* 手機使用直式原圖比例，站牌、車身與輪胎完整保留。 */
+  /* 手機海報改矮，第一屏才看得到三款標題。cover 裁掉直式海報上下緣。 */
   .hero {
-    aspect-ratio: 940 / 1410;
+    aspect-ratio: 16 / 9;
     margin-bottom: 12px;
+  }
+
+  .heroImage {
+    object-fit: cover;
+    object-position: center 42%;
   }
 
   .cardGrid {

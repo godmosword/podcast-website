@@ -90,6 +90,7 @@ single-game bridge belongs in `lib/gamekit/games/`.
 | --- | --- | --- | --- |
 | Block Drop | `components/games/BlockDropGame.tsx` | `useGameLoop`, `useTouchControls`, `useVisibilityPause`, `useBestScore`, `useGameAudio`; `progress/settings`; `progress/session` | local component game logic |
 | Candy Match | `components/games/CandyMatchGame.tsx` | `useGameAudio`; `progress/save`, `progress/meta`, `progress/session` | engine/levels in `lib/games/candy-match/` |
+| Orange Express | `components/games/OrangeExpressView.tsx` | `useGameLoop`, `useGameAudio`; `progress/session` | reducer in `lib/games/orange-express/`; windshield canvas is owned by the view, not GameHost |
 
 ## Adding a New Game
 
