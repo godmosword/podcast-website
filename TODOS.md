@@ -187,7 +187,7 @@ Plan：`~/.claude/plans/play-map-simplify.md`（D1=A 北中南分組、D2=A 純�
 | K-15 | 方塊 ready 面純 CSS 無字玩法示範（掉進缺口→整列亮→消掉） | ✅ `3e0a434a` |
 | K-16 | 方塊 over 層夜間標題白字壓奶油底（釘回馬卡龍 --ink）；就寢時段 night 局內 .playArea 內距 12→4 保 ≥25px 格子 | ✅ `3e0a434a` |
 | K-17 | hero 站牌／玩法圖示／道路指向第一張卡 | ✅ `296c75b4`（Codex image_gen，桌機＋手機直式） |
-| K-18 | 卡片縮圖玩法示範動畫 | 待做（出圖或 CSS 疊層） |
+| K-18 | 卡片縮圖玩法示範動畫 | ✅ 2026-10-26 CSS 疊層、不出圖（`components/games/GameCardDemo.tsx`）：著色＝左頁空白處星星線稿被黃色蠟筆塗滿；消消樂＝盤面上排換進小紅、三台一排消掉後淡回封面；壽司屋＝玉子落到飯上（沿用遊戲黏土食材圖）。共用 2.1 秒時間軸（常數寫進 `--demo-ms`）、白芯黃邊星光、最後一格是乾淨封面；進畫面播一次、三張依頁面順序一段接一段、滑鼠停 150ms 或鍵盤聚焦才重播、減少動態不播（播到一半切換也收掉）；播放時首張呼吸暫停。Opus 設計審兩輪（樣稿 Request changes → 三張 Approve with changes，已修）、Codex 工程審已修。`e2e/games-hub-demo.spec.ts` 守。見本 commit。 |
 
 ### 本輪已完成（2026-09-15）
 

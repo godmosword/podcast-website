@@ -1,6 +1,7 @@
 import Image from "next/image";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { GameCardDemo } from "@/components/games/GameCardDemo";
 import { GamePlayIcon } from "@/components/games/GamePlayIcon";
 import { GAMES, gameParentTip, type GameMeta } from "@/data/games";
 import JsonLd from "@/components/JsonLd";
@@ -69,6 +70,8 @@ function GameCard({ game, eager }: { game: GameMeta; eager: boolean }) {
             priority={eager}
             {...(eager ? {} : { loading: "eager" as const })}
           />
+          {/* 一小段玩法示範：進到畫面播一次、播完回到封面；hover／focus 重播；減少動態不播 */}
+          <GameCardDemo gameType={game.gameType} />
           {/* 封面只留玩法鈕：56px、依遊戲換圖示；首張卡輕微呼吸。副標與年齡不印在卡上。 */}
           <span
             className={`${styles.playFab}${eager ? ` ${styles.playFabLead}` : ""}`}

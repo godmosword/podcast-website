@@ -145,7 +145,7 @@
 
 .playFab {
   position: absolute;
-  z-index: 1;
+  z-index: 2;
   right: 10px;
   bottom: 10px;
   display: flex;
@@ -164,6 +164,11 @@
 /* 首張卡（第一站）輕微呼吸：孩子不用讀字也知道「先按這裡」 */
 .playFabLead {
   animation: playFabBreathe 2.4s ease-in-out infinite;
+}
+
+/* 卡片在播玩法示範時呼吸先停：同一張卡上不要兩個東西一起動 */
+.gameCard[data-demo-playing] .playFabLead {
+  animation-play-state: paused;
 }
 
 @keyframes playFabBreathe {

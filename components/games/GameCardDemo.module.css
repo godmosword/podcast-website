@@ -1,0 +1,458 @@
+/*
+ * 遊樂園卡片的玩法示範層（GameCardDemo）。蓋在封面上、不攔點擊（整張卡是連結）。
+ *
+ * 三段共用一條時間軸（--demo-ms 由元件寫入，只有一個來源）：
+ *   0–8% 淡入 → 10–55% 動作 → 55–65% 亮星（做對了）→ 65–82% 停住 → 82–100% 整層淡掉。
+ * 最後一格是乾淨的原封面。只用 transform／opacity（著色的蠟筆位置除外）；減少動態由元件端直接不掛。
+ * 封面是固定美術、日夜不變，示範裡的蠟筆紅與星光黃也是固定色，不吃會隨夜間變暗的 --c-* token。
+ *
+ * 位置原則：動作發生在封面裡原本該發生的地方，避開主角與右下 56px 玩法鈕（手機卡 thumb 約 150px 寬，
+ * 玩法鈕佔掉右下大半，壽司屋改放右上角）。
+ */
+.layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+  container: demo / inline-size;
+}
+
+.life {
+  position: absolute;
+  inset: 0;
+  display: block;
+  animation: demoLife var(--demo-ms, 2100ms) linear both;
+}
+
+@keyframes demoLife {
+  0% {
+    opacity: 0;
+  }
+
+  8%,
+  82% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ---- 共用：做對了的星光（白芯黃邊，在黃、綠背景上都看得見） ---- */
+.sparkle {
+  position: absolute;
+  width: max(16px, 11cqw);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  filter: drop-shadow(0 0 1px rgba(58, 36, 16, 0.8)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+  opacity: 0;
+  animation: sparkle var(--demo-ms, 2100ms) ease-out both;
+}
+
+.sparkle > span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgb(255 255 255) 0 26%, rgb(255 216 102) 30% 100%);
+  clip-path: polygon(50% 0, 62% 36%, 100% 50%, 62% 64%, 50% 100%, 38% 64%, 0 50%, 38% 36%);
+}
+
+@keyframes sparkle {
+  0%,
+  55% {
+    opacity: 0;
+    transform: scale(0.4) rotate(0deg);
+  }
+
+  61% {
+    opacity: 1;
+    transform: scale(1.15) rotate(15deg);
+  }
+
+  66%,
+  80% {
+    opacity: 1;
+    transform: scale(1) rotate(20deg);
+  }
+
+  90%,
+  100% {
+    opacity: 0;
+    transform: scale(0.9) rotate(30deg);
+  }
+}
+
+/* ---- 繪本塗塗鴉：左頁上方出現星星線稿，黃色蠟筆塗滿 ----
+ * 封面兩頁的圖都已上色，塗在上面看不出差別；星星畫在左頁旗子那一塊紙面上
+ * （左邊是黏土小紅車、右邊過了書脊是多多，都不壓到）。 */
+.coloring {
+  position: absolute;
+  top: 51%;
+  left: 33%;
+  width: 16%;
+  aspect-ratio: 1;
+}
+
+.starArt {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.starLine {
+  fill: none;
+  stroke: rgb(70 50 40);
+  stroke-width: 3.5;
+  stroke-linejoin: round;
+}
+
+/* 塗的筆畫被星星裁住；10–55% 一路塗滿 */
+.scribble {
+  fill: none;
+  stroke: rgb(255 205 60);
+  stroke-width: 18;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: scribble var(--demo-ms, 2100ms) linear both;
+}
+
+@keyframes scribble {
+  0%,
+  10% {
+    stroke-dashoffset: 1;
+  }
+
+  55%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* 蠟筆：筆尖對著筆畫的頭，沿折線頂點走（時間依每段長度分配） */
+.crayon {
+  position: absolute;
+  width: max(6px, 3.4cqw);
+  height: max(22px, 13cqw);
+  background: linear-gradient(to bottom, rgb(214 160 30) 0 24%, rgb(255 205 60) 24% 78%, rgb(255 246 230) 78% 100%);
+  border-radius: 1px 1px 3px 3px;
+  clip-path: polygon(50% 0, 100% 24%, 100% 100%, 0 100%, 0 24%);
+  transform: translate(-50%, 0) rotate(-32deg);
+  transform-origin: 50% 0;
+  filter: drop-shadow(0 1px 1px rgba(58, 36, 16, 0.45));
+  animation: crayonPath var(--demo-ms, 2100ms) linear both;
+}
+
+@keyframes crayonPath {
+  0%,
+  8% {
+    top: 40%;
+    left: 10%;
+    opacity: 0;
+  }
+
+  10% {
+    top: 40%;
+    left: 10%;
+    opacity: 1;
+  }
+
+  14.35% {
+    top: 14%;
+    left: 40%;
+  }
+
+  19.36% {
+    top: 56%;
+    left: 22%;
+  }
+
+  25.39% {
+    top: 18%;
+    left: 62%;
+  }
+
+  33.63% {
+    top: 86%;
+    left: 30%;
+  }
+
+  41.37% {
+    top: 36%;
+    left: 80%;
+  }
+
+  48.16% {
+    top: 90%;
+    left: 50%;
+  }
+
+  55% {
+    top: 44%;
+    left: 92%;
+    opacity: 1;
+  }
+
+  64%,
+  100% {
+    top: 44%;
+    left: 92%;
+    opacity: 0;
+  }
+}
+
+.coloringSparkle {
+  top: 8%;
+  left: 96%;
+}
+
+/* ---- 車車消消樂：盤面上排，中間那格換進小紅，三台一排就消掉 ---- */
+/* 上排三格在封面的 x 28–71%、y 20–37%（封面與卡片同為 4:3、置中裁切，百分比直接對得上） */
+.match {
+  position: absolute;
+  top: 20%;
+  left: 28%;
+  width: 43%;
+  height: 17%;
+  container: match / size;
+}
+
+.tile,
+.piece {
+  position: absolute;
+  top: 50%;
+  translate: -50% -50%;
+}
+
+.tile[data-col="0"],
+.piece[data-col="0"] {
+  left: 16.7%;
+}
+
+.tile[data-col="1"],
+.piece[data-col="1"] {
+  left: 50%;
+}
+
+.tile[data-col="2"],
+.piece[data-col="2"] {
+  left: 83.3%;
+}
+
+/* 蓋住封面原本那幾格（和盤面的奶油格同色），換子才看得清楚；消掉後淡回封面，像補上新棋子 */
+.tile {
+  width: 34%;
+  height: 104%;
+  border-radius: 16% / 18%;
+  background: rgb(255 248 236);
+  box-shadow: inset 0 -2px 0 rgba(150, 110, 70, 0.25);
+  animation: tileFade var(--demo-ms, 2100ms) linear both;
+}
+
+/* 中排中間：下一排的間距是封面高度 20%＝這一排高度的 118% */
+.tile[data-row="below"] {
+  top: 168%;
+}
+
+@keyframes tileFade {
+  0%,
+  56% {
+    opacity: 1;
+  }
+
+  66%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.piece {
+  display: block;
+  width: 25%;
+  aspect-ratio: 1;
+}
+
+.piece > * {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* 換子：上排中間的計程車往下、下面的小紅往上（10–32%） */
+.piece[data-role="out"] {
+  animation: swapOut var(--demo-ms, 2100ms) cubic-bezier(0.4, 0, 0.3, 1) both;
+}
+
+.piece[data-role="in"] {
+  animation:
+    swapIn var(--demo-ms, 2100ms) cubic-bezier(0.4, 0, 0.3, 1) both,
+    pop var(--demo-ms, 2100ms) ease-in both;
+}
+
+.piece[data-role="match"] {
+  animation: pop var(--demo-ms, 2100ms) ease-in both;
+}
+
+@keyframes swapOut {
+  0%,
+  10% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  32%,
+  56% {
+    opacity: 1;
+    transform: translateY(118cqh);
+  }
+
+  66%,
+  100% {
+    opacity: 0;
+    transform: translateY(118cqh);
+  }
+}
+
+@keyframes swapIn {
+  0%,
+  10% {
+    transform: translateY(118cqh);
+  }
+
+  32%,
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* 三台一排：跳一下（34–40%），再一起變大消掉（42–55%） */
+@keyframes pop {
+  0%,
+  33% {
+    opacity: 1;
+    scale: 1;
+  }
+
+  37% {
+    scale: 1.18;
+  }
+
+  41% {
+    scale: 1;
+  }
+
+  48% {
+    opacity: 1;
+    scale: 1.3;
+  }
+
+  55%,
+  100% {
+    opacity: 0;
+    scale: 0.2;
+  }
+}
+
+.matchSparkle {
+  top: 40%;
+  left: 50%;
+}
+
+/* ---- 多多壽司屋：玉子「啪」地落到飯上 ----
+ * 桌機在右側迴轉帶上方（約帶上壽司的 1.5–2 倍）；手機卡太小、右下被玩法鈕佔掉，改到右上角。 */
+.cooking {
+  position: absolute;
+  top: 30%;
+  right: 10%;
+  width: 24%;
+  aspect-ratio: 1;
+}
+
+@container demo (max-width: 220px) {
+  .cooking {
+    top: 2%;
+    right: 5%;
+    width: 29%;
+  }
+}
+
+/* 小瓷碟：和遊戲裡的托盤鈕同一種奶油瓷，接地陰影讓它坐在場景裡 */
+.plate {
+  position: absolute;
+  right: 2%;
+  bottom: 6%;
+  left: 2%;
+  height: 30%;
+  border-radius: 50%;
+  /* 固定色：封面日夜不變，碟子也不能跟著夜間 token 變暗 */
+  background: radial-gradient(ellipse at 50% 38%, rgb(255 249 238) 0 54%, rgb(234 214 188) 56% 100%);
+  box-shadow: 0 5px 8px rgba(60, 35, 10, 0.32);
+}
+
+@container demo (max-width: 220px) {
+  .plate {
+    box-shadow: 0 2px 4px rgba(60, 35, 10, 0.22);
+  }
+}
+
+.rice,
+.topping {
+  position: absolute;
+  left: 50%;
+  display: block;
+  height: auto;
+}
+
+.rice {
+  bottom: 14%;
+  width: 86%;
+  translate: -50% 0;
+}
+
+.topping {
+  bottom: 34%;
+  width: 70%;
+  translate: -50% 0;
+  transform-origin: 50% 100%;
+  animation: toppingDrop var(--demo-ms, 2100ms) linear both;
+}
+
+/* 10–38% 加速往下掉（ease-in，像重力），38–44% 落地壓扁，44–55% 彈回原狀 */
+@keyframes toppingDrop {
+  0%,
+  10% {
+    opacity: 0;
+    transform: translateY(-160%) rotate(-8deg);
+    animation-timing-function: ease-in;
+  }
+
+  12% {
+    opacity: 1;
+  }
+
+  38% {
+    transform: translateY(0) rotate(0deg) scale(1);
+    animation-timing-function: ease-out;
+  }
+
+  44% {
+    transform: translateY(0) scale(1.1, 0.86);
+    animation-timing-function: ease-out;
+  }
+
+  55%,
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.cookingSparkle {
+  top: 22%;
+  left: 92%;
+}
