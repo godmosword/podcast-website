@@ -117,6 +117,23 @@ class OrangeExpressInstance implements GameInstance {
     this.controller.onAction(action);
   }
 
+  /**
+   * 鍵盤按下當下就送動作。Host 每幀只看「還按著嗎」，按下又放開落在同一幀之間（快點一下、
+   * 低階手機一幀很長）就整個漏掉。這裡先記成按著，Host 下一幀看到同一顆鍵不會再送一次，
+   * 看到已放開時照常清掉。
+   */
+  pressKey(action: GameAction): void {
+    if (this.held.has(action)) return;
+    this.held.add(action);
+    if (this.status !== "playing") return;
+    this.controller.onAction(action);
+  }
+
+  /** 放開就清掉，同一幀內連按兩下才會算兩下。 */
+  releaseKey(action: GameAction): void {
+    this.held.delete(action);
+  }
+
   registerController(ctrl: OrangeExpressController): void {
     this.controller = ctrl;
   }

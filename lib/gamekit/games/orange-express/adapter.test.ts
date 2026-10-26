@@ -48,6 +48,33 @@ describe("orangeExpressAdapter", () => {
     expect(ctrl.onAction).toHaveBeenNthCalledWith(2, "dash");
   });
 
+  it("鍵盤按下就送；按下又放開落在同一幀之間也不漏，Host 下一幀不重送", () => {
+    const ctrl = controller();
+    const inst = new OrangeExpressInstance({ kidsMode: true, reducedMotion: false });
+    inst.registerController(ctrl);
+    inst.notifyPlaying("drive");
+    inst.pressKey("move-up");
+    inst.setAction("move-up", false);
+    expect(ctrl.onAction).toHaveBeenCalledTimes(1);
+
+    inst.pressKey("move-up");
+    inst.setAction("move-up", true);
+    inst.setAction("move-up", true);
+    expect(ctrl.onAction).toHaveBeenCalledTimes(2);
+
+    inst.setAction("move-up", false);
+    inst.pressKey("move-up");
+    inst.releaseKey("move-up");
+    inst.pressKey("move-up");
+    expect(ctrl.onAction).toHaveBeenCalledTimes(4);
+
+    inst.releaseKey("move-up");
+    inst.pause();
+    inst.setAction("move-up", false);
+    inst.pressKey("move-up");
+    expect(ctrl.onAction).toHaveBeenCalledTimes(4);
+  });
+
   it("結算只回報一次，並帶上這一檔", () => {
     const onSession = vi.fn();
     const inst = new OrangeExpressInstance({

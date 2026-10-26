@@ -384,6 +384,24 @@ test.describe("小橘特快車", () => {
     expect(await page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken)).toEqual([]);
   });
 
+  test("手機觸控：點動力格，車真的會走", async ({ browser }) => {
+    const context = await browser.newContext({
+      viewport: { width: 390, height: 844 },
+      hasTouch: true,
+      isMobile: true,
+    });
+    const page = await context.newPage();
+    await page.goto("/games/orange-express");
+    await startLevel(page, "自己開");
+    const power = page.getByRole("slider", { name: "動力" });
+    await power.locator('[data-notch="3"]').tap();
+    await expect(power).toHaveAttribute("aria-valuenow", "3");
+    await expect
+      .poll(async () => Number(await page.getByRole("meter", { name: "速度表" }).getAttribute("aria-valuenow")))
+      .toBeGreaterThan(0);
+    await context.close();
+  });
+
   test("系統減少動態時不晃", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/games/orange-express");
@@ -391,5 +409,72 @@ test.describe("小橘特快車", () => {
     const drive = page.getByTestId("orange-express-drive");
     await expect(drive).toHaveAttribute("data-reduced", "true");
     await expect(drive).toHaveAttribute("data-sway", "false");
+  });
+});
+
+test.describe("小橘特快車：桌面從 P0 推動力，車真的會走", () => {
+  test.use({ viewport: { width: 1280, height: 800 } });
+
+  async function speed(page: Page): Promise<number> {
+    return Number(await page.getByRole("meter", { name: "速度表" }).getAttribute("aria-valuenow"));
+  }
+
+  async function windshield(page: Page): Promise<Buffer> {
+    return page.getByTestId("orange-express-windshield").screenshot({ animations: "allow" });
+  }
+
+  test("鍵盤：快速按一下 ↑ 也算，速度表起來、前窗在動", async ({ page }) => {
+    await page.goto("/games/orange-express");
+    await startLevel(page, "自己開");
+    const power = page.getByRole("slider", { name: "動力" });
+    await expect(power).toHaveAttribute("aria-valuenow", "0");
+    expect(await speed(page)).toBe(0);
+    const still = await windshield(page);
+
+    await page.keyboard.press("ArrowUp");
+    await page.keyboard.press("ArrowUp");
+    await expect(power).toHaveAttribute("aria-valuenow", "2");
+    await expect(page.getByTestId("orange-express-power-word")).not.toHaveText("停");
+    await expect.poll(() => speed(page)).toBeGreaterThan(0);
+    await expect.poll(async () => (await windshield(page)).equals(still)).toBe(false);
+  });
+
+  test("鍵盤：焦點在桿上時方向鍵只動那根桿", async ({ page }) => {
+    await page.goto("/games/orange-express");
+    await startLevel(page, "自己開");
+    const power = page.getByRole("slider", { name: "動力" });
+    const brake = page.getByRole("slider", { name: "煞車" });
+    await power.focus();
+    await page.keyboard.press("ArrowUp");
+    await page.keyboard.press("ArrowUp");
+    await expect(power).toHaveAttribute("aria-valuenow", "2");
+    await expect(brake).toHaveAttribute("aria-valuenow", "0");
+    await expect.poll(() => speed(page)).toBeGreaterThan(0);
+
+    await brake.focus();
+    await page.keyboard.press("ArrowUp");
+    await expect(brake).toHaveAttribute("aria-valuenow", "1");
+    await expect(power).toHaveAttribute("aria-valuenow", "2");
+    await page.keyboard.press("Home");
+    await expect(brake).toHaveAttribute("aria-valuenow", "0");
+  });
+
+  test("滑鼠：點 P2 那一格、拖把手，速度表起來", async ({ page }) => {
+    await page.goto("/games/orange-express");
+    await startLevel(page, "自己開");
+    const power = page.getByRole("slider", { name: "動力" });
+    await power.locator('[data-notch="2"]').click();
+    await expect(power).toHaveAttribute("aria-valuenow", "2");
+    await expect.poll(() => speed(page)).toBeGreaterThan(0);
+
+    await power.locator('[data-notch="0"]').click();
+    await expect(power).toHaveAttribute("aria-valuenow", "0");
+    const box = (await power.boundingBox())!;
+    const x = box.x + box.width * 0.25;
+    await page.mouse.move(x, box.y + box.height - 10);
+    await page.mouse.down();
+    await page.mouse.move(x, box.y + 10, { steps: 8 });
+    await page.mouse.up();
+    await expect(power).toHaveAttribute("aria-valuenow", "4");
   });
 });

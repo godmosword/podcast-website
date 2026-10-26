@@ -12,6 +12,7 @@ import {
   powerWord,
 } from "@/lib/games/orange-express/copy";
 import { gaugeZone } from "@/lib/games/orange-express/gauge";
+import { sliderKeyTarget } from "@/lib/games/orange-express/lever";
 import { currentLimit, inTunnel, onBridge, powerCap } from "@/lib/games/orange-express/reducer";
 import {
   BRAKE_MAX,
@@ -136,6 +137,14 @@ function Lever({
         onPointerCancel={() => {
           dragging.current = false;
         }}
+        onKeyDown={(event) => {
+          const next = sliderKeyTarget(event.key, notch, max);
+          if (next === null) return;
+          // 焦點在這根桿上時 ↑↓ 只動這根（煞車桿按 ↑ 是加煞車），不要再讓整頁的鍵盤對應動動力桿。
+          event.preventDefault();
+          event.stopPropagation();
+          onChange(next);
+        }}
       >
         <span className={styles.leverSlot} aria-hidden />
         <span className={styles.leverHandle} aria-hidden>
@@ -157,6 +166,7 @@ function Lever({
                 data-emergency={
                   kind === "brake" && n === EMERGENCY ? "true" : "false"
                 }
+                onClick={() => onChange(n)}
               >
                 {text}
               </span>

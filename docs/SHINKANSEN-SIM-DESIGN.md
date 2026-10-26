@@ -627,6 +627,7 @@ Kaiyi 看完第二輪覺得有模擬器感了，再拍板 3B、6B、7B、8B。�
 - 手機煞車與動力桿高度 312px，煞車六格每格間距至少 48px（e2e 量測）。
 - 底部操作提示圖示對齊實際按鍵，見第 3 節。
 - 開車畫面上空白鍵不會捲動頁面（門還沒亮時也一樣）。
+- 鍵盤在按下當下就送動作（`OrangeExpressInstance.pressKey`），不靠 Host 每幀看「還按著嗎」；快點一下或一幀很長時才不會漏鍵。焦點在桿上時 ↑↓／Home／End 只動那根桿，←→ 仍是煞車。動力與煞車的每一格可以直接點或觸控。e2e 以不掛掛鉤的真實鍵盤、滑鼠、觸控驗證「從 P0 推動力，速度表起來」。
 
 主要檔案：`routes.ts`（司機、場景、速限牌、任務）、`reducer.ts`（自動輕煞、喇叭打招呼、對向列車計時、指差確認）、`notice.ts`、`announce.ts`、`windshield.ts`、`chime.ts`、`sound.ts`、`components/games/OrangeExpressSettings.tsx`。
 

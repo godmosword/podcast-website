@@ -684,6 +684,7 @@
   font-size: var(--fs-meta);
   font-weight: 900;
   line-height: 1;
+  pointer-events: auto;
 }
 
 .notchLamp[data-notch="0"] {

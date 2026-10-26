@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { GameAudioBus, OverlayProps } from "@/lib/gamekit/adapter";
 import type { GameAction } from "@/lib/gamekit/types";
 import { useGameLoop } from "@/lib/gamekit/react/useGameLoop";
+import { keyAction } from "@/lib/gamekit/runtime/input";
 import {
   loadOrangeExpressLevel,
   resolveOrangeExpressDriver,
@@ -56,6 +57,14 @@ const SOUND_RETRY_MS = 1000;
 const ANNOUNCE_DELAY_MS = 650;
 /** 對向列車擦身時「咻」的時間點（秒）。 */
 const WHOOSH_AT = 1.45;
+const DRIVE_KEYS: ReadonlySet<GameAction> = new Set([
+  "move-up",
+  "move-down",
+  "move-left",
+  "move-right",
+  "dash",
+  "action",
+]);
 
 function liveText(run: RunState): string {
   if (run.phase === "reversing") return COPY.reversing;
@@ -311,16 +320,29 @@ export function OrangeExpressView({
 
   useEffect(() => {
     if (screen !== "drive") return;
-    // 空白鍵是開門；門還沒亮時共用輸入層不攔，頁面會被捲走。焦點在按鈕上時留給按鈕自己。
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== " ") return;
+      if (e.repeat || e.altKey || e.ctrlKey || e.metaKey) return;
+      const action = keyAction(e.key);
+      if (!action || !DRIVE_KEYS.has(action)) return;
       const target = e.target as HTMLElement | null;
-      if (target?.closest("button, input, select, textarea, [role='slider'], [role='radio']")) return;
-      e.preventDefault();
+      if (target?.closest("input, select, textarea, [role='radio'], [role='dialog']")) return;
+      // 空白鍵在按鈕上是按那顆按鈕，不是開門。
+      if (action === "action" && target?.closest("button")) return;
+      // 空白鍵是開門；門還沒亮時共用輸入層不攔，頁面會被捲走。
+      if (action === "action") e.preventDefault();
+      instance.pressKey(action);
+    };
+    const onKeyUp = (e: KeyboardEvent) => {
+      const action = keyAction(e.key);
+      if (action && DRIVE_KEYS.has(action)) instance.releaseKey(action);
     };
     window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [screen]);
+    window.addEventListener("keyup", onKeyUp);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
+    };
+  }, [instance, screen]);
 
   useEffect(() => {
     if (!shake) return;
