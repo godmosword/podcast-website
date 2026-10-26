@@ -82,3 +82,19 @@ describe("games next-station flow", () => {
     expect(getNextGame("nope")).toBeNull();
   });
 });
+
+describe("遊戲封面 SVG", () => {
+  // #265 的小橘特快車封面曾經混進不是 UTF-8 的位元組，瀏覽器解析 XML 失敗，卡片整張破圖
+  test("每一張 SVG 封面都是合法的 UTF-8、有 <svg> 根節點", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { join } = await import("node:path");
+    const svgs = GAMES.flatMap((game) => [game.art.cover, game.art.thumbnail]).filter(
+      (src): src is string => typeof src === "string" && src.endsWith(".svg"),
+    );
+    for (const src of new Set(svgs)) {
+      const bytes = readFileSync(join(process.cwd(), "public", src));
+      const text = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+      expect(text, src).toMatch(/<svg[\s>]/);
+    }
+  });
+});
