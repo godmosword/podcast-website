@@ -1,3 +1,5 @@
+> **已封存（2026-10-26）：** 等距 3D 舞台（R3F／Three、GLB 模型、`build.py`、`?stage=world`）已在 Hero 改版 Phase 3c 下架，現行舞台只有橫向視差帶，見 [`specs/HERO-PARALLAX-SPEC.md`](../specs/HERO-PARALLAX-SPEC.md)。本文保留為歷史紀錄，裡面的路徑與指令都已不存在。
+
 # 車車遊樂園 3D Hero｜原始檔與設計理念
 
 > 這份文件整理本次 3D 首頁 Hero 的設計決策、技術架構、效能與無障礙策略，以及可重建場景的原始檔內容。  

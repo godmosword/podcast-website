@@ -1,5 +1,7 @@
 # 車車遊樂園 3D Intro / Portal — 詳細產品與技術規格
 
+> **2026-10-26：** 等距 3D 舞台（R3F／Three、GLB、`build.py`、`active-clock`）已在 Hero Phase 3c 下架，現行舞台只有橫向視差帶（[`HERO-PARALLAX-SPEC.md`](HERO-PARALLAX-SPEC.md) §5.1.1）。本文的 3D 段落為歷史紀錄。
+
 版本：1.0 · 日期：2026-09-06（狀態於 2026-09-08 依工作樹重新核對） · 狀態：設計規格；Phase 1、4、5 已實作並驗證。Phase 6／7 對**前端實際引用的 v3** 已成立：v3 現在由 `assets/blender/hero-world/build.py` 在 Blender 4.5（PyPI `bpy` 模組；實體 Blender CLI 驗證列為 Phase 13 前必做）乾淨重建，經 `optimize-hero-world.mjs`／`render-hero-posters.mjs` 產出，`polish-hero-world.mjs` 已刪除，manifest 記載 `blenderCleanRebuild: true`（證據見 `docs/qa/intro-portal/v3-clean-rebuild-20260908/`）。ADR-0003 的 opt-in 入口已實作。Phase 8 已就 v3 做視覺驗收（同上目錄的 before／after 對照）；Phase 9 的進站轉場與 focus 交接已實作並驗證（`docs/qa/intro-portal/phase9-20260908/`）；Phase 10（效能）與 Phase 11（可及性）已在無 GPU 的容器上量測與驗證（`phase10-20260908/`、`phase11-20260908/`），FPS 與螢幕閱讀器仍待真機；Phase 12 的模擬部分（跨 viewport 版面、旋轉、網路情境）已完成，真機部分因無實體裝置全部 NOT-RUN（`phase12-20260908/`）；Phase 13 待驗收
 
 本次交付遵循最新指示「把 SPEC／PLAN 寫給我就好，越細節越好」。文件中的「應」「必須」「驗收」均表示未來實作要求，不表示目前程式已達成。本文與 [執行計畫](INTRO-PORTAL-PLAN.md) 配套使用。

@@ -19,7 +19,8 @@ declare global {
  * - 沒有暫停鈕；看著頁面時動畫一直跑。隱藏分頁、離開視窗才凍住，不釋放 layer
  * - tile 載不出來不阻擋 ready 與出口；晚到的 tile 在路由切換後被丟掉
  *
- * 舊的 3D 舞台（`?stage=world`）只剩回滾用途，e2e 不再守它。
+ * 舊的 3D 舞台（R3F／Three、GLB 模型、`?stage=world`）已在 2026-10-26 Phase 3c 下架；
+ * 下面「不建 WebGL、不抓 GLB、不載 three」的契約仍保留，防止有人把 3D 加回來。
  *
  * 2026-09-12：產品已下架開場（`INTRO_PORTAL_ENABLED`）。本檔契約全部保留，
  * 旗標為 false 時只跑「訪客看不到開場」這組；改回 true 即重跑下面整份。

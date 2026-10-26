@@ -17,7 +17,6 @@ import { MAP_ROAMERS } from "../../data/universe-roamers";
 import { ZONE_MOTION } from "../../data/universe-zone-motion";
 import { ZONE_IDS } from "../../data/universe-zones";
 import { PARALLAX_ASSET_PATH, PARALLAX_LAYERS } from "../../components/landing/hero-parallax/layers";
-import { MODEL_PATH } from "../../components/landing/hero-world/config";
 import {
   cloudPath,
   CLOUD_IDS,
@@ -238,9 +237,6 @@ export function collectDynamicReferencePaths(): string[] {
     refs.add(`${PARALLAX_ASSET_PATH}/${layer.file}`);
   }
   refs.add(`${PARALLAX_ASSET_PATH}/l3-road-mobile.webp`);
-
-  refs.add(`${MODEL_PATH}/poster.webp`);
-  refs.add(`${MODEL_PATH}/poster-mobile.webp`);
 
   for (const parts of Object.values(ZONE_MOTION)) {
     if (!parts) continue;

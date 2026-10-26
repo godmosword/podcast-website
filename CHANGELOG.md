@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Removed
+
+- **開場舊的 3D 舞台**：首頁開場（目前沒有開放）只剩橫向視差帶。拿掉用 Three.js 畫的立體小島、3D 模型與它的製作腳本；網站上看不到差別，只是程式少了一大塊（建置產物少約 0.9MB、相依套件少 155 個）。
+
 ### Security
 
 - **Next.js 16.3.8 → 16.4.3**：修補 2026-10 公布的 GHSA-2464-fhr4-w9xw（圖片優化 API 處理 SVG 時遠端執行程式碼，critical）、GHSA-673q-mjm6-r5xr（`use cache` 遠端執行，critical；本站未使用）、GHSA-p3m5-59mp-jv5r（Server Actions 服務中斷；留言牆有用）。`eslint-config-next` 同步 16.4.3。16.4 新增的都是要主動開啟的功能，本站沒用到改名的 `unstable_prefetch`／`unstable_navigation`。

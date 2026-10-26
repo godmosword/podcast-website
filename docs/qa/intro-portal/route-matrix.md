@@ -1,5 +1,7 @@
 # Intro / Portal 測試矩陣對照表
 
+> **2026-10-26：** 等距 3D 舞台（R3F／Three、GLB、`build.py`、`active-clock`）已在 Hero Phase 3c 下架，現行舞台只有橫向視差帶（[`HERO-PARALLAX-SPEC.md`](../../specs/HERO-PARALLAX-SPEC.md) §5.1.1）。本文的 3D 段落為歷史紀錄。
+
 對照 [PLAN §15](../../specs/INTRO-PORTAL-PLAN.md) 的 R01–R12（路由與入口）與 F01–F13（載入與生命周期），共 25 個必測 ID。
 
 - 產生日期：2026-09-07；2026-09-08 依 ADR-0003 實作與 v3 乾淨重建更新；2026-09-08 再依 [ADR-0004](../../adr/0004-intro-overlay-on-home.md)（3D 開場改為首頁同頁覆蓋層）與手機構圖修正更新

@@ -108,7 +108,6 @@ const HARDCODED_COLOR_SOURCE_ALLOWLIST = [
   "components/games/GamePlayChromeSlot.tsx",
   "components/games/ResultStars.tsx",
   "components/games/blockDropTheme.ts",
-  "components/landing/hero-world/art-direction.ts",
   "components/ui/TapHand.tsx",
   "components/universe/MapBridgeLayer.tsx",
   "components/universe/MapDecorLayer.tsx",

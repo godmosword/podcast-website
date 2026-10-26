@@ -11,11 +11,11 @@ import {
 import styles from "./IntroOverlay.module.css";
 
 /**
- * 首頁的 3D 開場覆蓋層（ADR-0004）。
+ * 首頁的開場覆蓋層（ADR-0004；舞台是橫向視差帶，3D 舞台 2026-10-26 已下架）。
  *
  * 刻意**不用** `next/dynamic ssr:false`：它必須出現在 `/` 的 SSR HTML 裡。
  * 若改成「掛載後才顯示」，就會出現 ADR-0003 量到的那種閃爍的鏡像版——
- * 先看到 Landing，再被 3D 蓋上去。要不要顯示由 `<head>` 的同步 script 在
+ * 先看到 Landing，再被開場蓋上去。要不要顯示由 `<head>` 的同步 script 在
  * 首次繪製前決定（`html[data-intro-gate="on"]`），CSS 預設是隱藏。
  *
  * 底下的 Landing 是完整的 HTML，覆蓋層只是視覺層：`inert` 由 `<main>`

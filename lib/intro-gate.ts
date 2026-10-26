@@ -38,7 +38,7 @@ export type IntroGateInput = {
   saveData: boolean;
   /** `navigator.connection.effectiveType`。 */
   effectiveType: string;
-  /** 部署層的 3D 總開關（`NEXT_PUBLIC_HERO_3D`）。 */
+  /** 部署層的開場總開關（`NEXT_PUBLIC_HERO_3D`，名稱沿用 3D 舞台時代；2026-10-26 起只剩視差舞台）。 */
   heroDisabled: boolean;
 };
 

@@ -4,7 +4,7 @@
 
 把 Hero 從等距（isometric）3D diorama 改為橫向 2.5D 視差帶。本文包含現版問題診斷、小紅賽車角色一致性規範、分層實作規格，以及與現有 repo 的落差核對。
 
-配套文件：[`HERO-WORLD.md`](../HERO-WORLD.md)（現版 v3 架構）、[`INTRO-PORTAL-SPEC.md`](INTRO-PORTAL-SPEC.md)（`/intro` 產品規格）、[`UNIVERSE-ART-BIBLE.md`](../UNIVERSE-ART-BIBLE.md)（地圖與 roamer 美術）。
+配套文件：[`HERO-WORLD.md`](../archive/HERO-WORLD.md)（現版 v3 架構）、[`INTRO-PORTAL-SPEC.md`](INTRO-PORTAL-SPEC.md)（`/intro` 產品規格）、[`UNIVERSE-ART-BIBLE.md`](../UNIVERSE-ART-BIBLE.md)（地圖與 roamer 美術）。
 
 ---
 
@@ -276,11 +276,15 @@ Phase 3 若成立，現版 R3F／Three 依賴（`HeroScene`／`World`／`Vehicle
 
 visual baseline：`intro-poster`／`intro-ready`／`intro-greeting` 六張退役，`intro-parallax-1440x900`／`390x844` 兩張成為 Intro 的核心畫面。
 
-三支量 3D 指標的 QA 腳本（`qa:intro-viewports`、`measure:intro-performance`、`capture-intro-polish`）固定走 `?stage=world`，因為它們量的是 DPR、frame time 與 GLB 傳輸——視差帶沒有這些。
+量 3D 指標的 QA 腳本（`qa:intro-viewports`、`measure:intro-performance`、`capture-intro-polish`）已隨 Phase 3c 刪除。
 
-### 5.1.1 下一步：Phase 3c 下架 R3F／Three
+### 5.1.1 Phase 3c 下架 R3F／Three：✅ 已執行（2026-10-26）
 
-`world` 舞台現在只有單元測試守著，沒有 e2e。建議讓 parallax 上線幾天、確認實機沒問題後再下架：`HeroScene`／`World`／`Vehicle`／`CameraRig`／`QualityManager`／`SceneLoader`／`WorldEnvironment`、`three`／`@react-three/*` 依賴、`public/models/hero-world`、四支 hero-world 腳本與 `assets/blender`。這是本改版最大的效能與維護成本回收，也是不可逆的一步。
+刪掉 `HeroScene`／`World`／`Vehicle`／`CameraRig`／`QualityManager`／`SceneLoader`／`WorldEnvironment`、只給 3D 用的 `config.ts`（舞台切換、品質分級、道路與車子時間軸）、`art-direction.ts`、`active-clock.ts` 與其測試；`three`、`@react-three/fiber`、`@types/three`，以及只給模型管線用的 `@gltf-transform/*`、`gltf-validator`；`public/models/hero-world`（1.3MB）、`assets/blender/hero-world`；七支 3D 腳本與 `*:hero-world` 等 npm scripts。`HeroWorld.tsx` 留作入口殼，舞台只有視差帶，`data-stage` 固定 `parallax`，`?stage=` 與 `NEXT_PUBLIC_HERO_STAGE` 不再有作用。
+
+刪除前的驗收：開場自 2026-09-12 起已下架（`INTRO_PORTAL_ENABLED = false`，正式站 `/intro` 307 回首頁），視差帶**在正式站上看不到**，所以「正式版驗收」改成兩段——(1) 正式站 `/intro`、`/`、`/stories`、`/games` × Chromium／WebKit 桌機／iPhone 模擬 × 日夜 × 減少動態共 12 組：沒有 WebGL context、載入的腳本沒有一支含 `WebGLRenderer`、沒有頁面錯誤；(2) 本機暫時把旗標打開建一份，`e2e/intro-portal.spec.ts` 在 Chromium、WebKit、WebKit iPhone 跑 213 項，視差舞台本身的契約（不建 WebGL、不抓 GLB、進 ready、減少動態靜態、隱藏分頁凍結）全過；失敗的 10–12 項都是已下架開場流程的過期契約或瀏覽器預設（進入後網址停在 `/?enter=1`、Safari 預設 Tab 不停連結、Playwright WebKit 中鍵不開新分頁、雙擊導航中斷的網路錯誤），刪除前後同一類。iOS Safari 真機未驗。
+
+收益：build 產物 `static/chunks` 3704KB → 2760KB（少掉 920KB 的 three chunk）；它本來就是 lazy chunk，三個主要頁面每頁少一支腳本、約 −10KB（未壓縮）；`node_modules` 少 155 個套件。回滾＝ `git revert` 該 commit。
 
 ### 5.1.2 文字安全區的實作（Astra 審查後，2026-09-11）
 
@@ -331,6 +335,7 @@ visual baseline：`intro-poster`／`intro-ready`／`intro-greeting` 六張退役
 
 | 日期 | 說明 |
 |---|---|
+| 2026-10-26 | **Phase 3c：下架 R3F／Three 等距 3D 舞台**（§5.1.1）。Phase 2b／2c 的 3D 車身修飾標記為被取代、不實作 |
 | 2026-09-11 | **Phase 3b：預設舞台切為 parallax**。§5.1 改為契約對照表；新增 §5.1.1 Phase 3c 下架計畫 |
 | 2026-09-11 | **Phase 3 落地（A/B 並存）**：§5 Phase 3／4 列更新；新增 §5.1「切換預設舞台前要做的事」與 §5.2「與 §4.4 的落差」 |
 | 2026-09-09 | **Phase 2 落地**。§0.3 核對表改寫為落地後現況（行號、座標、色票全部重核），未處理項目改列獨立表格並各自附理由；新增 §0.4 記錄縮短車身造成的錨定破綻與教訓；§0.1 交付邊界、§5 Phase 2 列、§6「無 Blender CLI」與「canon 裁決未定」兩項阻擋同步更新 |

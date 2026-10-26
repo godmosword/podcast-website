@@ -26,7 +26,7 @@
 - ✅ **視覺基準每次重錄都會閃**：原本以為是動畫沒凍結，查下來是兩個別的原因。(1) 首頁段落在串流／hydration 時會被換成新節點，夜色遮罩與嘟嘟表情的 IntersectionObserver 只在掛載時抓一次節點，抓到舊的就再也不切換；平行跑時約三成停在第一段，`landing-health-390-night` 就錄成了冷色遮罩。真實使用者在慢手機上也會遇到。改成聽捲動、每次用 id 重找段落（`useActiveLandingAnchor`），視覺測試截圖前等遮罩與嘟嘟都切到該段。(2) `stabilizeVisualPage` 把圖鎖在當下的 `currentSrc`，hydration 還沒完成時會鎖到別的候選（消消樂封面平行 8 次有 1 次是 w=384）；改成照 `sizes`＋`srcset` 自己挑。整套連錄三次，剩下 about、adventures、消消樂標題 1280 夜間、壽司屋結算與 844×390 廚房還有極小抖動（單一像素最多差 17、≤0.25% 像素），遠在容差內，不再處理。見本 commit。
 - ✅ **重錄 darwin 視覺基準（給爸媽預設展開）**：五張 ep-3 基準都已重錄。抽看 390 日間：頂部連結已拿掉，共讀區預設展開。`612aa62a`
 - **後續（本輪不做）**：`.scrim` 左下 0.52 可調淡。
-- **Hero 橫向 2.5D 改版（規格已定；Phase 1／2／3／3b／4 已落地，視差帶已是預設、3D 只剩回滾）**：等距 diorama → 橫向視差帶；規格見 [Hero 橫向 2.5D 視差帶](./docs/specs/HERO-PARALLAX-SPEC.md)。四個 Phase、阻擋項與跨角色眼位決策（A/B/C）見該文 §5／§6／§2.5。`design · L · 需先決 §2.5`
+- ✅ **Hero 橫向 2.5D 改版（Phase 1／2／3／3b／3c／4 已落地；2b／2c 被取代）**：2026-10-26 Phase 3c 下架 R3F／Three，視差帶是唯一舞台。等距 diorama → 橫向視差帶；規格見 [Hero 橫向 2.5D 視差帶](./docs/specs/HERO-PARALLAX-SPEC.md)。四個 Phase、阻擋項與跨角色眼位決策（A/B/C）見該文 §5／§6／§2.5。`design · L · 需先決 §2.5`
 - **後續：拿掉 CTA `nowrap`**：把 `LandingSegment.tsx` 的 `" →"` 半形空白改不斷行空白，箭頭才不會孤行；同時避開 <348px Dudu 遮箭頭、文字級 200% 被 `.panel` 裁尾。
 - **後續：勿靜默啟用 `playCta`**：`LandingSegment.tsx` 三元式會讓主 CTA 從 56px／`--fs-h2`／不透明墨板退回 44px／`.subscribeCta`，契約測不會紅。`.subscribeCta` 已脫離玻璃；啟用前仍須處理字級／高度落差，且不得把分區主 CTA 換成橘 `.playCta`。
 
@@ -451,12 +451,13 @@ clip 快照在不同 macOS／Chromium 版本上的自然噪音底線。
 - [x] Phase 1 角色設定書入庫：`scripts/lib/character-sheet.ts` SSOT ＋契約測試，掛進 roamer prompt 與 `小紅賽車` `desc`（未跑生圖；`desc` 不被 UI 渲染，零像素影響）  `見本 commit`
 - [x] §2.5 canon 裁決：**必須 follow 定裝照**（C 案）。設定書的「大燈眼／黃條紋／星星天線」三項作廢；SSOT 正向鎖 canon 臉部配置、負向擋這三種漂移  `見本 commit`
 - [x] Phase 2 `build.py` 小紅幾何補齊：補車門白圓底號碼「2」＋微笑線加粗加寬，並修好縮短車身後 `Bumper`／`Headlight`／`Smile`／`Hood stripe` 仍釘在舊車頭座標的浮空破綻（規格 §0.4）。與 `npm run release:hero-world` 同一 commit；runbook 與教訓見 [`PHASE2-CANON-ALIGNMENT.md`](./assets/blender/hero-world/PHASE2-CANON-ALIGNMENT.md)  `見本 commit`
-- [ ] Phase 2c 引擎蓋長雙條紋＋引擎蓋大「2」、大燈白色外環、`blue` 色票偏青（轉 sRGB 約 `(.35,.57,.59)`，不是定裝照的鈷藍）、後照鏡紅球浮空 — 四項皆為構圖／配色尺度的改動，非確定性修補，另案
-- [ ] Phase 2b 輪徑對車高比例收斂 — 另案：`WHEEL_RADIUS` 同時在 `build.py` 與 `config.ts:24`，是輪速與行進距離的換算基準，改動會連帶輪心高度、接地與取景
+- [x] ~~Phase 2c 引擎蓋長雙條紋＋引擎蓋大「2」、大燈白色外環、`blue` 色票偏青、後照鏡紅球浮空~~ — **被取代（2026-10-26）**：3D 車身已隨 Phase 3c 下架，不實作。
+- [x] ~~Phase 2b 輪徑對車高比例收斂~~ — **被取代（2026-10-26）**：`build.py`／`config.ts` 已隨 Phase 3c 刪除，不實作。
 - [x] Phase 4 六層 tile 素材：四張零件表以 ChatGPT Images 2.5 生成（L0 走 CSS、L4 沿用既有 roamer sprite），由 `npm run compose:parallax` 合成為可平鋪 tile。零件表在 `assets/landing/hero-parallax/props/`、產物在 `public/landing/hero-parallax/`、接縫對照圖在 `verify/`。L3 路面另做色彩校正（`#a47846` → `#cfb789`，對齊 Art Bible 步道色）＋整數虛線週期裁切＋預乘 alpha 交叉淡接，左右邊緣 RGBA 平均差 11.9 → 3.6  `見本 commit`
 - [x] Phase 3 橫向視差帶前端：`components/landing/hero-parallax/HeroParallax.tsx` 純 CSS transform、reduced-motion 退靜態、暫停凍結動畫；HeroWorld 以 `HERO_STAGE` 選舞台，**預設仍是 world**（A/B 並存）。`NEXT_PUBLIC_HERO_STAGE=parallax` 全站切、`?stage=parallax` 本機看。visual baseline `intro-parallax-1440x900`／`390x844`  `見本 commit`
 - [x] Phase 3b 切預設舞台為 parallax：intro-portal e2e 改寫為視差帶契約（刪 3D 失效面、新增「永不請求 WebGL context／不載 three chunk」）、退役 intro-poster／ready／greeting 六張 baseline、三支 3D 指標 QA 腳本固定走 `?stage=world`。對照表見規格 §5.1  `見本 commit`
-- [ ] Phase 3c 下架 R3F／Three（`HeroScene`／`World`／`Vehicle`／`CameraRig`／`QualityManager`／`SceneLoader`）——3b 之後才做，這是本改版最大的效能與維護成本回收
+- [x] Phase 3c 下架 R3F／Three（2026-10-26）：刪 7 支 3D 元件、`config.ts`／`art-direction.ts`／`active-clock.ts` 與測試、`three`／`@react-three/fiber`／`@types/three`／`@gltf-transform/*`／`gltf-validator`（`node_modules` −155 套件）、`public/models/hero-world`、`assets/blender/hero-world`、七支 3D 腳本與 npm scripts；`HeroWorld.tsx` 留作入口殼、`data-stage` 固定 `parallax`。build `static/chunks` 3704KB → 2760KB（three chunk 920KB 本來就是 lazy，三個主要頁面每頁少一支腳本、約 −10KB）。驗收：開場自 9/12 已下架、正式站看不到視差帶，改成正式站 12 組（Chromium／WebKit／iPhone 模擬 × 日夜 × 減少動態）確認沒有 WebGL、沒有 three chunk、沒有錯誤，加本機打開旗標跑 intro-portal 三引擎，視差契約全過（細節見規格 §5.1.1）。3D 文件移到 `docs/archive/`。見本 commit。
+- 後續（重新開開場前要做）：`e2e/intro-portal.spec.ts` 從 9/12 起一直被跳過，已經過期——進入後網址會停在 `/?enter=1`（測試預期 `/`，有時 router.replace 來得及、有時來不及，所以時好時壞）、Safari 預設 Tab 不停連結（鍵盤與焦點兩項）、Playwright WebKit 中鍵不開新分頁、雙擊時導航中斷的網路錯誤。打開 `INTRO_PORTAL_ENABLED` 前先修。`eng · S · 無`
 
 > **核對出的五項落差**（實作前必讀，見規格 §0.2）：Hero 的車是 `build.py` 程序化建模不是生圖；微笑線存在只是太細；角色 Logo 系統已移除故該論證前提失效；缺 Do-NOT 的是 roamer 生圖管線不是 Hero；設定書的「大燈眼／黃條紋／星星天線」三項與定裝照 canon 牴觸——**已裁決 follow 定裝照，該三項作廢**。
 

@@ -1,8 +1,10 @@
+> **已封存（2026-10-26）：** 等距 3D 舞台（R3F／Three、GLB 模型、`build.py`、`?stage=world`）已在 Hero 改版 Phase 3c 下架，現行舞台只有橫向視差帶，見 [`specs/HERO-PARALLAX-SPEC.md`](../specs/HERO-PARALLAX-SPEC.md)。本文保留為歷史紀錄，裡面的路徑與指令都已不存在。
+
 # 車車遊樂園：微型故事入口
 
 完整的設計理念、架構說明與原始檔快照請參閱：[HERO-WORLD-SOURCE.md](./HERO-WORLD-SOURCE.md)。
 
-> **改版規格（未實作）：** 等距 diorama → 橫向 2.5D 視差帶的規格見 [`specs/HERO-PARALLAX-SPEC.md`](./specs/HERO-PARALLAX-SPEC.md)。該文 §0.3 逐項核對了現版 `build.py` 小紅幾何與角色設定書的落差。
+> **改版規格（未實作）：** 等距 diorama → 橫向 2.5D 視差帶的規格見 [`specs/HERO-PARALLAX-SPEC.md`](../specs/HERO-PARALLAX-SPEC.md)。該文 §0.3 逐項核對了現版 `build.py` 小紅幾何與角色設定書的落差。
 
 ## Repository inspection / implementation decision
 
