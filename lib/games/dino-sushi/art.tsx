@@ -2,7 +2,7 @@
 
 import { useEffect, type CSSProperties, type ReactNode } from "react";
 import { dinoSushiSrc } from "./asset-src";
-import type { Sushi } from "./sushi";
+import { layerKey, type Sushi } from "./sushi";
 import type { BaseId, ToppingId, ToppingKind } from "./toppings";
 
 /**
@@ -246,12 +246,11 @@ export function SushiArt({
     .map((id, i) => {
       const fit = TOPPING_FIT[id];
       const spot = spots[i] ?? spots[0]!;
-      /* 用「第幾個同樣的料」當 key：拿掉一層或滿了擠掉最舊那層時，留下來的不重掛、不重播落下動畫，只有新的那層會彈 */
-      const nth = sushi.toppings.slice(0, i).filter((t) => t === id).length;
       /* 手捲的位置與大小已經寫在 TEMAKI_PLACE，不再套握壽司那組 dy 與縮放。 */
       return {
         id,
-        key: `${id}-${nth}`,
+        /* 用這一層的編號當 key：拿掉一層或滿了擠掉最舊那層時，留下來的不重掛、不重播落下動畫，只有新的那層會彈 */
+        key: layerKey(sushi, i),
         x: spot.x,
         y: temaki ? spot.y : spot.y + fit.dy,
         w: temaki ? spot.w : spot.w * fit.scale,

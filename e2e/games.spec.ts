@@ -678,6 +678,46 @@ test.describe("多多壽司屋", () => {
     ]);
   });
 
+  test("同一種料放兩次（[A、B、A]）再加料：只有被擠掉的那個 A 離場，留下來的 B、A 料位與砧板上的層都不重掛", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/games/dino-sushi");
+    await page.getByRole("button", { name: "自由做" }).click();
+    await page.getByRole("button", { name: "選握壽司" }).click();
+    const tray = page.getByRole("group", { name: "壽司料" }).getByRole("button");
+    const [a, b, c] = await tray.evaluateAll((bs) => bs.slice(0, 3).map((el) => el.getAttribute("data-topping")!));
+    await tray.nth(0).click();
+    await tray.nth(1).click();
+    await tray.nth(0).click();
+    const slotButtons = page.getByRole("button", { name: /^拿掉/ });
+    const layers = page.locator('[data-role="prep-sushi"] > [data-sushi] > span');
+    await expect(slotButtons).toHaveCount(3);
+    await expect(layers).toHaveCount(3);
+    const mark = async () => {
+      await slotButtons.evaluateAll((els) => els.forEach((el, i) => el.setAttribute("data-mark", String(i))));
+      await layers.evaluateAll((els) => els.forEach((el, i) => el.setAttribute("data-mark", String(i))));
+    };
+    const marks = async () => ({
+      slots: await slotButtons.evaluateAll((els) => els.map((el) => el.getAttribute("data-mark"))),
+      layers: await layers.evaluateAll((els) => els.map((el) => el.getAttribute("data-mark"))),
+    });
+    const foods = () =>
+      layers.evaluateAll((els) => els.map((el) => el.querySelector("img")!.getAttribute("src")!.match(/([a-z-]+)\.webp/)![1]));
+    await mark();
+    const flyPromise = page.waitForFunction(() => document.querySelector("[data-evict]")?.getAttribute("data-evict") ?? null);
+    await tray.nth(2).click();
+    expect(await (await flyPromise).jsonValue()).toBe(a);
+    await expect(slotButtons).toHaveCount(3);
+    expect(await marks()).toEqual({ slots: ["1", "2", null], layers: ["1", "2", null] });
+    expect(await foods()).toEqual([b, a, c]);
+
+    // 拿掉現在第一層的 B：留下來的 A 與剛放的料都不重掛
+    await mark();
+    await slotButtons.first().click();
+    await expect(slotButtons).toHaveCount(2);
+    expect(await marks()).toEqual({ slots: ["1", "2"], layers: ["1", "2"] });
+    expect(await foods()).toEqual([a, c]);
+  });
+
   test("滿格再加料：被擠掉的料縮小飛回托盤；減少動態改成淡出", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/games/dino-sushi");

@@ -2,6 +2,7 @@
 import { cleanup, render } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { SushiArt } from "./art";
+import { addTopping, changeBase, EMPTY_SUSHI, removeTopping, type Sushi } from "./sushi";
 import type { BaseId, ToppingId } from "./toppings";
 
 afterEach(cleanup);
@@ -44,6 +45,41 @@ describe("砧板上的料重掛規則", () => {
       expect(added).toEqual([after.get("crab")]);
     },
   );
+
+  describe("同一種料放兩次（[玉子、蝦、玉子]）", () => {
+    /** 依 DOM 順序列出每一層的 span（同名料不會互相蓋掉）。 */
+    const spans = (container: HTMLElement) => [...container.querySelectorAll<HTMLElement>("[data-sushi] > span")]
+      .filter((s) => s.querySelector('img[src*="/food/"]'));
+    const build = (ids: ToppingId[]) => ids.reduce((s, id) => addTopping(s, id), changeBase(EMPTY_SUSHI, "nigiri"));
+
+    function rerenderSushi(from: Sushi, to: Sushi) {
+      const { container, rerender } = render(<SushiArt sushi={from} />);
+      const before = spans(container);
+      const root = container.querySelector("[data-sushi]")!;
+      const observer = new MutationObserver(() => {});
+      observer.observe(root, { childList: true });
+      rerender(<SushiArt sushi={to} />);
+      const added = observer.takeRecords().flatMap((r) => [...r.addedNodes]);
+      observer.disconnect();
+      return { before, after: spans(container), added };
+    }
+
+    it("滿了再加料：擠掉第一個玉子，蝦和第二個玉子都是原來的節點，只插入新的那層", () => {
+      const from = build(["tamago", "shrimp", "tamago"]);
+      const { before, after, added } = rerenderSushi(from, addTopping(from, "crab"));
+      expect(after[0]).toBe(before[1]);
+      expect(after[1]).toBe(before[2]);
+      expect(after).not.toContain(before[0]);
+      expect(added).toEqual([after[2]]);
+    });
+
+    it("拿掉第一個玉子：第二個玉子不重掛、不被搬動", () => {
+      const from = build(["tamago", "shrimp", "tamago"]);
+      const { before, after, added } = rerenderSushi(from, removeTopping(from, 0));
+      expect(after).toEqual([before[1], before[2]]);
+      expect(added).toEqual([]);
+    });
+  });
 
   it("拿掉中間那層：其他層不重掛、不被搬動", () => {
     const { before, after, added } = rerenderAdded("temaki", ["tuna", "salmon", "crab"], ["tuna", "crab"]);

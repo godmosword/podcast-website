@@ -4,7 +4,7 @@ import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { BaseArt, PlateArt, SHOP_SRC, SushiArt, ToppingArt } from "@/lib/games/dino-sushi/art";
 import { matchOrder, orderSpeechLine, orderThanksLine } from "@/lib/games/dino-sushi/orders";
 import { currentOrder } from "@/lib/games/dino-sushi/round";
-import { MAX_TOPPINGS } from "@/lib/games/dino-sushi/sushi";
+import { layerKey, MAX_TOPPINGS } from "@/lib/games/dino-sushi/sushi";
 import { BASES, baseById, toppingById, type BaseId, type ToppingId } from "@/lib/games/dino-sushi/toppings";
 import { DOME_AFTER_PLATES, domeStickerId, orderLead } from "@/lib/games/dino-sushi/variety";
 import { DinoSushiCustomerQueue } from "./DinoSushiCustomerQueue";
@@ -18,6 +18,7 @@ import { DinoSushiPlateStack } from "./DinoSushiPlateStack";
 import { ShopBelt, ShopWall } from "./DinoSushiShop";
 import { DinoSushiTray } from "./DinoSushiTray";
 import { useBaseFly } from "./useBaseFly";
+import { useRevealTray } from "./useRevealTray";
 import type { DinoSushiPlay } from "./useDinoSushiPlay";
 import { useDinoSushiSpeech } from "./useDinoSushiSpeech";
 import styles from "./DinoSushiKitchen.module.css";
@@ -107,6 +108,7 @@ export function DinoSushiKitchen({
   /** 等選飯時點了托盤：該點的皿跳兩下＋光圈。seq 單雙切 a／b 才會重播；最後一張播完就收掉。 */
   const [nudge, setNudge] = useState<{ seq: number; ids: readonly BaseId[] } | null>(null);
   const baseFly = useBaseFly({ rootRef, base: round?.sushi.base ?? null, reducedMotion, inputPaused });
+  useRevealTray({ rootRef, choosingBase, reducedMotion, inputPaused });
   /** 用鍵盤拿掉第幾格：料位以料當 key，那顆鈕會消失，焦點接到同一格（或最後一格），料位空了就回托盤。 */
   const refocusSlot = useRef<number | null>(null);
   const toppings = round?.sushi.toppings;
@@ -220,7 +222,7 @@ export function DinoSushiKitchen({
         {round.mode === "order" && eating && order ? <DinoSushiCustomerSeat order={order} /> : null}
         <DinoSushiPlateStack plates={round.plates} />
         {/* 右上一欄由上往下排：自由做的「多多吃飽了」→ 點餐泡泡 → 多多的字卡，彼此不會疊在一起 */}
-        <div className={styles.talk}>
+        <div className={styles.talk} data-role="talk">
           {round.mode === "free" ? (
             <TapButton className={styles.fullButton} onTap={actions.finish} disabled={disabled}>
               <span className={styles.fullArt} aria-hidden>
@@ -300,11 +302,10 @@ export function DinoSushiKitchen({
               {Array.from({ length: MAX_TOPPINGS }, (_, i) => {
                 const id = eating ? undefined : sushi.toppings[i];
                 const removeHint = layerHint?.kind === "remove" && layerHint.slot === i;
-                /* 跟砧板上的料同一種 key：滿了擠掉最舊那層時只有新的那格會彈，留下來的不重掛 */
-                const nth = id ? sushi.toppings.slice(0, i).filter((t) => t === id).length : 0;
                 return id ? (
                   <TapButton
-                    key={`${id}-${nth}`}
+                    /* 跟砧板上的料同一種 key：滿了擠掉最舊那層時只有新的那格會彈，留下來的不重掛 */
+                    key={layerKey(sushi, i)}
                     className={styles.slot}
                     aria-label={`拿掉${toppingById(id).label}`}
                     data-hint={removeHint ? "true" : undefined}

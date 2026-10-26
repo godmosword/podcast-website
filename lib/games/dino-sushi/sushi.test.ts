@@ -52,6 +52,22 @@ describe("組壽司", () => {
     expect(s.toppings).toEqual(["tamago", "shrimp", "tamago"]);
   });
 
+  it("每次放料給一個新的層編號；擠掉、拿掉時編號跟著那層走，留下來的不換號", () => {
+    let s = changeBase(EMPTY_SUSHI, "nigiri");
+    s = addTopping(addTopping(addTopping(s, "tamago"), "shrimp"), "tamago");
+    expect(s.layerIds).toEqual([0, 1, 2]);
+    // 滿了擠掉最舊的玉子（0）：留下來的蝦（1）和第二個玉子（2）不換號
+    const evicted = addTopping(s, "corn");
+    expect(evicted.toppings).toEqual(["shrimp", "tamago", "corn"]);
+    expect(evicted.layerIds).toEqual([1, 2, 3]);
+    // 拿掉第一個玉子：第二個玉子仍是 2，不會因為變成「第一個玉子」而換號
+    const removed = removeTopping(s, 0);
+    expect(removed.toppings).toEqual(["shrimp", "tamago"]);
+    expect(removed.layerIds).toEqual([1, 2]);
+    // 拿掉最新那層再放：新的編號不重用剛拿掉的那號
+    expect(addTopping(removeTopping(s, 2), "corn").layerIds).toEqual([0, 1, 3]);
+  });
+
   it("還沒選飯加料回傳同一物件（View 只讓料位輕晃）", () => {
     expect(addTopping(EMPTY_SUSHI, "corn")).toBe(EMPTY_SUSHI);
   });
@@ -68,7 +84,7 @@ describe("組壽司", () => {
     let s = changeBase(EMPTY_SUSHI, "nigiri");
     s = addTopping(s, "salmon");
     const changed = changeBase(s, "temaki");
-    expect(changed).toEqual({ base: "temaki", toppings: ["salmon"] });
+    expect(changed).toMatchObject({ base: "temaki", toppings: ["salmon"], layerIds: [0] });
     expect(changeBase(changed, "temaki")).toBe(changed);
   });
 });

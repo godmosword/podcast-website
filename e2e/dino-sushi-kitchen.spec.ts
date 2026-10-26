@@ -395,3 +395,44 @@ for (const vp of [
     expect(geo.faceW).toBeGreaterThanOrEqual(36);
   });
 }
+
+/** 很矮的直向（iPhone SE 的 Safari）放不下整個廚房：選完飯把托盤捲進來，但不捲過點餐泡泡。 */
+for (const { vp, reduced, scrolls } of [
+  { vp: { width: 320, height: 568 }, reduced: false, scrolls: true },
+  { vp: { width: 375, height: 553 }, reduced: false, scrolls: true },
+  { vp: { width: 375, height: 553 }, reduced: true, scrolls: true },
+  { vp: { width: 390, height: 844 }, reduced: false, scrolls: false },
+]) {
+  test(`${vp.width}×${vp.height}${reduced ? "（減少動態）" : ""}：選完飯${scrolls ? "托盤捲進畫面、泡泡留在抬頭下" : "不捲動"}`, async ({ page }) => {
+    await page.setViewportSize(vp);
+    if (reduced) await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/games/dino-sushi");
+    await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+    const bubble = page.getByRole("img", { name: /^第 1 單/ });
+    await expect(bubble).toBeVisible();
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.getByRole("button", { name: "選握壽司" }).click();
+    const tray = page.getByRole("group", { name: "壽司料" }).getByRole("button");
+    if (!scrolls) {
+      await page.waitForTimeout(800);
+      expect(await page.evaluate(() => window.scrollY)).toBe(0);
+      return;
+    }
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(40);
+    // 平滑捲動停下來再量
+    await expect
+      .poll(async () => {
+        const y = await page.evaluate(() => window.scrollY);
+        await page.waitForTimeout(120);
+        return (await page.evaluate(() => window.scrollY)) === y;
+      })
+      .toBe(true);
+    const headerBottom = await page.locator("header:has(#game-play-title)").evaluate((el) => el.getBoundingClientRect().bottom);
+    const bubbleBox = (await bubble.boundingBox())!;
+    expect(bubbleBox.y, "泡泡整個在抬頭下面").toBeGreaterThanOrEqual(headerBottom - 0.5);
+    const first = (await tray.first().boundingBox())!;
+    const last = (await tray.last().boundingBox())!;
+    expect(first.y + first.height, "托盤第一列整列看得到").toBeLessThanOrEqual(vp.height);
+    expect(vp.height - last.y, "第二列至少露出 40px，按得到").toBeGreaterThanOrEqual(40);
+  });
+}
