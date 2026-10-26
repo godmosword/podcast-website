@@ -22,6 +22,14 @@
 
 ### pending
 
+- **重錄 darwin 視覺基準（2026-10 稽核修正）**：Linux 不能改 `-chromium-darwin`。請在 Mac 跑 `npm run test:visual:trusted -- --update-snapshots`，只接受下面這些有意的差異後再更新。320 沒有基準。
+  - 睡前 390 日間／夜間：`landing-bedtime-390-light-chromium-darwin.png`、`landing-bedtime-390-night-chromium-darwin.png`（只縮小「數綿羊123．睡前故事」。1280 與其他段不動）。
+  - 遊樂園 390：`games-390-light-chromium-darwin.png`、`games-390-night-chromium-darwin.png`（手機海報改 16:9。桌面 `games-chromium-darwin.png`、`games-1280-night-chromium-darwin.png` 不該變）。
+  - 訂閱全寬度：`subscribe-390-light-chromium-darwin.png`、`subscribe-390-night-chromium-darwin.png`、`subscribe-1280-light-chromium-darwin.png`、`subscribe-1280-night-chromium-darwin.png`（送出鈕改深墨）。
+  - 宇宙地圖：`adventures-chromium-darwin.png`、`adventures-390-light-chromium-darwin.png`、`adventures-390-night-chromium-darwin.png`、`adventures-1280-night-chromium-darwin.png`（故事熱點 ✦ 改星星圖示；若差在容差內可維持原檔）。
+  - 消消樂標題：`candy-title-390-light-chromium-darwin.png`、`candy-title-1280-night-chromium-darwin.png`（卡面字色改墨色。教學「開始玩」不在這兩張裡）。
+  - 景點篩選在收合面板裡，播放結束與設定對話框沒有進視覺基準，這輪不重錄。
+  `design · S · 需 Mac`
 - ✅ **重錄 darwin 視覺基準（美術統一 2026-10-22）**：2026-10-24 在 Mac 跑 `npm run test:visual:trusted -- --update-snapshots`（79 passed／2 skipped），改寫 15 張：`/stories`、`/story/ep-3`、`/subscribe`、消消樂地圖與標題、壽司屋標題與兩張廚房（`612aa62a`）。2026-10-25 再用 `--update-snapshots=all` 全部重錄：首頁、`/games`、著色本像素完全不變；另有 49 張其實早就跟著 #260 和更早的改動變了，只是差異在比對容差內一直沒被改寫，例如 landing 夜間頂欄與往下鈕、頂欄下拉 chevron、壽司屋 1280 夜間「給多多吃」改深墨、結算換黏土金盤。逐張量過差異並抽看 6 張，都是有意的改動。只有雜訊的 3 張維持原樣。見本 commit。
 - ✅ **視覺基準每次重錄都會閃**：原本以為是動畫沒凍結，查下來是兩個別的原因。(1) 首頁段落在串流／hydration 時會被換成新節點，夜色遮罩與嘟嘟表情的 IntersectionObserver 只在掛載時抓一次節點，抓到舊的就再也不切換；平行跑時約三成停在第一段，`landing-health-390-night` 就錄成了冷色遮罩。真實使用者在慢手機上也會遇到。改成聽捲動、每次用 id 重找段落（`useActiveLandingAnchor`），視覺測試截圖前等遮罩與嘟嘟都切到該段。(2) `stabilizeVisualPage` 把圖鎖在當下的 `currentSrc`，hydration 還沒完成時會鎖到別的候選（消消樂封面平行 8 次有 1 次是 w=384）；改成照 `sizes`＋`srcset` 自己挑。整套連錄三次，剩下 about、adventures、消消樂標題 1280 夜間、壽司屋結算與 844×390 廚房還有極小抖動（單一像素最多差 17、≤0.25% 像素），遠在容差內，不再處理。見本 commit。
 - ✅ **重錄 darwin 視覺基準（給爸媽預設展開）**：五張 ep-3 基準都已重錄。抽看 390 日間：頂部連結已拿掉，共讀區預設展開。`612aa62a`

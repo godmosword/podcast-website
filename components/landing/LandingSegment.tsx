@@ -137,6 +137,7 @@ export default function LandingSegment({
             <Link
               href={segment.cta.href}
               className={`${segment.play ? styles.subscribeCta : styles.cta} scrollEnter scrollEnterStagger3`}
+              data-long={segment.id === "bedtime" ? "true" : undefined}
               aria-label={
                 segment.cta.external
                   ? `${segment.cta.label}（另開視窗）`

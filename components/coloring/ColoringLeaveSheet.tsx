@@ -1,6 +1,7 @@
 "use client";
 
 import { IconStar } from "@/components/games/ClayIcons";
+import Icon from "@/components/ui/Icon";
 import { PictureStackIcon } from "./ColoringToolbarIcons";
 import type { LeaveTarget } from "./useColoringLeave";
 import { ClearIcon, CrayonIcon } from "./ColoringToolbarIcons";
@@ -60,7 +61,7 @@ export function ColoringLeaveSheet({
   onGo,
   onDiscard,
 }: ColoringLeaveSheetProps) {
-  const place = destination === "picker" ? "換一張" : "回遊樂園";
+  const place = destination === "picker" ? "換一張" : destination === "back" ? "回上一頁" : "回遊樂園";
   const goLabel = unsaved ? `收起來，${place}` : place;
   const actions: PictureAction[] = [
     {
@@ -74,7 +75,13 @@ export function ColoringLeaveSheet({
       tone: "go",
       icon: (
         <span className={styles.goMark}>
-          {destination === "picker" ? <PictureStackIcon size={32} /> : <ParkGateIcon />}
+          {destination === "picker" ? (
+            <PictureStackIcon size={32} />
+          ) : destination === "back" ? (
+            <Icon name="arrow-left" size={32} />
+          ) : (
+            <ParkGateIcon />
+          )}
           {unsaved ? (
             <span className={styles.badge}>
               <IconStar size={16} style={{ width: 16, height: 16 }} />

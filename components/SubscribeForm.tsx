@@ -159,15 +159,17 @@ export default function SubscribeForm({ source = "subscribe_page" }: Props) {
       />
 
       <label className={styles.consent} htmlFor={consentId}>
-        <input
-          id={consentId}
-          className={styles.consentCheckbox}
-          type="checkbox"
-          checked={parentConsent}
-          onChange={(e) => setParentConsent(e.target.checked)}
-          disabled={submitting}
-          required
-        />
+        <span className={styles.consentHit}>
+          <input
+            id={consentId}
+            className={styles.consentCheckbox}
+            type="checkbox"
+            checked={parentConsent}
+            onChange={(e) => setParentConsent(e.target.checked)}
+            disabled={submitting}
+            required
+          />
+        </span>
         <span>
           {SUBSCRIBE_CONSENT_BEFORE_PRIVACY}
           <Link href="/legal#privacy" aria-label="閱讀隱私說明">

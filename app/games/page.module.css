@@ -207,10 +207,15 @@
     padding-top: calc(14px + var(--safe-top));
   }
 
-  /* 手機使用直式原圖比例，站牌、車身與輪胎完整保留。 */
+  /* 手機海報改矮，第一屏才看得到三款標題。cover 裁掉直式海報上下緣。 */
   .hero {
-    aspect-ratio: 940 / 1410;
+    aspect-ratio: 16 / 9;
     margin-bottom: 12px;
+  }
+
+  .heroImage {
+    object-fit: cover;
+    object-position: center 42%;
   }
 
   .cardGrid {

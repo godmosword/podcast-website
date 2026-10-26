@@ -221,4 +221,33 @@ describe("多多壽司屋貼紙存檔", () => {
     expect(profile.stickers).toContain("played-candy-match");
     expect(loadDinoSushiStickers().unlocked).toEqual(original);
   });
+
+  it("寫不進去時回報失敗，不把新貼紙算成已經存好", () => {
+    const setItem = vi.spyOn(localStorage, "setItem").mockImplementation(() => {
+      throw new Error("quota");
+    });
+    const saved = saveDinoSushiStickerState({
+      unlocked: ["surprise-daily"],
+      seen: [],
+      fresh: [],
+      gift: "",
+      roundKey: "",
+    });
+    expect(saved.ok).toBe(false);
+    expect(saved.state.unlocked).toEqual([]);
+    expect(loadDinoSushiStickers().unlocked).toEqual([]);
+    setItem.mockRestore();
+  });
+
+  it("加貼紙寫不進去時不回報已加上", () => {
+    const setItem = vi.spyOn(localStorage, "setItem").mockImplementation(() => {
+      throw new Error("quota");
+    });
+    const added = addDinoSushiStickers(["surprise-daily"]);
+    expect(added.ok).toBe(false);
+    expect(added.added).toEqual([]);
+    expect(added.state.unlocked).toEqual([]);
+    expect(loadDinoSushiStickers().unlocked).toEqual([]);
+    setItem.mockRestore();
+  });
 });

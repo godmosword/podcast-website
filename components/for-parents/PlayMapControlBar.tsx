@@ -87,6 +87,7 @@ export function PlayMapControlBar({
 
       <div className={styles.facetRow}>
         <span className={styles.facetLabel}>類型</span>
+        <div className={styles.chipScrollerWrap}>
         <div className={styles.chipScroller} role="group" aria-label="依類型篩選">
           <button
             type="button"
@@ -111,6 +112,10 @@ export function PlayMapControlBar({
               </button>
             );
           })}
+        </div>
+        <span className={styles.chipMore} aria-hidden="true">
+          還有
+        </span>
         </div>
       </div>
     </form>

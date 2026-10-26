@@ -42,11 +42,19 @@
   text-underline-offset: 2px;
 }
 
-.consentCheckbox {
-  width: 20px;
-  height: 20px;
-  margin-top: 2px;
+.consentHit {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin: -11px -8px -11px -12px;
   flex: none;
+}
+
+.consentCheckbox {
+  width: 22px;
+  height: 22px;
+  margin: 0;
 }
 
 .submit {
@@ -60,8 +68,8 @@
   font-size: var(--fs-body);
   font-weight: 800;
   cursor: pointer;
-  color: var(--landing-brand-ink);
-  background: var(--landing-brand);
+  color: var(--cta-solid-fg);
+  background: var(--cta-solid-bg);
   box-shadow: var(--shadow-sm);
   transition: transform var(--motion-press), box-shadow var(--motion-press),
     opacity var(--motion-press);

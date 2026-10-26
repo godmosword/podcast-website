@@ -313,6 +313,24 @@ export function useCandyMatchPlay(options: Options) {
     ];
   }, [clearTimers, cueSpeech]);
 
+  /** 暫停時清掉還沒響的閒置計時；恢復且人還在輕鬆局裡時，整段重排。 */
+  const wasPausedRef = useRef(inputPaused);
+  useEffect(() => {
+    const wasPaused = wasPausedRef.current;
+    wasPausedRef.current = inputPaused;
+    if (inputPaused) {
+      if (timersRef.current.length > 0) {
+        clearTimers();
+        setHint(null);
+      }
+      return;
+    }
+    if (!wasPaused) return;
+    const snap = playRef.current;
+    if (!snap || snap.round.mode !== "easy" || outcomeRef.current != null || briefingRef.current) return;
+    armIdle();
+  }, [armIdle, clearTimers, inputPaused]);
+
   useEffect(() => {
     if (!cheer) return;
     const t = setTimeout(() => setCheer(false), CHEER_MS);
@@ -386,7 +404,9 @@ export function useCandyMatchPlay(options: Options) {
         setOutcomeState({ kind: "win", stars, flawless, efficient });
         setMessage(CHEER_WIN);
         cueSpeech(CHEER_WIN, true);
-        [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => tone(f, 0.18, "triangle", 0.07), i * 120));
+        [523, 659, 784, 1046].forEach((f, i) => {
+          hornTimersRef.current.push(setTimeout(() => tone(f, 0.18, "triangle", 0.07), i * 120));
+        });
         instance.notifyWon({ candyMode: snap.round.mode, score, levelIndex: snap.round.index, cleared: true, flawless, collectedAll: efficient });
         syncHost();
         setBusyState(false);
@@ -399,7 +419,11 @@ export function useCandyMatchPlay(options: Options) {
         const missed = `${challengeMissSpeech(snap.round.stage.goals, progress)}再試一次！`;
         setMessage(missed);
         cueSpeech(missed, true);
-        instance.notifyRetry();
+        instance.notifyRetry({
+          candyMode: snap.round.mode,
+          score,
+          levelIndex: snap.round.index,
+        });
         syncHost();
         setBusyState(false);
         return;

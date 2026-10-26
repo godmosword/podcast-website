@@ -90,11 +90,22 @@ describe("candyMatchAdapter", () => {
     expect(onSession.mock.calls.map(([r]) => r.levelIndex)).toEqual([0, 1]);
   });
 
-  it("notifyRetry 對應 over 狀態", () => {
-    const inst = new CandyMatchInstance({ kidsMode: false, reducedMotion: false });
+  it("notifyRetry 把沒過關的一局記成玩過，不發星", () => {
+    const onSession = vi.fn();
+    const inst = new CandyMatchInstance({ kidsMode: false, reducedMotion: false, onSession });
     inst.notifyPlaying(1, 0);
-    inst.notifyRetry();
+    inst.notifyRetry({ score: 12, levelIndex: 1, candyMode: "challenge" });
+    inst.notifyRetry({ score: 99, levelIndex: 1, candyMode: "challenge" });
     expect(inst.getStatus()).toBe("over");
+    expect(onSession).toHaveBeenCalledTimes(1);
+    expect(onSession).toHaveBeenCalledWith({
+      gameId: "candy-match",
+      score: 12,
+      levelIndex: 1,
+      candyMode: "challenge",
+      cleared: false,
+      grantMedals: false,
+    });
   });
 
   it("start 從 title 進入 map（ready）", () => {

@@ -97,18 +97,18 @@
   margin-top: var(--space-2, 8px);
   border: none;
   border-radius: 999px;
-  background: linear-gradient(180deg, var(--c-yellow, #ffd866), #ffa600);
-  color: #4a2c00;
+  background: var(--cta-solid-bg);
+  color: var(--cta-solid-fg);
   font-weight: 900;
   font-size: 1.05rem;
   padding: 0.6rem 1.5rem;
   cursor: pointer;
-  box-shadow: 0 5px 0 #b97600;
+  box-shadow: 0 4px 0 #2a180c;
 }
 
 .startBtn:active {
   transform: translateY(2px);
-  box-shadow: 0 3px 0 #b97600;
+  box-shadow: 0 2px 0 #2a180c;
 }
 
 /* --- 手勢示範圖示 --- */
