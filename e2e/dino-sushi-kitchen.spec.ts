@@ -414,25 +414,43 @@ for (const { vp, reduced, scrolls } of [
     await page.getByRole("button", { name: "選握壽司" }).click();
     const tray = page.getByRole("group", { name: "壽司料" }).getByRole("button");
     if (!scrolls) {
-      await page.waitForTimeout(800);
+      await page.waitForTimeout(1000);
       expect(await page.evaluate(() => window.scrollY)).toBe(0);
       return;
     }
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(40);
-    // 平滑捲動停下來再量
+    // 平滑捲動停下來再量：連續 300ms 位置不變
     await expect
-      .poll(async () => {
-        const y = await page.evaluate(() => window.scrollY);
-        await page.waitForTimeout(120);
-        return (await page.evaluate(() => window.scrollY)) === y;
-      })
+      .poll(() =>
+        page.evaluate(async () => {
+          const ys: number[] = [];
+          for (let i = 0; i < 4; i++) {
+            ys.push(window.scrollY);
+            await new Promise((r) => setTimeout(r, 100));
+          }
+          return ys.every((y) => y === ys[0]);
+        }),
+      )
       .toBe(true);
     const headerBottom = await page.locator("header:has(#game-play-title)").evaluate((el) => el.getBoundingClientRect().bottom);
     const bubbleBox = (await bubble.boundingBox())!;
     expect(bubbleBox.y, "泡泡整個在抬頭下面").toBeGreaterThanOrEqual(headerBottom - 0.5);
+    expect(bubbleBox.y + bubbleBox.height, "泡泡底也在畫面內").toBeLessThanOrEqual(vp.height);
     const first = (await tray.first().boundingBox())!;
     const last = (await tray.last().boundingBox())!;
     expect(first.y + first.height, "托盤第一列整列看得到").toBeLessThanOrEqual(vp.height);
     expect(vp.height - last.y, "第二列至少露出 40px，按得到").toBeGreaterThanOrEqual(40);
   });
 }
+
+test("375×553：選完飯馬上按暫停，托盤不往下捲", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 553 });
+  await page.goto("/games/dino-sushi");
+  await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+  await expect(page.getByRole("img", { name: /^第 1 單/ })).toBeVisible();
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.getByRole("button", { name: "選握壽司" }).click();
+  await page.getByRole("button", { name: "暫停遊戲" }).click();
+  await page.waitForTimeout(1000);
+  expect(await page.evaluate(() => window.scrollY)).toBe(0);
+});

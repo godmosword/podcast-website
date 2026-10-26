@@ -6,6 +6,8 @@ import type { BaseId } from "@/lib/games/dino-sushi/toppings";
 /** 選飯過場的時間軸（毫秒）。320 仍小於廚房的連點防呆 400ms。 */
 export const BASE_FLY_MS = 320;
 const LAND_MS = 120;
+/** 飛到加上落地壓一下，整段過場的長度。 */
+export const BASE_FLY_TOTAL_MS = BASE_FLY_MS + LAND_MS;
 /** 中段往上拱的高度：獨立一條 ease-in-out 軌，頂點在時間的 47%，不被整體 easing 擠到前段。 */
 const ARC_PX = 12;
 const ARC_PEAK = 0.47;
