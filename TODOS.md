@@ -45,7 +45,7 @@ Plan：`~/.claude/plans/play-map-simplify.md`（D1=A 北中南分組、D2=A 純�
 
 - 後續（本輪不做）：`/for-parents/play-map/[placeId]` 詳情頁與 `collections/` 頁沿用新的卡片語彙。
 - 後續（本輪不做）：夜間 `SiteNavBar` 仍是奶油色，和本頁深底的 sticky 條件列形成一亮一暗兩條帶（全站導覽議題）。
-- 後續：`buildGoogleMapsPlaceUrl` 已沒有頁面在用（只剩 `data/playgrounds.test.ts`），要嘛刪、要嘛留給詳情頁。
+- ✅ 後續：`buildGoogleMapsPlaceUrl` 已刪（只剩測試在用）；同一 `it` 裡混測導航的只刪搜尋那幾行，`buildGoogleMapsNavUrl`／`playgroundMapsSearchQuery` 保留。見本 commit。
 
 ### 品牌標誌合規後續（2026-10-12）
 

@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
   buildGoogleMapsNavUrl,
-  buildGoogleMapsPlaceUrl,
   getPlayground,
   listCities,
   listPlaygrounds,
@@ -354,14 +353,10 @@ describe("playgrounds sidecar", () => {
     const dest = new URL(buildGoogleMapsNavUrl(place)).searchParams.get(
       "destination",
     );
-    const query = new URL(buildGoogleMapsPlaceUrl(place)).searchParams.get(
-      "query",
-    );
     expect(dest).toBe("卡司蒂菈樂園 蘆竹");
-    expect(query).toBe("卡司蒂菈樂園 蘆竹");
   });
 
-  it("有 placeId 時導航與搜尋帶 *_place_id（測試用物件，不寫進資料列）", () => {
+  it("有 placeId 時導航帶 destination_place_id（測試用物件，不寫進資料列）", () => {
     const fixture = {
       name: "測試場館",
       city: "桃園市",
@@ -374,12 +369,6 @@ describe("playgrounds sidecar", () => {
       "ChIJ_test_fixture_not_real",
     );
     expect(nav.searchParams.has("origin")).toBe(false);
-
-    const search = new URL(buildGoogleMapsPlaceUrl(fixture));
-    expect(search.searchParams.get("query")).toBe("測試查詢字串");
-    expect(search.searchParams.get("query_place_id")).toBe(
-      "ChIJ_test_fixture_not_real",
-    );
   });
 
   it("每一筆導航 destination 不是座標，且等於 mapsQuery 或 name＋city", () => {
@@ -393,22 +382,6 @@ describe("playgrounds sidecar", () => {
       );
       expect(dest, place.id).not.toMatch(coordOnly);
     }
-  });
-
-  it("buildGoogleMapsPlaceUrl 以頁面名稱搜尋，不是座標", () => {
-    const place = getPlayground("ty-fenghe");
-    expect(place).toBeDefined();
-    if (!place) return;
-
-    const url = buildGoogleMapsPlaceUrl(place);
-    const parsed = new URL(url);
-    expect(parsed.origin + parsed.pathname).toBe(
-      "https://www.google.com/maps/search/",
-    );
-    expect(parsed.searchParams.get("api")).toBe("1");
-    expect(parsed.searchParams.get("query")).toBe(
-      `${place.name}, ${place.city}`,
-    );
   });
 
   it("address 以 city 開頭，有 district 則含 district", () => {

@@ -53,7 +53,7 @@
 | `id` | 穩定 slug，不重複 |
 | `name`、`city`、`lat`、`lng`、`address` | 基本定位。`name` 是場館身分（見下節），導航 destination **預設**為 `${name}, ${city}`；不可把兩個場館黏在同一筆名稱裡，也不可為了搜尋好解析而改名 |
 | `mapsQuery`（選填） | 覆寫導航／搜尋字串。僅在 `name` 正確但搜尋不穩時填（例：顯示「卡司‧蒂菈樂園」、`mapsQuery: "卡司蒂菈樂園 中壢"`）。分工見下節 |
-| `placeId`（選填） | Google Place ID；有值時 URL 加 `destination_place_id`／`query_place_id`。免 API Key；**不要為了填而呼叫 Places API** |
+| `placeId`（選填） | Google Place ID；有值時導航 URL 加 `destination_place_id`。免 API Key；**不要為了填而呼叫 Places API** |
 | `type` | 場館家族（`PlaygroundType`）；與 `indoor` 獨立，勿混用 |
 | `ageRange`、`free`、`indoor` | 家長篩選；`indoor` 表物理室內條件（雨天備案），非 type 別名 |
 | `free` 判準 | **以「一般家庭是否需付費入場」為準**，不以「是否有人可免費」為準。成人需購票即 `free: false`（例：兒童新樂園全票 30 元、十三行博物館全票 80 元），縱使幼童免票亦然 |

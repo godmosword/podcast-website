@@ -1,7 +1,7 @@
 /**
  * 真實世界親子遊樂地點（sidecar）。
  * 供 /for-parents/play-map 地圖篩選與標記使用；與虛構宇宙地圖無關。
- * Google Maps 導航／定位連結由 buildGoogleMaps* helper 以 playgroundMapsSearchQuery
+ * Google Maps 導航連結由 buildGoogleMapsNavUrl 以 playgroundMapsSearchQuery
  * （mapsQuery 或場館名＋縣市）動態產生，不用 lat,lng 圖釘；可選 placeId。
  * Zod 契約在 `playgrounds.schema.ts`，不進 client bundle。
  */
@@ -67,7 +67,7 @@ export type Playground = {
    */
   status?: "temporarily-closed";
   /**
-   * Google Maps Place ID（選填）。有值時導航加 `destination_place_id`、搜尋加 `query_place_id`。
+   * Google Maps Place ID（選填）。有值時導航加 `destination_place_id`。
    * 本輪不填真實 placeId；契約由測試用物件覆蓋。
    */
   placeId?: string;
@@ -83,7 +83,7 @@ export type PlaygroundMapsFields = Pick<
   "name" | "city" | "mapsQuery" | "placeId"
 >;
 
-/** 導航 destination／搜尋 query：mapsQuery 優先，否則場館名＋縣市。 */
+/** 導航 destination：mapsQuery 優先，否則場館名＋縣市。 */
 export function playgroundMapsSearchQuery(
   place: Pick<Playground, "name" | "city" | "mapsQuery">,
 ): string {
@@ -104,18 +104,6 @@ export function buildGoogleMapsNavUrl(place: PlaygroundMapsFields): string {
     params.set("destination_place_id", place.placeId);
   }
   return `https://www.google.com/maps/dir/?${params.toString()}`;
-}
-
-/** Google Maps 只顯示位置（search 備案）。免 API Key。query 同樣用具名，不傳座標。 */
-export function buildGoogleMapsPlaceUrl(place: PlaygroundMapsFields): string {
-  const params = new URLSearchParams({
-    api: "1",
-    query: playgroundMapsSearchQuery(place),
-  });
-  if (place.placeId) {
-    params.set("query_place_id", place.placeId);
-  }
-  return `https://www.google.com/maps/search/?${params.toString()}`;
 }
 
 const PLAYGROUNDS: readonly Playground[] = [
