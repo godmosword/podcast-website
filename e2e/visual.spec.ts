@@ -9,6 +9,12 @@ import { INTRO_PORTAL_ENABLED, skipIntroOverlay } from "./intro-gate";
 import { PROGRESS_STORAGE_KEY } from "../lib/progress-store";
 import { DUDU_EMOTION_BY_SEGMENT, DUDU_EMOTION_LABEL } from "../data/dudu-emotions";
 import { pinClassicSushiDay } from "./helpers/dino-sushi";
+import {
+  jumpOrangeExpress,
+  pinOrangeExpressDisplay,
+  startOrangeExpress,
+} from "./helpers/orange-express";
+import type { OrangeExpressHook } from "../lib/games/orange-express/types";
 
 /**
  * D2 視覺回歸：Phase A smoke（5 頁 × 1280 light）+ Phase B 完整組合。
@@ -571,6 +577,161 @@ test("visual：多多壽司屋結算 390 light（5 單一次做對、三星）",
     maxDiffPixelRatio: 0.02,
     animations: "disabled",
   });
+});
+
+/**
+ * 小橘特快車：前窗是 canvas，一律定格（freeze）並關掉輕晃再錄，不錄行進中的前窗。
+ * 預設大司機：速限牌、隧道、鐵橋、對向列車與指差確認只在大司機的路線上。
+ */
+async function openOrangeExpress(
+  page: Page,
+  [width, height, theme]: OrangeSize,
+  hook: OrangeExpressHook = {},
+  gaugeNumbers = false,
+) {
+  await page.setViewportSize({ width, height });
+  await pinOrangeExpressDisplay(page, gaugeNumbers);
+  await page.addInitScript((h) => {
+    window.__orangeExpress = h;
+  }, { freeze: true, driver: "big", ...hook } satisfies OrangeExpressHook);
+  await page.goto("/games/orange-express");
+  await stabilizeVisualPage(page, { theme });
+  await expect(page.getByRole("button", { name: "開始開車" })).toBeVisible();
+}
+
+/** 改完狀態等兩個畫格，前窗與儀表都畫好了才截。 */
+async function settleOrangeExpress(page: Page) {
+  await page.evaluate(
+    () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))),
+  );
+}
+
+/** 停好、開門、等乘客上完車再關門；最後一站關門就到結算。 */
+async function serveOrangeStation(page: Page) {
+  await jumpOrangeExpress(page, { progress: 0.65, speed: 0, freeze: false });
+  await expect(page.getByTestId("orange-express-drive")).toHaveAttribute("data-phase", "stopped");
+  await page.getByRole("button", { name: "開門" }).click();
+  // 乘客上車時按鈕寫「上車中」，上完才變「關門」。
+  const close = page.getByRole("button", { name: "關門" });
+  await expect(close).toBeVisible();
+  await expect(close).not.toHaveAttribute("aria-disabled", "true");
+  await close.click();
+}
+
+type OrangeSize = readonly [number, number, VisualTheme];
+const PHONE: OrangeSize = [390, 844, "light"];
+const PHONE_NIGHT: OrangeSize = [390, 844, "night"];
+const DESKTOP: OrangeSize = [1280, 800, "light"];
+const orangeShot = (theme: VisualTheme) =>
+  ({ maxDiffPixelRatio: theme === "night" ? 0.03 : 0.02, animations: "disabled" }) as const;
+
+/** 標題選「自己開」：司機說明一起入鏡。只截遊戲本體，抬頭另有基準。 */
+for (const size of [PHONE, PHONE_NIGHT, DESKTOP, [1280, 800, "night"] as const]) {
+  const [width, , theme] = size;
+  test(`visual：小橘特快車標題 ${width} ${theme}`, async ({ page }) => {
+    await openOrangeExpress(page, size);
+    await page.getByRole("radio", { name: /自己開/ }).click();
+    await expect(page.getByTestId("orange-express-driver-note")).toBeVisible();
+    await expect(page.getByTestId("orange-express-title")).toHaveScreenshot(
+      `orange-express-title-${width}-${theme}.png`,
+      orangeShot(theme),
+    );
+  });
+}
+
+/** 開車中截整個視窗：手機收起抬頭、橫拿時兩根桿夾前窗，都是這幾張要守的版面。 */
+const ORANGE_DRIVE_SHOTS: readonly {
+  id: string;
+  label: string;
+  patch: OrangeExpressHook;
+  sizes: readonly OrangeSize[];
+}[] = [
+  { id: "power", label: "加速中 P3", patch: { progress: 0.3, speed: 0.5, power: 3 }, sizes: [PHONE, PHONE_NIGHT, DESKTOP] },
+  {
+    id: "approach",
+    label: "進站停車目標條",
+    patch: { progress: 0.5, speed: 0.3, brake: 2 },
+    sizes: [PHONE, PHONE_NIGHT, DESKTOP, [844, 390, "light"]],
+  },
+  { id: "sign", label: "速限牌", patch: { progress: 0.045, speed: 0.5, power: 3 }, sizes: [PHONE] },
+  { id: "tunnel", label: "隧道車內燈", patch: { progress: 0.14, speed: 0.4 }, sizes: [PHONE, PHONE_NIGHT] },
+  { id: "bridge", label: "鐵橋喇叭提示", patch: { stationIndex: 1, progress: 0.13, speed: 0.4 }, sizes: [PHONE] },
+  {
+    id: "passing",
+    label: "對向列車",
+    patch: { stationIndex: 1, progress: 0.03, speed: 0.4, passing: 1.85 },
+    sizes: [PHONE],
+  },
+  { id: "sea", label: "海邊", patch: { stationIndex: 2, progress: 0.035, speed: 0.4 }, sizes: [PHONE, DESKTOP] },
+];
+
+for (const shot of ORANGE_DRIVE_SHOTS) {
+  for (const size of shot.sizes) {
+    const [width, height, theme] = size;
+    test(`visual：小橘特快車${shot.label} ${width}×${height} ${theme}（定格）`, async ({ page }) => {
+      await openOrangeExpress(page, size);
+      await startOrangeExpress(page, "自己開");
+      await jumpOrangeExpress(page, shot.patch);
+      await settleOrangeExpress(page);
+      await expect(page).toHaveScreenshot(`orange-express-${shot.id}-${width}x${height}-${theme}.png`, orangeShot(theme));
+    });
+  }
+}
+
+test("visual：小橘特快車隧道 390 light（減少動態）", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await openOrangeExpress(page, PHONE);
+  await startOrangeExpress(page, "自己開");
+  await jumpOrangeExpress(page, { progress: 0.14, speed: 0.4 });
+  await expect(page.getByTestId("orange-express-drive")).toHaveAttribute("data-reduced", "true");
+  await settleOrangeExpress(page);
+  await expect(page).toHaveScreenshot("orange-express-tunnel-reduced-390x844-light.png", orangeShot("light"));
+});
+
+test("visual：小橘特快車速度表數字 390 light（家長打開）", async ({ page }) => {
+  await openOrangeExpress(page, PHONE, {}, true);
+  await startOrangeExpress(page, "自己開");
+  await jumpOrangeExpress(page, { progress: 0.3, speed: 0.4 });
+  const gauge = page.getByTestId("orange-express-gauge");
+  await expect(gauge).toHaveAttribute("data-numbers", "true");
+  await expect(gauge).toHaveScreenshot("orange-express-gauge-numbers-390-light.png", orangeShot("light"));
+});
+
+test("visual：小橘特快車停好開門 390 light（乘客上完車）", async ({ page }) => {
+  await openOrangeExpress(page, PHONE, { progress: 0.65, speed: 0, freeze: false });
+  await startOrangeExpress(page, "自己開");
+  await expect(page.getByTestId("orange-express-drive")).toHaveAttribute("data-phase", "stopped");
+  await page.getByRole("button", { name: "開門" }).click();
+  // 不再定格：掛勾會把狀態重設回「停好、門關著」。乘客上完車後畫面本來就不動。
+  const close = page.getByRole("button", { name: "關門" });
+  await expect(close).toBeVisible();
+  await expect(close).not.toHaveAttribute("aria-disabled", "true");
+  await settleOrangeExpress(page);
+  await expect(page).toHaveScreenshot("orange-express-doors-390x844-light.png", orangeShot("light"));
+});
+
+test("visual：小橘特快車結算 390 light（指差確認、鐵橋打招呼、三站綠區）", async ({ page }) => {
+  await openOrangeExpress(page, PHONE, { freeze: false });
+  await startOrangeExpress(page, "自己開");
+  await page.getByTestId("orange-express-point").click();
+  await serveOrangeStation(page);
+  await jumpOrangeExpress(page, { progress: 0.14, speed: 0.4, freeze: true });
+  await page.getByTestId("orange-express-horn").click();
+  await expect(page.getByTestId("orange-express-drive")).toHaveAttribute("data-bridge-greets", "1");
+  await serveOrangeStation(page);
+  await serveOrangeStation(page);
+  const result = page.getByTestId("orange-express-result");
+  await expect(result.getByTestId("orange-express-extras")).toBeVisible();
+  await expect(result).toHaveScreenshot("orange-express-result-390-light.png", orangeShot("light"));
+});
+
+test("visual：小橘特快車結算 390 night（開過頭，提示說原因）", async ({ page }) => {
+  await openOrangeExpress(page, PHONE_NIGHT, { progress: 0.62, speed: 0, misses: 1, freeze: false });
+  await startOrangeExpress(page, "慢慢看");
+  await serveOrangeStation(page);
+  const result = page.getByTestId("orange-express-result");
+  await expect(result.getByRole("list", { name: "還能多拿星星" })).toContainText("不要開過頭");
+  await expect(result).toHaveScreenshot("orange-express-result-390-night.png", orangeShot("night"));
 });
 
 test("visual：單集 ep-3 768 light", async ({ page }) => {

@@ -24,3 +24,17 @@ export function medalsFor(state: RunState, earlyDoorTaps: number): RunMedals {
   const stars = (cleared ? 1 : 0) + (flawless ? 1 : 0) + (collectedAll ? 1 : 0);
   return { cleared, flawless, collectedAll, stars };
 }
+
+export type StarMissReason = "green" | "overrun" | "early-door";
+
+/**
+ * 少的那顆星卡在哪裡，結算只說一件事。
+ * 停車位置是這款的主要本事，先說；每站都綠區時才輪到開過頭，最後才是門。
+ */
+export function starMissReason(state: RunState, earlyDoorTaps: number): StarMissReason | null {
+  if (medalsFor(state, earlyDoorTaps).flawless) return null;
+  if (!allGreen(state)) return "green";
+  if (state.misses > 0) return "overrun";
+  if (earlyDoorTaps > 0) return "early-door";
+  return null;
+}

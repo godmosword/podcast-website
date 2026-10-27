@@ -452,13 +452,15 @@
     margin-left: auto;
   }
 
-  /* 消消樂局內沒有 data-status，用棋盤出現來收成同一列抬頭。 */
-  .main[data-game-id="candy-match"]:has([data-testid="candy-match-board"]) .playHeader {
+  /* 消消樂局內沒有 data-status，用棋盤出現來收成同一列抬頭；小橘特快車看駕駛台。 */
+  .main[data-game-id="candy-match"]:has([data-testid="candy-match-board"]) .playHeader,
+  .main[data-game-id="orange-express"]:has([data-testid="orange-express-drive"]) .playHeader {
     flex-wrap: nowrap;
     margin-bottom: var(--space-1);
   }
 
-  .main[data-game-id="candy-match"]:has([data-testid="candy-match-board"]) .playTitle {
+  .main[data-game-id="candy-match"]:has([data-testid="candy-match-board"]) .playTitle,
+  .main[data-game-id="orange-express"]:has([data-testid="orange-express-drive"]) .playTitle {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -469,8 +471,17 @@
     white-space: nowrap;
   }
 
-  .main[data-game-id="candy-match"]:has([data-testid="candy-match-board"]) .headerActions {
+  .main[data-game-id="candy-match"]:has([data-testid="candy-match-board"]) .headerActions,
+  .main[data-game-id="orange-express"]:has([data-testid="orange-express-drive"]) .headerActions {
     margin-left: auto;
+  }
+}
+
+/* 小橘特快車在手機上開車：底部提示寫的是方向鍵與空白鍵，觸控用不到；
+ * 駕駛台兩根桿本身就寫著「動力」「煞車」。高度還給前窗。標題面與結算面照常顯示提示。 */
+@media (max-width: 719.98px), (orientation: landscape) and (max-height: 520px) {
+  .main[data-game-id="orange-express"]:has([data-testid="orange-express-drive"]) .playHints {
+    display: none;
   }
 }
 
@@ -515,25 +526,30 @@
 }
 
 /* 繽紛樂園橫向手機局內（計劃 §2）：抬頭收成 44px 一列、外框與提示讓位，
- * 井與兩側鍵欄同屏、不整頁捲動。只限 block-drop 局內，不影響其他遊戲與標題面。 */
+ * 井與兩側鍵欄同屏、不整頁捲動。只限 block-drop 局內，不影響其他遊戲與標題面。
+ * 小橘特快車開車時同一套：兩根桿夾著前窗，整個駕駛台要在一屏內。 */
 @media (orientation: landscape) and (max-height: 520px) {
-  .main[data-game-id="block-drop"]:has([data-status="playing"], [data-status="paused"]) {
+  .main[data-game-id="block-drop"]:has([data-status="playing"], [data-status="paused"]),
+  .main[data-game-id="orange-express"]:has([data-testid="orange-express-drive"]) {
     --main-pad-top: calc(2px + var(--safe-top));
     padding-top: var(--main-pad-top);
     padding-bottom: 4px;
   }
 
-  .main[data-game-id="block-drop"]:has([data-status="playing"], [data-status="paused"]) .playHeader {
+  .main[data-game-id="block-drop"]:has([data-status="playing"], [data-status="paused"]) .playHeader,
+  .main[data-game-id="orange-express"]:has([data-testid="orange-express-drive"]) .playHeader {
     flex-wrap: nowrap;
     min-height: calc(44px + var(--main-pad-top) + var(--edge-ramp));
     margin-bottom: 2px;
   }
 
-  .main[data-game-id="block-drop"]:has([data-status="playing"], [data-status="paused"]) .back {
+  .main[data-game-id="block-drop"]:has([data-status="playing"], [data-status="paused"]) .back,
+  .main[data-game-id="orange-express"]:has([data-testid="orange-express-drive"]) .back {
     min-height: 44px;
   }
 
-  .main[data-game-id="block-drop"]:has([data-status="playing"], [data-status="paused"]) .playTitle {
+  .main[data-game-id="block-drop"]:has([data-status="playing"], [data-status="paused"]) .playTitle,
+  .main[data-game-id="orange-express"]:has([data-testid="orange-express-drive"]) .playTitle {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -544,7 +560,8 @@
     white-space: nowrap;
   }
 
-  .main[data-game-id="block-drop"]:has([data-status="playing"], [data-status="paused"]) .headerActions {
+  .main[data-game-id="block-drop"]:has([data-status="playing"], [data-status="paused"]) .headerActions,
+  .main[data-game-id="orange-express"]:has([data-testid="orange-express-drive"]) .headerActions {
     margin-left: auto;
   }
 

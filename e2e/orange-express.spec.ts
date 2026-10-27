@@ -1,23 +1,12 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 import { PROGRESS_STORAGE_KEY } from "../lib/progress-keys";
-
-async function startLevel(page: Page, name: "慢慢看" | "自己開" | "小站長") {
-  await page.getByRole("radio", { name: new RegExp(name) }).click();
-  await page.getByRole("button", { name: "開始開車" }).click();
-  await expect(page.getByTestId("orange-express-drive")).toBeVisible();
-}
+import { jumpOrangeExpress as jump, startOrangeExpress as startLevel } from "./helpers/orange-express";
 
 async function tap(page: Page, key: string) {
   await page.keyboard.down(key);
   await page.waitForTimeout(60);
   await page.keyboard.up(key);
   await page.waitForTimeout(60);
-}
-
-async function jump(page: Page, patch: Record<string, number | boolean>) {
-  await page.evaluate((p) => {
-    window.__orangeExpressJump?.(p);
-  }, patch);
 }
 
 test.describe("小橘特快車", () => {
@@ -320,9 +309,15 @@ test.describe("小橘特快車", () => {
     await expect(point).toHaveCount(0);
   });
 
-  test("手機煞車格每格至少 48px；底部提示是方向鍵與空白鍵", async ({ page }) => {
+  test("手機煞車格每格至少 48px；底部提示在標題面，開車時收起讓給前窗", async ({ page }) => {
     await page.goto("/games/orange-express");
+    const hints = page.getByRole("list", { name: "操作提示" }).getByRole("listitem");
+    await expect(hints.filter({ hasText: "左邊推，車會走" }).locator("svg")).toHaveCount(2);
+    await expect(hints.filter({ hasText: "右邊拉，車會停" }).locator("svg")).toHaveCount(2);
+    await expect(hints.filter({ hasText: "門亮了就按" }).locator("svg")).toHaveCount(1);
+
     await startLevel(page, "自己開");
+    await expect(page.getByRole("list", { name: "操作提示" })).toBeHidden();
     const brake = page.getByRole("slider", { name: "煞車" });
     const box = (await brake.boundingBox())!;
     expect(box.height / 6).toBeGreaterThanOrEqual(48);
@@ -334,10 +329,42 @@ test.describe("小橘特快車", () => {
     for (let i = 1; i < tops.length; i += 1) {
       expect(Math.abs(tops[i]! - tops[i - 1]!)).toBeGreaterThanOrEqual(48);
     }
-    const hints = page.getByRole("list", { name: "操作提示" }).getByRole("listitem");
-    await expect(hints.filter({ hasText: "左邊推，車會走" }).locator("svg")).toHaveCount(2);
-    await expect(hints.filter({ hasText: "右邊拉，車會停" }).locator("svg")).toHaveCount(2);
-    await expect(hints.filter({ hasText: "門亮了就按" }).locator("svg")).toHaveCount(1);
+    // 前窗至少佔視窗三成五，車門在視窗內，不用捲。
+    const viewHeight = page.viewportSize()!.height;
+    const glass = (await page.getByTestId("orange-express-windshield").boundingBox())!;
+    expect(glass.height).toBeGreaterThanOrEqual(viewHeight * 0.35);
+    const door = (await page.getByRole("button", { name: "開門" }).boundingBox())!;
+    expect(door.y + door.height).toBeLessThanOrEqual(viewHeight);
+  });
+
+  test("慢慢看的動力桿只排摸得到的三格", async ({ page }) => {
+    await page.addInitScript(() => {
+      window.__orangeExpress = { freeze: true };
+    });
+    await page.goto("/games/orange-express");
+    await startLevel(page, "慢慢看");
+    const power = page.getByRole("slider", { name: "動力" });
+    await expect(power).toHaveAttribute("aria-valuemax", "2");
+    await expect(power.locator("[data-notch]")).toHaveCount(3);
+    const box = (await power.boundingBox())!;
+    await page.mouse.click(box.x + box.width / 2, box.y + 12);
+    await expect(power).toHaveAttribute("aria-valuenow", "2");
+    await expect(page.getByRole("button", { name: "開門" })).toHaveAttribute("data-shake", "false");
+  });
+
+  test("結算：每站都停綠區但開過頭，提示說不要開過頭", async ({ page }) => {
+    await page.addInitScript(() => {
+      window.__orangeExpress = { progress: 0.62, speed: 0, misses: 1 };
+    });
+    await page.goto("/games/orange-express");
+    await startLevel(page, "慢慢看");
+    await expect(page.getByTestId("orange-express-drive")).toHaveAttribute("data-phase", "stopped");
+    await page.getByRole("button", { name: "開門" }).click();
+    await page.getByRole("button", { name: "關門" }).click();
+    await expect(page.getByRole("heading", { name: "到家了" })).toBeVisible();
+    const hints = page.getByRole("list", { name: "還能多拿星星" });
+    await expect(hints).toContainText("不要開過頭");
+    await expect(hints).not.toContainText("停在綠色區");
   });
 
   test("車內廣播：音效開著念「下一站」，關掉音效就不念", async ({ page }) => {
@@ -476,5 +503,78 @@ test.describe("小橘特快車：桌面從 P0 推動力，車真的會走", () =
     await page.mouse.move(x, box.y + 10, { steps: 8 });
     await page.mouse.up();
     await expect(power).toHaveAttribute("aria-valuenow", "4");
+  });
+});
+
+test.describe("小橘特快車：版面", () => {
+  type Box = { x: number; y: number; width: number; height: number };
+  const overlaps = (a: Box, b: Box) =>
+    a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
+
+  for (const { width, height } of [
+    { width: 844, height: 390 },
+    { width: 667, height: 375 },
+  ]) {
+    test.describe(`橫拿手機 ${width}×${height}`, () => {
+      test.use({ viewport: { width, height }, hasTouch: true });
+
+      test("兩根桿、前窗、車門都在一屏內，前窗下面那條不互相蓋住", async ({ page }) => {
+        await page.addInitScript(() => {
+          window.__orangeExpress = { freeze: true, driver: "big" };
+        });
+        await page.goto("/games/orange-express");
+        await startLevel(page, "自己開");
+        const box = async (locator: Locator) => {
+          const found = await locator.boundingBox();
+          expect(found).not.toBeNull();
+          expect(found!.y).toBeGreaterThanOrEqual(0);
+          expect(found!.y + found!.height).toBeLessThanOrEqual(height);
+          return found!;
+        };
+        await box(page.getByRole("slider", { name: "動力" }));
+        await box(page.getByRole("slider", { name: "煞車" }));
+        const glass = await box(page.getByTestId("orange-express-windshield"));
+        expect(glass.height).toBeGreaterThanOrEqual(160);
+
+        const cab = page.getByTestId("orange-express-cab");
+        const strip = [
+          await box(page.getByTestId("orange-express-horn")),
+          await box(cab.getByText("遊樂園", { exact: true })),
+          await box(page.getByTestId("orange-express-gauge")),
+          await box(page.getByRole("button", { name: "開門" })),
+        ];
+        for (let i = 0; i < strip.length; i += 1) {
+          for (let j = i + 1; j < strip.length; j += 1) {
+            expect(overlaps(strip[i]!, strip[j]!), `第 ${i} 與第 ${j} 個疊在一起`).toBe(false);
+          }
+        }
+        const scroll = await page.evaluate(() => document.documentElement.scrollHeight);
+        expect(scroll).toBeLessThanOrEqual(height);
+      });
+    });
+  }
+
+  test.describe("最窄的手機", () => {
+    test.use({ viewport: { width: 320, height: 568 }, hasTouch: true });
+
+    test("駕駛台不橫向撐破，緊急格不換行", async ({ page }) => {
+      await page.goto("/games/orange-express");
+      await startLevel(page, "自己開");
+      const width = await page.evaluate(() => document.documentElement.scrollWidth);
+      expect(width).toBeLessThanOrEqual(320);
+      const cab = (await page.getByTestId("orange-express-cab").boundingBox())!;
+      expect(cab.x + cab.width).toBeLessThanOrEqual(320);
+      // 「緊急」兩個字排在同一行，也沒有被格子切掉。
+      const fit = await page
+        .getByRole("slider", { name: "煞車" })
+        .locator('[data-notch="5"]')
+        .evaluate((el) => {
+          const range = document.createRange();
+          range.selectNodeContents(el);
+          return { lines: range.getClientRects().length, overflow: el.scrollWidth - el.clientWidth };
+        });
+      expect(fit.lines).toBe(1);
+      expect(fit.overflow).toBeLessThanOrEqual(1);
+    });
   });
 });

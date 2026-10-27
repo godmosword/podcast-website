@@ -31,7 +31,7 @@ import {
   jointClack,
 } from "@/lib/games/orange-express/chime";
 import { COPY, DRIVER_HINT, DRIVER_NAME, GRADE_TEXT } from "@/lib/games/orange-express/copy";
-import { medalsFor } from "@/lib/games/orange-express/medals";
+import { medalsFor, starMissReason } from "@/lib/games/orange-express/medals";
 import {
   clampBrake,
   clampPower,
@@ -211,7 +211,8 @@ export function OrangeExpressView({
       const target = clampPower(notch);
       const next = step(cur, { type: "set-power", notch: target });
       if (next === cur) {
-        if (target > cur.power) setShake(true);
+        // 門開著推不走：抖車門，告訴孩子先關門。倒車中推不走就不抖，車門跟這件事無關。
+        if (cur.phase === "doors-open" && target > cur.power) setShake(true);
         return;
       }
       audio?.ensureAudio();
@@ -474,12 +475,13 @@ export function OrangeExpressView({
   }
 
   if (screen === "result") {
-    const medals = medalsFor(run, instance.earlyDoorCount());
+    const earlyDoors = instance.earlyDoorCount();
+    const medals = medalsFor(run, earlyDoors);
     return (
       <div className={styles.screen} data-screen="result">
         <OrangeExpressResult
           stars={medals.stars}
-          flawless={medals.flawless}
+          missReason={starMissReason(run, earlyDoors)}
           reduced={reducedMotion}
           stations={run.stations}
           grades={run.grades}

@@ -11,6 +11,11 @@ const SLEEPER_GAP = 0.9;
 const PORTAL_GAP = 50;
 const PLATFORM_BEFORE = 70;
 const PLATFORM_AFTER = 28;
+/**
+ * 月台頂比視線只低 0.5 公尺，畫到 Z_NEAR 時近端會停在畫面六成高，下面露出一塊地。
+ * 月台單獨畫到更近，頂面才會一路鋪到前窗下緣。
+ */
+const PLATFORM_NEAR = 0.3;
 const POST_AHEAD = 9;
 const OTHER_TRACK = 4.6;
 /** 對向列車：從多遠出現、車身多長。 */
@@ -114,7 +119,7 @@ const RAIL_SHINE = "rgb(236, 232, 224)";
 const SLEEPER = "rgb(176, 150, 120)";
 const POLE = "rgb(132, 140, 150)";
 const WIRE = "rgb(110, 116, 124)";
-const PLATFORM_TOP = "rgb(250, 230, 200)";
+export const PLATFORM_TOP = "rgb(250, 230, 200)";
 const PLATFORM_FACE = "rgb(214, 176, 134)";
 const PLATFORM_LINE = "rgb(255, 210, 90)";
 const POST = "rgb(255, 140, 43)";
@@ -492,7 +497,7 @@ function drawPortals(
 }
 
 function drawPlatform(ctx: CanvasRenderingContext2D, view: View, travel: number, targetWorld: number): void {
-  const z0 = Math.max(Z_NEAR, targetWorld - PLATFORM_BEFORE - travel);
+  const z0 = Math.max(PLATFORM_NEAR, targetWorld - PLATFORM_BEFORE - travel);
   const z1 = Math.min(Z_FAR, targetWorld + PLATFORM_AFTER - travel);
   if (z1 <= z0) return;
   const edge = -1.9;
@@ -501,15 +506,16 @@ function drawPlatform(ctx: CanvasRenderingContext2D, view: View, travel: number,
   quad(ctx, view, -40, edge, top, z0, z1, PLATFORM_TOP);
   quad(ctx, view, -2.75, -2.45, top, z0, z1, PLATFORM_LINE);
 
+  // 停車柱是「停在這裡」的主要線索：柱身與圓牌都比真的粗大，遠處也至少幾個像素。
   const postZ = targetWorld + POST_AHEAD - travel;
   if (postZ > Z_NEAR + 0.3 && postZ < Z_FAR) {
     const foot = project(view, -2.3, top, postZ);
     const head = project(view, -2.3, top + 2.1, postZ);
     const scale = view.f / postZ;
-    const width = Math.max(2, scale * 0.12);
+    const width = Math.max(3, scale * 0.22);
     ctx.fillStyle = POST;
     ctx.fillRect(foot.x - width / 2, head.y, width, foot.y - head.y);
-    const radius = Math.max(3, scale * 0.38);
+    const radius = Math.max(5, scale * 0.6);
     ctx.beginPath();
     ctx.arc(head.x, head.y, radius, 0, Math.PI * 2);
     ctx.fill();

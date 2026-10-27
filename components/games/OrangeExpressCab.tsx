@@ -17,7 +17,6 @@ import { currentLimit, inTunnel, onBridge, powerCap } from "@/lib/games/orange-e
 import {
   BRAKE_MAX,
   EMERGENCY,
-  POWER_MAX,
   type BrakeNotch,
   type PowerNotch,
   type RunState,
@@ -63,17 +62,16 @@ function notchFromY(el: HTMLElement, clientY: number, max: number): number {
 
 type LeverKind = "power" | "brake";
 
+/** 桿上只排摸得到的格：慢慢看的動力只到 P2，就只有三格，不放兩格按不動的淡格。 */
 function Lever({
   kind,
   notch,
   max,
-  cap,
   onChange,
 }: {
   kind: LeverKind;
   notch: number;
   max: number;
-  cap: number;
   onChange: (notch: number) => void;
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -162,7 +160,6 @@ function Lever({
                 className={styles.notchLamp}
                 data-notch={n}
                 data-on={n === notch && n > 0 ? "true" : "false"}
-                data-locked={n > cap ? "true" : "false"}
                 data-emergency={
                   kind === "brake" && n === EMERGENCY ? "true" : "false"
                 }
@@ -192,9 +189,12 @@ function FlagIcon() {
   );
 }
 
-function DoorIcon() {
+/** 不給 size 時由外層 CSS 決定大小（燈泡、車門鈕）；結算小籤沒有那層 CSS，要給 size。 */
+type GlyphProps = { size?: number };
+
+export function DoorIcon({ size }: GlyphProps) {
   return (
-    <svg viewBox="0 0 24 24" aria-hidden>
+    <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden>
       <rect
         x="4"
         y="3"
@@ -225,9 +225,9 @@ function DoorIcon() {
   );
 }
 
-function StopIcon() {
+export function StopIcon({ size }: GlyphProps) {
   return (
-    <svg viewBox="0 0 24 24" aria-hidden>
+    <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden>
       <path
         d="M12 21v-9"
         stroke="currentColor"
@@ -257,6 +257,25 @@ function LightIcon() {
         strokeLinejoin="round"
       />
       <path d="M9.5 20.5h5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+/** 號角：細管接喇叭口，右邊三道聲音。不用抬頭音效開關那顆揚聲器，免得看成「開關聲音」。 */
+function HornIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden>
+      <rect x="1.5" y="9.75" width="3.5" height="4.5" rx="1.2" fill="currentColor" />
+      <rect x="4.5" y="10.5" width="5.5" height="3" fill="currentColor" />
+      <path d="M9.5 10.2C12.6 9.8 14.6 7.6 16.2 4.6V19.4C14.6 16.4 12.6 14.2 9.5 13.8Z" fill="currentColor" />
+      <rect x="15.4" y="4.6" width="2.6" height="14.8" rx="1.3" fill="currentColor" />
+      <path
+        d="M20.2 8.6l1.8-1.4M20.6 12h2.2M20.2 15.4l1.8 1.4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -332,16 +351,20 @@ export function OrangeExpressCab({
       data-tunnel={tunnel ? "true" : "false"}
       data-auto-brake={run.autoBrake ? "true" : "false"}
     >
-      <div className={styles.cabTop}>
-        <OrangeBadge />
-        <p className={styles.stationName}>
-          <span className={styles.stationLead}>
-            {atStation ? COPY.atStation : COPY.nextStop}
-          </span>
-          {station ? (
-            <span className={styles.stationPlate}>{station.name}</span>
-          ) : null}
-        </p>
+      {/* 站名、速度表、指示燈收在兩根桿中間那一格；不另佔一列，高度留給前窗。DOM 放最前，讀屏先聽到站名。 */}
+      <div className={styles.dash}>
+        <div className={styles.dashHead}>
+          <OrangeBadge />
+          <p className={styles.stationName}>
+            <span className={styles.stationLead}>
+              {atStation ? COPY.atStation : COPY.nextStop}
+            </span>
+            {station ? (
+              <span className={styles.stationPlate}>{station.name}</span>
+            ) : null}
+          </p>
+        </div>
+        <OrangeExpressGauge speed={run.speed} limit={limit} numbers={numbers} />
         <ul className={styles.lamps} aria-label={COPY.lampsLabel}>
           <Lamp
             label={COPY.lampFlag}
@@ -368,18 +391,13 @@ export function OrangeExpressCab({
       <Lever
         kind="power"
         notch={run.power}
-        max={POWER_MAX}
-        cap={powerCap(run.level)}
+        max={powerCap(run.level)}
         onChange={onPower}
       />
-      <div className={styles.dash}>
-        <OrangeExpressGauge speed={run.speed} limit={limit} numbers={numbers} />
-      </div>
       <Lever
         kind="brake"
         notch={run.brake}
         max={BRAKE_MAX}
-        cap={BRAKE_MAX}
         onChange={onBrake}
       />
       <div className={styles.cabBottom}>
@@ -391,16 +409,7 @@ export function OrangeExpressCab({
           data-testid="orange-express-horn"
           onClick={onHorn}
         >
-          <svg viewBox="0 0 24 24" aria-hidden>
-            <path d="M4 10v4h3l5 4V6L7 10z" fill="currentColor" />
-            <path
-              d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-          </svg>
+          <HornIcon />
         </button>
         <button
           type="button"

@@ -44,6 +44,8 @@ export const COPY = {
   lightWord: "輕",
   emergencyWord: "緊急",
   starHint: "停在綠色區",
+  overrunHint: "不要開過頭",
+  earlyDoorHint: "門亮了再按",
   nextGame: "接著玩",
   lampFlag: "速度旗",
   lampDoor: "門",

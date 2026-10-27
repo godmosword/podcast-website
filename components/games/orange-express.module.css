@@ -149,6 +149,13 @@
     inset 0 0 0 2px color-mix(in srgb, var(--card) 35%, transparent);
 }
 
+/* 矮的直式手機（約 375×667）：前窗讓一點，車門才不會掉到視窗外。 */
+@media (orientation: portrait) and (max-height: 700px) {
+  .windshield {
+    min-height: 140px;
+  }
+}
+
 .glassWrap {
   position: absolute;
   inset: 0;
@@ -399,6 +406,9 @@
   font-size: var(--fs-label);
   font-weight: 900;
   line-height: 1.25;
+  /* 窄前窗要換行時只在「，」後面斷，不把「三顆星」拆成「三／顆星」。 */
+  word-break: keep-all;
+  text-wrap: balance;
 }
 
 .stopBar[data-grade="none"] .stopWords {
@@ -426,9 +436,9 @@
   /* 煞車六格（B0–B4＋緊急），每格至少 48px 才點得到。 */
   --lever-h: 312px;
   display: grid;
-  grid-template-columns: minmax(84px, 1fr) minmax(136px, 1.35fr) minmax(84px, 1fr);
+  /* minmax(0, …)：最窄的手機上三欄一起縮，不撐破外框（桿本身仍有 48px 下限）。 */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr) minmax(0, 1fr);
   grid-template-areas:
-    "top top top"
     "power dash brake"
     "bottom bottom bottom";
   gap: 8px;
@@ -447,6 +457,16 @@
     inset 0 -6px 0 color-mix(in srgb, var(--ink) 10%, transparent);
 }
 
+/*
+ * 直式矮螢幕（iPhone Safari 有工具列時約 390×664）：桿子跟著視窗縮一點，前窗才不會掉回一小條。
+ * 視窗高 743px 以上仍是 312px（煞車每格 ≥48px）；最矮 276px，每格約 44px。
+ */
+@supports (height: 1dvh) {
+  .cab {
+    --lever-h: clamp(276px, 42dvh, 312px);
+  }
+}
+
 /* 隧道裡車內燈亮：台面上緣一條暖光。 */
 .cab[data-tunnel="true"] {
   box-shadow:
@@ -456,11 +476,12 @@
     0 -6px 18px color-mix(in srgb, var(--c-yellow) 55%, transparent);
 }
 
-.cabTop {
-  grid-area: top;
+/* 徽章在上、站名在下，一律直排置中：站名長短不同時，速度表和燈不會跟著上下跳。 */
+.dashHead {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   min-width: 0;
 }
 
@@ -474,10 +495,12 @@
 .stationName {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 2px;
   min-width: 0;
   margin: 0;
   font-weight: 900;
+  white-space: nowrap;
 }
 
 .stationLead {
@@ -486,7 +509,7 @@
 }
 
 .stationPlate {
-  align-self: flex-start;
+  align-self: center;
   padding: 2px 10px;
   border-radius: var(--radius-xs);
   color: var(--cta-solid-fg);
@@ -496,9 +519,11 @@
 }
 
 .lamps {
-  display: flex;
-  gap: 6px;
-  margin: 0 0 0 auto;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(36px, auto));
+  justify-content: center;
+  gap: 4px 6px;
+  margin: 0;
   padding: 4px 6px;
   border: 2px solid var(--ink);
   border-radius: 14px;
@@ -684,6 +709,7 @@
   font-size: var(--fs-meta);
   font-weight: 900;
   line-height: 1;
+  white-space: nowrap;
   pointer-events: auto;
 }
 
@@ -713,10 +739,6 @@
   border-color: var(--ink);
   background: var(--support-from);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--support-from) 35%, transparent);
-}
-
-.notchLamp[data-locked="true"] {
-  opacity: 0.35;
 }
 
 /* ── 速度表 ─────────────────────────────────────────── */
@@ -887,8 +909,8 @@
 }
 
 .horn svg {
-  width: 26px;
-  height: 26px;
+  width: 30px;
+  height: 30px;
 }
 
 .door {
@@ -1021,12 +1043,12 @@
   font-weight: 900;
 }
 
-/* 寬螢幕：前窗在上，喇叭與車門收到速度表下面，桿子拉長到兩列。 */
+/* 寬螢幕：前窗在上，喇叭與車門收到速度表下面，桿子拉長到兩列。
+ * 中間那格夠寬，站名、速度表、指示燈改成一橫排。 */
 @media (min-width: 720px) {
   .cab {
     grid-template-columns: minmax(150px, 200px) minmax(220px, 1fr) minmax(150px, 200px);
     grid-template-areas:
-      "top top top"
       "power dash brake"
       "power bottom brake";
     padding: 12px 16px 14px;
@@ -1036,15 +1058,89 @@
     height: auto;
   }
 
+  /* 中間那格用格線排：寬時站名｜速度表｜燈一橫排；不夠寬時見下一段。不用 flex-wrap：
+   * 換行會把那格撐高，兩根桿跟著被拉長，前窗就變矮。 */
+  .dash {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    grid-template-areas: "head gauge lamps";
+    align-items: center;
+    justify-content: center;
+    gap: 8px 48px;
+  }
+
+  .dashHead {
+    grid-area: head;
+  }
+
   .gauge {
-    max-width: 230px;
+    grid-area: gauge;
+    width: clamp(140px, 18vw, 230px);
+  }
+
+  .lamps {
+    grid-area: lamps;
+  }
+}
+
+/* 平板直式（約 768 寬）：中間那格約 290px，站名疊在燈上面、速度表在右。 */
+@media (min-width: 720px) and (max-width: 999.98px) {
+  .dash {
+    grid-template-columns: auto auto;
+    grid-template-areas:
+      "head gauge"
+      "lamps gauge";
+    gap: 8px 20px;
+  }
+
+  .gauge {
+    width: 160px;
+  }
+}
+
+/* 直式矮螢幕：中間那格要比桿子矮，不然整排被撐高、前窗變矮。徽章只是裝飾，先收。 */
+@media (orientation: portrait) and (max-height: 760px) {
+  .badge {
+    display: none;
+  }
+}
+
+/* 桌機與平板：中間那格很寬，站名牌與燈放大，不要縮成兩座小島。橫拿手機（矮）不套。 */
+@media (min-width: 720px) and (min-height: 521px) {
+  .badge {
+    width: 52px;
+    height: 52px;
+  }
+
+  .stationPlate {
+    font-size: var(--fs-h4);
+  }
+
+  .lampBulb {
+    width: 40px;
+    height: 40px;
+  }
+
+  .lampBulb svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .lampText {
+    font-size: var(--fs-meta);
   }
 }
 
 @media (max-width: 359px) {
   .cab {
-    grid-template-columns: minmax(76px, 1fr) minmax(120px, 1.2fr) minmax(76px, 1fr);
-    padding: 8px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: 6px;
+    padding: 6px;
+  }
+
+  .badge {
+    width: 32px;
+    height: 32px;
   }
 
   .lamps {
@@ -1053,6 +1149,113 @@
 
   .lampText {
     display: none;
+  }
+}
+
+/*
+ * 橫拿手機（約 844×390、667×375）：兩根桿夾著前窗，前窗下面一條依序是喇叭（靠動力桿那隻手）、
+ * 站名＋速度表＋燈、車門（靠煞車那隻手）。整個駕駛台在一屏內，不用捲。
+ * .cab 與 .cabBottom 拆開（display: contents），子元素直接站上外層格線；黏土台面改畫在外層。
+ * 車門寬度固定，標籤換成「等人上車」「關門」時中間那格不會被擠。中間那格太窄就收起燈：
+ * 車門鈕變綠、速度表色帶都還在，燈的資訊有備援。桿子跟著視窗高，矮螢幕每格會略低於 48px。
+ */
+@media (orientation: landscape) and (max-height: 520px) {
+  .screen[data-screen="drive"] {
+    --console: color-mix(in srgb, var(--c-yellow) 10%, var(--surface-game));
+    --panel: color-mix(in srgb, var(--ink) 9%, var(--surface-game));
+    display: grid;
+    grid-template-columns: clamp(100px, 16vw, 150px) auto minmax(0, 1fr) auto clamp(100px, 16vw, 150px);
+    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "power glass glass glass brake"
+      "power horn dash door brake";
+    gap: 6px 8px;
+    padding: 6px;
+    border: 2px solid var(--ink);
+    border-radius: 20px;
+    background: linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--card) 55%, var(--console)) 0%,
+      var(--console) 40%,
+      color-mix(in srgb, var(--ink) 6%, var(--console)) 100%
+    );
+    box-shadow:
+      0 4px 0 var(--ink),
+      inset 0 3px 0 color-mix(in srgb, var(--card) 80%, transparent);
+  }
+
+  /* 隧道裡車內燈亮：直式畫在 .cab 上緣，橫式 .cab 拆開了，改畫在外層台面。 */
+  .screen[data-screen="drive"]:has(.cab[data-tunnel="true"]) {
+    box-shadow:
+      0 4px 0 var(--ink),
+      inset 0 4px 0 color-mix(in srgb, var(--c-yellow) 75%, var(--card)),
+      0 0 18px color-mix(in srgb, var(--c-yellow) 55%, transparent);
+  }
+
+  .screen[data-screen="drive"] .cab,
+  .screen[data-screen="drive"] .cabBottom {
+    display: contents;
+  }
+
+  .windshield {
+    grid-area: glass;
+    min-height: 0;
+  }
+
+  .lever {
+    height: auto;
+    min-height: 0;
+  }
+
+  .dash {
+    container-type: inline-size;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: center;
+    gap: 10px;
+    overflow: hidden;
+    padding: 4px 8px;
+  }
+
+  .dashHead {
+    gap: 2px;
+  }
+
+  .badge {
+    width: 28px;
+    height: 28px;
+  }
+
+  .gauge {
+    flex: 0 0 auto;
+    width: 88px;
+    min-width: 0;
+  }
+
+  .lamps {
+    grid-template-columns: repeat(2, minmax(32px, auto));
+    padding: 2px 4px;
+  }
+
+  .horn {
+    grid-area: horn;
+    align-self: center;
+  }
+
+  .door {
+    grid-area: door;
+    align-self: center;
+    width: 132px;
+    padding: 8px 10px;
+    font-size: var(--fs-body);
+    white-space: nowrap;
+  }
+
+  @container (max-width: 270px) {
+    .lamps {
+      display: none;
+    }
   }
 }
 

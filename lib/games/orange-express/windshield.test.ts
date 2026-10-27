@@ -3,6 +3,7 @@ import { PASS_DURATION } from "@/lib/games/orange-express/reducer";
 import {
   PASS_FAR,
   PASS_LENGTH,
+  PLATFORM_TOP,
   STATION_WORLD,
   cameraTravel,
   drawWindshield,
@@ -96,5 +97,48 @@ describe("前窗：隧道、鐵橋、速限牌、對向列車", () => {
     expect(calls).toContain("clip");
     expect(calls).not.toContain("fillText");
     expect(calls).not.toContain("drawImage");
+  });
+});
+
+type Fill = { color: string; pts: { x: number; y: number }[] };
+
+/** 記下每次 fill 的顏色與路徑點，看月台畫到哪裡。 */
+function recordFills(): { ctx: CanvasRenderingContext2D; fills: Fill[] } {
+  const fills: Fill[] = [];
+  let pts: Fill["pts"] = [];
+  let color = "";
+  const gradient = { addColorStop: () => {} };
+  const ctx = new Proxy(
+    {},
+    {
+      get(_target, prop: string) {
+        if (prop === "createLinearGradient") return () => gradient;
+        if (prop === "beginPath") return () => (pts = []);
+        if (prop === "moveTo" || prop === "lineTo") return (x: number, y: number) => pts.push({ x, y });
+        if (prop === "fill") return () => fills.push({ color, pts });
+        return () => {};
+      },
+      set(_target, prop: string, value: unknown) {
+        if (prop === "fillStyle") color = String(value);
+        return true;
+      },
+    },
+  ) as unknown as CanvasRenderingContext2D;
+  return { ctx, fills };
+}
+
+describe("前窗：月台", () => {
+  it("停好時月台頂面鋪到前窗下緣，近端不會被切在畫面中段", () => {
+    for (const [w, h] of [
+      [364, 183],
+      [1960, 270],
+    ] as const) {
+      const { ctx, fills } = recordFills();
+      drawWindshield(ctx, w, h, { progress: 0.65, phase: "stopped", reduced: true, target: 0.65 });
+      const top = fills.filter((fill) => fill.color === PLATFORM_TOP);
+      expect(top.length).toBeGreaterThan(0);
+      const lowest = Math.max(...top.flatMap((fill) => fill.pts.map((p) => p.y)));
+      expect(lowest).toBeGreaterThanOrEqual(h);
+    }
   });
 });

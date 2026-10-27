@@ -1,16 +1,29 @@
 "use client";
 
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { ResultStars } from "@/components/games/ResultStars";
 import { IconTrain } from "@/components/games/ClayIcons";
+import { DoorIcon, StopIcon } from "@/components/games/OrangeExpressCab";
 import { COPY, GRADE_TEXT, bridgeResultText, pointsResultText } from "@/lib/games/orange-express/copy";
+import type { StarMissReason } from "@/lib/games/orange-express/medals";
 import type { Station, StopGrade } from "@/lib/games/orange-express/types";
 import { getNextGame } from "@/data/games";
 import styles from "./orange-express.module.css";
 
+/**
+ * 少的那顆星卡在哪：只放一張小籤，說真正的原因。
+ * 圖示用駕駛台上同一個符號：開過頭配停車燈（不用往前的箭頭，孩子會讀成「繼續開」），門配車門。
+ */
+const MISS_HINT: Record<StarMissReason, { text: string; mark: ReactNode }> = {
+  green: { text: COPY.starHint, mark: <IconTrain size={18} /> },
+  overrun: { text: COPY.overrunHint, mark: <StopIcon size={18} /> },
+  "early-door": { text: COPY.earlyDoorHint, mark: <DoorIcon size={18} /> },
+};
+
 export function OrangeExpressResult({
   stars,
-  flawless,
+  missReason,
   reduced,
   stations,
   grades,
@@ -21,7 +34,7 @@ export function OrangeExpressResult({
   onTitle,
 }: {
   stars: number;
-  flawless: boolean;
+  missReason: StarMissReason | null;
   reduced: boolean;
   stations: readonly Station[];
   grades: readonly StopGrade[];
@@ -38,11 +51,7 @@ export function OrangeExpressResult({
       <ResultStars
         stars={stars}
         animate={!reduced}
-        hints={
-          flawless
-            ? []
-            : [{ key: "stop", text: COPY.starHint, mark: <IconTrain size={18} /> }]
-        }
+        hints={missReason ? [{ key: missReason, ...MISS_HINT[missReason] }] : []}
       />
       <ol className={styles.stationGrades}>
         {stations.map((station, index) => {
