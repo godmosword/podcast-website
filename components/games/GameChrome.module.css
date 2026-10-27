@@ -3,6 +3,12 @@
   isolation: isolate;
 }
 
+/* isolation 把遊戲裡的 z-index 收在這層，設定遮罩的 200 也只在層內比；
+ * 不抬起整層，頁面的 sticky 抬頭（z-index 20）會疊在遮罩上、蓋住對話框標題。 */
+.wrap[data-settings-open] {
+  z-index: 200;
+}
+
 .toolbar {
   display: flex;
   align-items: center;
@@ -57,13 +63,22 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
+  /* viewport-fit=cover：瀏海與主畫面指示條底下不放對話框。 */
+  padding:
+    max(1rem, env(safe-area-inset-top))
+    max(1rem, env(safe-area-inset-right))
+    max(1rem, env(safe-area-inset-bottom))
+    max(1rem, env(safe-area-inset-left));
   background: rgba(15, 23, 42, 0.55);
   backdrop-filter: blur(4px);
 }
 
+/* 設定列比視窗高時（矮手機、小橘特快車的大人開關）在框內捲，不從上下兩端溢出畫面。 */
 .dialog {
   width: min(100%, 22rem);
+  max-height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 1.25rem 1.35rem 1.35rem;
   border-radius: var(--radius-lg);
   border: 1.5px solid var(--line);

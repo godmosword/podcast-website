@@ -105,6 +105,13 @@ export function GameChromeToolbar({
   );
 }
 
+/** 會朗讀的遊戲才有「念出來」；說明寫這款自己念的東西。 */
+const VOICE_NOTE: Partial<Record<GameKitGameId, string>> = {
+  "candy-match": "關卡目標、鼓勵和提示用聲音念出來；關掉後音效照常。",
+  "dino-sushi": "訂單、提示和多多的話用聲音念出來；關掉後音效照常。",
+  "orange-express": "車內廣播「下一站」用聲音念出來；關掉後音效照常。",
+};
+
 function SettingsDialog({
   open,
   onClose,
@@ -167,7 +174,7 @@ function SettingsDialog({
   if (!open) return null;
 
   const showBlockDrop = gameId === "block-drop";
-  const showVoice = gameId === "candy-match" || gameId === "dino-sushi" || gameId === "orange-express";
+  const voiceNote = gameId ? VOICE_NOTE[gameId] : undefined;
 
   return (
     <div className={styles.overlay} role="presentation" onClick={onClose}>
@@ -234,15 +241,11 @@ function SettingsDialog({
             aria-label="遊戲音量"
           />
         </label>
-        {showVoice ? (
+        {voiceNote ? (
           <label className={styles.settingRow}>
             <span>
               <strong>念出來</strong>
-              <small>
-                {gameId === "orange-express"
-                  ? "車內廣播「下一站」用聲音念出來；關掉後音效照常。"
-                  : "訂單、提示和多多的話用聲音念出來；關掉後音效照常。"}
-              </small>
+              <small>{voiceNote}</small>
             </span>
             <input
               type="checkbox"
@@ -339,7 +342,10 @@ export default function GameChrome({
 
   return (
     <ChromeContext.Provider value={{ openSettings: () => setSettingsOpen(true) }}>
-      <div className={`${styles.wrap}${className ? ` ${className}` : ""}`}>
+      <div
+        className={`${styles.wrap}${className ? ` ${className}` : ""}`}
+        data-settings-open={settingsOpen ? "" : undefined}
+      >
         <div className="sr-only" aria-live="polite" aria-atomic="true">
           {announce ?? ""}
         </div>

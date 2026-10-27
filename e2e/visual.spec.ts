@@ -734,6 +734,14 @@ test("visual：小橘特快車結算 390 night（開過頭，提示說原因）"
   await expect(result).toHaveScreenshot("orange-express-result-390-night.png", orangeShot("night"));
 });
 
+/** 遊戲設定（共用對話框）列最多的一款：整個視窗截，抬頭要在遮罩底下。 */
+test("visual：小橘特快車遊戲設定 390 light（司機切換）", async ({ page }) => {
+  await openOrangeExpress(page, PHONE);
+  await page.getByRole("button", { name: "遊戲設定" }).click();
+  await expect(page.getByRole("dialog", { name: "遊戲設定" }).getByRole("radio", { name: "大司機" })).toBeVisible();
+  await expect(page).toHaveScreenshot("orange-express-settings-390x844-light.png", orangeShot("light"));
+});
+
 test("visual：單集 ep-3 768 light", async ({ page }) => {
   await page.setViewportSize({ width: 768, height: 900 });
   await page.goto("/story/ep-3");

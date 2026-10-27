@@ -1204,3 +1204,35 @@ test.describe("遊戲抬頭：320 寬局內", () => {
     await expect(page.getByRole("link", { name: /回遊樂園/ })).toContainText("回遊樂園");
   });
 });
+
+/**
+ * 遊戲設定對話框（GameChrome 共用）：矮手機與橫拿時比視窗高，要在框內捲；
+ * 遊戲外框有 isolation，打開時沒抬起整層，sticky 抬頭會疊在遮罩上蓋住標題。
+ */
+test.describe("遊戲設定對話框", () => {
+  for (const gameId of ["candy-match", "dino-sushi", "orange-express"] as const) {
+    for (const viewport of [{ width: 375, height: 667 }, PHONE_LANDSCAPE]) {
+      test(`${gameId} ${viewport.width}×${viewport.height}：整個框在畫面內、標題沒被抬頭蓋住、捲到「完成」按得到`, async ({
+        page,
+      }) => {
+        await page.setViewportSize(viewport);
+        await page.goto(`/games/${gameId}`);
+        await page.getByRole("button", { name: "遊戲設定" }).click();
+        const dialog = page.getByRole("dialog", { name: "遊戲設定" });
+        const box = (await dialog.boundingBox())!;
+        expect(box.y).toBeGreaterThanOrEqual(0);
+        expect(box.y + box.height).toBeLessThanOrEqual(viewport.height);
+        const titleOnTop = await dialog.getByRole("heading", { name: "遊戲設定" }).evaluate((el) => {
+          const b = el.getBoundingClientRect();
+          return el.contains(document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2));
+        });
+        expect(titleOnTop).toBe(true);
+        const done = dialog.getByRole("button", { name: "完成" });
+        await done.scrollIntoViewIfNeeded();
+        await expect(done).toBeInViewport();
+        await done.click();
+        await expect(dialog).toBeHidden();
+      });
+    }
+  }
+});

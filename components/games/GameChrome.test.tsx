@@ -42,6 +42,39 @@ describe("GameChrome settings by gameId", () => {
     }
   });
 
+  it("「念出來」的說明寫的是這款遊戲自己念的東西", () => {
+    for (const [gameId, says, notSays] of [
+      ["candy-match", "關卡目標", "多多"],
+      ["dino-sushi", "多多的話", "關卡目標"],
+      ["orange-express", "下一站", "多多"],
+    ] as const) {
+      render(
+        <GameChrome gameId={gameId}>
+          <GameChromeToolbar />
+        </GameChrome>,
+      );
+      fireEvent.click(screen.getByRole("button", { name: "遊戲設定" }));
+      const row = screen.getByRole("checkbox", { name: /念出來/ }).closest("label")!;
+      expect(row.textContent).toContain(says);
+      expect(row.textContent).not.toContain(notSays);
+      cleanup();
+    }
+  });
+
+  it("設定打開時外框標 data-settings-open，讓整層蓋過頁面抬頭；關上就拿掉", () => {
+    const { container } = render(
+      <GameChrome gameId="orange-express">
+        <GameChromeToolbar />
+      </GameChrome>,
+    );
+    const wrap = container.firstElementChild!;
+    expect(wrap.hasAttribute("data-settings-open")).toBe(false);
+    fireEvent.click(screen.getByRole("button", { name: "遊戲設定" }));
+    expect(wrap.hasAttribute("data-settings-open")).toBe(true);
+    fireEvent.click(screen.getByRole("button", { name: "完成" }));
+    expect(wrap.hasAttribute("data-settings-open")).toBe(false);
+  });
+
   it("方塊轉轉沒有朗讀，不顯示「念出來」", () => {
     render(
       <GameChrome gameId="block-drop">
