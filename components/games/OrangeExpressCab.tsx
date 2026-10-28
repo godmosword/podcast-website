@@ -2,6 +2,7 @@
 
 import { useRef, type CSSProperties, type ReactNode } from "react";
 import { OrangeExpressGauge } from "@/components/games/OrangeExpressGauge";
+import { HornIcon } from "@/components/games/OrangeExpressGlyphs";
 import {
   brakeLampLabel,
   brakeValueText,
@@ -13,9 +14,14 @@ import {
 } from "@/lib/games/orange-express/copy";
 import { gaugeZone } from "@/lib/games/orange-express/gauge";
 import { sliderKeyTarget } from "@/lib/games/orange-express/lever";
-import { currentLimit, inTunnel, onBridge, powerCap } from "@/lib/games/orange-express/reducer";
 import {
-  BRAKE_MAX,
+  brakeNotches,
+  currentLimit,
+  inTunnel,
+  onBridge,
+  powerNotches,
+} from "@/lib/games/orange-express/reducer";
+import {
   EMERGENCY,
   type BrakeNotch,
   type PowerNotch,
@@ -52,26 +58,33 @@ function OrangeBadge() {
   );
 }
 
-function notchFromY(el: HTMLElement, clientY: number, max: number): number {
+/** 點或拖到桿上哪一格：回傳格子的索引（0 在最下面）。 */
+function indexFromY(el: HTMLElement, clientY: number, last: number): number {
   const rect = el.getBoundingClientRect();
   const span = rect.height <= 0 ? 1 : rect.height;
   const t = Math.min(0.999, Math.max(0, (clientY - rect.top) / span));
-  const row = Math.floor(t * (max + 1));
-  return max - row;
+  const row = Math.floor(t * (last + 1));
+  return last - row;
 }
 
 type LeverKind = "power" | "brake";
 
-/** 桿上只排摸得到的格：慢慢看的動力只到 P2，就只有三格，不放兩格按不動的淡格。 */
+/**
+ * 桿上只排這一檔摸得到的格：慢慢看的動力只有 P0–P2，煞車只有鬆、停、緊急。
+ * 位置、aria、拖曳與方向鍵都用格子的索引；`data-notch` 留真正的格號。
+ */
 function Lever({
   kind,
   notch,
-  max,
+  notches,
+  simple,
   onChange,
 }: {
   kind: LeverKind;
   notch: number;
-  max: number;
+  notches: readonly number[];
+  /** 慢慢看：格上寫字（鬆、停、緊急），不寫 B3。 */
+  simple: boolean;
   onChange: (notch: number) => void;
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -80,17 +93,21 @@ function Lever({
   const valueText =
     kind === "power"
       ? powerValueText(notch as PowerNotch)
-      : brakeValueText(notch as BrakeNotch);
+      : brakeValueText(notch as BrakeNotch, simple);
   const word =
     kind === "power"
       ? powerWord(notch as PowerNotch)
       : brakeWord(notch as BrakeNotch);
-  const rows = Array.from({ length: max + 1 }, (_, i) => max - i);
+  const last = notches.length - 1;
+  const found = notches.indexOf(notch);
+  const index = found >= 0 ? found : 0;
+  const rows = Array.from({ length: notches.length }, (_, i) => last - i);
+  const pick = (i: number) => onChange(notches[Math.min(last, Math.max(0, i))]!);
 
   const move = (clientY: number) => {
     const el = ref.current;
     if (!el) return;
-    onChange(notchFromY(el, clientY, max));
+    pick(indexFromY(el, clientY, last));
   };
 
   return (
@@ -112,11 +129,11 @@ function Lever({
         aria-label={label}
         aria-orientation="vertical"
         aria-valuemin={0}
-        aria-valuemax={max}
-        aria-valuenow={notch}
+        aria-valuemax={last}
+        aria-valuenow={index}
         aria-valuetext={valueText}
         tabIndex={0}
-        style={{ "--notches": max + 1, "--at": max - notch } as CSSProperties}
+        style={{ "--notches": notches.length, "--at": last - index } as CSSProperties}
         onPointerDown={(event) => {
           dragging.current = true;
           event.currentTarget.setPointerCapture(event.pointerId);
@@ -136,12 +153,12 @@ function Lever({
           dragging.current = false;
         }}
         onKeyDown={(event) => {
-          const next = sliderKeyTarget(event.key, notch, max);
+          const next = sliderKeyTarget(event.key, index, last);
           if (next === null) return;
           // 焦點在這根桿上時 ↑↓ 只動這根（煞車桿按 ↑ 是加煞車），不要再讓整頁的鍵盤對應動動力桿。
           event.preventDefault();
           event.stopPropagation();
-          onChange(next);
+          pick(next);
         }}
       >
         <span className={styles.leverSlot} aria-hidden />
@@ -149,11 +166,12 @@ function Lever({
           <span className={styles.leverGrip} />
         </span>
         <span className={styles.notchPlate} aria-hidden>
-          {rows.map((n) => {
+          {rows.map((i) => {
+            const n = notches[i]!;
             const text =
               kind === "power"
                 ? powerLampLabel(n as PowerNotch)
-                : brakeLampLabel(n as BrakeNotch);
+                : brakeLampLabel(n as BrakeNotch, simple);
             return (
               <span
                 key={n}
@@ -163,7 +181,7 @@ function Lever({
                 data-emergency={
                   kind === "brake" && n === EMERGENCY ? "true" : "false"
                 }
-                onClick={() => onChange(n)}
+                onClick={() => pick(i)}
               >
                 {text}
               </span>
@@ -257,25 +275,6 @@ function LightIcon() {
         strokeLinejoin="round"
       />
       <path d="M9.5 20.5h5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-/** 號角：細管接喇叭口，右邊三道聲音。不用抬頭音效開關那顆揚聲器，免得看成「開關聲音」。 */
-function HornIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden>
-      <rect x="1.5" y="9.75" width="3.5" height="4.5" rx="1.2" fill="currentColor" />
-      <rect x="4.5" y="10.5" width="5.5" height="3" fill="currentColor" />
-      <path d="M9.5 10.2C12.6 9.8 14.6 7.6 16.2 4.6V19.4C14.6 16.4 12.6 14.2 9.5 13.8Z" fill="currentColor" />
-      <rect x="15.4" y="4.6" width="2.6" height="14.8" rx="1.3" fill="currentColor" />
-      <path
-        d="M20.2 8.6l1.8-1.4M20.6 12h2.2M20.2 15.4l1.8 1.4"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
     </svg>
   );
 }
@@ -391,13 +390,15 @@ export function OrangeExpressCab({
       <Lever
         kind="power"
         notch={run.power}
-        max={powerCap(run.level)}
+        notches={powerNotches(run.level)}
+        simple={run.level === "look"}
         onChange={onPower}
       />
       <Lever
         kind="brake"
         notch={run.brake}
-        max={BRAKE_MAX}
+        notches={brakeNotches(run.level)}
+        simple={run.level === "look"}
         onChange={onBrake}
       />
       <div className={styles.cabBottom}>

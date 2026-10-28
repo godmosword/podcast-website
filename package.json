@@ -55,6 +55,7 @@
     "generate:character-portraits": "tsx --env-file-if-exists=.env.local scripts/generate-character-portraits.ts",
     "generate:landing-art": "tsx --env-file-if-exists=.env.local scripts/generate-landing-art.ts",
     "generate:dino-sushi-cover": "tsx --env-file-if-exists=.env.local scripts/generate-dino-sushi-cover.ts",
+    "generate:orange-express-art": "tsx --env-file-if-exists=.env.local scripts/generate-orange-express-art.ts",
     "generate:roamer-assets": "tsx --env-file-if-exists=.env.local scripts/generate-roamer-assets.ts",
     "generate:llms-full": "tsx scripts/generate-llms-full.ts",
     "generate:indexnow-key": "tsx scripts/generate-indexnow-key.ts",

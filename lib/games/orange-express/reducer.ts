@@ -31,8 +31,11 @@ export const BOARD_STEP = 0.4;
 export const REVERSE_RATE = 0.16;
 /** 倒車退到窗頭前面多少。 */
 export const REVERSE_TO = 0.08;
-/** 慢慢看在進站後至少保持這個速度，不會停在月台前面。 */
-export const LOOK_CREEP = 0.08;
+/**
+ * 慢慢看在進站後至少保持這個速度，不會停在月台前面。
+ * 必須大於慢慢看的「算停住」門檻（stopEpsilon("look")），不然一拉煞車就在區間最前面（黃區）停下。
+ */
+export const LOOK_CREEP = 0.1;
 /** 自動輕煞的減速度，約等於 B2。 */
 export const AUTO_BRAKE_DECEL = 0.4;
 /** 超過速度旗這麼多才算超速，避免在旗子上下抖。 */
@@ -49,6 +52,13 @@ export function powerCap(level: LevelId): PowerNotch {
   return level === "look" ? 2 : POWER_MAX;
 }
 
+const POWER_ALL: readonly PowerNotch[] = [0, 1, 2, 3, 4];
+
+/** 動力桿上排的格：0 到這一檔的上限。 */
+export function powerNotches(level: LevelId): readonly PowerNotch[] {
+  return POWER_ALL.slice(0, powerCap(level) + 1);
+}
+
 export function clampPower(n: number, max: PowerNotch = POWER_MAX): PowerNotch {
   if (!Number.isFinite(n)) return 0;
   const next = Math.round(n);
@@ -63,6 +73,32 @@ export function clampBrake(n: number): BrakeNotch {
   if (next <= 0) return 0;
   if (next >= BRAKE_MAX) return BRAKE_MAX;
   return next as BrakeNotch;
+}
+
+/** 慢慢看的煞車桿只排三格：鬆、停（B3）、緊急。其他檔六格都在。 */
+const LOOK_BRAKES: readonly BrakeNotch[] = [0, 3, EMERGENCY];
+const ALL_BRAKES: readonly BrakeNotch[] = [0, 1, 2, 3, 4, EMERGENCY];
+
+export function brakeNotches(level: LevelId): readonly BrakeNotch[] {
+  return level === "look" ? LOOK_BRAKES : ALL_BRAKES;
+}
+
+/** 吸到這一檔有的最近一格；等距時取小的（慢慢看的 B4 吸到「停」，不會誤拉緊急）。 */
+export function snapBrake(level: LevelId, n: number): BrakeNotch {
+  const raw = clampBrake(n);
+  const notches = brakeNotches(level);
+  let best = notches[0]!;
+  for (const notch of notches) {
+    if (Math.abs(notch - raw) < Math.abs(best - raw)) best = notch;
+  }
+  return best;
+}
+
+/** 鍵盤 ←→ 照這一檔有的格子走一格；dir 1 是多拉一格煞車。 */
+export function stepBrake(level: LevelId, from: number, dir: 1 | -1): BrakeNotch {
+  const notches = brakeNotches(level);
+  const index = notches.indexOf(snapBrake(level, from));
+  return notches[Math.min(notches.length - 1, Math.max(0, index + dir))]!;
 }
 
 export function currentStation(state: RunState): Station {
@@ -193,7 +229,20 @@ export function predictStop(state: RunState): number | null {
   const accel = accelFor(state);
   if (accel >= -COAST_DRAG) return null;
   const distance = ((state.speed * state.speed) / (2 * -accel)) * PROGRESS_RATE;
-  return quant(Math.min(1.2, state.progress + distance));
+  let stop = state.progress + distance;
+  // 慢慢看進站後車會爬到爬行區尾端才放開，再用同樣的減速度停下；三角要畫在那裡，不然會指在黃區。
+  const station = currentStation(state);
+  const creepEnd = station.target - station.greenHalf / 2;
+  if (
+    state.level === "look" &&
+    state.brake < EMERGENCY &&
+    state.progress >= station.approachAt &&
+    state.progress < creepEnd &&
+    stop < creepEnd
+  ) {
+    stop = creepEnd + ((LOOK_CREEP * LOOK_CREEP) / (2 * -accel)) * PROGRESS_RATE;
+  }
+  return quant(Math.min(1.2, stop));
 }
 
 /** 速度 0 又在窗裡，就當成已經停好。 */
@@ -230,7 +279,7 @@ export function withHook(state: RunState, hook: OrangeExpressHook | null | undef
   const speed = quant(Math.max(0, finiteOr(hook.speed, state.speed)));
   const misses = Math.max(0, Math.floor(finiteOr(hook.misses, state.misses)));
   const power = clampPower(finiteOr(hook.power, state.power), powerCap(state.level));
-  const brake = clampBrake(finiteOr(hook.brake, state.brake));
+  const brake = snapBrake(state.level, finiteOr(hook.brake, state.brake));
   const sameStation = stationIndex === state.stationIndex;
   const grades = sameStation ? state.grades : state.grades.slice(0, stationIndex);
   const passing =
@@ -370,7 +419,7 @@ export function step(state: RunState, action: RunAction): RunState {
   }
 
   if (action.type === "set-brake") {
-    const notch = clampBrake(action.notch);
+    const notch = snapBrake(state.level, action.notch);
     if (notch === state.brake || state.phase === "route-done") return state;
     return { ...state, brake: notch };
   }

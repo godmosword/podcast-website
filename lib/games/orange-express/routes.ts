@@ -13,7 +13,8 @@ import type {
 const BONBON: Passenger = { id: "bonbon", name: "Bonbon" };
 const MAMI: Passenger = { id: "mami", name: "馬米" };
 const XIAONAN: Passenger = { id: "xiaonan", name: "小南" };
-const DOT: Passenger = { id: "dot", name: "色塊" };
+/** 小站長多接的一位：節目裡沒有這個角色，卡上只放頭像，不印佔位名字。 */
+const DOT: Passenger = { id: "dot", name: "一位朋友", showName: false };
 
 export function courseFor(level: LevelId, driver: DriverId): CourseId {
   if (level === "drive") return driver;

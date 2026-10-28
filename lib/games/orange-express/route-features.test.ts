@@ -66,7 +66,7 @@ describe("路線：四組規則", () => {
     expect(stationsFor("look")[0]!.scene).toBe("sea");
   });
 
-  it("小小司機：停進月台哪裡都是綠區三顆星", () => {
+  it("小小司機：停進月台哪裡都是綠區", () => {
     const station = stationsFor("drive", "little")[0]!;
     expect(station.target - station.greenHalf).toBeLessThanOrEqual(station.window.start);
     expect(station.target + station.greenHalf).toBeGreaterThanOrEqual(station.window.end);

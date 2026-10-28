@@ -1,6 +1,6 @@
 /** 孩子看得到的句子。禁詞測試掃這一包，也掃遊戲原始碼。 */
 
-import type { BrakeNotch, DriverId, PointKind, PowerNotch, StopGrade } from "@/lib/games/orange-express/types";
+import type { BrakeNotch, DriverId, LevelId, PointKind, PowerNotch, StopGrade } from "@/lib/games/orange-express/types";
 
 export const COPY = {
   routeName: "橘色小線",
@@ -69,6 +69,13 @@ export const COPY = {
   pointDone: "確認好了",
 } as const;
 
+/** 標題難度卡圖示下面的小點：幾點就是多難。 */
+export const LEVEL_DOTS: Record<LevelId, 1 | 2 | 3> = {
+  look: 1,
+  drive: 2,
+  captain: 3,
+};
+
 export const DRIVER_NAME: Record<DriverId, string> = {
   little: "小小司機",
   big: "大司機",
@@ -77,6 +84,13 @@ export const DRIVER_NAME: Record<DriverId, string> = {
 export const DRIVER_HINT: Record<DriverId, string> = {
   little: "3–4 歲：桿子自動限速，只學開和停",
   big: "5–7 歲：速限牌、停準拿星星、指差確認",
+};
+
+/** 指差確認圓鈕下面的小標：要確認的那樣東西。整句由朗讀與讀屏說。 */
+export const POINT_WHAT: Record<PointKind, string> = {
+  signal: "號誌",
+  sign: "速限牌",
+  platform: "月台",
 };
 
 /** 指差確認時說的話。 */
@@ -92,17 +106,28 @@ export function signWord(bars: 1 | 2 | 3): string {
   return COPY.signSlow;
 }
 
-export function pointsResultText(done: number, total: number): string {
-  return `${COPY.point} ${done}/${total}`;
+/** 只數做到的，不寫「幾分之幾」：沒按不扣分，寫成 1/9 會讀成沒及格。 */
+export function pointsResultText(done: number): string {
+  return `${COPY.point} ${done} 次`;
 }
 
 export function bridgeResultText(count: number): string {
   return `鐵橋打招呼 ${count} 次`;
 }
 
+/**
+ * 每站停車的等級。星星只留給整趟的獎章，這裡不說幾顆星。
+ * 黃區也算停好了，所以說「停到了」，不說「差一點」。逗號讓窄前窗在 keep-all 下有地方換行。
+ */
 export const GRADE_TEXT: Record<StopGrade, string> = {
-  green: "停在綠區，三顆星",
-  yellow: "停在黃區，兩顆星",
+  green: "剛剛好，停在綠區",
+  yellow: "停到了，在黃區",
+};
+
+/** 結算站卡上跟色塊並排的兩三個字。 */
+export const GRADE_WORD: Record<StopGrade, string> = {
+  green: "剛剛好",
+  yellow: "停到了",
 };
 
 export function powerWord(notch: PowerNotch): string {
@@ -121,8 +146,10 @@ export function powerLampLabel(notch: PowerNotch): string {
   return notch === 0 ? "P0" : `P${notch}`;
 }
 
-export function brakeLampLabel(notch: BrakeNotch): string {
+/** simple：慢慢看只有鬆、停、緊急三格，格上直接寫字，不寫 B3。 */
+export function brakeLampLabel(notch: BrakeNotch, simple = false): string {
   if (notch === 5) return COPY.emergencyWord;
+  if (simple) return brakeWord(notch);
   return `B${notch}`;
 }
 
@@ -130,7 +157,7 @@ export function powerValueText(notch: PowerNotch): string {
   return `${COPY.power} ${powerLampLabel(notch)}，${powerWord(notch)}`;
 }
 
-export function brakeValueText(notch: BrakeNotch): string {
-  if (notch === 5) return `${COPY.brake}，${COPY.emergencyWord}`;
+export function brakeValueText(notch: BrakeNotch, simple = false): string {
+  if (notch === 5 || simple) return `${COPY.brake}，${brakeWord(notch)}`;
   return `${COPY.brake} ${brakeLampLabel(notch)}，${brakeWord(notch)}`;
 }

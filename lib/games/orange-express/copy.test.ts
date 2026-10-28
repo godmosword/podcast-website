@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { COPY } from "@/lib/games/orange-express/copy";
+import { COPY, GRADE_TEXT, GRADE_WORD, pointsResultText } from "@/lib/games/orange-express/copy";
 import { stationsFor } from "@/lib/games/orange-express/routes";
 
 const BANNED = [
@@ -81,5 +81,19 @@ describe("小橘特快車文案", () => {
         : new RegExp(escaped, "i");
       expect(haystack, word).not.toMatch(pattern);
     }
+  });
+});
+
+describe("每站停車等級與結算小字", () => {
+  it("等級只說停在哪一區，不說幾顆星；黃區也算停好了", () => {
+    for (const text of [...Object.values(GRADE_TEXT), ...Object.values(GRADE_WORD)]) {
+      expect(text).not.toMatch(/星|★/);
+    }
+    expect(GRADE_WORD).toEqual({ green: "剛剛好", yellow: "停到了" });
+    expect(GRADE_TEXT.yellow).not.toContain("差一點");
+  });
+
+  it("指差確認只數做到的次數", () => {
+    expect(pointsResultText(1)).toBe("指差確認 1 次");
   });
 });

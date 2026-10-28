@@ -1,6 +1,8 @@
+import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { PROGRESS_STORAGE_KEY } from "../lib/progress-keys";
 import { jumpOrangeExpress as jump, startOrangeExpress as startLevel } from "./helpers/orange-express";
+import { pinTheme } from "./visual-helpers";
 
 async function tap(page: Page, key: string) {
   await page.keyboard.down(key);
@@ -22,9 +24,16 @@ test.describe("小橘特快車", () => {
     await expect(page.getByText("馬米")).toBeVisible();
     await expect(page.getByText("Bonbon")).toBeVisible();
     await expect(page.getByRole("button", { name: "關門" })).toBeVisible();
+    // 上車的朋友原位留一個勾（頭像滑走，勾冒出來）。
+    await expect(
+      page.getByRole("list", { name: "月台上的朋友" }).locator('li[data-boarded="true"] svg'),
+    ).toHaveCount(4);
     await page.getByRole("button", { name: "關門" }).click();
     await expect(page.getByRole("heading", { name: "到家了" })).toBeVisible();
-    await expect(page.getByText("停在綠區，三顆星")).toBeAttached();
+    // 星星只算整趟；每站是色塊加「剛剛好／停到了」，結算不再出現 ★。
+    const result = page.getByTestId("orange-express-result");
+    await expect(result.locator("li[data-grade='green']")).toContainText("剛剛好");
+    await expect(result).not.toContainText("★");
 
     const saved = await page.evaluate((key) => {
       const raw = localStorage.getItem(key);
@@ -83,7 +92,7 @@ test.describe("小橘特快車", () => {
     await expect(brake).toHaveAttribute("aria-valuenow", "4");
   });
 
-  test("進站：停車目標條出現，停在綠區三顆星、黃區兩顆星", async ({ page }) => {
+  test("進站：停車目標條出現，停在綠區說剛剛好、黃區說停到了", async ({ page }) => {
     await page.addInitScript(() => {
       window.__orangeExpress = { freeze: true, driver: "big" };
     });
@@ -97,13 +106,13 @@ test.describe("小橘特快車", () => {
 
     await jump(page, { progress: 0.65, speed: 0, brake: 4, freeze: false });
     await expect(bar).toHaveAttribute("data-grade", "green");
-    await expect(page.getByTestId("orange-express-stop-words")).toContainText("停在綠區，三顆星");
+    await expect(page.getByTestId("orange-express-stop-words")).toHaveText("剛剛好，停在綠區");
 
     await page.getByRole("button", { name: "開門" }).click();
     await page.getByRole("button", { name: "關門" }).click();
     await jump(page, { progress: 0.53, speed: 0 });
     await expect(bar).toHaveAttribute("data-grade", "yellow");
-    await expect(page.getByTestId("orange-express-stop-words")).toContainText("停在黃區，兩顆星");
+    await expect(page.getByTestId("orange-express-stop-words")).toHaveText("停到了，在黃區");
   });
 
   test("開過頭：小橘慢慢倒回去再試，不會失敗", async ({ page }) => {
@@ -218,10 +227,42 @@ test.describe("小橘特快車", () => {
     await expect(drive).toHaveAttribute("data-sway", "false");
   });
 
+  test("標題：三張難度卡都有圖示，小點一到三個表示多難", async ({ page }) => {
+    await page.goto("/games/orange-express");
+    for (const [name, dots] of [
+      ["慢慢看", 1],
+      ["自己開", 2],
+      ["小站長", 3],
+    ] as const) {
+      const card = page.getByRole("radio", { name: new RegExp(name) });
+      await expect(card.locator("svg")).toHaveCount(1);
+      await expect(card.locator('i[data-on="true"]')).toHaveCount(dots);
+    }
+  });
+
+  for (const theme of ["light", "night"] as const) {
+    test(`標題：選中的黃卡上，副標與司機說明的小字對比夠（${theme}）`, async ({ page }) => {
+      // 遊戲頁的 a11y 掃描排除標題屏；司機說明收進「自己開」卡片後，小字就落在黃底上。
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await pinTheme(page, theme);
+      await page.goto("/games/orange-express");
+      await page.getByRole("radio", { name: /自己開/ }).click();
+      await expect(page.getByTestId("orange-express-driver-note")).toContainText("家長在遊戲設定切換");
+      const results = await new AxeBuilder({ page })
+        .include('[role="radio"][aria-checked="true"]')
+        .withRules(["color-contrast"])
+        .analyze();
+      expect(results.violations.flatMap((v) => v.nodes.map((n) => n.failureSummary))).toEqual([]);
+    });
+  }
+
   test("司機：預設小小司機；家長在遊戲設定切成大司機", async ({ page }) => {
     await page.goto("/games/orange-express");
     await page.getByRole("radio", { name: /自己開/ }).click();
-    await expect(page.getByTestId("orange-express-driver-note")).toContainText("小小司機");
+    // 司機說明在「自己開」卡片裡，不是另外一張看起來能選的卡。
+    await expect(
+      page.getByRole("radio", { name: /自己開/ }).getByTestId("orange-express-driver-note"),
+    ).toContainText("小小司機");
     await page.getByRole("button", { name: "遊戲設定" }).click();
     await page.getByRole("radio", { name: "大司機" }).click();
     await page.getByRole("button", { name: "完成" }).click();
@@ -255,6 +296,8 @@ test.describe("小橘特快車", () => {
     await jump(page, { progress: 0.045, speed: 0.4 });
     await expect(page.getByTestId("orange-express-notice")).toHaveAttribute("data-kind", "sign");
     await expect(page.getByTestId("orange-express-notice")).toContainText("速限牌");
+    // 不識字也看得懂：每種提示前面都有圖示。
+    await expect(page.getByTestId("orange-express-notice").locator("svg")).toHaveCount(1);
 
     const drive = page.getByTestId("orange-express-drive");
     await jump(page, { progress: 0.065, speed: 0.75, power: 3, freeze: false });
@@ -352,6 +395,32 @@ test.describe("小橘特快車", () => {
     await expect(page.getByRole("button", { name: "開門" })).toHaveAttribute("data-shake", "false");
   });
 
+  test("慢慢看的煞車桿只有鬆、停、緊急三格，←→ 照順序走", async ({ page }) => {
+    await page.addInitScript(() => {
+      window.__orangeExpress = { freeze: true };
+    });
+    await page.goto("/games/orange-express");
+    await startLevel(page, "慢慢看");
+    const brake = page.getByRole("slider", { name: "煞車" });
+    await expect(brake).toHaveAttribute("aria-valuemax", "2");
+    const notches = brake.locator("[data-notch]");
+    await expect(notches).toHaveCount(3);
+    await expect(notches).toHaveText(["緊急", "停", "鬆"]);
+    for (const n of ["0", "3", "5"]) {
+      const box = (await brake.locator(`[data-notch="${n}"]`).boundingBox())!;
+      expect(box.height).toBeGreaterThanOrEqual(48);
+    }
+    await tap(page, "ArrowLeft");
+    await expect(brake).toHaveAttribute("aria-valuetext", "煞車，停");
+    await expect(brake.locator('[data-notch="3"]')).toHaveAttribute("data-on", "true");
+    await tap(page, "ArrowLeft");
+    await expect(brake).toHaveAttribute("aria-valuetext", "煞車，緊急");
+    await tap(page, "ArrowRight");
+    await tap(page, "ArrowRight");
+    await expect(brake).toHaveAttribute("aria-valuenow", "0");
+    await expect(brake).toHaveAttribute("aria-valuetext", "煞車，鬆");
+  });
+
   test("結算：每站都停綠區但開過頭，提示說不要開過頭", async ({ page }) => {
     await page.addInitScript(() => {
       window.__orangeExpress = { progress: 0.62, speed: 0, misses: 1 };
@@ -403,6 +472,10 @@ test.describe("小橘特快車", () => {
     await expect
       .poll(() => page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken))
       .toContain("下一站，遊樂園站");
+    // 「下一站」念完才輪到前窗：出發的指差確認念要喊的那句，只念一次。
+    await expect
+      .poll(() => page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken), { timeout: 8000 })
+      .toEqual(["下一站，遊樂園站", "號誌，綠燈！"]);
 
     await page.goto("/games/orange-express");
     await page.getByRole("button", { name: "關閉音效" }).click();
@@ -550,6 +623,120 @@ test.describe("小橘特快車：版面", () => {
         }
         const scroll = await page.evaluate(() => document.documentElement.scrollHeight);
         expect(scroll).toBeLessThanOrEqual(height);
+      });
+    });
+  }
+
+  test.describe("直拿手機 390×844：前窗疊層", () => {
+    test.use({ viewport: { width: 390, height: 844 } });
+
+    test("開車與進站時前窗中間那條空著；提示、指差確認鈕、乘客卡、停車目標條不互相蓋住", async ({ page }) => {
+      // 指差確認鈕出現時會跳一下；量框要量停下來的大小。
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await page.addInitScript(() => {
+        window.__orangeExpress = { freeze: true, driver: "big" };
+      });
+      await page.goto("/games/orange-express");
+      await startLevel(page, "小站長");
+      const glass = (await page.getByTestId("orange-express-windshield").boundingBox())!;
+      const layers = async () => {
+        const out: { name: string; box: Box }[] = [];
+        for (const [name, locator] of [
+          ["停車目標條", page.getByTestId("orange-express-stopbar")],
+          ["提示", page.getByTestId("orange-express-notice")],
+          ["指差確認", page.getByTestId("orange-express-point")],
+          ["乘客卡", page.getByRole("list", { name: "月台上的朋友" })],
+        ] as const) {
+          if ((await locator.count()) === 0) continue;
+          const box = await locator.boundingBox();
+          if (box) out.push({ name, box });
+        }
+        return out;
+      };
+      const states = [
+        { label: "出發", patch: { progress: 0, speed: 0.2 }, running: true },
+        { label: "速限牌", patch: { progress: 0.05, speed: 0.4 }, running: true },
+        { label: "鐵橋", patch: { stationIndex: 1, progress: 0.15, speed: 0.4 }, running: true },
+        { label: "進站", patch: { stationIndex: 1, progress: 0.5, speed: 0.3, brake: 2 }, running: true },
+        { label: "停好", patch: { stationIndex: 1, progress: 0.65, speed: 0 }, running: false },
+      ];
+      for (const { label, patch, running } of states) {
+        await jump(page, patch);
+        await page.waitForTimeout(100);
+        const found = await layers();
+        for (let i = 0; i < found.length; i += 1) {
+          for (let j = i + 1; j < found.length; j += 1) {
+            expect(overlaps(found[i]!.box, found[j]!.box), `${label}：${found[i]!.name}和${found[j]!.name}疊在一起`).toBe(
+              false,
+            );
+          }
+        }
+        if (!running) continue;
+        const top = Math.max(
+          glass.y,
+          ...found.filter((f) => f.name === "停車目標條" || f.name === "提示").map((f) => f.box.y + f.box.height),
+        );
+        const strip = { x: glass.x + glass.width * 0.3, y: top, width: glass.width * 0.4, height: glass.y + glass.height - top };
+        for (const f of found) {
+          if (f.name === "停車目標條" || f.name === "提示") continue;
+          expect(overlaps(f.box, strip), `${label}：${f.name}蓋到前窗中間`).toBe(false);
+        }
+      }
+      await expect(page.getByText("色塊")).toHaveCount(0);
+    });
+  });
+
+  for (const { width, height } of [
+    { width: 375, height: 553 },
+    { width: 320, height: 568 },
+  ]) {
+    test.describe(`很矮的直式手機 ${width}×${height}`, () => {
+      test.use({ viewport: { width, height }, hasTouch: true });
+
+      test("不捲就看得到整顆車門，煞車每格至少 40px，前窗疊層不互相蓋住", async ({ page }) => {
+        // 指差確認鈕出現時會跳一下；量框要量停下來的大小。
+        await page.emulateMedia({ reducedMotion: "reduce" });
+        await page.addInitScript(() => {
+          window.__orangeExpress = { freeze: true, driver: "big" };
+        });
+        await page.goto("/games/orange-express");
+        await startLevel(page, "自己開");
+        const door = (await page.getByRole("button", { name: "開門" }).boundingBox())!;
+        expect(door.y + door.height).toBeLessThanOrEqual(height);
+        const scroll = await page.evaluate(() => document.documentElement.scrollHeight);
+        expect(scroll).toBeLessThanOrEqual(height);
+        const brake = page.getByRole("slider", { name: "煞車" });
+        const tops: number[] = [];
+        for (let i = 0; i <= 5; i += 1) tops.push((await brake.locator(`[data-notch="${i}"]`).boundingBox())!.y);
+        for (let i = 1; i < tops.length; i += 1) expect(Math.abs(tops[i]! - tops[i - 1]!)).toBeGreaterThanOrEqual(40);
+        const glass = (await page.getByTestId("orange-express-windshield").boundingBox())!;
+        expect(glass.height).toBeGreaterThanOrEqual(110);
+
+        // 出發（號誌題＋速限牌提示）、速限牌、進站、停好：提示、停車目標條、指差確認鈕、乘客卡彼此不重疊。
+        for (const patch of [
+          { progress: 0, speed: 0.2 },
+          { progress: 0.05, speed: 0.4 },
+          { progress: 0.5, speed: 0.3, brake: 2 },
+          { progress: 0.65, speed: 0 },
+        ]) {
+          await jump(page, patch);
+          await page.waitForTimeout(100);
+          const boxes: Box[] = [];
+          for (const locator of [
+            page.getByTestId("orange-express-notice"),
+            page.getByTestId("orange-express-stopbar"),
+            page.getByTestId("orange-express-point"),
+            page.getByRole("list", { name: "月台上的朋友" }),
+          ]) {
+            if ((await locator.count()) === 0) continue;
+            const box = await locator.boundingBox();
+            if (box) boxes.push(box);
+          }
+          expect(boxes.length).toBeGreaterThanOrEqual(2);
+          for (let i = 0; i < boxes.length; i += 1) {
+            for (let j = i + 1; j < boxes.length; j += 1) expect(overlaps(boxes[i]!, boxes[j]!)).toBe(false);
+          }
+        }
       });
     });
   }

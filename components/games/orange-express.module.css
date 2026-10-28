@@ -54,25 +54,65 @@
   box-shadow: 0 4px 0 var(--ink);
 }
 
+/* 難度卡：左邊圖示加難度小點，右邊字。不識字的孩子看圖選。 */
 .level,
 .levelOn {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
+  align-items: center;
+  gap: 12px;
   min-height: 48px;
   padding: 8px 12px;
   background: var(--card);
   text-align: left;
 }
 
+.levelArt {
+  display: grid;
+  flex: 0 0 auto;
+  justify-items: center;
+  gap: 4px;
+}
+
+.levelGlyph {
+  width: 44px;
+  height: 44px;
+}
+
+.levelDots {
+  display: flex;
+  gap: 3px;
+}
+
+.levelDots i {
+  width: 7px;
+  height: 7px;
+  border: 1.5px solid var(--ink);
+  border-radius: 50%;
+}
+
+.levelDots i[data-on="true"] {
+  background: var(--ink);
+}
+
+.levelText {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+}
+
 .levelOn {
   background: color-mix(in srgb, var(--c-yellow) 55%, var(--card));
 }
 
-.level small,
-.levelOn small {
+.level small {
   color: var(--ink-soft);
+}
+
+/* 選中的黃卡上 --ink-soft 只有 3.3:1（夜間）；混一半墨色，日夜都過 4.5:1。司機說明也在這張卡上。 */
+.levelOn small {
+  color: color-mix(in srgb, var(--ink-soft) 50%, var(--ink));
 }
 
 .driverChip {
@@ -89,17 +129,11 @@
 .driverNote {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: 2px;
-  margin: 0;
-  padding: 8px 12px;
-  border: 2px dashed color-mix(in srgb, var(--ink) 40%, transparent);
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--card) 70%, transparent);
-  font-size: var(--fs-label);
 }
 
 .driverNote small {
-  color: var(--ink-soft);
   font-size: var(--fs-meta);
 }
 
@@ -197,9 +231,9 @@
   left: 9%;
   bottom: 10px;
   display: flex;
-  gap: 8px;
+  gap: 6px;
   margin: 0;
-  padding: 4px 8px;
+  padding: 4px 6px;
   border-radius: 14px;
   background: color-mix(in srgb, var(--card) 70%, transparent);
   list-style: none;
@@ -209,20 +243,66 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 48px;
+  min-width: 44px;
   color: var(--ink);
   font-size: var(--fs-meta);
   font-weight: 800;
 }
 
+/* 頭像 40px：小站長兩位朋友時，卡片右緣仍在前窗四成以內，不擋到停車柱那一帶。 */
 .riders svg {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
 }
 
-.riders li[data-boarded="true"] {
-  opacity: 0.45;
-  transform: translateX(8px);
+/* 頭像與上車後的勾疊在同一格，卡片大小不跟著變。 */
+.riderSeat {
+  position: relative;
+  display: grid;
+  width: 40px;
+  height: 40px;
+}
+
+.riderSeat > svg {
+  grid-area: 1 / 1;
+}
+
+/*
+ * 上車：頭像往左下（車門那邊）滑出淡掉，約 600ms；一位一位上（reducer 每 0.4 秒上一位）。
+ * 滑完原位冒出綠勾。減少動態（系統或遊戲內設定）時不滑，直接換勾。
+ */
+.riders li[data-boarded="true"] .riderSeat > svg:first-child {
+  animation: riderBoard 600ms ease-in forwards;
+}
+
+.riderCheck {
+  animation: riderCheck 220ms 420ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes riderBoard {
+  to {
+    opacity: 0;
+    transform: translate(-12px, 16px) scale(0.7);
+  }
+}
+
+@keyframes riderCheck {
+  from {
+    transform: scale(0);
+  }
+
+  to {
+    transform: scale(1);
+  }
+}
+
+.screen[data-reduced="true"] .riders li[data-boarded="true"] .riderSeat > svg:first-child {
+  animation: none;
+  opacity: 0;
+}
+
+.screen[data-reduced="true"] .riderCheck {
+  animation: none;
 }
 
 /* ── 前窗提示與指差確認 ─────────────────────────────── */
@@ -254,40 +334,62 @@
   background: color-mix(in srgb, var(--c-yellow) 30%, var(--card));
 }
 
-.signGlyph {
-  width: 28px;
-  height: 28px;
+/* 提示前面的圖示：孩子先看圖，字是給大人看的。 */
+.noticeGlyph {
+  width: 32px;
+  height: 32px;
   flex: 0 0 auto;
 }
 
+/*
+ * 指差確認：56px 手勢圓鈕貼右邊窗柱，左緣在前窗七成以右，前窗中間那條留給軌道和停車柱。
+ * 鈕下的小牌只寫要確認的東西（號誌、速限牌、月台）。出現時輕輕跳一下，減少動態時不跳。
+ */
 .pointTask {
   position: absolute;
-  right: 9%;
-  bottom: 10px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 52px;
-  padding: 4px 12px 4px 8px;
+  right: 8%;
+  bottom: 16px;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  padding: 0;
   font: inherit;
-  font-weight: 900;
   color: var(--ink);
   border: 2px solid var(--ink);
-  border-radius: 16px;
+  border-radius: 50%;
   background: color-mix(in srgb, var(--c-mint) 70%, var(--card));
   box-shadow: 0 4px 0 var(--ink);
-  text-align: left;
+  animation: pointPop 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.pointTask span {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.2;
-}
-
-.pointTask small {
+.pointWhat {
+  position: absolute;
+  left: 50%;
+  bottom: -12px;
+  translate: -50% 0;
+  padding: 0 6px;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-pill);
+  background: var(--card);
   font-size: var(--fs-meta);
-  color: var(--ink-soft);
+  font-weight: 900;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+@keyframes pointPop {
+  0% {
+    transform: scale(0.6);
+  }
+
+  70% {
+    transform: scale(1.08);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 
 .pointTask:active {
@@ -298,6 +400,10 @@
 .pointTask:focus-visible {
   outline: 3px solid var(--accent-ink);
   outline-offset: 3px;
+}
+
+.screen[data-reduced="true"] .pointTask {
+  animation: none;
 }
 
 .pointIcon {
@@ -341,11 +447,15 @@
   bottom: 0;
 }
 
-.stopYellow {
+/* 停車目標條的黃區、綠區，結算站卡的色塊用同一塊：孩子在結算看到的顏色就是剛才停進去的那一區。
+ * 綠區另帶白直紋，分不清綠黃的孩子也認得出來。 */
+.stopYellow,
+.gradeSwatch[data-grade="yellow"] {
   background: var(--c-yellow);
 }
 
-.stopGreen {
+.stopGreen,
+.gradeSwatch[data-grade="green"] {
   background: var(--c-mint);
   background-image: repeating-linear-gradient(
     90deg,
@@ -406,18 +516,13 @@
   font-size: var(--fs-label);
   font-weight: 900;
   line-height: 1.25;
-  /* 窄前窗要換行時只在「，」後面斷，不把「三顆星」拆成「三／顆星」。 */
+  /* 窄前窗要換行時只在「，」後面斷，不把「剛剛好」拆成「剛／剛好」。 */
   word-break: keep-all;
   text-wrap: balance;
 }
 
 .stopBar[data-grade="none"] .stopWords {
   min-width: 4.5em;
-}
-
-.gradeStars {
-  color: color-mix(in srgb, var(--landing-brand) 80%, var(--ink));
-  letter-spacing: 1px;
 }
 
 .live {
@@ -788,7 +893,8 @@
 
 .bandGreen,
 .bandYellow,
-.bandRed {
+.bandRed,
+.bandRest {
   fill: none;
   stroke-width: 13;
 }
@@ -803,6 +909,11 @@
 
 .bandRed {
   stroke: color-mix(in srgb, var(--support-from) 75%, var(--card));
+}
+
+/* 旗子後面用不到的那一段：淡灰，指針不會走到這裡。 */
+.bandRest {
+  stroke: color-mix(in srgb, var(--ink) 10%, var(--card));
 }
 
 .tickMajor,
@@ -844,13 +955,13 @@
 .gaugeFlag {
   fill: var(--c-yellow);
   stroke: var(--ink);
-  stroke-width: 2;
+  stroke-width: 2.5;
   stroke-linejoin: round;
 }
 
 .gaugeFlagPole {
   stroke: var(--ink);
-  stroke-width: 3;
+  stroke-width: 4;
   stroke-linecap: round;
 }
 
@@ -982,12 +1093,18 @@
   font-weight: 800;
 }
 
-.stationGrades li[data-grade="green"] {
-  background: color-mix(in srgb, var(--c-mint) 45%, var(--card));
+.gradeSwatch {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  border: 2px solid var(--ink);
+  border-radius: 8px;
 }
 
-.stationGrades li[data-grade="yellow"] {
-  background: color-mix(in srgb, var(--c-yellow) 45%, var(--card));
+.gradeWord {
+  font-size: var(--fs-meta);
+  font-weight: 800;
+  color: var(--ink);
 }
 
 .extras {
@@ -1265,9 +1382,17 @@
   .primary:active,
   .secondary:active,
   .horn:active,
-  .door:active,
-  .riders li[data-boarded="true"] {
+  .door:active {
     transform: none;
+  }
+
+  .riders li[data-boarded="true"] .riderSeat > svg:first-child {
+    animation: none;
+    opacity: 0;
+  }
+
+  .riderCheck {
+    animation: none;
   }
 
   .leverHandle,
@@ -1282,6 +1407,10 @@
 
   .pointTask:active {
     transform: none;
+  }
+
+  .pointTask {
+    animation: none;
   }
 }
 
@@ -1320,5 +1449,88 @@
   }
   75% {
     transform: translateX(3px);
+  }
+}
+
+/*
+ * 很矮的直式手機（iPhone SE 開著 Safari 工具列約 375×553，以及最窄的手機）：整個駕駛台再收一階，不捲就按得到車門。
+ * 量過（Chromium）：原本 375×553 要捲 60px、最窄的手機要捲 29px，省在桿高、前窗下限、台面內距與下排按鈕。
+ * 桿高 256px：煞車六格每格仍有 40px；慢慢看只有三格，每格遠大於 48px。42dvh 在這個高度一定小於 256，直接寫死。
+ * 前窗下限 116px（375×553 量過，124px 時整頁還多 4px）。
+ * 停車目標條讓出右邊一欄給指差確認圓鈕，兩個左右分開，前窗再矮也不會疊在一起。
+ * 寫在檔尾，蓋過前面 @supports 的桿高與 359px 以下的台面內距。
+ */
+@media (orientation: portrait) and (max-height: 600px) {
+  .screen[data-screen="drive"] {
+    gap: 6px;
+  }
+
+  .windshield {
+    min-height: 116px;
+  }
+
+  .cab {
+    --lever-h: 256px;
+    gap: 6px;
+    padding-block: 6px 8px;
+  }
+
+  .dash {
+    gap: 4px;
+    padding-block: 6px;
+  }
+
+  .stopBar {
+    right: 26%;
+    padding-block: 2px;
+  }
+
+  .stopTrack {
+    margin-block: 6px 4px;
+  }
+
+  .pointTask {
+    bottom: 12px;
+  }
+
+  /* 開車中的提示改靠左、最寬六成：前窗只剩約 104px 高，提示和右下的指差確認鈕上下會疊，左右分開才不會。 */
+  .notice {
+    right: auto;
+    left: 9%;
+    max-width: 60%;
+  }
+
+  /* 乘客卡縮成只有頭像（名字留給讀屏），停好時才不會頂到停車目標條。 */
+  .riders li {
+    min-width: 36px;
+  }
+
+  .riders svg,
+  .riderSeat {
+    width: 32px;
+    height: 32px;
+  }
+
+  .riders li > span:last-child {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .cabBottom {
+    grid-template-columns: 48px 1fr;
+  }
+
+  .horn {
+    width: 48px;
+    height: 48px;
+  }
+
+  .door {
+    min-height: 48px;
+    padding-block: 4px;
   }
 }

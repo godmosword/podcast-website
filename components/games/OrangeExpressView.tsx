@@ -12,11 +12,12 @@ import {
   saveOrangeExpressLevel,
 } from "@/lib/gamekit/progress/orange-express-prefs";
 import { OrangeExpressCab } from "@/components/games/OrangeExpressCab";
+import { LevelGlyph } from "@/components/games/OrangeExpressGlyphs";
 import { OrangeExpressResult } from "@/components/games/OrangeExpressResult";
 import { useOrangeExpressDisplay } from "@/components/games/OrangeExpressSettings";
 import { OrangeExpressWindshield } from "@/components/games/OrangeExpressWindshield";
 import type { OrangeExpressInstance } from "@/lib/gamekit/games/orange-express/adapter";
-import { announce, nextStationAnnouncement } from "@/lib/games/orange-express/announce";
+import { announce, nextStationAnnouncement, speechMs } from "@/lib/games/orange-express/announce";
 import {
   ANNOUNCE_CHIME,
   ARRIVAL_MELODY,
@@ -30,23 +31,24 @@ import {
   POINT_OK,
   jointClack,
 } from "@/lib/games/orange-express/chime";
-import { COPY, DRIVER_HINT, DRIVER_NAME, GRADE_TEXT } from "@/lib/games/orange-express/copy";
+import { COPY, DRIVER_HINT, DRIVER_NAME, GRADE_TEXT, LEVEL_DOTS } from "@/lib/games/orange-express/copy";
 import { medalsFor, starMissReason } from "@/lib/games/orange-express/medals";
+import { nextSpeech } from "@/lib/games/orange-express/notice";
 import {
-  clampBrake,
   clampPower,
   createRun,
   currentStation,
   inTunnel,
   onBridge,
-  pointTotal,
   powerCap,
   step,
+  stepBrake,
   withHook,
 } from "@/lib/games/orange-express/reducer";
 import { DriveSound, driveMix, jointsCrossed } from "@/lib/games/orange-express/sound";
 import { NO_SWAY, decayBump, swayAt } from "@/lib/games/orange-express/sway";
 import { EMERGENCY, type LevelId, type RunState } from "@/lib/games/orange-express/types";
+import { speakText } from "@/lib/games/shared/speech";
 import styles from "./orange-express.module.css";
 
 type Screen = "title" | "drive" | "result";
@@ -102,6 +104,8 @@ export function OrangeExpressView({
   const [run, setRun] = useState<RunState | null>(null);
   const [shake, setShake] = useState(false);
   const [honked, setHonked] = useState(0);
+  /** 車停著時 run 不會變；廣播念完後用它叫朗讀再看一次前窗。 */
+  const [voiceTick, setVoiceTick] = useState(0);
   const [display] = useOrangeExpressDisplay();
   const runRef = useRef<RunState | null>(null);
   const levelRef = useRef(level);
@@ -115,6 +119,10 @@ export function OrangeExpressView({
   const sound = useRef<DriveSound | null>(null);
   const soundTriedAt = useRef(0);
   const announceTimer = useRef<number | null>(null);
+  /** 這一趟念過的前窗提示（「站號:種類:位置」）。 */
+  const spoken = useRef<Set<string>>(new Set());
+  /** 車內廣播或上一句提示大約念到這個時間（performance.now）；之前不念新的提示。 */
+  const voiceBusyUntil = useRef(0);
   const driver = resolveOrangeExpressDriver(display.driver, kidsMode);
   const driverRef = useRef(driver);
   const voiceRef = useRef(false);
@@ -148,6 +156,8 @@ export function OrangeExpressView({
       clearAnnounce();
       audio?.voices?.(ANNOUNCE_CHIME);
       const item = nextStationAnnouncement(currentStation(state));
+      // 「下一站」永遠先念：叮咚加整句念完之前，前窗提示先等。
+      voiceBusyUntil.current = performance.now() + ANNOUNCE_DELAY_MS + speechMs(item.text);
       announceTimer.current = window.setTimeout(() => {
         announceTimer.current = null;
         if (!voiceRef.current) return;
@@ -165,6 +175,7 @@ export function OrangeExpressView({
     const nextDriver = hook?.driver ?? driverRef.current;
     const next = withHook(createRun(nextLevel, nextDriver), hook);
     phaseRef.current = next.phase;
+    spoken.current = new Set();
     apply(next);
     announceNext(next);
     setScreen("drive");
@@ -226,7 +237,8 @@ export function OrangeExpressView({
     (notch: number) => {
       const cur = runRef.current;
       if (!cur) return;
-      const next = step(cur, { type: "set-brake", notch: clampBrake(notch) });
+      // 吸到這一檔有的格子在 step 裡做（慢慢看只有鬆、停、緊急）。
+      const next = step(cur, { type: "set-brake", notch });
       if (next === cur) return;
       audio?.ensureAudio();
       audio?.voices?.(next.brake === EMERGENCY ? EMERGENCY_CLICK : NOTCH_CLICK);
@@ -265,7 +277,7 @@ export function OrangeExpressView({
         return;
       }
       if (action === "move-left" || action === "move-right") {
-        setBrake(cur.brake + (action === "move-left" ? 1 : -1));
+        setBrake(stepBrake(cur.level, cur.brake, action === "move-left" ? 1 : -1));
         return;
       }
       if (action === "dash") {
@@ -344,6 +356,25 @@ export function OrangeExpressView({
       window.removeEventListener("keyup", onKeyUp);
     };
   }, [instance, screen]);
+
+  // 前窗提示與指差確認念一次：同一件事一站只念一句，排在車內廣播後面，輪到時已經消失的就不念。
+  useEffect(() => {
+    if (!run || screen !== "drive" || status !== "playing" || !voiceRef.current) return;
+    const recheck = (ms: number) => {
+      const timer = window.setTimeout(() => setVoiceTick((tick) => tick + 1), ms + 20);
+      return () => window.clearTimeout(timer);
+    };
+    const wait = voiceBusyUntil.current - performance.now();
+    if (wait > 0) return recheck(wait);
+    const item = nextSpeech(run, display.gaugeNumbers, spoken.current);
+    if (!item) return;
+    spoken.current.add(item.key);
+    const ms = speechMs(item.text);
+    voiceBusyUntil.current = performance.now() + ms;
+    speakText(item.text, { interrupt: false, volume: volumeRef.current });
+    // 車停著時 run 不會變；念完再看一次，同一刻還有下一句（例如提示）就接著念。
+    return recheck(ms);
+  }, [display.gaugeNumbers, run, screen, status, voiceTick]);
 
   useEffect(() => {
     if (!shake) return;
@@ -447,23 +478,35 @@ export function OrangeExpressView({
               className={level === id ? styles.levelOn : styles.level}
               onClick={() => choose(id)}
             >
-              <strong>{COPY.levels[id]}</strong>
-              <small>{COPY.levelHints[id]}</small>
-              {id === "drive" ? (
-                <em className={styles.driverChip} data-driver={driver}>
-                  {COPY.driverLabel}：{DRIVER_NAME[driver]}
-                </em>
-              ) : null}
+              <span className={styles.levelArt} aria-hidden>
+                <LevelGlyph level={id} />
+                <span className={styles.levelDots}>
+                  {[1, 2, 3].map((n) => (
+                    <i key={n} data-on={n <= LEVEL_DOTS[id] ? "true" : "false"} />
+                  ))}
+                </span>
+              </span>
+              <span className={styles.levelText}>
+                <strong>{COPY.levels[id]}</strong>
+                <small>{COPY.levelHints[id]}</small>
+                {id === "drive" ? (
+                  // 司機說明收在「自己開」卡片裡（按鈕裡只能放行內元素），不再另外一個像第四張卡的框。
+                  <span className={styles.driverNote} data-testid="orange-express-driver-note">
+                    <em className={styles.driverChip} data-driver={driver}>
+                      {COPY.driverLabel}：{DRIVER_NAME[driver]}
+                    </em>
+                    {level === "drive" ? (
+                      <>
+                        <small>{DRIVER_HINT[driver]}</small>
+                        <small>{COPY.driverHow}</small>
+                      </>
+                    ) : null}
+                  </span>
+                ) : null}
+              </span>
             </button>
           ))}
         </div>
-        {level === "drive" ? (
-          <p className={styles.driverNote} data-testid="orange-express-driver-note">
-            <strong>{DRIVER_NAME[driver]}</strong>
-            {DRIVER_HINT[driver]}
-            <small>{COPY.driverHow}</small>
-          </p>
-        ) : null}
         <button type="button" className={styles.primary} onClick={onStart}>
           {COPY.start}
         </button>
@@ -486,7 +529,6 @@ export function OrangeExpressView({
           stations={run.stations}
           grades={run.grades}
           pointsDone={run.pointsDone.length}
-          pointsTotal={pointTotal(run)}
           bridgeGreets={run.bridgeGreets}
           onReplay={begin}
           onTitle={goTitle}

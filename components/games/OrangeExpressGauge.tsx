@@ -6,6 +6,7 @@ import {
   GAUGE_UNIT,
   arcPath,
   gaugeBands,
+  gaugeFlag,
   gaugeTicks,
   gaugeValueText,
   gaugeZone,
@@ -32,9 +33,7 @@ export function OrangeExpressGauge({
   const bands = gaugeBands(limit);
   const zone = gaugeZone(speed, limit);
   const angle = speedToAngle(speed);
-  const flagAngle = speedToAngle(limit);
-  const flagFoot = polar(C, C, BAND_R + 6, flagAngle);
-  const flagTip = polar(C, C, BAND_R + 22, flagAngle);
+  const flag = gaugeFlag(limit);
   const now = Math.round(Math.min(100, Math.max(0, (speed / (limit > 0 ? limit : 1)) * 100)));
   const ticks = gaugeTicks();
 
@@ -66,6 +65,10 @@ export function OrangeExpressGauge({
           d={arcPath(C, C, BAND_R, speedToAngle(bands.red[0]), speedToAngle(bands.red[1]))}
           className={styles.bandRed}
         />
+        <path
+          d={arcPath(C, C, BAND_R, speedToAngle(bands.rest[0]), speedToAngle(bands.rest[1]))}
+          className={styles.bandRest}
+        />
         {ticks.map((tick) => {
           const deg = speedToAngle(tick.value / GAUGE_MAX_KMH);
           const a = polar(C, C, TICK_R, deg);
@@ -95,15 +98,14 @@ export function OrangeExpressGauge({
           : null}
         <g data-testid="orange-express-gauge-flag">
           <line
-            x1={flagFoot.x}
-            y1={flagFoot.y}
-            x2={flagTip.x}
-            y2={flagTip.y}
+            x1={flag.foot.x}
+            y1={flag.foot.y}
+            x2={flag.tip.x}
+            y2={flag.tip.y}
             className={styles.gaugeFlagPole}
           />
-          <path
-            d={`M${flagTip.x.toFixed(1)} ${flagTip.y.toFixed(1)}l13 4l-13 6z`}
-            transform={`rotate(${flagAngle} ${flagTip.x.toFixed(1)} ${flagTip.y.toFixed(1)})`}
+          <polygon
+            points={flag.cloth.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ")}
             className={styles.gaugeFlag}
           />
         </g>

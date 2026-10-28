@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, type Ref } from "react";
+import { NoticeGlyph } from "@/components/games/OrangeExpressGlyphs";
 import { OrangeExpressStopBar } from "@/components/games/OrangeExpressStopBar";
-import { COPY, POINT_CALL } from "@/lib/games/orange-express/copy";
+import { COPY, POINT_CALL, POINT_WHAT } from "@/lib/games/orange-express/copy";
 import { windowNotice } from "@/lib/games/orange-express/notice";
 import { currentStation, pendingPoint } from "@/lib/games/orange-express/reducer";
 import { drawWindshield, windshieldFrame } from "@/lib/games/orange-express/windshield";
@@ -60,17 +61,12 @@ function RiderFace({ id }: RiderProps) {
   );
 }
 
-/** 速限牌的小圖：跟前窗畫的一樣，紅圈白底、幾條直槓，不寫數字。 */
-export function SignGlyph({ bars }: { bars: 1 | 2 | 3 }) {
+/** 上車了：頭像滑走後原位留一個綠勾。 */
+function BoardedCheck() {
   return (
-    <svg viewBox="0 0 32 32" aria-hidden className={styles.signGlyph}>
-      <circle cx="16" cy="16" r="15" fill="rgb(232, 106, 74)" />
-      <circle cx="16" cy="16" r="11" fill="rgb(255, 252, 244)" />
-      {[0, 1, 2].map((i) =>
-        i < bars ? (
-          <rect key={i} x={9.5 + i * 5} y={21 - (4 + i * 3.5)} width="3.4" height={4 + i * 3.5} rx="1" fill="rgb(58, 46, 40)" />
-        ) : null,
-      )}
+    <svg viewBox="0 0 40 40" aria-hidden className={styles.riderCheck}>
+      <circle cx="20" cy="20" r="15" fill="rgb(150, 210, 160)" stroke="rgb(58, 46, 40)" strokeWidth="2.5" />
+      <path d="M13 20.5l5 5 9-10" fill="none" stroke="rgb(58, 46, 40)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -166,36 +162,40 @@ export function OrangeExpressWindshield({
       <OrangeExpressStopBar run={run} numbers={numbers} />
       {notice && !showRiders ? (
         <p className={styles.notice} data-kind={notice.kind} data-testid="orange-express-notice">
-          {notice.bars ? <SignGlyph bars={notice.bars} /> : null}
+          <NoticeGlyph notice={notice} />
           {notice.text}
         </p>
       ) : null}
       {task ? (
+        // 貼右邊窗柱的手勢圓鈕，不蓋前窗中間；要喊的整句由朗讀與讀屏說，鈕下只標確認哪樣東西。
         <button
           type="button"
           className={styles.pointTask}
           data-kind={task.kind}
           data-testid="orange-express-point"
+          aria-label={`${COPY.point}：${POINT_CALL[task.kind]}`}
           onClick={onPoint}
         >
           <PointIcon />
-          <span>
-            <small>{COPY.point}</small>
-            {POINT_CALL[task.kind]}
+          <span className={styles.pointWhat} aria-hidden>
+            {POINT_WHAT[task.kind]}
           </span>
         </button>
       ) : null}
       {showRiders ? (
         <ul className={styles.riders} aria-label="月台上的朋友">
-          {station.passengers.map((rider, index) => (
-            <li
-              key={rider.id}
-              data-boarded={run.phase === "doors-open" && index < run.boarded ? "true" : "false"}
-            >
-              <RiderFace id={rider.id} />
-              <span>{rider.name}</span>
-            </li>
-          ))}
+          {station.passengers.map((rider, index) => {
+            const boarded = run.phase === "doors-open" && index < run.boarded;
+            return (
+              <li key={rider.id} data-boarded={boarded ? "true" : "false"}>
+                <span className={styles.riderSeat}>
+                  <RiderFace id={rider.id} />
+                  {boarded ? <BoardedCheck /> : null}
+                </span>
+                <span className={rider.showName === false ? styles.srOnly : undefined}>{rider.name}</span>
+              </li>
+            );
+          })}
         </ul>
       ) : null}
     </div>
