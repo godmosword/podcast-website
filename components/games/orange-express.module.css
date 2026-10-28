@@ -254,9 +254,10 @@
   background: color-mix(in srgb, var(--c-yellow) 30%, var(--card));
 }
 
-.signGlyph {
-  width: 28px;
-  height: 28px;
+/* 提示前面的圖示：孩子先看圖，字是給大人看的。 */
+.noticeGlyph {
+  width: 32px;
+  height: 32px;
   flex: 0 0 auto;
 }
 

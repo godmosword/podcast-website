@@ -28,6 +28,14 @@ export type AnnounceDeps = {
   canSpeak?: () => boolean;
 };
 
+/**
+ * 一句大約念多久（毫秒）：稍慢的童聲一個字約 0.3 秒，前後各留一點。
+ * 用來排先後，念完「下一站」才輪到前窗提示；不是逾時上限。
+ */
+export function speechMs(text: string): number {
+  return 600 + text.length * 300;
+}
+
 export function nextStationAnnouncement(station: Pick<Station, "id" | "name">): Announcement {
   return { id: `next-${station.id}`, text: `下一站，${station.name}站` };
 }

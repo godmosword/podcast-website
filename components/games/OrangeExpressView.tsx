@@ -16,7 +16,7 @@ import { OrangeExpressResult } from "@/components/games/OrangeExpressResult";
 import { useOrangeExpressDisplay } from "@/components/games/OrangeExpressSettings";
 import { OrangeExpressWindshield } from "@/components/games/OrangeExpressWindshield";
 import type { OrangeExpressInstance } from "@/lib/gamekit/games/orange-express/adapter";
-import { announce, nextStationAnnouncement } from "@/lib/games/orange-express/announce";
+import { announce, nextStationAnnouncement, speechMs } from "@/lib/games/orange-express/announce";
 import {
   ANNOUNCE_CHIME,
   ARRIVAL_MELODY,
@@ -32,6 +32,7 @@ import {
 } from "@/lib/games/orange-express/chime";
 import { COPY, DRIVER_HINT, DRIVER_NAME, GRADE_TEXT } from "@/lib/games/orange-express/copy";
 import { medalsFor, starMissReason } from "@/lib/games/orange-express/medals";
+import { nextSpeech } from "@/lib/games/orange-express/notice";
 import {
   clampPower,
   createRun,
@@ -46,6 +47,7 @@ import {
 import { DriveSound, driveMix, jointsCrossed } from "@/lib/games/orange-express/sound";
 import { NO_SWAY, decayBump, swayAt } from "@/lib/games/orange-express/sway";
 import { EMERGENCY, type LevelId, type RunState } from "@/lib/games/orange-express/types";
+import { speakText } from "@/lib/games/shared/speech";
 import styles from "./orange-express.module.css";
 
 type Screen = "title" | "drive" | "result";
@@ -101,6 +103,8 @@ export function OrangeExpressView({
   const [run, setRun] = useState<RunState | null>(null);
   const [shake, setShake] = useState(false);
   const [honked, setHonked] = useState(0);
+  /** 車停著時 run 不會變；廣播念完後用它叫朗讀再看一次前窗。 */
+  const [voiceTick, setVoiceTick] = useState(0);
   const [display] = useOrangeExpressDisplay();
   const runRef = useRef<RunState | null>(null);
   const levelRef = useRef(level);
@@ -114,6 +118,10 @@ export function OrangeExpressView({
   const sound = useRef<DriveSound | null>(null);
   const soundTriedAt = useRef(0);
   const announceTimer = useRef<number | null>(null);
+  /** 這一趟念過的前窗提示（「站號:種類:位置」）。 */
+  const spoken = useRef<Set<string>>(new Set());
+  /** 車內廣播或上一句提示大約念到這個時間（performance.now）；之前不念新的提示。 */
+  const voiceBusyUntil = useRef(0);
   const driver = resolveOrangeExpressDriver(display.driver, kidsMode);
   const driverRef = useRef(driver);
   const voiceRef = useRef(false);
@@ -147,6 +155,8 @@ export function OrangeExpressView({
       clearAnnounce();
       audio?.voices?.(ANNOUNCE_CHIME);
       const item = nextStationAnnouncement(currentStation(state));
+      // 「下一站」永遠先念：叮咚加整句念完之前，前窗提示先等。
+      voiceBusyUntil.current = performance.now() + ANNOUNCE_DELAY_MS + speechMs(item.text);
       announceTimer.current = window.setTimeout(() => {
         announceTimer.current = null;
         if (!voiceRef.current) return;
@@ -164,6 +174,7 @@ export function OrangeExpressView({
     const nextDriver = hook?.driver ?? driverRef.current;
     const next = withHook(createRun(nextLevel, nextDriver), hook);
     phaseRef.current = next.phase;
+    spoken.current = new Set();
     apply(next);
     announceNext(next);
     setScreen("drive");
@@ -344,6 +355,21 @@ export function OrangeExpressView({
       window.removeEventListener("keyup", onKeyUp);
     };
   }, [instance, screen]);
+
+  // 前窗提示與指差確認念一次：同一件事一站只念一句，排在車內廣播後面，輪到時已經消失的就不念。
+  useEffect(() => {
+    if (!run || screen !== "drive" || !voiceRef.current) return;
+    const wait = voiceBusyUntil.current - performance.now();
+    if (wait > 0) {
+      const timer = window.setTimeout(() => setVoiceTick((tick) => tick + 1), wait + 20);
+      return () => window.clearTimeout(timer);
+    }
+    const item = nextSpeech(run, display.gaugeNumbers, spoken.current);
+    if (!item) return;
+    spoken.current.add(item.key);
+    voiceBusyUntil.current = performance.now() + speechMs(item.text);
+    speakText(item.text, { interrupt: false, volume: volumeRef.current });
+  }, [display.gaugeNumbers, run, screen, voiceTick]);
 
   useEffect(() => {
     if (!shake) return;

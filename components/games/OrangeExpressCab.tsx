@@ -2,6 +2,7 @@
 
 import { useRef, type CSSProperties, type ReactNode } from "react";
 import { OrangeExpressGauge } from "@/components/games/OrangeExpressGauge";
+import { HornIcon } from "@/components/games/OrangeExpressGlyphs";
 import {
   brakeLampLabel,
   brakeValueText,
@@ -274,25 +275,6 @@ function LightIcon() {
         strokeLinejoin="round"
       />
       <path d="M9.5 20.5h5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-/** 號角：細管接喇叭口，右邊三道聲音。不用抬頭音效開關那顆揚聲器，免得看成「開關聲音」。 */
-function HornIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden>
-      <rect x="1.5" y="9.75" width="3.5" height="4.5" rx="1.2" fill="currentColor" />
-      <rect x="4.5" y="10.5" width="5.5" height="3" fill="currentColor" />
-      <path d="M9.5 10.2C12.6 9.8 14.6 7.6 16.2 4.6V19.4C14.6 16.4 12.6 14.2 9.5 13.8Z" fill="currentColor" />
-      <rect x="15.4" y="4.6" width="2.6" height="14.8" rx="1.3" fill="currentColor" />
-      <path
-        d="M20.2 8.6l1.8-1.4M20.6 12h2.2M20.2 15.4l1.8 1.4"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
     </svg>
   );
 }

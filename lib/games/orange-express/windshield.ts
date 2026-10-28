@@ -65,11 +65,26 @@ export function passingNose(t: number): number {
   return PASS_FAR - (t / PASS_DURATION) * (PASS_FAR + PASS_LENGTH);
 }
 
-/** 速限牌上畫幾條：快 3、中 2、慢 1。牌上不寫字。 */
+/** 速限牌上亮幾格：快 3、中 2、慢 1。牌上不寫字。 */
 export function signBars(limit: number): 1 | 2 | 3 {
   if (limit >= 0.7) return 3;
   if (limit >= 0.48) return 2;
   return 1;
+}
+
+export type SignCell = { x: number; y: number; w: number; h: number; lit: boolean };
+
+/**
+ * 速限牌上永遠三個等高的格子，亮幾格就是多快，沒亮的只描邊。
+ * 不畫成一條、兩條：兩條等高的直條看起來就是暫停鍵。
+ * 座標以牌心為原點、牌的半徑為 1；前窗畫布與提示小圖共用。
+ */
+export function signCells(bars: 1 | 2 | 3): SignCell[] {
+  const w = 0.2;
+  const gap = 0.1;
+  const h = 0.62;
+  const left = -(3 * w + 2 * gap) / 2;
+  return [0, 1, 2].map((i) => ({ x: left + i * (w + gap), y: -h / 2, w, h, lit: i < bars }));
 }
 
 type Palette = {
@@ -526,7 +541,7 @@ function drawPlatform(ctx: CanvasRenderingContext2D, view: View, travel: number,
   }
 }
 
-/** 路旁速限牌：圓牌、紅圈、幾條直槓表示快慢。牌上沒有數字。 */
+/** 路旁速限牌：圓牌、紅圈、三個格子亮幾格表示快慢。牌上沒有數字。 */
 function drawSigns(
   ctx: CanvasRenderingContext2D,
   view: View,
@@ -553,13 +568,14 @@ function drawSigns(
     ctx.beginPath();
     ctx.arc(center.x, center.y, r * 0.74, 0, Math.PI * 2);
     ctx.fill();
-    const bars = signBars(sign.limit);
-    const bw = r * 0.18;
     ctx.fillStyle = INK;
-    for (let i = 0; i < 3; i += 1) {
-      const bh = r * (0.32 + i * 0.22);
-      const bx = center.x - r * 0.42 + i * r * 0.3;
-      if (i < bars) ctx.fillRect(bx, center.y + r * 0.42 - bh, bw, bh);
+    ctx.strokeStyle = INK;
+    ctx.lineWidth = Math.max(1, r * 0.07);
+    for (const cell of signCells(signBars(sign.limit))) {
+      const x = center.x + cell.x * r;
+      const y = center.y + cell.y * r;
+      if (cell.lit) ctx.fillRect(x, y, cell.w * r, cell.h * r);
+      else ctx.strokeRect(x, y, cell.w * r, cell.h * r);
     }
   }
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type Ref } from "react";
+import { NoticeGlyph } from "@/components/games/OrangeExpressGlyphs";
 import { OrangeExpressStopBar } from "@/components/games/OrangeExpressStopBar";
 import { COPY, POINT_CALL } from "@/lib/games/orange-express/copy";
 import { windowNotice } from "@/lib/games/orange-express/notice";
@@ -56,21 +57,6 @@ function RiderFace({ id }: RiderProps) {
       <circle cx="15" cy="32" r="2.4" fill="rgb(255, 170, 180)" />
       <circle cx="33" cy="32" r="2.4" fill="rgb(255, 170, 180)" />
       <path d="M20 33c2 3 6 3 8 0" fill="none" stroke="rgb(50, 42, 36)" strokeWidth="1.6" />
-    </svg>
-  );
-}
-
-/** 速限牌的小圖：跟前窗畫的一樣，紅圈白底、幾條直槓，不寫數字。 */
-export function SignGlyph({ bars }: { bars: 1 | 2 | 3 }) {
-  return (
-    <svg viewBox="0 0 32 32" aria-hidden className={styles.signGlyph}>
-      <circle cx="16" cy="16" r="15" fill="rgb(232, 106, 74)" />
-      <circle cx="16" cy="16" r="11" fill="rgb(255, 252, 244)" />
-      {[0, 1, 2].map((i) =>
-        i < bars ? (
-          <rect key={i} x={9.5 + i * 5} y={21 - (4 + i * 3.5)} width="3.4" height={4 + i * 3.5} rx="1" fill="rgb(58, 46, 40)" />
-        ) : null,
-      )}
     </svg>
   );
 }
@@ -166,7 +152,7 @@ export function OrangeExpressWindshield({
       <OrangeExpressStopBar run={run} numbers={numbers} />
       {notice && !showRiders ? (
         <p className={styles.notice} data-kind={notice.kind} data-testid="orange-express-notice">
-          {notice.bars ? <SignGlyph bars={notice.bars} /> : null}
+          <NoticeGlyph notice={notice} />
           {notice.text}
         </p>
       ) : null}

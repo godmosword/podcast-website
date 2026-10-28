@@ -109,7 +109,7 @@ export function GameChromeToolbar({
 const VOICE_NOTE: Partial<Record<GameKitGameId, string>> = {
   "candy-match": "關卡目標、鼓勵和提示用聲音念出來；關掉後音效照常。",
   "dino-sushi": "訂單、提示和多多的話用聲音念出來；關掉後音效照常。",
-  "orange-express": "車內廣播「下一站」用聲音念出來；關掉後音效照常。",
+  "orange-express": "車內廣播「下一站」和前窗提示用聲音念出來；關掉後音效照常。",
 };
 
 function SettingsDialog({

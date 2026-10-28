@@ -258,6 +258,8 @@ test.describe("小橘特快車", () => {
     await jump(page, { progress: 0.045, speed: 0.4 });
     await expect(page.getByTestId("orange-express-notice")).toHaveAttribute("data-kind", "sign");
     await expect(page.getByTestId("orange-express-notice")).toContainText("速限牌");
+    // 不識字也看得懂：每種提示前面都有圖示。
+    await expect(page.getByTestId("orange-express-notice").locator("svg")).toHaveCount(1);
 
     const drive = page.getByTestId("orange-express-drive");
     await jump(page, { progress: 0.065, speed: 0.75, power: 3, freeze: false });
@@ -432,6 +434,10 @@ test.describe("小橘特快車", () => {
     await expect
       .poll(() => page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken))
       .toContain("下一站，遊樂園站");
+    // 「下一站」念完才輪到前窗：出發的指差確認念要喊的那句，只念一次。
+    await expect
+      .poll(() => page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken), { timeout: 8000 })
+      .toEqual(["下一站，遊樂園站", "號誌，綠燈！"]);
 
     await page.goto("/games/orange-express");
     await page.getByRole("button", { name: "關閉音效" }).click();
