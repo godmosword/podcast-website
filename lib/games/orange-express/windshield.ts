@@ -8,6 +8,9 @@ const Z_FAR = 220;
 const Z_HORIZON = 4000;
 const EYE = 1.6;
 const SLEEPER_GAP = 0.9;
+/** 鋼軌與軌頂亮面的半寬（公尺）。比真的粗一些，小前窗上才看得到。 */
+const RAIL_HALF = 0.05;
+const SHINE_HALF = 0.018;
 const PORTAL_GAP = 50;
 const PLATFORM_BEFORE = 70;
 const PLATFORM_AFTER = 28;
@@ -17,6 +20,8 @@ const PLATFORM_AFTER = 28;
  */
 const PLATFORM_NEAR = 0.3;
 const POST_AHEAD = 9;
+/** 停車柱前後這麼多公尺不畫門形線柱，兩根柱子才不會疊成「雙桿」。 */
+const POST_CLEAR = 12;
 const OTHER_TRACK = 4.6;
 /** 對向列車：從多遠出現、車身多長。 */
 export const PASS_FAR = 220;
@@ -63,6 +68,16 @@ export function cameraTravel(
 /** 對向列車車頭離鏡頭幾公尺（相對速度固定，跟我們開多快無關）。 */
 export function passingNose(t: number): number {
   return PASS_FAR - (t / PASS_DURATION) * (PASS_FAR + PASS_LENGTH);
+}
+
+/** 停車柱在世界裡的位置（公尺）：停車目標再往前一點，停好時柱子剛好在前窗左邊。 */
+export function stopPostWorld(target: number): number {
+  return target * STATION_WORLD + POST_AHEAD;
+}
+
+/** 這座門形線柱要不要畫：離停車柱太近就不畫。 */
+export function portalVisible(portalWorld: number, postWorld: number): boolean {
+  return Math.abs(portalWorld - postWorld) > POST_CLEAR;
 }
 
 /** 速限牌上亮幾格：快 3、中 2、慢 1。牌上不寫字。 */
@@ -157,7 +172,8 @@ const SIGN_FACE = "rgb(255, 252, 244)";
 const INK = "rgb(58, 46, 40)";
 const TRAIN_BODY = "rgb(252, 248, 238)";
 const TRAIN_ROOF = "rgb(232, 230, 224)";
-const TRAIN_STRIPE = "rgb(110, 176, 226)";
+/** 淡紫腰帶：白車身配天藍腰帶太像真實車種，換成沒有真實列車在用的顏色。 */
+const TRAIN_STRIPE = "rgb(176, 150, 220)";
 const TRAIN_WINDOW = "rgb(70, 96, 120)";
 const TRAIN_SKIRT = "rgb(160, 164, 170)";
 const TRAIN_LAMP = "rgb(255, 236, 160)";
@@ -477,10 +493,13 @@ function drawTrack(
   for (let z = Z_NEAR + SLEEPER_GAP - offset; z < Math.min(70, zFar); z += SLEEPER_GAP) {
     quad(ctx, view, center - 1.25, center + 1.25, 0, z, z + 0.24, dim ? TUNNEL_DARK : SLEEPER);
   }
-  const railWidth = Math.max(2, view.w / 160);
+  // 鋼軌是有寬度的面，近粗遠細；再描一條 1px 的線，遠處縮成次像素時仍連得起來。
+  // 以前是固定粗細的線，寬畫面上會變成兩條一樣粗的槓一路伸到消失點。
   for (const side of [-0.75, 0.75]) {
-    line(ctx, view, center + side, 0.05, Z_NEAR, zFar, dim ? TUNNEL_RAIL : RAIL, railWidth * 1.6);
-    if (!dim) line(ctx, view, center + side, 0.08, Z_NEAR, zFar, RAIL_SHINE, Math.max(1, railWidth * 0.5));
+    const x = center + side;
+    quad(ctx, view, x - RAIL_HALF, x + RAIL_HALF, 0.05, Z_NEAR, zFar, dim ? TUNNEL_RAIL : RAIL);
+    line(ctx, view, x, 0.05, Z_NEAR, zFar, dim ? TUNNEL_RAIL : RAIL, 1);
+    if (!dim) quad(ctx, view, x - SHINE_HALF, x + SHINE_HALF, 0.08, Z_NEAR, zFar, RAIL_SHINE);
   }
 }
 
@@ -489,9 +508,11 @@ function drawPortals(
   view: View,
   travel: number,
   tunnelZ: readonly [number, number] | null,
+  postWorld: number,
 ): void {
   for (const z of repeats(travel, PORTAL_GAP, Z_NEAR + 0.5, Z_FAR)) {
     if (tunnelZ && z >= tunnelZ[0] - 4 && z <= tunnelZ[1] + 4) continue;
+    if (!portalVisible(travel + z, postWorld)) continue;
     const width = Math.max(1.5, (view.f / z) * 0.22);
     ctx.fillStyle = POLE;
     for (const x of [-2.9, 2.3, 7]) {
@@ -522,7 +543,7 @@ function drawPlatform(ctx: CanvasRenderingContext2D, view: View, travel: number,
   quad(ctx, view, -2.75, -2.45, top, z0, z1, PLATFORM_LINE);
 
   // 停車柱是「停在這裡」的主要線索：柱身與圓牌都比真的粗大，遠處也至少幾個像素。
-  const postZ = targetWorld + POST_AHEAD - travel;
+  const postZ = stopPostWorld(targetWorld / STATION_WORLD) - travel;
   if (postZ > Z_NEAR + 0.3 && postZ < Z_FAR) {
     const foot = project(view, -2.3, top, postZ);
     const head = project(view, -2.3, top + 2.1, postZ);
@@ -697,7 +718,7 @@ function drawTunnelInside(
   }
 }
 
-/** 迎面的原創列車：奶油車身、天藍色腰帶、圓圓的長鼻子。不是任何真實車種的塗裝。 */
+/** 迎面的原創列車：奶油車身、淡紫腰帶、圓圓的長鼻子。不是任何真實車種的塗裝。 */
 function drawOncoming(ctx: CanvasRenderingContext2D, view: View, t: number): void {
   const nose = passingNose(t);
   const tail = nose + PASS_LENGTH;
@@ -805,7 +826,7 @@ export function drawWindshield(
     drawSigns(ctx, view, travel, paint.signs ?? []);
     if (passing !== null) drawOncoming(ctx, view, passing);
     if (bridgeZ) drawBridge(ctx, view, bridgeZ[0], bridgeZ[1]);
-    drawPortals(ctx, view, travel, tunnelZ);
+    drawPortals(ctx, view, travel, tunnelZ, stopPostWorld(paint.target));
   };
 
   ctx.clearRect(0, 0, width, height);

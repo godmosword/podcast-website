@@ -8,9 +8,13 @@ import {
   cameraTravel,
   drawWindshield,
   passingNose,
+  portalVisible,
   signBars,
+  signCells,
+  stopPostWorld,
   windshieldFrame,
 } from "@/lib/games/orange-express/windshield";
+import { stationsFor } from "@/lib/games/orange-express/routes";
 import type { Phase } from "@/lib/games/orange-express/types";
 
 const PHASES: Phase[] = ["running", "in-window", "stopped", "doors-open", "reversing", "route-done"];
@@ -54,10 +58,25 @@ describe("前窗：隧道、鐵橋、速限牌、對向列車", () => {
     expect(passingNose(PASS_DURATION) + PASS_LENGTH).toBeLessThanOrEqual(0.001);
   });
 
-  it("速限牌只畫條數：快 3、中 2、慢 1", () => {
+  it("速限牌亮幾格：快 3、中 2、慢 1", () => {
     expect(signBars(0.82)).toBe(3);
     expect(signBars(0.55)).toBe(2);
     expect(signBars(0.35)).toBe(1);
+  });
+
+  it("速限牌永遠三個等高格子，亮幾格就是多快，整組在牌面裡置中", () => {
+    for (const bars of [1, 2, 3] as const) {
+      const cells = signCells(bars);
+      expect(cells).toHaveLength(3);
+      expect(new Set(cells.map((cell) => cell.h)).size).toBe(1);
+      expect(cells.filter((cell) => cell.lit)).toHaveLength(bars);
+      const left = cells[0]!.x;
+      const right = cells[2]!.x + cells[2]!.w;
+      expect(left + right).toBeCloseTo(0);
+      for (const cell of cells) {
+        expect(Math.hypot(Math.max(Math.abs(cell.x), Math.abs(cell.x + cell.w)), cell.h / 2)).toBeLessThan(0.74);
+      }
+    }
   });
 
   it("三種背景與隧道內外、鐵橋、對向列車都畫得出來，而且不畫字", () => {
@@ -140,5 +159,24 @@ describe("前窗：月台", () => {
       const lowest = Math.max(...top.flatMap((fill) => fill.pts.map((p) => p.y)));
       expect(lowest).toBeGreaterThanOrEqual(h);
     }
+  });
+});
+
+describe("前窗：停車柱與門形線柱", () => {
+  it("每一檔每一站，停車柱前後 12 公尺內都沒有門形線柱，不會疊成雙桿", () => {
+    for (const level of ["look", "drive", "captain"] as const) {
+      for (const driver of ["little", "big"] as const) {
+        for (const station of stationsFor(level, driver)) {
+          const post = stopPostWorld(station.target);
+          for (let portal = 0; portal <= STATION_WORLD; portal += 50) {
+            if (Math.abs(portal - post) <= 12) expect(portalVisible(portal, post)).toBe(false);
+            else expect(portalVisible(portal, post)).toBe(true);
+          }
+        }
+      }
+    }
+    // 目標 0.65 時停車柱在 399 公尺，400 公尺那一座要拿掉。
+    expect(portalVisible(400, stopPostWorld(0.65))).toBe(false);
+    expect(portalVisible(350, stopPostWorld(0.65))).toBe(true);
   });
 });
