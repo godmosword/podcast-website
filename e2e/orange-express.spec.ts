@@ -1,6 +1,8 @@
+import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { PROGRESS_STORAGE_KEY } from "../lib/progress-keys";
 import { jumpOrangeExpress as jump, startOrangeExpress as startLevel } from "./helpers/orange-express";
+import { pinTheme } from "./visual-helpers";
 
 async function tap(page: Page, key: string) {
   await page.keyboard.down(key);
@@ -237,6 +239,22 @@ test.describe("小橘特快車", () => {
       await expect(card.locator('i[data-on="true"]')).toHaveCount(dots);
     }
   });
+
+  for (const theme of ["light", "night"] as const) {
+    test(`標題：選中的黃卡上，副標與司機說明的小字對比夠（${theme}）`, async ({ page }) => {
+      // 遊戲頁的 a11y 掃描排除標題屏；司機說明收進「自己開」卡片後，小字就落在黃底上。
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await pinTheme(page, theme);
+      await page.goto("/games/orange-express");
+      await page.getByRole("radio", { name: /自己開/ }).click();
+      await expect(page.getByTestId("orange-express-driver-note")).toContainText("家長在遊戲設定切換");
+      const results = await new AxeBuilder({ page })
+        .include('[role="radio"][aria-checked="true"]')
+        .withRules(["color-contrast"])
+        .analyze();
+      expect(results.violations.flatMap((v) => v.nodes.map((n) => n.failureSummary))).toEqual([]);
+    });
+  }
 
   test("司機：預設小小司機；家長在遊戲設定切成大司機", async ({ page }) => {
     await page.goto("/games/orange-express");

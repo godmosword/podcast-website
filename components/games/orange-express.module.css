@@ -106,9 +106,13 @@
   background: color-mix(in srgb, var(--c-yellow) 55%, var(--card));
 }
 
-.level small,
-.levelOn small {
+.level small {
   color: var(--ink-soft);
+}
+
+/* 選中的黃卡上 --ink-soft 只有 3.3:1（夜間）；混一半墨色，日夜都過 4.5:1。司機說明也在這張卡上。 */
+.levelOn small {
+  color: color-mix(in srgb, var(--ink-soft) 50%, var(--ink));
 }
 
 .driverChip {
@@ -130,7 +134,6 @@
 }
 
 .driverNote small {
-  color: var(--ink-soft);
   font-size: var(--fs-meta);
 }
 
