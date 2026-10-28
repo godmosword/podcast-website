@@ -61,6 +61,16 @@ function RiderFace({ id }: RiderProps) {
   );
 }
 
+/** 上車了：頭像滑走後原位留一個綠勾。 */
+function BoardedCheck() {
+  return (
+    <svg viewBox="0 0 40 40" aria-hidden className={styles.riderCheck}>
+      <circle cx="20" cy="20" r="15" fill="rgb(150, 210, 160)" stroke="rgb(58, 46, 40)" strokeWidth="2.5" />
+      <path d="M13 20.5l5 5 9-10" fill="none" stroke="rgb(58, 46, 40)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 function PointIcon() {
   return (
     <svg viewBox="0 0 32 32" aria-hidden className={styles.pointIcon}>
@@ -174,15 +184,18 @@ export function OrangeExpressWindshield({
       ) : null}
       {showRiders ? (
         <ul className={styles.riders} aria-label="月台上的朋友">
-          {station.passengers.map((rider, index) => (
-            <li
-              key={rider.id}
-              data-boarded={run.phase === "doors-open" && index < run.boarded ? "true" : "false"}
-            >
-              <RiderFace id={rider.id} />
-              <span className={rider.showName === false ? styles.srOnly : undefined}>{rider.name}</span>
-            </li>
-          ))}
+          {station.passengers.map((rider, index) => {
+            const boarded = run.phase === "doors-open" && index < run.boarded;
+            return (
+              <li key={rider.id} data-boarded={boarded ? "true" : "false"}>
+                <span className={styles.riderSeat}>
+                  <RiderFace id={rider.id} />
+                  {boarded ? <BoardedCheck /> : null}
+                </span>
+                <span className={rider.showName === false ? styles.srOnly : undefined}>{rider.name}</span>
+              </li>
+            );
+          })}
         </ul>
       ) : null}
     </div>

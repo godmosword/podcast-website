@@ -22,6 +22,10 @@ test.describe("小橘特快車", () => {
     await expect(page.getByText("馬米")).toBeVisible();
     await expect(page.getByText("Bonbon")).toBeVisible();
     await expect(page.getByRole("button", { name: "關門" })).toBeVisible();
+    // 上車的朋友原位留一個勾（頭像滑走，勾冒出來）。
+    await expect(
+      page.getByRole("list", { name: "月台上的朋友" }).locator('li[data-boarded="true"] svg'),
+    ).toHaveCount(4);
     await page.getByRole("button", { name: "關門" }).click();
     await expect(page.getByRole("heading", { name: "到家了" })).toBeVisible();
     // 星星只算整趟；每站是色塊加「剛剛好／停到了」，結算不再出現 ★。

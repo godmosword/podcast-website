@@ -252,9 +252,54 @@
   height: 40px;
 }
 
-.riders li[data-boarded="true"] {
-  opacity: 0.45;
-  transform: translateX(8px);
+/* 頭像與上車後的勾疊在同一格，卡片大小不跟著變。 */
+.riderSeat {
+  position: relative;
+  display: grid;
+  width: 40px;
+  height: 40px;
+}
+
+.riderSeat > svg {
+  grid-area: 1 / 1;
+}
+
+/*
+ * 上車：頭像往左下（車門那邊）滑出淡掉，約 600ms；一位一位上（reducer 每 0.4 秒上一位）。
+ * 滑完原位冒出綠勾。減少動態（系統或遊戲內設定）時不滑，直接換勾。
+ */
+.riders li[data-boarded="true"] .riderSeat > svg:first-child {
+  animation: riderBoard 600ms ease-in forwards;
+}
+
+.riderCheck {
+  animation: riderCheck 220ms 420ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes riderBoard {
+  to {
+    opacity: 0;
+    transform: translate(-12px, 16px) scale(0.7);
+  }
+}
+
+@keyframes riderCheck {
+  from {
+    transform: scale(0);
+  }
+
+  to {
+    transform: scale(1);
+  }
+}
+
+.screen[data-reduced="true"] .riders li[data-boarded="true"] .riderSeat > svg:first-child {
+  animation: none;
+  opacity: 0;
+}
+
+.screen[data-reduced="true"] .riderCheck {
+  animation: none;
 }
 
 /* ── 前窗提示與指差確認 ─────────────────────────────── */
@@ -1333,9 +1378,17 @@
   .primary:active,
   .secondary:active,
   .horn:active,
-  .door:active,
-  .riders li[data-boarded="true"] {
+  .door:active {
     transform: none;
+  }
+
+  .riders li[data-boarded="true"] .riderSeat > svg:first-child {
+    animation: none;
+    opacity: 0;
+  }
+
+  .riderCheck {
+    animation: none;
   }
 
   .leverHandle,
