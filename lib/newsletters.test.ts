@@ -66,7 +66,7 @@ describe("newsletters", () => {
     }
   });
 
-  it("來源連結都留在原稿裡，10/28 主題是審過的精簡稿", () => {
+  it("來源連結都留在原稿裡，10/28 主題是審過的口語版", () => {
     for (const issue of NEWSLETTERS) {
       const hrefs = [...issue.body.matchAll(/\]\((https?:\/\/[^)\s]+)\)/g)].map(
         (match) => match[1],
@@ -79,7 +79,7 @@ describe("newsletters", () => {
       expect(body).toContain(href);
     }
     expect(body).toContain(
-      "孩子卡關喊「我不會啦！」時，先別急著幫忙，坐到他旁邊說「你已經試了 20 秒囉」。",
+      "孩子卡關喊「我不會啦！」的時候，先別急著出手。坐到他旁邊，說一句「你已經試了 20 秒囉」。",
     );
     expect(body).not.toContain("五歲的小宇");
     expect(body).not.toContain("今年七月");
