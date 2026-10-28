@@ -26,8 +26,27 @@ function tryGitShortRev(rev: string): string | undefined {
   }
 }
 
+/**
+ * 「目前 HEAD 的前一個 commit」。PR 的 CI 跑在 GitHub 合成的 merge commit 上：第一個 parent 是 main，
+ * HEAD~1..HEAD 會把整個 PR 的 commit 都算進去，PR 超過 MAX_NOTIFY_GIT_HEAD_AHEAD 個 commit 時這條就紅。
+ * HEAD 是 merge commit 時改拿第二個 parent（PR 的 head），才是線性歷史上的前一個。
+ */
+function headParentRev(): string {
+  try {
+    const parents = execFileSync("git", ["rev-list", "--parents", "-n", "1", "HEAD"], {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+    })
+      .trim()
+      .split(" ");
+    return parents.length > 2 ? "HEAD^2" : "HEAD~1";
+  } catch {
+    return "HEAD~1";
+  }
+}
+
 /** Apple sync GHA checkout 預設 fetch-depth:1，沒有 HEAD~1。 */
-const headParentShort = tryGitShortRev("HEAD~1");
+const headParentShort = tryGitShortRev(headParentRev());
 
 const freshRunAt = new Date().toISOString();
 
