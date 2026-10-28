@@ -1489,6 +1489,26 @@
     bottom: 12px;
   }
 
+  /* 乘客卡縮成只有頭像（名字留給讀屏），停好時才不會頂到停車目標條。 */
+  .riders li {
+    min-width: 36px;
+  }
+
+  .riders svg,
+  .riderSeat {
+    width: 32px;
+    height: 32px;
+  }
+
+  .riders li > span:last-child {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
   .cabBottom {
     grid-template-columns: 48px 1fr;
   }
