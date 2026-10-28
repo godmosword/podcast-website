@@ -335,7 +335,7 @@ export default function SiteNavBar() {
     );
   };
 
-  /** 給爸媽四項：與主列同一套圖示格，最長匹配避免跟其他家長項搶 active。 */
+  /** 給爸媽小字（育兒文章、電子報等）：與主列同一套圖示格，最長匹配避免跟其他家長項搶 active。 */
   const renderNote = (note: (typeof PARENT_SECTION_ITEMS)[number]) => {
     const item = byId.get(note.id);
     if (!item) return null;

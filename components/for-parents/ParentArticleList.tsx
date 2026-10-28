@@ -6,9 +6,6 @@ import {
   parentArticleMonthLabel,
   parentArticlePath,
   parentArticleReadingMinutes,
-  type ParentArticleMonth,
-  type ParentArticleSeriesGroup,
-  type ParentArticlesLayout,
 } from "@/lib/parent-articles";
 import Icon from "@/components/ui/Icon";
 import styles from "./ParentArticleList.module.css";
@@ -17,6 +14,31 @@ import styles from "./ParentArticleList.module.css";
 const FEATURE_EXCERPT_LINES = 3;
 const MORE_HEADING_ID = "parent-articles-more";
 
+/** 列表卡只需要這些欄位。育兒文章多出來的 blocks 仍可傳進來。 */
+export type ArticleCard = {
+  readonly slug: string;
+  readonly title: string;
+  readonly publishedAt: string;
+  readonly excerpt: string;
+  readonly coverImage?: string;
+  readonly coverAlt?: string;
+  /** 有給就用；沒給則依育兒文章的 blocks 估算。 */
+  readonly minutes?: number;
+};
+
+export type ArticleListLayout = {
+  readonly latest: ArticleCard | null;
+  readonly series: readonly {
+    readonly id: string;
+    readonly title: string;
+    readonly articles: readonly ArticleCard[];
+  }[];
+  readonly months: readonly {
+    readonly key: string;
+    readonly articles: readonly ArticleCard[];
+  }[];
+};
+
 function excerptLines(excerpt: string): string[] {
   return excerpt
     .split("\n")
@@ -24,9 +46,20 @@ function excerptLines(excerpt: string): string[] {
     .slice(0, FEATURE_EXCERPT_LINES);
 }
 
-function FeaturedArticle({ article }: { article: ParentArticle }) {
+function cardMinutes(article: ArticleCard): number {
+  if (typeof article.minutes === "number") return article.minutes;
+  return parentArticleReadingMinutes(article as ParentArticle);
+}
+
+function FeaturedArticle({
+  article,
+  hrefFor,
+}: {
+  article: ArticleCard;
+  hrefFor: (slug: string) => string;
+}) {
   return (
-    <Link className={styles.feature} href={parentArticlePath(article.slug)}>
+    <Link className={styles.feature} href={hrefFor(article.slug)}>
       {article.coverImage ? (
         <span className={styles.cover}>
           <Image
@@ -43,7 +76,7 @@ function FeaturedArticle({ article }: { article: ParentArticle }) {
           <time dateTime={article.publishedAt}>
             {formatParentArticleDate(article.publishedAt)}
           </time>
-          {` · 約 ${parentArticleReadingMinutes(article)} 分鐘`}
+          {` · 約 ${cardMinutes(article)} 分鐘`}
         </span>
       </p>
       <h2 className={styles.featureTitle}>{article.title}</h2>
@@ -60,7 +93,7 @@ function FeaturedArticle({ article }: { article: ParentArticle }) {
   );
 }
 
-function seriesMeta(series: ParentArticleSeriesGroup): string {
+function seriesMeta(series: ArticleListLayout["series"][number]): string {
   const first = series.articles[0];
   const dates = new Set(series.articles.map((entry) => entry.publishedAt));
   const when =
@@ -72,7 +105,13 @@ function seriesMeta(series: ParentArticleSeriesGroup): string {
   return parts.join(" · ");
 }
 
-function ArticleSeries({ series }: { series: ParentArticleSeriesGroup }) {
+function ArticleSeries({
+  series,
+  hrefFor,
+}: {
+  series: ArticleListLayout["series"][number];
+  hrefFor: (slug: string) => string;
+}) {
   const headingId = `parent-series-${series.id}`;
   return (
     <section className={styles.series} aria-labelledby={headingId}>
@@ -86,7 +125,7 @@ function ArticleSeries({ series }: { series: ParentArticleSeriesGroup }) {
       <ol className={styles.parts}>
         {series.articles.map((article, index) => (
           <li key={article.slug}>
-            <Link className={styles.part} href={parentArticlePath(article.slug)}>
+            <Link className={styles.part} href={hrefFor(article.slug)}>
               <span className={styles.partNum} aria-hidden="true">
                 {index + 1}
               </span>
@@ -100,7 +139,13 @@ function ArticleSeries({ series }: { series: ParentArticleSeriesGroup }) {
   );
 }
 
-function MoreArticles({ months }: { months: readonly ParentArticleMonth[] }) {
+function MoreArticles({
+  months,
+  hrefFor,
+}: {
+  months: ArticleListLayout["months"];
+  hrefFor: (slug: string) => string;
+}) {
   return (
     <section className={styles.more} aria-labelledby={MORE_HEADING_ID}>
       <h2 id={MORE_HEADING_ID} className={styles.sectionTitle}>
@@ -114,7 +159,7 @@ function MoreArticles({ months }: { months: readonly ParentArticleMonth[] }) {
               <li key={article.slug}>
                 <Link
                   className={styles.row}
-                  href={parentArticlePath(article.slug)}
+                  href={hrefFor(article.slug)}
                   aria-label={`${article.title}，${formatParentArticleDate(article.publishedAt)}`}
                 >
                   <time className={styles.day} dateTime={article.publishedAt}>
@@ -137,18 +182,24 @@ function MoreArticles({ months }: { months: readonly ParentArticleMonth[] }) {
   );
 }
 
-/** 育兒文章列表：最新一篇當封面故事、系列照閱讀順序、其他文章依月份。 */
-export function ParentArticleList({ layout }: { layout: ParentArticlesLayout }) {
+/** 育兒文章列表：最新一篇當封面故事、系列照閱讀順序、其他文章依月份。電子報沿用同一套。 */
+export function ParentArticleList({
+  layout,
+  hrefFor = parentArticlePath,
+}: {
+  layout: ArticleListLayout;
+  hrefFor?: (slug: string) => string;
+}) {
   const { latest, series, months } = layout;
   if (!latest && series.length === 0 && months.length === 0) return null;
 
   return (
     <div className={styles.stack}>
-      {latest ? <FeaturedArticle article={latest} /> : null}
+      {latest ? <FeaturedArticle article={latest} hrefFor={hrefFor} /> : null}
       {series.map((entry) => (
-        <ArticleSeries key={entry.id} series={entry} />
+        <ArticleSeries key={entry.id} series={entry} hrefFor={hrefFor} />
       ))}
-      {months.length > 0 ? <MoreArticles months={months} /> : null}
+      {months.length > 0 ? <MoreArticles months={months} hrefFor={hrefFor} /> : null}
     </div>
   );
 }

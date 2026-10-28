@@ -272,6 +272,13 @@ function renderGlyph(name: IconName) {
           <path d="m13.5 6.5 4 4" />
         </g>
       );
+    case "mail":
+      return (
+        <g {...STROKE}>
+          <rect x="3.5" y="5.5" width="17" height="13" rx="2" />
+          <path d="m4 7 8 6 8-6" />
+        </g>
+      );
     case "sun":
       return (
         <g {...STROKE}>

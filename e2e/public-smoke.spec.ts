@@ -14,6 +14,8 @@ const PUBLIC_ROUTES = [
   "/for-parents/dashboard",
   "/for-parents/articles",
   "/for-parents/articles/vision-care-1",
+  "/newsletter",
+  "/newsletter/2026-10-28",
   "/for-parents/play-map/collections",
   "/subscribe",
   "/legal",

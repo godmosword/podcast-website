@@ -17,6 +17,7 @@ import {
   listParentArticles,
   parentArticlePath,
 } from "@/lib/parent-articles";
+import { listNewsletters, newsletterPath } from "@/lib/newsletters";
 import { getSiteUrl } from "@/lib/site-url";
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -60,6 +61,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${baseUrl}/for-parents/articles`,
       lastModified:
         listParentArticles()[listParentArticles().length - 1]?.publishedAt,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/newsletter`,
+      lastModified: listNewsletters()[listNewsletters().length - 1]?.publishedAt,
       changeFrequency: "monthly",
       priority: 0.7,
     },
@@ -149,6 +156,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }),
   );
 
+  const newsletterPages: MetadataRoute.Sitemap = listNewsletters().map(
+    (issue) => ({
+      url: `${baseUrl}${newsletterPath(issue.slug)}`,
+      lastModified: issue.publishedAt,
+      changeFrequency: "yearly" as const,
+      priority: 0.65,
+    }),
+  );
+
   const storyPages: MetadataRoute.Sitemap = stories.map((story) => ({
     url: `${baseUrl}/story/${story.slug}`,
     lastModified: storyDateModified(story),
@@ -186,6 +202,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     ...staticPages,
     ...parentArticlePages,
+    ...newsletterPages,
     ...collectionPages,
     ...playgroundPages,
     ...storyPages,

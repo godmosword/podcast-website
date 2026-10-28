@@ -1,0 +1,42 @@
+/* 內文欄的標題、段落、清單間距沿用育兒文章的 .body。
+   這裡只補文章頁沒有的方框、外連與編號清單。 */
+
+.callout {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: start;
+  margin: 1.1em 0 0;
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  background: var(--warm-surface);
+  box-shadow: var(--elev-1);
+}
+
+.calloutIcon {
+  margin-top: 0.35em;
+  color: var(--accent-ink);
+}
+
+.rich a {
+  color: var(--accent-ink);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.rich a:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
+}
+
+.rich ol {
+  margin: 0.45em 0 0;
+  padding-left: 1.4em;
+}
+
+.rich strong {
+  font-weight: 700;
+}
