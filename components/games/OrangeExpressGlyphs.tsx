@@ -1,4 +1,5 @@
 import type { WindowNotice } from "@/lib/games/orange-express/notice";
+import type { LevelId } from "@/lib/games/orange-express/types";
 import { signCells } from "@/lib/games/orange-express/windshield";
 import styles from "./orange-express.module.css";
 
@@ -102,4 +103,46 @@ export function NoticeGlyph({ notice }: { notice: WindowNotice }) {
   if (notice.kind === "bridge" || notice.kind === "greeted") return <HornBadge />;
   if (notice.kind === "passing") return <OncomingGlyph />;
   return <TunnelGlyph />;
+}
+
+/** 標題難度卡的圖示：慢慢看是烏龜，自己開是動力桿，小站長是站長帽。 */
+export function LevelGlyph({ level }: { level: LevelId }) {
+  if (level === "look") {
+    return (
+      <svg viewBox="0 0 44 44" aria-hidden className={styles.levelGlyph}>
+        <ellipse cx="22" cy="36" rx="16" ry="3" fill="rgb(0, 0, 0)" opacity="0.12" />
+        <ellipse cx="11" cy="33" rx="4" ry="3" fill="rgb(150, 198, 140)" />
+        <ellipse cx="30" cy="33" rx="4" ry="3" fill="rgb(150, 198, 140)" />
+        <circle cx="37" cy="24" r="5.5" fill="rgb(150, 198, 140)" />
+        <circle cx="38.5" cy="22.5" r="1.2" fill={INK} />
+        <path d="M6 30a15 14 0 0 1 30 0z" fill="rgb(96, 158, 96)" />
+        <path d="M6 30a15 13 0 0 1 30 0z" fill="rgb(126, 186, 120)" />
+        <path d="M13 29l3-7h10l3 7M16 22l5-5 5 5" fill="none" stroke="rgb(96, 158, 96)" strokeWidth="2" strokeLinejoin="round" />
+        <ellipse cx="15" cy="20" rx="4" ry="1.8" fill={SHINE} opacity="0.45" />
+      </svg>
+    );
+  }
+  if (level === "drive") {
+    return (
+      <svg viewBox="0 0 44 44" aria-hidden className={styles.levelGlyph}>
+        <rect x="9" y="4" width="26" height="37" rx="9" fill="rgb(206, 196, 180)" />
+        <rect x="9" y="3" width="26" height="36" rx="9" fill="rgb(236, 228, 214)" />
+        <rect x="19.5" y="9" width="5" height="25" rx="2.5" fill="rgb(120, 104, 96)" />
+        <rect x="11" y="13" width="22" height="9" rx="4.5" fill="rgb(214, 118, 46)" />
+        <rect x="11" y="12" width="22" height="9" rx="4.5" fill="rgb(255, 150, 70)" />
+        <ellipse cx="17" cy="14.5" rx="4" ry="1.4" fill={SHINE} opacity="0.55" />
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 44 44" aria-hidden className={styles.levelGlyph}>
+      <path d="M6 30c4 5 28 5 32 0l-2 5c-5 4-23 4-28 0z" fill="rgb(70, 62, 60)" />
+      <path d="M8 29c0-14 6-21 14-21s14 7 14 21z" fill="rgb(236, 228, 214)" />
+      <path d="M8 29c0-13 6-20 14-20s14 7 14 20z" fill="rgb(255, 250, 240)" />
+      <rect x="8" y="23" width="28" height="6" fill="rgb(255, 150, 70)" />
+      <circle cx="22" cy="17" r="4.5" fill="rgb(255, 150, 70)" />
+      <rect x="18" y="16" width="8" height="2" rx="1" fill="rgb(255, 250, 240)" />
+      <ellipse cx="15" cy="13" rx="3.5" ry="1.5" fill={SHINE} opacity="0.7" />
+    </svg>
+  );
 }

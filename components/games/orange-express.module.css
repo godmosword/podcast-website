@@ -54,16 +54,52 @@
   box-shadow: 0 4px 0 var(--ink);
 }
 
+/* 難度卡：左邊圖示加難度小點，右邊字。不識字的孩子看圖選。 */
 .level,
 .levelOn {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
+  align-items: center;
+  gap: 12px;
   min-height: 48px;
   padding: 8px 12px;
   background: var(--card);
   text-align: left;
+}
+
+.levelArt {
+  display: grid;
+  flex: 0 0 auto;
+  justify-items: center;
+  gap: 4px;
+}
+
+.levelGlyph {
+  width: 44px;
+  height: 44px;
+}
+
+.levelDots {
+  display: flex;
+  gap: 3px;
+}
+
+.levelDots i {
+  width: 7px;
+  height: 7px;
+  border: 1.5px solid var(--ink);
+  border-radius: 50%;
+}
+
+.levelDots i[data-on="true"] {
+  background: var(--ink);
+}
+
+.levelText {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
 }
 
 .levelOn {
@@ -89,13 +125,8 @@
 .driverNote {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: 2px;
-  margin: 0;
-  padding: 8px 12px;
-  border: 2px dashed color-mix(in srgb, var(--ink) 40%, transparent);
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--card) 70%, transparent);
-  font-size: var(--fs-label);
 }
 
 .driverNote small {

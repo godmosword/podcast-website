@@ -221,10 +221,26 @@ test.describe("小橘特快車", () => {
     await expect(drive).toHaveAttribute("data-sway", "false");
   });
 
+  test("標題：三張難度卡都有圖示，小點一到三個表示多難", async ({ page }) => {
+    await page.goto("/games/orange-express");
+    for (const [name, dots] of [
+      ["慢慢看", 1],
+      ["自己開", 2],
+      ["小站長", 3],
+    ] as const) {
+      const card = page.getByRole("radio", { name: new RegExp(name) });
+      await expect(card.locator("svg")).toHaveCount(1);
+      await expect(card.locator('i[data-on="true"]')).toHaveCount(dots);
+    }
+  });
+
   test("司機：預設小小司機；家長在遊戲設定切成大司機", async ({ page }) => {
     await page.goto("/games/orange-express");
     await page.getByRole("radio", { name: /自己開/ }).click();
-    await expect(page.getByTestId("orange-express-driver-note")).toContainText("小小司機");
+    // 司機說明在「自己開」卡片裡，不是另外一張看起來能選的卡。
+    await expect(
+      page.getByRole("radio", { name: /自己開/ }).getByTestId("orange-express-driver-note"),
+    ).toContainText("小小司機");
     await page.getByRole("button", { name: "遊戲設定" }).click();
     await page.getByRole("radio", { name: "大司機" }).click();
     await page.getByRole("button", { name: "完成" }).click();

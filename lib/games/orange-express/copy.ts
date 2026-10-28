@@ -1,6 +1,6 @@
 /** 孩子看得到的句子。禁詞測試掃這一包，也掃遊戲原始碼。 */
 
-import type { BrakeNotch, DriverId, PointKind, PowerNotch, StopGrade } from "@/lib/games/orange-express/types";
+import type { BrakeNotch, DriverId, LevelId, PointKind, PowerNotch, StopGrade } from "@/lib/games/orange-express/types";
 
 export const COPY = {
   routeName: "橘色小線",
@@ -68,6 +68,13 @@ export const COPY = {
   point: "指差確認",
   pointDone: "確認好了",
 } as const;
+
+/** 標題難度卡圖示下面的小點：幾點就是多難。 */
+export const LEVEL_DOTS: Record<LevelId, 1 | 2 | 3> = {
+  look: 1,
+  drive: 2,
+  captain: 3,
+};
 
 export const DRIVER_NAME: Record<DriverId, string> = {
   little: "小小司機",

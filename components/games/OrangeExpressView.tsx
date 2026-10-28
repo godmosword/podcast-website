@@ -12,6 +12,7 @@ import {
   saveOrangeExpressLevel,
 } from "@/lib/gamekit/progress/orange-express-prefs";
 import { OrangeExpressCab } from "@/components/games/OrangeExpressCab";
+import { LevelGlyph } from "@/components/games/OrangeExpressGlyphs";
 import { OrangeExpressResult } from "@/components/games/OrangeExpressResult";
 import { useOrangeExpressDisplay } from "@/components/games/OrangeExpressSettings";
 import { OrangeExpressWindshield } from "@/components/games/OrangeExpressWindshield";
@@ -30,7 +31,7 @@ import {
   POINT_OK,
   jointClack,
 } from "@/lib/games/orange-express/chime";
-import { COPY, DRIVER_HINT, DRIVER_NAME, GRADE_TEXT } from "@/lib/games/orange-express/copy";
+import { COPY, DRIVER_HINT, DRIVER_NAME, GRADE_TEXT, LEVEL_DOTS } from "@/lib/games/orange-express/copy";
 import { medalsFor, starMissReason } from "@/lib/games/orange-express/medals";
 import { nextSpeech } from "@/lib/games/orange-express/notice";
 import {
@@ -473,23 +474,35 @@ export function OrangeExpressView({
               className={level === id ? styles.levelOn : styles.level}
               onClick={() => choose(id)}
             >
-              <strong>{COPY.levels[id]}</strong>
-              <small>{COPY.levelHints[id]}</small>
-              {id === "drive" ? (
-                <em className={styles.driverChip} data-driver={driver}>
-                  {COPY.driverLabel}：{DRIVER_NAME[driver]}
-                </em>
-              ) : null}
+              <span className={styles.levelArt} aria-hidden>
+                <LevelGlyph level={id} />
+                <span className={styles.levelDots}>
+                  {[1, 2, 3].map((n) => (
+                    <i key={n} data-on={n <= LEVEL_DOTS[id] ? "true" : "false"} />
+                  ))}
+                </span>
+              </span>
+              <span className={styles.levelText}>
+                <strong>{COPY.levels[id]}</strong>
+                <small>{COPY.levelHints[id]}</small>
+                {id === "drive" ? (
+                  // 司機說明收在「自己開」卡片裡（按鈕裡只能放行內元素），不再另外一個像第四張卡的框。
+                  <span className={styles.driverNote} data-testid="orange-express-driver-note">
+                    <em className={styles.driverChip} data-driver={driver}>
+                      {COPY.driverLabel}：{DRIVER_NAME[driver]}
+                    </em>
+                    {level === "drive" ? (
+                      <>
+                        <small>{DRIVER_HINT[driver]}</small>
+                        <small>{COPY.driverHow}</small>
+                      </>
+                    ) : null}
+                  </span>
+                ) : null}
+              </span>
             </button>
           ))}
         </div>
-        {level === "drive" ? (
-          <p className={styles.driverNote} data-testid="orange-express-driver-note">
-            <strong>{DRIVER_NAME[driver]}</strong>
-            {DRIVER_HINT[driver]}
-            <small>{COPY.driverHow}</small>
-          </p>
-        ) : null}
         <button type="button" className={styles.primary} onClick={onStart}>
           {COPY.start}
         </button>
