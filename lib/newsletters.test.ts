@@ -4,11 +4,21 @@ import { newsletterVisibleText } from "@/lib/newsletter-markdown";
 import sitemap from "@/app/sitemap";
 import {
   getNewsletter,
+  newsletterNeighbors,
   newsletterPath,
   newsletterReadingMinutes,
   newslettersIndexPath,
   newslettersLayout,
 } from "./newsletters";
+
+const SLUGS = [
+  "2026-10-09",
+  "2026-10-13",
+  "2026-10-16",
+  "2026-10-20",
+  "2026-10-23",
+  "2026-10-28",
+] as const;
 
 const SOURCE_LINKS = [
   "https://resou.osaka-u.ac.jp/ja/research/2026/20260715_1",
@@ -32,31 +42,39 @@ function manuscriptChars(markdown: string): string {
 }
 
 describe("newsletters", () => {
-  it("第一期標題、日期、主旨與路徑", () => {
-    const issue = NEWSLETTERS[0];
-    expect(issue?.slug).toBe("2026-10-28");
-    expect(issue?.publishedAt).toBe("2026-10-28");
-    expect(issue?.title).toBe(
+  it("六期依日期由舊到新排，路徑用期別日期", () => {
+    expect(NEWSLETTERS.map((issue) => issue.slug)).toEqual([...SLUGS]);
+    for (const issue of NEWSLETTERS) {
+      expect(issue.publishedAt).toBe(issue.slug);
+      expect(getNewsletter(issue.slug)).toBe(issue);
+      expect(newsletterPath(issue.slug)).toBe(`/newsletter/${issue.slug}`);
+    }
+    expect(newslettersIndexPath()).toBe("/newsletter");
+    expect(getNewsletter("2026-10-28")?.title).toBe(
       "⏱️ 「你已經試了 20 秒囉」：陪在旁邊說出孩子努力多久，他更願意再撐一下",
     );
-    expect(issue?.description).toBe(
+    expect(getNewsletter("2026-10-28")?.description).toBe(
       "孩子卡關就喊「我不會」？今晚 5 分鐘「計時小幫手」遊戲，陪他多撐一下",
     );
-    expect(getNewsletter("2026-10-28")?.slug).toBe("2026-10-28");
-    expect(newslettersIndexPath()).toBe("/newsletter");
-    expect(newsletterPath("2026-10-28")).toBe("/newsletter/2026-10-28");
   });
 
   it("原稿標記拿掉之後，看得見的字一個都沒少", () => {
-    const issue = NEWSLETTERS[0];
-    expect(issue).toBeTruthy();
-    expect(newsletterVisibleText(issue!.body).replace(/\s/g, "")).toBe(
-      manuscriptChars(issue!.body),
-    );
+    for (const issue of NEWSLETTERS) {
+      expect(newsletterVisibleText(issue.body).replace(/\s/g, "")).toBe(
+        manuscriptChars(issue.body),
+      );
+    }
   });
 
-  it("來源四個連結都在原稿裡，主題是審過的精簡稿", () => {
-    const body = NEWSLETTERS[0]?.body ?? "";
+  it("來源連結都留在原稿裡，10/28 主題是審過的精簡稿", () => {
+    for (const issue of NEWSLETTERS) {
+      const hrefs = [...issue.body.matchAll(/\]\((https?:\/\/[^)\s]+)\)/g)].map(
+        (match) => match[1],
+      );
+      expect(hrefs.length).toBeGreaterThan(0);
+      for (const href of hrefs) expect(issue.body).toContain(href);
+    }
+    const body = getNewsletter("2026-10-28")?.body ?? "";
     for (const href of SOURCE_LINKS) {
       expect(body).toContain(href);
     }
@@ -67,25 +85,49 @@ describe("newsletters", () => {
     expect(body).not.toContain("今年七月");
   });
 
-  it("列表只把這一期放在封面，沒有系列也沒有更多文章", () => {
+  it("列表封面是 10/28，其餘同一個月由新到舊", () => {
     const layout = newslettersLayout();
+    const latest = getNewsletter("2026-10-28");
     expect(layout.latest?.slug).toBe("2026-10-28");
-    expect(layout.latest?.excerpt).toBe(NEWSLETTERS[0]?.description);
+    expect(layout.latest?.excerpt).toBe(latest?.description);
     expect(layout.latest?.minutes).toBeGreaterThanOrEqual(1);
     expect(layout.series).toEqual([]);
-    expect(layout.months).toEqual([]);
-    expect(newsletterReadingMinutes(NEWSLETTERS[0]!)).toBe(layout.latest?.minutes);
+    expect(layout.months.map((month) => month.key)).toEqual(["2026-10"]);
+    expect(layout.months[0]?.articles.map((article) => article.slug)).toEqual([
+      "2026-10-23",
+      "2026-10-20",
+      "2026-10-16",
+      "2026-10-13",
+      "2026-10-09",
+    ]);
+    expect(newsletterReadingMinutes(latest!)).toBe(layout.latest?.minutes);
   });
 
-  it("sitemap 有列表與這一期", () => {
+  it("上一期是較早的，下一期是較新的", () => {
+    expect(newsletterNeighbors("2026-10-09")).toMatchObject({
+      previous: null,
+      next: { slug: "2026-10-13" },
+    });
+    expect(newsletterNeighbors("2026-10-23")).toMatchObject({
+      previous: { slug: "2026-10-20" },
+      next: { slug: "2026-10-28" },
+    });
+    expect(newsletterNeighbors("2026-10-28")).toMatchObject({
+      previous: { slug: "2026-10-23" },
+      next: null,
+    });
+  });
+
+  it("sitemap 有列表與每一期", () => {
     vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com");
-    const urls = sitemap().map((entry) => entry.url);
+    const entries = sitemap();
+    const urls = entries.map((entry) => entry.url);
     expect(urls).toContain("https://example.com/newsletter");
-    expect(urls).toContain("https://example.com/newsletter/2026-10-28");
-    const issue = sitemap().find(
-      (entry) => entry.url === "https://example.com/newsletter/2026-10-28",
-    );
-    expect(issue?.lastModified).toBe("2026-10-28");
+    for (const slug of SLUGS) {
+      const url = `https://example.com/newsletter/${slug}`;
+      expect(urls).toContain(url);
+      expect(entries.find((entry) => entry.url === url)?.lastModified).toBe(slug);
+    }
     vi.unstubAllEnvs();
   });
 });
