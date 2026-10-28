@@ -1,6 +1,6 @@
 # 小橘特快車美術／UX 第二批
 
-> 狀態：第二版，已收工程審與設計審意見，等你核准。2026-10-28，起點 `main` @ `2c6f340`。
+> 狀態：2026-10-28 核准並實作完（PR #267，草稿），等 Mac 重錄視覺基準。交接見文末。起點 `main` @ `2c6f340`。
 > 來源：`TODOS.md`「小橘特快車美術／UX 審查的後續」、接手時看 10/27 視覺基準找到的三項。編號對齊儀表板（B1–B19）。
 > 已拍板（2026-10-28）：B1 選 A、B5 選 A、B6 選 A。
 
@@ -162,7 +162,10 @@ npm run test:visual:trusted -- -g 小橘特快車 --update-snapshots
   - Opus 設計審：Approve with changes；必改項（速限牌三格與朗讀去重、B3 寬度、B4 小螢幕疊層與 e2e、結算色塊跟停車目標條同一塊、上車動畫顧到遊戲內減少動態）都已改進本版。小項（鐵橋用號角圖示、難度小點、600ms 一位一位上車、prompt 補玩具比例與拿掉 "HSR" 字樣）也一併採用。
   - 沒採用：「乘客色塊沒有臉」（頭像本來就有眼睛和笑臉，只是名字不印）；速度表灰帶加斜紋（孩子看不到鎖住的格子了，淡灰就夠）。
 - 實作後再審一次（T12）。
-- 狀態：**待你核准**。
+- 狀態：**已核准**（2026-10-28，連同 B18 A、B1 A）。
+- 實作後審查（T12）：
+  - 工程審（只讀子代理代 Codex）：Approve with changes。必改：很矮的手機開車時提示與指差確認鈕疊在一起、同一面速限牌念兩次；建議：慢慢看預測停車點沒算爬行、生圖腳本防護（不自動重試、真的透明檢查、manifest 逐張寫、拒收不認得的參數）、e2e 量到動畫途中、暫停時仍會念。全部已修（`55ea01c`）。
+  - Opus 設計審：Approve with changes。必改：站長帽帽徽像禁止進入標誌；建議：速限牌小圖沒亮的格、結算色塊放大。全部已修（`7e83aa5`）。
 
 ## B1：生圖 prompt 與張數（等你確認）
 
@@ -177,3 +180,25 @@ npm run test:visual:trusted -- -g 小橘特快車 --update-snapshots
 > A single claymation sticker of the character 小橘 from the reference image, kept on-model as a short, chubby toy: one single rounded car, cream-white body, a dark rounded windshield cap on top of the nose, a short smooth bullet nose, big round eyes on the front of the nose just below the windshield cap, pink cheeks, happy open smile, one bold orange stripe running diagonally from under the face back along the side, dark grey lower body. The face is large and fills most of the front so it still reads at 48 pixels. Three-quarter front view facing right. Soft matte plasticine texture, soft top-left light, gentle contact shadow only. Transparent background, clean edges, centered with padding. No pantograph, no thin dark line under the orange stripe. Absolutely no arms, hands or limbs. No track, no platform, no text, no letters, no numbers, no logos.
 
 生完先給你看 contact sheet，你核准才進儲存庫，並登記在 `public/games/v2/orange-express/SOURCES.md`（比照多多壽司屋）。
+
+## 交接（2026-10-28）
+
+雲端這邊做完、驗完，回本機接手只剩需要 Mac 或金鑰的事。
+
+**分支**：`claude/orange-express-art-batch2`（PR #267，草稿）。推送時用了 `SKIP_VISUAL_GATE=1`：畫面有改，但 darwin 基準 Linux 錄不出來，要在 Mac 補。
+
+**已驗證（Linux）**：小橘特快車相關單元測試 121 項、`npm run typecheck`、`npm run lint`、`npm run audit:colors`、e2e `e2e/orange-express.spec.ts`＋`e2e/games.spec.ts` 128 項全過。小螢幕量測：375×553 前窗 120px、320×568 前窗 139px，都不用捲。
+
+**本機要做（照順序）**
+
+1. `git fetch origin && git switch claude/orange-express-art-batch2`，`npm ci`。
+2. 重錄視覺基準：`npm run test:visual:trusted -- -g 小橘特快車 --update-snapshots`。預計 24 張小橘特快車基準都會變（標題 4、開車中 17 含速度表特寫、結算 2、遊戲設定 1），遊樂園卡片不該變。逐張看過再 commit。要特別看的：
+   - 標題三張難度卡的圖示（烏龜、動力桿、星星站長帽）與難度小點。
+   - 速限牌三格亮幾格、提示前面的圖示、淡紫腰帶的對向列車。
+   - 指差確認圓鈕貼右窗柱、前窗中間空著；停車柱旁沒有第二根柱子；鋼軌近粗遠細。
+   - 結算站卡是綠／黃色塊加「剛剛好／停到了」，沒有 ★。
+3. 實機（iPhone Safari）：375×553 有工具列時不捲就按得到車門；開著音效聽一趟大司機，「下一站」念完才念提示，同一件事只念一次。
+4. B1 生圖（付費，已確認 2 張、各 1 輪）：`npm run generate:orange-express-art -- --dry-run` 先看 prompt，再不加參數跑一次；看 `public/.games-staging/orange-express/<run>/` 的併排審稿圖。滿意才 `--approve`，然後登記 `public/games/v2/orange-express/SOURCES.md`、把 `data/games.ts` 的封面改指 `cover.webp`、改設計文件第 9 節。不滿意要重抽，先決定哪一張、幾張。B1 建議另開一個 PR，跟 B10（結算放小橘）、B15（桌機放大徽章）一起做。
+5. 基準 commit 推上去後，PR #267 轉成正式、等 CI 綠再合併。
+
+**還沒做的**：B10、B15（等貼紙）；B19（前窗補號誌、指差確認改成看得到才出題）；車內廣播錄音。都在 `TODOS.md`。
