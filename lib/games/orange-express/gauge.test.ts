@@ -3,8 +3,10 @@ import {
   GAUGE_MAX_KMH,
   GAUGE_START_DEG,
   GAUGE_SWEEP_DEG,
+  RED_SPAN,
   arcPath,
   gaugeBands,
+  gaugeFlag,
   gaugeTicks,
   gaugeValueText,
   gaugeZone,
@@ -26,7 +28,8 @@ describe("圓形速度表", () => {
     expect(bands.green[0]).toBe(0);
     expect(bands.green[1]).toBe(bands.yellow[0]);
     expect(bands.yellow[1]).toBe(0.82);
-    expect(bands.red).toEqual([0.82, 1]);
+    expect(bands.red[0]).toBe(0.82);
+    expect(bands.rest[1]).toBe(1);
   });
 
   it("綠、黃、紅三區", () => {
@@ -54,5 +57,26 @@ describe("圓形速度表", () => {
   it("太短的弧不畫", () => {
     expect(arcPath(100, 100, 70, 10, 10)).toBe("");
     expect(arcPath(100, 100, 70, -120, 120)).toMatch(/^M.+A70 70 0 1 1 /);
+  });
+});
+
+describe("速度表的紅帶與速度旗", () => {
+  it("紅帶只畫旗子後面一小段，再後面是用不到的淡灰帶；接起來仍是一整圈", () => {
+    const bands = gaugeBands(0.4);
+    expect(bands.red).toEqual([0.4, 0.4 + RED_SPAN]);
+    expect(bands.rest).toEqual([0.4 + RED_SPAN, 1]);
+    expect(bands.red[1] - bands.red[0]).toBeLessThan(0.15);
+    expect(gaugeBands(0.95).red[1]).toBe(1);
+  });
+
+  it("速度旗整面留在錶面裡，旗面比旗桿頂更靠內", () => {
+    for (let limit = 0; limit <= 1.0001; limit += 0.05) {
+      const flag = gaugeFlag(limit);
+      for (const p of [flag.foot, flag.tip, ...flag.cloth]) {
+        expect(Math.hypot(p.x - 100, p.y - 100)).toBeLessThanOrEqual(97);
+      }
+      const hang = flag.cloth[2];
+      expect(Math.hypot(hang.x - 100, hang.y - 100)).toBeLessThan(Math.hypot(flag.tip.x - 100, flag.tip.y - 100));
+    }
   });
 });

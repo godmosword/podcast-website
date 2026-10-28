@@ -814,7 +814,8 @@
 
 .bandGreen,
 .bandYellow,
-.bandRed {
+.bandRed,
+.bandRest {
   fill: none;
   stroke-width: 13;
 }
@@ -829,6 +830,11 @@
 
 .bandRed {
   stroke: color-mix(in srgb, var(--support-from) 75%, var(--card));
+}
+
+/* 旗子後面用不到的那一段：淡灰，指針不會走到這裡。 */
+.bandRest {
+  stroke: color-mix(in srgb, var(--ink) 10%, var(--card));
 }
 
 .tickMajor,
@@ -870,13 +876,13 @@
 .gaugeFlag {
   fill: var(--c-yellow);
   stroke: var(--ink);
-  stroke-width: 2;
+  stroke-width: 2.5;
   stroke-linejoin: round;
 }
 
 .gaugeFlagPole {
   stroke: var(--ink);
-  stroke-width: 3;
+  stroke-width: 4;
   stroke-linecap: round;
 }
 
