@@ -265,6 +265,7 @@ describe("SiteNavBar", () => {
       "/for-parents/dashboard",
       "/for-parents/play-map",
       "/for-parents/articles",
+      "/newsletter",
       "/for-parents/travel-abroad",
       "/for-parents/travel-taiwan",
       "/for-parents/story-making",
@@ -275,7 +276,7 @@ describe("SiteNavBar", () => {
     expect(panelHrefs).not.toContain("/games/coloring-book");
     expect(panelHrefs.some((h) => h?.startsWith("mailto:"))).toBe(false);
     expect(panelHrefs).not.toContain("/for-parents");
-    expect(panelHrefs.length).toBe(11);
+    expect(panelHrefs.length).toBe(12);
   });
 
   test("抽屜兩組各為 role=list，家長組以 aria-labelledby 綁小標", async () => {
@@ -320,6 +321,7 @@ describe("SiteNavBar", () => {
       "宇宙地圖",
       "關於我們",
       "育兒文章分享",
+      "電子報",
       "親子出國",
       "國內旅遊",
       "故事創作",
@@ -348,6 +350,7 @@ describe("SiteNavBar", () => {
     );
     expect(parentHrefs).toEqual([
       "/for-parents/articles",
+      "/newsletter",
       "/for-parents/travel-abroad",
       "/for-parents/travel-taiwan",
       "/for-parents/story-making",
@@ -355,9 +358,15 @@ describe("SiteNavBar", () => {
       "/for-parents/play-map",
     ]);
     const noteTexts = Array.from(parentList.querySelectorAll("a"))
-      .slice(0, 4)
+      .slice(0, 5)
       .map((a) => a.textContent?.replace(/\s/g, ""));
-    expect(noteTexts).toEqual(["育兒文章分享", "親子出國", "國內旅遊", "故事創作"]);
+    expect(noteTexts).toEqual([
+      "育兒文章分享",
+      "電子報",
+      "親子出國",
+      "國內旅遊",
+      "故事創作",
+    ]);
 
     // 每列前面是全站線條圖示（aria-hidden 的 svg），不再用 emoji
     const allRows = Array.from(mobileNav.querySelectorAll('ul[role="list"] a'));
@@ -575,6 +584,18 @@ describe("SiteNavBar active 狀態", () => {
     ).toBe(false);
     expect(progressPanel.querySelectorAll('[aria-current="page"]')).toHaveLength(1);
     cleanup();
+  });
+
+  test("電子報列表與單篇只標電子報", async () => {
+    for (const path of ["/newsletter", "/newsletter/2026-10-28", "/newsletter/2026-10-09"]) {
+      const view = await renderNavBarAt(path);
+      const panel = view.container.querySelector('nav[aria-label="網站選單"]')!;
+      expect(
+        panel.querySelector('a[href="/newsletter"]')?.getAttribute("aria-current"),
+      ).toBe("page");
+      expect(panel.querySelectorAll('[aria-current="page"]')).toHaveLength(1);
+      cleanup();
+    }
   });
 
   test("給爸媽小字路徑只標自己", async () => {
