@@ -39,7 +39,6 @@ import {
   currentStation,
   inTunnel,
   onBridge,
-  pointTotal,
   powerCap,
   step,
   withHook,
@@ -486,7 +485,6 @@ export function OrangeExpressView({
           stations={run.stations}
           grades={run.grades}
           pointsDone={run.pointsDone.length}
-          pointsTotal={pointTotal(run)}
           bridgeGreets={run.bridgeGreets}
           onReplay={begin}
           onTitle={goTitle}

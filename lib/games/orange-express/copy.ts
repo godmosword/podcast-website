@@ -92,17 +92,28 @@ export function signWord(bars: 1 | 2 | 3): string {
   return COPY.signSlow;
 }
 
-export function pointsResultText(done: number, total: number): string {
-  return `${COPY.point} ${done}/${total}`;
+/** 只數做到的，不寫「幾分之幾」：沒按不扣分，寫成 1/9 會讀成沒及格。 */
+export function pointsResultText(done: number): string {
+  return `${COPY.point} ${done} 次`;
 }
 
 export function bridgeResultText(count: number): string {
   return `鐵橋打招呼 ${count} 次`;
 }
 
+/**
+ * 每站停車的等級。星星只留給整趟的獎章，這裡不說幾顆星。
+ * 黃區也算停好了，所以說「停到了」，不說「差一點」。逗號讓窄前窗在 keep-all 下有地方換行。
+ */
 export const GRADE_TEXT: Record<StopGrade, string> = {
-  green: "停在綠區，三顆星",
-  yellow: "停在黃區，兩顆星",
+  green: "剛剛好，停在綠區",
+  yellow: "停到了，在黃區",
+};
+
+/** 結算站卡上跟色塊並排的兩三個字。 */
+export const GRADE_WORD: Record<StopGrade, string> = {
+  green: "剛剛好",
+  yellow: "停到了",
 };
 
 export function powerWord(notch: PowerNotch): string {

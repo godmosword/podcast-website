@@ -50,11 +50,6 @@ export function OrangeExpressStopBar({ run, numbers }: { run: RunState; numbers:
         <span className={styles.stopTrain} style={{ left: `${bar.train}%` }} />
       </div>
       <p className={styles.stopWords} data-testid="orange-express-stop-words">
-        {atStation && grade ? (
-          <span className={styles.gradeStars} data-grade={grade} aria-hidden>
-            {grade === "green" ? "★★★" : "★★"}
-          </span>
-        ) : null}
         {words}
         {bar.predicted !== null && !atStation && run.phase !== "reversing" ? (
           <span className={styles.srOnly}>，{COPY.predicted}</span>

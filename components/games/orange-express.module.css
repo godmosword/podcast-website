@@ -341,11 +341,15 @@
   bottom: 0;
 }
 
-.stopYellow {
+/* 停車目標條的黃區、綠區，結算站卡的色塊用同一塊：孩子在結算看到的顏色就是剛才停進去的那一區。
+ * 綠區另帶白直紋，分不清綠黃的孩子也認得出來。 */
+.stopYellow,
+.gradeSwatch[data-grade="yellow"] {
   background: var(--c-yellow);
 }
 
-.stopGreen {
+.stopGreen,
+.gradeSwatch[data-grade="green"] {
   background: var(--c-mint);
   background-image: repeating-linear-gradient(
     90deg,
@@ -406,18 +410,13 @@
   font-size: var(--fs-label);
   font-weight: 900;
   line-height: 1.25;
-  /* 窄前窗要換行時只在「，」後面斷，不把「三顆星」拆成「三／顆星」。 */
+  /* 窄前窗要換行時只在「，」後面斷，不把「剛剛好」拆成「剛／剛好」。 */
   word-break: keep-all;
   text-wrap: balance;
 }
 
 .stopBar[data-grade="none"] .stopWords {
   min-width: 4.5em;
-}
-
-.gradeStars {
-  color: color-mix(in srgb, var(--landing-brand) 80%, var(--ink));
-  letter-spacing: 1px;
 }
 
 .live {
@@ -982,12 +981,17 @@
   font-weight: 800;
 }
 
-.stationGrades li[data-grade="green"] {
-  background: color-mix(in srgb, var(--c-mint) 45%, var(--card));
+.gradeSwatch {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--ink);
+  border-radius: 7px;
 }
 
-.stationGrades li[data-grade="yellow"] {
-  background: color-mix(in srgb, var(--c-yellow) 45%, var(--card));
+.gradeWord {
+  font-size: var(--fs-meta);
+  color: var(--ink-soft);
 }
 
 .extras {

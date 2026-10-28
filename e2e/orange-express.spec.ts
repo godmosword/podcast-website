@@ -24,7 +24,10 @@ test.describe("小橘特快車", () => {
     await expect(page.getByRole("button", { name: "關門" })).toBeVisible();
     await page.getByRole("button", { name: "關門" }).click();
     await expect(page.getByRole("heading", { name: "到家了" })).toBeVisible();
-    await expect(page.getByText("停在綠區，三顆星")).toBeAttached();
+    // 星星只算整趟；每站是色塊加「剛剛好／停到了」，結算不再出現 ★。
+    const result = page.getByTestId("orange-express-result");
+    await expect(result.locator("li[data-grade='green']")).toContainText("剛剛好");
+    await expect(result).not.toContainText("★");
 
     const saved = await page.evaluate((key) => {
       const raw = localStorage.getItem(key);
@@ -83,7 +86,7 @@ test.describe("小橘特快車", () => {
     await expect(brake).toHaveAttribute("aria-valuenow", "4");
   });
 
-  test("進站：停車目標條出現，停在綠區三顆星、黃區兩顆星", async ({ page }) => {
+  test("進站：停車目標條出現，停在綠區說剛剛好、黃區說停到了", async ({ page }) => {
     await page.addInitScript(() => {
       window.__orangeExpress = { freeze: true, driver: "big" };
     });
@@ -97,13 +100,13 @@ test.describe("小橘特快車", () => {
 
     await jump(page, { progress: 0.65, speed: 0, brake: 4, freeze: false });
     await expect(bar).toHaveAttribute("data-grade", "green");
-    await expect(page.getByTestId("orange-express-stop-words")).toContainText("停在綠區，三顆星");
+    await expect(page.getByTestId("orange-express-stop-words")).toHaveText("剛剛好，停在綠區");
 
     await page.getByRole("button", { name: "開門" }).click();
     await page.getByRole("button", { name: "關門" }).click();
     await jump(page, { progress: 0.53, speed: 0 });
     await expect(bar).toHaveAttribute("data-grade", "yellow");
-    await expect(page.getByTestId("orange-express-stop-words")).toContainText("停在黃區，兩顆星");
+    await expect(page.getByTestId("orange-express-stop-words")).toHaveText("停到了，在黃區");
   });
 
   test("開過頭：小橘慢慢倒回去再試，不會失敗", async ({ page }) => {

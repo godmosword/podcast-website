@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { ResultStars } from "@/components/games/ResultStars";
 import { IconTrain } from "@/components/games/ClayIcons";
 import { DoorIcon, StopIcon } from "@/components/games/OrangeExpressCab";
-import { COPY, GRADE_TEXT, bridgeResultText, pointsResultText } from "@/lib/games/orange-express/copy";
+import { COPY, GRADE_WORD, bridgeResultText, pointsResultText } from "@/lib/games/orange-express/copy";
 import type { StarMissReason } from "@/lib/games/orange-express/medals";
 import type { Station, StopGrade } from "@/lib/games/orange-express/types";
 import { getNextGame } from "@/data/games";
@@ -28,7 +28,6 @@ export function OrangeExpressResult({
   stations,
   grades,
   pointsDone,
-  pointsTotal,
   bridgeGreets,
   onReplay,
   onTitle,
@@ -39,7 +38,6 @@ export function OrangeExpressResult({
   stations: readonly Station[];
   grades: readonly StopGrade[];
   pointsDone: number;
-  pointsTotal: number;
   bridgeGreets: number;
   onReplay: () => void;
   onTitle: () => void;
@@ -58,18 +56,16 @@ export function OrangeExpressResult({
           const grade = grades[index] ?? "yellow";
           return (
             <li key={station.id} data-grade={grade}>
+              <span className={styles.gradeSwatch} data-grade={grade} aria-hidden />
               <span className={styles.stationGradeName}>{station.name}</span>
-              <span className={styles.gradeStars} data-grade={grade} aria-hidden>
-                {grade === "green" ? "★★★" : "★★"}
-              </span>
-              <span className={styles.srOnly}>{GRADE_TEXT[grade]}</span>
+              <span className={styles.gradeWord}>{GRADE_WORD[grade]}</span>
             </li>
           );
         })}
       </ol>
-      {pointsTotal > 0 || bridgeGreets > 0 ? (
+      {pointsDone > 0 || bridgeGreets > 0 ? (
         <ul className={styles.extras} data-testid="orange-express-extras">
-          {pointsTotal > 0 ? <li>{pointsResultText(pointsDone, pointsTotal)}</li> : null}
+          {pointsDone > 0 ? <li>{pointsResultText(pointsDone)}</li> : null}
           {bridgeGreets > 0 ? <li>{bridgeResultText(bridgeGreets)}</li> : null}
         </ul>
       ) : null}

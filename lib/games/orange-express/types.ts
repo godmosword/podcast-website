@@ -26,7 +26,7 @@ export type Phase =
   | "reversing"
   | "route-done";
 
-/** 停在哪一區：綠區三顆星、黃區兩顆星。 */
+/** 停在哪一區：綠區「剛剛好」、黃區「停到了」。星星只算整趟，不算每站。 */
 export type StopGrade = "green" | "yellow";
 
 export type PassengerId = "bonbon" | "mami" | "xiaonan" | "dot";
