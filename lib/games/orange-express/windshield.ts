@@ -169,6 +169,7 @@ const TUNNEL_LAMP = "rgb(255, 214, 130)";
 const PORTAL_RIM = "rgb(206, 196, 180)";
 const SIGN_RING = "rgb(232, 106, 74)";
 const SIGN_FACE = "rgb(255, 252, 244)";
+const SIGN_UNLIT = "rgb(232, 222, 210)";
 const INK = "rgb(58, 46, 40)";
 const TRAIN_BODY = "rgb(252, 248, 238)";
 const TRAIN_ROOF = "rgb(232, 230, 224)";
@@ -589,14 +590,20 @@ function drawSigns(
     ctx.beginPath();
     ctx.arc(center.x, center.y, r * 0.74, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = INK;
-    ctx.strokeStyle = INK;
-    ctx.lineWidth = Math.max(1, r * 0.07);
+    ctx.strokeStyle = "rgb(176, 160, 146)";
+    ctx.lineWidth = Math.max(1, r * 0.05);
     for (const cell of signCells(signBars(sign.limit))) {
       const x = center.x + cell.x * r;
       const y = center.y + cell.y * r;
-      if (cell.lit) ctx.fillRect(x, y, cell.w * r, cell.h * r);
-      else ctx.strokeRect(x, y, cell.w * r, cell.h * r);
+      if (cell.lit) {
+        ctx.fillStyle = INK;
+        ctx.fillRect(x, y, cell.w * r, cell.h * r);
+      } else {
+        // 沒亮的格淡色填滿再描邊；只描邊時遠處的牌三格分不出亮幾格。
+        ctx.fillStyle = SIGN_UNLIT;
+        ctx.fillRect(x, y, cell.w * r, cell.h * r);
+        ctx.strokeRect(x, y, cell.w * r, cell.h * r);
+      }
     }
   }
 }

@@ -51,6 +51,11 @@ export function windowNotice(state: RunState, numbers: boolean): WindowNotice | 
   return null;
 }
 
+function signHasTask(state: RunState, at: number | undefined): boolean {
+  if (at === undefined) return false;
+  return currentStation(state).points.some((task) => task.kind === "sign" && task.at <= at && at <= task.until);
+}
+
 export type SpeechItem = {
   /** 「站號:種類:位置」。不用文字當 key：家長開關速度表數字會改字。 */
   key: string;
@@ -59,7 +64,7 @@ export type SpeechItem = {
 
 /**
  * 前窗這一刻可以念的句子，越前面越優先。
- * 指差確認題排第一，念要喊的那句；速限牌提示和「速限牌，確認！」是同一件事，只念要喊的。
+ * 指差確認題排第一，念要喊的那句；速限牌提示和「速限牌，確認！」是同一件事，那面牌只念題目那句。
  * 「叭叭！跟鐵橋打招呼了」不念，喇叭聲本身就是回饋。
  */
 export function speechCandidates(state: RunState, numbers: boolean): SpeechItem[] {
@@ -69,7 +74,8 @@ export function speechCandidates(state: RunState, numbers: boolean): SpeechItem[
   if (task) out.push({ key: `${station}:point:${task.id}`, text: POINT_CALL[task.kind] });
   const notice = windowNotice(state, numbers);
   if (!notice || notice.kind === "greeted") return out;
-  if (notice.kind === "sign" && task?.kind === "sign") return out;
+  // 這面牌有「速限牌，確認！」題的話，只念題目那句；題目還沒出、已經做完都一樣，不然同一面牌會念兩次。
+  if (notice.kind === "sign" && signHasTask(state, notice.at)) return out;
   const where = notice.kind === "sign" ? `:${notice.at ?? 0}` : "";
   out.push({ key: `${station}:${notice.kind}${where}`, text: notice.text });
   return out;

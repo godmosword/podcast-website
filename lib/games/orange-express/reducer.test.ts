@@ -198,6 +198,14 @@ describe("小橘特快車 step", () => {
     expect(halted.progress).toBeLessThan(0.5);
   });
 
+  it("慢慢看拉「停」時，預測停車點畫在爬行之後真的停下的地方，不會指在黃區", () => {
+    const state = at(createRun("look"), { power: 1, brake: 3, progress: 0.4, speed: 0.1, phase: "in-window" });
+    const predicted = predictStop(state)!;
+    const stopped = runUntil(state, (s) => s.phase === "stopped");
+    expect(stopped.grades[0]).toBe("green");
+    expect(Math.abs(predicted - stopped.progress)).toBeLessThan(0.02);
+  });
+
   it("慢慢看的煞車只有鬆、停、緊急三格：吸到最近的一格，等距取小的", () => {
     expect(brakeNotches("look")).toEqual([0, 3, 5]);
     expect(brakeNotches("drive")).toEqual([0, 1, 2, 3, 4, 5]);

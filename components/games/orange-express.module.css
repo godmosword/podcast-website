@@ -1469,7 +1469,7 @@
   .cab {
     --lever-h: 256px;
     gap: 6px;
-    padding: 6px 8px 8px;
+    padding-block: 6px 8px;
   }
 
   .dash {
@@ -1488,6 +1488,13 @@
 
   .pointTask {
     bottom: 12px;
+  }
+
+  /* 開車中的提示改靠左、最寬六成：前窗只剩約 104px 高，提示和右下的指差確認鈕上下會疊，左右分開才不會。 */
+  .notice {
+    right: auto;
+    left: 9%;
+    max-width: 60%;
   }
 
   /* 乘客卡縮成只有頭像（名字留給讀屏），停好時才不會頂到停車目標條。 */

@@ -229,7 +229,20 @@ export function predictStop(state: RunState): number | null {
   const accel = accelFor(state);
   if (accel >= -COAST_DRAG) return null;
   const distance = ((state.speed * state.speed) / (2 * -accel)) * PROGRESS_RATE;
-  return quant(Math.min(1.2, state.progress + distance));
+  let stop = state.progress + distance;
+  // 慢慢看進站後車會爬到爬行區尾端才放開，再用同樣的減速度停下；三角要畫在那裡，不然會指在黃區。
+  const station = currentStation(state);
+  const creepEnd = station.target - station.greenHalf / 2;
+  if (
+    state.level === "look" &&
+    state.brake < EMERGENCY &&
+    state.progress >= station.approachAt &&
+    state.progress < creepEnd &&
+    stop < creepEnd
+  ) {
+    stop = creepEnd + ((LOOK_CREEP * LOOK_CREEP) / (2 * -accel)) * PROGRESS_RATE;
+  }
+  return quant(Math.min(1.2, stop));
 }
 
 /** 速度 0 又在窗裡，就當成已經停好。 */

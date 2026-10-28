@@ -79,3 +79,25 @@ describe("前窗提示的朗讀", () => {
     expect(speechMs("下一站，遊樂園站")).toBeGreaterThan(speechMs("叮"));
   });
 });
+
+describe("前窗提示的朗讀：同一面速限牌不念兩次", () => {
+  it("號誌題念完、速限牌題還沒出：速限牌提示先不念，等題目出來只念「速限牌，確認！」", () => {
+    const base = createRun("drive", "big");
+    const early = withHook(base, { progress: 0.02, speed: 0.1 });
+    const spoken = new Set(["0:point:orange-park-signal"]);
+    expect(windowNotice(early, false)?.kind).toBe("sign");
+    expect(nextSpeech(early, false, spoken)).toBeNull();
+    const signTask = currentStation(base).points.find((task) => task.kind === "sign")!;
+    const later = withHook(base, { progress: signTask.at + 0.005, speed: 0.1 });
+    expect(nextSpeech(later, false, spoken)?.text).toBe("速限牌，確認！");
+  });
+
+  it("沒有指差確認的司機，速限牌提示照念", () => {
+    const base = createRun("drive", "little");
+    expect(currentStation(base).signs).toHaveLength(0);
+    const big = createRun("captain");
+    const second = currentStation(big).signs[1]!;
+    const near = withHook(big, { progress: second.at - 0.03, speed: 0.4 });
+    expect(nextSpeech(near, false, new Set())?.text).toMatch(/^速限牌：/);
+  });
+});

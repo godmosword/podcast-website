@@ -359,18 +359,22 @@ export function OrangeExpressView({
 
   // 前窗提示與指差確認念一次：同一件事一站只念一句，排在車內廣播後面，輪到時已經消失的就不念。
   useEffect(() => {
-    if (!run || screen !== "drive" || !voiceRef.current) return;
-    const wait = voiceBusyUntil.current - performance.now();
-    if (wait > 0) {
-      const timer = window.setTimeout(() => setVoiceTick((tick) => tick + 1), wait + 20);
+    if (!run || screen !== "drive" || status !== "playing" || !voiceRef.current) return;
+    const recheck = (ms: number) => {
+      const timer = window.setTimeout(() => setVoiceTick((tick) => tick + 1), ms + 20);
       return () => window.clearTimeout(timer);
-    }
+    };
+    const wait = voiceBusyUntil.current - performance.now();
+    if (wait > 0) return recheck(wait);
     const item = nextSpeech(run, display.gaugeNumbers, spoken.current);
     if (!item) return;
     spoken.current.add(item.key);
-    voiceBusyUntil.current = performance.now() + speechMs(item.text);
+    const ms = speechMs(item.text);
+    voiceBusyUntil.current = performance.now() + ms;
     speakText(item.text, { interrupt: false, volume: volumeRef.current });
-  }, [display.gaugeNumbers, run, screen, voiceTick]);
+    // 車停著時 run 不會變；念完再看一次，同一刻還有下一句（例如提示）就接著念。
+    return recheck(ms);
+  }, [display.gaugeNumbers, run, screen, status, voiceTick]);
 
   useEffect(() => {
     if (!shake) return;

@@ -120,7 +120,8 @@ async function generateRaw(spec: ArtSpec): Promise<Buffer> {
   const missing = spec.references.filter((p) => !existsSync(p));
   if (missing.length > 0) throw new Error(`缺少參考圖：${missing.map(displayPath).join("、")}`);
   const { default: OpenAI, toFile } = await import("openai");
-  const client = new OpenAI();
+  // SDK 預設失敗會自動重試 2 次；付費生圖每張最多 1 次呼叫，不讓它自己重試。
+  const client = new OpenAI({ maxRetries: 0 });
   const files = await Promise.all(
     spec.references.map(async (p, i) =>
       // 參考圖一律轉成 PNG 送出（webp 不一定被接受）
@@ -141,8 +142,9 @@ async function generateRaw(spec: ArtSpec): Promise<Buffer> {
 
 async function finish(spec: ArtSpec, raw: Buffer): Promise<Buffer> {
   if (!spec.transparent) return sharp(raw).webp({ quality: 90 }).toBuffer();
-  const { channels } = await sharp(raw).metadata();
-  if (channels !== 4) throw new Error("貼紙沒有透明底（模型回傳實底）；不要直接用，先回報。");
+  // 有 alpha 通道不代表真的透明：模型回實底時常常還是 RGBA，要看有沒有真的透明的像素。
+  const { isOpaque } = await sharp(raw).stats();
+  if (isOpaque) throw new Error("貼紙沒有透明底（模型回傳實底）；不要直接用，先回報。");
   return sharp(raw).trim().webp({ quality: 90, alphaQuality: 100 }).toBuffer();
 }
 
@@ -217,8 +219,9 @@ async function runGenerate(ids: readonly ArtId[]): Promise<void> {
       sha256: sha256(art),
       prompt: spec.prompt,
     });
+    // 每生完一張就寫一次：後一張失敗時，已經付費的前一張仍然可以 approve。
+    writeFileSync(join(runDir, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
   }
-  writeFileSync(join(runDir, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
   const sheets = await writeContactSheet(runDir, made);
   console.log(`✓ staging：${displayPath(runDir)}`);
   for (const sheet of sheets) console.log(`  併排審稿：${displayPath(sheet)}`);
@@ -246,8 +249,15 @@ async function runApprove(runId: string): Promise<void> {
   console.log("\n記得登記 public/games/v2/orange-express/SOURCES.md，並把 data/games.ts 的封面改指新的 webp。");
 }
 
+const KNOWN_ARGS = new Set(["--dry-run", "--approve", "--run", "--only"]);
+
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
+  // 打錯參數（例如 --dryrun、--only=cover）不能默默變成付費生圖。
+  args.forEach((arg, i) => {
+    const isValue = i > 0 && (args[i - 1] === "--run" || args[i - 1] === "--only");
+    if (!isValue && !KNOWN_ARGS.has(arg)) throw new Error(`不認得的參數：${arg}（可用：${[...KNOWN_ARGS].join("、")}）`);
+  });
   const runIndex = args.indexOf("--run");
   const runId = runIndex === -1 ? null : args[runIndex + 1];
   if (runIndex !== -1 && (!runId || runId.startsWith("-"))) throw new Error("--run 後面需要接 run-id。");

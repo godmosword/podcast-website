@@ -613,6 +613,8 @@ test.describe("小橘特快車：版面", () => {
     test.use({ viewport: { width: 390, height: 844 } });
 
     test("開車與進站時前窗中間那條空著；提示、指差確認鈕、乘客卡、停車目標條不互相蓋住", async ({ page }) => {
+      // 指差確認鈕出現時會跳一下；量框要量停下來的大小。
+      await page.emulateMedia({ reducedMotion: "reduce" });
       await page.addInitScript(() => {
         window.__orangeExpress = { freeze: true, driver: "big" };
       });
@@ -674,6 +676,8 @@ test.describe("小橘特快車：版面", () => {
       test.use({ viewport: { width, height }, hasTouch: true });
 
       test("不捲就看得到整顆車門，煞車每格至少 40px，前窗疊層不互相蓋住", async ({ page }) => {
+        // 指差確認鈕出現時會跳一下；量框要量停下來的大小。
+        await page.emulateMedia({ reducedMotion: "reduce" });
         await page.addInitScript(() => {
           window.__orangeExpress = { freeze: true, driver: "big" };
         });
@@ -690,8 +694,10 @@ test.describe("小橘特快車：版面", () => {
         const glass = (await page.getByTestId("orange-express-windshield").boundingBox())!;
         expect(glass.height).toBeGreaterThanOrEqual(110);
 
-        // 進站與停好時，停車目標條、指差確認鈕、乘客卡都在，彼此不重疊。
+        // 出發（號誌題＋速限牌提示）、速限牌、進站、停好：提示、停車目標條、指差確認鈕、乘客卡彼此不重疊。
         for (const patch of [
+          { progress: 0, speed: 0.2 },
+          { progress: 0.05, speed: 0.4 },
           { progress: 0.5, speed: 0.3, brake: 2 },
           { progress: 0.65, speed: 0 },
         ]) {
@@ -699,6 +705,7 @@ test.describe("小橘特快車：版面", () => {
           await page.waitForTimeout(100);
           const boxes: Box[] = [];
           for (const locator of [
+            page.getByTestId("orange-express-notice"),
             page.getByTestId("orange-express-stopbar"),
             page.getByTestId("orange-express-point"),
             page.getByRole("list", { name: "月台上的朋友" }),
