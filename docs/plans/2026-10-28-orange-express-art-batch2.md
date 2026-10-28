@@ -202,3 +202,5 @@ npm run test:visual:trusted -- -g 小橘特快車 --update-snapshots
 5. 基準 commit 推上去後，PR #267 轉成正式、等 CI 綠再合併。
 
 **還沒做的**：B10、B15（等貼紙）；B19（前窗補號誌、指差確認改成看得到才出題）；車內廣播錄音。都在 `TODOS.md`。
+
+**本機接手（2026-10-28）**：bundle 核對雜湊與 `git bundle verify` 後快轉到 `19fc40f`，合併 main（電子報三個 PR，無衝突）。步驟 1、2 完成：24 張基準重錄、新舊併排逐張看過；其他 57 張基準沒變。Mac 上單元測試 3067 項、typecheck、lint、`audit:colors`、e2e `orange-express`＋`games` 128 項全過。新字（凸、抹、烏、簷、錶）只在註解，不用重做字型子集。剩步驟 3（iPhone 實機）、4（B1 生圖）。
