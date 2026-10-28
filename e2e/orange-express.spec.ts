@@ -662,6 +662,56 @@ test.describe("小橘特快車：版面", () => {
     });
   });
 
+  for (const { width, height } of [
+    { width: 375, height: 553 },
+    { width: 320, height: 568 },
+  ]) {
+    test.describe(`很矮的直式手機 ${width}×${height}`, () => {
+      test.use({ viewport: { width, height }, hasTouch: true });
+
+      test("不捲就看得到整顆車門，煞車每格至少 40px，前窗疊層不互相蓋住", async ({ page }) => {
+        await page.addInitScript(() => {
+          window.__orangeExpress = { freeze: true, driver: "big" };
+        });
+        await page.goto("/games/orange-express");
+        await startLevel(page, "自己開");
+        const door = (await page.getByRole("button", { name: "開門" }).boundingBox())!;
+        expect(door.y + door.height).toBeLessThanOrEqual(height);
+        const scroll = await page.evaluate(() => document.documentElement.scrollHeight);
+        expect(scroll).toBeLessThanOrEqual(height);
+        const brake = page.getByRole("slider", { name: "煞車" });
+        const tops: number[] = [];
+        for (let i = 0; i <= 5; i += 1) tops.push((await brake.locator(`[data-notch="${i}"]`).boundingBox())!.y);
+        for (let i = 1; i < tops.length; i += 1) expect(Math.abs(tops[i]! - tops[i - 1]!)).toBeGreaterThanOrEqual(40);
+        const glass = (await page.getByTestId("orange-express-windshield").boundingBox())!;
+        expect(glass.height).toBeGreaterThanOrEqual(110);
+
+        // 進站與停好時，停車目標條、指差確認鈕、乘客卡都在，彼此不重疊。
+        for (const patch of [
+          { progress: 0.5, speed: 0.3, brake: 2 },
+          { progress: 0.65, speed: 0 },
+        ]) {
+          await jump(page, patch);
+          await page.waitForTimeout(100);
+          const boxes: Box[] = [];
+          for (const locator of [
+            page.getByTestId("orange-express-stopbar"),
+            page.getByTestId("orange-express-point"),
+            page.getByRole("list", { name: "月台上的朋友" }),
+          ]) {
+            if ((await locator.count()) === 0) continue;
+            const box = await locator.boundingBox();
+            if (box) boxes.push(box);
+          }
+          expect(boxes.length).toBeGreaterThanOrEqual(2);
+          for (let i = 0; i < boxes.length; i += 1) {
+            for (let j = i + 1; j < boxes.length; j += 1) expect(overlaps(boxes[i]!, boxes[j]!)).toBe(false);
+          }
+        }
+      });
+    });
+  }
+
   test.describe("最窄的手機", () => {
     test.use({ viewport: { width: 320, height: 568 }, hasTouch: true });
 

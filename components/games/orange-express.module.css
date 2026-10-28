@@ -1394,3 +1394,58 @@
     transform: translateX(3px);
   }
 }
+
+/*
+ * 很矮的直式手機（iPhone SE 開著 Safari 工具列約 375×553、最窄的 320×568）：整個駕駛台再收一階，不捲就按得到車門。
+ * 量過（Chromium）：原本 375×553 要捲 60px、320×568 要捲 29px，省在桿高、前窗下限、台面內距與下排按鈕。
+ * 桿高 256px：煞車六格每格仍有 40px；慢慢看只有三格，每格遠大於 48px。42dvh 在這個高度一定小於 256，直接寫死。
+ * 停車目標條讓出右邊一欄給指差確認圓鈕，兩個左右分開，前窗再矮也不會疊在一起。
+ * 寫在檔尾，蓋過前面 @supports 的桿高與 359px 以下的台面內距。
+ */
+@media (orientation: portrait) and (max-height: 600px) {
+  .screen[data-screen="drive"] {
+    gap: 6px;
+  }
+
+  .windshield {
+    min-height: 124px;
+  }
+
+  .cab {
+    --lever-h: 256px;
+    gap: 6px;
+    padding: 6px 8px 8px;
+  }
+
+  .dash {
+    gap: 4px;
+    padding-block: 6px;
+  }
+
+  .stopBar {
+    right: 26%;
+    padding-block: 2px;
+  }
+
+  .stopTrack {
+    margin-block: 6px 4px;
+  }
+
+  .pointTask {
+    bottom: 12px;
+  }
+
+  .cabBottom {
+    grid-template-columns: 48px 1fr;
+  }
+
+  .horn {
+    width: 48px;
+    height: 48px;
+  }
+
+  .door {
+    min-height: 48px;
+    padding-block: 4px;
+  }
+}
