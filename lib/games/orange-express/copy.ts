@@ -79,6 +79,13 @@ export const DRIVER_HINT: Record<DriverId, string> = {
   big: "5–7 歲：速限牌、停準拿星星、指差確認",
 };
 
+/** 指差確認圓鈕下面的小標：要確認的那樣東西。整句由朗讀與讀屏說。 */
+export const POINT_WHAT: Record<PointKind, string> = {
+  signal: "號誌",
+  sign: "速限牌",
+  platform: "月台",
+};
+
 /** 指差確認時說的話。 */
 export const POINT_CALL: Record<PointKind, string> = {
   signal: "號誌，綠燈！",

@@ -589,6 +589,63 @@ test.describe("小橘特快車：版面", () => {
     });
   }
 
+  test.describe("直拿手機 390×844：前窗疊層", () => {
+    test.use({ viewport: { width: 390, height: 844 } });
+
+    test("開車與進站時前窗中間那條空著；提示、指差確認鈕、乘客卡、停車目標條不互相蓋住", async ({ page }) => {
+      await page.addInitScript(() => {
+        window.__orangeExpress = { freeze: true, driver: "big" };
+      });
+      await page.goto("/games/orange-express");
+      await startLevel(page, "小站長");
+      const glass = (await page.getByTestId("orange-express-windshield").boundingBox())!;
+      const layers = async () => {
+        const out: { name: string; box: Box }[] = [];
+        for (const [name, locator] of [
+          ["停車目標條", page.getByTestId("orange-express-stopbar")],
+          ["提示", page.getByTestId("orange-express-notice")],
+          ["指差確認", page.getByTestId("orange-express-point")],
+          ["乘客卡", page.getByRole("list", { name: "月台上的朋友" })],
+        ] as const) {
+          if ((await locator.count()) === 0) continue;
+          const box = await locator.boundingBox();
+          if (box) out.push({ name, box });
+        }
+        return out;
+      };
+      const states = [
+        { label: "出發", patch: { progress: 0, speed: 0.2 }, running: true },
+        { label: "速限牌", patch: { progress: 0.05, speed: 0.4 }, running: true },
+        { label: "鐵橋", patch: { stationIndex: 1, progress: 0.15, speed: 0.4 }, running: true },
+        { label: "進站", patch: { stationIndex: 1, progress: 0.5, speed: 0.3, brake: 2 }, running: true },
+        { label: "停好", patch: { stationIndex: 1, progress: 0.65, speed: 0 }, running: false },
+      ];
+      for (const { label, patch, running } of states) {
+        await jump(page, patch);
+        await page.waitForTimeout(100);
+        const found = await layers();
+        for (let i = 0; i < found.length; i += 1) {
+          for (let j = i + 1; j < found.length; j += 1) {
+            expect(overlaps(found[i]!.box, found[j]!.box), `${label}：${found[i]!.name}和${found[j]!.name}疊在一起`).toBe(
+              false,
+            );
+          }
+        }
+        if (!running) continue;
+        const top = Math.max(
+          glass.y,
+          ...found.filter((f) => f.name === "停車目標條" || f.name === "提示").map((f) => f.box.y + f.box.height),
+        );
+        const strip = { x: glass.x + glass.width * 0.3, y: top, width: glass.width * 0.4, height: glass.y + glass.height - top };
+        for (const f of found) {
+          if (f.name === "停車目標條" || f.name === "提示") continue;
+          expect(overlaps(f.box, strip), `${label}：${f.name}蓋到前窗中間`).toBe(false);
+        }
+      }
+      await expect(page.getByText("色塊")).toHaveCount(0);
+    });
+  });
+
   test.describe("最窄的手機", () => {
     test.use({ viewport: { width: 320, height: 568 }, hasTouch: true });
 

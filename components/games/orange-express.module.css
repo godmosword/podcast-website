@@ -197,9 +197,9 @@
   left: 9%;
   bottom: 10px;
   display: flex;
-  gap: 8px;
+  gap: 6px;
   margin: 0;
-  padding: 4px 8px;
+  padding: 4px 6px;
   border-radius: 14px;
   background: color-mix(in srgb, var(--card) 70%, transparent);
   list-style: none;
@@ -209,15 +209,16 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 48px;
+  min-width: 44px;
   color: var(--ink);
   font-size: var(--fs-meta);
   font-weight: 800;
 }
 
+/* 頭像 40px：小站長兩位朋友時，卡片右緣仍在前窗四成以內，不擋到停車柱那一帶。 */
 .riders svg {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
 }
 
 .riders li[data-boarded="true"] {
@@ -261,34 +262,55 @@
   flex: 0 0 auto;
 }
 
+/*
+ * 指差確認：56px 手勢圓鈕貼右邊窗柱，左緣在前窗七成以右，前窗中間那條留給軌道和停車柱。
+ * 鈕下的小牌只寫要確認的東西（號誌、速限牌、月台）。出現時輕輕跳一下，減少動態時不跳。
+ */
 .pointTask {
   position: absolute;
-  right: 9%;
-  bottom: 10px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 52px;
-  padding: 4px 12px 4px 8px;
+  right: 8%;
+  bottom: 16px;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  padding: 0;
   font: inherit;
-  font-weight: 900;
   color: var(--ink);
   border: 2px solid var(--ink);
-  border-radius: 16px;
+  border-radius: 50%;
   background: color-mix(in srgb, var(--c-mint) 70%, var(--card));
   box-shadow: 0 4px 0 var(--ink);
-  text-align: left;
+  animation: pointPop 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.pointTask span {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.2;
-}
-
-.pointTask small {
+.pointWhat {
+  position: absolute;
+  left: 50%;
+  bottom: -12px;
+  translate: -50% 0;
+  padding: 0 6px;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-pill);
+  background: var(--card);
   font-size: var(--fs-meta);
-  color: var(--ink-soft);
+  font-weight: 900;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+@keyframes pointPop {
+  0% {
+    transform: scale(0.6);
+  }
+
+  70% {
+    transform: scale(1.08);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 
 .pointTask:active {
@@ -299,6 +321,10 @@
 .pointTask:focus-visible {
   outline: 3px solid var(--accent-ink);
   outline-offset: 3px;
+}
+
+.screen[data-reduced="true"] .pointTask {
+  animation: none;
 }
 
 .pointIcon {
@@ -1287,6 +1313,10 @@
 
   .pointTask:active {
     transform: none;
+  }
+
+  .pointTask {
+    animation: none;
   }
 }
 

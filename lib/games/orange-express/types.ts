@@ -33,7 +33,9 @@ export type PassengerId = "bonbon" | "mami" | "xiaonan" | "dot";
 
 export type Passenger = {
   id: PassengerId;
+  /** 卡上印的名字；showName 為 false 時只給讀屏念。 */
   name: string;
+  showName?: boolean;
 };
 
 export type StationId = "orange-park" | "orange-slope" | "orange-home";

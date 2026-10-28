@@ -3,7 +3,7 @@
 import { useEffect, useRef, type Ref } from "react";
 import { NoticeGlyph } from "@/components/games/OrangeExpressGlyphs";
 import { OrangeExpressStopBar } from "@/components/games/OrangeExpressStopBar";
-import { COPY, POINT_CALL } from "@/lib/games/orange-express/copy";
+import { COPY, POINT_CALL, POINT_WHAT } from "@/lib/games/orange-express/copy";
 import { windowNotice } from "@/lib/games/orange-express/notice";
 import { currentStation, pendingPoint } from "@/lib/games/orange-express/reducer";
 import { drawWindshield, windshieldFrame } from "@/lib/games/orange-express/windshield";
@@ -157,17 +157,18 @@ export function OrangeExpressWindshield({
         </p>
       ) : null}
       {task ? (
+        // 貼右邊窗柱的手勢圓鈕，不蓋前窗中間；要喊的整句由朗讀與讀屏說，鈕下只標確認哪樣東西。
         <button
           type="button"
           className={styles.pointTask}
           data-kind={task.kind}
           data-testid="orange-express-point"
+          aria-label={`${COPY.point}：${POINT_CALL[task.kind]}`}
           onClick={onPoint}
         >
           <PointIcon />
-          <span>
-            <small>{COPY.point}</small>
-            {POINT_CALL[task.kind]}
+          <span className={styles.pointWhat} aria-hidden>
+            {POINT_WHAT[task.kind]}
           </span>
         </button>
       ) : null}
@@ -179,7 +180,7 @@ export function OrangeExpressWindshield({
               data-boarded={run.phase === "doors-open" && index < run.boarded ? "true" : "false"}
             >
               <RiderFace id={rider.id} />
-              <span>{rider.name}</span>
+              <span className={rider.showName === false ? styles.srOnly : undefined}>{rider.name}</span>
             </li>
           ))}
         </ul>
