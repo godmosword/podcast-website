@@ -134,15 +134,17 @@ export function LevelGlyph({ level }: { level: LevelId }) {
       </svg>
     );
   }
+  // 站長帽：上寬下窄的平頂帽身、橘色帽帶、帽帶前面小橘徽記，帽簷是往前下翹的一彎，不畫成整條（整條像漢堡）。
   return (
     <svg viewBox="0 0 44 44" aria-hidden className={styles.levelGlyph}>
-      <path d="M6 30c4 5 28 5 32 0l-2 5c-5 4-23 4-28 0z" fill="rgb(70, 62, 60)" />
-      <path d="M8 29c0-14 6-21 14-21s14 7 14 21z" fill="rgb(236, 228, 214)" />
-      <path d="M8 29c0-13 6-20 14-20s14 7 14 20z" fill="rgb(255, 250, 240)" />
-      <rect x="8" y="23" width="28" height="6" fill="rgb(255, 150, 70)" />
-      <circle cx="22" cy="17" r="4.5" fill="rgb(255, 150, 70)" />
-      <rect x="18" y="16" width="8" height="2" rx="1" fill="rgb(255, 250, 240)" />
-      <ellipse cx="15" cy="13" rx="3.5" ry="1.5" fill={SHINE} opacity="0.7" />
+      <ellipse cx="22" cy="39" rx="13" ry="2.5" fill="rgb(0, 0, 0)" opacity="0.12" />
+      <path d="M4 15c6-7 30-7 36 0l-5 14H9z" fill="rgb(236, 228, 214)" />
+      <path d="M4 14c6-7 30-7 36 0l-5 13H9z" fill="rgb(255, 250, 240)" />
+      <path d="M9 24h26v6H9z" fill="rgb(255, 150, 70)" />
+      <path d="M10 30c3 7 21 7 24 0c-7 3-17 3-24 0z" fill="rgb(70, 62, 60)" />
+      <circle cx="22" cy="18" r="4" fill="rgb(255, 150, 70)" />
+      <rect x="18.5" y="17.2" width="7" height="1.8" rx="0.9" fill="rgb(255, 250, 240)" />
+      <ellipse cx="13" cy="11.5" rx="4.5" ry="1.4" fill={SHINE} opacity="0.7" />
     </svg>
   );
 }
