@@ -587,7 +587,7 @@ describe("SiteNavBar active 狀態", () => {
   });
 
   test("電子報列表與單篇只標電子報", async () => {
-    for (const path of ["/newsletter", "/newsletter/2026-10-28"]) {
+    for (const path of ["/newsletter", "/newsletter/2026-10-28", "/newsletter/2026-10-09"]) {
       const view = await renderNavBarAt(path);
       const panel = view.container.querySelector('nav[aria-label="網站選單"]')!;
       expect(
