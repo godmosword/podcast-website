@@ -55,11 +55,16 @@ describe("newsletters", () => {
     );
   });
 
-  it("來源四個連結都在原稿裡", () => {
+  it("來源四個連結都在原稿裡，主題是審過的精簡稿", () => {
     const body = NEWSLETTERS[0]?.body ?? "";
     for (const href of SOURCE_LINKS) {
       expect(body).toContain(href);
     }
+    expect(body).toContain(
+      "孩子卡關喊「我不會啦！」時，先別急著幫忙，坐到他旁邊說「你已經試了 20 秒囉」。",
+    );
+    expect(body).not.toContain("五歲的小宇");
+    expect(body).not.toContain("今年七月");
   });
 
   it("列表只把這一期放在封面，沒有系列也沒有更多文章", () => {
