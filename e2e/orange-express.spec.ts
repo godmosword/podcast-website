@@ -355,6 +355,32 @@ test.describe("小橘特快車", () => {
     await expect(page.getByRole("button", { name: "開門" })).toHaveAttribute("data-shake", "false");
   });
 
+  test("慢慢看的煞車桿只有鬆、停、緊急三格，←→ 照順序走", async ({ page }) => {
+    await page.addInitScript(() => {
+      window.__orangeExpress = { freeze: true };
+    });
+    await page.goto("/games/orange-express");
+    await startLevel(page, "慢慢看");
+    const brake = page.getByRole("slider", { name: "煞車" });
+    await expect(brake).toHaveAttribute("aria-valuemax", "2");
+    const notches = brake.locator("[data-notch]");
+    await expect(notches).toHaveCount(3);
+    await expect(notches).toHaveText(["緊急", "停", "鬆"]);
+    for (const n of ["0", "3", "5"]) {
+      const box = (await brake.locator(`[data-notch="${n}"]`).boundingBox())!;
+      expect(box.height).toBeGreaterThanOrEqual(48);
+    }
+    await tap(page, "ArrowLeft");
+    await expect(brake).toHaveAttribute("aria-valuetext", "煞車，停");
+    await expect(brake.locator('[data-notch="3"]')).toHaveAttribute("data-on", "true");
+    await tap(page, "ArrowLeft");
+    await expect(brake).toHaveAttribute("aria-valuetext", "煞車，緊急");
+    await tap(page, "ArrowRight");
+    await tap(page, "ArrowRight");
+    await expect(brake).toHaveAttribute("aria-valuenow", "0");
+    await expect(brake).toHaveAttribute("aria-valuetext", "煞車，鬆");
+  });
+
   test("結算：每站都停綠區但開過頭，提示說不要開過頭", async ({ page }) => {
     await page.addInitScript(() => {
       window.__orangeExpress = { progress: 0.62, speed: 0, misses: 1 };

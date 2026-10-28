@@ -132,8 +132,10 @@ export function powerLampLabel(notch: PowerNotch): string {
   return notch === 0 ? "P0" : `P${notch}`;
 }
 
-export function brakeLampLabel(notch: BrakeNotch): string {
+/** simple：慢慢看只有鬆、停、緊急三格，格上直接寫字，不寫 B3。 */
+export function brakeLampLabel(notch: BrakeNotch, simple = false): string {
   if (notch === 5) return COPY.emergencyWord;
+  if (simple) return brakeWord(notch);
   return `B${notch}`;
 }
 
@@ -141,7 +143,7 @@ export function powerValueText(notch: PowerNotch): string {
   return `${COPY.power} ${powerLampLabel(notch)}，${powerWord(notch)}`;
 }
 
-export function brakeValueText(notch: BrakeNotch): string {
-  if (notch === 5) return `${COPY.brake}，${COPY.emergencyWord}`;
+export function brakeValueText(notch: BrakeNotch, simple = false): string {
+  if (notch === 5 || simple) return `${COPY.brake}，${brakeWord(notch)}`;
   return `${COPY.brake} ${brakeLampLabel(notch)}，${brakeWord(notch)}`;
 }

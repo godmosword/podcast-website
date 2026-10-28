@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import { medalsFor } from "@/lib/games/orange-express/medals";
 import {
   BRAKE_ACCEL,
+  LOOK_CREEP,
   POWER_ACCEL,
   accelFor,
+  brakeNotches,
   clampBrake,
   clampPower,
   createRun,
@@ -11,11 +13,13 @@ import {
   gradeFor,
   honk,
   predictStop,
+  snapBrake,
   step,
+  stepBrake,
   withHook,
 } from "@/lib/games/orange-express/reducer";
-import { stationsFor } from "@/lib/games/orange-express/routes";
-import type { RunState } from "@/lib/games/orange-express/types";
+import { stationsFor, stopEpsilon } from "@/lib/games/orange-express/routes";
+import { EMERGENCY, type RunState } from "@/lib/games/orange-express/types";
 
 function at(state: RunState, patch: Partial<RunState>): RunState {
   return { ...state, ...patch };
@@ -181,6 +185,37 @@ describe("小橘特快車 step", () => {
     expect(state.phase).toBe("stopped");
     expect(state.grades[0]).toBe("green");
     expect(state.misses).toBe(0);
+  });
+
+  it("慢慢看進站後拉「停」，車會慢慢滑進綠區才停；拉緊急馬上停", () => {
+    const start = at(createRun("look"), { power: 1, brake: 3, progress: 0.3, speed: 0.4 });
+    const stopped = runUntil(start, (s) => s.phase === "stopped");
+    expect(stopped.grades[0]).toBe("green");
+    expect(LOOK_CREEP).toBeGreaterThan(stopEpsilon("look"));
+
+    const early = at(createRun("look"), { power: 1, brake: EMERGENCY, progress: 0.4, speed: 0.4 });
+    const halted = runUntil(early, (s) => s.phase === "stopped");
+    expect(halted.progress).toBeLessThan(0.5);
+  });
+
+  it("慢慢看的煞車只有鬆、停、緊急三格：吸到最近的一格，等距取小的", () => {
+    expect(brakeNotches("look")).toEqual([0, 3, 5]);
+    expect(brakeNotches("drive")).toEqual([0, 1, 2, 3, 4, 5]);
+    expect(snapBrake("look", 1)).toBe(0);
+    expect(snapBrake("look", 2)).toBe(3);
+    expect(snapBrake("look", 4)).toBe(3);
+    expect(snapBrake("look", 9)).toBe(5);
+    expect(snapBrake("drive", 4)).toBe(4);
+    expect(stepBrake("look", 0, 1)).toBe(3);
+    expect(stepBrake("look", 3, 1)).toBe(5);
+    expect(stepBrake("look", 5, 1)).toBe(5);
+    expect(stepBrake("look", 5, -1)).toBe(3);
+    expect(stepBrake("drive", 2, -1)).toBe(1);
+
+    const look = createRun("look");
+    expect(step(look, { type: "set-brake", notch: 2 }).brake).toBe(3);
+    expect(withHook(look, { brake: 4 }).brake).toBe(3);
+    expect(withHook(createRun("drive"), { brake: 4 }).brake).toBe(4);
   });
 
   it("自己開不幫忙，不煞車就停不住", () => {

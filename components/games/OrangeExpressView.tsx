@@ -33,7 +33,6 @@ import {
 import { COPY, DRIVER_HINT, DRIVER_NAME, GRADE_TEXT } from "@/lib/games/orange-express/copy";
 import { medalsFor, starMissReason } from "@/lib/games/orange-express/medals";
 import {
-  clampBrake,
   clampPower,
   createRun,
   currentStation,
@@ -41,6 +40,7 @@ import {
   onBridge,
   powerCap,
   step,
+  stepBrake,
   withHook,
 } from "@/lib/games/orange-express/reducer";
 import { DriveSound, driveMix, jointsCrossed } from "@/lib/games/orange-express/sound";
@@ -225,7 +225,8 @@ export function OrangeExpressView({
     (notch: number) => {
       const cur = runRef.current;
       if (!cur) return;
-      const next = step(cur, { type: "set-brake", notch: clampBrake(notch) });
+      // 吸到這一檔有的格子在 step 裡做（慢慢看只有鬆、停、緊急）。
+      const next = step(cur, { type: "set-brake", notch });
       if (next === cur) return;
       audio?.ensureAudio();
       audio?.voices?.(next.brake === EMERGENCY ? EMERGENCY_CLICK : NOTCH_CLICK);
@@ -264,7 +265,7 @@ export function OrangeExpressView({
         return;
       }
       if (action === "move-left" || action === "move-right") {
-        setBrake(cur.brake + (action === "move-left" ? 1 : -1));
+        setBrake(stepBrake(cur.level, cur.brake, action === "move-left" ? 1 : -1));
         return;
       }
       if (action === "dash") {
