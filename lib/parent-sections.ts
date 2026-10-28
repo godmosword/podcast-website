@@ -13,6 +13,13 @@ export const PARENT_SECTION_ITEMS = [
       "馬米寫給爸媽的育兒心得與日常經驗，同步自方格子，每篇短短幾分鐘就能讀完。",
   },
   {
+    id: "newsletter",
+    label: "電子報",
+    href: "/newsletter",
+    icon: "mail",
+    description: "馬米寫給爸媽的電子報，每期一個今晚就能試的小練習。",
+  },
+  {
     id: "parent-travel-abroad",
     label: "親子出國",
     href: "/for-parents/travel-abroad",
