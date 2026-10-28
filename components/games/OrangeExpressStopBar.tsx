@@ -1,6 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
+import { XiaojuFace } from "@/components/games/OrangeExpressGlyphs";
 import { COPY, GRADE_TEXT } from "@/lib/games/orange-express/copy";
 import { currentStation } from "@/lib/games/orange-express/reducer";
 import { stopBarFor } from "@/lib/games/orange-express/stop-target";
@@ -47,7 +48,9 @@ export function OrangeExpressStopBar({ run, numbers }: { run: RunState; numbers:
             style={{ left: `${bar.predicted}%` }}
           />
         ) : null}
-        <span className={styles.stopTrain} style={{ left: `${bar.train}%` }} />
+        <span className={styles.stopTrain} style={{ left: `${bar.train}%` }}>
+          <XiaojuFace />
+        </span>
       </div>
       <p className={styles.stopWords} data-testid="orange-express-stop-words">
         {words}

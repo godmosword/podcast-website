@@ -37,6 +37,8 @@
   - ✅ **重錄 darwin 視覺基準（第二批）**：2026-10-28 在 Mac 合併 main 後重錄，24 張小橘特快車基準全變（標題 4、開車中 17 含速度表特寫、結算 2、遊戲設定 1），新舊併排逐張看過，都是 B2–B18 有意的改動。重錄前整套跑一次：其他 57 張（含遊樂園卡片與 main 的電子報改動）都沒變；重錄後再跑一次 24 passed。見本 commit。
   - **封面與小橘貼紙（B1，已拍板 A）**：prompt 與張數（2 張、各 1 輪）已確認，見計畫最後一節。這個環境沒有 `OPENAI_API_KEY`，要在 Mac 跑 `scripts/generate-orange-express-art.ts`，生完看 contact sheet 再核准進 repo，登記 `public/games/v2/orange-express/SOURCES.md`，並改設計文件第 9 節「不生新貼紙」。`design · M · 需 Mac`
   - 結算放小橘（B10）、桌機儀表放大徽章（B15）：等 B1 的貼紙。`design · S · 依賴 B1`
+  - ✅ **小橘徽章照定裝照重畫（B21）**：原本橘條橫過整張臉、沒有擋風帽，像藥丸。改成頭頂擋風帽、橘條從臉下面斜上去的正臉，儀表徽章與停車目標條上的小車共用。見本 commit；darwin 基準要在 Mac 重錄（開車中各張都有徽章）。
+  - **標題畫面沒有主視覺（B20）**：另外三款都把封面放在標題的框裡，小橘特快車標題上看不到小橘，1280 寬下半頁全空。B1 封面生好後照消消樂、壽司屋的做法放進框裡、配一句標語。`design · S · 依賴 B1`
   - 號誌與月台還沒進畫面就出指差確認題，前窗也沒有畫號誌（B19）：補畫號誌、題目改成看得到那樣東西才出。`ux · S`
 - **小橘特快車車內廣播錄音**：結構已留好（`lib/games/orange-express/announce.ts` 的 `ANNOUNCE_CLIPS`）。家人或小橘錄「下一站，遊樂園站／橘子坡站／回家站」三句，放 `public/games/v2/orange-express/voice/next-<站 id>.m4a` 並登記；錄好前用瀏覽器朗讀暫代。也要在 iPhone／Android 實機各聽一次朗讀與「叮叮」輕煞聲。`content · S · 需真人`
 - **重錄 darwin 視覺基準（2026-10 稽核修正）**：Linux 不能改 `-chromium-darwin`。請在 Mac 跑 `npm run test:visual:trusted -- --update-snapshots`，只接受下面這些有意的差異後再更新。320 沒有基準。
