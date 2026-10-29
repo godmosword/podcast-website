@@ -12,7 +12,8 @@ import {
   saveOrangeExpressLevel,
 } from "@/lib/gamekit/progress/orange-express-prefs";
 import { OrangeExpressCab } from "@/components/games/OrangeExpressCab";
-import { LevelGlyph } from "@/components/games/OrangeExpressGlyphs";
+import Image from "next/image";
+import { LevelGlyph, XiaojuFace } from "@/components/games/OrangeExpressGlyphs";
 import { OrangeExpressResult } from "@/components/games/OrangeExpressResult";
 import { useOrangeExpressDisplay } from "@/components/games/OrangeExpressSettings";
 import { OrangeExpressWindshield } from "@/components/games/OrangeExpressWindshield";
@@ -49,7 +50,33 @@ import { DriveSound, driveMix, jointsCrossed } from "@/lib/games/orange-express/
 import { NO_SWAY, decayBump, swayAt } from "@/lib/games/orange-express/sway";
 import { EMERGENCY, type LevelId, type RunState } from "@/lib/games/orange-express/types";
 import { speakText } from "@/lib/games/shared/speech";
+import { gameBySlug } from "@/data/games";
 import styles from "./orange-express.module.css";
+
+/** 標題主視覺：封面還是暫代的 SVG 時，用向量小橘站在山坡上頂著（B20）。 */
+const TITLE_COVER_SRC = gameBySlug("orange-express").art.cover;
+
+function TitleHero() {
+  return (
+    <div className={styles.titleHero} data-testid="orange-express-title-hero" aria-hidden>
+      {TITLE_COVER_SRC.endsWith(".svg") ? (
+        <span className={styles.titleHeroStandIn}>
+          <XiaojuFace className={styles.titleHeroFace} />
+        </span>
+      ) : (
+        <Image
+          src={TITLE_COVER_SRC}
+          alt=""
+          fill
+          loading="eager"
+          fetchPriority="high"
+          sizes="(min-width: 720px) 420px, calc(100vw - 32px)"
+          className={styles.titleHeroImage}
+        />
+      )}
+    </div>
+  );
+}
 
 type Screen = "title" | "drive" | "result";
 
@@ -467,6 +494,7 @@ export function OrangeExpressView({
   if (screen === "title" || !run) {
     return (
       <div className={styles.screen} data-screen="title" data-testid="orange-express-title">
+        <TitleHero />
         <p className={styles.route}>{COPY.routeName}</p>
         <div className={styles.levels} role="radiogroup" aria-label={COPY.routeName}>
           {LEVELS.map((id) => (

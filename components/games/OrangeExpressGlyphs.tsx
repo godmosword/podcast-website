@@ -46,7 +46,7 @@ export function XiaojuFace({ className }: { className?: string }) {
       <circle cx="26.1" cy="33.4" r="1.1" fill={SHINE} />
       <circle cx="40.1" cy="33.4" r="1.1" fill={SHINE} />
       <ellipse cx="17.5" cy="39.5" rx="3.4" ry="2.3" fill="rgb(255, 160, 165)" />
-      <ellipse cx="46.5" cy="37.8" rx="3.4" ry="2.3" fill="rgb(255, 160, 165)" />
+      <ellipse cx="46.5" cy="36" rx="3.4" ry="2.3" fill="rgb(255, 160, 165)" />
       <path d="M28.5 39.5c1.8 2.4 5.2 2.4 7 0" fill="none" stroke={INK} strokeWidth="2" strokeLinecap="round" />
       <ellipse cx="11.5" cy="31" rx="2" ry="5" fill={SHINE} opacity="0.7" transform="rotate(25 11.5 31)" />
     </svg>

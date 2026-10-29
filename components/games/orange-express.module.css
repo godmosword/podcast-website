@@ -23,8 +23,72 @@
   white-space: nowrap;
 }
 
+/* 標題主視覺（B20）：跟消消樂、壽司屋一樣，標題最上面一張有框的圖。封面生好前用向量小橘站在山坡上。 */
+.titleHero {
+  position: relative;
+  flex: 0 0 auto;
+  height: clamp(96px, 22svh, 200px);
+  overflow: hidden;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-md);
+  background: var(--card);
+}
+
+.titleHeroImage {
+  object-fit: cover;
+  object-position: 50% 45%;
+}
+
+.titleHeroStandIn {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--c-sky) 40%, var(--card)) 0 64%,
+    color-mix(in srgb, var(--ink) 22%, transparent) 64% calc(64% + 3px),
+    color-mix(in srgb, var(--c-mint) 70%, var(--card)) calc(64% + 3px)
+  );
+}
+
+.titleHeroFace {
+  width: auto;
+  height: 78%;
+  margin-bottom: 4%;
+}
+
+/* 很矮的直式手機：主視覺壓成一條，「開始開車」留在第一屏。 */
+@media (orientation: portrait) and (max-height: 600px) {
+  .titleHero {
+    height: 72px;
+  }
+}
+
+/* 橫拿手機：全寬會變成細長一條，封面只剩中間一線；改成 3:2 小框置中。 */
+@media (orientation: landscape) and (max-height: 520px) {
+  .titleHero {
+    align-self: center;
+    width: auto;
+    max-width: 100%;
+    height: 96px;
+    aspect-ratio: 3 / 2;
+  }
+}
+
+/* 桌機：框跟封面一樣 3:2、置中，換上封面時不會只剩中間一條，小橘的臉不會被切掉。 */
+@media (min-width: 720px) and (min-height: 521px) {
+  .titleHero {
+    align-self: center;
+    width: auto;
+    max-width: 100%;
+    height: clamp(180px, 32svh, 280px);
+    aspect-ratio: 3 / 2;
+  }
+}
+
 .route {
-  margin: 0;
+  margin: 4px 0 0;
   font-size: var(--fs-h3);
   font-weight: 900;
 }
@@ -1064,6 +1128,21 @@
   padding: 12px 8px 8px;
 }
 
+/* 到家的小橘（B10）。 */
+.resultXiaoju {
+  display: block;
+  width: 96px;
+  height: 96px;
+}
+
+.resultXiaoju svg,
+.resultXiaoju img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
 .result h2 {
   margin: 0;
   font-size: var(--fs-h2);
@@ -1243,6 +1322,14 @@
 
   .lampText {
     font-size: var(--fs-meta);
+  }
+}
+
+/* 桌機：中間那格很寬，小橘徽章放大，不再是站名旁邊一顆小點（B15）。 */
+@media (min-width: 1000px) and (min-height: 700px) {
+  .badge {
+    width: 88px;
+    height: 88px;
   }
 }
 
