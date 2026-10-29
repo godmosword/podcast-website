@@ -14,24 +14,51 @@ import {
 } from "./orange-express-art";
 
 const ROOT = join(__dirname, "..", "..");
-const games = readFileSync(join(ROOT, "data/games.ts"), "utf8");
-const art = readFileSync(join(ROOT, "lib/games/orange-express/art.ts"), "utf8");
+
+/** 核准前的樣子（固定資料）：真的 data/games.ts、art.ts 核准後就換掉了，轉換要用不會變的輸入測。 */
+const PLACEHOLDER_GAMES = [
+  "export const GAMES = [",
+  '  { slug: "candy-match", art: { cover: "/games/v2/candy-match/cover.webp", alt: "消消樂" } },',
+  "  {",
+  '    slug: "orange-express",',
+  "    art: {",
+  `      cover: "${COVER_SVG}",`,
+  `      thumbnail: "${COVER_SVG}",`,
+  '      alt: "奶油色圓臉、橘色條紋的小橘徽章",',
+  "    },",
+  "  },",
+  "];",
+  "",
+].join("\n");
+const PLACEHOLDER_ART = "export const XIAOJU_STICKER_SRC: string | null = null;\n";
 
 describe("小橘特快車生圖核准：自動換路徑", () => {
   it("data/games.ts：封面與縮圖都換成 cover.webp，替代文字換新；再跑一次不變", () => {
-    const once = switchGamesCover(games);
+    const once = switchGamesCover(PLACEHOLDER_GAMES);
     expect(once).not.toContain(COVER_SVG);
     expect(once.split(COVER_WEBP)).toHaveLength(3);
     expect(once).toContain(`alt: "${COVER_ALT}"`);
     expect(switchGamesCover(once)).toBe(once);
-    // 只動小橘特快車那幾行，其他遊戲不變。
-    expect(once.split("\n").filter((line, i) => line !== games.split("\n")[i])).toHaveLength(3);
+    // 只動小橘特快車那三行，其他遊戲不變。
+    const before = PLACEHOLDER_GAMES.split("\n");
+    expect(once.split("\n").filter((line, i) => line !== before[i])).toHaveLength(3);
   });
 
   it("art.ts：貼紙路徑從 null 換成 xiaoju-sticker.webp；再跑一次不變", () => {
-    const once = switchStickerSrc(art);
+    const once = switchStickerSrc(PLACEHOLDER_ART);
     expect(once).toContain(`XIAOJU_STICKER_SRC: string | null = "${STICKER_WEBP}"`);
     expect(switchStickerSrc(once)).toBe(once);
+  });
+
+  it("真的 data/games.ts 與 art.ts 不是還沒換、就是已經換好：核准前後都換得動，換完不再變", () => {
+    for (const [path, change] of [
+      ["data/games.ts", switchGamesCover],
+      ["lib/games/orange-express/art.ts", switchStickerSrc],
+    ] as const) {
+      const source = readFileSync(join(ROOT, path), "utf8");
+      const switched = change(source);
+      expect(change(switched), path).toBe(switched);
+    }
   });
 
   it("找不到要換的地方就丟，不默默略過", () => {
