@@ -20,15 +20,6 @@ const PHONE: BoardView = { width: 390, height: 520 };
 const NARROW: BoardView = { width: 320, height: 420 };
 const DESKTOP: BoardView = { width: 1280, height: 720 };
 
-function run(view: BoardView, seconds: number): BoardSimState {
-  let state = createBoardSim(loadEpisodeBoard().actors);
-  const frames = Math.round(seconds * 30);
-  for (let frame = 0; frame < frames; frame += 1) {
-    state = stepBoard(state, 1 / 30, view);
-  }
-  return state;
-}
-
 describe("episode board simulation", () => {
   it("用 rAF timestamp 計時，暫停時不累積、單格有上限", () => {
     expect(deltaSeconds(1000, null, false)).toEqual({ dt: 0, last: 1000 });
@@ -114,9 +105,19 @@ describe("episode board simulation", () => {
     expect(jumped.age).toBeCloseTo(0.05);
   });
 
-  it("空名單不會壞", () => {
+  it("空名單不會壞，整隊車每幀模擬夠快", () => {
     const state = createBoardSim([]);
     expect(stepBoard(state, 0.2, PHONE)).toBe(state);
-    expect(run(PHONE, 0.1).actors.length).toBe(3);
+    const cast = loadEpisodeBoard().actors;
+    expect(cast.length).toBeGreaterThan(4);
+    let moving = createBoardSim(cast);
+    const started = performance.now();
+    const frames = 180;
+    for (let frame = 0; frame < frames; frame += 1) {
+      moving = stepBoard(moving, 1 / 30, PHONE);
+    }
+    const avgMs = (performance.now() - started) / frames;
+    expect(avgMs).toBeLessThan(4);
+    expect(actorPropClearance(moving)).toBeGreaterThanOrEqual(-0.2);
   });
 });

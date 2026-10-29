@@ -927,7 +927,8 @@ for (const viewportId of Object.keys(VIEWPORTS) as VisualViewportId[]) {
       await board.scrollIntoViewIfNeeded();
       await expect(page.locator(`[data-active-segment="segment-episode-board"]`)).toBeAttached();
       await expect(board).toHaveAttribute("data-motion", "reduced");
-      await expect(board.locator("canvas")).toHaveAttribute("data-ready", "true");
+      await expect(board).toHaveAttribute("data-ready", "true");
+      await expect(board.locator("[data-zone='car-park'] img")).toBeVisible();
       await expect(page).toHaveScreenshot(
         `episode-board-${viewport.label}-${theme}.png`,
         {

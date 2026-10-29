@@ -45,7 +45,7 @@ describe("EpisodeBoard", () => {
     );
     expect(screen.getByRole("heading", { name: "這一集的車車" })).toBeTruthy();
     expect(screen.getByRole("button", { name: /恐龍車多多/ })).toBeTruthy();
-    expect(screen.getByRole("button", { name: /小紅賽車/ })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /小紅賽車，/ })).toBeTruthy();
     expect(screen.getByRole("button", { name: /小貨車灰灰/ })).toBeTruthy();
     expect(document.querySelector("a[href^='http']")).toBeNull();
 

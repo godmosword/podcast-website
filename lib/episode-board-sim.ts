@@ -1,120 +1,78 @@
 import type { BoardActionId, BoardCharacterId } from "@/lib/episode-board-types";
 
-/** 按鈕直徑 48 加上相鄰 8。車身若畫得更大，間隔再跟著加。 */
+/** 按鈕直徑 48 加上相鄰 8。 */
 export const MIN_ACTOR_SCREEN_GAP = 56;
 
-/** 跟畫面縮放同一套，讓碰撞間隔蓋得住車身，而不只是圓心。 */
-export function spriteScale(view: BoardView): number {
-  const basis = Math.min(view.width, view.height);
-  return Math.max(2.8, Math.min(4.8, basis / 128));
-}
-
-export function minActorScreenGap(view: BoardView): number {
-  return Math.max(MIN_ACTOR_SCREEN_GAP, spriteScale(view) * 22 + 8);
-}
-
-/** 畫布裝置像素比上限。再高只是多畫像素，手機不划算。 */
+/** 畫布裝置像素比上限。地圖改走宇宙地圖的圖片層之後，這仍給需要畫布的測試用。 */
 export const MAX_CANVAS_DPR = 2;
 
-const SPAN_X = 92;
-const SPAN_Y = 150;
-const ORIGIN_V = 0.1;
-const ACTOR_RADIUS = 4.8;
+const ACTOR_RADIUS = 4.2;
 const SUBSTEP = 1 / 30;
 
-export type BoardView = {
-  width: number;
-  height: number;
-};
+export type BoardView = { width: number; height: number };
 
-export type TownPropKind = "cottage" | "tree" | "pond" | "light" | "candy";
+/** 跟宇宙地圖同一組島：車車樂園在中間，其餘四島分開。 */
+export type BoardIslandId = "forest" | "dino" | "rescue" | "car-park" | "ocean";
 
-export type TownProp = {
-  id: string;
-  kind: TownPropKind;
+export type BoardIsland = {
+  id: BoardIslandId;
+  /** 舞台百分比，沙岸底中心（對齊島圖 anchor）。 */
   x: number;
   y: number;
+  /** 碰撞圓半徑（舞台百分比）。 */
   r: number;
+  /** 島圖寬度占舞台寬的百分比。 */
+  width: number;
 };
 
-export type Waypoint = {
-  x: number;
-  y: number;
-  gate?: boolean;
-};
-
-export const TOWN_PROPS: readonly TownProp[] = [
-  { id: "cottage", kind: "cottage", x: 30, y: 26, r: 6.2 },
-  { id: "tree-east", kind: "tree", x: 60, y: 22, r: 4.2 },
-  { id: "tree-west", kind: "tree", x: 18, y: 30, r: 4.2 },
-  { id: "pond", kind: "pond", x: 62, y: 28, r: 6.4 },
-  { id: "light", kind: "light", x: 48, y: 40, r: 2.6 },
-  { id: "candy", kind: "candy", x: 36, y: 10, r: 2.8 },
+export const BOARD_ISLANDS: readonly BoardIsland[] = [
+  { id: "forest", x: 50, y: 20, r: 8, width: 30 },
+  { id: "dino", x: 16, y: 34, r: 7.5, width: 26 },
+  { id: "rescue", x: 84, y: 34, r: 7.5, width: 26 },
+  { id: "car-park", x: 50, y: 50, r: 10, width: 36 },
+  { id: "ocean", x: 28, y: 74, r: 7.5, width: 26 },
 ];
 
-const LIGHT_PROP = TOWN_PROPS.find((prop) => prop.kind === "light")!;
+/** 紅綠燈是海上的小建物，車不能穿過去。 */
+export const BOARD_LIGHT = { id: "light", x: 70, y: 62, r: 3 } as const;
 
-type Slot = {
-  path: readonly Waypoint[];
-};
+type Obstacle = { id: string; x: number; y: number; r: number };
 
-/** 路線刻意分開。紅綠燈那條有 gate，會變成機器人的紅車也走這條。 */
-const SLOTS: readonly Slot[] = [
-  {
-    path: [
-      { x: 48, y: 14 },
-      { x: 58, y: 16 },
-      { x: 54, y: 22 },
-      { x: 42, y: 16 },
-    ],
-  },
-  {
-    path: [
-      { x: 28, y: 34 },
-      { x: 54, y: 48, gate: true },
-      { x: 58, y: 34 },
-      { x: 40, y: 36 },
-      { x: 32, y: 40 },
-    ],
-  },
-  {
-    path: [
-      { x: 24, y: 50 },
-      { x: 36, y: 54 },
-      { x: 28, y: 60 },
-      { x: 20, y: 54 },
-    ],
-  },
-  {
-    path: [
-      { x: 40, y: 56 },
-      { x: 52, y: 58 },
-      { x: 46, y: 64 },
-      { x: 36, y: 60 },
-    ],
-  },
+const OBSTACLES: readonly Obstacle[] = [
+  ...BOARD_ISLANDS.map((island) => ({ id: island.id, x: island.x, y: island.y, r: island.r })),
+  BOARD_LIGHT,
 ];
 
-const SLOT_PREFERENCE: Partial<Record<BoardActionId, number>> = {
-  "brush-teeth": 0,
-  sweep: 0,
-  "wait-light": 1,
-  "transform-robot": 1,
-  drive: 1,
-  "paint-self": 2,
-  dig: 3,
-  idle: 2,
-};
+export type Waypoint = { x: number; y: number; gate?: boolean };
+
+type Home = { x: number; y: number; gate?: boolean };
+
+/** 起點都在島與島之間的海面上，彼此在 320px 寬時仍隔得開。 */
+const HOMES: readonly Home[] = [
+  { x: 8, y: 22 },
+  { x: 58, y: 64, gate: true },
+  { x: 78, y: 18 },
+  { x: 8, y: 48 },
+  { x: 88, y: 48 },
+  { x: 70, y: 82 },
+  { x: 88, y: 78 },
+  { x: 8, y: 88 },
+  { x: 62, y: 28 },
+  { x: 48, y: 90 },
+  { x: 92, y: 8 },
+  { x: 22, y: 60 },
+];
 
 const SPEED: Record<BoardActionId, number> = {
   idle: 0,
-  drive: 6,
-  "brush-teeth": 3.2,
-  "wait-light": 6,
-  "paint-self": 4.2,
-  "transform-robot": 5,
-  dig: 2.4,
-  sweep: 3.6,
+  drive: 5,
+  "brush-teeth": 3,
+  "wait-light": 5,
+  "paint-self": 3.6,
+  "transform-robot": 4.4,
+  dig: 2.2,
+  lift: 2.2,
+  sweep: 3.2,
 };
 
 export type LightPhase = "stop" | "count" | "go";
@@ -123,7 +81,6 @@ export type BoardPose = {
   bob: number;
   robot: number;
   brush: number;
-  /** 0、1、2 是借來的顏色，3 是自己原來的顏色。 */
   paint: 0 | 1 | 2 | 3;
   dig: number;
   sweep: number;
@@ -144,10 +101,7 @@ export type SimActor = {
   waiting: boolean;
 };
 
-export type BoardSimState = {
-  age: number;
-  actors: SimActor[];
-};
+export type BoardSimState = { age: number; actors: SimActor[] };
 
 export type BoardSpawn = {
   id: string;
@@ -155,25 +109,23 @@ export type BoardSpawn = {
   action: BoardActionId;
 };
 
+export function minActorScreenGap(view?: BoardView): number {
+  void view;
+  return MIN_ACTOR_SCREEN_GAP;
+}
+
+/** 舞台百分比 → 0–1，給按鈕的 translate 用。y 越大越靠近鏡頭。 */
 export function projectNorm(x: number, y: number): { u: number; v: number } {
-  return {
-    u: 0.5 + (x - y) / SPAN_X,
-    v: ORIGIN_V + (x + y) / SPAN_Y,
-  };
+  return { u: x / 100, v: y / 100 };
 }
 
-export function screenPoint(
-  x: number,
-  y: number,
-  view: BoardView,
-): { x: number; y: number } {
-  const norm = projectNorm(x, y);
-  return { x: norm.u * view.width, y: norm.v * view.height };
+export function screenPoint(x: number, y: number, view: BoardView): { x: number; y: number } {
+  return { x: (x / 100) * view.width, y: (y / 100) * view.height };
 }
 
-/** 等角深度：x + y 越大越靠近鏡頭，要後畫。 */
+/** 與宇宙地圖相同：y 越大越靠近鏡頭，要後畫。 */
 export function depthKey(x: number, y: number, bias = 0): number {
-  return x + y + bias;
+  return y + bias + x * 0.0001;
 }
 
 export type DrawEntity = {
@@ -182,26 +134,22 @@ export type DrawEntity = {
   x: number;
   y: number;
   depth: number;
-  prop?: TownProp;
-  actor?: SimActor;
 };
 
 export function sortDrawOrder(state: BoardSimState): DrawEntity[] {
-  const props: DrawEntity[] = TOWN_PROPS.map((prop) => ({
+  const props: DrawEntity[] = OBSTACLES.map((prop) => ({
     id: prop.id,
-    kind: "prop",
+    kind: "prop" as const,
     x: prop.x,
     y: prop.y,
     depth: depthKey(prop.x, prop.y),
-    prop,
   }));
   const actors: DrawEntity[] = state.actors.map((actor) => ({
     id: actor.id,
-    kind: "actor",
+    kind: "actor" as const,
     x: actor.x,
     y: actor.y,
     depth: depthKey(actor.x, actor.y, 0.35),
-    actor,
   }));
   return [...props, ...actors].sort((a, b) => a.depth - b.depth);
 }
@@ -213,11 +161,7 @@ export function lightPhase(age: number): LightPhase {
   return "go";
 }
 
-export function poseFor(
-  action: BoardActionId,
-  age: number,
-  waiting: boolean,
-): BoardPose {
+export function poseFor(action: BoardActionId, age: number, waiting: boolean): BoardPose {
   const bob = action === "idle" || waiting ? 0 : Math.sin(age * 3.2);
   const cycle = ((age % 4) + 4) % 4;
   let robot = 0;
@@ -228,22 +172,19 @@ export function poseFor(
   }
   const paintSlot = Math.floor((((age % 4.8) + 4.8) % 4.8) / 1.2);
   const paint = (paintSlot > 3 ? 3 : paintSlot) as 0 | 1 | 2 | 3;
+  const swing = (((age % 1.6) + 1.6) % 1.6) / 1.6;
   return {
     bob,
     robot,
-    brush: ((age % 1.1) + 1.1) % 1.1 / 1.1,
+    brush: (((age % 1.1) + 1.1) % 1.1) / 1.1,
     paint: action === "paint-self" ? paint : 3,
-    dig: ((age % 1.6) + 1.6) % 1.6 / 1.6,
-    sweep: ((age % 0.8) + 0.8) % 0.8 / 0.8,
+    dig: action === "dig" || action === "lift" ? swing : 0,
+    sweep: (((age % 0.8) + 0.8) % 0.8) / 0.8,
     waiting,
   };
 }
 
-export function canvasPixelSize(
-  cssWidth: number,
-  cssHeight: number,
-  dpr: number,
-): { ratio: number; width: number; height: number } {
+export function canvasPixelSize(cssWidth: number, cssHeight: number, dpr: number) {
   const ratio = Math.min(MAX_CANVAS_DPR, Math.max(1, Number.isFinite(dpr) ? dpr : 1));
   return {
     ratio,
@@ -260,38 +201,19 @@ export function boardClockPaused(input: {
   return input.reduced || !input.visible || !input.pageVisible;
 }
 
-/**
- * 用 rAF 的 timestamp 算這格要前進多少秒。
- * 暫停時把 last 更新成現在，恢復後才不會一次跳很遠。
- * 單格最多 50ms，避免切回分頁的第一格穿模。
- */
-export function deltaSeconds(
-  now: number,
-  last: number | null,
-  paused: boolean,
-): { dt: number; last: number } {
+export function deltaSeconds(now: number, last: number | null, paused: boolean) {
   if (last === null || paused || !Number.isFinite(now)) {
     return { dt: 0, last: Number.isFinite(now) ? now : 0 };
   }
-  const dt = Math.min(0.05, Math.max(0, (now - last) / 1000));
-  return { dt, last: now };
+  return { dt: Math.min(0.05, Math.max(0, (now - last) / 1000)), last: now };
 }
 
 export function createBoardSim(spawns: readonly BoardSpawn[]): BoardSimState {
   const used = new Set<number>();
-  const actors: SimActor[] = spawns.map((spawn) => {
-    const preferred = SLOT_PREFERENCE[spawn.action] ?? 0;
-    let slot = preferred;
-    if (used.has(slot)) {
-      slot = SLOTS.findIndex((_, index) => !used.has(index));
-      if (slot < 0) slot = 0;
-    }
-    used.add(slot);
-    const path = SLOTS[slot]?.path ?? SLOTS[0]!.path;
-    const gateIndex = path.findIndex((point) => point.gate);
-    const startIndex =
-      spawn.action === "wait-light" && gateIndex >= 0 ? gateIndex : 0;
-    const start = path[startIndex] ?? path[0]!;
+  const actors = spawns.map((spawn) => {
+    const home = takeHome(spawn.action === "wait-light", used);
+    const path = loopAround(home.x, home.y, Boolean(home.gate));
+    const start = path[0]!;
     return {
       id: spawn.id,
       character: spawn.character,
@@ -300,20 +222,30 @@ export function createBoardSim(spawns: readonly BoardSpawn[]): BoardSimState {
       y: start.y,
       r: ACTOR_RADIUS,
       path,
-      pathIndex: startIndex,
+      pathIndex: 0,
       age: spawn.action === "paint-self" ? 3.6 : 0,
       stuck: 0,
-      waiting: spawn.action === "wait-light" && gateIndex >= 0,
+      waiting: Boolean(home.gate && spawn.action === "wait-light"),
     };
   });
   return { age: 0, actors };
 }
 
-export function stepBoard(
-  state: BoardSimState,
-  dt: number,
-  view: BoardView,
-): BoardSimState {
+function takeHome(preferGate: boolean, used: Set<number>): Home {
+  if (preferGate) {
+    const gate = HOMES.findIndex((home, index) => home.gate && !used.has(index));
+    if (gate >= 0) {
+      used.add(gate);
+      return HOMES[gate]!;
+    }
+  }
+  const free = HOMES.findIndex((_, index) => !used.has(index));
+  const index = free >= 0 ? free : used.size % HOMES.length;
+  used.add(index);
+  return HOMES[index]!;
+}
+
+export function stepBoard(state: BoardSimState, dt: number, view: BoardView): BoardSimState {
   const safeDt = Math.min(0.05, Math.max(0, dt));
   if (safeDt === 0 || state.actors.length === 0) return state;
   const actors = state.actors.map((actor) => ({ ...actor }));
@@ -335,10 +267,7 @@ export function stepBoard(
   return { age, actors };
 }
 
-export function actorScreenGap(
-  state: BoardSimState,
-  view: BoardView,
-): number {
+export function actorScreenGap(state: BoardSimState, view: BoardView): number {
   let min = Infinity;
   for (let i = 0; i < state.actors.length; i += 1) {
     for (let j = i + 1; j < state.actors.length; j += 1) {
@@ -353,12 +282,20 @@ export function actorScreenGap(
 export function actorPropClearance(state: BoardSimState): number {
   let min = Infinity;
   for (const actor of state.actors) {
-    for (const prop of TOWN_PROPS) {
-      const dist = Math.hypot(actor.x - prop.x, actor.y - prop.y);
-      min = Math.min(min, dist - actor.r - prop.r);
+    for (const prop of OBSTACLES) {
+      min = Math.min(min, Math.hypot(actor.x - prop.x, actor.y - prop.y) - actor.r - prop.r);
     }
   }
   return min;
+}
+
+function loopAround(x: number, y: number, gate: boolean): Waypoint[] {
+  return [
+    { x, y, gate },
+    { x: clampNum(x + 3), y: clampNum(y + 1.2) },
+    { x: clampNum(x + 0.4), y: clampNum(y + 3.2) },
+    { x: clampNum(x - 2.4), y: clampNum(y + 1) },
+  ];
 }
 
 function advanceActor(actor: SimActor, h: number, age: number) {
@@ -397,8 +334,20 @@ function advanceActor(actor: SimActor, h: number, age: number) {
 
 function separateFromProps(actors: SimActor[]) {
   for (const actor of actors) {
-    for (const prop of TOWN_PROPS) {
-      pushApart(actor, prop.x, prop.y, actor.r + prop.r, 1);
+    for (const prop of OBSTACLES) {
+      let dx = actor.x - prop.x;
+      let dy = actor.y - prop.y;
+      let dist = Math.hypot(dx, dy);
+      const min = actor.r + prop.r;
+      if (dist >= min) continue;
+      if (dist < 0.001) {
+        dx = 1;
+        dy = 0;
+        dist = 1;
+      }
+      const push = (min - dist) / dist;
+      actor.x += dx * push;
+      actor.y += dy * push;
     }
   }
 }
@@ -424,6 +373,7 @@ function separateActors(actors: SimActor[]) {
 
 function separateOnScreen(actors: SimActor[], view: BoardView) {
   if (view.width < 8 || view.height < 8) return;
+  const minGap = MIN_ACTOR_SCREEN_GAP;
   for (let i = 0; i < actors.length; i += 1) {
     for (let j = i + 1; j < actors.length; j += 1) {
       const a = actors[i]!;
@@ -433,58 +383,29 @@ function separateOnScreen(actors: SimActor[], view: BoardView) {
       let dx = bs.x - as.x;
       let dy = bs.y - as.y;
       let dist = Math.hypot(dx, dy);
-      const minGap = minActorScreenGap(view);
       if (dist >= minGap) continue;
       if (dist < 0.5) {
         dx = 1;
         dy = 0;
         dist = 1;
       }
-      const need = Math.min(24, (minGap - dist) / 2);
-      nudgeByScreen(a, (-dx / dist) * need, (-dy / dist) * need, view);
-      nudgeByScreen(b, (dx / dist) * need, (dy / dist) * need, view);
+      const need = Math.min(18, (minGap - dist) / 2);
+      nudge(a, (-dx / dist) * need, (-dy / dist) * need, view);
+      nudge(b, (dx / dist) * need, (dy / dist) * need, view);
     }
   }
 }
 
-function pushApart(
-  actor: SimActor,
-  x: number,
-  y: number,
-  min: number,
-  share: number,
-) {
-  let dx = actor.x - x;
-  let dy = actor.y - y;
-  let dist = Math.hypot(dx, dy);
-  if (dist >= min) return;
-  if (dist < 0.001) {
-    dx = 1;
-    dy = 0;
-    dist = 1;
-  }
-  const push = ((min - dist) / dist) * share;
-  actor.x += dx * push;
-  actor.y += dy * push;
-}
-
-function nudgeByScreen(
-  actor: SimActor,
-  dpx: number,
-  dpy: number,
-  view: BoardView,
-) {
-  const du = dpx / view.width;
-  const dv = dpy / view.height;
-  actor.x += (du * SPAN_X + dv * SPAN_Y) / 2;
-  actor.y += (dv * SPAN_Y - du * SPAN_X) / 2;
+function nudge(actor: SimActor, dpx: number, dpy: number, view: BoardView) {
+  actor.x += (dpx / view.width) * 100;
+  actor.y += (dpy / view.height) * 100;
 }
 
 function clampActor(actor: SimActor) {
-  actor.x = Math.min(74, Math.max(12, actor.x));
-  actor.y = Math.min(66, Math.max(8, actor.y));
+  actor.x = clampNum(actor.x);
+  actor.y = clampNum(actor.y);
 }
 
-export function nearestLightDistance(actor: SimActor): number {
-  return Math.hypot(actor.x - LIGHT_PROP.x, actor.y - LIGHT_PROP.y);
+function clampNum(value: number): number {
+  return Math.min(94, Math.max(6, value));
 }

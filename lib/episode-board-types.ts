@@ -4,8 +4,13 @@ export const BOARD_CHARACTER_IDS = [
   "xiao-hong",
   "hui-hui",
   "dong-dong",
+  "diao-che",
   "ling-ling",
   "an-an",
+  "lan-ba-shi",
+  "monster-truck",
+  "a-ku",
+  "xiang-xiang",
   "watt",
 ] as const;
 
@@ -20,6 +25,7 @@ export const BOARD_ACTION_IDS = [
   "paint-self",
   "transform-robot",
   "dig",
+  "lift",
   "sweep",
 ] as const;
 

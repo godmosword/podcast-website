@@ -1,10 +1,17 @@
 import { describe, expect, it } from "vitest";
+import { universe } from "@/data/universe";
+import { ISLAND_STATUS } from "@/components/landing/EpisodeBoardMap";
 import { loadEpisodeBoard, parseEpisodeBoard } from "@/lib/episode-board";
 
 describe("episode board JSON", () => {
   it("最新一筆是多多刷牙，而且每筆都是站內故事", () => {
     const board = loadEpisodeBoard();
-    expect(board.actors.map((actor) => actor.id)).toEqual(["ep-35", "ep-34", "ep-33"]);
+    expect(board.actors.map((actor) => actor.id).slice(0, 3)).toEqual([
+      "ep-35",
+      "ep-34",
+      "ep-33",
+    ]);
+    expect(board.actors.length).toBeGreaterThan(4);
     expect(board.actors[0]).toMatchObject({
       character: "duo-duo",
       action: "brush-teeth",
@@ -101,19 +108,38 @@ describe("episode board JSON", () => {
     expect(parseEpisodeBoard([]).actors).toEqual([]);
   });
 
-  it("超過四台就不再加，頁面仍看得到前面的車", () => {
-    const episodes = ["duo-duo", "xiao-hong", "hui-hui", "dong-dong", "ling-ling"].map(
-      (character, index) => ({
-        id: `ep-${index + 1}`,
-        character,
-        action: "idle",
-        title: `第 ${index + 1} 台`,
-        summary: "在小鎮裡",
-        href: `/story/ep-${index + 1}`,
-      }),
-    );
+  it("不再限制台上車車的數量", () => {
+    const ids = [
+      "duo-duo",
+      "xiao-hong",
+      "hui-hui",
+      "dong-dong",
+      "diao-che",
+      "ling-ling",
+      "an-an",
+      "lan-ba-shi",
+      "monster-truck",
+      "a-ku",
+      "xiang-xiang",
+      "watt",
+    ];
+    const episodes = ids.map((character, index) => ({
+      id: `ep-${index + 1}`,
+      character,
+      action: "idle",
+      title: `第 ${index + 1} 台`,
+      summary: "在海上",
+      href: `/story/ep-${index + 1}`,
+    }));
     const board = parseEpisodeBoard({ version: 1, episodes });
-    expect(board.actors).toHaveLength(4);
-    expect(board.dropped.at(-1)?.reason).toBe("over-capacity");
+    expect(board.actors).toHaveLength(ids.length);
+    expect(board.dropped).toEqual([]);
+    expect(loadEpisodeBoard().actors.length).toBeGreaterThan(4);
+  });
+
+  it("五島狀態跟宇宙地圖同一份資料", () => {
+    for (const zone of universe.zones) {
+      expect(ISLAND_STATUS[zone.id]).toBe(zone.status);
+    }
   });
 });

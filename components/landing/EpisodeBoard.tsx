@@ -18,7 +18,6 @@ import { isSafeInternalHref } from "@/lib/episode-board-href";
 import { transitionLandingToAnchor } from "@/lib/landing-scroll";
 import {
   boardClockPaused,
-  canvasPixelSize,
   createBoardSim,
   deltaSeconds,
   projectNorm,
@@ -26,8 +25,10 @@ import {
   type BoardSimState,
   type BoardView,
 } from "@/lib/episode-board-sim";
+import { mapDepthZ } from "@/lib/universe-depth";
 import type { EpisodeBoardActor } from "@/lib/episode-board-types";
-import { drawTown, readBoardPalette } from "./episode-board-draw";
+import EpisodeBoardActorArt from "./EpisodeBoardActorArt";
+import EpisodeBoardMap from "./EpisodeBoardMap";
 import styles from "./EpisodeBoard.module.css";
 
 type EpisodeBoardProps = {
@@ -47,7 +48,6 @@ export default function EpisodeBoard({ actors, nextAnchorId }: EpisodeBoardProps
 
   const sectionRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const returnFocusRef = useRef<HTMLButtonElement | null>(null);
   const slotRefs = useRef(new Map<string, HTMLDivElement>());
@@ -67,17 +67,25 @@ export default function EpisodeBoard({ actors, nextAnchorId }: EpisodeBoardProps
   useEffect(() => {
     const section = sectionRef.current;
     const stage = stageRef.current;
-    const canvas = canvasRef.current;
-    if (!section || !stage || !canvas) return;
+    if (!section || !stage) return;
 
     let stopped = false;
     let raf = 0;
     let last: number | null = null;
+    let lastTs: number | null = null;
     let visible = false;
     let pageVisible = document.visibilityState !== "hidden";
     const motionQuery = window.matchMedia?.("(prefers-reduced-motion: reduce)");
     let reduced = Boolean(motionQuery?.matches);
     let sim: BoardSimState = createBoardSim(safeActors);
+    let simAcc = 0;
+    let wallAcc = 0;
+    let samples = 0;
+
+    const viewOf = (): BoardView => ({
+      width: Math.max(1, stage.clientWidth),
+      height: Math.max(1, stage.clientHeight),
+    });
 
     const placeSlots = (state: BoardSimState) => {
       for (const actor of state.actors) {
@@ -86,42 +94,43 @@ export default function EpisodeBoard({ actors, nextAnchorId }: EpisodeBoardProps
         const norm = projectNorm(actor.x, actor.y);
         slot.style.setProperty("--u", `${norm.u * 100}%`);
         slot.style.setProperty("--v", `${norm.v * 100}%`);
+        slot.style.zIndex = String(mapDepthZ(actor.y, "roamer"));
       }
     };
 
-    const paint = (state: BoardSimState) => {
-      const view = viewOf(canvas, stage);
-      placeSlots(state);
-      const prepared = prepareCanvas(canvas, window.devicePixelRatio || 1, view);
-      if (!prepared) return;
-      drawTown(
-        prepared,
-        view,
-        state,
-        readBoardPalette(getComputedStyle(stage)),
-        getComputedStyle(section).fontFamily || "sans-serif",
-      );
-      canvas.dataset.ready = "true";
-    };
-
-    const pausedNow = () =>
-      boardClockPaused({ reduced, visible, pageVisible });
+    const pausedNow = () => boardClockPaused({ reduced, visible, pageVisible });
 
     const applyFlags = () => {
       section.setAttribute("data-motion", reduced ? "reduced" : "full");
       section.setAttribute("data-paused", pausedNow() ? "true" : "false");
+      section.dataset.ready = "true";
+    };
+
+    const publishFrame = (simMs: number, wallMs: number) => {
+      simAcc += simMs;
+      wallAcc += wallMs;
+      samples += 1;
+      if (samples < 12) return;
+      section.dataset.simMs = (simAcc / samples).toFixed(2);
+      section.dataset.frameMs = (wallAcc / samples).toFixed(2);
+      section.dataset.frames = String(samples);
+      simAcc = 0;
+      wallAcc = 0;
+      samples = 0;
     };
 
     const loop = (ts: number) => {
       if (stopped) return;
+      const wall = lastTs === null ? 16 : ts - lastTs;
+      lastTs = ts;
       const paused = pausedNow();
       const clock = deltaSeconds(ts, last, paused);
       last = clock.last;
-      if (!paused && clock.dt > 0) {
-        sim = stepBoard(sim, clock.dt, viewOf(canvas, stage));
-      }
+      const started = performance.now();
+      if (!paused && clock.dt > 0) sim = stepBoard(sim, clock.dt, viewOf());
+      placeSlots(sim);
+      publishFrame(performance.now() - started, wall);
       applyFlags();
-      paint(sim);
       if (!paused) raf = window.requestAnimationFrame(loop);
     };
 
@@ -131,8 +140,9 @@ export default function EpisodeBoard({ actors, nextAnchorId }: EpisodeBoardProps
       raf = 0;
       last = null;
       if (reduced) sim = createBoardSim(safeActors);
+      lastTs = null;
+      placeSlots(sim);
       applyFlags();
-      paint(sim);
       if (!pausedNow()) raf = window.requestAnimationFrame(loop);
     };
 
@@ -164,15 +174,9 @@ export default function EpisodeBoard({ actors, nextAnchorId }: EpisodeBoardProps
 
     let resize: ResizeObserver | null = null;
     if (typeof ResizeObserver !== "undefined") {
-      resize = new ResizeObserver(() => paint(sim));
+      resize = new ResizeObserver(() => placeSlots(sim));
       resize.observe(stage);
     }
-
-    const theme = new MutationObserver(() => paint(sim));
-    theme.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["data-theme", "data-bedtime"],
-    });
 
     kick();
 
@@ -181,7 +185,6 @@ export default function EpisodeBoard({ actors, nextAnchorId }: EpisodeBoardProps
       window.cancelAnimationFrame(raf);
       observer?.disconnect();
       resize?.disconnect();
-      theme.disconnect();
       document.removeEventListener("visibilitychange", onPage);
       motionQuery?.removeEventListener?.("change", onMotion);
     };
@@ -238,43 +241,46 @@ export default function EpisodeBoard({ actors, nextAnchorId }: EpisodeBoardProps
         </p>
       </header>
       <div ref={stageRef} className={styles.stage}>
-        <canvas ref={canvasRef} className={styles.canvas} aria-hidden="true" />
-        {safeActors.length === 0 ? (
-          <p className={styles.empty}>車車還在路上，晚點再來找他們。</p>
-        ) : null}
-        {safeActors.map((actor, index) => {
-          const spot = initial.actors.find((item) => item.id === actor.id);
-          const norm = projectNorm(spot?.x ?? 40, spot?.y ?? 40);
-          return (
-            <div
-              key={actor.id}
-              className={styles.actorSlot}
-              ref={(node) => {
-                if (node) slotRefs.current.set(actor.id, node);
-                else slotRefs.current.delete(actor.id);
-              }}
-              style={
-                {
-                  "--u": `${norm.u * 100}%`,
-                  "--v": `${norm.v * 100}%`,
-                } as CSSProperties
-              }
-            >
-              <button
-                type="button"
-                className={styles.hit}
-                aria-pressed={openId === actor.id}
-                aria-haspopup="dialog"
-                onClick={(event) => openFrom(actor, event.currentTarget)}
-                onKeyDown={(event) => onActorKeyDown(event, index)}
+        <EpisodeBoardMap>
+          {safeActors.length === 0 ? (
+            <p className={styles.empty}>車車還在路上，晚點再來找他們。</p>
+          ) : null}
+          {safeActors.map((actor, index) => {
+            const spot = initial.actors.find((item) => item.id === actor.id);
+            const norm = projectNorm(spot?.x ?? 40, spot?.y ?? 40);
+            return (
+              <div
+                key={actor.id}
+                className={styles.actorSlot}
+                ref={(node) => {
+                  if (node) slotRefs.current.set(actor.id, node);
+                  else slotRefs.current.delete(actor.id);
+                }}
+                style={
+                  {
+                    "--u": `${norm.u * 100}%`,
+                    "--v": `${norm.v * 100}%`,
+                    zIndex: mapDepthZ(spot?.y ?? 40, "roamer"),
+                  } as CSSProperties
+                }
               >
-                <span className="sr-only">
-                  {actor.name}，{actor.actionLabel}。{actor.title}
-                </span>
-              </button>
-            </div>
-          );
-        })}
+                <button
+                  type="button"
+                  className={styles.hit}
+                  aria-pressed={openId === actor.id}
+                  aria-haspopup="dialog"
+                  onClick={(event) => openFrom(actor, event.currentTarget)}
+                  onKeyDown={(event) => onActorKeyDown(event, index)}
+                >
+                  <EpisodeBoardActorArt character={actor.character} action={actor.action} />
+                  <span className="sr-only">
+                    {actor.name}，{actor.actionLabel}。{actor.title}
+                  </span>
+                </button>
+              </div>
+            );
+          })}
+        </EpisodeBoardMap>
       </div>
       <div className={styles.dock}>
         <a
@@ -312,28 +318,4 @@ export default function EpisodeBoard({ actors, nextAnchorId }: EpisodeBoardProps
       ) : null}
     </section>
   );
-}
-
-function viewOf(canvas: HTMLCanvasElement, stage: HTMLElement): BoardView {
-  return {
-    width: Math.max(1, canvas.clientWidth || stage.clientWidth || 1),
-    height: Math.max(1, canvas.clientHeight || stage.clientHeight || 1),
-  };
-}
-
-function prepareCanvas(
-  canvas: HTMLCanvasElement,
-  dpr: number,
-  view: BoardView,
-): CanvasRenderingContext2D | null {
-  if (view.width < 2 || view.height < 2) return null;
-  const size = canvasPixelSize(view.width, view.height, dpr);
-  if (canvas.width !== size.width || canvas.height !== size.height) {
-    canvas.width = size.width;
-    canvas.height = size.height;
-  }
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return null;
-  ctx.setTransform(size.ratio, 0, 0, size.ratio, 0, 0);
-  return ctx;
 }

@@ -68,25 +68,33 @@ test.describe("首頁每集角色看板", () => {
     const board = page.locator("#segment-episode-board");
     await board.scrollIntoViewIfNeeded();
     await expect(board).toHaveAttribute("data-motion", "reduced");
-    await expect(board.locator("canvas")).toHaveAttribute("data-ready", "true");
+    await expect(board).toHaveAttribute("data-ready", "true");
+    await expect(board.locator("[data-zone='car-park'] img")).toBeVisible();
 
     const first = board.getByRole("button", { name: /恐龍車多多/ });
     await first.focus();
     await page.keyboard.press("ArrowRight");
-    await expect(board.getByRole("button", { name: /小紅賽車/ })).toBeFocused();
+    await expect(board.getByRole("button", { name: /小紅賽車，/ })).toBeFocused();
     await page.keyboard.press("Enter");
     await expect(page.getByRole("dialog")).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(page.getByRole("dialog")).toHaveCount(0);
   });
 
-  test("離開畫面後動畫暫停", async ({ page }) => {
+  test("手機上每幀模擬夠短，離開畫面後暫停", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/");
     const board = page.locator("#segment-episode-board");
     await expect(board).toHaveAttribute("data-paused", "true");
     await board.scrollIntoViewIfNeeded();
     await expect(board).toHaveAttribute("data-paused", "false");
+    await expect
+      .poll(async () => Number((await board.getAttribute("data-sim-ms")) ?? "999"), {
+        timeout: 5_000,
+      })
+      .toBeLessThan(12);
+    const frameMs = Number(await board.getAttribute("data-frame-ms"));
+    expect(frameMs).toBeGreaterThan(0);
     await page.evaluate(() => {
       Object.defineProperty(document, "visibilityState", {
         configurable: true,

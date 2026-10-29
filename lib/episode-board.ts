@@ -12,16 +12,18 @@ import {
   type EpisodeBoardActor,
 } from "@/lib/episode-board-types";
 
-/** 畫面上同時出現的車車上限。再多，手機上的點擊範圍會疊在一起。 */
-export const EPISODE_BOARD_ACTOR_LIMIT = 4;
-
 const CHARACTER_NAME: Record<BoardCharacterId, string> = {
   "duo-duo": "恐龍車多多",
   "xiao-hong": "小紅賽車",
   "hui-hui": "小貨車灰灰",
   "dong-dong": "東東挖土機",
+  "diao-che": "吊車阿公",
   "ling-ling": "鈴鈴清潔車",
   "an-an": "安安救護車",
+  "lan-ba-shi": "藍色小巴士",
+  "monster-truck": "猛猛",
+  "a-ku": "阿酷鑽地車",
+  "xiang-xiang": "香香餐車",
   watt: "小機器人沃特",
 };
 
@@ -33,6 +35,7 @@ const ACTION_LABEL: Record<BoardActionId, string> = {
   "paint-self": "試著換成不同顏色，再變回自己",
   "transform-robot": "變成圓滾滾的機器人",
   dig: "正在挖土",
+  lift: "正在把東西吊起來",
   sweep: "正在掃地",
 };
 
@@ -40,8 +43,7 @@ export type EpisodeBoardDropReason =
   | "invalid"
   | "unknown-character"
   | "unsafe-href"
-  | "duplicate-character"
-  | "over-capacity";
+  | "duplicate-character";
 
 export type EpisodeBoardDrop = {
   index: number;
@@ -103,10 +105,6 @@ export function parseEpisodeBoard(raw: unknown): EpisodeBoardModel {
     }
     if (seen.has(row.character)) {
       dropped.push({ index, id: row.id, reason: "duplicate-character" });
-      return;
-    }
-    if (actors.length >= EPISODE_BOARD_ACTOR_LIMIT) {
-      dropped.push({ index, id: row.id, reason: "over-capacity" });
       return;
     }
     seen.add(row.character);
