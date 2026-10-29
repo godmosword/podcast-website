@@ -25,15 +25,23 @@ export function listTravelAbroadArticles(): readonly ParentArticle[] {
   return PARENT_TRAVEL_ABROAD_ARTICLES;
 }
 
-/** 列表頁用：發布日新的在前；同一天較晚同步的在前。 */
-export function listTravelAbroadArticlesByRecency(): readonly ParentArticle[] {
-  return PARENT_TRAVEL_ABROAD_ARTICLES.map((article, index) => ({ article, index }))
+/** 發布日新的在前；同一天陣列裡較後面的在前。 */
+export function travelAbroadArticlesByRecency(
+  articles: readonly ParentArticle[],
+): readonly ParentArticle[] {
+  return articles
+    .map((article, index) => ({ article, index }))
     .sort(
       (left, right) =>
         right.article.publishedAt.localeCompare(left.article.publishedAt) ||
         right.index - left.index,
     )
     .map(({ article }) => article);
+}
+
+/** 列表頁用正式資料，依發布日新到舊。 */
+export function listTravelAbroadArticlesByRecency(): readonly ParentArticle[] {
+  return travelAbroadArticlesByRecency(PARENT_TRAVEL_ABROAD_ARTICLES);
 }
 
 export function getTravelAbroadArticle(slug: string): ParentArticle | undefined {

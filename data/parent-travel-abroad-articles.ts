@@ -11,25 +11,6 @@
  */
 import type { ParentArticle } from "./parent-articles";
 
-/**
- * 版面範例。正式文章會從方格子同步進來。
- * 合併到正式站之前若還沒有真文章，可以刪掉這篇，頁面會回到「內容整理中」。
- */
+/** 還沒有從方格子同步進來的文章時保持空陣列，列表頁會顯示「內容整理中」。 */
 export const PARENT_TRAVEL_ABROAD_ARTICLES: readonly ParentArticle[] = [
-  {
-    slug: "travel-abroad-sample",
-    title: "親子出國專欄範例",
-    publishedAt: "2026-10-29",
-    sourceUrl: "https://vocus.cc/user/6aa4a7adaa92714642f625a3",
-    excerpt: "這篇是網站版面範例，用來確認列表與內頁。",
-    blocks: [
-      { type: "paragraph", text: "這篇是網站版面範例，用來確認列表與內頁。" },
-      { type: "spacer" },
-      { type: "paragraph", text: "正式文章會從方格子同步進來。" },
-      {
-        type: "paragraph",
-        text: "作者把標記放在文末時，文章會出現在這一區；標記本身不會留在頁面上。",
-      },
-    ],
-  },
 ];
