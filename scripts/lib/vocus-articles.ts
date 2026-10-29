@@ -1,6 +1,7 @@
 /**
  * 方格子文章 → 家長區 `ParentArticle` 的純轉換。
  * 抓列表、下載圖片與寫檔在 `scripts/sync-vocus-articles.ts`。
+ * 文末標記「同步更新至親子出國專欄」會改收進親子出國，見 `vocusArticleDestination`。
  */
 import { JSDOM } from "jsdom";
 import { z } from "zod";
@@ -515,34 +516,434 @@ export function serializeParentArticle(article: ParentArticle): string {
   return lines.join("\n");
 }
 
-/** 在 `PARENT_ARTICLES` 結尾插入新文。已有相同 `sourceUrl` 時原樣返回。 */
+/** 在指定的文章陣列結尾插入新文。已有相同 `sourceUrl` 時原樣返回。 */
 export function appendParentArticleSource(
   source: string,
   articles: readonly ParentArticle[],
+  exportName = "PARENT_ARTICLES",
 ): string {
   const fresh = articles.filter((article) => !source.includes(article.sourceUrl));
   if (fresh.length === 0) return source;
-  const marker = "export const PARENT_ARTICLES";
+  const marker = `export const ${exportName}`;
   const start = source.indexOf(marker);
-  if (start < 0) throw new Error("找不到 PARENT_ARTICLES");
+  if (start < 0) throw new Error(`找不到 ${exportName}`);
   const close = source.lastIndexOf("\n];");
-  if (close < start) throw new Error("找不到 PARENT_ARTICLES 結尾");
+  if (close < start) throw new Error(`找不到 ${exportName} 結尾`);
   const insertion = `\n${fresh.map((article) => serializeParentArticle(article)).join("\n")}`;
   return `${source.slice(0, close)}${insertion}${source.slice(close)}`;
+}
+
+/**
+ * 作者放在文末、用來把這篇收進「親子出國」的標記。
+ * 引號不是標記的一部分；分類時會拿掉包住它的引號、空白與標點。
+ */
+export const TRAVEL_ABROAD_MARKER = "同步更新至親子出國專欄";
+
+export type VocusArticleDestination = "parent-articles" | "travel-abroad";
+
+const MARKER_EDGE = new Set([
+  "「", "」", "『", "』", '"', "'", "“", "”", "‘", "’", "＂", "〝", "〞",
+  "〈", "〉", "《", "》", "(", ")", "（", "）", "[", "]", "【", "】",
+  "｢", "｣",
+  "。", "．", ".", "！", "!", "？", "?", "、", "，", ",", "；", ";", "：", ":",
+  "…", "—", "－", "-", "～", "~", "・", "·", "｡", "､", "･",
+]);
+
+const MARKER_QUOTE_OR_SPACE = new Set([
+  "「", "」", "『", "』", '"', "'", "“", "”", "‘", "’", "＂", "〝", "〞",
+  "｢", "｣",
+  " ", "\n", "\r", "\t", "\u00a0", "\u3000", "\u2800", "\u200b", "\ufeff", "\u2060",
+]);
+
+type TextPiece = {
+  blockIndex: number;
+  itemIndex: number | null;
+  text: string;
+};
+
+function compactMarkerText(value: string): string {
+  return value.normalize("NFKC").replace(/[\s\u2800\u200b\ufeff\u2060]/g, "");
+}
+
+function stripMarkerEdges(value: string): string {
+  const chars = [...value];
+  let start = 0;
+  let end = chars.length;
+  while (start < end && MARKER_EDGE.has(chars[start] ?? "")) start += 1;
+  while (end > start && MARKER_EDGE.has(chars[end - 1] ?? "")) end -= 1;
+  return chars.slice(start, end).join("");
+}
+
+/** 比對用：全形折成半形、去掉空白，再剝掉兩端的引號與標點。 */
+export function normalizeTravelMarkerProbe(value: string): string {
+  return stripMarkerEdges(compactMarkerText(value));
+}
+
+function textPieces(blocks: readonly ParentArticleBlock[]): TextPiece[] {
+  const pieces: TextPiece[] = [];
+  blocks.forEach((block, blockIndex) => {
+    if (block.type === "paragraph" || block.type === "heading") {
+      pieces.push({ blockIndex, itemIndex: null, text: block.text });
+      return;
+    }
+    if (block.type === "list") {
+      block.items.forEach((text, itemIndex) => {
+        pieces.push({ blockIndex, itemIndex, text });
+      });
+    }
+  });
+  return pieces;
+}
+
+function articleEndingText(blocks: readonly ParentArticleBlock[]): string {
+  return textPieces(blocks)
+    .map((piece) => piece.text)
+    .join("\n");
+}
+
+/**
+ * 文末（圖片說明不算）在拿掉空白、引號與兩端標點之後，
+ * 以「同步更新至親子出國專欄」結尾才算親子出國。正文中間提到不算。
+ */
+export function vocusArticleDestination(
+  blocks: readonly ParentArticleBlock[],
+): VocusArticleDestination {
+  const probe = normalizeTravelMarkerProbe(articleEndingText(blocks));
+  return probe.endsWith(TRAVEL_ABROAD_MARKER) ? "travel-abroad" : "parent-articles";
+}
+
+function findMarkerCut(text: string): number | null {
+  let cut: number | null = null;
+  for (let index = 0; index <= text.length; ) {
+    if (normalizeTravelMarkerProbe(text.slice(index)) === TRAVEL_ABROAD_MARKER) {
+      cut = index;
+    }
+    if (index === text.length) break;
+    const code = text.charCodeAt(index);
+    index += code >= 0xd800 && code <= 0xdbff ? 2 : 1;
+  }
+  return cut;
+}
+
+function trimMarkerPrefix(value: string): string {
+  const chars = [...value];
+  let end = chars.length;
+  while (end > 0 && MARKER_QUOTE_OR_SPACE.has(chars[end - 1] ?? "")) end -= 1;
+  return chars.slice(0, end).join("");
+}
+
+/**
+ * 刪掉文末標記。標記自己一行（可含引號、空白、標點）就整段拿掉；
+ * 跟在句子後面時只刪標記，前面的句子留下。沒有標記時原樣返回。
+ */
+export function stripTravelAbroadMarker(
+  blocks: readonly ParentArticleBlock[],
+): readonly ParentArticleBlock[] {
+  if (vocusArticleDestination(blocks) !== "travel-abroad") return blocks;
+  const pieces = textPieces(blocks);
+  const joined = pieces.map((piece) => piece.text).join("\n");
+  const cut = findMarkerCut(joined);
+  if (cut === null) {
+    throw new Error("文末有親子出國標記，但無法定位要刪除的字");
+  }
+
+  const dropPiece = new Set<number>();
+  const replaceText = new Map<number, string>();
+  let offset = 0;
+  for (let index = 0; index < pieces.length; index += 1) {
+    const piece = pieces[index];
+    if (!piece) continue;
+    const start = offset;
+    const end = start + piece.text.length;
+    const boundary = end + (index < pieces.length - 1 ? 1 : 0);
+    if (cut >= boundary) {
+      offset = boundary;
+      continue;
+    }
+    if (cut > start && cut < end) {
+      const kept = trimMarkerPrefix(piece.text.slice(0, cut - start));
+      if (kept.length === 0 || normalizeTravelMarkerProbe(kept) === "") {
+        dropPiece.add(index);
+      } else {
+        replaceText.set(index, kept);
+      }
+    } else if (cut <= start) {
+      dropPiece.add(index);
+    }
+    offset = boundary;
+  }
+
+  const pieceIndexByBlock = new Map<number, number[]>();
+  pieces.forEach((piece, index) => {
+    const list = pieceIndexByBlock.get(piece.blockIndex) ?? [];
+    list.push(index);
+    pieceIndexByBlock.set(piece.blockIndex, list);
+  });
+
+  const next: ParentArticleBlock[] = [];
+  blocks.forEach((block, blockIndex) => {
+    const owned = pieceIndexByBlock.get(blockIndex);
+    if (!owned) {
+      next.push(block);
+      return;
+    }
+    if (block.type === "paragraph" || block.type === "heading") {
+      const pieceIndex = owned[0];
+      if (pieceIndex === undefined || dropPiece.has(pieceIndex)) return;
+      const text = replaceText.get(pieceIndex) ?? block.text;
+      next.push({ ...block, text });
+      return;
+    }
+    if (block.type === "list") {
+      const items = block.items.flatMap((item, itemIndex) => {
+        const pieceIndex = owned[itemIndex];
+        if (pieceIndex === undefined || dropPiece.has(pieceIndex)) return [];
+        return [replaceText.get(pieceIndex) ?? item];
+      });
+      if (items.length === 0) return;
+      next.push({ ...block, items });
+    }
+  });
+  return trimEdgeSpacers(next);
 }
 
 export function articleFromVocusPost(
   post: VocusListItem,
   existingSlugs: ReadonlySet<string>,
+  slug?: string,
 ): ParentArticle {
-  const blocks = htmlToParentBlocks(post.html);
+  const blocks = stripTravelAbroadMarker(htmlToParentBlocks(post.html));
   const excerpt = excerptFromBlocks(blocks);
   return {
-    slug: slugForVocusPost(post.contentId, existingSlugs),
+    slug: slug ?? slugForVocusPost(post.contentId, existingSlugs),
     title: post.title,
     publishedAt: publishedAtTaipei(post.publishAt),
     sourceUrl: post.sourceUrl,
     excerpt,
     blocks,
   };
+}
+
+export type VocusStoredArticle = {
+  sourceUrl: string;
+  slug: string;
+  destination: VocusArticleDestination;
+};
+
+export type VocusSyncAction =
+  | { kind: "add"; destination: VocusArticleDestination; post: VocusListItem }
+  | {
+      kind: "move";
+      destination: VocusArticleDestination;
+      from: VocusArticleDestination;
+      slug: string;
+      post: VocusListItem;
+    };
+
+/**
+ * 新文加到標記指定的區。已收錄但標記改了（或拿掉）則整篇搬走，沿用原來的 slug，
+ * 不另建一篇。同一輪由舊到新，跟附加順序一致。
+ */
+export function planVocusArticleSync(
+  items: readonly VocusListItem[],
+  stored: readonly VocusStoredArticle[],
+): {
+  actions: VocusSyncAction[];
+  skippedExisting: number;
+  skippedUnpublished: number;
+} {
+  const byUrl = new Map(stored.map((entry) => [entry.sourceUrl, entry]));
+  const seen = new Set<string>();
+  const actions: VocusSyncAction[] = [];
+  let skippedExisting = 0;
+  let skippedUnpublished = 0;
+
+  for (const item of items) {
+    if (seen.has(item.sourceUrl)) {
+      skippedExisting += 1;
+      continue;
+    }
+    seen.add(item.sourceUrl);
+    const current = byUrl.get(item.sourceUrl);
+    if (!isPublishableVocusPost(item)) {
+      if (current) skippedExisting += 1;
+      else skippedUnpublished += 1;
+      continue;
+    }
+    const destination = vocusArticleDestination(htmlToParentBlocks(item.html));
+    if (!current) {
+      actions.push({ kind: "add", destination, post: item });
+      continue;
+    }
+    if (current.destination === destination) {
+      skippedExisting += 1;
+      continue;
+    }
+    actions.push({
+      kind: "move",
+      destination,
+      from: current.destination,
+      slug: current.slug,
+      post: item,
+    });
+  }
+
+  actions.sort((left, right) => {
+    const byTime = left.post.publishAt.localeCompare(right.post.publishAt);
+    if (byTime !== 0) return byTime;
+    return left.post.contentId.localeCompare(right.post.contentId);
+  });
+  return { actions, skippedExisting, skippedUnpublished };
+}
+
+function skipSourceToken(source: string, index: number): number {
+  const quote = source[index];
+  if (quote === '"' || quote === "'" || quote === "`") {
+    let cursor = index + 1;
+    while (cursor < source.length) {
+      if (source[cursor] === "\\") {
+        cursor += 2;
+        continue;
+      }
+      if (source[cursor] === quote) return cursor + 1;
+      cursor += 1;
+    }
+    throw new Error("文章資料裡有未結束的字串");
+  }
+  if (quote === "/" && source[index + 1] === "/") {
+    const newline = source.indexOf("\n", index);
+    return newline === -1 ? source.length : newline + 1;
+  }
+  if (quote === "/" && source[index + 1] === "*") {
+    const end = source.indexOf("*/", index + 2);
+    return end === -1 ? source.length : end + 2;
+  }
+  return -1;
+}
+
+function findExportedArray(
+  source: string,
+  exportName: string,
+): { open: number; close: number } {
+  const marker = `export const ${exportName}`;
+  const start = source.indexOf(marker);
+  if (start < 0) throw new Error(`找不到 ${exportName}`);
+  // `ParentArticle[]` 的方括號在宣告上，陣列本體是後面的 `= [`。
+  const equals = source.indexOf("= [", start);
+  if (equals < 0) throw new Error(`找不到 ${exportName} 的 [`);
+  const open = equals + 2;
+  let depth = 0;
+  for (let index = open; index < source.length; index += 1) {
+    const skipped = skipSourceToken(source, index);
+    if (skipped >= 0) {
+      index = skipped - 1;
+      continue;
+    }
+    const char = source[index];
+    if (char === "[") depth += 1;
+    else if (char === "]") {
+      depth -= 1;
+      if (depth === 0) return { open, close: index };
+    }
+  }
+  throw new Error(`找不到 ${exportName} 結尾`);
+}
+
+function articleObjectSpans(
+  source: string,
+  open: number,
+  close: number,
+): Array<{ start: number; end: number }> {
+  const spans: Array<{ start: number; end: number }> = [];
+  let depth = 0;
+  let objectStart = -1;
+  for (let index = open + 1; index < close; index += 1) {
+    const skipped = skipSourceToken(source, index);
+    if (skipped >= 0) {
+      index = skipped - 1;
+      continue;
+    }
+    const char = source[index];
+    if (char === "{" || char === "[") {
+      if (char === "{" && depth === 0) objectStart = index;
+      depth += 1;
+    } else if (char === "}" || char === "]") {
+      depth -= 1;
+      if (char === "}" && depth === 0 && objectStart >= 0) {
+        spans.push({ start: objectStart, end: index + 1 });
+        objectStart = -1;
+      }
+    }
+  }
+  return spans;
+}
+
+function sourceUrlProperty(sourceUrl: string): string {
+  return `sourceUrl: ${JSON.stringify(sourceUrl)}`;
+}
+
+/**
+ * 從文章陣列拿掉指定 `sourceUrl` 的物件。用來把已收錄的文章改放到另一區，
+ * 避免同一篇同時留在兩個檔案。
+ */
+export function removeParentArticlesFromSource(
+  source: string,
+  sourceUrls: readonly string[],
+  exportName = "PARENT_ARTICLES",
+): string {
+  if (sourceUrls.length === 0) return source;
+  const wanted = new Set(sourceUrls.map(sourceUrlProperty));
+  for (const sourceUrl of sourceUrls) {
+    if (!source.includes(sourceUrlProperty(sourceUrl))) {
+      throw new Error(`找不到要移走的文章：${sourceUrl}`);
+    }
+  }
+  const array = findExportedArray(source, exportName);
+  const spans = articleObjectSpans(source, array.open, array.close).filter((span) => {
+    const body = source.slice(span.start, span.end);
+    for (const property of wanted) {
+      if (body.includes(property)) return true;
+    }
+    return false;
+  });
+  if (spans.length !== sourceUrls.length) {
+    throw new Error("要移走的文章數量跟資料檔裡對得上的物件數不一樣");
+  }
+
+  let next = source;
+  for (const span of [...spans].sort((left, right) => right.start - left.start)) {
+    let start = span.start;
+    while (start > 0 && next[start - 1] !== "\n") start -= 1;
+    let end = span.end;
+    while (end < next.length && (next[end] === " " || next[end] === "\t")) end += 1;
+    if (next[end] === ",") end += 1;
+    if (next[end] === "\r") end += 1;
+    if (next[end] === "\n") end += 1;
+    next = `${next.slice(0, start)}${next.slice(end)}`;
+  }
+  for (const sourceUrl of sourceUrls) {
+    if (next.includes(sourceUrlProperty(sourceUrl))) {
+      throw new Error(`文章沒有移走：${sourceUrl}`);
+    }
+  }
+  return next;
+}
+
+/** 文章離開育兒文章分享時，從系列名單拿掉 slug。空的系列一併刪除。 */
+export function removeParentSeriesSlugs(
+  source: string,
+  slugs: readonly string[],
+): string {
+  if (slugs.length === 0) return source;
+  const drop = new Set(slugs);
+  const replaced = source.replace(/slugs:\s*\[[\s\S]*?\]/g, (full) => {
+    const found = [...full.matchAll(/"([^"]+)"/g)].map((match) => match[1] ?? "");
+    const next = found.filter((slug) => !drop.has(slug));
+    if (next.length === found.length) return full;
+    return `slugs: [${next.map((slug) => JSON.stringify(slug)).join(", ")}]`;
+  });
+  return replaced.replace(
+    /\{\s*id:\s*"(?:[^"\\]|\\.)*",\s*title:\s*"(?:[^"\\]|\\.)*",\s*slugs:\s*\[\s*\],?\s*\},?/g,
+    "",
+  );
 }

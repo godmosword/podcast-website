@@ -17,6 +17,11 @@ import {
   listParentArticles,
   parentArticlePath,
 } from "@/lib/parent-articles";
+import {
+  listTravelAbroadArticles,
+  travelAbroadArticlePath,
+  travelAbroadIndexPath,
+} from "@/lib/parent-travel-abroad";
 import { listNewsletters, newsletterPath } from "@/lib/newsletters";
 import { getSiteUrl } from "@/lib/site-url";
 
@@ -156,6 +161,25 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }),
   );
 
+  const travelArticles = listTravelAbroadArticles();
+  const travelAbroadPages: MetadataRoute.Sitemap =
+    travelArticles.length === 0
+      ? []
+      : [
+          {
+            url: `${baseUrl}${travelAbroadIndexPath()}`,
+            lastModified: travelArticles[travelArticles.length - 1]?.publishedAt,
+            changeFrequency: "monthly" as const,
+            priority: 0.7,
+          },
+          ...travelArticles.map((article) => ({
+            url: `${baseUrl}${travelAbroadArticlePath(article.slug)}`,
+            lastModified: article.publishedAt,
+            changeFrequency: "yearly" as const,
+            priority: 0.65,
+          })),
+        ];
+
   const newsletterPages: MetadataRoute.Sitemap = listNewsletters().map(
     (issue) => ({
       url: `${baseUrl}${newsletterPath(issue.slug)}`,
@@ -202,6 +226,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     ...staticPages,
     ...parentArticlePages,
+    ...travelAbroadPages,
     ...newsletterPages,
     ...collectionPages,
     ...playgroundPages,

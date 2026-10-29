@@ -23,6 +23,14 @@ describe("sitemap freshness", () => {
     expect(urls).toContain("https://example.com/about");
     expect(urls).toContain("https://example.com/for-parents/dashboard");
     expect(urls).toContain("https://example.com/for-parents/play-map");
+    expect(urls).toContain("https://example.com/for-parents/articles");
+    expect(urls).toContain("https://example.com/for-parents/travel-abroad");
+    expect(urls).toContain(
+      "https://example.com/for-parents/travel-abroad/travel-abroad-sample",
+    );
+    expect(urls).not.toContain(
+      "https://example.com/for-parents/articles/travel-abroad-sample",
+    );
     expect(urls).toContain("https://example.com/subscribe");
     expect(urls).toContain("https://example.com/feedback");
     expect(urls).not.toContain("https://example.com/studio/feedback");
