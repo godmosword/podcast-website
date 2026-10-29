@@ -506,6 +506,8 @@ describe("方格子 article 型別", () => {
     expect(coverForVocusArticle(`vocus-${contentId}`, merged.ogImageURL)).toEqual({
       coverImage: `/parent-articles/vocus-${contentId}-cover.webp`,
       coverAlt: "小松 PC4000 大型怪手前，大人與小孩的背影",
+      coverWidth: 1600,
+      coverHeight: 2133,
       downloadOg: false,
     });
     expect(coverForVocusArticle("vocus-aaaaaaaaaaaaaaaaaaaaaaaa", "https://images.example/a.jpg")).toEqual({

@@ -12,9 +12,17 @@ import { ParentSectionPage } from "./ParentSectionPage";
 vi.stubGlobal("React", React);
 
 vi.mock("next/image", () => ({
-  default: ({ alt }: { alt: string }) => (
+  default: ({
+    alt,
+    width,
+    height,
+  }: {
+    alt: string;
+    width?: number;
+    height?: number;
+  }) => (
     // eslint-disable-next-line @next/next/no-img-element -- 測試 mock
-    <img alt={alt} />
+    <img alt={alt} width={width} height={height} />
   ),
 }));
 
@@ -73,6 +81,43 @@ describe("親子出國列表", () => {
       "/for-parents/travel-abroad",
     );
     expect(screen.queryByText("同步更新至親子出國專欄")).toBeNull();
+  });
+
+  it("有原圖寬高的封面完整顯示，沒有寬高的封面維持 16:9", () => {
+    const { rerender } = render(
+      <ParentArticleView
+        article={{
+          ...fixture,
+          coverImage: "/parent-articles/full.webp",
+          coverAlt: "完整照片",
+          coverWidth: 1600,
+          coverHeight: 2133,
+        }}
+        previous={null}
+        next={null}
+      />,
+    );
+    const natural = screen.getByRole("figure");
+    expect(natural.className).toContain("heroNatural");
+    const full = screen.getByAltText("完整照片");
+    expect(full.getAttribute("width")).toBe("1600");
+    expect(full.getAttribute("height")).toBe("2133");
+
+    rerender(
+      <ParentArticleView
+        article={{
+          ...fixture,
+          coverImage: "/parent-articles/wide.webp",
+          coverAlt: "橫式封面",
+        }}
+        previous={null}
+        next={null}
+      />,
+    );
+    const cropped = screen.getByRole("figure");
+    expect(cropped.className).toContain("hero");
+    expect(cropped.className).not.toContain("heroNatural");
+    expect(screen.getByAltText("橫式封面").getAttribute("width")).toBeNull();
   });
 
   it("沒有文章時仍是整理中", () => {

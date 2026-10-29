@@ -198,6 +198,8 @@ async function materializeImages(
 
   let coverImage = article.coverImage;
   let coverAlt = article.coverAlt;
+  let coverWidth = article.coverWidth;
+  let coverHeight = article.coverHeight;
   const cover = coverForVocusArticle(article.slug, ogImageURL);
   if (cover.downloadOg && ogImageURL) {
     const filename = `${article.slug}-cover.webp`;
@@ -206,16 +208,33 @@ async function materializeImages(
     }
     coverImage = cover.coverImage;
     coverAlt = article.title;
+    coverWidth = undefined;
+    coverHeight = undefined;
   } else if (cover.coverImage) {
     coverImage = cover.coverImage;
     coverAlt = cover.coverAlt ?? article.coverAlt ?? article.title;
+    coverWidth = cover.coverWidth;
+    coverHeight = cover.coverHeight;
   }
 
-  return {
+  const next: ParentArticle = {
     ...article,
     ...(coverImage ? { coverImage } : {}),
     ...(coverAlt ? { coverAlt } : {}),
     blocks,
+  };
+  if (coverWidth && coverHeight) {
+    return { ...next, coverWidth, coverHeight };
+  }
+  return {
+    slug: next.slug,
+    title: next.title,
+    publishedAt: next.publishedAt,
+    sourceUrl: next.sourceUrl,
+    excerpt: next.excerpt,
+    ...(next.coverImage ? { coverImage: next.coverImage } : {}),
+    ...(next.coverAlt ? { coverAlt: next.coverAlt } : {}),
+    blocks: next.blocks,
   };
 }
 
