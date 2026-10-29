@@ -195,7 +195,9 @@ describe("指差確認", () => {
     const base = createRun("drive", "big");
     const sign = currentStation(base).signs[0]!;
     expect(pendingPoint(at(base, { progress: sign.at }))?.kind).toBe("sign");
-    expect(pendingPoint(at(base, { progress: currentStation(base).approachAt + 0.01 }))?.kind).toBe("platform");
+    const platform = currentStation(base).points.find((task) => task.kind === "platform")!;
+    expect(pendingPoint(at(base, { progress: platform.at - 0.01 }))).toBeNull();
+    expect(pendingPoint(at(base, { progress: platform.at + 0.01 }))?.kind).toBe("platform");
     expect(pointTotal(base)).toBe(9);
     expect(pointTotal(createRun("drive", "little"))).toBe(0);
   });

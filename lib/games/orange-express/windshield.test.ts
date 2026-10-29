@@ -4,6 +4,7 @@ import {
   PASS_FAR,
   PASS_LENGTH,
   PLATFORM_TOP,
+  SIGNAL_WORLD,
   STATION_WORLD,
   cameraTravel,
   drawWindshield,
@@ -14,16 +15,16 @@ import {
   stopPostWorld,
   windshieldFrame,
 } from "@/lib/games/orange-express/windshield";
-import { stationsFor } from "@/lib/games/orange-express/routes";
+import { PLATFORM_TASK_LEAD, SIGNAL_UNTIL, stationsFor } from "@/lib/games/orange-express/routes";
 import type { Phase } from "@/lib/games/orange-express/types";
 
 const PHASES: Phase[] = ["running", "in-window", "stopped", "doors-open", "reversing", "route-done"];
 
 describe("前窗", () => {
-  it("減少動態時只有三格，相機只停在三個位置", () => {
+  it("減少動態時只有三格；出發號誌題過後，相機只停在三個位置", () => {
     const seen = new Set<number>();
     for (const phase of PHASES) {
-      for (const progress of [0, 0.2, 0.5, 0.9, 1]) {
+      for (const progress of [0.2, 0.5, 0.9, 1]) {
         const frame = windshieldFrame(progress, phase);
         expect([0, 1, 2]).toContain(frame);
         seen.add(cameraTravel(true, progress, phase, 0.65));
@@ -180,3 +181,80 @@ describe("前窗：停車柱與門形線柱", () => {
     expect(portalVisible(350, stopPostWorld(0.65))).toBe(true);
   });
 });
+
+describe("前窗：指差確認的東西要看得到（B19）", () => {
+  const pointingStations = (["drive", "captain"] as const).flatMap((level) => stationsFor(level, "big"));
+
+  it("號誌題整段，出發號誌都在前窗裡；減少動態時停在起點", () => {
+    expect(pointingStations.length).toBeGreaterThan(0);
+    for (const station of pointingStations) {
+      const task = station.points.find((p) => p.kind === "signal")!;
+      expect(task.until).toBe(SIGNAL_UNTIL);
+      for (const progress of [task.at, task.until]) {
+        const z = SIGNAL_WORLD - cameraTravel(false, progress, "running", station.target);
+        expect(z).toBeGreaterThan(10);
+        expect(z).toBeLessThan(40);
+      }
+    }
+    expect(cameraTravel(true, 0, "running", 0.65)).toBe(0);
+    expect(cameraTravel(true, SIGNAL_UNTIL - 0.001, "running", 0.65)).toBe(0);
+    expect(cameraTravel(true, SIGNAL_UNTIL + 0.01, "running", 0.65)).toBeCloseTo(0.28 * STATION_WORLD);
+  });
+
+  it("月台題出來時，月台近端已經在八公尺內", () => {
+    for (const station of pointingStations) {
+      const task = station.points.find((p) => p.kind === "platform")!;
+      const nearEnd = station.target * STATION_WORLD - 70 - task.at * STATION_WORLD;
+      expect(nearEnd).toBeLessThanOrEqual(8.001);
+      expect(task.at).toBeGreaterThanOrEqual(station.approachAt);
+      expect(task.at).toBeCloseTo(Math.max(station.approachAt, station.target - PLATFORM_TASK_LEAD));
+      expect(task.until).toBeGreaterThan(task.at + 0.1);
+    }
+  });
+
+  it("出發時畫亮綠燈的號誌（前面有隧道口也不會被蓋掉），開遠了就不畫", () => {
+    const go = "rgb(96, 214, 120)";
+    const start = recordFills();
+    drawWindshield(start.ctx, 480, 270, {
+      progress: 0,
+      phase: "running",
+      reduced: false,
+      target: 0.65,
+      tunnel: { from: 0.1, to: 0.18 },
+    });
+    const lastGo = start.fills.map((fill) => fill.color).lastIndexOf(go);
+    const lastTunnel = start.fills.map((fill) => fill.color).lastIndexOf("rgb(46, 42, 56)");
+    expect(lastGo).toBeGreaterThan(-1);
+    expect(lastGo).toBeGreaterThan(lastTunnel);
+    // 沒有隧道的站：門形線柱與架空線比號誌遠，號誌要畫在它們後面（線不能從綠燈上劃過）。
+    const open = recordStrokes();
+    drawWindshield(open.ctx, 480, 270, { progress: 0.02, phase: "running", reduced: false, target: 0.65 });
+    expect(open.events.lastIndexOf("fill:" + go)).toBeGreaterThan(open.events.lastIndexOf("stroke"));
+    const later = recordFills();
+    drawWindshield(later.ctx, 480, 270, { progress: 0.2, phase: "running", reduced: false, target: 0.65 });
+    expect(later.fills.some((fill) => fill.color === go)).toBe(false);
+  });
+});
+
+/** 依序記下 fill（含顏色）與 stroke，看誰畫在誰上面。 */
+function recordStrokes(): { ctx: CanvasRenderingContext2D; events: string[] } {
+  const events: string[] = [];
+  let color = "";
+  const gradient = { addColorStop: () => {} };
+  const ctx = new Proxy(
+    {},
+    {
+      get(_target, prop: string) {
+        if (prop === "createLinearGradient") return () => gradient;
+        if (prop === "fill") return () => events.push(`fill:${color}`);
+        if (prop === "stroke") return () => events.push("stroke");
+        return () => {};
+      },
+      set(_target, prop: string, value: unknown) {
+        if (prop === "fillStyle") color = String(value);
+        return true;
+      },
+    },
+  ) as unknown as CanvasRenderingContext2D;
+  return { ctx, events };
+}

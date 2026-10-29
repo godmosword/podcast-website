@@ -657,7 +657,7 @@ test.describe("小橘特快車：版面", () => {
         { label: "出發", patch: { progress: 0, speed: 0.2 }, running: true },
         { label: "速限牌", patch: { progress: 0.05, speed: 0.4 }, running: true },
         { label: "鐵橋", patch: { stationIndex: 1, progress: 0.15, speed: 0.4 }, running: true },
-        { label: "進站", patch: { stationIndex: 1, progress: 0.5, speed: 0.3, brake: 2 }, running: true },
+        { label: "進站", patch: { stationIndex: 1, progress: 0.55, speed: 0.3, brake: 2 }, running: true },
         { label: "停好", patch: { stationIndex: 1, progress: 0.65, speed: 0 }, running: false },
       ];
       for (const { label, patch, running } of states) {
@@ -712,11 +712,11 @@ test.describe("小橘特快車：版面", () => {
         const glass = (await page.getByTestId("orange-express-windshield").boundingBox())!;
         expect(glass.height).toBeGreaterThanOrEqual(110);
 
-        // 出發（號誌題＋速限牌提示）、速限牌、進站、停好：提示、停車目標條、指差確認鈕、乘客卡彼此不重疊。
+        // 出發（號誌題＋速限牌提示）、速限牌、進站（月台題）、停好：提示、停車目標條、指差確認鈕、乘客卡彼此不重疊。
         for (const patch of [
           { progress: 0, speed: 0.2 },
           { progress: 0.05, speed: 0.4 },
-          { progress: 0.5, speed: 0.3, brake: 2 },
+          { progress: 0.55, speed: 0.3, brake: 2 },
           { progress: 0.65, speed: 0 },
         ]) {
           await jump(page, patch);
