@@ -23,9 +23,27 @@ export function vocusContentsUrl(page: number, pageSize = 10): string {
   return url.toString();
 }
 
-export function vocusSourceUrl(contentId: string): string {
-  return `https://vocus.cc/post/${contentId}`;
+export function vocusSourceUrl(contentId: string, type = "post"): string {
+  const kind = type === "article" ? "article" : "post";
+  return `https://vocus.cc/${kind}/${contentId}`;
 }
+
+/** 單篇「article」內文。列表 API 的 article 物件沒有 HTML。 */
+export function vocusArticleUrl(contentId: string): string {
+  if (!/^[a-f0-9]{24}$/.test(contentId)) {
+    throw new Error(`不是方格子文章 id：${contentId}`);
+  }
+  return `https://api.vocus.cc/api/article/${contentId}`;
+}
+
+const embeddedBodySchema = z
+  .object({
+    content: z.string().optional(),
+    ogImageURL: z.string().optional(),
+    thumbnailUrl: z.string().optional(),
+    title: z.string().optional(),
+  })
+  .optional();
 
 const contentSchema = z.object({
   title: z.string(),
@@ -35,13 +53,8 @@ const contentSchema = z.object({
   spam: z.number().optional(),
   contentId: z.string(),
   publishAt: z.string(),
-  post: z
-    .object({
-      content: z.string().optional(),
-      ogImageURL: z.string().optional(),
-      title: z.string().optional(),
-    })
-    .optional(),
+  post: embeddedBodySchema,
+  article: embeddedBodySchema,
 });
 
 const contentsPageSchema = z.object({
@@ -351,9 +364,11 @@ export function trimEdgeSpacers(
 
 /** 方格子 Lexical HTML → `ParentArticleBlock[]`。不改寫作者文字。 */
 export function htmlToParentBlocks(html: string): ParentArticleBlock[] {
-  const dom = new JSDOM(`<!doctype html><html><body>${html}</body></html>`, {
-    url: "https://vocus.cc/",
-  });
+  const prepared = preserveTravelMarkerTags(html);
+  const wrapped = /<html[\s>]/i.test(prepared)
+    ? prepared
+    : `<!doctype html><html><body>${prepared}</body></html>`;
+  const dom = new JSDOM(wrapped, { url: "https://vocus.cc/" });
   try {
     const blocks: ParentArticleBlock[] = [];
     const body = dom.window.document.body as unknown as NodeLike;
@@ -404,7 +419,7 @@ export function slugForVocusPost(
 
 export function isPublishableVocusPost(item: VocusListItem): boolean {
   return (
-    item.type === "post" &&
+    (item.type === "post" || item.type === "article") &&
     !item.isPay &&
     !item.adult &&
     item.spam === 0 &&
@@ -416,13 +431,17 @@ export function isPublishableVocusPost(item: VocusListItem): boolean {
 export function parseContentsPage(payload: unknown): VocusContentsPage {
   const page = contentsPageSchema.parse(payload);
   const items = page.contents.map((entry): VocusListItem => {
-    const og = entry.post?.ogImageURL?.trim() ?? "";
+    const og =
+      entry.post?.ogImageURL?.trim() ||
+      entry.article?.ogImageURL?.trim() ||
+      entry.article?.thumbnailUrl?.trim() ||
+      "";
     return {
       contentId: entry.contentId,
-      title: (entry.post?.title || entry.title).trim(),
+      title: (entry.post?.title || entry.article?.title || entry.title).trim(),
       publishAt: entry.publishAt,
-      sourceUrl: vocusSourceUrl(entry.contentId),
-      html: entry.post?.content ?? "",
+      sourceUrl: vocusSourceUrl(entry.contentId, entry.type),
+      html: entry.post?.content ?? entry.article?.content ?? "",
       ogImageURL: og.startsWith("https://") ? og : null,
       isPay: entry.isPay === true,
       adult: entry.adult === true,
@@ -431,6 +450,30 @@ export function parseContentsPage(payload: unknown): VocusContentsPage {
     };
   });
   return { count: page.count, items };
+}
+
+const articleDetailSchema = z.object({
+  article: z.object({
+    content: z.string().optional(),
+    title: z.string().optional(),
+    thumbnailUrl: z.string().optional(),
+    ogImageURL: z.string().optional(),
+  }),
+});
+
+/**
+ * 列表裡的 article 沒有內文。單篇 API 補上 HTML；縮圖只在列表沒給封面時補上。
+ */
+export function mergeArticleDetail(item: VocusListItem, payload: unknown): VocusListItem {
+  const detail = articleDetailSchema.parse(payload).article;
+  const html = detail.content?.trim() ? detail.content : item.html;
+  const thumb = detail.thumbnailUrl?.trim() || detail.ogImageURL?.trim() || "";
+  return {
+    ...item,
+    title: item.title || detail.title?.trim() || item.title,
+    html,
+    ogImageURL: item.ogImageURL ?? (thumb.startsWith("https://") ? thumb : null),
+  };
 }
 
 /**
@@ -544,6 +587,7 @@ export type VocusArticleDestination = "parent-articles" | "travel-abroad";
 const MARKER_EDGE = new Set([
   "「", "」", "『", "』", '"', "'", "“", "”", "‘", "’", "＂", "〝", "〞",
   "〈", "〉", "《", "》", "(", ")", "（", "）", "[", "]", "【", "】",
+  "<", ">", "＜", "＞",
   "｢", "｣",
   "。", "．", ".", "！", "!", "？", "?", "、", "，", ",", "；", ";", "：", ":",
   "…", "—", "－", "-", "～", "~", "・", "·", "｡", "､", "･",
@@ -551,9 +595,22 @@ const MARKER_EDGE = new Set([
 
 const MARKER_QUOTE_OR_SPACE = new Set([
   "「", "」", "『", "』", '"', "'", "“", "”", "‘", "’", "＂", "〝", "〞",
+  "〈", "〉", "《", "》", "<", ">", "＜", "＞",
   "｢", "｣",
   " ", "\n", "\r", "\t", "\u00a0", "\u3000", "\u2800", "\u200b", "\ufeff", "\u2060",
 ]);
+
+/**
+ * 作者若把標記寫成 `<同步更新至親子出國專欄>`，瀏覽器會把它當成標籤，
+ * 文字就消失。先換成純文字，分類與刪除才看得到。
+ */
+export function preserveTravelMarkerTags(html: string): string {
+  const body = [...TRAVEL_ABROAD_MARKER].join("\\s*");
+  return html.replace(
+    new RegExp(`<\\s*(\\/?)\\s*${body}\\s*>`, "gu"),
+    (_match, slash: string) => (slash ? "" : TRAVEL_ABROAD_MARKER),
+  );
+}
 
 type TextPiece = {
   blockIndex: number;
