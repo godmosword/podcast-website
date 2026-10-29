@@ -4,7 +4,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ParentArticle } from "@/data/parent-articles";
 import ParentTravelAbroadPage from "@/app/for-parents/travel-abroad/page";
-import { listTravelAbroadArticles, travelAbroadArticlePath } from "@/lib/parent-travel-abroad";
+import { travelAbroadArticlePath } from "@/lib/parent-travel-abroad";
 import { ParentArticleView } from "./ParentArticleView";
 import { ParentSectionArticleList } from "./ParentSectionArticleList";
 import { ParentSectionPage } from "./ParentSectionPage";
@@ -40,6 +40,24 @@ describe("親子出國列表", () => {
     expect(screen.getByText("這篇只存在測試裡。")).toBeTruthy();
   });
 
+  it("有封面時列表卡片顯示同一張圖的替代文字", () => {
+    render(
+      <ParentSectionArticleList
+        articles={[
+          {
+            ...fixture,
+            coverImage: "/parent-articles/vocus-6ae34027fd897800012f3e51-cover.webp",
+            coverAlt: "小松 PC4000 大型怪手前，大人與小孩的背影",
+          },
+        ]}
+        hrefFor={travelAbroadArticlePath}
+      />,
+    );
+    expect(
+      screen.getByAltText("小松 PC4000 大型怪手前，大人與小孩的背影"),
+    ).toBeTruthy();
+  });
+
   it("內頁回到親子出國", () => {
     render(
       <ParentArticleView
@@ -63,11 +81,12 @@ describe("親子出國列表", () => {
     expect(screen.getByText("這一區的內容還在整理。")).toBeTruthy();
   });
 
-  it("正式資料是空的時，親子出國頁回到整理中", () => {
-    expect(listTravelAbroadArticles()).toEqual([]);
+  it("小松那篇出現在親子出國列表，標記沒有留在頁面上", () => {
     render(<ParentTravelAbroadPage />);
     expect(screen.getByRole("heading", { name: "親子出國" })).toBeTruthy();
-    expect(screen.getByText("這一區的內容還在整理。")).toBeTruthy();
-    expect(screen.queryByText("測試用出國文章")).toBeNull();
+    expect(screen.getByRole("link", { name: /小松之杜/ })).toBeTruthy();
+    expect(screen.getByAltText("小松 PC4000 大型怪手前，大人與小孩的背影")).toBeTruthy();
+    expect(screen.queryByText("這一區的內容還在整理。")).toBeNull();
+    expect(screen.queryByText("同步更新至親子出國專欄")).toBeNull();
   });
 });

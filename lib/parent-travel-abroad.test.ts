@@ -25,15 +25,26 @@ function fixture(slug: string, publishedAt: string): ParentArticle {
 }
 
 describe("親子出國文章", () => {
-  it("正式資料是空的，不和育兒文章重複，頁面上沒有標記", () => {
+  it("小松那篇在親子出國，不和育兒文章重複，頁面上沒有標記", () => {
     const parentSlugs = new Set(listParentArticles().map((article) => article.slug));
     const parentUrls = new Set(listParentArticles().map((article) => article.sourceUrl));
-    expect(listTravelAbroadArticles()).toEqual([]);
+    const article = getTravelAbroadArticle("vocus-6ae34027fd897800012f3e51");
+    expect(article?.title).toContain("小松之杜");
+    expect(article?.sourceUrl).toBe(
+      "https://vocus.cc/article/6ae34027fd897800012f3e51",
+    );
+    expect(article?.coverImage).toBe(
+      "/parent-articles/vocus-6ae34027fd897800012f3e51-cover.webp",
+    );
+    expect(article?.coverAlt).toBe("小松 PC4000 大型怪手前，大人與小孩的背影");
     expect(getTravelAbroadArticle("travel-abroad-sample")).toBeUndefined();
-    for (const article of listTravelAbroadArticles()) {
-      expect(parentSlugs.has(article.slug)).toBe(false);
-      expect(parentUrls.has(article.sourceUrl)).toBe(false);
-      expect(JSON.stringify(article.blocks)).not.toContain("同步更新至親子出國專欄");
+    for (const entry of listTravelAbroadArticles()) {
+      expect(parentSlugs.has(entry.slug)).toBe(false);
+      expect(parentUrls.has(entry.sourceUrl)).toBe(false);
+      expect(JSON.stringify(entry.blocks)).not.toContain("同步更新至親子出國專欄");
+      expect(travelAbroadArticlePath(entry.slug)).toBe(
+        `/for-parents/travel-abroad/${entry.slug}`,
+      );
     }
   });
 
@@ -75,9 +86,13 @@ describe("親子出國文章", () => {
       destination: "/for-parents/articles/vision-care-1",
       permanent: true,
     });
-    expect(redirects).toHaveLength(PARENT_ARTICLES.length);
-    expect(redirects.some((entry) => entry.source.includes("travel-abroad-sample"))).toBe(
-      false,
+    expect(redirects).toContainEqual({
+      source: "/for-parents/articles/vocus-6ae34027fd897800012f3e51",
+      destination: "/for-parents/travel-abroad/vocus-6ae34027fd897800012f3e51",
+      permanent: true,
+    });
+    expect(redirects).toHaveLength(
+      PARENT_ARTICLES.length + listTravelAbroadArticles().length,
     );
   });
 
@@ -86,8 +101,8 @@ describe("親子出國文章", () => {
     expect(redirects).toEqual(
       expect.arrayContaining([
         {
-          source: "/for-parents/travel-abroad/vision-care-1",
-          destination: "/for-parents/articles/vision-care-1",
+          source: "/for-parents/articles/vocus-6ae34027fd897800012f3e51",
+          destination: "/for-parents/travel-abroad/vocus-6ae34027fd897800012f3e51",
           permanent: true,
         },
       ]),
