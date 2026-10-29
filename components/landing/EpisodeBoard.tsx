@@ -18,7 +18,9 @@ import {
 } from "@/lib/episode-board-grid";
 import {
   buildFloor,
+  castAnchor,
   FALLBACK_PALETTE,
+  paintCastSheet,
   paintTown,
   type PaintCar,
   type TownPalette,
@@ -65,6 +67,10 @@ export default function EpisodeBoard({ actors, nextAnchorId }: EpisodeBoardProps
     [actors],
   );
   const featured = safeActors.find((actor) => actor.featured) ?? safeActors[0];
+  const [castMode, setCastMode] = useState(false);
+  useEffect(() => {
+    setCastMode(new URLSearchParams(window.location.search).get("cast") === "1");
+  }, []);
   const [openId, setOpenId] = useState<string | null>(null);
   const openActor = safeActors.find((actor) => actor.id === openId) ?? null;
 
@@ -127,9 +133,6 @@ export default function EpisodeBoard({ actors, nextAnchorId }: EpisodeBoardProps
         canvas.width = px.width;
         canvas.height = px.height;
       }
-      const layout = isoLayout(view);
-      const floor = buildFloor(view, layout, palette, px.ratio);
-      const phase = lightPhase(age);
       const cars: PaintCar[] = [];
       safeActors.forEach((actor, index) => {
         const agent = agents.find((item) => item.id === actor.id);
@@ -143,6 +146,21 @@ export default function EpisodeBoard({ actors, nextAnchorId }: EpisodeBoardProps
           agent,
         });
       });
+      if (castMode) {
+        paintCastSheet(ctx, view, palette, cars, px.ratio);
+        agents.forEach((agent, index) => {
+          const slot = slotRefs.current.get(agent.id);
+          if (!slot) return;
+          const point = castAnchor(index, agents.length, view);
+          slot.style.setProperty("--x", `${point.x}px`);
+          slot.style.setProperty("--y", `${point.y}px`);
+          slot.style.setProperty("--z", String(20 + index));
+        });
+        return;
+      }
+      const layout = isoLayout(view);
+      const floor = buildFloor(view, layout, palette, px.ratio);
+      const phase = lightPhase(age);
       paintTown(ctx, floor, view, layout, palette, cars, phase, reduced, px.ratio);
       placeSlots(layout);
     };
@@ -279,7 +297,7 @@ export default function EpisodeBoard({ actors, nextAnchorId }: EpisodeBoardProps
       document.removeEventListener("visibilitychange", onPage);
       motionQuery?.removeEventListener?.("change", onMotion);
     };
-  }, [safeActors]);
+  }, [castMode, safeActors]);
 
   function openFrom(actor: EpisodeBoardActor, button: HTMLButtonElement) {
     returnFocusRef.current = button;
@@ -354,6 +372,7 @@ export default function EpisodeBoard({ actors, nextAnchorId }: EpisodeBoardProps
               <span className="sr-only">
                 {actor.name}，{actor.actionLabel}。{actor.title}
               </span>
+              {castMode ? <span className={styles.castName}>{actor.name}</span> : null}
             </button>
           </div>
         ))}

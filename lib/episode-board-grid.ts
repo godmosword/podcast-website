@@ -41,16 +41,27 @@ export const TOWN_HOMES: readonly Cell[] = [
   { x: 4, y: 7 },
   { x: 7, y: 7 },
   { x: 10, y: 7 },
-  { x: 1, y: 7 },
+  { x: 1, y: 1 },
   { x: 1, y: 4 },
   { x: 4, y: 4 },
   { x: 7, y: 4 },
   { x: 10, y: 4 },
-  { x: 1, y: 1 },
+  { x: 1, y: 7 },
   { x: 4, y: 1 },
   { x: 7, y: 1 },
   { x: 10, y: 1 },
 ];
+
+/** 長車往 +x 再佔一格。恐龍車和機器人維持一格，輪廓才不會一樣長。 */
+export function characterFootprint(character: string): readonly Cell[] {
+  if (character === "duo-duo" || character === "watt" || character === "dong-dong") {
+    return [{ x: 0, y: 0 }];
+  }
+  return [
+    { x: 0, y: 0 },
+    { x: 1, y: 0 },
+  ];
+}
 
 export type TownPropKind = "house" | "tree" | "light" | "dirt" | "barrier" | "bench" | "flower";
 
@@ -77,8 +88,8 @@ export const TOWN_PROPS: readonly TownProp[] = [
   { id: "flower-park", kind: "flower", x: 3, y: 6, w: 1, h: 1 },
   { id: "flower-front", kind: "flower", x: 6, y: 9, w: 1, h: 1 },
   { id: "bench", kind: "bench", x: 5, y: 6, w: 1, h: 1 },
-  { id: "dirt", kind: "dirt", x: 9, y: 4, w: 1, h: 1 },
-  { id: "barrier", kind: "barrier", x: 9, y: 5, w: 1, h: 1 },
+  { id: "dirt", kind: "dirt", x: 2, y: 9, w: 1, h: 1 },
+  { id: "barrier", kind: "barrier", x: 4, y: 9, w: 1, h: 1 },
   { id: "light", kind: "light", x: 12, y: 5, w: 1, h: 1 },
 ];
 
@@ -93,9 +104,9 @@ for (const prop of TOWN_PROPS) {
 const POND_CELLS = new Set(TOWN_PONDS.map(cellKey));
 
 function streetVisual(x: number, y: number): boolean {
-  if (x < 1 || x > 11 || y < 1 || y > 8) return false;
+  if (x < 1 || x > 12 || y < 1 || y > 8) return false;
   if (y === 1 || y === 2 || y === 4 || y === 5 || y === 7 || y === 8) return true;
-  return x === 1 || x === 2 || x === 4 || x === 5 || x === 7 || x === 8 || x === 10 || x === 11;
+  return x === 1 || x === 2 || x === 4 || x === 5 || x === 7 || x === 8 || x === 10 || x === 11 || x === 12;
 }
 
 const ROAD = new Set<string>();
@@ -234,12 +245,23 @@ export function agentOrigin(agent: TownAgent): { x: number; y: number } {
   };
 }
 
+function footprintAt(agent: TownAgent, origin: Cell): Cell[] {
+  return characterFootprint(agent.character).map((part) => ({
+    x: origin.x + part.x,
+    y: origin.y + part.y,
+  }));
+}
+
 export function occupiedCells(agent: TownAgent): Cell[] {
-  const from = add(agent.home, PARADE_OFFSETS[agent.leg]!);
-  if (agent.toward === null || agent.progress <= 0) return [from];
-  const to = add(agent.home, PARADE_OFFSETS[agent.toward]!);
-  if (sameCell(from, to)) return [from];
-  return [from, to];
+  const bag = new Map<string, Cell>();
+  const put = (origin: Cell) => {
+    for (const cell of footprintAt(agent, origin)) bag.set(cellKey(cell), cell);
+  };
+  put(add(agent.home, PARADE_OFFSETS[agent.leg]!));
+  if (agent.toward !== null && agent.progress > 0) {
+    put(add(agent.home, PARADE_OFFSETS[agent.toward]!));
+  }
+  return [...bag.values()];
 }
 
 /**
@@ -293,7 +315,11 @@ function planParade(agents: readonly TownAgent[]): number[] | null {
     for (const [key, id] of held) {
       if (id !== agent.id) blocked.add(key);
     }
-    if (!isRoad(goal.x, goal.y) || blocked.has(cellKey(goal))) return null;
+    for (const cell of footprintAt(agent, goal)) {
+      if (!isRoad(cell.x, cell.y)) return null;
+      const owner = held.get(cellKey(cell));
+      if (owner && owner !== agent.id) return null;
+    }
     const path = findPath(start, goal, blocked);
     if (!path || path.length !== 1 || !sameCell(path[0]!, goal)) return null;
     legs.push(nextLeg);
@@ -449,7 +475,7 @@ export function projectIso(
 export function bounceHeight(age: number, index: number, reduced: boolean, moving: boolean): number {
   if (reduced) return 0;
   const speed = moving ? 8.4 : 3.2;
-  const amp = moving ? 0.16 : 0.1;
+  const amp = moving ? 0.08 : 0.05;
   return Math.abs(Math.sin(age * speed + index * 0.9)) * amp;
 }
 

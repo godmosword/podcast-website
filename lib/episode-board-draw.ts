@@ -285,6 +285,17 @@ function drawFlower(put: Put, palette: TownPalette) {
   put(0.4, 0.4, 0.22, palette.yellow, "cube", 0.12);
 }
 
+type Mood = "friendly" | "eager" | "shy" | "cool" | "kind" | "polite";
+
+function moodOf(character: BoardCharacterId): Mood {
+  if (character === "xiao-hong") return "eager";
+  if (character === "dong-dong" || character === "hui-hui") return "shy";
+  if (character === "a-ku") return "cool";
+  if (character === "watt") return "polite";
+  if (character === "diao-che" || character === "an-an" || character === "lan-ba-shi") return "kind";
+  return "friendly";
+}
+
 function drawCar(
   ctx: CanvasRenderingContext2D,
   layout: IsoLayout,
@@ -300,72 +311,262 @@ function drawCar(
   const pose = reduced ? { ...posed, paint: 3 as const } : posed;
   const gx = origin.x;
   const gy = origin.y;
-  const chubby = 1.28;
   const put: Put = (x, y, z, color, shape, scale) =>
-    blit(ctx, layout, gx + x * chubby, gy + y * chubby, z * chubby + hop, color, shape, scale * chubby);
-  blitShadow(
-    ctx,
-    layout,
-    gx + 0.42 * chubby,
-    gy + 0.48 * chubby,
-    (car.character === "lan-ba-shi" ? 1.35 : 1.05) * chubby,
-  );
+    blit(ctx, layout, gx + x, gy + y, z + hop, color, shape, scale);
+  const long = car.character !== "duo-duo" && car.character !== "watt" && car.character !== "dong-dong";
+  blitShadow(ctx, layout, gx + (long ? 0.85 : 0.42), gy + 0.48, long ? 1.45 : 0.95);
   const blush = mix(palette.pink, palette.brand, 0.42);
   const colors = carColors(car.character, pose, palette);
+  const face = (ox: number, oy: number, oz: number, scale: number) =>
+    drawFace(put, ox, oy, oz, scale, palette, blush, closed, moodOf(car.character), car.character === "diao-che");
 
-  if (car.character === "watt") {
-    drawWatt(put, palette, colors.body, closed, blush);
-    return;
+  switch (car.character) {
+    case "duo-duo":
+      drawDuoDuo(put, palette, face, pose, car.action === "brush-teeth", reduced);
+      break;
+    case "xiao-hong":
+      drawRacer(put, palette, face);
+      break;
+    case "hui-hui":
+      drawBoxTruck(put, palette, colors.body, face);
+      break;
+    case "a-ku":
+      drawDrill(put, palette, pose, car, reduced, face);
+      break;
+    case "xiang-xiang":
+      drawFoodTruck(put, palette, face);
+      break;
+    case "monster-truck":
+      drawMonster(put, palette, face);
+      break;
+    case "an-an":
+      drawAmbulance(put, palette, face);
+      break;
+    case "dong-dong":
+      drawExcavator(put, palette, pose, reduced, face);
+      break;
+    case "diao-che":
+      drawCraneTruck(put, palette, pose, reduced, face);
+      break;
+    case "ling-ling":
+      drawSweeper(put, palette, pose, reduced, face);
+      break;
+    case "lan-ba-shi":
+      drawBus(put, palette, face);
+      break;
+    default:
+      drawWatt(put, palette, face);
   }
-  if (car.character === "lan-ba-shi") {
-    drawBus(put, palette, colors, closed, blush);
-    return;
-  }
-
-  drawWheels(put, palette.ink, car.character === "monster-truck" ? 0.4 : 0.26, car.character === "monster-truck" ? 0 : 0.02);
-  const bodyZ = car.character === "monster-truck" ? 0.28 : 0.16;
-  put(0.08, 0.12, bodyZ, colors.body, "body", 0.86);
-  if (car.character === "hui-hui") put(0.02, 0.02, bodyZ + 0.08, mix(palette.card, palette.ink, 0.2), "cube", 0.36);
-  if (car.character === "an-an") {
-    put(0.62, 0.28, bodyZ + 0.16, palette.pink, "slab", 0.22);
-    put(0.55, 0.36, bodyZ + 0.22, palette.pink, "cube", 0.16);
-  }
-  if (car.character === "xiao-hong") {
-    put(0.22, 0.18, bodyZ + 0.2, palette.paper, "slab", 0.22);
-    drawNumberTwo(put, palette.brandInk, bodyZ);
-  }
-
-  const headZ = bodyZ + 0.36;
-  put(0.02, 0.2, headZ, colors.head, "head", 1.02);
-  drawFace(put, 0.02, 0.2, headZ, 1.02, palette, blush, closed);
-
-  if (car.character === "duo-duo") {
-    put(0.18, 0.28, headZ + 0.78, palette.brand, "cube", 0.2);
-    put(0.4, 0.22, headZ + 0.84, palette.brand, "cube", 0.26);
-    put(0.64, 0.3, headZ + 0.76, palette.brand, "cube", 0.2);
-    put(0.36, 0.95, headZ + 0.2, palette.mint, "cube", 0.28);
-    if (car.action === "brush-teeth") {
-      const swing = reduced ? 0 : Math.sin(pose.brush * Math.PI * 2) * 0.1;
-      put(0.72 + swing, 1.05, headZ + 0.34, palette.paper, "slab", 0.16);
-      put(0.78 + swing, 1.12, headZ + 0.48, palette.mint, "cube", 0.14);
-    }
-  }
-  if (car.character === "dong-dong" || car.character === "a-ku") drawDig(put, palette, colors.body, pose, car, reduced, bodyZ);
-  if (car.character === "diao-che") drawCrane(put, palette, colors.body, pose, reduced, bodyZ);
-  if (car.character === "ling-ling") {
-    const sweep = reduced ? 0 : Math.sin(pose.sweep * Math.PI * 2) * 0.08;
-    put(0.12, 0.95, 0.02, palette.teal, "cube", 0.22);
-    put(0.58 + sweep, 0.98, 0.02, palette.mint, "cube", 0.22);
-  }
-  if (car.character === "xiang-xiang") put(0.04, 0.16, headZ + 0.55, palette.paper, "slab", 1.05);
-  if (car.character === "monster-truck") put(0.2, 0.22, headZ + 0.7, palette.brand, "slab", 0.4);
 }
 
-function drawWheels(put: Put, ink: string, scale: number, z: number) {
-  put(0.08, 0.14, z, ink, "cube", scale);
-  put(0.08, 0.62, z, ink, "cube", scale);
-  put(0.62, 0.14, z, ink, "cube", scale);
-  put(0.62, 0.62, z, ink, "cube", scale);
+function drawDuoDuo(
+  put: Put,
+  palette: TownPalette,
+  face: (ox: number, oy: number, oz: number, scale: number) => void,
+  pose: BoardPose,
+  brushing: boolean,
+  reduced: boolean,
+) {
+  drawWheels(put, palette.ink, 0.22, 0.02, 0.55);
+  put(0.1, 0.16, 0.14, palette.leaf, "body", 0.72);
+  put(0.55, 0.28, 0.22, palette.skyBlue, "cube", 0.22);
+  put(0.02, 0.08, 0.42, palette.leaf, "head", 0.92);
+  put(0.22, 0.72, 0.48, palette.mint, "cube", 0.42);
+  put(0.34, 0.95, 0.4, palette.brandInk, "slab", 0.22);
+  put(0.38, 0.9, 0.48, palette.yellow, "cube", 0.12);
+  put(0.12, 0.18, 1.05, palette.brand, "cube", 0.28);
+  put(0.38, 0.12, 1.16, palette.brand, "cube", 0.34);
+  put(0.64, 0.2, 1.02, palette.brand, "cube", 0.26);
+  face(0.08, 0.22, 0.5, 0.72);
+  if (brushing) {
+    const swing = reduced ? 0 : Math.sin(pose.brush * Math.PI * 2) * 0.12;
+    put(0.78 + swing, 0.85, 0.55, palette.paper, "slab", 0.16);
+    put(0.82 + swing, 0.95, 0.78, palette.skyBlue, "cube", 0.28);
+  }
+}
+
+function drawRacer(put: Put, palette: TownPalette, face: (ox: number, oy: number, oz: number, scale: number) => void) {
+  drawWheels(put, palette.ink, 0.2, 0, 1.35);
+  put(0.05, 0.28, 0.12, palette.pink, "slab", 0.78);
+  put(0.78, 0.22, 0.1, palette.pink, "slab", 0.86);
+  put(0.28, 0.32, 0.28, palette.paper, "slab", 0.7);
+  put(0.15, 0.18, 0.42, palette.ink, "cube", 0.28);
+  put(1.15, 0.55, 0.22, palette.yellow, "cube", 0.18);
+  put(1.15, 0.78, 0.22, palette.yellow, "cube", 0.18);
+  put(0.95, 0.4, 0.28, palette.skyBlue, "cube", 0.22);
+  drawNumberTwo(put, 0.42, 0.18, 0.18);
+  face(0.85, 0.38, 0.22, 0.48);
+}
+
+function drawBoxTruck(
+  put: Put,
+  palette: TownPalette,
+  cargo: string,
+  face: (ox: number, oy: number, oz: number, scale: number) => void,
+) {
+  drawWheels(put, palette.ink, 0.22, 0, 1.2);
+  put(0.02, 0.18, 0.16, cargo, "cube", 0.92);
+  put(0.08, 0.28, 0.95, palette.pink, "slab", 0.28);
+  put(0.55, 0.42, 1.05, palette.yellow, "cube", 0.16);
+  put(0.88, 0.22, 0.16, palette.skyBlue, "body", 0.62);
+  face(0.92, 0.28, 0.28, 0.5);
+}
+
+function drawDrill(
+  put: Put,
+  palette: TownPalette,
+  pose: BoardPose,
+  car: PaintCar,
+  reduced: boolean,
+  face: (ox: number, oy: number, oz: number, scale: number) => void,
+) {
+  const spin = reduced ? 0 : Math.sin(car.age * 8 + pose.dig * 6) * 0.06;
+  put(0.08, 0.22, 0.02, palette.ink, "slab", 0.72);
+  put(0.08, 0.55, 0.02, palette.ink, "slab", 0.72);
+  put(0.18, 0.28, 0.08, palette.yellow, "cube", 0.16);
+  put(0.42, 0.28, 0.08, palette.yellow, "cube", 0.16);
+  put(0.12, 0.2, 0.16, mix(palette.card, palette.ink, 0.35), "cube", 0.7);
+  face(0.16, 0.28, 0.28, 0.52);
+  put(0.7, 0.28, 0.2, palette.yellow, "cube", 0.42);
+  put(0.95 + spin, 0.36, 0.28, palette.brandInk, "cube", 0.48);
+  put(1.2 + spin, 0.46, 0.36, palette.ink, "cube", 0.32);
+  put(1.4 + spin, 0.54, 0.44, palette.paper, "cube", 0.18);
+}
+
+function drawFoodTruck(put: Put, palette: TownPalette, face: (ox: number, oy: number, oz: number, scale: number) => void) {
+  drawWheels(put, palette.ink, 0.22, 0, 1.15);
+  put(0.04, 0.34, 0.12, palette.mint, "slab", 0.9);
+  put(0.82, 0.28, 0.12, palette.mint, "slab", 0.72);
+  put(0.08, 0.22, 0.28, palette.pink, "cube", 0.82);
+  put(0.22, 0.4, 0.42, palette.brandInk, "cube", 0.42);
+  put(0.3, 0.48, 0.55, palette.leaf, "cube", 0.16);
+  put(0.42, 0.5, 0.52, palette.leaf, "cube", 0.14);
+  put(0.02, 0.18, 0.95, palette.paper, "slab", 0.42);
+  put(0.38, 0.16, 0.98, palette.pink, "slab", 0.42);
+  put(0.72, 0.18, 0.95, palette.paper, "slab", 0.38);
+  put(0.95, 0.3, 0.32, palette.skyBlue, "cube", 0.4);
+  face(1.0, 0.36, 0.28, 0.42);
+}
+
+function drawMonster(put: Put, palette: TownPalette, face: (ox: number, oy: number, oz: number, scale: number) => void) {
+  const wheel = 0.58;
+  put(0.02, 0.08, 0, palette.ink, "cube", wheel);
+  put(0.02, 0.55, 0, palette.ink, "cube", wheel);
+  put(0.95, 0.02, 0, palette.ink, "cube", wheel);
+  put(0.95, 0.58, 0, palette.ink, "cube", wheel);
+  put(0.16, 0.22, 0.18, palette.yellow, "cube", 0.18);
+  put(1.08, 0.16, 0.18, palette.yellow, "cube", 0.18);
+  put(0.12, 0.18, 0.48, mix(palette.yellow, palette.brand, 0.35), "cube", 0.95);
+  put(0.2, 0.28, 1.15, palette.ink, "slab", 0.7);
+  put(0.28, 0.32, 1.28, palette.yellow, "cube", 0.14);
+  put(0.48, 0.32, 1.28, palette.yellow, "cube", 0.14);
+  put(0.68, 0.32, 1.28, palette.yellow, "cube", 0.14);
+  face(0.28, 0.32, 0.62, 0.55);
+}
+
+function drawAmbulance(put: Put, palette: TownPalette, face: (ox: number, oy: number, oz: number, scale: number) => void) {
+  drawWheels(put, palette.ink, 0.22, 0, 1.2);
+  put(0.04, 0.2, 0.14, palette.paper, "cube", 0.78);
+  put(0.72, 0.16, 0.14, palette.paper, "cube", 0.82);
+  put(0.1, 0.28, 0.42, palette.pink, "slab", 0.62);
+  put(0.28, 0.22, 0.28, palette.pink, "cube", 0.28);
+  put(0.22, 0.18, 0.95, palette.pink, "cube", 0.22);
+  put(0.48, 0.18, 0.95, palette.pink, "cube", 0.22);
+  put(1.05, 0.55, 0.22, palette.yellow, "cube", 0.16);
+  face(0.82, 0.28, 0.32, 0.5);
+}
+
+function drawExcavator(
+  put: Put,
+  palette: TownPalette,
+  pose: BoardPose,
+  reduced: boolean,
+  face: (ox: number, oy: number, oz: number, scale: number) => void,
+) {
+  const dig = reduced ? 0.35 : pose.dig;
+  put(0.06, 0.2, 0.02, palette.ink, "slab", 0.78);
+  put(0.06, 0.52, 0.02, palette.ink, "slab", 0.78);
+  put(0.14, 0.28, 0.14, palette.yellow, "cube", 0.62);
+  face(0.18, 0.36, 0.28, 0.46);
+  put(0.42, 0.22, 0.55, palette.yellow, "cube", 0.28);
+  put(0.55, 0.08, 0.72 + dig * 0.35, palette.yellow, "slab", 0.62);
+  put(0.78, 0.42, 0.42 + dig * 0.15, palette.brandInk, "cube", 0.32);
+}
+
+function drawCraneTruck(
+  put: Put,
+  palette: TownPalette,
+  pose: BoardPose,
+  reduced: boolean,
+  face: (ox: number, oy: number, oz: number, scale: number) => void,
+) {
+  const lift = reduced ? 0.45 : 0.2 + pose.dig * 0.8;
+  drawWheels(put, palette.ink, 0.2, 0, 1.45);
+  put(0.55, 0.42, 0, palette.ink, "cube", 0.2);
+  put(0.02, 0.28, 0.12, mix(palette.card, palette.ink, 0.28), "slab", 0.85);
+  put(0.78, 0.24, 0.12, palette.brand, "cube", 0.7);
+  face(0.84, 0.32, 0.28, 0.48);
+  put(0.28, 0.3, 0.28, palette.brand, "cube", 0.22);
+  put(0.3, 0.32, 0.48, palette.brand, "cube", 0.18);
+  put(0.3, 0.32, 0.72, palette.brand, "cube", 0.18);
+  put(0.3, 0.32, 1.05, palette.brand, "cube", 0.18);
+  put(0.22, 0.24, 1.35, palette.brand, "slab", 0.85 + lift * 0.35);
+  put(0.85, 0.48, 1.15, mix(palette.card, palette.ink, 0.45), "cube", 0.16);
+  put(0.88, 0.5, 0.85, palette.ink, "slab", 0.1);
+}
+
+function drawSweeper(
+  put: Put,
+  palette: TownPalette,
+  pose: BoardPose,
+  reduced: boolean,
+  face: (ox: number, oy: number, oz: number, scale: number) => void,
+) {
+  const sweep = reduced ? 0 : Math.sin(pose.sweep * Math.PI * 2) * 0.08;
+  drawWheels(put, palette.ink, 0.2, 0, 1.05);
+  put(0.02, 0.4, 0.12, palette.leaf, "slab", 0.95);
+  put(0.7, 0.28, 0.16, palette.paper, "cube", 0.7);
+  face(0.76, 0.36, 0.32, 0.48);
+  put(0.2, 0.22, 0.85, palette.brand, "slab", 0.55);
+  put(0.55, 0.3, 0.95, palette.ink, "cube", 0.32);
+  put(0.62, 0.38, 1.15, palette.pink, "slab", 0.16);
+  put(0.15, 0.72 + sweep, 0.02, palette.yellow, "head", 0.42);
+  put(0.55, 0.78 - sweep, 0.02, palette.yellow, "head", 0.42);
+}
+
+function drawWheels(put: Put, ink: string, scale: number, z: number, span: number) {
+  put(0.04, 0.12, z, ink, "cube", scale);
+  put(0.04, 0.62, z, ink, "cube", scale);
+  put(span - scale * 0.2, 0.08, z, ink, "cube", scale);
+  put(span - scale * 0.2, 0.62, z, ink, "cube", scale);
+}
+
+type FaceFn = (ox: number, oy: number, oz: number, scale: number) => void;
+
+function drawBus(put: Put, palette: TownPalette, face: FaceFn) {
+  drawWheels(put, palette.ink, 0.2, 0, 1.55);
+  put(0.9, 0.55, 0, palette.ink, "cube", 0.2);
+  put(0, 0.22, 0.16, palette.skyBlue, "cube", 0.72);
+  put(0.62, 0.18, 0.16, palette.skyBlue, "cube", 0.78);
+  put(1.15, 0.16, 0.14, palette.paper, "slab", 0.55);
+  put(0.12, 0.3, 0.38, palette.skyBlue, "cube", 0.22);
+  put(0.4, 0.28, 0.38, palette.skyBlue, "cube", 0.22);
+  put(0.7, 0.26, 0.4, palette.paper, "cube", 0.2);
+  put(0.95, 0.24, 0.4, palette.paper, "cube", 0.2);
+  put(0.35, 0.2, 0.95, palette.skyBlue, "head", 0.28);
+  put(1.2, 0.48, 0.22, palette.yellow, "cube", 0.16);
+  put(1.2, 0.7, 0.22, palette.brand, "cube", 0.12);
+  face(0.7, 0.28, 0.32, 0.5);
+}
+
+function drawWatt(put: Put, palette: TownPalette, face: FaceFn) {
+  put(0.12, 0.42, 0, palette.teal, "cube", 0.24);
+  put(0.58, 0.42, 0, palette.teal, "cube", 0.24);
+  put(0.16, 0.28, 0.2, palette.teal, "body", 0.62);
+  put(-0.02, 0.12, 0.48, palette.teal, "head", 1.05);
+  face(0.08, 0.22, 0.58, 0.72);
+  put(0.42, 0.4, 1.28, palette.ink, "slab", 0.08);
+  put(0.38, 0.36, 1.4, palette.yellow, "cube", 0.18);
 }
 
 function drawFace(
@@ -377,27 +578,55 @@ function drawFace(
   palette: TownPalette,
   blush: string,
   closed: boolean,
+  mood: Mood,
+  mustache: boolean,
 ) {
+  const shy = mood === "shy";
+  const cool = mood === "cool";
+  const eager = mood === "eager";
+  const polite = mood === "polite";
   const eye: ShapeId = closed ? "slab" : "head";
-  const front = oy + scale * 0.62;
-  const ez = oz + scale * 0.22;
-  const eyeScale = scale * (closed ? 0.22 : 0.36);
-  const left = ox + scale * 0.06;
-  const right = ox + scale * 0.56;
-  put(left - scale * 0.02, front + scale * 0.08, ez - scale * 0.06, blush, "head", scale * 0.18);
-  put(right + scale * 0.22, front + scale * 0.08, ez - scale * 0.06, blush, "head", scale * 0.18);
+  const front = oy + scale * 0.58;
+  const ez = oz + scale * (shy ? 0.12 : 0.2);
+  const eyeScale = scale * (closed ? 0.18 : shy || polite ? 0.26 : cool ? 0.3 : 0.4);
+  const left = ox + scale * 0.04;
+  const right = ox + scale * 0.52;
+  const blushScale = scale * (shy ? 0.26 : cool ? 0.1 : 0.16);
+  put(left - scale * 0.06, front + scale * 0.12, ez - scale * 0.08, blush, "head", blushScale);
+  put(right + scale * 0.22, front + scale * 0.12, ez - scale * 0.08, blush, "head", blushScale);
   put(left, front, ez, palette.paper, eye, eyeScale);
   put(right, front, ez, palette.paper, eye, eyeScale);
   if (!closed) {
-    const pupil = eyeScale * 0.38;
-    put(left + eyeScale * 0.28, front + eyeScale * 0.35, ez + eyeScale * 0.28, palette.ink, "cube", pupil);
-    put(right + eyeScale * 0.28, front + eyeScale * 0.35, ez + eyeScale * 0.28, palette.ink, "cube", pupil);
+    const pupil = eyeScale * (cool ? 0.32 : 0.36);
+    const drop = shy ? eyeScale * 0.15 : 0;
+    put(left + eyeScale * 0.3, front + eyeScale * 0.32, ez + eyeScale * 0.22 - drop, palette.ink, "cube", pupil);
+    put(right + eyeScale * 0.3, front + eyeScale * 0.32, ez + eyeScale * 0.22 - drop, palette.ink, "cube", pupil);
   }
-  put(left + scale * 0.02, front - scale * 0.04, ez + eyeScale * 0.72, palette.brandInk, "slab", scale * 0.2);
-  put(right + scale * 0.02, front - scale * 0.04, ez + eyeScale * 0.72, palette.brandInk, "slab", scale * 0.2);
+  const brow = cool ? scale * 0.28 : scale * 0.16;
+  const browZ = ez + eyeScale * (eager ? 0.85 : shy ? 0.95 : 0.78);
+  put(left, front - scale * 0.02, browZ + (eager ? scale * 0.08 : 0), palette.brandInk, "slab", brow);
+  put(right, front - scale * 0.02, browZ - (eager ? scale * 0.06 : 0), palette.brandInk, "slab", brow);
+  const mouthZ = ez - scale * 0.02;
+  const mouthY = front + scale * 0.2;
+  if (mood === "friendly" || mood === "kind") {
+    put(left + scale * 0.12, mouthY, mouthZ, palette.brandInk, "slab", scale * 0.34);
+  } else if (eager) {
+    put(left + scale * 0.22, mouthY, mouthZ + scale * 0.06, palette.brandInk, "cube", scale * 0.14);
+  } else if (cool) {
+    put(left + scale * 0.16, mouthY, mouthZ + scale * 0.04, palette.ink, "slab", scale * 0.22);
+  } else if (shy) {
+    put(left + scale * 0.24, mouthY, mouthZ, palette.brandInk, "cube", scale * 0.1);
+  } else {
+    put(left + scale * 0.2, mouthY, mouthZ, palette.brandInk, "slab", scale * 0.18);
+  }
+  if (mustache) {
+    put(left + scale * 0.02, mouthY + scale * 0.04, mouthZ + scale * 0.08, mix(palette.card, palette.ink, 0.55), "slab", scale * 0.2);
+    put(right + scale * 0.02, mouthY + scale * 0.04, mouthZ + scale * 0.08, mix(palette.card, palette.ink, 0.55), "slab", scale * 0.2);
+  }
 }
 
-function drawNumberTwo(put: Put, color: string, bodyZ: number) {
+function drawNumberTwo(put: Put, x: number, y: number, z: number) {
+  put(x - 0.06, y - 0.04, z - 0.04, "rgb(255, 248, 242)", "head", 0.62);
   const cells: [number, number][] = [
     [0, 0],
     [1, 0],
@@ -412,66 +641,8 @@ function drawNumberTwo(put: Put, color: string, bodyZ: number) {
     [2, 4],
   ];
   for (const [col, row] of cells) {
-    put(0.7, 0.16 + col * 0.11, bodyZ + 0.46 - row * 0.075, color, "cube", 0.1);
+    put(x + col * 0.12, y + 0.08, z + 0.42 - row * 0.09, "rgb(58, 36, 16)", "cube", 0.11);
   }
-}
-
-function drawDig(
-  put: Put,
-  palette: TownPalette,
-  color: string,
-  pose: BoardPose,
-  car: PaintCar,
-  reduced: boolean,
-  bodyZ: number,
-) {
-  if (car.character === "a-ku") {
-    const spin = reduced ? 0 : Math.sin(car.age * 10) * 0.05;
-    put(0.34, 0.9, bodyZ, color, "cube", 0.28);
-    put(0.4 + spin, 1.08, bodyZ + 0.04, palette.brand, "cube", 0.2);
-    put(0.46 + spin, 1.22, bodyZ + 0.08, palette.paper, "cube", 0.12);
-    return;
-  }
-  const dig = reduced ? 0.25 : pose.dig;
-  put(0.72, 0.2, bodyZ + 0.28, color, "cube", 0.2);
-  put(0.86, 0.08 + dig * 0.15, bodyZ + 0.48 + dig * 0.2, color, "slab", 0.32);
-  put(0.98, 0.4, bodyZ + 0.22, palette.brandInk, "cube", 0.18);
-}
-
-function drawCrane(put: Put, palette: TownPalette, color: string, pose: BoardPose, reduced: boolean, bodyZ: number) {
-  const lift = reduced ? 0.4 : 0.25 + pose.dig * 0.7;
-  put(0.2, 0.2, bodyZ + 0.42, palette.ink, "cube", 0.16);
-  put(0.2, 0.2, bodyZ + 0.58, palette.ink, "slab", 0.16);
-  put(0.2, 0.2, bodyZ + 0.86, color, "slab", 0.16 + lift * 0.2);
-  put(0.18, 0.18, bodyZ + 1.15, color, "slab", 0.7);
-  put(0.7, 0.55, bodyZ + 0.95, palette.ink, "cube", 0.1);
-}
-
-function drawBus(
-  put: Put,
-  palette: TownPalette,
-  colors: { body: string; head: string },
-  closed: boolean,
-  blush: string,
-) {
-  drawWheels(put, palette.ink, 0.24, 0);
-  put(0.7, 0.16, 0, palette.ink, "cube", 0.24);
-  put(0, 0.14, 0.14, colors.body, "body", 0.72);
-  put(0.58, 0.14, 0.14, colors.body, "body", 0.72);
-  put(0.18, 0.28, 0.14, palette.paper, "cube", 0.2);
-  put(0.72, 0.28, 0.14, palette.paper, "cube", 0.2);
-  put(0.22, 0.22, 0.46, colors.head, "head", 0.95);
-  drawFace(put, 0.22, 0.22, 0.46, 0.95, palette, blush, closed);
-}
-
-function drawWatt(put: Put, palette: TownPalette, color: string, closed: boolean, blush: string) {
-  put(0.18, 0.4, 0, color, "cube", 0.22);
-  put(0.64, 0.4, 0, color, "cube", 0.22);
-  put(0.14, 0.22, 0.16, color, "body", 0.74);
-  put(0, 0.18, 0.5, color, "head", 1.12);
-  drawFace(put, 0, 0.18, 0.5, 1.12, palette, blush, closed);
-  put(0.48, 0.42, 1.32, palette.yellow, "cube", 0.14);
-  put(0.5, 0.44, 1.16, palette.ink, "slab", 0.08);
 }
 
 function carColors(
@@ -510,6 +681,53 @@ function carColors(
   if (character === "an-an") return { body: palette.paper, head: palette.paper };
   if (character === "lan-ba-shi") return { body: palette.skyBlue, head: palette.skyBlue };
   return { body: palette.teal, head: palette.teal };
+}
+
+/** 十二台並排，給角色表截圖用。車子停在原點，減少動態。 */
+export function paintCastSheet(
+  ctx: CanvasRenderingContext2D,
+  view: { width: number; height: number },
+  palette: TownPalette,
+  cars: readonly PaintCar[],
+  dpr: number,
+) {
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.imageSmoothingEnabled = true;
+  ctx.fillStyle = palette.sky;
+  ctx.fillRect(0, 0, view.width, view.height);
+  const count = Math.max(1, cars.length);
+  const tw = Math.min(view.width / (count * 2.35), view.height * 0.18);
+  const layoutBase: IsoLayout = { ox: 0, oy: 0, tw, th: tw / 2, zh: tw * 1.15 };
+  cars.forEach((car, index) => {
+    const slotX = ((index + 0.5) * view.width) / count;
+    const baseline = view.height * 0.56;
+    const probe = projectIso(0.55, 0.4, 0, layoutBase);
+    const layout: IsoLayout = {
+      ...layoutBase,
+      ox: slotX - probe.x,
+      oy: baseline - probe.y,
+    };
+    const agent: TownAgent = {
+      ...car.agent,
+      home: { x: 0, y: 0 },
+      leg: 0,
+      toward: null,
+      progress: 0,
+    };
+    drawCar(ctx, layout, palette, { ...car, agent, age: 0 }, true);
+  });
+}
+
+export function castAnchor(
+  index: number,
+  count: number,
+  view: { width: number; height: number },
+): { x: number; y: number } {
+  const safe = Math.max(1, count);
+  return {
+    x: ((index + 0.5) * view.width) / safe,
+    y: view.height * 0.56,
+  };
 }
 
 export function luminance(color: string): number {

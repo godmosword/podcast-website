@@ -3,12 +3,14 @@ import { loadEpisodeBoard } from "@/lib/episode-board";
 import {
   actorHitGap,
   bounceHeight,
+  characterFootprint,
   createTownAgents,
   eyesClosed,
   findPath,
   hasOverlap,
   isRoad,
   MIN_HIT_GAP,
+  occupiedCells,
   paradeCells,
   piecesForFrame,
   sortByDepth,
@@ -122,6 +124,27 @@ describe("episode board grid", () => {
     const frame = piecesForFrame(createTownAgents(loadEpisodeBoard().actors));
     const frameKeys = frame.map((piece) => piece.gx + piece.gy);
     expect(frameKeys).toEqual([...frameKeys].sort((a, b) => a - b));
+  });
+
+  it("巴士和賽車佔兩格，恐龍車和機器人才佔一格，多出來的格子也在路上", () => {
+    const agents = createTownAgents(loadEpisodeBoard().actors);
+    const bus = agents.find((agent) => agent.character === "lan-ba-shi");
+    const racer = agents.find((agent) => agent.character === "xiao-hong");
+    const dino = agents.find((agent) => agent.character === "duo-duo");
+    const robot = agents.find((agent) => agent.character === "watt");
+    expect(bus && occupiedCells(bus)).toHaveLength(2);
+    expect(racer && occupiedCells(racer)).toHaveLength(2);
+    expect(dino && occupiedCells(dino)).toHaveLength(1);
+    expect(robot && occupiedCells(robot)).toHaveLength(1);
+    expect(characterFootprint("lan-ba-shi")).toHaveLength(2);
+    for (const agent of agents) {
+      for (let leg = 0; leg < 4; leg += 1) {
+        const parked = { ...agent, leg, toward: null, progress: 0 };
+        for (const cell of occupiedCells(parked)) {
+          expect(isRoad(cell.x, cell.y), `${agent.character} ${cell.x},${cell.y}`).toBe(true);
+        }
+      }
+    }
   });
 
   it("減少動態時不跳也不眨眼，尋路模擬夠快", () => {

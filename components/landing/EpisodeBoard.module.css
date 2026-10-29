@@ -66,6 +66,23 @@
   visibility: hidden;
 }
 
+.castName {
+  position: absolute;
+  top: 46px;
+  left: 0;
+  transform: translateX(-50%);
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--card) 92%, transparent);
+  white-space: nowrap;
+  font-family: var(--font-stack-display);
+  font-size: var(--fs-label);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--ink);
+  pointer-events: none;
+}
+
 .hit {
   position: absolute;
   top: 0;
