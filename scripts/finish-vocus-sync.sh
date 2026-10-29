@@ -21,6 +21,8 @@ git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 git checkout -B "$branch"
 
 git add data/parent-articles.ts
+git add data/parent-travel-abroad-articles.ts
+git add data/parent-article-series.ts
 git add app/fonts/huninn-subset.woff2 app/fonts/gensen-rounded-tw-bold-subset.woff2
 if compgen -G "public/parent-articles/*" >/dev/null; then
   git add public/parent-articles
@@ -39,7 +41,7 @@ fi
 
 title_list="新文"
 if [ -f "$report" ]; then
-  title_list="$(jq -r '[.added[].title] | if length == 0 then "新文" else map("「" + . + "」") | join("、") end' "$report")"
+  title_list="$(jq -r '[.added[]?.title, .moved[]?.title] | map(select(. != null and . != "")) | if length == 0 then "新文" else map("「" + . + "」") | join("、") end' "$report")"
 fi
 commit_title="sync: 方格子${title_list}"
 if [ "${#commit_title}" -gt 240 ]; then
