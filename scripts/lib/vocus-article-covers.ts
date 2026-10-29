@@ -5,12 +5,17 @@
 export type PinnedVocusCover = {
   readonly src: string;
   readonly alt: string;
+  /** 單篇首圖用原圖比例。列表卡仍是 16:9 裁切框。 */
+  readonly width: number;
+  readonly height: number;
 };
 
 export const PINNED_VOCUS_COVERS: Readonly<Record<string, PinnedVocusCover>> = {
   "6ae34027fd897800012f3e51": {
     src: "/parent-articles/vocus-6ae34027fd897800012f3e51-cover.webp",
     alt: "小松 PC4000 大型怪手前，大人與小孩的背影",
+    width: 1600,
+    height: 2133,
   },
 };
 
@@ -32,10 +37,16 @@ export function pinnedVocusCover(slug: string): PinnedVocusCover | undefined {
 export function coverForVocusArticle(
   slug: string,
   ogImageURL: string | null,
-): { coverImage?: string; coverAlt?: string; downloadOg: boolean } {
+): { coverImage?: string; coverAlt?: string; coverWidth?: number; coverHeight?: number; downloadOg: boolean } {
   const pinned = pinnedVocusCover(slug);
   if (pinned) {
-    return { coverImage: pinned.src, coverAlt: pinned.alt, downloadOg: false };
+    return {
+      coverImage: pinned.src,
+      coverAlt: pinned.alt,
+      coverWidth: pinned.width,
+      coverHeight: pinned.height,
+      downloadOg: false,
+    };
   }
   if (ogImageURL) {
     return {

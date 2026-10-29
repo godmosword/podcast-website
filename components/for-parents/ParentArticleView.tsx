@@ -76,15 +76,28 @@ export function ParentArticleView({
         </time>
       </header>
       {article.coverImage ? (
-        <figure className={styles.hero}>
-          <Image
-            src={article.coverImage}
-            alt={article.coverAlt ?? ""}
-            fill
-            priority
-            sizes="(max-width: 720px) 100vw, 640px"
-          />
-        </figure>
+        article.coverWidth && article.coverHeight ? (
+          <figure className={styles.heroNatural}>
+            <Image
+              src={article.coverImage}
+              alt={article.coverAlt ?? ""}
+              width={article.coverWidth}
+              height={article.coverHeight}
+              priority
+              sizes="(max-width: 720px) 100vw, 640px"
+            />
+          </figure>
+        ) : (
+          <figure className={styles.hero}>
+            <Image
+              src={article.coverImage}
+              alt={article.coverAlt ?? ""}
+              fill
+              priority
+              sizes="(max-width: 720px) 100vw, 640px"
+            />
+          </figure>
+        )
       ) : null}
       <div className={styles.body}>
         {article.blocks.map((block, index) => (

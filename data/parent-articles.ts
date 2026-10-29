@@ -44,6 +44,12 @@ export type ParentArticle = {
   readonly excerpt: string;
   readonly coverImage?: string;
   readonly coverAlt?: string;
+  /**
+   * 有這兩個數字時，單篇首圖照原比例完整顯示。
+   * 沒有時，首圖維持 16:9、`object-fit: cover`（其他文章不變）。
+   */
+  readonly coverWidth?: number;
+  readonly coverHeight?: number;
   readonly blocks: readonly ParentArticleBlock[];
 };
 

@@ -551,6 +551,10 @@ export function serializeParentArticle(article: ParentArticle): string {
     if (article.coverAlt) {
       lines.push(`    coverAlt: ${JSON.stringify(article.coverAlt)},`);
     }
+    if (article.coverWidth && article.coverHeight) {
+      lines.push(`    coverWidth: ${article.coverWidth},`);
+      lines.push(`    coverHeight: ${article.coverHeight},`);
+    }
   }
   lines.push("    blocks: [");
   for (const block of article.blocks) lines.push(serializeBlock(block));

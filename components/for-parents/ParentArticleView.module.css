@@ -63,6 +63,19 @@
   object-fit: cover;
 }
 
+.heroNatural {
+  margin: 0 0 var(--space-6);
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--warm-cover-bg);
+}
+
+.heroNatural img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 .body {
   color: var(--ink);
   font-size: 1.125rem;

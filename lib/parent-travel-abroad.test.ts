@@ -37,6 +37,8 @@ describe("親子出國文章", () => {
       "/parent-articles/vocus-6ae34027fd897800012f3e51-cover.webp",
     );
     expect(article?.coverAlt).toBe("小松 PC4000 大型怪手前，大人與小孩的背影");
+    expect(article?.coverWidth).toBe(1600);
+    expect(article?.coverHeight).toBe(2133);
     expect(getTravelAbroadArticle("travel-abroad-sample")).toBeUndefined();
     for (const entry of listTravelAbroadArticles()) {
       expect(parentSlugs.has(entry.slug)).toBe(false);

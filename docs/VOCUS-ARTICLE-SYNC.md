@@ -72,4 +72,4 @@ lint、typecheck、test 或字型子集有一項失敗：仍把新文推上 `syn
 
 方格子的 `article` 型別（公開網址是 `/article/<id>`，不是 `/post/<id>`）在列表裡沒有內文。同步會再打 `GET https://api.vocus.cc/api/article/<contentId>` 取 HTML。文末若寫成 `<同步更新至親子出國專欄>`，先換成純文字再分類，避免被當成 HTML 標籤吃掉。
 
-`scripts/lib/vocus-article-covers.ts` 裡指定的封面，同步重寫該篇時沿用，不會改去下載方格子縮圖蓋掉檔案。已經在正確區的文章，排程本來就不會重寫。
+`scripts/lib/vocus-article-covers.ts` 裡指定的封面，同步重寫該篇時沿用，不會改去下載方格子縮圖蓋掉檔案。小松之杜這張標了原圖寬高，單篇首圖照直式完整顯示；列表卡仍是 16:9 裁切框。已經在正確區的文章，排程本來就不會重寫。
