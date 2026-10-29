@@ -382,6 +382,7 @@ npm run font:subset
 | 文件 | 說明 |
 |------|------|
 | [EPISODE-WORKFLOW.md](./docs/EPISODE-WORKFLOW.md) | 單集全幕插圖標準流程 |
+| [en-pilot/SPEC.md](./docs/en-pilot/SPEC.md) | 英文站內重創音訊 pilot（EP4）規格 v1.1；流程見 [WORKFLOW.md](./docs/en-pilot/WORKFLOW.md)。生產尚未核准 |
 | [SUBTITLE-PROOFREAD.md](./docs/SUBTITLE-PROOFREAD.md) | 字幕校對 SOP |
 | [VIDEO-EXPORT.md](./docs/VIDEO-EXPORT.md) | YouTube 整集影片匯出 |
 | [GAMEKIT-ARCHITECTURE.md](./docs/GAMEKIT-ARCHITECTURE.md) | GameKit 分層與新增遊戲 |
