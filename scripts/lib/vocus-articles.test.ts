@@ -19,10 +19,14 @@ import {
   slugForVocusPost,
   stripTravelAbroadMarker,
   TRAVEL_ABROAD_MARKER,
+  isPublishableVocusPost,
+  mergeArticleDetail,
   vocusArticleDestination,
+  vocusArticleUrl,
   vocusContentsUrl,
   type VocusListItem,
 } from "./vocus-articles";
+import { coverForVocusArticle } from "./vocus-article-covers";
 
 const fixtures = join(dirname(fileURLToPath(import.meta.url)), "../fixtures/vocus");
 
@@ -418,5 +422,95 @@ describe("已收錄文章加上標記會搬走、不複製", () => {
     ]);
     expect(emptied).not.toContain("vision-care");
     expect(emptied).toContain("export const PARENT_ARTICLE_SERIES");
+  });
+});
+
+describe("方格子 article 型別", () => {
+  const contentId = "6ae34027fd897800012f3e51";
+  const listPayload = {
+    count: 1,
+    contents: [
+      {
+        title: "名古屋北陸",
+        type: "article",
+        isPay: false,
+        adult: false,
+        spam: 0,
+        contentId,
+        publishAt: "2026-10-29T13:06:04.184Z",
+        article: {
+          title: "名古屋北陸",
+          thumbnailUrl: "https://images.vocus.cc/thumb.png",
+        },
+      },
+    ],
+  };
+  const detailHtml = [
+    "<html><body><div>",
+    '<p class="graf--p"><span style="white-space: pre-wrap;">帶孩子去小松看挖土機。</span></p>',
+    '<p class="graf--p"><span style="white-space: pre-wrap;"><同步更新至親子出國專欄></span></p>',
+    "</div></body></html>",
+  ].join("");
+
+  it("列表沒有內文時先不當公開文，補上單篇 HTML 後收進親子出國", () => {
+    const parsed = parseContentsPage(listPayload);
+    const listed = parsed.items[0];
+    expect(listed).toBeDefined();
+    if (!listed) return;
+    expect(listed.type).toBe("article");
+    expect(listed.html).toBe("");
+    expect(listed.sourceUrl).toBe(`https://vocus.cc/article/${contentId}`);
+    expect(listed.ogImageURL).toBe("https://images.vocus.cc/thumb.png");
+    expect(isPublishableVocusPost(listed)).toBe(false);
+    expect(vocusArticleUrl(contentId)).toBe(
+      `https://api.vocus.cc/api/article/${contentId}`,
+    );
+
+    const merged = mergeArticleDetail(listed, { article: { content: detailHtml } });
+    expect(isPublishableVocusPost(merged)).toBe(true);
+    expect(vocusArticleDestination(htmlToParentBlocks(merged.html))).toBe("travel-abroad");
+
+    const article = articleFromVocusPost(merged, new Set());
+    expect(article.slug).toBe(`vocus-${contentId}`);
+    expect(article.blocks).toEqual([
+      { type: "paragraph", text: "帶孩子去小松看挖土機。" },
+    ]);
+    expect(JSON.stringify(article)).not.toContain(TRAVEL_ABROAD_MARKER);
+
+    const plan = planVocusArticleSync([merged], []);
+    expect(plan.actions).toEqual([
+      { kind: "add", destination: "travel-abroad", post: merged },
+    ]);
+    expect(plan.skippedUnpublished).toBe(0);
+  });
+
+  it("已經在親子出國的 article 再跑一次不會重寫，指定封面也不改去下載縮圖", () => {
+    const parsed = parseContentsPage(listPayload);
+    const listed = parsed.items[0];
+    expect(listed).toBeDefined();
+    if (!listed) return;
+    const merged = mergeArticleDetail(listed, { article: { content: detailHtml } });
+    const again = planVocusArticleSync(
+      [merged],
+      [
+        {
+          sourceUrl: merged.sourceUrl,
+          slug: `vocus-${contentId}`,
+          destination: "travel-abroad",
+        },
+      ],
+    );
+    expect(again.actions).toEqual([]);
+    expect(again.skippedExisting).toBe(1);
+
+    expect(coverForVocusArticle(`vocus-${contentId}`, merged.ogImageURL)).toEqual({
+      coverImage: `/parent-articles/vocus-${contentId}-cover.webp`,
+      coverAlt: "小松 PC4000 大型怪手前，大人與小孩的背影",
+      downloadOg: false,
+    });
+    expect(coverForVocusArticle("vocus-aaaaaaaaaaaaaaaaaaaaaaaa", "https://images.example/a.jpg")).toEqual({
+      coverImage: "/parent-articles/vocus-aaaaaaaaaaaaaaaaaaaaaaaa-cover.webp",
+      downloadOg: true,
+    });
   });
 });

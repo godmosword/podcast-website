@@ -23,14 +23,18 @@ import { PARENT_TRAVEL_ABROAD_ARTICLES } from "../data/parent-travel-abroad-arti
 import {
   appendParentArticleSource,
   articleFromVocusPost,
+  mergeArticleDetail,
   parseContentsPage,
   planVocusArticleSync,
   removeParentArticlesFromSource,
   removeParentSeriesSlugs,
+  vocusArticleUrl,
   vocusContentsUrl,
   type VocusArticleDestination,
+  type VocusListItem,
   type VocusSyncAction,
 } from "./lib/vocus-articles";
+import { coverForVocusArticle } from "./lib/vocus-article-covers";
 
 const USER_AGENT =
   "podcast-website-vocus-sync/1.0 (low-frequency parent-article mirror; one creator)";
@@ -108,6 +112,21 @@ async function listAllPosts(): Promise<{ listed: number; items: VocusListItem[] 
   return { listed, items };
 }
 
+/** 列表 API 的 article 沒有 HTML，改向單篇 API 補內文。 */
+async function hydrateArticleBodies(items: VocusListItem[]): Promise<VocusListItem[]> {
+  const hydrated: VocusListItem[] = [];
+  for (const item of items) {
+    if (item.type !== "article" || item.html.trim() !== "") {
+      hydrated.push(item);
+      continue;
+    }
+    await sleep(PAGE_DELAY_MS);
+    const payload = await fetchJson(vocusArticleUrl(item.contentId));
+    hydrated.push(mergeArticleDetail(item, payload));
+  }
+  return hydrated;
+}
+
 async function downloadWebp(
   url: string,
   destPath: string,
@@ -179,13 +198,17 @@ async function materializeImages(
 
   let coverImage = article.coverImage;
   let coverAlt = article.coverAlt;
-  if (ogImageURL) {
+  const cover = coverForVocusArticle(article.slug, ogImageURL);
+  if (cover.downloadOg && ogImageURL) {
     const filename = `${article.slug}-cover.webp`;
     if (!dryRun) {
       await downloadWebp(ogImageURL, path.join(IMAGE_DIR, filename));
     }
-    coverImage = `/parent-articles/${filename}`;
+    coverImage = cover.coverImage;
     coverAlt = article.title;
+  } else if (cover.coverImage) {
+    coverImage = cover.coverImage;
+    coverAlt = cover.coverAlt ?? article.coverAlt ?? article.title;
   }
 
   return {
@@ -223,6 +246,7 @@ async function main(): Promise<void> {
   }
 
   const { listed, items } = await listAllPosts();
+  const hydrated = await hydrateArticleBodies(items);
   const stored = [
     ...PARENT_ARTICLES.map((article) => ({
       sourceUrl: article.sourceUrl,
@@ -235,7 +259,7 @@ async function main(): Promise<void> {
       destination: "travel-abroad" as const,
     })),
   ];
-  const plan = planVocusArticleSync(items, stored);
+  const plan = planVocusArticleSync(hydrated, stored);
   const slugs = new Set(stored.map((article) => article.slug));
   const built: Array<VocusSyncAction & { article: ParentArticle }> = [];
   for (const action of plan.actions) {
