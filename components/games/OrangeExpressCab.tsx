@@ -2,7 +2,7 @@
 
 import { useRef, type CSSProperties, type ReactNode } from "react";
 import { OrangeExpressGauge } from "@/components/games/OrangeExpressGauge";
-import { HornIcon } from "@/components/games/OrangeExpressGlyphs";
+import { HornIcon, XiaojuFace } from "@/components/games/OrangeExpressGlyphs";
 import {
   brakeLampLabel,
   brakeValueText,
@@ -28,35 +28,6 @@ import {
   type RunState,
 } from "@/lib/games/orange-express/types";
 import styles from "./orange-express.module.css";
-
-function OrangeBadge() {
-  return (
-    <svg viewBox="0 0 64 64" className={styles.badge} aria-hidden>
-      <rect
-        x="6"
-        y="18"
-        width="52"
-        height="30"
-        rx="15"
-        fill="rgb(255, 248, 236)"
-        stroke="currentColor"
-        strokeWidth="3"
-      />
-      <rect x="6" y="30" width="52" height="8" fill="rgb(255, 150, 70)" />
-      <circle cx="24" cy="28" r="3" fill="currentColor" />
-      <circle cx="40" cy="28" r="3" fill="currentColor" />
-      <circle cx="18" cy="38" r="3" fill="rgb(255, 170, 180)" />
-      <circle cx="46" cy="38" r="3" fill="rgb(255, 170, 180)" />
-      <path
-        d="M26 40c2 3 10 3 12 0"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
 
 /** 點或拖到桿上哪一格：回傳格子的索引（0 在最下面）。 */
 function indexFromY(el: HTMLElement, clientY: number, last: number): number {
@@ -353,7 +324,7 @@ export function OrangeExpressCab({
       {/* 站名、速度表、指示燈收在兩根桿中間那一格；不另佔一列，高度留給前窗。DOM 放最前，讀屏先聽到站名。 */}
       <div className={styles.dash}>
         <div className={styles.dashHead}>
-          <OrangeBadge />
+          <XiaojuFace className={styles.badge} />
           <p className={styles.stationName}>
             <span className={styles.stationLead}>
               {atStation ? COPY.atStation : COPY.nextStop}

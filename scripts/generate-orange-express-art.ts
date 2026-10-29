@@ -7,6 +7,10 @@
  *   npm run generate:orange-express-art -- --only cover         # 只生其中一張（cover 或 sticker）
  *   npm run generate:orange-express-art -- --approve [--run <run-id>]   # 人工審圖後才放進正式位置
  *
+ * --approve 會一起做：寫正式檔（貼紙另做 sm/ 縮小副本）、data/games.ts 的封面改指 cover.webp、
+ * lib/games/orange-express/art.ts 的 XIAOJU_STICKER_SRC 填上貼紙路徑、新增或更新 SOURCES.md。
+ * 只改這次 run 有的那幾張；已經換過的地方原樣不動。
+ *
  * 張數與 prompt 已在 2026-10-28 確認（docs/plans/2026-10-28-orange-express-art-batch2.md 最後一節）：
  * 封面 1 張、貼紙 1 張，各 1 輪。
  * 紅線：付費生圖，每次執行每張最多 1 次 API 呼叫、不自動重抽；不滿意要重抽先列張數等確認。
@@ -17,12 +21,23 @@ import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFi
 import { dirname, join, relative } from "node:path";
 import sharp from "sharp";
 import { getImageModel } from "./lib/illustrate-core";
+import {
+  COVER_CROPS,
+  coverCrop,
+  switchGamesCover,
+  switchStickerSrc,
+  upsertSources,
+  type SourceRow,
+} from "./lib/orange-express-art";
 import { ROOT } from "./lib/transcribe-core";
 
 const PUBLIC_DIR = join(ROOT, "public");
 const STAGING_ROOT = join(PUBLIC_DIR, ".games-staging", "orange-express");
 const CHARACTER_REF = join(PUBLIC_DIR, "characters/小橘高鐵.jpg");
 const HUB_REF = join(PUBLIC_DIR, "games/v2/hub/hero-desktop.webp");
+const GAMES_DATA = join(ROOT, "data/games.ts");
+const ART_MODULE = join(ROOT, "lib/games/orange-express/art.ts");
+const SOURCES_MD = join(PUBLIC_DIR, "games/v2/orange-express/SOURCES.md");
 
 /** 透明底只有 gpt-image-1.5 這一代支援（gpt-image-2 不支援，見 generate-zone-night-art.ts）。 */
 const STICKER_MODEL = "gpt-image-1.5";
@@ -164,6 +179,7 @@ async function writeContactSheet(runDir: string, made: Partial<Record<ArtId, Buf
       .jpeg({ quality: 88 })
       .toFile(path);
     out.push(path);
+    out.push(await writeCoverCrops(runDir, made.cover));
   }
   if (made.sticker) {
     const sizes = [400, 120, 48];
@@ -193,6 +209,36 @@ async function writeContactSheet(runDir: string, made: Partial<Record<ArtId, Buf
     out.push(path);
   }
   return out;
+}
+
+/**
+ * 封面裁進各個框的樣子（遊樂園卡片、標題主視覺三種），一列一個框，寬 600。
+ * 遊樂園卡片右下角畫出播放圓鈕的位置：小橘的臉不能在那裡、也不能被切掉。
+ */
+async function writeCoverCrops(runDir: string, cover: Buffer): Promise<string> {
+  const { width = 0, height = 0 } = await sharp(cover).metadata();
+  const tileWidth = 600;
+  const gap = 12;
+  const layers: sharp.OverlayOptions[] = [];
+  let top = 0;
+  for (const crop of COVER_CROPS) {
+    const box = coverCrop(width, height, crop.aspect, crop.y);
+    const tileHeight = Math.round(tileWidth / crop.aspect);
+    layers.push({ input: await sharp(cover).extract(box).resize(tileWidth, tileHeight).png().toBuffer(), left: 0, top });
+    if (crop.cornerBadge) {
+      const d = Math.round(tileWidth * crop.cornerBadge * 0.5);
+      const r = d / 2;
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${tileWidth}" height="${tileHeight}"><circle cx="${tileWidth - r - 10}" cy="${tileHeight - r - 10}" r="${r}" fill="white" fill-opacity="0.55" stroke="black" stroke-width="3"/></svg>`;
+      layers.push({ input: Buffer.from(svg), left: 0, top });
+    }
+    top += tileHeight + gap;
+  }
+  const path = join(runDir, "contact-cover-crops.jpg");
+  await sharp({ create: { width: tileWidth, height: top - gap, channels: 3, background: "#ffffff" } })
+    .composite(layers)
+    .jpeg({ quality: 88 })
+    .toFile(path);
+  return path;
 }
 
 async function runGenerate(ids: readonly ArtId[]): Promise<void> {
@@ -225,6 +271,9 @@ async function runGenerate(ids: readonly ArtId[]): Promise<void> {
   const sheets = await writeContactSheet(runDir, made);
   console.log(`✓ staging：${displayPath(runDir)}`);
   for (const sheet of sheets) console.log(`  併排審稿：${displayPath(sheet)}`);
+  if (made.cover) {
+    console.log(`  裁切審稿由上而下：${COVER_CROPS.map((crop) => crop.label).join("、")}（圓圈是遊樂園卡片的播放鈕）`);
+  }
   console.log(`\n請人工審圖；通過後：npm run generate:orange-express-art -- --approve --run ${runId}`);
 }
 
@@ -246,7 +295,56 @@ async function runApprove(runId: string): Promise<void> {
       console.log(`✓ approve：${displayPath(staged)} → ${displayPath(target.path)}`);
     }
   }
-  console.log("\n記得登記 public/games/v2/orange-express/SOURCES.md，並把 data/games.ts 的封面改指新的 webp。");
+  const approved = new Set(manifest.items.map((item) => item.id));
+  if (approved.has("cover")) rewrite(GAMES_DATA, switchGamesCover);
+  if (approved.has("sticker")) rewrite(ART_MODULE, switchStickerSrc);
+  const date = manifest.createdAt.slice(0, 10);
+  const rows = manifest.items.flatMap((item) => sourceRows(item.id, item.model, date));
+  writeFileSync(SOURCES_MD, upsertSources(existsSync(SOURCES_MD) ? readFileSync(SOURCES_MD, "utf8") : null, rows), "utf8");
+  console.log(`✓ 來源表：${displayPath(SOURCES_MD)}（對應 PR 寫「待填」，開 PR 後補上）`);
+  console.log(
+    "\n還要人工做：看一眼 data/games.ts 的封面替代文字對不對得上圖、改設計文件第 9 節「不生新貼紙」那句，" +
+      "然後重錄小橘特快車的 darwin 基準（npm run test:visual:trusted -- -g 小橘特快車 --update-snapshots）。",
+  );
+}
+
+/** 改一個原始碼檔；內容沒變就不寫。 */
+function rewrite(path: string, change: (source: string) => string): void {
+  const before = readFileSync(path, "utf8");
+  const after = change(before);
+  if (after === before) {
+    console.log(`= 已經換過：${displayPath(path)}`);
+    return;
+  }
+  writeFileSync(path, after, "utf8");
+  console.log(`✓ 改好：${displayPath(path)}`);
+}
+
+function sourceRows(id: ArtId, model: string, date: string): SourceRow[] {
+  const how = "AI 生圖（`scripts/generate-orange-express-art.ts`，1 次 API 呼叫），人工審稿後 `--approve`。";
+  if (id === "cover") {
+    return [
+      {
+        file: "cover.webp",
+        use: "遊樂園卡片、標題主視覺、著色本「下一站」卡",
+        how,
+        model,
+        date,
+        handling: "轉 webp（quality 90）。未重畫。",
+      },
+    ];
+  }
+  return [
+    { file: "xiaoju-sticker.webp", use: "結算的小橘", how, model, date, handling: "去透明邊、轉 webp（quality 90）。未重畫。" },
+    {
+      file: "sm/xiaoju-sticker.webp",
+      use: "小橘貼紙的縮小副本（寬 256）",
+      how: "由原檔以同一支腳本縮小。不是另一次生圖。",
+      model: "同原檔（這張不是另一次生圖）",
+      date,
+      handling: "sharp 縮小後轉 webp（quality 86、alphaQuality 100）。",
+    },
+  ];
 }
 
 const KNOWN_ARGS = new Set(["--dry-run", "--approve", "--run", "--only"]);
@@ -274,6 +372,9 @@ async function main(): Promise<void> {
       console.log(`\n[${id}] 模型 ${spec.model()}，${spec.size}${spec.transparent ? "，透明底" : ""}，1 張`);
       console.log(`參考圖：${spec.references.map(displayPath).join("、")}`);
       console.log(`正式位置（approve 才寫）：${spec.targets.map((t) => displayPath(t.path)).join("、")}`);
+      console.log(
+        `approve 時另外改：${id === "cover" ? displayPath(GAMES_DATA) : displayPath(ART_MODULE)}、${displayPath(SOURCES_MD)}`,
+      );
       console.log(`Prompt：\n${spec.prompt}`);
     }
     return;

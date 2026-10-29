@@ -101,7 +101,7 @@ npm run dev
 | `npm run optimize:lcp-images` | 預生成 landing／hero-home／**故事全幕** WebP／AVIF（`--verify` 只檢查不寫檔） |
 | `npm run generate:coloring-lineart` | 由定裝／場景 JPG 產生著色線稿 PNG（演算法版；`--only <id>`／`--kind`／`--verify`） |
 | `npm run generate:coloring-cover` | 繪本著色 hero cover（黏土風 1448×1086 webp；寫入 `public/.games-staging/<run>/`，人工審後 `--approve`；需 `OPENAI_API_KEY`，CI 不跑） |
-| `npm run generate:orange-express-art` | 小橘特快車黏土封面（1536×1024）與小橘透明貼紙（另做 `sm/`）；寫入 `public/.games-staging/orange-express/<run>/` 並出併排審稿圖，人工審後 `--approve`；`--only cover｜sticker` 只生一張、`--dry-run` 只印 prompt；需 `OPENAI_API_KEY`，CI 不跑 |
+| `npm run generate:orange-express-art` | 小橘特快車黏土封面（1536×1024）與小橘透明貼紙（另做 `sm/`）；寫入 `public/.games-staging/orange-express/<run>/` 並出併排審稿圖與封面裁切審稿圖，人工審後 `--approve`（一併改 `data/games.ts` 封面、`art.ts` 貼紙路徑、寫 `SOURCES.md`）；`--only cover｜sticker` 只生一張、`--dry-run` 只印 prompt；需 `OPENAI_API_KEY`，CI 不跑 |
 | `npm run generate:coloring-ai-lineart` | AI 重生著色線稿（images.edit＋定裝 ref；character／scene 分流 prompt；gate 含構圖 edgeIou；寫入 `public/.coloring-staging/<run>/`，人工審 contact sheet＋清單後 `--approve <id>` 才上線；硬閘 16 calls/run，需 `OPENAI_API_KEY`，CI 不跑） |
 
 ### 地圖／資產（維護者）

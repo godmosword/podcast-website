@@ -34,6 +34,8 @@ test.describe("小橘特快車", () => {
     const result = page.getByTestId("orange-express-result");
     await expect(result.locator("li[data-grade='green']")).toContainText("剛剛好");
     await expect(result).not.toContainText("★");
+    // 到家的小橘（貼紙生好前是向量小橘臉）。
+    await expect(result.getByTestId("orange-express-result-xiaoju").locator("svg, img")).toHaveCount(1);
 
     const saved = await page.evaluate((key) => {
       const raw = localStorage.getItem(key);
@@ -225,6 +227,26 @@ test.describe("小橘特快車", () => {
     await page.getByRole("checkbox", { name: /畫面晃動/ }).uncheck();
     await page.getByRole("button", { name: "完成" }).click();
     await expect(drive).toHaveAttribute("data-sway", "false");
+  });
+
+  test("標題：最上面一張有框的主視覺看得到小橘，手機第一屏仍按得到開始開車", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/games/orange-express");
+    const hero = page.getByTestId("orange-express-title-hero");
+    await expect(hero).toBeVisible();
+    // 封面還是暫代 SVG 時用向量小橘頂著；換成生成的封面後是一張圖。
+    await expect(hero.locator("svg, img")).toHaveCount(1);
+    const start = (await page.getByRole("button", { name: "開始開車" }).boundingBox())!;
+    expect(start.y + start.height).toBeLessThanOrEqual(844);
+    // 很矮的手機：主視覺壓成一條，開始鈕仍在第一屏。
+    for (const [width, height] of [
+      [375, 553],
+      [320, 568],
+    ] as const) {
+      await page.setViewportSize({ width, height });
+      const low = (await page.getByRole("button", { name: "開始開車" }).boundingBox())!;
+      expect(low.y + low.height, `${width}×${height}`).toBeLessThanOrEqual(height);
+    }
   });
 
   test("標題：三張難度卡都有圖示，小點一到三個表示多難", async ({ page }) => {
@@ -657,7 +679,7 @@ test.describe("小橘特快車：版面", () => {
         { label: "出發", patch: { progress: 0, speed: 0.2 }, running: true },
         { label: "速限牌", patch: { progress: 0.05, speed: 0.4 }, running: true },
         { label: "鐵橋", patch: { stationIndex: 1, progress: 0.15, speed: 0.4 }, running: true },
-        { label: "進站", patch: { stationIndex: 1, progress: 0.5, speed: 0.3, brake: 2 }, running: true },
+        { label: "進站", patch: { stationIndex: 1, progress: 0.55, speed: 0.3, brake: 2 }, running: true },
         { label: "停好", patch: { stationIndex: 1, progress: 0.65, speed: 0 }, running: false },
       ];
       for (const { label, patch, running } of states) {
@@ -712,11 +734,11 @@ test.describe("小橘特快車：版面", () => {
         const glass = (await page.getByTestId("orange-express-windshield").boundingBox())!;
         expect(glass.height).toBeGreaterThanOrEqual(110);
 
-        // 出發（號誌題＋速限牌提示）、速限牌、進站、停好：提示、停車目標條、指差確認鈕、乘客卡彼此不重疊。
+        // 出發（號誌題＋速限牌提示）、速限牌、進站（月台題）、停好：提示、停車目標條、指差確認鈕、乘客卡彼此不重疊。
         for (const patch of [
           { progress: 0, speed: 0.2 },
           { progress: 0.05, speed: 0.4 },
-          { progress: 0.5, speed: 0.3, brake: 2 },
+          { progress: 0.55, speed: 0.3, brake: 2 },
           { progress: 0.65, speed: 0 },
         ]) {
           await jump(page, patch);

@@ -1,4 +1,5 @@
 import { PASS_DURATION } from "@/lib/games/orange-express/reducer";
+import { SIGNAL_UNTIL } from "@/lib/games/orange-express/routes";
 import type { Phase, SceneId, SpeedSign, Span } from "@/lib/games/orange-express/types";
 
 /** 一站的 0–1 在前窗裡等於幾公尺的世界。只影響畫面，不影響判定。 */
@@ -23,6 +24,14 @@ const POST_AHEAD = 9;
 /** 停車柱前後這麼多公尺不畫門形線柱，兩根柱子才不會疊成「雙桿」。 */
 const POST_CLEAR = 12;
 const OTHER_TRACK = 4.6;
+/**
+ * 出發號誌立在每站起點前方這麼遠（公尺），在兩條軌道中間。
+ * 號誌題（進度 0 到 SIGNAL_UNTIL，也就是 0 到 24 公尺）整段都在前窗裡，題目過了才從旁邊經過。
+ */
+export const SIGNAL_WORLD = 36;
+const SIGNAL_X = 2.3;
+/** 燈箱中心離地多高（公尺）。比真的矮：靠近時燈箱才不會跑到前窗頂端、被提示條蓋住。 */
+const SIGNAL_HEAD = 2.8;
 /** 對向列車：從多遠出現、車身多長。 */
 export const PASS_FAR = 220;
 export const PASS_LENGTH = 110;
@@ -57,6 +66,8 @@ export function cameraTravel(
 ): number {
   if (!reduced) return progress * STATION_WORLD;
   const frame = windshieldFrame(progress, phase);
+  // 剛出發、號誌題還在：停在起點，前窗看得到出發號誌。
+  if (frame === 0 && progress < SIGNAL_UNTIL) return 0;
   if (frame === 2) return target * STATION_WORLD;
   if (frame === 1) return (target - 0.12) * STATION_WORLD;
   for (const span of [spans.tunnel, spans.bridge]) {
@@ -170,6 +181,11 @@ const PORTAL_RIM = "rgb(206, 196, 180)";
 const SIGN_RING = "rgb(232, 106, 74)";
 const SIGN_FACE = "rgb(255, 252, 244)";
 const SIGN_UNLIT = "rgb(232, 222, 210)";
+const SIGNAL_BOX = "rgb(52, 50, 62)";
+const SIGNAL_GO = "rgb(96, 214, 120)";
+const SIGNAL_GLOW = "rgb(196, 246, 196)";
+const SIGNAL_OFF = "rgb(120, 72, 70)";
+const SIGNAL_RIM = "rgb(236, 232, 224)";
 const INK = "rgb(58, 46, 40)";
 const TRAIN_BODY = "rgb(252, 248, 238)";
 const TRAIN_ROOF = "rgb(232, 230, 224)";
@@ -608,6 +624,49 @@ function drawSigns(
   }
 }
 
+/**
+ * 出發號誌：灰桿上一個深色圓角燈箱，上面亮綠燈、下面紅燈不亮。
+ * 燈箱比真的大，遠處也看得出上下兩顆燈；圖內不寫字。
+ */
+function drawSignal(ctx: CanvasRenderingContext2D, view: View, travel: number): void {
+  const z = SIGNAL_WORLD - travel;
+  if (z <= Z_NEAR + 0.6 || z >= Z_FAR) return;
+  const foot = project(view, SIGNAL_X, 0, z);
+  const head = project(view, SIGNAL_X, SIGNAL_HEAD, z);
+  const w = widthAt(view, z, 1.1, 6);
+  const h = w * 1.9;
+  ctx.fillStyle = POLE;
+  const pole = widthAt(view, z, 0.16, 1.5);
+  ctx.fillRect(foot.x - pole / 2, head.y, pole, foot.y - head.y);
+  const r = w / 2;
+  const top = head.y - h / 2;
+  const bottom = head.y + h / 2;
+  ctx.fillStyle = SIGNAL_BOX;
+  ctx.beginPath();
+  ctx.arc(head.x, top + r, r, Math.PI, 0);
+  ctx.lineTo(head.x + r, bottom - r);
+  ctx.arc(head.x, bottom - r, r, 0, Math.PI);
+  ctx.closePath();
+  ctx.fill();
+  // 淺色邊：燈箱背後常是隧道口或遠山，深色疊深色會糊在一起。
+  ctx.strokeStyle = SIGNAL_RIM;
+  ctx.lineWidth = Math.max(1, w * 0.1);
+  ctx.stroke();
+  const lamp = r * 0.62;
+  ctx.fillStyle = SIGNAL_GLOW;
+  ctx.beginPath();
+  ctx.arc(head.x, top + r, lamp * 1.25, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = SIGNAL_GO;
+  ctx.beginPath();
+  ctx.arc(head.x, top + r, lamp, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = SIGNAL_OFF;
+  ctx.beginPath();
+  ctx.arc(head.x, bottom - r, lamp, 0, Math.PI * 2);
+  ctx.fill();
+}
+
 function drawBridge(ctx: CanvasRenderingContext2D, view: View, z0: number, z1: number): void {
   const a = Math.max(Z_NEAR, z0);
   const b = Math.min(Z_FAR, z1);
@@ -834,6 +893,8 @@ export function drawWindshield(
     if (passing !== null) drawOncoming(ctx, view, passing);
     if (bridgeZ) drawBridge(ctx, view, bridgeZ[0], bridgeZ[1]);
     drawPortals(ctx, view, travel, tunnelZ, stopPostWorld(paint.target));
+    // 號誌最後畫：看得到它的時候，門形線柱、架空線、鐵橋都比它遠，不能從燈上劃過去。
+    drawSignal(ctx, view, travel);
   };
 
   ctx.clearRect(0, 0, width, height);
@@ -846,5 +907,6 @@ export function drawWindshield(
     drawTunnelMouth(ctx, view, palette, travel, tunnelZ[0], tunnelZ[1]);
     const nearSigns = (paint.signs ?? []).filter((sign) => sign.at * STATION_WORLD - travel < tunnelZ[0]);
     drawSigns(ctx, view, travel, nearSigns);
+    if (SIGNAL_WORLD - travel < tunnelZ[0]) drawSignal(ctx, view, travel);
   }
 }

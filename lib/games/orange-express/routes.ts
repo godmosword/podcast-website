@@ -117,15 +117,24 @@ const SCENERY: Record<Station["id"], Scenery> = {
   },
 };
 
+/** 出發號誌那題到這裡為止。前窗的出發號誌立得比這遠，整段題目都看得到它。 */
+export const SIGNAL_UNTIL = 0.04;
+
+/**
+ * 月台題最早在停車目標前這麼遠才出。月台頂只比視線低半公尺，遠處只是地平線上一條細線；
+ * 月台近端要到八公尺內，前窗左邊才鋪得出一塊看得出是月台的面（前窗月台從目標前 70 公尺開始，(70 + 8) / 600）。
+ */
+export const PLATFORM_TASK_LEAD = 0.13;
+
 function pointsFor(id: Station["id"], spec: WindowSpec, signs: readonly SpeedSign[]): PointTask[] {
-  const signalUntil = 0.04;
-  const out: PointTask[] = [{ id: `${id}-signal`, kind: "signal", at: 0, until: signalUntil }];
+  const out: PointTask[] = [{ id: `${id}-signal`, kind: "signal", at: 0, until: SIGNAL_UNTIL }];
   const first = signs[0];
   if (first) {
-    const from = Math.max(signalUntil + 0.001, first.at - 0.04);
+    const from = Math.max(SIGNAL_UNTIL + 0.001, first.at - 0.04);
     out.push({ id: `${id}-sign`, kind: "sign", at: from, until: first.at + 0.05 });
   }
-  out.push({ id: `${id}-platform`, kind: "platform", at: spec.approachAt, until: spec.window.end });
+  const platformAt = Math.max(spec.approachAt, spec.target - PLATFORM_TASK_LEAD);
+  out.push({ id: `${id}-platform`, kind: "platform", at: platformAt, until: spec.window.end });
   return out;
 }
 

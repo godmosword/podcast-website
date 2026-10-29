@@ -1,10 +1,13 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { ResultStars } from "@/components/games/ResultStars";
 import { IconTrain } from "@/components/games/ClayIcons";
 import { DoorIcon, StopIcon } from "@/components/games/OrangeExpressCab";
+import { XiaojuFace } from "@/components/games/OrangeExpressGlyphs";
+import { XIAOJU_STICKER_SRC } from "@/lib/games/orange-express/art";
 import { COPY, GRADE_WORD, bridgeResultText, pointsResultText } from "@/lib/games/orange-express/copy";
 import type { StarMissReason } from "@/lib/games/orange-express/medals";
 import type { Station, StopGrade } from "@/lib/games/orange-express/types";
@@ -45,6 +48,14 @@ export function OrangeExpressResult({
   const next = getNextGame("orange-express");
   return (
     <div className={styles.result} data-testid="orange-express-result">
+      {/* 到家的小橘（B10）：貼紙生好前用向量小橘臉。 */}
+      <span className={styles.resultXiaoju} data-testid="orange-express-result-xiaoju" aria-hidden>
+        {XIAOJU_STICKER_SRC ? (
+          <Image src={XIAOJU_STICKER_SRC} alt="" width={112} height={112} />
+        ) : (
+          <XiaojuFace />
+        )}
+      </span>
       <h2>{COPY.arrivedHome}</h2>
       <ResultStars
         stars={stars}

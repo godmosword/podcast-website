@@ -13,6 +13,46 @@ const SHINE = "rgb(255, 255, 255)";
 /** 速限牌小圖上沒亮的格：淡色填滿。32px 時只描邊會糊成實心，看起來像三格全亮。 */
 const UNLIT = "rgb(232, 222, 210)";
 
+/**
+ * 小橘的正臉（儀表徽章、停車目標條上的小車）。對稿 `characters/小橘高鐵.jpg`：
+ * 圓圓的奶油色車頭、頭頂一塊深色擋風帽、眼睛在帽子下面、橘條從臉下面往右後斜上去、下緣深灰。
+ * 橘條不橫過臉：橫的那版看起來像藥丸，不像車。沒有手、沒有腳。
+ */
+export function XiaojuFace({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 64 64" aria-hidden className={className}>
+      <ellipse cx="32" cy="58.5" rx="24" ry="3" fill="rgb(0, 0, 0)" opacity="0.12" />
+      <path
+        d="M5 45C5 25 16 12 32 12s27 13 27 33c0 5-3 9-8 9H13c-5 0-8-4-8-9z"
+        fill="rgb(255, 248, 236)"
+        stroke={INK}
+        strokeWidth="2.5"
+      />
+      <path
+        d="M6.3 45.5c15 0 33-3 51.2-13.5.2 2.3.3 4.6.3 7C40 47 23 50.5 6.9 50.5 6.5 48.8 6.3 47.2 6.3 45.5z"
+        fill="rgb(255, 150, 70)"
+      />
+      <path
+        d="M7.6 51.6C24 51.6 41 48.3 57.6 41.5 57 48.5 54.5 53 50.5 53h-37c-2.8 0-4.9-.5-5.9-1.4z"
+        fill="rgb(96, 92, 104)"
+      />
+      <path
+        d="M14.5 26C17 19 23.5 15.5 32 15.5S47 19 49.5 26c-4.5 2.2-10.5 3.3-17.5 3.3S19 28.2 14.5 26z"
+        fill="rgb(52, 50, 62)"
+      />
+      <ellipse cx="24" cy="19" rx="5.5" ry="1.6" fill={SHINE} opacity="0.35" />
+      <circle cx="25" cy="34.5" r="3.3" fill={INK} />
+      <circle cx="39" cy="34.5" r="3.3" fill={INK} />
+      <circle cx="26.1" cy="33.4" r="1.1" fill={SHINE} />
+      <circle cx="40.1" cy="33.4" r="1.1" fill={SHINE} />
+      <ellipse cx="17.5" cy="39.5" rx="3.4" ry="2.3" fill="rgb(255, 160, 165)" />
+      <ellipse cx="46.5" cy="36" rx="3.4" ry="2.3" fill="rgb(255, 160, 165)" />
+      <path d="M28.5 39.5c1.8 2.4 5.2 2.4 7 0" fill="none" stroke={INK} strokeWidth="2" strokeLinecap="round" />
+      <ellipse cx="11.5" cy="31" rx="2" ry="5" fill={SHINE} opacity="0.7" transform="rotate(25 11.5 31)" />
+    </svg>
+  );
+}
+
 /** 號角：細管接喇叭口，右邊三道聲音。駕駛台的紅色喇叭鈕與鐵橋提示用同一個，孩子才知道要按哪顆。 */
 export function HornIcon() {
   return (
