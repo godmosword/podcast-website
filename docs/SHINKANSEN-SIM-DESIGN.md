@@ -691,6 +691,6 @@ Kaiyi 看完第二輪覺得有模擬器感了，再拍板 3B、6B、7B、8B。�
 - 標題最上面一張有框的主視覺（`TitleHero`）：讀 `data/games.ts` 的 `art.cover`，還是 `.svg` 時畫天空、草地和向量小橘；換成 `cover.webp` 就鋪封面（`object-fit: cover`）。直式手機全寬、高 `clamp(96px, 22svh, 200px)`，很矮的直式手機（高 ≤600）壓成 72px；橫拿手機（高 ≤520）與桌機（寬 ≥720 且高 ≥521）是跟封面一樣的 3:2 小框置中，橫拿 96px 高、桌機 `clamp(180px, 32svh, 280px)`，換上封面時不會只剩中間一條。390×844、375×553、320×568 第一屏都按得到「開始開車」（e2e）。不另加標語，路線名「橘色小線」照舊。
 - 結算「到家了」上方放 96px 的小橘：`lib/games/orange-express/art.ts` 的 `XIAOJU_STICKER_SRC` 是 null 時用向量臉，填了貼紙路徑就顯示貼紙。
 - 桌機（寬 ≥1000、高 ≥700）儀表徽章 88px。儀表本身是向量黏土，徽章維持向量，不換貼紙。
-- B1 核准後只改兩處：`art.cover` 指 `cover.webp`、`XIAOJU_STICKER_SRC` 填貼紙路徑；第 9 節「不生新貼紙」那句跟著改。
+- B1 核准時 `npm run generate:orange-express-art -- --approve` 會自動改這兩處（`art.cover` 指 `cover.webp`、`XIAOJU_STICKER_SRC` 填貼紙路徑）並寫 `SOURCES.md`；第 9 節「不生新貼紙」那句人工改。
 
 第二批當時沒做的：darwin 視覺基準（之後在 Mac 重錄）、實際生圖（這個環境沒有金鑰，腳本 `npm run generate:orange-express-art`）；結算放小橘與桌機放大徽章、號誌與月台的出題時機，後來分別在 B10／B15、B19 做了（見上面幾段）。
