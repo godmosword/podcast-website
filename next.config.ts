@@ -3,6 +3,7 @@ import { adventuresZoneQueryRedirects } from "./lib/adventures-redirects";
 import { retiredGameRedirects } from "./lib/retired-game-redirects";
 import { retiredPageRedirects } from "./lib/retired-page-redirects";
 import { legacyStoryRedirects } from "./lib/story-slug-aliases";
+import { travelAbroadLocationRedirects } from "./lib/parent-travel-abroad";
 
 /**
  * 視覺回歸用的凍結資料（見 lib/visual-fixture.ts）。這份產物只給本機截圖用：
@@ -56,6 +57,7 @@ const nextConfig: NextConfig = {
       ...adventuresZoneQueryRedirects(),
       ...retiredGameRedirects(),
       ...retiredPageRedirects(),
+      ...travelAbroadLocationRedirects(),
     ];
   },
   async headers() {

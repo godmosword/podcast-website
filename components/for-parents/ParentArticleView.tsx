@@ -53,15 +53,21 @@ export function ParentArticleView({
   article,
   previous,
   next,
+  indexHref = parentArticlesIndexPath(),
+  indexLabel = "回到育兒文章分享",
+  hrefFor = parentArticlePath,
 }: {
   article: ParentArticle;
   previous: ParentArticle | null;
   next: ParentArticle | null;
+  indexHref?: string;
+  indexLabel?: string;
+  hrefFor?: (slug: string) => string;
 }) {
   return (
     <article className={styles.article}>
-      <Link className={styles.back} href={parentArticlesIndexPath()}>
-        <Icon name="arrow-left" size={16} className="icon-lead" />回到育兒文章分享
+      <Link className={styles.back} href={indexHref}>
+        <Icon name="arrow-left" size={16} className="icon-lead" />{indexLabel}
       </Link>
       <header className={styles.header}>
         <h1 className={styles.title}>{article.title}</h1>
@@ -93,7 +99,7 @@ export function ParentArticleView({
       </p>
       <nav className={styles.seriesNav} aria-label="系列文章">
         {previous ? (
-          <Link className={styles.seriesLink} href={parentArticlePath(previous.slug)}>
+          <Link className={styles.seriesLink} href={hrefFor(previous.slug)}>
             <span className={styles.seriesLabel}>上一篇</span>
             <span className={styles.seriesTitle}>{previous.title}</span>
           </Link>
@@ -101,7 +107,7 @@ export function ParentArticleView({
         {next ? (
           <Link
             className={`${styles.seriesLink} ${styles.seriesNext}`}
-            href={parentArticlePath(next.slug)}
+            href={hrefFor(next.slug)}
           >
             <span className={styles.seriesLabel}>下一篇</span>
             <span className={styles.seriesTitle}>{next.title}</span>

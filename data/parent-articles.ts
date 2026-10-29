@@ -3,6 +3,8 @@
  *
  * 方格子新文由 `npm run sync:vocus` 附加到 `PARENT_ARTICLES` 末端
  * （閱讀順序＝陣列順序；多篇時較早發布的在前）。手動補一篇時也加在最後。
+ * 文末有「同步更新至親子出國專欄」的文不進這個陣列，改收進
+ * `data/parent-travel-abroad-articles.ts`。
  * 流程、列表 API 與自動合併見 `docs/VOCUS-ARTICLE-SYNC.md`。
  * 列表、上一篇／下一篇與靜態路徑都讀這個陣列，不用改版面元件。
  * 系列（列表頁照閱讀順序排成一組）另記在 `data/parent-article-series.ts`，

@@ -1,6 +1,12 @@
 # 方格子育兒文同步
 
-作者在方格子公開的新文，會收進 `data/parent-articles.ts`，顯示在 `/for-parents/articles`。閱讀順序就是陣列順序：既有文章不動，新文加在末端（多篇時較早發布的在前）。
+作者在方格子公開的新文，預設收進 `data/parent-articles.ts`，顯示在 `/for-parents/articles`。閱讀順序就是陣列順序：既有文章不動，新文加在末端（多篇時較早發布的在前）。
+
+文末（圖片說明不算）在拿掉空白、引號與兩端標點之後，以「同步更新至親子出國專欄」結尾的文，改收進 `data/parent-travel-abroad-articles.ts`，顯示在 `/for-parents/travel-abroad`。標記可以自己一行，也可以接在最後一句後面；包住它的 `「」『』“”""`、全形／半形標點、全形空白都認。正文中間提到這句、但文章最後不是這句的，仍進育兒文章分享。
+
+標記不會出現在網站上：自己一行就整段刪掉；跟在句子後面就只刪這句，前面的字留下。請把標記自己放一行，比較不會切到正文。
+
+已經收過的文章，後來加上標記會整篇搬到親子出國；拿掉標記會搬回育兒文章分享的末端。slug 沿用，所以網址改了，舊網址會永久轉到新網址，不會兩區各有一篇。圖片仍在 `public/parent-articles/`。搬走時會用方格子上的最新內文重寫這一頁；若這篇曾在本機手改過，那些手改會被蓋掉。原本屬於育兒系列的 slug 會從系列拿掉，搬回去時不會自動加回系列。
 
 ## 列表從哪來
 
@@ -27,7 +33,7 @@ Lexical HTML 轉成 `ParentArticleBlock[]`，不改寫文字。
 - `ul`／`ol` → `list`。粗體、連結只留可見文字。
 - `img` 下載成 `public/parent-articles/<slug>-<n>.webp`（最寬 1600、quality 82）。有 `ogImageURL` 時另存封面。
 - U+FFFC（嵌入物件佔位）刪除；它不是作者打的字。
-- 發布日用 `publishAt` 轉台北日曆日。`slug` 為 `vocus-<contentId>`，用 `sourceUrl` 去重。
+- 發布日用 `publishAt` 轉台北日曆日。`slug` 為 `vocus-<contentId>`，用 `sourceUrl` 去重。搬走時 slug 不變。
 - 摘要沿用 `lib/parent-articles.test.ts`：第一個 spacer 之前的 paragraph，以換行接起。
 
 ## 列表頁怎麼排
@@ -42,7 +48,7 @@ npm run sync:vocus
 npm run font:subset
 ```
 
-第二次再跑應印出「沒有新文」，不改檔。
+第二次再跑應印出「沒有新文」，不改檔。已經在正確區的文章不會因為內文改了而重抓；只有「新文」或「標記讓它換區」才寫入。
 
 ## 自動合併
 

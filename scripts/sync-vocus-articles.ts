@@ -1,9 +1,13 @@
 #!/usr/bin/env npx tsx
 /**
- * 把方格子作者「車車遊樂園」的新公開文收進 `data/parent-articles.ts`。
+ * 把方格子作者「車車遊樂園」的新公開文收進家長區。
+ *
+ * 文末沒有標記 → `data/parent-articles.ts`（育兒文章分享）。
+ * 文末有「同步更新至親子出國專欄」→ `data/parent-travel-abroad-articles.ts`。
+ * 已收錄的文章若後來加上或拿掉標記，會整篇搬走（沿用 slug），不留兩份。
+ * 圖片都放 `public/parent-articles/`，搬走時路徑不用改。
  *
  * 列表：`GET https://api.vocus.cc/api/contents`（作者頁 __NEXT_DATA__ 用的同一支查詢）。
- * 已收錄以 `sourceUrl` 比對。新文附加在 `PARENT_ARTICLES` 末端。
  *
  * 用法：
  *   npm run sync:vocus -- --dry-run
@@ -15,13 +19,17 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 import { PARENT_ARTICLES, type ParentArticle, type ParentArticleBlock } from "../data/parent-articles";
+import { PARENT_TRAVEL_ABROAD_ARTICLES } from "../data/parent-travel-abroad-articles";
 import {
   appendParentArticleSource,
   articleFromVocusPost,
   parseContentsPage,
-  selectPostsToAppend,
+  planVocusArticleSync,
+  removeParentArticlesFromSource,
+  removeParentSeriesSlugs,
   vocusContentsUrl,
-  type VocusListItem,
+  type VocusArticleDestination,
+  type VocusSyncAction,
 } from "./lib/vocus-articles";
 
 const USER_AGENT =
@@ -34,10 +42,16 @@ const IMAGE_MAX_WIDTH = 1600;
 const WEBP_QUALITY = 82;
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const DATA_FILE = path.join(ROOT, "data", "parent-articles.ts");
+const PARENT_FILE = path.join(ROOT, "data", "parent-articles.ts");
+const TRAVEL_FILE = path.join(ROOT, "data", "parent-travel-abroad-articles.ts");
+const SERIES_FILE = path.join(ROOT, "data", "parent-article-series.ts");
 const IMAGE_DIR = path.join(ROOT, "public", "parent-articles");
+const PARENT_EXPORT = "PARENT_ARTICLES";
+const TRAVEL_EXPORT = "PARENT_TRAVEL_ABROAD_ARTICLES";
 
-type AddedArticle = {
+type SyncChange = {
+  action: "add" | "move";
+  destination: VocusArticleDestination;
   title: string;
   slug: string;
   sourceUrl: string;
@@ -49,9 +63,15 @@ type AddedArticle = {
 type SyncReport = {
   dryRun: boolean;
   listed: number;
-  added: AddedArticle[];
+  added: SyncChange[];
+  moved: SyncChange[];
   skippedExisting: number;
   skippedUnpublished: number;
+};
+
+const DESTINATION_LABEL: Record<VocusArticleDestination, string> = {
+  "parent-articles": "育兒文章分享",
+  "travel-abroad": "親子出國",
 };
 
 function sleep(ms: number): Promise<void> {
@@ -177,17 +197,19 @@ async function materializeImages(
 }
 
 function printReport(report: SyncReport): void {
-  if (report.added.length === 0) {
+  const changes = [...report.added, ...report.moved];
+  if (changes.length === 0) {
     console.log(
       `沒有新文。列表 ${report.listed} 篇，已收錄略過 ${report.skippedExisting}，未公開略過 ${report.skippedUnpublished}。`,
     );
     return;
   }
   const mode = report.dryRun ? "dry-run，尚未寫入" : "已寫入";
-  console.log(`${mode} ${report.added.length} 篇：`);
-  for (const article of report.added) {
+  console.log(`${mode} ${changes.length} 篇：`);
+  for (const article of changes) {
+    const verb = article.action === "move" ? "移到" : "新增";
     console.log(
-      `- ${article.publishedAt} ${article.title}\n  ${article.sourceUrl}\n  slug ${article.slug}，${article.blockCount} 個 blocks，${article.imageCount} 張圖`,
+      `- ${verb}${DESTINATION_LABEL[article.destination]} ${article.publishedAt} ${article.title}\n  ${article.sourceUrl}\n  slug ${article.slug}，${article.blockCount} 個 blocks，${article.imageCount} 張圖`,
     );
   }
 }
@@ -201,44 +223,107 @@ async function main(): Promise<void> {
   }
 
   const { listed, items } = await listAllPosts();
-  const existingUrls = new Set(PARENT_ARTICLES.map((article) => article.sourceUrl));
-  const { posts, skippedExisting, skippedUnpublished } = selectPostsToAppend(
-    items,
-    existingUrls,
-  );
-  const slugs = new Set(PARENT_ARTICLES.map((article) => article.slug));
-  const built: ParentArticle[] = [];
-  for (const post of posts) {
-    const draft = articleFromVocusPost(post, slugs);
+  const stored = [
+    ...PARENT_ARTICLES.map((article) => ({
+      sourceUrl: article.sourceUrl,
+      slug: article.slug,
+      destination: "parent-articles" as const,
+    })),
+    ...PARENT_TRAVEL_ABROAD_ARTICLES.map((article) => ({
+      sourceUrl: article.sourceUrl,
+      slug: article.slug,
+      destination: "travel-abroad" as const,
+    })),
+  ];
+  const plan = planVocusArticleSync(items, stored);
+  const slugs = new Set(stored.map((article) => article.slug));
+  const built: Array<VocusSyncAction & { article: ParentArticle }> = [];
+  for (const action of plan.actions) {
+    const slug = action.kind === "move" ? action.slug : undefined;
+    const draft = articleFromVocusPost(action.post, slugs, slug);
     if (draft.blocks.length === 0 || draft.excerpt.length === 0) {
       throw new Error(`「${draft.title}」沒有可收錄的段落，停止寫入`);
     }
-    slugs.add(draft.slug);
-    built.push(await materializeImages(draft, post.ogImageURL, dryRun));
+    if (!slug) slugs.add(draft.slug);
+    built.push({
+      ...action,
+      article: await materializeImages(draft, action.post.ogImageURL, dryRun),
+    });
   }
 
   if (!dryRun && built.length > 0) {
-    const source = await readFile(DATA_FILE, "utf8");
-    const next = appendParentArticleSource(source, built);
-    if (next === source) {
+    let parentSource = await readFile(PARENT_FILE, "utf8");
+    let travelSource = await readFile(TRAVEL_FILE, "utf8");
+    let seriesSource = await readFile(SERIES_FILE, "utf8");
+    const parentBefore = parentSource;
+    const travelBefore = travelSource;
+    const seriesBefore = seriesSource;
+
+    const leaveParent = built.flatMap((entry) =>
+      entry.kind === "move" && entry.from === "parent-articles"
+        ? [entry.article.sourceUrl]
+        : [],
+    );
+    const leaveTravel = built.flatMap((entry) =>
+      entry.kind === "move" && entry.from === "travel-abroad"
+        ? [entry.article.sourceUrl]
+        : [],
+    );
+    const leaveSeries = built.flatMap((entry) =>
+      entry.kind === "move" && entry.from === "parent-articles" ? [entry.slug] : [],
+    );
+    if (leaveParent.length > 0) {
+      parentSource = removeParentArticlesFromSource(parentSource, leaveParent, PARENT_EXPORT);
+    }
+    if (leaveTravel.length > 0) {
+      travelSource = removeParentArticlesFromSource(travelSource, leaveTravel, TRAVEL_EXPORT);
+    }
+    if (leaveSeries.length > 0) {
+      seriesSource = removeParentSeriesSlugs(seriesSource, leaveSeries);
+    }
+
+    const toParent = built.flatMap((entry) =>
+      entry.destination === "parent-articles" ? [entry.article] : [],
+    );
+    const toTravel = built.flatMap((entry) =>
+      entry.destination === "travel-abroad" ? [entry.article] : [],
+    );
+    if (toParent.length > 0) {
+      parentSource = appendParentArticleSource(parentSource, toParent, PARENT_EXPORT);
+    }
+    if (toTravel.length > 0) {
+      travelSource = appendParentArticleSource(travelSource, toTravel, TRAVEL_EXPORT);
+    }
+
+    if (
+      parentSource === parentBefore &&
+      travelSource === travelBefore &&
+      seriesSource === seriesBefore
+    ) {
       throw new Error("選到新文，但資料檔沒有變更");
     }
-    await writeFile(DATA_FILE, next);
+    if (parentSource !== parentBefore) await writeFile(PARENT_FILE, parentSource);
+    if (travelSource !== travelBefore) await writeFile(TRAVEL_FILE, travelSource);
+    if (seriesSource !== seriesBefore) await writeFile(SERIES_FILE, seriesSource);
   }
 
+  const toChange = (entry: (typeof built)[number]): SyncChange => ({
+    action: entry.kind,
+    destination: entry.destination,
+    title: entry.article.title,
+    slug: entry.article.slug,
+    sourceUrl: entry.article.sourceUrl,
+    publishedAt: entry.article.publishedAt,
+    blockCount: entry.article.blocks.length,
+    imageCount: entry.article.blocks.filter((block) => block.type === "image").length,
+  });
   const report: SyncReport = {
     dryRun,
     listed,
-    skippedExisting,
-    skippedUnpublished,
-    added: built.map((article) => ({
-      title: article.title,
-      slug: article.slug,
-      sourceUrl: article.sourceUrl,
-      publishedAt: article.publishedAt,
-      blockCount: article.blocks.length,
-      imageCount: article.blocks.filter((block) => block.type === "image").length,
-    })),
+    skippedExisting: plan.skippedExisting,
+    skippedUnpublished: plan.skippedUnpublished,
+    added: built.filter((entry) => entry.kind === "add").map(toChange),
+    moved: built.filter((entry) => entry.kind === "move").map(toChange),
   };
   printReport(report);
   if (reportPath) {
