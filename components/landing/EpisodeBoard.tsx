@@ -1,34 +1,31 @@
 "use client";
 
 import Link from "next/link";
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type CSSProperties,
-  type KeyboardEvent,
-  type MouseEvent,
-} from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type MouseEvent } from "react";
 import Icon from "@/components/ui/Icon";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useModalLayer } from "@/hooks/useModalLayer";
 import { EPISODE_BOARD_ANCHOR_ID } from "@/lib/episode-board-anchor";
 import { isSafeInternalHref } from "@/lib/episode-board-href";
-import { transitionLandingToAnchor } from "@/lib/landing-scroll";
 import {
-  boardClockPaused,
-  createBoardSim,
-  deltaSeconds,
-  projectNorm,
-  stepBoard,
-  type BoardSimState,
-  type BoardView,
-} from "@/lib/episode-board-sim";
-import { mapDepthZ } from "@/lib/universe-depth";
+  actorButtonPoint,
+  agentOrigin,
+  createTownAgents,
+  depthKey,
+  isoLayout,
+  stepTown,
+  type TownAgent,
+} from "@/lib/episode-board-grid";
+import {
+  buildFloor,
+  FALLBACK_PALETTE,
+  paintTown,
+  type PaintCar,
+  type TownPalette,
+} from "@/lib/episode-board-draw";
+import { transitionLandingToAnchor } from "@/lib/landing-scroll";
+import { boardClockPaused, canvasPixelSize, deltaSeconds, lightPhase } from "@/lib/episode-board-sim";
 import type { EpisodeBoardActor } from "@/lib/episode-board-types";
-import EpisodeBoardActorArt from "./EpisodeBoardActorArt";
-import EpisodeBoardMap from "./EpisodeBoardMap";
 import styles from "./EpisodeBoard.module.css";
 
 type EpisodeBoardProps = {
@@ -36,18 +33,44 @@ type EpisodeBoardProps = {
   nextAnchorId: string;
 };
 
+const PALETTE_VARS = [
+  ["sky", "--sky"],
+  ["skyBlue", "--c-sky"],
+  ["leaf", "--leaf"],
+  ["pink", "--c-pink"],
+  ["yellow", "--c-yellow"],
+  ["mint", "--c-mint"],
+  ["teal", "--c-teal"],
+  ["lilac", "--c-lilac"],
+  ["brand", "--landing-brand"],
+  ["card", "--card"],
+  ["ink", "--ink"],
+  ["brandInk", "--landing-brand-ink"],
+  ["paper", "--landing-nav-cta-bg"],
+] as const;
+
+function readPalette(node: HTMLElement): TownPalette {
+  const style = getComputedStyle(node);
+  const palette = { ...FALLBACK_PALETTE };
+  for (const [key, name] of PALETTE_VARS) {
+    const value = style.getPropertyValue(name).trim();
+    if (value) palette[key] = value;
+  }
+  return palette;
+}
+
 export default function EpisodeBoard({ actors, nextAnchorId }: EpisodeBoardProps) {
   const safeActors = useMemo(
     () => actors.filter((actor) => isSafeInternalHref(actor.href)),
     [actors],
   );
   const featured = safeActors.find((actor) => actor.featured) ?? safeActors[0];
-  const initial = useMemo(() => createBoardSim(safeActors), [safeActors]);
   const [openId, setOpenId] = useState<string | null>(null);
   const openActor = safeActors.find((actor) => actor.id === openId) ?? null;
 
   const sectionRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const returnFocusRef = useRef<HTMLButtonElement | null>(null);
   const slotRefs = useRef(new Map<string, HTMLDivElement>());
@@ -67,7 +90,15 @@ export default function EpisodeBoard({ actors, nextAnchorId }: EpisodeBoardProps
   useEffect(() => {
     const section = sectionRef.current;
     const stage = stageRef.current;
+    const canvas = canvasRef.current;
     if (!section || !stage) return;
+    const ctx = canvas?.getContext("2d") ?? null;
+    if (!canvas || !ctx) {
+      section.dataset.ready = "true";
+      section.dataset.motion = "full";
+      const id = window.requestAnimationFrame(() => {});
+      return () => window.cancelAnimationFrame(id);
+    }
 
     let stopped = false;
     let raf = 0;
@@ -77,25 +108,55 @@ export default function EpisodeBoard({ actors, nextAnchorId }: EpisodeBoardProps
     let pageVisible = document.visibilityState !== "hidden";
     const motionQuery = window.matchMedia?.("(prefers-reduced-motion: reduce)");
     let reduced = Boolean(motionQuery?.matches);
-    let sim: BoardSimState = createBoardSim(safeActors);
+    let agents: TownAgent[] = createTownAgents(safeActors);
+    let age = 0;
+    let palette = readPalette(stage);
     let simAcc = 0;
     let wallAcc = 0;
     let samples = 0;
 
-    const viewOf = (): BoardView => ({
+    const viewOf = () => ({
       width: Math.max(1, stage.clientWidth),
       height: Math.max(1, stage.clientHeight),
     });
 
-    const placeSlots = (state: BoardSimState) => {
-      for (const actor of state.actors) {
-        const slot = slotRefs.current.get(actor.id);
-        if (!slot) continue;
-        const norm = projectNorm(actor.x, actor.y);
-        slot.style.setProperty("--u", `${norm.u * 100}%`);
-        slot.style.setProperty("--v", `${norm.v * 100}%`);
-        slot.style.zIndex = String(mapDepthZ(actor.y, "roamer"));
+    const paint = () => {
+      const view = viewOf();
+      const px = canvasPixelSize(view.width, view.height, window.devicePixelRatio || 1);
+      if (canvas.width !== px.width || canvas.height !== px.height) {
+        canvas.width = px.width;
+        canvas.height = px.height;
       }
+      const layout = isoLayout(view);
+      const floor = buildFloor(view, layout, palette, px.ratio);
+      const phase = lightPhase(age);
+      const cars: PaintCar[] = [];
+      safeActors.forEach((actor, index) => {
+        const agent = agents.find((item) => item.id === actor.id);
+        if (!agent) return;
+        cars.push({
+          id: actor.id,
+          character: actor.character,
+          action: actor.action,
+          index,
+          age,
+          agent,
+        });
+      });
+      paintTown(ctx, floor, view, layout, palette, cars, phase, reduced, px.ratio);
+      placeSlots(layout);
+    };
+
+    const placeSlots = (layout: ReturnType<typeof isoLayout>) => {
+      agents.forEach((agent, index) => {
+        const slot = slotRefs.current.get(agent.id);
+        if (!slot) return;
+        const point = actorButtonPoint(agent, index, layout, age, reduced);
+        const at = agentOrigin(agent);
+        slot.style.setProperty("--x", `${point.x}px`);
+        slot.style.setProperty("--y", `${point.y}px`);
+        slot.style.setProperty("--z", String(20 + Math.round(depthKey(at.x, at.y) * 10)));
+      });
     };
 
     const pausedNow = () => boardClockPaused({ reduced, visible, pageVisible });
@@ -127,8 +188,14 @@ export default function EpisodeBoard({ actors, nextAnchorId }: EpisodeBoardProps
       const clock = deltaSeconds(ts, last, paused);
       last = clock.last;
       const started = performance.now();
-      if (!paused && clock.dt > 0) sim = stepBoard(sim, clock.dt, viewOf());
-      placeSlots(sim);
+      if (!paused && clock.dt > 0) {
+        age += clock.dt;
+        agents = stepTown(agents, clock.dt, {
+          reduced: false,
+          allowMove: lightPhase(age) === "go",
+        });
+      }
+      paint();
       publishFrame(performance.now() - started, wall);
       applyFlags();
       if (!paused) raf = window.requestAnimationFrame(loop);
@@ -139,9 +206,13 @@ export default function EpisodeBoard({ actors, nextAnchorId }: EpisodeBoardProps
       window.cancelAnimationFrame(raf);
       raf = 0;
       last = null;
-      if (reduced) sim = createBoardSim(safeActors);
       lastTs = null;
-      placeSlots(sim);
+      if (reduced) {
+        age = 0;
+        agents = createTownAgents(safeActors);
+      }
+      palette = readPalette(stage);
+      paint();
       applyFlags();
       if (!pausedNow()) raf = window.requestAnimationFrame(loop);
     };
@@ -172,9 +243,28 @@ export default function EpisodeBoard({ actors, nextAnchorId }: EpisodeBoardProps
     };
     motionQuery?.addEventListener?.("change", onMotion);
 
+    const onTheme = () => {
+      palette = readPalette(stage);
+      if (pausedNow()) {
+        paint();
+        applyFlags();
+      }
+    };
+    const themeObserver = new MutationObserver(onTheme);
+    themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+
     let resize: ResizeObserver | null = null;
     if (typeof ResizeObserver !== "undefined") {
-      resize = new ResizeObserver(() => placeSlots(sim));
+      resize = new ResizeObserver(() => {
+        palette = readPalette(stage);
+        if (pausedNow()) {
+          paint();
+          applyFlags();
+        }
+      });
       resize.observe(stage);
     }
 
@@ -185,6 +275,7 @@ export default function EpisodeBoard({ actors, nextAnchorId }: EpisodeBoardProps
       window.cancelAnimationFrame(raf);
       observer?.disconnect();
       resize?.disconnect();
+      themeObserver.disconnect();
       document.removeEventListener("visibilitychange", onPage);
       motionQuery?.removeEventListener?.("change", onMotion);
     };
@@ -195,10 +286,7 @@ export default function EpisodeBoard({ actors, nextAnchorId }: EpisodeBoardProps
     setOpenId(actor.id);
   }
 
-  function onActorKeyDown(
-    event: KeyboardEvent<HTMLButtonElement>,
-    index: number,
-  ) {
+  function onActorKeyDown(event: KeyboardEvent<HTMLButtonElement>, index: number) {
     if (
       event.key !== "ArrowRight" &&
       event.key !== "ArrowLeft" &&
@@ -241,46 +329,34 @@ export default function EpisodeBoard({ actors, nextAnchorId }: EpisodeBoardProps
         </p>
       </header>
       <div ref={stageRef} className={styles.stage}>
-        <EpisodeBoardMap>
-          {safeActors.length === 0 ? (
-            <p className={styles.empty}>車車還在路上，晚點再來找他們。</p>
-          ) : null}
-          {safeActors.map((actor, index) => {
-            const spot = initial.actors.find((item) => item.id === actor.id);
-            const norm = projectNorm(spot?.x ?? 40, spot?.y ?? 40);
-            return (
-              <div
-                key={actor.id}
-                className={styles.actorSlot}
-                ref={(node) => {
-                  if (node) slotRefs.current.set(actor.id, node);
-                  else slotRefs.current.delete(actor.id);
-                }}
-                style={
-                  {
-                    "--u": `${norm.u * 100}%`,
-                    "--v": `${norm.v * 100}%`,
-                    zIndex: mapDepthZ(spot?.y ?? 40, "roamer"),
-                  } as CSSProperties
-                }
-              >
-                <button
-                  type="button"
-                  className={styles.hit}
-                  aria-pressed={openId === actor.id}
-                  aria-haspopup="dialog"
-                  onClick={(event) => openFrom(actor, event.currentTarget)}
-                  onKeyDown={(event) => onActorKeyDown(event, index)}
-                >
-                  <EpisodeBoardActorArt character={actor.character} action={actor.action} />
-                  <span className="sr-only">
-                    {actor.name}，{actor.actionLabel}。{actor.title}
-                  </span>
-                </button>
-              </div>
-            );
-          })}
-        </EpisodeBoardMap>
+        <canvas ref={canvasRef} className={styles.canvas} aria-hidden="true" />
+        {safeActors.length === 0 ? (
+          <p className={styles.empty}>車車還在路上，晚點再來找他們。</p>
+        ) : null}
+        {safeActors.map((actor, index) => (
+          <div
+            key={actor.id}
+            className={styles.actorSlot}
+            ref={(node) => {
+              if (node) slotRefs.current.set(actor.id, node);
+              else slotRefs.current.delete(actor.id);
+            }}
+            style={{ "--x": "-999px", "--y": "-999px", "--z": "1" } as CSSProperties}
+          >
+            <button
+              type="button"
+              className={styles.hit}
+              aria-pressed={openId === actor.id}
+              aria-haspopup="dialog"
+              onClick={(event) => openFrom(actor, event.currentTarget)}
+              onKeyDown={(event) => onActorKeyDown(event, index)}
+            >
+              <span className="sr-only">
+                {actor.name}，{actor.actionLabel}。{actor.title}
+              </span>
+            </button>
+          </div>
+        ))}
       </div>
       <div className={styles.dock}>
         <a

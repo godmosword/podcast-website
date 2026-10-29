@@ -69,7 +69,7 @@ test.describe("首頁每集角色看板", () => {
     await board.scrollIntoViewIfNeeded();
     await expect(board).toHaveAttribute("data-motion", "reduced");
     await expect(board).toHaveAttribute("data-ready", "true");
-    await expect(board.locator("[data-zone='car-park'] img")).toBeVisible();
+    await expect(board.locator("canvas")).toBeVisible();
 
     const first = board.getByRole("button", { name: /恐龍車多多/ });
     await first.focus();

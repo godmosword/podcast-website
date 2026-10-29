@@ -1,6 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { universe } from "@/data/universe";
-import { ISLAND_STATUS } from "@/components/landing/EpisodeBoardMap";
 import { loadEpisodeBoard, parseEpisodeBoard } from "@/lib/episode-board";
 
 describe("episode board JSON", () => {
@@ -135,11 +133,5 @@ describe("episode board JSON", () => {
     expect(board.actors).toHaveLength(ids.length);
     expect(board.dropped).toEqual([]);
     expect(loadEpisodeBoard().actors.length).toBeGreaterThan(4);
-  });
-
-  it("五島狀態跟宇宙地圖同一份資料", () => {
-    for (const zone of universe.zones) {
-      expect(ISLAND_STATUS[zone.id]).toBe(zone.status);
-    }
   });
 });

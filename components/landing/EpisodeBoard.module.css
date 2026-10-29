@@ -41,129 +41,29 @@
   flex: 1;
   min-height: 0;
   overflow: hidden;
-  background: var(--c-sky);
-  container-type: size;
+  background: var(--sky);
 }
 
-.sea,
-.seaNight {
-  position: absolute;
-  inset: 0;
-  background-repeat: repeat;
-  background-size: 180px auto;
-  pointer-events: none;
-}
-
-.seaNight {
-  opacity: 0;
-}
-
-.sky {
-  position: absolute;
-  inset: 0 0 auto;
-  height: 28%;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.cloudA,
-.cloudB,
-.sun,
-.moon {
-  position: absolute;
-  height: auto;
-  pointer-events: none;
-}
-
-.cloudA {
-  width: 28%;
-  left: 6%;
-  top: 8%;
-}
-
-.cloudB {
-  width: 22%;
-  right: 18%;
-  top: 4%;
-}
-
-.sun,
-.moon {
-  width: 48px;
-  height: 48px;
-  right: var(--space-6);
-  top: var(--space-3);
-}
-
-.moon {
-  opacity: 0;
-}
-
-.world {
-  position: absolute;
-  inset: 0;
-}
-
-.bridges {
+.canvas {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  overflow: visible;
   pointer-events: none;
-}
-
-.bridge {
-  fill: none;
-  stroke: color-mix(in srgb, var(--c-yellow) 62%, var(--landing-brand-ink));
-  stroke-width: 1.6;
-  stroke-linecap: round;
-}
-
-.island {
-  position: absolute;
-  width: 30cqmin;
-  transform: translate(-50%, -72%);
-  pointer-events: none;
-}
-
-.island[data-zone="car-park"] {
-  width: 38cqmin;
-}
-
-.islandImg {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.signal {
-  position: absolute;
-  width: 12px;
-  height: 32px;
-  transform: translate(-50%, -100%);
-  border-radius: var(--radius-pill);
-  background: var(--landing-brand-ink);
-  pointer-events: none;
-}
-
-.signal::before {
-  content: "";
-  position: absolute;
-  left: 2px;
-  right: 2px;
-  top: 4px;
-  height: 6px;
-  border-radius: var(--radius-circle);
-  background: var(--c-pink);
-  box-shadow: 0 8px 0 var(--c-yellow), 0 16px 0 var(--c-mint);
 }
 
 .actorSlot {
   position: absolute;
-  inset: 0;
+  left: var(--x, -999px);
+  top: var(--y, -999px);
+  z-index: var(--z, 1);
+  width: 0;
+  height: 0;
   pointer-events: none;
-  transform: translate(var(--u, 50%), var(--v, 50%));
+}
+
+.section:not([data-ready="true"]) .hit {
+  visibility: hidden;
 }
 
 .hit {
@@ -319,84 +219,8 @@
   }
 }
 
-.figure {
-  position: relative;
-  display: block;
-  width: 44px;
-  height: 44px;
-  pointer-events: none;
-}
-
-.figureShadow {
-  position: absolute;
-  left: 18%;
-  right: 18%;
-  bottom: 6%;
-  height: 14%;
-  border-radius: var(--radius-pill);
-  background: color-mix(in srgb, var(--landing-brand-ink) 28%, transparent);
-}
-
-.figureImg,
-.figureSvg {
-  position: relative;
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.body { fill: var(--c-mint); }
-.figure[data-character="duo-duo"] .body { fill: var(--leaf); }
-.figure[data-character="hui-hui"] .body { fill: color-mix(in srgb, var(--ink) 22%, var(--card)); }
-.figure[data-character="an-an"] .body { fill: var(--card); }
-.figure[data-character="xiang-xiang"] .body { fill: var(--c-pink); }
-.figure[data-character="lan-ba-shi"] .body { fill: var(--c-sky); }
-.figure[data-character="dong-dong"] .body,
-.figure[data-character="diao-che"] .body { fill: var(--c-yellow); }
-.figure[data-character="watt"] .body { fill: var(--c-teal); }
-.wheel { fill: var(--landing-brand-ink); }
-.hub { fill: var(--c-yellow); }
-.spike { fill: var(--landing-brand); }
-.window { fill: var(--c-sky); }
-.eye { fill: var(--landing-brand-ink); }
-.cross { fill: var(--c-pink); }
-.awning { fill: var(--card); }
-.boom,
-.brushStick {
-  fill: none;
-  stroke: var(--landing-brand-ink);
-  stroke-width: 2;
-  stroke-linecap: round;
-}
-.brush { fill: var(--c-mint); }
-.badge { fill: var(--landing-nav-cta-bg); }
-.badgeText {
-  font-size: 7px;
-  font-family: var(--font-stack-display);
-  fill: var(--landing-brand-ink);
-}
-
-.section[data-motion="full"][data-paused="false"] .swing {
-  transform-origin: 32px 28px;
-  animation: boardSwing 1.2s ease-in-out infinite;
-}
-
-:global(html[data-theme="night"]) .seaNight { opacity: 1; }
-:global(html[data-theme="night"]) .sun { opacity: 0; }
-:global(html[data-theme="night"]) .moon { opacity: 1; }
-:global(html[data-theme="night"]) .islandImg { filter: brightness(0.93); }
-:global(html[data-theme="night"]) .island[data-status="open"] .islandImg { filter: brightness(1.02); }
-
-@keyframes boardSwing {
-  50% { transform: rotate(-14deg); }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .skip:active { transform: none; }
-  .swing { animation: none; }
-  .seaNight,
-  .sun,
-  .moon,
-  .islandImg { transition: none; }
+  .skip:active {
+    transform: none;
+  }
 }
