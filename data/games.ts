@@ -139,9 +139,9 @@ export const GAMES: GameMeta[] = [
     gameType: "driving",
     controls: ["左邊推，車會走", "右邊拉，車會停", "門亮了就按"],
     art: {
-      cover: "/games/v2/orange-express/cover.svg",
-      thumbnail: "/games/v2/orange-express/cover.svg",
-      alt: "奶油色圓臉、橘色條紋的小橘徽章",
+      cover: "/games/v2/orange-express/cover.webp",
+      thumbnail: "/games/v2/orange-express/cover.webp",
+      alt: "小橘沿著山坡上的彎道開過來，左邊是月台，遠處有摩天輪",
     },
     tutorial: [
       { text: "左邊讓車走", gesture: "arrows" },

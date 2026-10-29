@@ -83,12 +83,12 @@ export type CoverCrop = {
 
 /**
  * 封面會被裁進的框。比例取自實際畫面：遊樂園卡片約 4:3、右下角有播放圓鈕；
- * 標題主視覺直式手機全寬（390×844 約 358×186）、很矮的手機壓成 72px 高，橫拿與桌機是 3:2。
+ * 標題主視覺直式手機全寬（390×844 約 358×186）、很矮的手機壓成 72px 高、往下對齊到 55%（笑臉才不會被切掉），橫拿與桌機是 3:2。
  */
 export const COVER_CROPS: readonly CoverCrop[] = [
   { id: "hub", label: "遊樂園卡片", aspect: 4 / 3, y: 0.5, cornerBadge: 0.37 },
   { id: "title-phone", label: "標題・直式手機", aspect: 358 / 186, y: 0.45 },
-  { id: "title-short", label: "標題・很矮的手機", aspect: 343 / 72, y: 0.45 },
+  { id: "title-short", label: "標題・很矮的手機", aspect: 343 / 72, y: 0.55 },
   { id: "title-wide", label: "標題・橫拿與桌機", aspect: 3 / 2, y: 0.45 },
 ];
 

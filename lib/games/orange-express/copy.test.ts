@@ -30,6 +30,9 @@ const PARENT_ONLY: Record<string, string> = {
   "km/h": "lib/games/orange-express/gauge.ts",
 };
 
+/** 點陣圖與音檔是二進位，當文字讀會隨機湊出「jr」這種短詞；SVG 與 SOURCES.md 照樣掃。 */
+const BINARY_ASSET = /\.(webp|png|jpe?g|avif|gif|m4a|mp3)$/i;
+
 function filesIn(dir: string): string[] {
   const out: string[] = [];
   for (const name of readdirSync(dir)) {
@@ -39,6 +42,7 @@ function filesIn(dir: string): string[] {
       continue;
     }
     if (name.endsWith(".test.ts") || name.endsWith(".test.tsx")) continue;
+    if (BINARY_ASSET.test(name)) continue;
     out.push(path);
   }
   return out;
