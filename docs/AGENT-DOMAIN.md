@@ -175,3 +175,4 @@ Skill／Agent 發現只掃描 repository 受版本控制的檔案；排除 `node
 | 2026-07-31 | 紅線「生圖／重抽禁止自行連抽」；alwaysApply `podcast.mdc` + EPISODE-WORKFLOW 審圖閘門（ep-23 越權連抽） |
 | 2026-08-24 | 驗證矩陣補「視覺回歸」列；VIS-DEBT-1 結案（根因是 baseline 拍進隨集數變動的內容，非環境漂移） |
 | 2026-08-30 | VIS-DEBT-3：視覺回歸加 `.githooks/pre-push` 機械閘門。根因不是 VIS-DEBT-1 復發（遮罩修法有效），而是**沒有人在 push 前跑它**——2026-08-25 重錄後 4 天內約 20 個 UI commit 直接 ship，44 張 baseline 全過期。文件規範已證實擋不住，故改硬擋 |
+| 2026-10-29 | VIS-DEBT-3 閘門補洞：新分支原本取「最近 50 個 commit」當範圍，main 上別人重錄過 baseline 就一起算進來，只改 UI 的新分支會被放行（#271 第一次推送）。改成只看從 `origin/main` 分出來之後的 commit；契約測試補兩條實際跑 hook 的案例 |

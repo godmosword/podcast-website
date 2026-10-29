@@ -1,5 +1,7 @@
-import { readFileSync, statSync } from "node:fs";
-import { join } from "node:path";
+import { spawnSync } from "node:child_process";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { dirname, join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 /**
@@ -56,5 +58,71 @@ describe("VIS-DEBT-3 視覺 baseline 閘門", () => {
     );
     expect(domain).toContain("test:visual:trusted");
     expect(domain).toContain("刻意不進 CI");
+  });
+});
+
+/** 在暫存 repo 裡實際跑 hook：main 上有人重錄過 baseline，新分支只改 UI。 */
+describe("VIS-DEBT-3 閘門：新分支只看從 main 分出來之後的 commit", () => {
+  const ZERO = "0".repeat(40);
+
+  function repo(): { dir: string; git: (...args: string[]) => string; commit: (path: string, msg: string) => void } {
+    const dir = mkdtempSync(join(tmpdir(), "visual-gate-"));
+    const git = (...args: string[]) => {
+      const out = spawnSync("git", args, { cwd: dir, encoding: "utf8" });
+      if (out.status !== 0) throw new Error(out.stderr);
+      return out.stdout.trim();
+    };
+    git("init", "-q", "-b", "main");
+    git("config", "user.email", "gate@test");
+    git("config", "user.name", "gate");
+    const commit = (path: string, msg: string) => {
+      mkdirSync(dirname(join(dir, path)), { recursive: true });
+      writeFileSync(join(dir, path), `${msg}\n`);
+      git("add", path);
+      git("commit", "-q", "-m", msg);
+    };
+    return { dir, git, commit };
+  }
+
+  function push(dir: string, sha: string, remote = ZERO) {
+    return spawnSync("sh", [HOOK_PATH], {
+      cwd: dir,
+      input: `refs/heads/feature ${sha} refs/heads/feature ${remote}\n`,
+      encoding: "utf8",
+      env: { ...process.env, SKIP_VISUAL_GATE: "" },
+    });
+  }
+
+  it("main 歷史裡的 baseline 變更不算數：只改 UI 的新分支會被擋", () => {
+    const { dir, git, commit } = repo();
+    try {
+      commit("components/Old.tsx", "ui on main");
+      commit("e2e/visual.spec.ts-snapshots/old.png", "baseline on main");
+      git("update-ref", "refs/remotes/origin/main", "HEAD");
+      git("switch", "-q", "-c", "feature");
+      commit("components/New.tsx", "ui only");
+      const result = push(dir, git("rev-parse", "HEAD"));
+      expect(result.status).toBe(1);
+      expect(result.stderr).toContain("components/New.tsx");
+      expect(result.stderr).not.toContain("components/Old.tsx");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("新分支自己帶了 baseline 就放行；沒有 UI 變更也放行", () => {
+    const { dir, git, commit } = repo();
+    try {
+      commit("README.md", "base");
+      git("update-ref", "refs/remotes/origin/main", "HEAD");
+      git("switch", "-q", "-c", "feature");
+      commit("scripts/tool.ts", "not ui");
+      expect(push(dir, git("rev-parse", "HEAD")).status).toBe(0);
+      commit("components/New.tsx", "ui");
+      commit("e2e/visual.spec.ts-snapshots/new.png", "baseline");
+      expect(push(dir, git("rev-parse", "HEAD")).status).toBe(0);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });
