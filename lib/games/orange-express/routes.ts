@@ -28,13 +28,15 @@ export type CourseRules = {
   autoBrake: boolean;
   /** 指差確認小任務。 */
   pointing: boolean;
+  /** 門還沒亮就按開門會少一顆星。低齡只在當下提醒，不扣星。 */
+  earlyDoorCosts: boolean;
 };
 
 export const COURSE_RULES: Record<CourseId, CourseRules> = {
-  look: { signs: false, autoBrake: false, pointing: false },
-  little: { signs: false, autoBrake: false, pointing: false },
-  big: { signs: true, autoBrake: true, pointing: true },
-  captain: { signs: true, autoBrake: true, pointing: true },
+  look: { signs: false, autoBrake: false, pointing: false, earlyDoorCosts: false },
+  little: { signs: false, autoBrake: false, pointing: false, earlyDoorCosts: false },
+  big: { signs: true, autoBrake: true, pointing: true, earlyDoorCosts: true },
+  captain: { signs: true, autoBrake: true, pointing: true, earlyDoorCosts: true },
 };
 
 type WindowSpec = Pick<Station, "window" | "target" | "greenHalf" | "approachAt" | "approachLimit">;

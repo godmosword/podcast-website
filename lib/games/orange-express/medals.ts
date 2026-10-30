@@ -1,3 +1,4 @@
+import { COURSE_RULES } from "@/lib/games/orange-express/routes";
 import type { RunState } from "@/lib/games/orange-express/types";
 
 export type RunMedals = {
@@ -16,10 +17,12 @@ export function allGreen(state: RunState): boolean {
  * 開完每一站才算過關。
  * 每站都停在綠區、沒開過頭、也沒在還在跑的時候按開門，才是三顆星。
  * 停在黃區或倒車重停過是兩顆星。喇叭不算。開完這一條，朋友都接到了。
+ * 慢慢看、小小司機提早按門只在當下提醒，不算進星星。
  */
 export function medalsFor(state: RunState, earlyDoorTaps: number): RunMedals {
   const cleared = state.phase === "route-done";
-  const flawless = cleared && state.misses === 0 && earlyDoorTaps === 0 && allGreen(state);
+  const doorOk = !COURSE_RULES[state.course].earlyDoorCosts || earlyDoorTaps === 0;
+  const flawless = cleared && state.misses === 0 && doorOk && allGreen(state);
   const collectedAll = cleared;
   const stars = (cleared ? 1 : 0) + (flawless ? 1 : 0) + (collectedAll ? 1 : 0);
   return { cleared, flawless, collectedAll, stars };

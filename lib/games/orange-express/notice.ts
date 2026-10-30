@@ -1,10 +1,12 @@
 import { COPY, POINT_CALL, signWord } from "@/lib/games/orange-express/copy";
 import { kmh } from "@/lib/games/orange-express/gauge";
 import { currentStation, inTunnel, nextSign, onBridge, pendingPoint } from "@/lib/games/orange-express/reducer";
+import { stopBarFor } from "@/lib/games/orange-express/stop-target";
 import { signBars } from "@/lib/games/orange-express/windshield";
 import type { RunState } from "@/lib/games/orange-express/types";
 
-export type NoticeKind = "bridge" | "greeted" | "sign" | "passing" | "tunnel";
+/** door：門還沒亮就按了，只在按下後短暫出現，不念進 speechCandidates（畫面另外排）。 */
+export type NoticeKind = "bridge" | "greeted" | "sign" | "passing" | "tunnel" | "door";
 
 export type WindowNotice = {
   kind: NoticeKind;
@@ -49,6 +51,15 @@ export function windowNotice(state: RunState, numbers: boolean): WindowNotice | 
   }
   if (inTunnel(state)) return { kind: "tunnel", text: COPY.tunnel };
   return null;
+}
+
+/**
+ * 門還沒亮就按了的那兩秒多：前窗右上說「門亮了再按」，蓋過其他提示。
+ * 進站區間有停車目標條時由目標條說（見 OrangeExpressStopBar 的 hint），這裡回到平常的提示。
+ */
+export function noticeWithDoorHint(state: RunState, numbers: boolean, doorHint: boolean): WindowNotice | null {
+  if (doorHint && !stopBarFor(state)) return { kind: "door", text: COPY.earlyDoorHint };
+  return windowNotice(state, numbers);
 }
 
 function signHasTask(state: RunState, at: number | undefined): boolean {

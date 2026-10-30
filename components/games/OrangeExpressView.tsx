@@ -34,7 +34,7 @@ import {
 } from "@/lib/games/orange-express/chime";
 import { COPY, DRIVER_HINT, DRIVER_NAME, GRADE_TEXT, LEVEL_DOTS } from "@/lib/games/orange-express/copy";
 import { medalsFor, starMissReason } from "@/lib/games/orange-express/medals";
-import { nextSpeech } from "@/lib/games/orange-express/notice";
+import { nextSpeech, type SpeechItem } from "@/lib/games/orange-express/notice";
 import {
   clampPower,
   createRun,
@@ -84,6 +84,10 @@ const LEVELS: readonly LevelId[] = ["look", "drive", "captain"];
 const SOUND_RETRY_MS = 1000;
 /** 「叮咚」之後再念站名。 */
 const ANNOUNCE_DELAY_MS = 650;
+/** 門還沒亮就按：前窗提示留這麼久。 */
+const DOOR_HINT_MS = 2400;
+/** 「門亮了再按」排在廣播後面；等太久才輪到就不念了，孩子早就不記得剛剛按過。 */
+const DOOR_SPEECH_STALE_MS = 4000;
 /** 對向列車擦身時「咻」的時間點（秒）。 */
 const WHOOSH_AT = 1.45;
 const DRIVE_KEYS: ReadonlySet<GameAction> = new Set([
@@ -95,8 +99,9 @@ const DRIVE_KEYS: ReadonlySet<GameAction> = new Set([
   "action",
 ]);
 
-function liveText(run: RunState): string {
+function liveText(run: RunState, doorHint: boolean): string {
   if (run.phase === "reversing") return COPY.reversing;
+  if (doorHint) return COPY.earlyDoorHint;
   if (run.autoBrake) return COPY.autoBrakeOn;
   if (run.phase === "doors-open") return COPY.boarding;
   if (run.phase === "stopped") {
@@ -130,6 +135,8 @@ export function OrangeExpressView({
   const [level, setLevel] = useState<LevelId>("look");
   const [run, setRun] = useState<RunState | null>(null);
   const [shake, setShake] = useState(false);
+  /** 門還沒亮就按了：前窗（或停車目標條）當下說「門亮了再按」，不等到結算。 */
+  const [doorHint, setDoorHint] = useState(false);
   const [honked, setHonked] = useState(0);
   /** 車停著時 run 不會變；廣播念完後用它叫朗讀再看一次前窗。 */
   const [voiceTick, setVoiceTick] = useState(0);
@@ -150,6 +157,8 @@ export function OrangeExpressView({
   const spoken = useRef<Set<string>>(new Set());
   /** 車內廣播或上一句提示大約念到這個時間（performance.now）；之前不念新的提示。 */
   const voiceBusyUntil = useRef(0);
+  /** 等著念的「門亮了再按」：一站只念一次，排在廣播後面。 */
+  const doorSpeech = useRef<{ item: SpeechItem; at: number } | null>(null);
   const driver = resolveOrangeExpressDriver(display.driver, kidsMode);
   const driverRef = useRef(driver);
   const voiceRef = useRef(false);
@@ -203,6 +212,8 @@ export function OrangeExpressView({
     const next = withHook(createRun(nextLevel, nextDriver), hook);
     phaseRef.current = next.phase;
     spoken.current = new Set();
+    doorSpeech.current = null;
+    setDoorHint(false);
     apply(next);
     announceNext(next);
     setScreen("drive");
@@ -213,6 +224,8 @@ export function OrangeExpressView({
   const goTitle = useCallback(() => {
     runRef.current = null;
     phaseRef.current = null;
+    doorSpeech.current = null;
+    setDoorHint(false);
     setRun(null);
     setScreen("title");
     stopSound();
@@ -236,6 +249,12 @@ export function OrangeExpressView({
       if (cur.phase === "running" || cur.phase === "in-window" || cur.phase === "reversing") {
         instance.noteEarlyDoor();
         setShake(true);
+        setDoorHint(true);
+        const key = `${cur.stationIndex}:door`;
+        if (!spoken.current.has(key)) {
+          doorSpeech.current = { item: { key, text: COPY.earlyDoorHint }, at: performance.now() };
+          setVoiceTick((tick) => tick + 1);
+        }
       }
       return;
     }
@@ -393,7 +412,10 @@ export function OrangeExpressView({
     };
     const wait = voiceBusyUntil.current - performance.now();
     if (wait > 0) return recheck(wait);
-    const item = nextSpeech(run, display.gaugeNumbers, spoken.current);
+    const door = doorSpeech.current;
+    doorSpeech.current = null;
+    const freshDoor = door && performance.now() - door.at <= DOOR_SPEECH_STALE_MS ? door.item : null;
+    const item = freshDoor ?? nextSpeech(run, display.gaugeNumbers, spoken.current);
     if (!item) return;
     spoken.current.add(item.key);
     const ms = speechMs(item.text);
@@ -408,6 +430,13 @@ export function OrangeExpressView({
     const timer = window.setTimeout(() => setShake(false), 280);
     return () => window.clearTimeout(timer);
   }, [shake]);
+
+  // 再按一次會重新顯示：shake 每按一次都會變，計時跟著重來。
+  useEffect(() => {
+    if (!doorHint) return;
+    const timer = window.setTimeout(() => setDoorHint(false), DOOR_HINT_MS);
+    return () => window.clearTimeout(timer);
+  }, [doorHint, shake]);
 
   useEffect(() => {
     if (!run || screen !== "drive") return;
@@ -588,10 +617,11 @@ export function OrangeExpressView({
         reduced={reducedMotion}
         numbers={display.gaugeNumbers}
         swayRef={swayRef}
+        doorHint={doorHint}
         onPoint={pointCheck}
       />
       <p className={styles.live} aria-live="polite">
-        {liveText(run)}
+        {liveText(run, doorHint)}
       </p>
       <OrangeExpressCab
         run={run}

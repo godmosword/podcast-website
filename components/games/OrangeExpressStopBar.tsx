@@ -17,8 +17,15 @@ function distanceText(meters: number): string {
   return `還有 ${meters} 公尺`;
 }
 
+type StopBarProps = {
+  run: RunState;
+  numbers: boolean;
+  /** 暫時蓋過距離字的一句（門還沒亮就按了）。倒車與停好時不蓋。 */
+  hint?: string | null;
+};
+
 /** 前窗上方的停車目標條：黃區、綠區、目標線、預測停車點、小橘現在的位置。 */
-export function OrangeExpressStopBar({ run, numbers }: { run: RunState; numbers: boolean }) {
+export function OrangeExpressStopBar({ run, numbers, hint = null }: StopBarProps) {
   const bar = stopBarFor(run);
   if (!bar) return null;
   const grade = run.grades[run.stationIndex];
@@ -26,6 +33,7 @@ export function OrangeExpressStopBar({ run, numbers }: { run: RunState; numbers:
   let words: string = numbers ? distanceText(bar.remainingMeters) : bar.words;
   if (run.phase === "reversing") words = COPY.reversing;
   else if (atStation && grade) words = GRADE_TEXT[grade];
+  else if (hint) words = hint;
 
   return (
     <div

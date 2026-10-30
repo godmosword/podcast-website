@@ -146,7 +146,7 @@ export const GAMES: GameMeta[] = [
     tutorial: [
       { text: "左邊讓車走", gesture: "arrows" },
       { text: "右邊讓車停", gesture: "arrows" },
-      { text: "門亮了就開", gesture: "tap" },
+      { text: "門亮了再按", gesture: "tap" },
     ],
   },
 ];
