@@ -409,6 +409,22 @@
   flex: 0 0 auto;
 }
 
+/* 門還沒亮就按：跟駕駛台車門鈕同一個門圖示，圓底讓它跟其他提示的小圓牌一樣大。 */
+.noticeDoor {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: var(--card);
+}
+
+.notice[data-kind="door"] {
+  background: color-mix(in srgb, var(--c-pink) 30%, var(--card));
+}
+
 /*
  * 指差確認：56px 手勢圓鈕貼右邊窗柱，左緣在前窗七成以右，前窗中間那條留給軌道和停車柱。
  * 鈕下的小牌只寫要確認的東西（號誌、速限牌、月台）。出現時輕輕跳一下，減少動態時不跳。

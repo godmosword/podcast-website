@@ -45,6 +45,24 @@ test.describe("小橘特快車", () => {
     expect(saved.gameProfile.medals["orange-express"][0] & 1).toBe(1);
   });
 
+  test("慢慢看：門還沒亮就按，當下說門亮了再按，到家還是三顆星", async ({ page }) => {
+    await page.goto("/games/orange-express");
+    await startLevel(page, "慢慢看");
+    const door = page.getByRole("button", { name: "開門" });
+    await door.click({ force: true });
+    const notice = page.getByTestId("orange-express-notice");
+    await expect(notice).toHaveAttribute("data-kind", "door");
+    await expect(notice).toContainText("門亮了再按");
+
+    await jump(page, { progress: 0.6, speed: 0 });
+    await door.click();
+    await page.getByRole("button", { name: "關門" }).click();
+    await expect(page.getByRole("heading", { name: "到家了" })).toBeVisible();
+    const result = page.getByTestId("orange-express-result");
+    await expect(result.getByRole("img", { name: "拿到 3 顆星，共 3 顆" })).toBeVisible();
+    await expect(result.locator('[data-rule="early-door"]')).toHaveCount(0);
+  });
+
   test("自己開：還在跑時開門沒反應，停好才進下一站，速度表不超過旗", async ({ page }) => {
     await page.addInitScript(() => {
       window.__orangeExpress = { driver: "big" };
@@ -55,6 +73,10 @@ test.describe("小橘特快車", () => {
     await door.click({ force: true });
     await expect(page.getByTestId("orange-express-drive")).toHaveAttribute("data-station-index", "0");
     await expect(door).toHaveAttribute("aria-disabled", "true");
+    // 按太早當下就說，不等到結算才知道。
+    const notice = page.getByTestId("orange-express-notice");
+    await expect(notice).toHaveAttribute("data-kind", "door");
+    await expect(notice).toContainText("門亮了再按");
 
     await jump(page, { progress: 0.65, speed: 0 });
     await expect(door).not.toHaveAttribute("aria-disabled", "true");
@@ -105,6 +127,10 @@ test.describe("小橘特快車", () => {
     const bar = page.getByTestId("orange-express-stopbar");
     await expect(bar).toBeVisible();
     await expect(page.getByTestId("orange-express-stop-words")).toContainText("快到了");
+    // 進站時按太早：停車目標條說，不在前窗右上再多一塊。
+    await page.getByRole("button", { name: "開門" }).click({ force: true });
+    await expect(page.getByTestId("orange-express-stop-words")).toContainText("門亮了再按");
+    await expect(page.getByTestId("orange-express-notice")).toHaveCount(0);
 
     await jump(page, { progress: 0.65, speed: 0, brake: 4, freeze: false });
     await expect(bar).toHaveAttribute("data-grade", "green");

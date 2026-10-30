@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { medalsFor, starMissReason } from "@/lib/games/orange-express/medals";
 import { createRun } from "@/lib/games/orange-express/reducer";
-import type { RunState, StopGrade } from "@/lib/games/orange-express/types";
+import type { DriverId, LevelId, RunState, StopGrade } from "@/lib/games/orange-express/types";
 
-function finished(grades: StopGrade[], misses = 0): RunState {
-  return { ...createRun("drive", "big"), phase: "route-done", grades, misses };
+function finished(grades: StopGrade[], misses = 0, level: LevelId = "drive", driver: DriverId = "big"): RunState {
+  return { ...createRun(level, driver), phase: "route-done", grades, misses };
 }
 
 describe("結算：少一顆星的原因", () => {
@@ -28,6 +28,23 @@ describe("結算：少一顆星的原因", () => {
     const run = finished(["green", "green", "green"]);
     expect(medalsFor(run, 2).stars).toBe(2);
     expect(starMissReason(run, 2)).toBe("early-door");
+  });
+
+  it("小站長門還沒亮就按了，也少一顆星", () => {
+    const run = finished(["green", "green", "green"], 0, "captain");
+    expect(medalsFor(run, 1).stars).toBe(2);
+    expect(starMissReason(run, 1)).toBe("early-door");
+  });
+
+  it("慢慢看、小小司機門還沒亮就按了，當下提醒就好，不扣星", () => {
+    for (const [level, driver] of [
+      ["look", "big"],
+      ["drive", "little"],
+    ] as const) {
+      const run = finished(["green", "green", "green"], 0, level, driver);
+      expect(medalsFor(run, 3).stars, run.course).toBe(3);
+      expect(starMissReason(run, 3), run.course).toBeNull();
+    }
   });
 
   it("好幾個原因時先說停車位置，再說開過頭，最後才是門", () => {

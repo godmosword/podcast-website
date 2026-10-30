@@ -1,7 +1,15 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { COPY, GRADE_TEXT, GRADE_WORD, pointsResultText } from "@/lib/games/orange-express/copy";
+import {
+  COPY,
+  GRADE_TEXT,
+  GRADE_WORD,
+  brakeWord,
+  pointsResultText,
+  powerValueText,
+  powerWord,
+} from "@/lib/games/orange-express/copy";
 import { stationsFor } from "@/lib/games/orange-express/routes";
 
 const BANNED = [
@@ -99,5 +107,16 @@ describe("每站停車等級與結算小字", () => {
 
   it("指差確認只數做到的次數", () => {
     expect(pointsResultText(1)).toBe("指差確認 1 次");
+  });
+});
+
+describe("桿上的字", () => {
+  it("動力推到底是「不推」：車只是滑行，「停」留給煞車", () => {
+    expect(powerWord(0)).toBe("不推");
+    expect(powerValueText(0)).toBe("動力 P0，不推");
+    for (const notch of [0, 1, 2, 3, 4] as const) {
+      expect(powerWord(notch)).not.toBe("停");
+    }
+    expect(brakeWord(3)).toBe("停");
   });
 });

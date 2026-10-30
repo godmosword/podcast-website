@@ -38,6 +38,8 @@ export const COPY = {
   stopTarget: "停車目標",
   predicted: "會停在這裡",
   stopWord: "停",
+  /** 動力推到底：車只是滑行，不能寫「停」，不然孩子以為不用拉煞車。 */
+  coastWord: "不推",
   slowWord: "慢",
   fastWord: "快",
   looseWord: "鬆",
@@ -131,7 +133,7 @@ export const GRADE_WORD: Record<StopGrade, string> = {
 };
 
 export function powerWord(notch: PowerNotch): string {
-  if (notch === 0) return COPY.stopWord;
+  if (notch === 0) return COPY.coastWord;
   return notch <= 2 ? COPY.slowWord : COPY.fastWord;
 }
 

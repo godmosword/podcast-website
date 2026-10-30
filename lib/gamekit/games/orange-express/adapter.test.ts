@@ -98,7 +98,7 @@ describe("orangeExpressAdapter", () => {
     });
   });
 
-  it("提早開門就拿不到停得很漂亮", () => {
+  it("慢慢看提早開門只在當下提醒，還是停得很漂亮", () => {
     const onSession = vi.fn();
     const inst = new OrangeExpressInstance({
       kidsMode: true,
@@ -108,6 +108,24 @@ describe("orangeExpressAdapter", () => {
     inst.notifyPlaying("look");
     inst.noteEarlyDoor();
     inst.notifyWon(finishLook());
+    expect(onSession.mock.calls[0]?.[0]).toMatchObject({
+      cleared: true,
+      flawless: true,
+      collectedAll: true,
+    });
+  });
+
+  it("小站長提早開門就拿不到停得很漂亮", () => {
+    const onSession = vi.fn();
+    const inst = new OrangeExpressInstance({
+      kidsMode: false,
+      reducedMotion: false,
+      onSession,
+    });
+    const run = createRun("captain");
+    inst.notifyPlaying("captain");
+    inst.noteEarlyDoor();
+    inst.notifyWon({ ...run, phase: "route-done", grades: run.stations.map(() => "green" as const) });
     expect(onSession.mock.calls[0]?.[0]).toMatchObject({
       cleared: true,
       flawless: false,

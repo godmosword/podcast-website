@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useRef, type Ref } from "react";
+import { DoorIcon } from "@/components/games/OrangeExpressCab";
 import { NoticeGlyph } from "@/components/games/OrangeExpressGlyphs";
 import { OrangeExpressStopBar } from "@/components/games/OrangeExpressStopBar";
 import { COPY, POINT_CALL, POINT_WHAT } from "@/lib/games/orange-express/copy";
-import { windowNotice } from "@/lib/games/orange-express/notice";
+import { noticeWithDoorHint } from "@/lib/games/orange-express/notice";
 import { currentStation, pendingPoint } from "@/lib/games/orange-express/reducer";
 import { drawWindshield, windshieldFrame } from "@/lib/games/orange-express/windshield";
 import type { PassengerId, RunState } from "@/lib/games/orange-express/types";
@@ -91,12 +92,15 @@ export function OrangeExpressWindshield({
   reduced,
   numbers,
   swayRef,
+  doorHint,
   onPoint,
 }: {
   run: RunState;
   reduced: boolean;
   numbers: boolean;
   swayRef: Ref<HTMLDivElement>;
+  /** 門還沒亮就按了：右上（或停車目標條）說「門亮了再按」。 */
+  doorHint: boolean;
   onPoint: () => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -105,7 +109,7 @@ export function OrangeExpressWindshield({
   const here = currentStation(run);
   const target = here.target;
   const showRiders = frame === 2 && station != null;
-  const notice = windowNotice(run, numbers);
+  const notice = noticeWithDoorHint(run, numbers, doorHint);
   const task = pendingPoint(run);
 
   useEffect(() => {
@@ -159,10 +163,16 @@ export function OrangeExpressWindshield({
       </div>
       <span className={styles.pillarLeft} aria-hidden />
       <span className={styles.pillarRight} aria-hidden />
-      <OrangeExpressStopBar run={run} numbers={numbers} />
+      <OrangeExpressStopBar run={run} numbers={numbers} hint={doorHint ? COPY.earlyDoorHint : null} />
       {notice && !showRiders ? (
         <p className={styles.notice} data-kind={notice.kind} data-testid="orange-express-notice">
-          <NoticeGlyph notice={notice} />
+          {notice.kind === "door" ? (
+            <span className={styles.noticeDoor} aria-hidden>
+              <DoorIcon size={20} />
+            </span>
+          ) : (
+            <NoticeGlyph notice={notice} />
+          )}
           {notice.text}
         </p>
       ) : null}

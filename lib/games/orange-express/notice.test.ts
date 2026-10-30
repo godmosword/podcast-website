@@ -1,7 +1,23 @@
 import { describe, expect, it } from "vitest";
 import { speechMs } from "@/lib/games/orange-express/announce";
-import { nextSpeech, speechCandidates, windowNotice } from "@/lib/games/orange-express/notice";
+import { nextSpeech, noticeWithDoorHint, speechCandidates, windowNotice } from "@/lib/games/orange-express/notice";
 import { createRun, currentStation, withHook } from "@/lib/games/orange-express/reducer";
+
+describe("門還沒亮就按", () => {
+  it("剛出發按了：前窗右上馬上說「門亮了再按」，蓋過速限牌", () => {
+    const base = createRun("drive", "big");
+    const sign = currentStation(base).signs[0]!;
+    const near = withHook(base, { progress: sign.at - 0.03, speed: 0.4 });
+    expect(noticeWithDoorHint(near, false, true)).toEqual({ kind: "door", text: "門亮了再按" });
+    expect(noticeWithDoorHint(near, false, false)?.kind).toBe("sign");
+  });
+
+  it("進站區間有停車目標條：交給目標條說，前窗右上不再多一塊", () => {
+    const base = createRun("drive", "little");
+    const approach = withHook(base, { progress: currentStation(base).approachAt + 0.02, speed: 0.3 });
+    expect(noticeWithDoorHint(approach, false, true)).toBeNull();
+  });
+});
 
 describe("前窗提示", () => {
   it("快到速限牌時提醒，牌子畫幾條、文字說快慢；家長開數字時說速限多少", () => {
