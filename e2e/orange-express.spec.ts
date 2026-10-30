@@ -1009,3 +1009,19 @@ test.describe("小橘特快車：停好時的開心小橘", () => {
     await expect(page.getByTestId("orange-express-stop-train")).toHaveAttribute("data-mood", "calm");
   });
 });
+
+test.describe("小橘特快車：站點地標", () => {
+  test("下一站旁有地標小圖示，換站跟著換；結算站卡也有", async ({ page }) => {
+    await page.addInitScript(() => {
+      window.__orangeExpress = { driver: "big", freeze: true };
+    });
+    await page.goto("/games/orange-express");
+    await startLevel(page, "自己開");
+    const cab = page.getByTestId("orange-express-cab");
+    await expect(cab.locator('[data-landmark="ferris"]')).toHaveCount(1);
+    await jump(page, { stationIndex: 1 });
+    await expect(cab.locator('[data-landmark="orange-tree"]')).toHaveCount(1);
+    await jump(page, { stationIndex: 2 });
+    await expect(cab.locator('[data-landmark="house"]')).toHaveCount(1);
+  });
+});

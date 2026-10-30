@@ -1,6 +1,6 @@
 import type { XiaojuMood } from "@/lib/games/orange-express/mood";
 import type { WindowNotice } from "@/lib/games/orange-express/notice";
-import type { LevelId } from "@/lib/games/orange-express/types";
+import type { LandmarkId, LevelId } from "@/lib/games/orange-express/types";
 import { signCells } from "@/lib/games/orange-express/windshield";
 import styles from "./orange-express.module.css";
 
@@ -223,3 +223,51 @@ export function LevelGlyph({ level }: { level: LevelId }) {
     </svg>
   );
 }
+
+/**
+ * 站點地標的小圖示（駕駛台「下一站」旁、結算站卡）：跟前窗裡的地標同一個東西，
+ * 不識字的孩子看圖就知道下一站是摩天輪那一站。
+ */
+export function LandmarkGlyph({ id, className }: { id: LandmarkId; className?: string }) {
+  if (id === "ferris") {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden className={className} data-landmark={id}>
+        <path d="M7 22l5-11 5 11" fill="none" stroke="rgb(150, 124, 196)" strokeWidth="2" strokeLinecap="round" />
+        <circle cx="12" cy="10" r="7.5" fill="none" stroke="rgb(58, 46, 40)" strokeWidth="3.2" />
+        <circle cx="12" cy="10" r="7.5" fill="none" stroke="rgb(236, 128, 104)" strokeWidth="1.8" />
+        <path d="M12 2.5v15M5.5 6.25l13 7.5M5.5 13.75l13-7.5" stroke="rgb(214, 196, 170)" strokeWidth="1.2" />
+        <circle cx="12" cy="2.5" r="1.9" fill="rgb(247, 168, 196)" />
+        <circle cx="18.5" cy="6.25" r="1.9" fill="rgb(255, 214, 102)" />
+        <circle cx="18.5" cy="13.75" r="1.9" fill="rgb(150, 214, 180)" />
+        <circle cx="12" cy="17.5" r="1.9" fill="rgb(140, 200, 236)" />
+        <circle cx="5.5" cy="13.75" r="1.9" fill="rgb(196, 170, 230)" />
+        <circle cx="5.5" cy="6.25" r="1.9" fill="rgb(255, 170, 100)" />
+        <circle cx="12" cy="10" r="2.2" fill="rgb(176, 140, 220)" />
+      </svg>
+    );
+  }
+  if (id === "orange-tree") {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden className={className} data-landmark={id}>
+        <path d="M2 23c2-4 6-5.5 10-5.5s8 1.5 10 5.5z" fill="rgb(118, 184, 108)" />
+        <rect x="10.8" y="12" width="2.4" height="7" rx="1" fill="rgb(140, 98, 64)" />
+        <circle cx="12" cy="9" r="7.5" fill="rgb(82, 150, 72)" />
+        <circle cx="10" cy="7" r="4.5" fill="rgb(104, 176, 86)" />
+        <circle cx="8.5" cy="9.5" r="1.8" fill="rgb(255, 150, 48)" />
+        <circle cx="14" cy="5.5" r="1.8" fill="rgb(255, 150, 48)" />
+        <circle cx="15.5" cy="11" r="1.8" fill="rgb(255, 150, 48)" />
+        <circle cx="11" cy="13" r="1.6" fill="rgb(255, 150, 48)" />
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden className={className} data-landmark={id}>
+      <rect x="15" y="3" width="2.6" height="5" fill="rgb(184, 70, 56)" />
+      <rect x="4.5" y="11" width="15" height="11" rx="1" fill="rgb(255, 244, 224)" stroke="rgb(58, 46, 40)" strokeWidth="1.2" />
+      <path d="M2.5 12L12 3.5l9.5 8.5z" fill="rgb(188, 70, 58)" stroke="rgb(58, 46, 40)" strokeWidth="1.2" strokeLinejoin="round" />
+      <rect x="6.5" y="13.5" width="4" height="3.5" rx="0.6" fill="rgb(255, 214, 102)" />
+      <rect x="13" y="15" width="3.6" height="7" rx="0.6" fill="rgb(150, 100, 70)" />
+    </svg>
+  );
+}
+

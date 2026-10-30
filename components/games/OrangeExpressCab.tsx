@@ -2,7 +2,7 @@
 
 import { useRef, type CSSProperties, type ReactNode } from "react";
 import { OrangeExpressGauge } from "@/components/games/OrangeExpressGauge";
-import { HornIcon, XiaojuFace } from "@/components/games/OrangeExpressGlyphs";
+import { HornIcon, LandmarkGlyph, XiaojuFace } from "@/components/games/OrangeExpressGlyphs";
 import {
   brakeLampLabel,
   brakeValueText,
@@ -373,6 +373,7 @@ export function OrangeExpressCab({
           <XiaojuFace className={styles.badge} mood={xiaojuMood(run)} />
           <p className={styles.stationName}>
             <span className={styles.stationLead}>
+              {station ? <LandmarkGlyph id={station.landmark} className={styles.stationLandmark} /> : null}
               {atStation ? COPY.atStation : COPY.nextStop}
             </span>
             {station ? (

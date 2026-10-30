@@ -43,6 +43,9 @@ export type StationId = "orange-park" | "orange-slope" | "orange-home";
 /** 窗外背景。 */
 export type SceneId = "field" | "city" | "sea";
 
+/** 每站一個醒目地標：遊樂園摩天輪、橘子坡橘子大樹、回家紅屋頂小房子。 */
+export type LandmarkId = "ferris" | "orange-tree" | "house";
+
 /** 一段路（這一站的 0–1）。 */
 export type Span = { from: number; to: number };
 
@@ -67,6 +70,8 @@ export type Station = {
   approachLimit: number;
   passengers: readonly Passenger[];
   scene: SceneId;
+  /** 窗外的站點地標；駕駛台站名旁與結算站卡也放同一個小圖示。 */
+  landmark: LandmarkId;
   tunnel: Span | null;
   bridge: Span | null;
   /** 對向列車在這裡出發迎面擦身；null 表示這一站沒有。 */
