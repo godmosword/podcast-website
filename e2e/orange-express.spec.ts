@@ -970,3 +970,42 @@ test.describe("小橘特快車：低齡桿面與第一次進站示範", () => {
     await expect(page.getByTestId("orange-express-stopbar")).toHaveAttribute("data-coach", "none");
   });
 });
+
+test.describe("小橘特快車：停好時的開心小橘", () => {
+  test.use({ viewport: { width: 375, height: 553 } });
+
+  test("停在綠區、黃區都是開心臉；開過頭倒車是平常的臉；減少動態不放大", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.addInitScript(() => {
+      window.__orangeExpress = { driver: "big" };
+    });
+    await page.goto("/games/orange-express");
+    await startLevel(page, "自己開");
+    const train = page.getByTestId("orange-express-stop-train");
+
+    await jump(page, { progress: 0.5, speed: 0.3, brake: 2, freeze: true });
+    await expect(train).toHaveAttribute("data-mood", "calm");
+    await jump(page, { progress: 0.65, speed: 0, freeze: false });
+    await expect(train).toHaveAttribute("data-mood", "happy");
+    await expect(train.locator("svg")).toHaveAttribute("data-mood", "happy");
+    expect(await train.evaluate((el) => getComputedStyle(el).animationName)).toBe("none");
+
+    await page.getByRole("button", { name: "開門" }).click();
+    const close = page.getByRole("button", { name: "關門" });
+    await expect(close).not.toHaveAttribute("aria-disabled", "true");
+    await close.click();
+    await jump(page, { progress: 0.53, speed: 0 });
+    await expect(train).toHaveAttribute("data-mood", "happy");
+  });
+
+  test("開過頭倒車時是平常的臉", async ({ page }) => {
+    await page.addInitScript(() => {
+      window.__orangeExpress = { driver: "big" };
+    });
+    await page.goto("/games/orange-express");
+    await startLevel(page, "自己開");
+    await jump(page, { progress: 0.79, speed: 0.8 });
+    await expect(page.getByTestId("orange-express-drive")).toHaveAttribute("data-phase", "reversing");
+    await expect(page.getByTestId("orange-express-stop-train")).toHaveAttribute("data-mood", "calm");
+  });
+});

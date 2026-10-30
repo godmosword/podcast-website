@@ -13,6 +13,7 @@ import {
   powerWord,
 } from "@/lib/games/orange-express/copy";
 import { gaugeZone } from "@/lib/games/orange-express/gauge";
+import { xiaojuMood } from "@/lib/games/orange-express/mood";
 import { sliderKeyTarget } from "@/lib/games/orange-express/lever";
 import {
   brakeNotches,
@@ -369,7 +370,7 @@ export function OrangeExpressCab({
       {/* 站名、速度表、指示燈收在兩根桿中間那一格；不另佔一列，高度留給前窗。DOM 放最前，讀屏先聽到站名。 */}
       <div className={styles.dash}>
         <div className={styles.dashHead}>
-          <XiaojuFace className={styles.badge} />
+          <XiaojuFace className={styles.badge} mood={xiaojuMood(run)} />
           <p className={styles.stationName}>
             <span className={styles.stationLead}>
               {atStation ? COPY.atStation : COPY.nextStop}
