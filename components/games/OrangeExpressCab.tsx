@@ -19,6 +19,7 @@ import {
   brakeNotches,
   currentLimit,
   inTunnel,
+  landmarkTaskPending,
   onBridge,
   powerNotches,
   simpleLevers,
@@ -350,7 +351,8 @@ export function OrangeExpressCab({
   const atStation = run.phase === "stopped" || run.phase === "doors-open";
   const tunnel = inTunnel(run);
   const simple = simpleLevers(run.course);
-  const hornHint = onBridge(run) && !run.bridgeGreeted && run.phase === "running";
+  // 鐵橋上，或停好後還沒跟地標打招呼（大司機、小站長）：喇叭亮黃圈。
+  const hornHint = (onBridge(run) && !run.bridgeGreeted && run.phase === "running") || landmarkTaskPending(run);
   const flagLamp: LampState = run.autoBrake
     ? "orange"
     : run.speed <= 0.001

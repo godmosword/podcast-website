@@ -31,13 +31,15 @@ export type CourseRules = {
   pointing: boolean;
   /** 門還沒亮就按開門會少一顆星。低齡只在當下提醒，不扣星。 */
   earlyDoorCosts: boolean;
+  /** 停好後按喇叭跟這一站的地標打招呼（不影響星星，結算蓋地標章）。 */
+  landmarkGreet: boolean;
 };
 
 export const COURSE_RULES: Record<CourseId, CourseRules> = {
-  look: { signs: false, autoBrake: false, pointing: false, earlyDoorCosts: false },
-  little: { signs: false, autoBrake: false, pointing: false, earlyDoorCosts: false },
-  big: { signs: true, autoBrake: true, pointing: true, earlyDoorCosts: true },
-  captain: { signs: true, autoBrake: true, pointing: true, earlyDoorCosts: true },
+  look: { signs: false, autoBrake: false, pointing: false, earlyDoorCosts: false, landmarkGreet: false },
+  little: { signs: false, autoBrake: false, pointing: false, earlyDoorCosts: false, landmarkGreet: false },
+  big: { signs: true, autoBrake: true, pointing: true, earlyDoorCosts: true, landmarkGreet: true },
+  captain: { signs: true, autoBrake: true, pointing: true, earlyDoorCosts: true, landmarkGreet: true },
 };
 
 type WindowSpec = Pick<Station, "window" | "target" | "greenHalf" | "approachAt" | "approachLimit">;

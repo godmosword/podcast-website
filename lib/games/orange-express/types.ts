@@ -108,6 +108,8 @@ export type RunState = {
   /** 這一站在鐵橋上按過喇叭。 */
   bridgeGreeted: boolean;
   bridgeGreets: number;
+  /** 停好後按喇叭跟地標打過招呼的站（站號）。跟指差確認、鐵橋分開數。 */
+  landmarkGreets: readonly number[];
   /** 完成的指差確認 id。 */
   pointsDone: readonly string[];
 };

@@ -13,6 +13,7 @@ import {
   currentLimit,
   gradeFor,
   honk,
+  landmarkTaskPending,
   powerCap,
   powerNotches,
   predictStop,
@@ -336,5 +337,39 @@ describe("小橘特快車 step", () => {
     expect(parked.phase).toBe("stopped");
     expect(parked.power).toBe(3);
     expect(parked.brake).toBe(2);
+  });
+});
+
+describe("停好後跟地標打招呼（大司機、小站長）", () => {
+  it("開門等人時按喇叭記一筆，同一站只記一次；開車中、停好還沒開門時按不算", () => {
+    const big = createRun("drive", "big");
+    expect(landmarkTaskPending(withHook(big, { progress: 0.3, speed: 0.4 }))).toBe(false);
+    expect(honk(withHook(big, { progress: 0.3, speed: 0.4 })).landmarkGreets).toEqual([]);
+
+    const stopped = withHook(big, { progress: 0.65, speed: 0 });
+    expect(landmarkTaskPending(stopped)).toBe(false);
+    expect(honk(stopped).landmarkGreets).toEqual([]);
+    const open = step(stopped, { type: "open-doors" });
+    expect(landmarkTaskPending(open)).toBe(true);
+    const greeted = honk(open);
+    expect(greeted.landmarkGreets).toEqual([0]);
+    expect(landmarkTaskPending(greeted)).toBe(false);
+    expect(honk(greeted)).toBe(greeted);
+  });
+
+  it("慢慢看、小小司機沒有這個任務", () => {
+    for (const run of [createRun("look"), createRun("drive", "little")]) {
+      const open = step(withHook(run, { progress: 0.65, speed: 0 }), { type: "open-doors" });
+      expect(open.phase).toBe("doors-open");
+      expect(landmarkTaskPending(open)).toBe(false);
+      expect(honk(open).landmarkGreets).toEqual([]);
+    }
+  });
+
+  it("換站後記錄留著，結算看得到哪幾站打過招呼", () => {
+    const open = step(withHook(createRun("captain"), { progress: 0.65, speed: 0 }), { type: "open-doors" });
+    const next = withHook(honk(open), { stationIndex: 1, progress: 0.65, speed: 0 });
+    expect(next.landmarkGreets).toEqual([0]);
+    expect(honk(step(next, { type: "open-doors" })).landmarkGreets).toEqual([0, 1]);
   });
 });

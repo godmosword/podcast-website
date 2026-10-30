@@ -1,6 +1,14 @@
 /** 孩子看得到的句子。禁詞測試掃這一包，也掃遊戲原始碼。 */
 
-import type { BrakeNotch, DriverId, LevelId, PointKind, PowerNotch, StopGrade } from "@/lib/games/orange-express/types";
+import type {
+  BrakeNotch,
+  DriverId,
+  LandmarkId,
+  LevelId,
+  PointKind,
+  PowerNotch,
+  StopGrade,
+} from "@/lib/games/orange-express/types";
 
 export const COPY = {
   routeName: "橘色小線",
@@ -68,6 +76,7 @@ export const COPY = {
   bridge: "鐵橋！按喇叭打招呼",
   bridgeGreeted: "叭叭！跟鐵橋打招呼了",
   passing: "對向列車來了，揮揮手",
+  friendsAboard: "朋友上車了",
   point: "指差確認",
   pointDone: "確認好了",
 } as const;
@@ -87,6 +96,13 @@ export const DRIVER_NAME: Record<DriverId, string> = {
 export const DRIVER_HINT: Record<DriverId, string> = {
   little: "3–4 歲：桿子自動限速，只學開和停",
   big: "5–7 歲：速限牌、停準拿星星、指差確認",
+};
+
+/** 停好後跟地標打招呼（大司機、小站長）：朗讀與讀屏說這句，喇叭亮黃圈。 */
+export const LANDMARK_GREET: Record<LandmarkId, string> = {
+  ferris: "按喇叭，跟摩天輪打招呼",
+  "orange-tree": "按喇叭，跟橘子樹打招呼",
+  house: "按喇叭，跟小房子打招呼",
 };
 
 /** 指差確認圓鈕下面的小標：要確認的那樣東西。整句由朗讀與讀屏說。 */
@@ -116,6 +132,11 @@ export function pointsResultText(done: number): string {
 
 export function bridgeResultText(count: number): string {
   return `鐵橋打招呼 ${count} 次`;
+}
+
+/** 有打才顯示，跟鐵橋那顆一樣只加不減；讀屏也讀得到地標章。 */
+export function landmarkResultText(count: number): string {
+  return `跟地標打招呼 ${count} 站`;
 }
 
 /**

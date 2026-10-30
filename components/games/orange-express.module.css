@@ -373,6 +373,97 @@
   animation: none;
 }
 
+/*
+ * 朋友上車的愛心泡泡：乘客卡滑完（600ms）才冒出來，停約一秒再淡掉，不跟滑動同時動。
+ * 減少動態：直接出現、直接消失，不彈跳。
+ */
+.riderHeart {
+  position: absolute;
+  top: -12px;
+  right: -8px;
+  width: 22px;
+  height: 22px;
+  opacity: 0;
+  pointer-events: none;
+  animation: riderHeart 1.2s 640ms ease-out both;
+}
+
+.riders .riderHeart svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes riderHeart {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.6);
+  }
+
+  20%,
+  80% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-6px) scale(1);
+  }
+}
+
+@keyframes riderHeartStill {
+  0%,
+  99% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+.screen[data-reduced="true"] .riderHeart {
+  animation-name: riderHeartStill;
+  animation-timing-function: step-end;
+}
+
+/*
+ * 結算的地標章只加不減：沒打招呼的地標照常上色（孩子還要靠它認站名，第一次玩多半三站都沒打）；
+ * 打過的墊一個黃色圓章、出現時「蓋」一下。減少動態時直接出現。
+ */
+.resultLandmark[data-stamped="true"] {
+  box-sizing: content-box;
+  padding: 3px;
+  margin-block: -3px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--c-yellow) 75%, var(--card));
+  box-shadow: 0 0 0 2px var(--ink);
+  animation: landmarkStamp 360ms 500ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes landmarkStamp {
+  from {
+    transform: scale(1.5) rotate(-12deg);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1) rotate(0);
+    opacity: 1;
+  }
+}
+
+.result[data-reduced="true"] .resultLandmark[data-stamped="true"] {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .resultLandmark[data-stamped="true"] {
+    animation: none;
+  }
+}
+
 /* ── 前窗提示與指差確認 ─────────────────────────────── */
 
 .notice {
@@ -1658,6 +1749,11 @@
     animation: none;
   }
 
+  .riderHeart {
+    animation-name: riderHeartStill;
+    animation-timing-function: step-end;
+  }
+
   .leverHandle,
   .needle {
     transition: none;
@@ -1784,6 +1880,13 @@
   .riderSeat {
     width: 32px;
     height: 32px;
+  }
+
+  .riderHeart {
+    top: -6px;
+    right: -6px;
+    width: 18px;
+    height: 18px;
   }
 
   .riders li > span:last-child {

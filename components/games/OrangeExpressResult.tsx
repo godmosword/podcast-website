@@ -8,7 +8,7 @@ import { IconTrain } from "@/components/games/ClayIcons";
 import { DoorIcon, StopIcon } from "@/components/games/OrangeExpressCab";
 import { LandmarkGlyph, XiaojuFace } from "@/components/games/OrangeExpressGlyphs";
 import { XIAOJU_STICKER_SRC } from "@/lib/games/orange-express/art";
-import { COPY, GRADE_WORD, bridgeResultText, pointsResultText } from "@/lib/games/orange-express/copy";
+import { COPY, GRADE_WORD, bridgeResultText, landmarkResultText, pointsResultText } from "@/lib/games/orange-express/copy";
 import type { StarMissReason } from "@/lib/games/orange-express/medals";
 import type { Station, StopGrade } from "@/lib/games/orange-express/types";
 import { getNextGame } from "@/data/games";
@@ -32,6 +32,8 @@ export function OrangeExpressResult({
   grades,
   pointsDone,
   bridgeGreets,
+  landmarkGreets,
+  landmarkTask,
   onReplay,
   onTitle,
 }: {
@@ -42,12 +44,16 @@ export function OrangeExpressResult({
   grades: readonly StopGrade[];
   pointsDone: number;
   bridgeGreets: number;
+  /** 停好後跟地標打過招呼的站（站號）。 */
+  landmarkGreets: readonly number[];
+  /** 這一組有沒有跟地標打招呼的任務（大司機、小站長）；沒有就不蓋章，地標照常上色。 */
+  landmarkTask: boolean;
   onReplay: () => void;
   onTitle: () => void;
 }) {
   const next = getNextGame("orange-express");
   return (
-    <div className={styles.result} data-testid="orange-express-result">
+    <div className={styles.result} data-testid="orange-express-result" data-reduced={reduced ? "true" : "false"}>
       {/* 到家的小橘（B10）：貼紙生好前用向量小橘臉。 */}
       <span className={styles.resultXiaoju} data-testid="orange-express-result-xiaoju" aria-hidden>
         {XIAOJU_STICKER_SRC ? (
@@ -68,17 +74,22 @@ export function OrangeExpressResult({
           return (
             <li key={station.id} data-grade={grade}>
               <span className={styles.gradeSwatch} data-grade={grade} aria-hidden />
-              <LandmarkGlyph id={station.landmark} className={styles.resultLandmark} />
+              <LandmarkGlyph
+                id={station.landmark}
+                className={styles.resultLandmark}
+                stamped={landmarkTask ? landmarkGreets.includes(index) : undefined}
+              />
               <span className={styles.stationGradeName}>{station.name}</span>
               <span className={styles.gradeWord}>{GRADE_WORD[grade]}</span>
             </li>
           );
         })}
       </ol>
-      {pointsDone > 0 || bridgeGreets > 0 ? (
+      {pointsDone > 0 || bridgeGreets > 0 || landmarkGreets.length > 0 ? (
         <ul className={styles.extras} data-testid="orange-express-extras">
           {pointsDone > 0 ? <li>{pointsResultText(pointsDone)}</li> : null}
           {bridgeGreets > 0 ? <li>{bridgeResultText(bridgeGreets)}</li> : null}
+          {landmarkGreets.length > 0 ? <li>{landmarkResultText(landmarkGreets.length)}</li> : null}
         </ul>
       ) : null}
       <div className={styles.resultActions}>

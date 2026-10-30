@@ -1,6 +1,13 @@
-import { COPY, POINT_CALL, signWord } from "@/lib/games/orange-express/copy";
+import { COPY, LANDMARK_GREET, POINT_CALL, signWord } from "@/lib/games/orange-express/copy";
 import { kmh } from "@/lib/games/orange-express/gauge";
-import { currentStation, inTunnel, nextSign, onBridge, pendingPoint } from "@/lib/games/orange-express/reducer";
+import {
+  currentStation,
+  inTunnel,
+  landmarkTaskPending,
+  nextSign,
+  onBridge,
+  pendingPoint,
+} from "@/lib/games/orange-express/reducer";
 import { stopBarFor } from "@/lib/games/orange-express/stop-target";
 import { signBars } from "@/lib/games/orange-express/windshield";
 import type { RunState } from "@/lib/games/orange-express/types";
@@ -89,6 +96,10 @@ export function speechCandidates(state: RunState, numbers: boolean, options: Spe
   const task = pendingPoint(state);
   if (task && !(options.skipPlatform && task.kind === "platform")) {
     out.push({ key: `${station}:point:${task.id}`, text: POINT_CALL[task.kind] });
+  }
+  // 停好後跟地標打招呼（大司機、小站長）：排在指差確認後面。
+  if (landmarkTaskPending(state)) {
+    out.push({ key: `${station}:landmark`, text: LANDMARK_GREET[currentStation(state).landmark] });
   }
   const notice = windowNotice(state, numbers);
   if (!notice || notice.kind === "greeted") return out;
