@@ -12,7 +12,12 @@ import {
   portalVisible,
   signBars,
   signCells,
+  LANDMARK_AHEAD,
+  landmarkBox,
+  postScreenBox,
   stopPostWorld,
+  treeVisible,
+  viewFor,
   windshieldFrame,
 } from "@/lib/games/orange-express/windshield";
 import { PLATFORM_TASK_LEAD, SIGNAL_UNTIL, stationsFor } from "@/lib/games/orange-express/routes";
@@ -258,3 +263,74 @@ function recordStrokes(): { ctx: CanvasRenderingContext2D; events: string[] } {
   ) as unknown as CanvasRenderingContext2D;
   return { ctx, events };
 }
+
+describe("前窗：路旁樹叢的禁區", () => {
+  const base = { targetWorld: 0.65 * STATION_WORLD, scene: "field" as const, tunnel: null, bridge: null };
+
+  it("太近不畫（高速時大樹不會一閃一閃）、太遠不畫", () => {
+    expect(treeVisible({ ...base, side: 1, world: 100, z: 6 })).toBe(false);
+    expect(treeVisible({ ...base, side: -1, world: 100, z: 40 })).toBe(true);
+    expect(treeVisible({ ...base, side: -1, world: 100, z: 400 })).toBe(false);
+  });
+
+  it("月台那一段左邊不畫；右下指差確認鈕那塊（右邊太近）不畫", () => {
+    expect(treeVisible({ ...base, side: -1, world: base.targetWorld - 20, z: 40 })).toBe(false);
+    expect(treeVisible({ ...base, side: 1, world: 100, z: 40 })).toBe(true);
+    expect(treeVisible({ ...base, side: 1, world: 100, z: 14 })).toBe(false);
+    // 地標那一側：站前一整段都不生樹，進站時遠遠就看得到地標。
+    expect(treeVisible({ ...base, side: 1, world: base.targetWorld - 120, z: 40 })).toBe(false);
+  });
+
+  it("城市有房子、海邊右邊是海、隧道與鐵橋那段都不畫", () => {
+    expect(treeVisible({ ...base, scene: "city", side: -1, world: 100, z: 40 })).toBe(false);
+    expect(treeVisible({ ...base, scene: "sea", side: 1, world: 100, z: 40 })).toBe(false);
+    expect(treeVisible({ ...base, scene: "sea", side: -1, world: 100, z: 40 })).toBe(true);
+    expect(treeVisible({ ...base, tunnel: { from: 0.1, to: 0.18 }, side: -1, world: 80, z: 40 })).toBe(false);
+    expect(treeVisible({ ...base, bridge: { from: 0.1, to: 0.19 }, side: 1, world: 80, z: 40 })).toBe(false);
+  });
+});
+
+describe("前窗：站點地標", () => {
+  const W = 390;
+  const H = 330;
+  const target = 0.65;
+  const targetWorld = target * STATION_WORLD;
+
+  it("每站一個地標：遊樂園摩天輪、橘子坡橘子大樹、回家紅屋頂小房子", () => {
+    expect(stationsFor("drive", "big").map((s) => s.landmark)).toEqual(["ferris", "orange-tree", "house"]);
+    expect(stationsFor("look").map((s) => s.landmark)).toEqual(["house"]);
+  });
+
+  it("停好時地標在月台另一側（右邊）、提示條下面、指差確認鈕上面，約前窗六分之一寬", () => {
+    const view = viewFor(W, H);
+    const box = landmarkBox(view, targetWorld, targetWorld, "field", "ferris")!;
+    expect(box.left).toBeGreaterThan(W / 2);
+    expect(box.right).toBeLessThanOrEqual(W);
+    expect(box.top).toBeGreaterThan(50);
+    expect(box.bottom).toBeLessThan(H - 16 - 56);
+    expect(box.right - box.left).toBeGreaterThan(W / 8);
+    expect(box.right - box.left).toBeLessThan(W / 4);
+  });
+
+  it("回家站右邊是海：小房子放左邊陸地上，不疊到停車柱", () => {
+    const view = viewFor(W, H);
+    const box = landmarkBox(view, targetWorld, targetWorld, "sea", "house")!;
+    expect(box.right).toBeLessThan(W / 2);
+    const post = postScreenBox(view, targetWorld, target);
+    expect(box.right).toBeLessThan(post.left);
+  });
+
+  it("地標比停車點遠，一出發在地平線上就小小地看得到；開過了就不畫", () => {
+    const view = viewFor(W, H);
+    const far = landmarkBox(view, 20, targetWorld, "field", "ferris")!;
+    expect(far.right - far.left).toBeGreaterThan(0);
+    expect(far.right - far.left).toBeLessThan(20);
+    expect(landmarkBox(view, targetWorld + LANDMARK_AHEAD, targetWorld, "field", "ferris")).toBeNull();
+  });
+
+  it("地標那一帶不畫路旁樹（海邊是左邊）", () => {
+    const base = { targetWorld, tunnel: null, bridge: null, z: 40 };
+    expect(treeVisible({ ...base, scene: "field", side: 1, world: targetWorld + LANDMARK_AHEAD })).toBe(false);
+    expect(treeVisible({ ...base, scene: "sea", side: -1, world: targetWorld + LANDMARK_AHEAD })).toBe(false);
+  });
+});

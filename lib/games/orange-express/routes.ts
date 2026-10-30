@@ -1,6 +1,7 @@
 import type {
   CourseId,
   DriverId,
+  LandmarkId,
   LevelId,
   Passenger,
   PointTask,
@@ -78,6 +79,7 @@ const WINDOWS: Record<CourseId, WindowSpec> = {
 
 type Scenery = {
   scene: SceneId;
+  landmark: LandmarkId;
   tunnel: Span | null;
   bridge: Span | null;
   passAt: number | null;
@@ -89,6 +91,7 @@ type Scenery = {
 const SCENERY: Record<Station["id"], Scenery> = {
   "orange-park": {
     scene: "field",
+    landmark: "ferris",
     tunnel: { from: 0.1, to: 0.18 },
     bridge: null,
     passAt: null,
@@ -99,6 +102,7 @@ const SCENERY: Record<Station["id"], Scenery> = {
   },
   "orange-slope": {
     scene: "city",
+    landmark: "orange-tree",
     tunnel: null,
     bridge: { from: 0.1, to: 0.19 },
     passAt: 0.02,
@@ -109,6 +113,7 @@ const SCENERY: Record<Station["id"], Scenery> = {
   },
   "orange-home": {
     scene: "sea",
+    landmark: "house",
     tunnel: null,
     bridge: { from: 0.11, to: 0.2 },
     passAt: 0.03,
@@ -158,6 +163,7 @@ function station(
     passengers,
     ...spec,
     scene: scenery.scene,
+    landmark: scenery.landmark,
     tunnel: scenery.tunnel,
     bridge: scenery.bridge,
     passAt: scenery.passAt,

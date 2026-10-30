@@ -731,8 +731,29 @@
 }
 
 .stationLead {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font-size: var(--fs-meta);
   color: var(--ink-soft);
+}
+
+/*
+ * 下一站的地標小圖示：跟前窗裡的地標同一個東西。矮手機收起徽章時不跟著收。
+ * 上下負邊距讓它不把「下一站」那行撐高：矮手機的中間格多 1px 就會讓整頁捲動。
+ */
+.stationLandmark {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  margin-block: -6px;
+}
+
+.resultLandmark {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+  margin-inline-start: 2px;
 }
 
 .stationPlate {

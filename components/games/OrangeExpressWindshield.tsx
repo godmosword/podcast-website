@@ -148,6 +148,7 @@ export function OrangeExpressWindshield({
         bridge: here.bridge,
         signs: here.signs,
         passing: run.passing,
+        landmark: here.landmark,
       });
     };
     draw();

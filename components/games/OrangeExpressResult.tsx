@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import { ResultStars } from "@/components/games/ResultStars";
 import { IconTrain } from "@/components/games/ClayIcons";
 import { DoorIcon, StopIcon } from "@/components/games/OrangeExpressCab";
-import { XiaojuFace } from "@/components/games/OrangeExpressGlyphs";
+import { LandmarkGlyph, XiaojuFace } from "@/components/games/OrangeExpressGlyphs";
 import { XIAOJU_STICKER_SRC } from "@/lib/games/orange-express/art";
 import { COPY, GRADE_WORD, bridgeResultText, pointsResultText } from "@/lib/games/orange-express/copy";
 import type { StarMissReason } from "@/lib/games/orange-express/medals";
@@ -68,6 +68,7 @@ export function OrangeExpressResult({
           return (
             <li key={station.id} data-grade={grade}>
               <span className={styles.gradeSwatch} data-grade={grade} aria-hidden />
+              <LandmarkGlyph id={station.landmark} className={styles.resultLandmark} />
               <span className={styles.stationGradeName}>{station.name}</span>
               <span className={styles.gradeWord}>{GRADE_WORD[grade]}</span>
             </li>
