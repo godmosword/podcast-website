@@ -38,16 +38,17 @@ export const COPY = {
   stopTarget: "停車目標",
   predicted: "會停在這裡",
   stopWord: "停",
-  /** 動力推到底：車只是滑行，不能寫「停」，不然孩子以為不用拉煞車。 */
-  coastWord: "不推",
   slowWord: "慢",
   fastWord: "快",
+  /** 兩根桿歸零都叫「鬆」：是狀態不是命令。動力歸零車只是滑行，不能寫「停」；「不推」讀起來像「不要推」。 */
   looseWord: "鬆",
   lightWord: "輕",
   emergencyWord: "緊急",
   starHint: "停在綠色區",
   overrunHint: "不要開過頭",
   earlyDoorHint: "門亮了再按",
+  /** 第一次進站示範：前半同怎麼玩的「右邊拉，車會停」，後半同停車目標條的「停在綠區」。 */
+  coachBrake: "右邊拉，停在綠區",
   nextGame: "接著玩",
   lampFlag: "速度旗",
   lampDoor: "門",
@@ -132,8 +133,14 @@ export const GRADE_WORD: Record<StopGrade, string> = {
   yellow: "停到了",
 };
 
-export function powerWord(notch: PowerNotch): string {
-  if (notch === 0) return COPY.coastWord;
+/** 低齡桿面的三格照位置寫：鬆、慢、快（慢慢看是 P0–P2，小小司機是 P0／P2／P4）。 */
+const SIMPLE_POWER_WORDS = [COPY.looseWord, COPY.slowWord, COPY.fastWord] as const;
+
+/** simple：低齡桿面這一組的格子；有給就照位置寫字。 */
+export function powerWord(notch: PowerNotch, simple?: readonly PowerNotch[]): string {
+  const at = simple ? simple.indexOf(notch) : -1;
+  if (at >= 0) return SIMPLE_POWER_WORDS[Math.min(at, SIMPLE_POWER_WORDS.length - 1)]!;
+  if (notch === 0) return COPY.looseWord;
   return notch <= 2 ? COPY.slowWord : COPY.fastWord;
 }
 
@@ -143,19 +150,21 @@ export function brakeWord(notch: BrakeNotch): string {
   return notch <= 2 ? COPY.lightWord : COPY.stopWord;
 }
 
-/** 燈上的小字：P1…P4、B1…B4、緊急。 */
-export function powerLampLabel(notch: PowerNotch): string {
-  return notch === 0 ? "P0" : `P${notch}`;
+/** 燈上的小字：P1…P4、B1…B4、緊急。低齡桿面寫字，不寫代碼。 */
+export function powerLampLabel(notch: PowerNotch, simple?: readonly PowerNotch[]): string {
+  if (simple) return powerWord(notch, simple);
+  return `P${notch}`;
 }
 
-/** simple：慢慢看只有鬆、停、緊急三格，格上直接寫字，不寫 B3。 */
+/** simple：低齡只有鬆、停、緊急三格，格上直接寫字，不寫 B3。 */
 export function brakeLampLabel(notch: BrakeNotch, simple = false): string {
   if (notch === 5) return COPY.emergencyWord;
   if (simple) return brakeWord(notch);
   return `B${notch}`;
 }
 
-export function powerValueText(notch: PowerNotch): string {
+export function powerValueText(notch: PowerNotch, simple?: readonly PowerNotch[]): string {
+  if (simple) return `${COPY.power}，${powerWord(notch, simple)}`;
   return `${COPY.power} ${powerLampLabel(notch)}，${powerWord(notch)}`;
 }
 

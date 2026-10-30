@@ -130,6 +130,8 @@ export type OrangeExpressHook = {
   freeze?: boolean;
   /** 只在開局時讀：蓋過家長設定的司機。 */
   driver?: DriverId;
+  /** 只在開局時讀：掛鉤在時預設不做第一次進站示範（測試與基準要穩定），寫 true 才做。 */
+  coach?: boolean;
 };
 
 export const LEVEL_INDEX: Record<LevelId, number> = {

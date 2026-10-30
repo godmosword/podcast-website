@@ -4,6 +4,7 @@ import {
   EMERGENCY,
   POWER_MAX,
   type BrakeNotch,
+  type CourseId,
   type DriverId,
   type LevelId,
   type OrangeExpressHook,
@@ -48,15 +49,47 @@ function quant(n: number): number {
   return Math.round(n * 1e6) / 1e6;
 }
 
-export function powerCap(level: LevelId): PowerNotch {
-  return level === "look" ? 2 : POWER_MAX;
+const POWER_ALL: readonly PowerNotch[] = [0, 1, 2, 3, 4];
+/** 慢慢看：P0–P2，小橘幫忙停，只開得到慢慢的。 */
+const LOOK_POWERS: readonly PowerNotch[] = [0, 1, 2];
+/** 小小司機：鬆、慢、快三格（P0／P2／P4）。最快仍被速度旗壓住，只是起步沒有 P1 那麼慢。 */
+const LITTLE_POWERS: readonly PowerNotch[] = [0, 2, POWER_MAX];
+
+/** 動力桿上排的格，跟規則組走（小小司機與大司機都是「自己開」，桿面不一樣）。 */
+export function powerNotches(course: CourseId): readonly PowerNotch[] {
+  if (course === "look") return LOOK_POWERS;
+  if (course === "little") return LITTLE_POWERS;
+  return POWER_ALL;
 }
 
-const POWER_ALL: readonly PowerNotch[] = [0, 1, 2, 3, 4];
+export function powerCap(course: CourseId): PowerNotch {
+  const notches = powerNotches(course);
+  return notches[notches.length - 1]!;
+}
 
-/** 動力桿上排的格：0 到這一檔的上限。 */
-export function powerNotches(level: LevelId): readonly PowerNotch[] {
-  return POWER_ALL.slice(0, powerCap(level) + 1);
+/** 低齡桿面（慢慢看、小小司機）：兩根桿各三格，格上畫圖示、寫字，不寫 P／B 代碼。 */
+export function simpleLevers(course: CourseId): boolean {
+  return course === "look" || course === "little";
+}
+
+/** 吸到最近的一格；等距時取小的（小小司機的 P1 吸到「鬆」、P3 吸到「慢」，不會一推就最快）。 */
+function snapTo<T extends number>(notches: readonly T[], raw: number): T {
+  let best = notches[0]!;
+  for (const notch of notches) {
+    if (Math.abs(notch - raw) < Math.abs(best - raw)) best = notch;
+  }
+  return best;
+}
+
+export function snapPower(course: CourseId, n: number): PowerNotch {
+  return snapTo(powerNotches(course), clampPower(n));
+}
+
+/** 鍵盤 ↑↓ 照這一組有的格子走一格；dir 1 是多推一格。 */
+export function stepPower(course: CourseId, from: number, dir: 1 | -1): PowerNotch {
+  const notches = powerNotches(course);
+  const index = notches.indexOf(snapPower(course, from));
+  return notches[Math.min(notches.length - 1, Math.max(0, index + dir))]!;
 }
 
 export function clampPower(n: number, max: PowerNotch = POWER_MAX): PowerNotch {
@@ -75,29 +108,23 @@ export function clampBrake(n: number): BrakeNotch {
   return next as BrakeNotch;
 }
 
-/** 慢慢看的煞車桿只排三格：鬆、停（B3）、緊急。其他檔六格都在。 */
-const LOOK_BRAKES: readonly BrakeNotch[] = [0, 3, EMERGENCY];
+/** 低齡的煞車桿只排三格：鬆、停（B3）、緊急。大司機與小站長六格都在。 */
+const SIMPLE_BRAKES: readonly BrakeNotch[] = [0, 3, EMERGENCY];
 const ALL_BRAKES: readonly BrakeNotch[] = [0, 1, 2, 3, 4, EMERGENCY];
 
-export function brakeNotches(level: LevelId): readonly BrakeNotch[] {
-  return level === "look" ? LOOK_BRAKES : ALL_BRAKES;
+export function brakeNotches(course: CourseId): readonly BrakeNotch[] {
+  return simpleLevers(course) ? SIMPLE_BRAKES : ALL_BRAKES;
 }
 
-/** 吸到這一檔有的最近一格；等距時取小的（慢慢看的 B4 吸到「停」，不會誤拉緊急）。 */
-export function snapBrake(level: LevelId, n: number): BrakeNotch {
-  const raw = clampBrake(n);
-  const notches = brakeNotches(level);
-  let best = notches[0]!;
-  for (const notch of notches) {
-    if (Math.abs(notch - raw) < Math.abs(best - raw)) best = notch;
-  }
-  return best;
+/** 吸到這一組有的最近一格；等距時取小的（低齡的 B4 吸到「停」，不會誤拉緊急）。 */
+export function snapBrake(course: CourseId, n: number): BrakeNotch {
+  return snapTo(brakeNotches(course), clampBrake(n));
 }
 
-/** 鍵盤 ←→ 照這一檔有的格子走一格；dir 1 是多拉一格煞車。 */
-export function stepBrake(level: LevelId, from: number, dir: 1 | -1): BrakeNotch {
-  const notches = brakeNotches(level);
-  const index = notches.indexOf(snapBrake(level, from));
+/** 鍵盤 ←→ 照這一組有的格子走一格；dir 1 是多拉一格煞車。 */
+export function stepBrake(course: CourseId, from: number, dir: 1 | -1): BrakeNotch {
+  const notches = brakeNotches(course);
+  const index = notches.indexOf(snapBrake(course, from));
   return notches[Math.min(notches.length - 1, Math.max(0, index + dir))]!;
 }
 
@@ -278,8 +305,8 @@ export function withHook(state: RunState, hook: OrangeExpressHook | null | undef
   const progress = quant(Math.min(1, Math.max(0, finiteOr(hook.progress, state.progress))));
   const speed = quant(Math.max(0, finiteOr(hook.speed, state.speed)));
   const misses = Math.max(0, Math.floor(finiteOr(hook.misses, state.misses)));
-  const power = clampPower(finiteOr(hook.power, state.power), powerCap(state.level));
-  const brake = snapBrake(state.level, finiteOr(hook.brake, state.brake));
+  const power = snapPower(state.course, finiteOr(hook.power, state.power));
+  const brake = snapBrake(state.course, finiteOr(hook.brake, state.brake));
   const sameStation = stationIndex === state.stationIndex;
   const grades = sameStation ? state.grades : state.grades.slice(0, stationIndex);
   const passing =
@@ -411,7 +438,7 @@ function unchanged(state: RunState, next: RunState): boolean {
 
 export function step(state: RunState, action: RunAction): RunState {
   if (action.type === "set-power") {
-    const notch = clampPower(action.notch, powerCap(state.level));
+    const notch = snapPower(state.course, action.notch);
     if (notch === state.power) return state;
     if (state.phase === "route-done" || state.phase === "reversing") return state;
     if (state.phase === "doors-open" && notch > state.power) return state;
@@ -419,7 +446,7 @@ export function step(state: RunState, action: RunAction): RunState {
   }
 
   if (action.type === "set-brake") {
-    const notch = snapBrake(state.level, action.notch);
+    const notch = snapBrake(state.course, action.notch);
     if (notch === state.brake || state.phase === "route-done") return state;
     return { ...state, brake: notch };
   }

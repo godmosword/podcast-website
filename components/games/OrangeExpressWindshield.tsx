@@ -5,6 +5,7 @@ import { DoorIcon } from "@/components/games/OrangeExpressCab";
 import { NoticeGlyph } from "@/components/games/OrangeExpressGlyphs";
 import { OrangeExpressStopBar } from "@/components/games/OrangeExpressStopBar";
 import { COPY, POINT_CALL, POINT_WHAT } from "@/lib/games/orange-express/copy";
+import type { CoachBeat } from "@/lib/games/orange-express/coach";
 import { noticeWithDoorHint } from "@/lib/games/orange-express/notice";
 import { currentStation, pendingPoint } from "@/lib/games/orange-express/reducer";
 import { drawWindshield, windshieldFrame } from "@/lib/games/orange-express/windshield";
@@ -93,6 +94,7 @@ export function OrangeExpressWindshield({
   numbers,
   swayRef,
   doorHint,
+  coach,
   onPoint,
 }: {
   run: RunState;
@@ -101,6 +103,8 @@ export function OrangeExpressWindshield({
   swayRef: Ref<HTMLDivElement>;
   /** 門還沒亮就按了：右上（或停車目標條）說「門亮了再按」。 */
   doorHint: boolean;
+  /** 第一次進站示範的這一拍；示範那一站不出月台指差確認題。 */
+  coach: { beat: CoachBeat; on: boolean };
   onPoint: () => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -110,7 +114,8 @@ export function OrangeExpressWindshield({
   const target = here.target;
   const showRiders = frame === 2 && station != null;
   const notice = noticeWithDoorHint(run, numbers, doorHint);
-  const task = pendingPoint(run);
+  const pending = pendingPoint(run);
+  const task = coach.on && pending?.kind === "platform" ? null : pending;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -163,7 +168,7 @@ export function OrangeExpressWindshield({
       </div>
       <span className={styles.pillarLeft} aria-hidden />
       <span className={styles.pillarRight} aria-hidden />
-      <OrangeExpressStopBar run={run} numbers={numbers} hint={doorHint ? COPY.earlyDoorHint : null} />
+      <OrangeExpressStopBar run={run} numbers={numbers} hint={doorHint ? COPY.earlyDoorHint : null} coach={coach.beat} />
       {notice && !showRiders ? (
         <p className={styles.notice} data-kind={notice.kind} data-testid="orange-express-notice">
           {notice.kind === "door" ? (

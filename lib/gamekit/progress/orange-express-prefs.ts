@@ -8,6 +8,7 @@ import {
   resolveOrangeExpressDriver,
   resolveOrangeExpressLevel,
 } from "@/lib/games/orange-express/level";
+import { EMPTY_COACH, normalizeOrangeExpressCoach, type CoachRecord } from "@/lib/games/orange-express/coach-record";
 import type { DriverId, LevelId } from "@/lib/games/orange-express/types";
 
 export {
@@ -79,4 +80,23 @@ export function saveOrangeExpressDisplay(patch: Partial<OrangeExpressDisplay>): 
   }
   window.dispatchEvent(new CustomEvent(ORANGE_EXPRESS_DISPLAY_EVENT, { detail: next }));
   return next;
+}
+
+/** 第一次進站的停車示範：讀不到（私密瀏覽、存檔壞掉）就當沒看過，只影響示範，不影響其他設定。 */
+export function loadOrangeExpressCoach(): CoachRecord {
+  if (typeof window === "undefined") return { ...EMPTY_COACH };
+  try {
+    return normalizeOrangeExpressCoach(getGameKitSettingsFromStore().orangeExpressCoach);
+  } catch {
+    return { ...EMPTY_COACH };
+  }
+}
+
+export function saveOrangeExpressCoach(record: CoachRecord): void {
+  if (typeof window === "undefined") return;
+  try {
+    saveGameKitSettingsToStore({ orangeExpressCoach: normalizeOrangeExpressCoach(record) });
+  } catch {
+    // 存不進去時，下次開新頁會再示範一次。
+  }
 }

@@ -1,10 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   ORANGE_EXPRESS_DISPLAY_EVENT,
+  loadOrangeExpressCoach,
   loadOrangeExpressDisplay,
   loadOrangeExpressLevel,
   resolveOrangeExpressDriver,
   resolveOrangeExpressLevel,
+  saveOrangeExpressCoach,
   saveOrangeExpressDisplay,
   saveOrangeExpressLevel,
 } from "@/lib/gamekit/progress/orange-express-prefs";
@@ -102,6 +104,15 @@ describe("小橘特快車難度偏好", () => {
     expect(getGameKitSettingsFromStore().orangeExpressLevel).toBe("drive");
     expect(getGameKitSettingsFromStore().candyMatchMode).toBe("easy");
     expect(loadOrangeExpressDisplay().sway).toBe(true);
+  });
+
+  it("進站示範：舊存檔沒有＝沒看過；存了讀得回來，不動其他設定", () => {
+    saveGameKitSettingsToStore({ candyMatchMode: "easy", orangeExpressLevel: "drive" });
+    expect(loadOrangeExpressCoach()).toEqual({ littleRuns: 0, littleLearned: false, bigLearned: false });
+    saveOrangeExpressCoach({ littleRuns: 2, littleLearned: false, bigLearned: true });
+    expect(loadOrangeExpressCoach()).toEqual({ littleRuns: 2, littleLearned: false, bigLearned: true });
+    expect(getGameKitSettingsFromStore().orangeExpressLevel).toBe("drive");
+    expect(getGameKitSettingsFromStore().candyMatchMode).toBe("easy");
   });
 
   it("司機欄位亂掉時回到未設定", () => {

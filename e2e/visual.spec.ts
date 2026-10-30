@@ -678,6 +678,31 @@ for (const shot of ORANGE_DRIVE_SHOTS) {
   }
 }
 
+/** 低齡桿面（小小司機）：兩根桿各三格、圖示加常駐底色、中間格只留兩盞燈；矮手機的前窗要變高。 */
+for (const size of [PHONE, PHONE_NIGHT, [375, 553, "light"] as const]) {
+  const [width, height, theme] = size;
+  test(`visual：小橘特快車小小司機 ${width}×${height} ${theme}（定格）`, async ({ page }) => {
+    await openOrangeExpress(page, size, { driver: "little" });
+    await startOrangeExpress(page, "自己開");
+    await jumpOrangeExpress(page, { progress: 0.2, speed: 0.4, power: 2 });
+    await settleOrangeExpress(page);
+    await expect(page).toHaveScreenshot(`orange-express-little-${width}x${height}-${theme}.png`, orangeShot(theme));
+  });
+}
+
+/** 第一次進站示範的第二拍：停車目標條外圈亮、字換成「右邊拉，停在綠區」、「停」那格亮外框（截圖停掉動畫）。 */
+for (const size of [PHONE, [375, 553, "light"] as const]) {
+  const [width, height, theme] = size;
+  test(`visual：小橘特快車小小司機進站示範 ${width}×${height} ${theme}（定格）`, async ({ page }) => {
+    await openOrangeExpress(page, size, { driver: "little", coach: true });
+    await startOrangeExpress(page, "自己開");
+    await jumpOrangeExpress(page, { progress: 0.4, speed: 0.45 });
+    await expect(page.getByTestId("orange-express-stopbar")).toHaveAttribute("data-coach", "brake");
+    await settleOrangeExpress(page);
+    await expect(page).toHaveScreenshot(`orange-express-coach-${width}x${height}-${theme}.png`, orangeShot(theme));
+  });
+}
+
 test("visual：小橘特快車隧道 390 light（減少動態）", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await openOrangeExpress(page, PHONE);
