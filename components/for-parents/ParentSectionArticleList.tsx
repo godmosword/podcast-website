@@ -1,10 +1,12 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { ParentArticle } from "@/data/parent-articles";
 import { formatParentArticleDate } from "@/lib/parent-articles";
 import styles from "./ParentSectionPage.module.css";
 
-/** 親子出國列表。沿用這一區的欄寬與字級，不套育兒文章的封面／系列版面。 */
+/**
+ * 親子出國列表。沿用這一區的欄寬與字級，不套育兒文章的封面／系列版面。
+ * 列表卡片不顯示首圖（2026-10-30）；直式首圖只留在單篇文章頁。
+ */
 export function ParentSectionArticleList({
   articles,
   hrefFor,
@@ -18,16 +20,6 @@ export function ParentSectionArticleList({
       {articles.map((article) => (
         <li key={article.slug}>
           <Link className={styles.card} href={hrefFor(article.slug)}>
-            {article.coverImage ? (
-              <span className={styles.cardCover}>
-                <Image
-                  src={article.coverImage}
-                  alt={article.coverAlt ?? ""}
-                  fill
-                  sizes="(max-width: 720px) 100vw, 640px"
-                />
-              </span>
-            ) : null}
             <h2 className={styles.cardTitle}>{article.title}</h2>
             <time className={styles.cardDate} dateTime={article.publishedAt}>
               {formatParentArticleDate(article.publishedAt)}

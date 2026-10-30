@@ -48,7 +48,7 @@ describe("親子出國列表", () => {
     expect(screen.getByText("這篇只存在測試裡。")).toBeTruthy();
   });
 
-  it("有封面時列表卡片顯示同一張圖的替代文字", () => {
+  it("即使有封面，列表卡片也不顯示首圖", () => {
     render(
       <ParentSectionArticleList
         articles={[
@@ -56,14 +56,20 @@ describe("親子出國列表", () => {
             ...fixture,
             coverImage: "/parent-articles/vocus-6ae34027fd897800012f3e51-cover.webp",
             coverAlt: "小松 PC4000 大型怪手前，大人與小孩的背影",
+            coverWidth: 1600,
+            coverHeight: 2133,
           },
         ]}
         hrefFor={travelAbroadArticlePath}
       />,
     );
-    expect(
-      screen.getByAltText("小松 PC4000 大型怪手前，大人與小孩的背影"),
-    ).toBeTruthy();
+    expect(screen.queryByRole("img")).toBeNull();
+    expect(screen.queryByAltText("小松 PC4000 大型怪手前，大人與小孩的背影")).toBeNull();
+    expect(screen.getByRole("link", { name: /測試用出國文章/ }).getAttribute("href")).toBe(
+      "/for-parents/travel-abroad/fixture-trip",
+    );
+    expect(screen.getByText("2026年10月29日")).toBeTruthy();
+    expect(screen.getByText("這篇只存在測試裡。")).toBeTruthy();
   });
 
   it("內頁回到親子出國", () => {
@@ -130,7 +136,8 @@ describe("親子出國列表", () => {
     render(<ParentTravelAbroadPage />);
     expect(screen.getByRole("heading", { name: "親子出國" })).toBeTruthy();
     expect(screen.getByRole("link", { name: /小松之杜/ })).toBeTruthy();
-    expect(screen.getByAltText("小松 PC4000 大型怪手前，大人與小孩的背影")).toBeTruthy();
+    expect(screen.queryByRole("img")).toBeNull();
+    expect(screen.queryByAltText("小松 PC4000 大型怪手前，大人與小孩的背影")).toBeNull();
     expect(screen.queryByText("這一區的內容還在整理。")).toBeNull();
     expect(screen.queryByText("同步更新至親子出國專欄")).toBeNull();
   });
