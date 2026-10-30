@@ -105,17 +105,3 @@
   line-height: 1.6;
   white-space: pre-line;
 }
-
-.cardCover {
-  position: relative;
-  display: block;
-  overflow: hidden;
-  aspect-ratio: 16 / 9;
-  margin: calc(var(--space-4) * -1) calc(var(--space-4) * -1) 0;
-  border-radius: var(--radius-md) var(--radius-md) 0 0;
-  background: var(--warm-cover-bg);
-}
-
-.cardCover img {
-  object-fit: cover;
-}
