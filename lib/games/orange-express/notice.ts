@@ -78,11 +78,18 @@ export type SpeechItem = {
  * 指差確認題排第一，念要喊的那句；速限牌提示和「速限牌，確認！」是同一件事，那面牌只念題目那句。
  * 「叭叭！跟鐵橋打招呼了」不念，喇叭聲本身就是回饋。
  */
-export function speechCandidates(state: RunState, numbers: boolean): SpeechItem[] {
+export type SpeechOptions = {
+  /** 第一次進站示範那一站不出月台指差確認題，不跟停車搶注意力。 */
+  skipPlatform?: boolean;
+};
+
+export function speechCandidates(state: RunState, numbers: boolean, options: SpeechOptions = {}): SpeechItem[] {
   const out: SpeechItem[] = [];
   const station = state.stationIndex;
   const task = pendingPoint(state);
-  if (task) out.push({ key: `${station}:point:${task.id}`, text: POINT_CALL[task.kind] });
+  if (task && !(options.skipPlatform && task.kind === "platform")) {
+    out.push({ key: `${station}:point:${task.id}`, text: POINT_CALL[task.kind] });
+  }
   const notice = windowNotice(state, numbers);
   if (!notice || notice.kind === "greeted") return out;
   // 這面牌有「速限牌，確認！」題的話，只念題目那句；題目還沒出、已經做完都一樣，不然同一面牌會念兩次。
@@ -97,6 +104,11 @@ export function speechCandidates(state: RunState, numbers: boolean): SpeechItem[
  * 每次都從「這一刻」的畫面挑，提示已經消失的就自然不會念到。
  * 車內廣播還沒念完時由呼叫端先等，不在這裡排隊。
  */
-export function nextSpeech(state: RunState, numbers: boolean, spoken: ReadonlySet<string>): SpeechItem | null {
-  return speechCandidates(state, numbers).find((item) => !spoken.has(item.key)) ?? null;
+export function nextSpeech(
+  state: RunState,
+  numbers: boolean,
+  spoken: ReadonlySet<string>,
+  options: SpeechOptions = {},
+): SpeechItem | null {
+  return speechCandidates(state, numbers, options).find((item) => !spoken.has(item.key)) ?? null;
 }

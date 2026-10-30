@@ -514,6 +514,16 @@
   box-shadow: 0 3px 0 color-mix(in srgb, var(--ink) 55%, transparent);
 }
 
+/*
+ * 第一次進站示範（只在示範那一趟）：停車目標條外圈一圈黃，讓孩子先看這裡；不動。
+ * 第二拍再強調煞車（見 .notchLamp[data-coach]）。用 outline 不改版面、不碰 z-index。
+ */
+.stopBar[data-coach="watch"],
+.stopBar[data-coach="brake"] {
+  outline: 4px solid rgb(255, 216, 102);
+  outline-offset: 2px;
+}
+
 .stopTrack {
   position: relative;
   flex: 1 1 auto;
@@ -926,6 +936,103 @@
   border-color: var(--ink);
   background: var(--support-from);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--support-from) 35%, transparent);
+}
+
+.notchText {
+  line-height: 1;
+}
+
+/*
+ * 示範第二拍：低齡亮「停」那一格，大司機與小站長亮整根煞車桿。
+ * 約 1Hz 脈動三下就停成靜態外框；同一時間畫面上只有它在動。減少動態時只留靜態外框。
+ */
+.notchLamp[data-coach="true"],
+.lever[data-coach="true"] {
+  /* 黃框釘成白天的黃：夜間 --c-yellow 會變成芥末色，疊在白天的前窗與台面上看不出來。 */
+  outline: 4px solid rgb(255, 216, 102);
+  outline-offset: 2px;
+  animation: coachPulse 1s ease-in-out 3;
+}
+
+/* 黃框對奶油台面亮度差很小：格子本身再加一圈墨色框，跟停車目標條一樣是「深框＋黃框」。 */
+.notchLamp[data-coach="true"] {
+  border-color: var(--ink);
+}
+
+@keyframes coachPulse {
+  50% {
+    outline-offset: 6px;
+    outline-color: rgba(255, 216, 102, 0.35);
+  }
+}
+
+.screen[data-reduced="true"] .notchLamp[data-coach="true"],
+.screen[data-reduced="true"] .lever[data-coach="true"] {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notchLamp[data-coach="true"],
+  .lever[data-coach="true"] {
+    animation: none;
+  }
+}
+
+/*
+ * 低齡桿面（慢慢看、小小司機）：圖示在上、字在下（字是給家長看的）。
+ * 底色一直在、不只在亮的時候：孩子靠「位置＋顏色」記哪一格是慢、快、停、緊急，不靠讀字。
+ * 動力淡橘到橘，對齊橘色握把；煞車「停」藍綠，對齊藍綠握把；「緊急」紅。
+ */
+.lever[data-simple="true"] .notchLamp {
+  grid-auto-flow: row;
+  align-content: center;
+  gap: 3px;
+}
+
+.notchGlyph {
+  display: block;
+  width: 28px;
+  height: 28px;
+}
+
+.notchGlyph svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.lever[data-simple="true"][data-kind="power"] .notchLamp[data-step="1"] {
+  background: color-mix(in srgb, var(--landing-brand) 22%, var(--card));
+}
+
+.lever[data-simple="true"][data-kind="power"] .notchLamp[data-step="2"] {
+  background: color-mix(in srgb, var(--landing-brand) 42%, var(--card));
+}
+
+.lever[data-simple="true"][data-kind="power"] .notchLamp[data-on="true"] {
+  background: color-mix(in srgb, var(--landing-brand) 72%, var(--card));
+}
+
+/* 低齡格的字與圖示用墨色：灰字疊在橘、藍綠底上對比不夠（約 3.3:1）。 */
+.lever[data-simple="true"] .notchLamp:not([data-emergency="true"]) {
+  color: var(--ink);
+}
+
+/* 「停」是要按的那格：底色與框都比「緊急」重，孩子的眼睛先落在這裡。 */
+.lever[data-simple="true"][data-kind="brake"] .notchLamp[data-step="1"] {
+  border-color: color-mix(in srgb, var(--ink) 50%, transparent);
+  background: color-mix(in srgb, var(--c-teal) 45%, var(--card));
+}
+
+.lever[data-simple="true"][data-kind="brake"] .notchLamp[data-step="1"][data-on="true"] {
+  background: color-mix(in srgb, var(--c-teal) 78%, var(--card));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-teal) 40%, transparent);
+}
+
+.lever[data-simple="true"][data-kind="brake"] .notchLamp[data-emergency="true"]:not([data-on="true"]) {
+  border-color: color-mix(in srgb, var(--ink) 30%, transparent);
+  color: var(--support-to);
+  background: color-mix(in srgb, var(--support-from) 10%, var(--card));
 }
 
 /* ── 速度表 ─────────────────────────────────────────── */
@@ -1578,6 +1685,18 @@
     --lever-h: 256px;
     gap: 6px;
     padding-block: 6px 8px;
+  }
+
+  /*
+   * 低齡桿面（慢慢看、小小司機）兩根桿各三格：每格 56px（3 × 56＋上下 12px），中間格也只剩一列燈，
+   * 速度表小一點，整排變矮，高度還給前窗。375×553 前窗從 120px 量到約 190px。
+   */
+  .cab[data-simple="true"] {
+    --lever-h: 180px;
+  }
+
+  .cab[data-simple="true"] .gauge {
+    max-width: 92px;
   }
 
   .dash {

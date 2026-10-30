@@ -6,9 +6,11 @@ import type { GameAction } from "@/lib/gamekit/types";
 import { useGameLoop } from "@/lib/gamekit/react/useGameLoop";
 import { keyAction } from "@/lib/gamekit/runtime/input";
 import {
+  loadOrangeExpressCoach,
   loadOrangeExpressLevel,
   resolveOrangeExpressDriver,
   resolveOrangeExpressLevel,
+  saveOrangeExpressCoach,
   saveOrangeExpressLevel,
 } from "@/lib/gamekit/progress/orange-express-prefs";
 import { OrangeExpressCab } from "@/components/games/OrangeExpressCab";
@@ -32,6 +34,8 @@ import {
   POINT_OK,
   jointClack,
 } from "@/lib/games/orange-express/chime";
+import { coachBeat, type CoachBeat } from "@/lib/games/orange-express/coach";
+import { coachThisRun, learnCoach, startCoachRun } from "@/lib/games/orange-express/coach-record";
 import { COPY, DRIVER_HINT, DRIVER_NAME, GRADE_TEXT, LEVEL_DOTS } from "@/lib/games/orange-express/copy";
 import { medalsFor, starMissReason } from "@/lib/games/orange-express/medals";
 import { nextSpeech, type SpeechItem } from "@/lib/games/orange-express/notice";
@@ -41,9 +45,9 @@ import {
   currentStation,
   inTunnel,
   onBridge,
-  powerCap,
   step,
   stepBrake,
+  stepPower,
   withHook,
 } from "@/lib/games/orange-express/reducer";
 import { DriveSound, driveMix, jointsCrossed } from "@/lib/games/orange-express/sound";
@@ -99,9 +103,10 @@ const DRIVE_KEYS: ReadonlySet<GameAction> = new Set([
   "action",
 ]);
 
-function liveText(run: RunState, doorHint: boolean): string {
+function liveText(run: RunState, doorHint: boolean, coach: CoachBeat): string {
   if (run.phase === "reversing") return COPY.reversing;
   if (doorHint) return COPY.earlyDoorHint;
+  if (coach === "brake") return COPY.coachBrake;
   if (run.autoBrake) return COPY.autoBrakeOn;
   if (run.phase === "doors-open") return COPY.boarding;
   if (run.phase === "stopped") {
@@ -137,6 +142,8 @@ export function OrangeExpressView({
   const [shake, setShake] = useState(false);
   /** 門還沒亮就按了：前窗（或停車目標條）當下說「門亮了再按」，不等到結算。 */
   const [doorHint, setDoorHint] = useState(false);
+  /** 這一趟要不要做第一次進站的停車示範；停好學會了就關掉。 */
+  const [coachOn, setCoachOn] = useState(false);
   const [honked, setHonked] = useState(0);
   /** 車停著時 run 不會變；廣播念完後用它叫朗讀再看一次前窗。 */
   const [voiceTick, setVoiceTick] = useState(0);
@@ -159,6 +166,12 @@ export function OrangeExpressView({
   const voiceBusyUntil = useRef(0);
   /** 等著念的「門亮了再按」：一站只念一次，排在廣播後面。 */
   const doorSpeech = useRef<{ item: SpeechItem; at: number } | null>(null);
+  /** 等著念的「右邊拉，停在綠區」：一站一次，排在最前面，不套逾時（還在第二拍就念）。 */
+  const coachSpeech = useRef<SpeechItem | null>(null);
+  /** 這一趟示範過了沒（小小司機的趟數只加一次）。 */
+  const coachCounted = useRef(false);
+  /** 示範在哪一站真的出現過；停好時要是這一站才算學會（直接跳到停好、示範沒出現過不算）。 */
+  const coachShownAt = useRef<number | null>(null);
   const driver = resolveOrangeExpressDriver(display.driver, kidsMode);
   const driverRef = useRef(driver);
   const voiceRef = useRef(false);
@@ -170,6 +183,9 @@ export function OrangeExpressView({
   volumeRef.current = gameVolume;
 
   const swayOn = display.sway && !reducedMotion;
+  /** 第一次進站示範的這一拍；暫停、離開駕駛畫面、這一趟不示範時都是 none。 */
+  const beat: CoachBeat =
+    run && coachOn && status === "playing" && screen === "drive" ? coachBeat(run) : "none";
 
   const apply = useCallback((next: RunState) => {
     runRef.current = next;
@@ -214,6 +230,12 @@ export function OrangeExpressView({
     spoken.current = new Set();
     doorSpeech.current = null;
     setDoorHint(false);
+    // 掛鉤在（測試、視覺基準）時不示範，除非掛鉤寫 coach: true。
+    const coachAllowed = !hook || hook.coach === true;
+    setCoachOn(coachAllowed && coachThisRun(next.course, loadOrangeExpressCoach()));
+    coachCounted.current = false;
+    coachShownAt.current = null;
+    coachSpeech.current = null;
     apply(next);
     announceNext(next);
     setScreen("drive");
@@ -226,6 +248,9 @@ export function OrangeExpressView({
     phaseRef.current = null;
     doorSpeech.current = null;
     setDoorHint(false);
+    setCoachOn(false);
+    coachShownAt.current = null;
+    coachSpeech.current = null;
     setRun(null);
     setScreen("title");
     stopSound();
@@ -319,11 +344,11 @@ export function OrangeExpressView({
       const cur = runRef.current;
       if (!cur || instance.isInputPaused()) return;
       if (action === "move-up" || action === "move-down") {
-        setPower(Math.min(powerCap(cur.level), cur.power + (action === "move-up" ? 1 : -1)));
+        setPower(stepPower(cur.course, cur.power, action === "move-up" ? 1 : -1));
         return;
       }
       if (action === "move-left" || action === "move-right") {
-        setBrake(stepBrake(cur.level, cur.brake, action === "move-left" ? 1 : -1));
+        setBrake(stepBrake(cur.course, cur.brake, action === "move-left" ? 1 : -1));
         return;
       }
       if (action === "dash") {
@@ -412,10 +437,13 @@ export function OrangeExpressView({
     };
     const wait = voiceBusyUntil.current - performance.now();
     if (wait > 0) return recheck(wait);
-    const door = doorSpeech.current;
-    doorSpeech.current = null;
+    const coach = coachSpeech.current;
+    coachSpeech.current = null;
+    const freshCoach = coach && beat === "brake" ? coach : null;
+    const door = freshCoach ? null : doorSpeech.current;
+    if (!freshCoach) doorSpeech.current = null;
     const freshDoor = door && performance.now() - door.at <= DOOR_SPEECH_STALE_MS ? door.item : null;
-    const item = freshDoor ?? nextSpeech(run, display.gaugeNumbers, spoken.current);
+    const item = freshCoach ?? freshDoor ?? nextSpeech(run, display.gaugeNumbers, spoken.current, { skipPlatform: coachOn });
     if (!item) return;
     spoken.current.add(item.key);
     const ms = speechMs(item.text);
@@ -423,7 +451,22 @@ export function OrangeExpressView({
     speakText(item.text, { interrupt: false, volume: volumeRef.current });
     // 車停著時 run 不會變；念完再看一次，同一刻還有下一句（例如提示）就接著念。
     return recheck(ms);
-  }, [display.gaugeNumbers, run, screen, status, voiceTick]);
+  }, [beat, coachOn, display.gaugeNumbers, run, screen, status, voiceTick]);
+
+  // 示範真的出現了才算一趟（開局就離開的不算）；到第二拍排一句「右邊拉，停在綠區」，一站一次。
+  useEffect(() => {
+    if (!run || beat === "none") return;
+    coachShownAt.current = run.stationIndex;
+    if (!coachCounted.current) {
+      coachCounted.current = true;
+      saveOrangeExpressCoach(startCoachRun(run.course, loadOrangeExpressCoach()));
+    }
+    if (beat !== "brake") return;
+    const key = `${run.stationIndex}:coach`;
+    if (spoken.current.has(key) || coachSpeech.current?.key === key) return;
+    coachSpeech.current = { key, text: COPY.coachBrake };
+    setVoiceTick((tick) => tick + 1);
+  }, [beat, run]);
 
   useEffect(() => {
     if (!shake) return;
@@ -444,7 +487,14 @@ export function OrangeExpressView({
     if (prev !== "in-window" && prev !== "stopped" && run.phase === "in-window") {
       audio?.voices?.(ARRIVE_CHIME);
     }
-    if (prev !== "stopped" && run.phase === "stopped") audio?.voices?.(ARRIVAL_MELODY);
+    if (prev !== "stopped" && run.phase === "stopped") {
+      audio?.voices?.(ARRIVAL_MELODY);
+      // 示範中停在綠區或黃區才算學會；停太早、開過頭倒車都不算，下一站或下一趟再示範。
+      if (coachOn && coachShownAt.current === run.stationIndex && run.grades[run.stationIndex]) {
+        saveOrangeExpressCoach(learnCoach(run.course, loadOrangeExpressCoach()));
+        setCoachOn(false);
+      }
+    }
     if (prev !== "doors-open" && run.phase === "doors-open") audio?.voices?.(DOOR_CHIME);
     phaseRef.current = run.phase;
     if (run.phase === "route-done") {
@@ -453,7 +503,7 @@ export function OrangeExpressView({
       setScreen("result");
       syncHost();
     }
-  }, [audio, instance, run, screen, stopSound, syncHost]);
+  }, [audio, coachOn, instance, run, screen, stopSound, syncHost]);
 
   const driving = status === "playing" && screen === "drive" && run?.phase !== "route-done";
 
@@ -618,10 +668,11 @@ export function OrangeExpressView({
         numbers={display.gaugeNumbers}
         swayRef={swayRef}
         doorHint={doorHint}
+        coach={{ beat, on: coachOn }}
         onPoint={pointCheck}
       />
       <p className={styles.live} aria-live="polite">
-        {liveText(run, doorHint)}
+        {liveText(run, doorHint, beat)}
       </p>
       <OrangeExpressCab
         run={run}
@@ -631,6 +682,7 @@ export function OrangeExpressView({
         onBrake={setBrake}
         onHorn={pressHorn}
         onDoor={tryDoors}
+        coachBrake={beat === "brake"}
       />
       {status === "paused" ? (
         <div className={styles.paused}>

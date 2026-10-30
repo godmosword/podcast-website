@@ -5,6 +5,7 @@ import {
 import type { GameKitGameId } from "@/lib/gamekit/types";
 import type { PlayerProfile } from "@/lib/gamekit/types";
 import { emptyDayFlags, normalizeDayFlags } from "@/lib/games/dino-sushi/day-progress";
+import { normalizeOrangeExpressCoach, type CoachRecord } from "@/lib/games/orange-express/coach-record";
 import { normalizeOrangeExpressDriver, normalizeOrangeExpressLevel } from "@/lib/games/orange-express/level";
 import type { DriverId, LevelId } from "@/lib/games/orange-express/types";
 import { isDinoSushiStickerId } from "@/lib/games/dino-sushi/stickers";
@@ -73,6 +74,8 @@ export type GameKitPreferenceStore = {
   orangeExpressSway: boolean;
   /** 「自己開」用哪一種司機。null＝家長還沒切過，由兒童模式決定小小司機或大司機。 */
   orangeExpressDriver: DriverId | null;
+  /** 第一次進站的停車示範看到哪裡。舊存檔沒有＝都還沒看過。 */
+  orangeExpressCoach: CoachRecord;
 };
 
 export type ContinueState = {
@@ -173,6 +176,7 @@ export const DEFAULT_PROGRESS: ProgressStore = {
       orangeExpressGaugeNumbers: false,
       orangeExpressSway: true,
       orangeExpressDriver: null,
+      orangeExpressCoach: { littleRuns: 0, littleLearned: false, bigLearned: false },
     },
     theme: "system",
     nightPromptDismissed: false,
@@ -329,6 +333,7 @@ function normalizeGameKitPreferences(
     orangeExpressGaugeNumbers: value?.orangeExpressGaugeNumbers === true,
     orangeExpressSway: value?.orangeExpressSway !== false,
     orangeExpressDriver: normalizeOrangeExpressDriver(value?.orangeExpressDriver),
+    orangeExpressCoach: normalizeOrangeExpressCoach(value?.orangeExpressCoach),
   };
 }
 

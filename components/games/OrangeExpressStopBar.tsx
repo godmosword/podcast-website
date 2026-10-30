@@ -2,6 +2,7 @@
 
 import type { CSSProperties } from "react";
 import { XiaojuFace } from "@/components/games/OrangeExpressGlyphs";
+import type { CoachBeat } from "@/lib/games/orange-express/coach";
 import { COPY, GRADE_TEXT } from "@/lib/games/orange-express/copy";
 import { currentStation } from "@/lib/games/orange-express/reducer";
 import { stopBarFor } from "@/lib/games/orange-express/stop-target";
@@ -22,10 +23,12 @@ type StopBarProps = {
   numbers: boolean;
   /** 暫時蓋過距離字的一句（門還沒亮就按了）。倒車與停好時不蓋。 */
   hint?: string | null;
+  /** 第一次進站示範：watch 只亮外圈；brake 再把字換成「右邊拉，停在綠區」。 */
+  coach?: CoachBeat;
 };
 
 /** 前窗上方的停車目標條：黃區、綠區、目標線、預測停車點、小橘現在的位置。 */
-export function OrangeExpressStopBar({ run, numbers, hint = null }: StopBarProps) {
+export function OrangeExpressStopBar({ run, numbers, hint = null, coach = "none" }: StopBarProps) {
   const bar = stopBarFor(run);
   if (!bar) return null;
   const grade = run.grades[run.stationIndex];
@@ -34,6 +37,7 @@ export function OrangeExpressStopBar({ run, numbers, hint = null }: StopBarProps
   if (run.phase === "reversing") words = COPY.reversing;
   else if (atStation && grade) words = GRADE_TEXT[grade];
   else if (hint) words = hint;
+  else if (coach === "brake") words = COPY.coachBrake;
 
   return (
     <div
@@ -44,6 +48,7 @@ export function OrangeExpressStopBar({ run, numbers, hint = null }: StopBarProps
       data-phase={run.phase}
       data-grade={atStation && grade ? grade : "none"}
       data-predicted={bar.predictedGrade ?? "none"}
+      data-coach={coach}
     >
       <div className={styles.stopTrack} aria-hidden>
         <span className={styles.stopYellow} style={span(bar.yellow[0], bar.yellow[1])} />

@@ -5,11 +5,15 @@ import {
   COPY,
   GRADE_TEXT,
   GRADE_WORD,
+  brakeLampLabel,
+  brakeValueText,
   brakeWord,
   pointsResultText,
+  powerLampLabel,
   powerValueText,
   powerWord,
 } from "@/lib/games/orange-express/copy";
+import { powerNotches } from "@/lib/games/orange-express/reducer";
 import { stationsFor } from "@/lib/games/orange-express/routes";
 
 const BANNED = [
@@ -111,12 +115,26 @@ describe("每站停車等級與結算小字", () => {
 });
 
 describe("桿上的字", () => {
-  it("動力推到底是「不推」：車只是滑行，「停」留給煞車", () => {
-    expect(powerWord(0)).toBe("不推");
-    expect(powerValueText(0)).toBe("動力 P0，不推");
+  it("兩根桿歸零都叫「鬆」：是狀態不是命令；「停」只留給煞車", () => {
+    expect(powerWord(0)).toBe("鬆");
+    expect(brakeWord(0)).toBe("鬆");
+    expect(powerValueText(0)).toBe("動力 P0，鬆");
     for (const notch of [0, 1, 2, 3, 4] as const) {
       expect(powerWord(notch)).not.toBe("停");
     }
     expect(brakeWord(3)).toBe("停");
+  });
+
+  it("低齡桿面照格子的位置寫字、讀屏只說字，不寫 P／B 代碼", () => {
+    for (const course of ["look", "little"] as const) {
+      const notches = powerNotches(course);
+      expect(notches.map((n) => powerLampLabel(n, notches))).toEqual(["鬆", "慢", "快"]);
+      expect(notches.map((n) => powerValueText(n, notches))).toEqual(["動力，鬆", "動力，慢", "動力，快"]);
+    }
+    expect([0, 3, 5].map((n) => brakeLampLabel(n as 0 | 3 | 5, true))).toEqual(["鬆", "停", "緊急"]);
+    expect(brakeValueText(3, true)).toBe("煞車，停");
+    // 大司機、小站長照舊寫代碼。
+    expect(powerLampLabel(3)).toBe("P3");
+    expect(powerValueText(3)).toBe("動力 P3，快");
   });
 });

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { medalsFor } from "@/lib/games/orange-express/medals";
 import {
   BRAKE_ACCEL,
+  CRUISE_LIMIT,
   LOOK_CREEP,
   POWER_ACCEL,
   accelFor,
@@ -12,10 +13,14 @@ import {
   currentLimit,
   gradeFor,
   honk,
+  powerCap,
+  powerNotches,
   predictStop,
   snapBrake,
+  snapPower,
   step,
   stepBrake,
+  stepPower,
   withHook,
 } from "@/lib/games/orange-express/reducer";
 import { stationsFor, stopEpsilon } from "@/lib/games/orange-express/routes";
@@ -206,24 +211,79 @@ describe("小橘特快車 step", () => {
     expect(Math.abs(predicted - stopped.progress)).toBeLessThan(0.02);
   });
 
-  it("慢慢看的煞車只有鬆、停、緊急三格：吸到最近的一格，等距取小的", () => {
-    expect(brakeNotches("look")).toEqual([0, 3, 5]);
-    expect(brakeNotches("drive")).toEqual([0, 1, 2, 3, 4, 5]);
-    expect(snapBrake("look", 1)).toBe(0);
-    expect(snapBrake("look", 2)).toBe(3);
-    expect(snapBrake("look", 4)).toBe(3);
-    expect(snapBrake("look", 9)).toBe(5);
-    expect(snapBrake("drive", 4)).toBe(4);
-    expect(stepBrake("look", 0, 1)).toBe(3);
-    expect(stepBrake("look", 3, 1)).toBe(5);
-    expect(stepBrake("look", 5, 1)).toBe(5);
-    expect(stepBrake("look", 5, -1)).toBe(3);
-    expect(stepBrake("drive", 2, -1)).toBe(1);
+  it("慢慢看、小小司機的煞車只有鬆、停、緊急三格：吸到最近的一格，等距取小的", () => {
+    for (const course of ["look", "little"] as const) {
+      expect(brakeNotches(course)).toEqual([0, 3, 5]);
+      expect(snapBrake(course, 1)).toBe(0);
+      expect(snapBrake(course, 2)).toBe(3);
+      expect(snapBrake(course, 4)).toBe(3);
+      expect(snapBrake(course, 9)).toBe(5);
+      expect(stepBrake(course, 0, 1)).toBe(3);
+      expect(stepBrake(course, 3, 1)).toBe(5);
+      expect(stepBrake(course, 5, 1)).toBe(5);
+      expect(stepBrake(course, 5, -1)).toBe(3);
+    }
+    for (const course of ["big", "captain"] as const) {
+      expect(brakeNotches(course)).toEqual([0, 1, 2, 3, 4, 5]);
+      expect(snapBrake(course, 4)).toBe(4);
+      expect(stepBrake(course, 2, -1)).toBe(1);
+    }
 
     const look = createRun("look");
     expect(step(look, { type: "set-brake", notch: 2 }).brake).toBe(3);
     expect(withHook(look, { brake: 4 }).brake).toBe(3);
-    expect(withHook(createRun("drive"), { brake: 4 }).brake).toBe(4);
+    const little = createRun("drive", "little");
+    expect(step(little, { type: "set-brake", notch: 2 }).brake).toBe(3);
+    expect(withHook(little, { brake: 4 }).brake).toBe(3);
+    expect(withHook(createRun("drive", "big"), { brake: 4 }).brake).toBe(4);
+  });
+
+  it("動力桿的格跟規則組走：慢慢看 P0–P2，小小司機 P0／P2／P4，大司機與小站長五格", () => {
+    expect(powerNotches("look")).toEqual([0, 1, 2]);
+    expect(powerNotches("little")).toEqual([0, 2, 4]);
+    expect(powerNotches("big")).toEqual([0, 1, 2, 3, 4]);
+    expect(powerNotches("captain")).toEqual([0, 1, 2, 3, 4]);
+    expect(powerCap("look")).toBe(2);
+    expect(powerCap("little")).toBe(4);
+    // 小小司機沒有 P1、P3：吸到最近的一格，等距取小的（不會一推就最快）。
+    expect(snapPower("little", 1)).toBe(0);
+    expect(snapPower("little", 3)).toBe(2);
+    expect(snapPower("little", 9)).toBe(4);
+    expect(snapPower("look", 4)).toBe(2);
+    expect(stepPower("little", 0, 1)).toBe(2);
+    expect(stepPower("little", 2, 1)).toBe(4);
+    expect(stepPower("little", 4, 1)).toBe(4);
+    expect(stepPower("little", 4, -1)).toBe(2);
+    expect(stepPower("big", 2, 1)).toBe(3);
+    expect(stepPower("look", 2, 1)).toBe(2);
+
+    const little = createRun("drive", "little");
+    expect(step(little, { type: "set-power", notch: 3 }).power).toBe(2);
+    expect(withHook(little, { power: 1 }).power).toBe(0);
+    expect(withHook(createRun("drive", "big"), { power: 3 }).power).toBe(3);
+  });
+
+  it("開局動力看 level：慢慢看從 P1 起步，其他從 P0", () => {
+    expect(createRun("look").power).toBe(1);
+    expect(createRun("drive", "little").power).toBe(0);
+    expect(createRun("drive", "big").power).toBe(0);
+    expect(createRun("captain").power).toBe(0);
+  });
+
+  it("小小司機少了 P1：起步是 P2 的加速度，最快仍被速度旗壓住", () => {
+    let state = step(createRun("drive", "little"), { type: "set-power", notch: 2 });
+    expect(accelFor(state)).toBe(POWER_ACCEL[2]);
+    state = step(state, { type: "set-power", notch: 4 });
+    expect(accelFor(state)).toBe(POWER_ACCEL[4]);
+    // 速度旗降下來時（進站）多出來的速度用固定速率滑回旗子，不是瞬間；所以守的是「從不超過路上最快的旗子」。
+    let top = 0;
+    for (let i = 0; i < 200; i += 1) {
+      state = step(state, { type: "tick", dt: 0.05 });
+      if (state.phase !== "running") break;
+      top = Math.max(top, state.speed);
+    }
+    expect(top).toBeGreaterThan(0.5);
+    expect(top).toBeLessThanOrEqual(CRUISE_LIMIT + 1e-9);
   });
 
   it("自己開不幫忙，不煞車就停不住", () => {

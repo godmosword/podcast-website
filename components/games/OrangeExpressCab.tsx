@@ -20,6 +20,7 @@ import {
   inTunnel,
   onBridge,
   powerNotches,
+  simpleLevers,
 } from "@/lib/games/orange-express/reducer";
 import {
   EMERGENCY,
@@ -40,34 +41,68 @@ function indexFromY(el: HTMLElement, clientY: number, last: number): number {
 
 type LeverKind = "power" | "brake";
 
+/** 動力「慢」「快」：一個、兩個往上的箭頭。不識字的孩子看箭頭多寡就知道快慢。 */
+function PowerArrows({ count }: { count: 1 | 2 }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden className={styles.notchGlyph}>
+      {count === 2 ? (
+        <path d="M6 12l6-6 6 6M6 19l6-6 6 6" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      ) : (
+        <path d="M6 15l6-6 6 6" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      )}
+    </svg>
+  );
+}
+
 /**
- * 桿上只排這一檔摸得到的格：慢慢看的動力只有 P0–P2，煞車只有鬆、停、緊急。
- * 位置、aria、拖曳與方向鍵都用格子的索引；`data-notch` 留真正的格號。
+ * 低齡桿面每格的圖：歸零格是虛線空格（不畫圖）；動力一個、兩個箭頭；
+ * 煞車「停」用停車柱（跟前窗的停車柱、駕駛台的停車燈同一個符號）；「緊急」靠紅底，不另畫圖。
+ */
+function NotchGlyph({ kind, step }: { kind: LeverKind; step: number }) {
+  if (step === 0) return null;
+  if (kind === "power") return <PowerArrows count={step >= 2 ? 2 : 1} />;
+  if (step === 1) {
+    return (
+      <span className={styles.notchGlyph} aria-hidden>
+        <StopIcon />
+      </span>
+    );
+  }
+  return null;
+}
+
+/**
+ * 桿上只排這一組摸得到的格：低齡（慢慢看、小小司機）兩根桿各三格，大司機與小站長是 P0–P4、B0–B4＋緊急。
+ * 位置、aria、拖曳與方向鍵都用格子的索引；`data-notch` 留真正的格號，`data-step` 是由下往上第幾格。
  */
 function Lever({
   kind,
   notch,
   notches,
   simple,
+  coach = false,
   onChange,
 }: {
   kind: LeverKind;
   notch: number;
   notches: readonly number[];
-  /** 慢慢看：格上寫字（鬆、停、緊急），不寫 B3。 */
+  /** 低齡桿面：格上畫圖示、常駐底色，字縮小放圖下，不寫 P／B 代碼。 */
   simple: boolean;
+  /** 第一次進站示範的煞車強調：低齡亮「停」那一格，大司機與小站長亮整根桿。 */
+  coach?: boolean;
   onChange: (notch: number) => void;
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const dragging = useRef(false);
   const label = kind === "power" ? COPY.power : COPY.brake;
+  const simplePowers = kind === "power" && simple ? (notches as readonly PowerNotch[]) : undefined;
   const valueText =
     kind === "power"
-      ? powerValueText(notch as PowerNotch)
+      ? powerValueText(notch as PowerNotch, simplePowers)
       : brakeValueText(notch as BrakeNotch, simple);
   const word =
     kind === "power"
-      ? powerWord(notch as PowerNotch)
+      ? powerWord(notch as PowerNotch, simplePowers)
       : brakeWord(notch as BrakeNotch);
   const last = notches.length - 1;
   const found = notches.indexOf(notch);
@@ -96,6 +131,8 @@ function Lever({
         ref={ref}
         className={styles.lever}
         data-kind={kind}
+        data-simple={simple ? "true" : "false"}
+        data-coach={coach && !simple ? "true" : "false"}
         role="slider"
         aria-label={label}
         aria-orientation="vertical"
@@ -141,20 +178,23 @@ function Lever({
             const n = notches[i]!;
             const text =
               kind === "power"
-                ? powerLampLabel(n as PowerNotch)
+                ? powerLampLabel(n as PowerNotch, simplePowers)
                 : brakeLampLabel(n as BrakeNotch, simple);
             return (
               <span
                 key={n}
                 className={styles.notchLamp}
                 data-notch={n}
+                data-step={i}
+                data-coach={coach && simple && i === 1 ? "true" : "false"}
                 data-on={n === notch && n > 0 ? "true" : "false"}
                 data-emergency={
                   kind === "brake" && n === EMERGENCY ? "true" : "false"
                 }
                 onClick={() => pick(i)}
               >
-                {text}
+                {simple ? <NotchGlyph kind={kind} step={i} /> : null}
+                <span className={styles.notchText}>{text}</span>
               </span>
             );
           })}
@@ -282,10 +322,13 @@ export function OrangeExpressCab({
   onBrake,
   onHorn,
   onDoor,
+  coachBrake = false,
 }: {
   run: RunState;
   shake: boolean;
   numbers: boolean;
+  /** 第一次進站示範的第二拍：強調煞車。 */
+  coachBrake?: boolean;
   onPower: (notch: number) => void;
   onBrake: (notch: number) => void;
   onHorn: () => void;
@@ -305,6 +348,7 @@ export function OrangeExpressCab({
     run.phase === "stopped" || (run.phase === "doors-open" && !waiting);
   const atStation = run.phase === "stopped" || run.phase === "doors-open";
   const tunnel = inTunnel(run);
+  const simple = simpleLevers(run.course);
   const hornHint = onBridge(run) && !run.bridgeGreeted && run.phase === "running";
   const flagLamp: LampState = run.autoBrake
     ? "orange"
@@ -320,6 +364,7 @@ export function OrangeExpressCab({
       data-testid="orange-express-cab"
       data-tunnel={tunnel ? "true" : "false"}
       data-auto-brake={run.autoBrake ? "true" : "false"}
+      data-simple={simple ? "true" : "false"}
     >
       {/* 站名、速度表、指示燈收在兩根桿中間那一格；不另佔一列，高度留給前窗。DOM 放最前，讀屏先聽到站名。 */}
       <div className={styles.dash}>
@@ -335,12 +380,15 @@ export function OrangeExpressCab({
           </p>
         </div>
         <OrangeExpressGauge speed={run.speed} limit={limit} numbers={numbers} />
+        {/* 低齡只留「門」「停車」：桿子自己限速，速度旗燈不會亮橘；車內燈是裝飾。省下一列給前窗。 */}
         <ul className={styles.lamps} aria-label={COPY.lampsLabel}>
-          <Lamp
-            label={COPY.lampFlag}
-            state={flagLamp}
-            icon={<FlagIcon />}
-          />
+          {simple ? null : (
+            <Lamp
+              label={COPY.lampFlag}
+              state={flagLamp}
+              icon={<FlagIcon />}
+            />
+          )}
           <Lamp
             label={COPY.lampDoor}
             state={run.phase === "doors-open" ? "orange" : "off"}
@@ -351,25 +399,28 @@ export function OrangeExpressCab({
             state={atStation ? "green" : "off"}
             icon={<StopIcon />}
           />
-          <Lamp
-            label={COPY.lampLight}
-            state={tunnel ? "yellow" : "off"}
-            icon={<LightIcon />}
-          />
+          {simple ? null : (
+            <Lamp
+              label={COPY.lampLight}
+              state={tunnel ? "yellow" : "off"}
+              icon={<LightIcon />}
+            />
+          )}
         </ul>
       </div>
       <Lever
         kind="power"
         notch={run.power}
-        notches={powerNotches(run.level)}
-        simple={run.level === "look"}
+        notches={powerNotches(run.course)}
+        simple={simple}
         onChange={onPower}
       />
       <Lever
         kind="brake"
         notch={run.brake}
-        notches={brakeNotches(run.level)}
-        simple={run.level === "look"}
+        notches={brakeNotches(run.course)}
+        simple={simple}
+        coach={coachBrake}
         onChange={onBrake}
       />
       <div className={styles.cabBottom}>
