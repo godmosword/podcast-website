@@ -1,3 +1,4 @@
+import type { XiaojuMood } from "@/lib/games/orange-express/mood";
 import type { WindowNotice } from "@/lib/games/orange-express/notice";
 import type { LevelId } from "@/lib/games/orange-express/types";
 import { signCells } from "@/lib/games/orange-express/windshield";
@@ -18,9 +19,14 @@ const UNLIT = "rgb(232, 222, 210)";
  * 圓圓的奶油色車頭、頭頂一塊深色擋風帽、眼睛在帽子下面、橘條從臉下面往右後斜上去、下緣深灰。
  * 橘條不橫過臉：橫的那版看起來像藥丸，不像車。沒有手、沒有腳。
  */
-export function XiaojuFace({ className }: { className?: string }) {
+/**
+ * 小橘正臉。mood 開心時眼睛彎成 ^^、張嘴笑（停好、朋友上車時）；平常是圓眼微笑。
+ * 小尺寸分不出兩種笑臉，所以只有一種開心。
+ */
+export function XiaojuFace({ className, mood = "calm" }: { className?: string; mood?: XiaojuMood }) {
+  const happy = mood === "happy";
   return (
-    <svg viewBox="0 0 64 64" aria-hidden className={className}>
+    <svg viewBox="0 0 64 64" aria-hidden className={className} data-mood={mood}>
       <ellipse cx="32" cy="58.5" rx="24" ry="3" fill="rgb(0, 0, 0)" opacity="0.12" />
       <path
         d="M5 45C5 25 16 12 32 12s27 13 27 33c0 5-3 9-8 9H13c-5 0-8-4-8-9z"
@@ -41,13 +47,27 @@ export function XiaojuFace({ className }: { className?: string }) {
         fill="rgb(52, 50, 62)"
       />
       <ellipse cx="24" cy="19" rx="5.5" ry="1.6" fill={SHINE} opacity="0.35" />
-      <circle cx="25" cy="34.5" r="3.3" fill={INK} />
-      <circle cx="39" cy="34.5" r="3.3" fill={INK} />
-      <circle cx="26.1" cy="33.4" r="1.1" fill={SHINE} />
-      <circle cx="40.1" cy="33.4" r="1.1" fill={SHINE} />
+      {happy ? (
+        <>
+          {/* 線寬與弧寬加大：縮到停車目標條的 26px 時，^^ 才跟平常的圓眼差不多重。 */}
+          <path d="M20.8 35.8q4.2-5 8.4 0" fill="none" stroke={INK} strokeWidth="3.3" strokeLinecap="round" />
+          <path d="M34.8 35.8q4.2-5 8.4 0" fill="none" stroke={INK} strokeWidth="3.3" strokeLinecap="round" />
+        </>
+      ) : (
+        <>
+          <circle cx="25" cy="34.5" r="3.3" fill={INK} />
+          <circle cx="39" cy="34.5" r="3.3" fill={INK} />
+          <circle cx="26.1" cy="33.4" r="1.1" fill={SHINE} />
+          <circle cx="40.1" cy="33.4" r="1.1" fill={SHINE} />
+        </>
+      )}
       <ellipse cx="17.5" cy="39.5" rx="3.4" ry="2.3" fill="rgb(255, 160, 165)" />
       <ellipse cx="46.5" cy="36" rx="3.4" ry="2.3" fill="rgb(255, 160, 165)" />
-      <path d="M28.5 39.5c1.8 2.4 5.2 2.4 7 0" fill="none" stroke={INK} strokeWidth="2" strokeLinecap="round" />
+      {happy ? (
+        <path d="M27.4 38.6h9.2c0 3.6-2 5.8-4.6 5.8s-4.6-2.2-4.6-5.8z" fill={INK} />
+      ) : (
+        <path d="M28.5 39.5c1.8 2.4 5.2 2.4 7 0" fill="none" stroke={INK} strokeWidth="2" strokeLinecap="round" />
+      )}
       <ellipse cx="11.5" cy="31" rx="2" ry="5" fill={SHINE} opacity="0.7" transform="rotate(25 11.5 31)" />
     </svg>
   );
