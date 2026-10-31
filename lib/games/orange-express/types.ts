@@ -93,6 +93,10 @@ export type RunState = {
   tractive: number;
   /** 實際的煞車作用（每秒減多少速度）。 */
   braking: number;
+  /** 停住前最後一段的減速度，供平穩停車回饋判斷。 */
+  stopJerk: number;
+  /** 第一次停靠時平穩停下的站數。 */
+  smoothStops: number;
   speed: number;
   /** 這一站的 0–1。到站窗用這個判斷，不看畫面上的像素。 */
   progress: number;

@@ -264,6 +264,21 @@
   transform-origin: 50% 60%;
 }
 
+.windshield[data-nod="true"] .glassWrap {
+  animation: arrivalNod 180ms ease-out;
+}
+
+@keyframes arrivalNod {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+
+  42% {
+    translate: 0 2px;
+  }
+}
+
 .screen[data-sway="true"] .glassWrap {
   will-change: transform;
 }
@@ -692,6 +707,10 @@
 /* 停好那一刻：小橘放大到約 44px、約一秒回原位（只跑一次）。減少動態時只換臉、不放大。 */
 .stopTrain[data-mood="happy"] {
   animation: happyPop 1.1s ease-out 1;
+}
+
+.stopTrain[data-mood="happy"][data-nod-before="true"] {
+  animation-delay: 180ms;
 }
 
 @keyframes happyPop {
@@ -1494,9 +1513,10 @@
 
 .extras {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: center;
-  gap: 8px;
+  max-width: 100%;
+  overflow: hidden;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -1505,9 +1525,24 @@
 }
 
 .extras li {
-  padding: 2px 10px;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  padding: 2px 8px;
   border: 2px dashed color-mix(in srgb, var(--ink) 40%, transparent);
   border-radius: var(--radius-pill);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--fs-meta);
+}
+
+.resultLine {
+  max-width: 38rem;
+  margin: -4px 0 0;
+  color: var(--ink);
+  font-size: var(--fs-label);
+  font-weight: 800;
+  text-align: center;
 }
 
 .stationGradeName {
@@ -1770,6 +1805,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .windshield[data-nod="true"] .glassWrap {
+    animation: none;
+  }
+
   .level:active,
   .levelOn:active,
   .primary:active,

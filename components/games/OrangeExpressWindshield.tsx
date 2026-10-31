@@ -124,6 +124,8 @@ export function OrangeExpressWindshield({
   swayRef,
   doorHint,
   coach,
+  nod,
+  nodBeforeHappy,
   onPoint,
 }: {
   run: RunState;
@@ -134,6 +136,9 @@ export function OrangeExpressWindshield({
   doorHint: boolean;
   /** 第一次進站示範的這一拍；示範那一站不出月台指差確認題。 */
   coach: { beat: CoachBeat; on: boolean };
+  /** 頓停時在畫面晃動已開啟的情況下，輕輕點頭一次。 */
+  nod: boolean;
+  nodBeforeHappy: boolean;
   onPoint: () => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -194,13 +199,20 @@ export function OrangeExpressWindshield({
       data-testid="orange-express-windshield"
       data-scene={here.scene}
       data-notice={notice?.kind ?? "none"}
+      data-nod={nod ? "true" : "false"}
     >
       <div ref={swayRef} className={styles.glassWrap}>
         <canvas ref={canvasRef} className={styles.glass} aria-hidden />
       </div>
       <span className={styles.pillarLeft} aria-hidden />
       <span className={styles.pillarRight} aria-hidden />
-      <OrangeExpressStopBar run={run} numbers={numbers} hint={doorHint ? COPY.earlyDoorHint : null} coach={coach.beat} />
+      <OrangeExpressStopBar
+        run={run}
+        numbers={numbers}
+        hint={doorHint ? COPY.earlyDoorHint : null}
+        coach={coach.beat}
+        nodBeforeHappy={nodBeforeHappy}
+      />
       {notice && !showRiders ? (
         <p className={styles.notice} data-kind={notice.kind} data-testid="orange-express-notice">
           {notice.kind === "door" ? (

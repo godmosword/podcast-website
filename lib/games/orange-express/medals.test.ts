@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { medalsFor, starMissReason } from "@/lib/games/orange-express/medals";
+import { SMOOTH_STOP_JERK, isSmoothStop, medalsFor, starMissReason } from "@/lib/games/orange-express/medals";
 import { createRun } from "@/lib/games/orange-express/reducer";
 import type { DriverId, LevelId, RunState, StopGrade } from "@/lib/games/orange-express/types";
 
@@ -50,5 +50,23 @@ describe("結算：少一顆星的原因", () => {
   it("好幾個原因時先說停車位置，再說開過頭，最後才是門", () => {
     expect(starMissReason(finished(["yellow", "green", "green"], 1), 3)).toBe("green");
     expect(starMissReason(finished(["green", "green", "green"], 1), 3)).toBe("overrun");
+  });
+});
+
+describe("平穩停車", () => {
+  it("只給大司機、小站長；煞車 B2 以內或最後一段減速度低於門檻都算", () => {
+    const big = createRun("drive", "big");
+    const captain = createRun("captain");
+    expect(isSmoothStop({ ...big, brake: 2, stopJerk: 1 })).toBe(true);
+    expect(isSmoothStop({ ...big, brake: 3, stopJerk: SMOOTH_STOP_JERK - 0.001 })).toBe(true);
+    expect(isSmoothStop({ ...big, brake: 3, stopJerk: SMOOTH_STOP_JERK })).toBe(false);
+    // 緊急煞車是保護工具；平穩判斷不把它本身當成失誤。
+    expect(isSmoothStop({ ...captain, brake: 5, stopJerk: 0 })).toBe(true);
+    expect(isSmoothStop(createRun("drive", "little"))).toBe(false);
+    expect(isSmoothStop(createRun("look"))).toBe(false);
+  });
+
+  it("結算獎章保留這趟平穩停車站數", () => {
+    expect(medalsFor({ ...finished(["green", "green", "green"]), smoothStops: 2 }, 0).smoothStops).toBe(2);
   });
 });

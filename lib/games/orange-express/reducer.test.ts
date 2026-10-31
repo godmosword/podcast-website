@@ -119,6 +119,23 @@ describe("小橘特快車 step", () => {
     expect(gradeFor(station, 0.75)).toBe("yellow");
   });
 
+  it("停住時記錄最後一段減速度，平穩停車每站只計一次", () => {
+    const gentle = runUntil(
+      withHook(createRun("drive", "big"), { progress: 0.6, speed: 0.25, brake: 1 }),
+      (state) => state.phase === "stopped",
+    );
+    expect(gentle.stopJerk).toBeGreaterThan(0);
+    expect(gentle.smoothStops).toBe(1);
+    expect(withHook(gentle, { progress: 0.65, speed: 0 }).smoothStops).toBe(1);
+
+    const hard = runUntil(
+      withHook(createRun("drive", "big"), { progress: 0.6, speed: 0.25, brake: 4 }),
+      (state) => state.phase === "stopped",
+    );
+    expect(hard.stopJerk).toBeGreaterThan(0.32);
+    expect(hard.smoothStops).toBe(0);
+  });
+
   it("窗外停住不能開門", () => {
     const outside = at(createRun("drive"), { progress: 0.2, speed: 0, phase: "running" });
     expect(step(outside, { type: "open-doors" })).toBe(outside);

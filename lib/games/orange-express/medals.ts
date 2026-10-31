@@ -6,7 +6,17 @@ export type RunMedals = {
   flawless: boolean;
   collectedAll: boolean;
   stars: number;
+  smoothStops: number;
 };
+
+/** 速度每秒減少 0.32 以下視為柔和；落在 B1 與 B2 的設定之間。 */
+export const SMOOTH_STOP_JERK = 0.32;
+
+/** 平穩回饋只給大司機、小站長；B0–B2 或停住前減速度低於門檻都算平穩。 */
+export function isSmoothStop(state: Pick<RunState, "course" | "brake" | "stopJerk">): boolean {
+  if (state.course !== "big" && state.course !== "captain") return false;
+  return state.brake <= 2 || state.stopJerk < SMOOTH_STOP_JERK;
+}
 
 /** 每一站都第一次就停在綠區。 */
 export function allGreen(state: RunState): boolean {
@@ -25,7 +35,7 @@ export function medalsFor(state: RunState, earlyDoorTaps: number): RunMedals {
   const flawless = cleared && state.misses === 0 && doorOk && allGreen(state);
   const collectedAll = cleared;
   const stars = (cleared ? 1 : 0) + (flawless ? 1 : 0) + (collectedAll ? 1 : 0);
-  return { cleared, flawless, collectedAll, stars };
+  return { cleared, flawless, collectedAll, stars, smoothStops: state.smoothStops };
 }
 
 export type StarMissReason = "green" | "overrun" | "early-door";

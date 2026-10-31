@@ -26,6 +26,8 @@ const MISS_HINT: Record<StarMissReason, { text: string; mark: ReactNode }> = {
 
 export function OrangeExpressResult({
   stars,
+  resultLine,
+  smoothStops,
   missReason,
   reduced,
   stations,
@@ -38,6 +40,8 @@ export function OrangeExpressResult({
   onTitle,
 }: {
   stars: number;
+  resultLine: string;
+  smoothStops: number;
   missReason: StarMissReason | null;
   reduced: boolean;
   stations: readonly Station[];
@@ -52,6 +56,18 @@ export function OrangeExpressResult({
   onTitle: () => void;
 }) {
   const next = getNextGame("orange-express");
+  const statParts = [
+    pointsDone > 0 ? `指差 ${pointsDone}` : null,
+    bridgeGreets > 0 ? `鐵橋 ${bridgeGreets}` : null,
+    landmarkGreets.length > 0 ? `地標 ${landmarkGreets.length}` : null,
+    smoothStops > 0 ? `輕停 ${smoothStops}` : null,
+  ].filter((part): part is string => part !== null);
+  const statLabel = [
+    pointsDone > 0 ? pointsResultText(pointsDone) : null,
+    bridgeGreets > 0 ? bridgeResultText(bridgeGreets) : null,
+    landmarkGreets.length > 0 ? landmarkResultText(landmarkGreets.length) : null,
+    smoothStops > 0 ? `平穩停車 ${smoothStops} 站` : null,
+  ].filter((part): part is string => part !== null).join("、");
   return (
     <div className={styles.result} data-testid="orange-express-result" data-reduced={reduced ? "true" : "false"}>
       {/* 到家的小橘（B10）：貼紙生好前用向量小橘臉。 */}
@@ -63,6 +79,7 @@ export function OrangeExpressResult({
         )}
       </span>
       <h2>{COPY.arrivedHome}</h2>
+      <p className={styles.resultLine} data-testid="orange-express-result-line">{resultLine}</p>
       <ResultStars
         stars={stars}
         animate={!reduced}
@@ -85,11 +102,9 @@ export function OrangeExpressResult({
           );
         })}
       </ol>
-      {pointsDone > 0 || bridgeGreets > 0 || landmarkGreets.length > 0 ? (
-        <ul className={styles.extras} data-testid="orange-express-extras">
-          {pointsDone > 0 ? <li>{pointsResultText(pointsDone)}</li> : null}
-          {bridgeGreets > 0 ? <li>{bridgeResultText(bridgeGreets)}</li> : null}
-          {landmarkGreets.length > 0 ? <li>{landmarkResultText(landmarkGreets.length)}</li> : null}
+      {statParts.length > 0 ? (
+        <ul className={styles.extras} data-testid="orange-express-extras" aria-label={statLabel}>
+          <li>{statParts.join("・")}</li>
         </ul>
       ) : null}
       <div className={styles.resultActions}>
