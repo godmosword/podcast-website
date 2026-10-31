@@ -1085,36 +1085,57 @@
 }
 
 /*
- * 示範第二拍：低齡亮「停」那一格，大司機與小站長亮整根煞車桿。
+ * 「看這裡」的黃框（示範第二拍、先鬆煞車共用）：
+ * - 示範：低齡亮「停」那一格，大司機與小站長亮整根煞車桿。
+ * - 先鬆煞車：推了動力、煞車沒放、車不走，亮煞車桿「鬆」那一格（低齡的虛線空格改實線）。
+ *   不用藍綠：藍綠在低齡桿面是「停」的顏色，選中的格又是天藍外圈，色弱分不出來。
  * 約 1Hz 脈動三下就停成靜態外框；同一時間畫面上只有它在動。減少動態時只留靜態外框。
  */
 .notchLamp[data-coach="true"],
+.notchLamp[data-release="true"],
 .lever[data-coach="true"] {
   /* 黃框釘成白天的黃：夜間 --c-yellow 會變成芥末色，疊在白天的前窗與台面上看不出來。 */
   outline: 4px solid rgb(255, 216, 102);
-  outline-offset: 2px;
+  outline-offset: var(--pulse-from, 2px);
   animation: coachPulse 1s ease-in-out 3;
 }
 
 /* 黃框對奶油台面亮度差很小：格子本身再加一圈墨色框，跟停車目標條一樣是「深框＋黃框」。 */
-.notchLamp[data-coach="true"] {
+.notchLamp[data-coach="true"],
+.notchLamp[data-release="true"] {
+  border-style: solid;
   border-color: var(--ink);
+}
+
+/* 「鬆」在桿子最底下，離桿框只有約 8px：外框收小，脈動時不壓到桿框。 */
+.notchLamp[data-release="true"] {
+  --pulse-from: 1px;
+  --pulse-to: 4px;
+}
+
+/* 桿頂小牌改寫「↓鬆」，跟格子同一個黃。 */
+.leverWord[data-release="true"] {
+  color: var(--ink);
+  background: rgb(255, 216, 102);
+  box-shadow: 0 0 0 2px var(--ink);
 }
 
 @keyframes coachPulse {
   50% {
-    outline-offset: 6px;
+    outline-offset: var(--pulse-to, 6px);
     outline-color: rgba(255, 216, 102, 0.35);
   }
 }
 
 .screen[data-reduced="true"] .notchLamp[data-coach="true"],
+.screen[data-reduced="true"] .notchLamp[data-release="true"],
 .screen[data-reduced="true"] .lever[data-coach="true"] {
   animation: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .notchLamp[data-coach="true"],
+  .notchLamp[data-release="true"],
   .lever[data-coach="true"] {
     animation: none;
   }

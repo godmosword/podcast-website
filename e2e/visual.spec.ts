@@ -722,6 +722,34 @@ test("visual：小橘特快車速度表數字 390 light（家長打開）", asyn
   await expect(gauge).toHaveScreenshot("orange-express-gauge-numbers-390-light.png", orangeShot("light"));
 });
 
+/** 推了動力、煞車沒放、車不走：煞車桿「鬆」那格亮實線框、桿頂的字跟著亮（大司機）。 */
+test("visual：小橘特快車先鬆煞車 390 light", async ({ page }) => {
+  await openOrangeExpress(page, PHONE);
+  await startOrangeExpress(page, "自己開");
+  await jumpOrangeExpress(page, { progress: 0.2, speed: 0, power: 2, brake: 2 });
+  const brake = page.getByRole("slider", { name: "煞車" });
+  await expect(brake.locator('[data-notch="0"]')).toHaveAttribute("data-release", "true", { timeout: 3000 });
+  await settleOrangeExpress(page);
+  await expect(page.getByTestId("orange-express-cab")).toHaveScreenshot(
+    "orange-express-release-390-light.png",
+    orangeShot("light"),
+  );
+});
+
+/** 小小司機：「鬆」格本來是虛線空格，提示時改實線＋黃框，跟旁邊藍綠的「停」分得開。 */
+test("visual：小橘特快車小小司機先鬆煞車 390 light", async ({ page }) => {
+  await openOrangeExpress(page, PHONE, { driver: "little" });
+  await startOrangeExpress(page, "自己開");
+  await jumpOrangeExpress(page, { progress: 0.2, speed: 0, power: 2, brake: 3 });
+  const brake = page.getByRole("slider", { name: "煞車" });
+  await expect(brake.locator('[data-notch="0"]')).toHaveAttribute("data-release", "true", { timeout: 3000 });
+  await settleOrangeExpress(page);
+  await expect(page.getByTestId("orange-express-cab")).toHaveScreenshot(
+    "orange-express-release-little-390-light.png",
+    orangeShot("light"),
+  );
+});
+
 /** 直式矮手機：地標站在停車目標條右邊那一欄，不被條子蓋住（大司機，前窗只剩約 110px）。 */
 test("visual：小橘特快車停好開門 375×553 light（矮手機地標）", async ({ page }) => {
   await openOrangeExpress(page, [375, 553, "light"], { progress: 0.65, speed: 0, freeze: false });
