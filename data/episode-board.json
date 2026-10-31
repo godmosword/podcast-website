@@ -1,0 +1,101 @@
+{
+  "version": 1,
+  "episodes": [
+    {
+      "id": "ep-35",
+      "character": "duo-duo",
+      "action": "brush-teeth",
+      "title": "恐龍車多多問為什麼不能一直吃糖果？",
+      "summary": "多多好喜歡吃糖果，吃太多卻出了一連串糗事。跟著多多少吃糖果、好好吃飯，再把牙齒刷乾淨。",
+      "href": "/story/ep-35/play"
+    },
+    {
+      "id": "ep-34",
+      "character": "xiao-hong",
+      "action": "wait-light",
+      "title": "小紅賽車好想生氣怎麼辦？",
+      "summary": "小紅遇到不順利的事會氣噗噗。紅綠燈唱歌教他：紅燈停一停、黃燈數一數，綠燈亮了再開心向前走。",
+      "href": "/story/ep-34/play"
+    },
+    {
+      "id": "ep-33",
+      "character": "hui-hui",
+      "action": "paint-self",
+      "title": "神奇的油漆車長出自己的樣子",
+      "summary": "灰灰覺得別人的顏色比較好看，換了紅、藍、黃，卻越來越不像自己。後來才發現，自己的樣子就很好。",
+      "href": "/story/ep-33/play"
+    },
+    {
+      "id": "ep-13",
+      "character": "a-ku",
+      "action": "dig",
+      "title": "鑽地車阿酷的溫柔救援任務",
+      "summary": "阿酷開著鑽地車去幫忙。他外表酷酷的，做起事來卻很溫柔。",
+      "href": "/story/ep-13/play"
+    },
+    {
+      "id": "ep-10",
+      "character": "xiang-xiang",
+      "action": "drive",
+      "title": "香香的粽子餐車",
+      "summary": "端午節到了，香香的餐車帶來粽子，把好吃的分給大家。",
+      "href": "/story/ep-10/play"
+    },
+    {
+      "id": "ep-8",
+      "character": "monster-truck",
+      "action": "drive",
+      "title": "怪獸卡車輕輕開",
+      "summary": "猛猛的聲音很大、輪子也很大。他學著輕輕開，顧到旁邊的朋友。",
+      "href": "/story/ep-8/play"
+    },
+    {
+      "id": "ep-6",
+      "character": "an-an",
+      "action": "drive",
+      "title": "安安救護車｜勇敢說出我需要幫忙",
+      "summary": "安安救護車出任務時遇到困難，學會開口求助，和夥伴一起合作完成任務。",
+      "href": "/story/ep-6/play"
+    },
+    {
+      "id": "ep-5-dong-dong",
+      "character": "dong-dong",
+      "action": "dig",
+      "title": "東東挖土機的勇氣任務",
+      "summary": "東東挖土機有點膽小，卻鼓起勇氣，一步步完成任務。",
+      "href": "/story/ep-5/play"
+    },
+    {
+      "id": "ep-5-diao-che",
+      "character": "diao-che",
+      "action": "lift",
+      "title": "東東挖土機的勇氣任務",
+      "summary": "吊車阿公溫柔地鼓勵東東，教他一小步一小步來。",
+      "href": "/story/ep-5/play"
+    },
+    {
+      "id": "ep-4",
+      "character": "ling-ling",
+      "action": "sweep",
+      "title": "守信用的鈴鈴清潔車",
+      "summary": "鈴鈴清潔車的早安音樂鈴壞掉了，她仍努力提醒車車朋友起床，學會守信用、說到做到。",
+      "href": "/story/ep-4/play"
+    },
+    {
+      "id": "ep-3-lan-ba-shi",
+      "character": "lan-ba-shi",
+      "action": "drive",
+      "title": "小紅賽車不是第一名也沒關係",
+      "summary": "小藍巴士在這一集溫柔陪著朋友。小紅在比賽裡遇到挫折，學會不是第一名也沒關係。",
+      "href": "/story/ep-3/play"
+    },
+    {
+      "id": "ep-1",
+      "character": "watt",
+      "action": "idle",
+      "title": "神奇的未來電動車",
+      "summary": "小機器人沃特出現在未來電動車的故事裡，陪大家想像坐車時可以做的好多事。",
+      "href": "/story/ep-1/play"
+    }
+  ]
+}

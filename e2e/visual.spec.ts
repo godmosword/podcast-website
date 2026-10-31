@@ -949,6 +949,36 @@ for (const viewportId of Object.keys(VIEWPORTS) as VisualViewportId[]) {
   }
 }
 
+// 角色看板是第二個 snap，不在四段 hero 裡。基準要在 Mac 重錄（見 TODOS）。
+for (const viewportId of Object.keys(VIEWPORTS) as VisualViewportId[]) {
+  for (const theme of THEMES) {
+    const viewport = VIEWPORTS[viewportId];
+    test(`visual：角色看板 ${viewport.label} ${theme}`, async ({ page }) => {
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await page.setViewportSize({
+        width: viewport.width,
+        height: viewport.height,
+      });
+      await page.goto("/");
+      await stabilizeVisualPage(page, { theme });
+      const board = page.locator("#segment-episode-board");
+      await board.scrollIntoViewIfNeeded();
+      await expect(page.locator(`[data-active-segment="segment-episode-board"]`)).toBeAttached();
+      await expect(board).toHaveAttribute("data-motion", "reduced");
+      await expect(board).toHaveAttribute("data-ready", "true");
+      await expect(board.locator("canvas")).toBeVisible();
+      await expect(page).toHaveScreenshot(
+        `episode-board-${viewport.label}-${theme}.png`,
+        {
+          fullPage: false,
+          maxDiffPixelRatio: theme === "night" ? 0.03 : 0.02,
+          animations: "disabled",
+        },
+      );
+    });
+  }
+}
+
 // 頂欄 IA／980 斷點：只截 header，避免全頁噪音。實測無集數文案，不需 mask。
 for (const viewport of NAV_BREAKPOINT_VIEWPORTS) {
   test(`visual：頂欄導覽 ${viewport.label} light`, async ({ page }) => {
