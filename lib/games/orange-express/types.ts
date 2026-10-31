@@ -89,6 +89,10 @@ export type RunState = {
   phase: Phase;
   power: PowerNotch;
   brake: BrakeNotch;
+  /** 實際的動力作用（每秒加多少速度）。桿位變了要一點時間才跟上，見 physics.ts。 */
+  tractive: number;
+  /** 實際的煞車作用（每秒減多少速度）。 */
+  braking: number;
   speed: number;
   /** 這一站的 0–1。到站窗用這個判斷，不看畫面上的像素。 */
   progress: number;

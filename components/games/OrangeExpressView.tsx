@@ -26,12 +26,13 @@ import {
   ARRIVAL_MELODY,
   ARRIVE_CHIME,
   AUTO_BRAKE_DING,
+  BRAKE_LEVER_SOUND,
   DOOR_CHIME,
   EMERGENCY_CLICK,
   HORN,
-  NOTCH_CLICK,
   PASS_WHOOSH,
   POINT_OK,
+  POWER_LEVER_SOUND,
   jointClack,
 } from "@/lib/games/orange-express/chime";
 import { coachBeat, type CoachBeat } from "@/lib/games/orange-express/coach";
@@ -326,7 +327,7 @@ export function OrangeExpressView({
         return;
       }
       audio?.ensureAudio();
-      audio?.voices?.(NOTCH_CLICK);
+      audio?.voices?.(POWER_LEVER_SOUND);
       apply(next);
     },
     [apply, audio],
@@ -340,7 +341,7 @@ export function OrangeExpressView({
       const next = step(cur, { type: "set-brake", notch });
       if (next === cur) return;
       audio?.ensureAudio();
-      audio?.voices?.(next.brake === EMERGENCY ? EMERGENCY_CLICK : NOTCH_CLICK);
+      audio?.voices?.(next.brake === EMERGENCY ? EMERGENCY_CLICK : BRAKE_LEVER_SOUND);
       apply(next);
     },
     [apply, audio],
@@ -620,7 +621,7 @@ export function OrangeExpressView({
           }
         }
       }
-      sound.current?.update(driveMix(next.speed, next.power, next.brake, inTunnel(next)));
+      sound.current?.update(driveMix(next.speed, next.tractive, next.braking, inTunnel(next)));
 
       const sameStation = next.stationIndex === cur.stationIndex;
       if (next.autoBrakeCount > cur.autoBrakeCount) audio?.voices?.(AUTO_BRAKE_DING);

@@ -24,6 +24,16 @@ export const NOTCH_CLICK: readonly SynthVoice[] = [
   { wave: "sine", freq: 1100, freqEnd: 700, dur: 0.04, vol: 0.05, attack: 0.002 },
 ];
 
+/** 換動力桿時立刻給一聲很輕的馬達「嗡」，不必等車速起來。 */
+export const POWER_LEVER_SOUND: readonly SynthVoice[] = [
+  { wave: "triangle", freq: 110, freqEnd: 180, dur: 0.12, vol: 0.055, attack: 0.008 },
+];
+
+/** 換煞車桿時立刻給一聲很輕的進氣「噗」，不必等車開始減速。 */
+export const BRAKE_LEVER_SOUND: readonly SynthVoice[] = [
+  { wave: "noise", dur: 0.09, vol: 0.055, attack: 0.008, filter: { type: "bandpass", freq: 1100, q: 1.4 } },
+];
+
 /** 拉到緊急那一格，比較重的「咚」。 */
 export const EMERGENCY_CLICK: readonly SynthVoice[] = [
   { wave: "noise", dur: 0.06, vol: 0.1, attack: 0.002, filter: { type: "bandpass", freq: 900, q: 1.5 } },
@@ -78,6 +88,8 @@ export const CHIME_SETS = [
   ARRIVE_CHIME,
   DOOR_CHIME,
   NOTCH_CLICK,
+  POWER_LEVER_SOUND,
+  BRAKE_LEVER_SOUND,
   EMERGENCY_CLICK,
   AUTO_BRAKE_DING,
   ARRIVAL_MELODY,

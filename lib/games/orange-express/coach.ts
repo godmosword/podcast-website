@@ -1,4 +1,4 @@
-import { currentStation, predictStop } from "@/lib/games/orange-express/reducer";
+import { currentStation, predictStop, step } from "@/lib/games/orange-express/reducer";
 import type { BrakeNotch, RunState } from "@/lib/games/orange-express/types";
 
 /** 「停」那一格（低齡桿面三格裡的中間那格）。 */
@@ -19,7 +19,9 @@ export function coachBeat(state: RunState): CoachBeat {
   if (state.progress < station.approachAt) return "none";
   if (state.speed <= 0) return "watch";
   const brake = (state.brake > STOP_NOTCH ? state.brake : STOP_NOTCH) as BrakeNotch;
-  const ifPulled = predictStop({ ...state, power: 0, brake, autoBrake: false });
+  // 「現在拉『停』」用真的換桿算：作用從當下的值開始、照樣先跳一點再跟上，跟孩子真的拉下去一樣。
+  const pulled = step(step(state, { type: "set-power", notch: 0 }), { type: "set-brake", notch: brake });
+  const ifPulled = predictStop({ ...pulled, autoBrake: false });
   if (ifPulled === null) return "watch";
   return ifPulled >= station.window.start ? "brake" : "watch";
 }
