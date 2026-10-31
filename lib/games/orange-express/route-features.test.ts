@@ -39,10 +39,17 @@ describe("路線：四組規則", () => {
 
   it("只有大司機與小站長有速限牌與指差確認，提早按門也只有他們扣星", () => {
     for (const course of ["look", "little"] as const) {
-      expect(COURSE_RULES[course]).toEqual({ signs: false, autoBrake: false, pointing: false, earlyDoorCosts: false });
+      expect(COURSE_RULES[course]).toEqual({
+        signs: false,
+        autoBrake: false,
+        pointing: false,
+        earlyDoorCosts: false,
+        landmarkGreet: false,
+      });
     }
     for (const course of ["big", "captain"] as const) {
       expect(COURSE_RULES[course].earlyDoorCosts).toBe(true);
+      expect(COURSE_RULES[course].landmarkGreet).toBe(true);
     }
     for (const station of stationsFor("drive", "little")) {
       expect(station.signs).toHaveLength(0);

@@ -117,3 +117,27 @@ describe("前窗提示的朗讀：同一面速限牌不念兩次", () => {
     expect(nextSpeech(near, false, new Set())?.text).toMatch(/^速限牌：/);
   });
 });
+
+describe("停好後跟地標打招呼的朗讀", () => {
+  it("大司機開門等人時念「按喇叭，跟摩天輪打招呼」；停好還沒開門不念；打過招呼就不念", () => {
+    const parked = withHook(createRun("drive", "big"), { progress: 0.65, speed: 0 });
+    expect(speechCandidates(parked, false).map((item) => item.text)).not.toContain("按喇叭，跟摩天輪打招呼");
+    const stopped = { ...parked, phase: "doors-open" as const };
+    const items = speechCandidates(stopped, false);
+    expect(items.map((item) => item.text)).toContain("按喇叭，跟摩天輪打招呼");
+    const greeted = { ...stopped, landmarkGreets: [0] };
+    expect(speechCandidates(greeted, false).map((item) => item.text)).not.toContain("按喇叭，跟摩天輪打招呼");
+  });
+
+  it("每站念自己的地標", () => {
+    const run = createRun("captain");
+    const texts = [1, 2].map((stationIndex) =>
+      speechCandidates({ ...withHook(run, { stationIndex, progress: 0.65, speed: 0 }), phase: "doors-open" }, false).map(
+        (item) => item.text,
+      ),
+    );
+    expect(texts[0]).toContain("按喇叭，跟橘子樹打招呼");
+    expect(texts[1]).toContain("按喇叭，跟小房子打招呼");
+  });
+});
+

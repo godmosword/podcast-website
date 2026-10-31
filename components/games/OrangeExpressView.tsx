@@ -38,6 +38,7 @@ import { coachBeat, type CoachBeat } from "@/lib/games/orange-express/coach";
 import { coachThisRun, learnCoach, startCoachRun } from "@/lib/games/orange-express/coach-record";
 import { COPY, DRIVER_HINT, DRIVER_NAME, GRADE_TEXT, LEVEL_DOTS } from "@/lib/games/orange-express/copy";
 import { medalsFor, starMissReason } from "@/lib/games/orange-express/medals";
+import { COURSE_RULES } from "@/lib/games/orange-express/routes";
 import { nextSpeech, type SpeechItem } from "@/lib/games/orange-express/notice";
 import {
   clampPower,
@@ -88,6 +89,8 @@ const LEVELS: readonly LevelId[] = ["look", "drive", "captain"];
 const SOUND_RETRY_MS = 1000;
 /** 「叮咚」之後再念站名。 */
 const ANNOUNCE_DELAY_MS = 650;
+/** 乘客卡滑完（600ms）、愛心泡泡冒出來的時候。 */
+const BOARD_CHIME_DELAY_MS = 640;
 /** 門還沒亮就按：前窗提示留這麼久。 */
 const DOOR_HINT_MS = 2400;
 /** 「門亮了再按」排在廣播後面；等太久才輪到就不念了，孩子早就不記得剛剛按過。 */
@@ -108,7 +111,10 @@ function liveText(run: RunState, doorHint: boolean, coach: CoachBeat): string {
   if (doorHint) return COPY.earlyDoorHint;
   if (coach === "brake") return COPY.coachBrake;
   if (run.autoBrake) return COPY.autoBrakeOn;
-  if (run.phase === "doors-open") return COPY.boarding;
+  if (run.phase === "doors-open") {
+    const waiting = run.boarded < currentStation(run).passengers.length;
+    return waiting ? COPY.boarding : COPY.friendsAboard;
+  }
   if (run.phase === "stopped") {
     const grade = run.grades[run.stationIndex];
     return grade ? `${COPY.atStation}，${GRADE_TEXT[grade]}` : COPY.atStation;
@@ -511,6 +517,33 @@ export function OrangeExpressView({
     if (!driving) stopSound();
   }, [driving, stopSound]);
 
+  // 每位朋友上車：等乘客卡滑完、愛心泡泡冒出來時叮一聲（現有的輕鈴，不念角色台詞）。
+  // 上車時每一幀 run 都在變，timer 不能跟著 effect 清掉，不然 0.4 秒上一位、0.64 秒才響的鈴會被下一幀取消；
+  // 收進清單，只在離開畫面時一起清。
+  const boardedRef = useRef(0);
+  const boardChimes = useRef<number[]>([]);
+  useEffect(() => {
+    if (!run || run.phase !== "doors-open") {
+      boardedRef.current = 0;
+      return;
+    }
+    if (run.boarded <= boardedRef.current) return;
+    boardedRef.current = run.boarded;
+    const timer = window.setTimeout(() => {
+      boardChimes.current = boardChimes.current.filter((t) => t !== timer);
+      audio?.voices?.(ARRIVE_CHIME);
+    }, BOARD_CHIME_DELAY_MS);
+    boardChimes.current.push(timer);
+  }, [audio, run]);
+
+  useEffect(() => {
+    const timers = boardChimes;
+    return () => {
+      for (const timer of timers.current) window.clearTimeout(timer);
+      timers.current = [];
+    };
+  }, []);
+
   useEffect(() => stopSound, [stopSound]);
   useEffect(() => clearAnnounce, [clearAnnounce]);
 
@@ -637,6 +670,8 @@ export function OrangeExpressView({
           grades={run.grades}
           pointsDone={run.pointsDone.length}
           bridgeGreets={run.bridgeGreets}
+          landmarkGreets={run.landmarkGreets}
+          landmarkTask={COURSE_RULES[run.course].landmarkGreet}
           onReplay={begin}
           onTitle={goTitle}
         />

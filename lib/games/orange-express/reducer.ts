@@ -202,6 +202,7 @@ export function createRun(level: LevelId, driver: DriverId = "big"): RunState {
     passedTrain: false,
     bridgeGreeted: false,
     bridgeGreets: 0,
+    landmarkGreets: [],
     pointsDone: [],
   };
 }
@@ -334,8 +335,24 @@ export function withHook(state: RunState, hook: OrangeExpressHook | null | undef
   });
 }
 
-/** 喇叭只有在鐵橋上第一次按才記一筆「打招呼」；其他時候回傳同一個物件。 */
+/**
+ * 大司機、小站長開門等人時，這一站還沒跟地標打招呼。
+ * 停好還沒開門時不出：那時「開門」是唯一要按的，一次只做一件事；等朋友上車的空檔才打招呼。
+ */
+export function landmarkTaskPending(state: RunState): boolean {
+  if (!COURSE_RULES[state.course].landmarkGreet) return false;
+  if (state.phase !== "doors-open") return false;
+  return !state.landmarkGreets.includes(state.stationIndex);
+}
+
+/**
+ * 喇叭記一筆「打招呼」只有兩種時候：停好後跟這一站的地標（大司機、小站長），
+ * 或在鐵橋上第一次按。其他時候回傳同一個物件。
+ */
 export function honk(state: RunState): RunState {
+  if (landmarkTaskPending(state)) {
+    return { ...state, landmarkGreets: [...state.landmarkGreets, state.stationIndex] };
+  }
   if (state.bridgeGreeted || !onBridge(state)) return state;
   return { ...state, bridgeGreeted: true, bridgeGreets: state.bridgeGreets + 1 };
 }

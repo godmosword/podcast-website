@@ -24,10 +24,10 @@ test.describe("小橘特快車", () => {
     await expect(page.getByText("馬米")).toBeVisible();
     await expect(page.getByText("Bonbon")).toBeVisible();
     await expect(page.getByRole("button", { name: "關門" })).toBeVisible();
-    // 上車的朋友原位留一個勾（頭像滑走，勾冒出來）。
+    // 上車的朋友原位留一個勾（頭像滑走，勾冒出來），旁邊冒一個愛心泡泡：兩位朋友各三個圖。
     await expect(
       page.getByRole("list", { name: "月台上的朋友" }).locator('li[data-boarded="true"] svg'),
-    ).toHaveCount(4);
+    ).toHaveCount(6);
     await page.getByRole("button", { name: "關門" }).click();
     await expect(page.getByRole("heading", { name: "到家了" })).toBeVisible();
     // 星星只算整趟；每站是色塊加「剛剛好／停到了」，結算不再出現 ★。
@@ -1023,5 +1023,53 @@ test.describe("小橘特快車：站點地標", () => {
     await expect(cab.locator('[data-landmark="orange-tree"]')).toHaveCount(1);
     await jump(page, { stationIndex: 2 });
     await expect(cab.locator('[data-landmark="house"]')).toHaveCount(1);
+  });
+});
+
+test.describe("小橘特快車：停好後跟地標打招呼、朋友上車的愛心", () => {
+  test("大司機開門等人時喇叭亮黃圈，按了就收；結算那站蓋地標章，沒打的照常上色", async ({ page }) => {
+    await page.addInitScript(() => {
+      window.__orangeExpress = { driver: "big", stationIndex: 2, progress: 0.65, speed: 0 };
+    });
+    await page.goto("/games/orange-express");
+    await startLevel(page, "自己開");
+    const horn = page.getByTestId("orange-express-horn");
+    await expect(page.getByTestId("orange-express-drive")).toHaveAttribute("data-phase", "stopped");
+    // 停好還沒開門：開門是唯一要按的，喇叭不亮。
+    await expect(horn).toHaveAttribute("data-hint", "false");
+    await page.getByRole("button", { name: "開門" }).click();
+    await expect(horn).toHaveAttribute("data-hint", "true");
+    await horn.click();
+    await expect(horn).toHaveAttribute("data-hint", "false");
+
+    // 朋友上車：頭像旁冒愛心泡泡，讀屏說朋友上車了。
+    await expect(page.getByRole("list", { name: "月台上的朋友" }).locator('li[data-boarded="true"] svg')).not.toHaveCount(0);
+    const close = page.getByRole("button", { name: "關門" });
+    await expect(close).not.toHaveAttribute("aria-disabled", "true");
+    await expect(page.getByTestId("orange-express-drive").locator("p[aria-live]")).toHaveText("朋友上車了");
+    await close.click();
+
+    const result = page.getByTestId("orange-express-result");
+    await expect(result.locator('[data-landmark="house"]')).toHaveAttribute("data-stamped", "true");
+    await expect(result.locator('[data-landmark="ferris"]')).toHaveAttribute("data-stamped", "false");
+    // 只加不減：沒打招呼的地標照常上色，不變灰。
+    expect(await result.locator('[data-landmark="ferris"]').evaluate((el) => getComputedStyle(el).filter)).toBe("none");
+    await expect(result.getByTestId("orange-express-extras")).toContainText("跟地標打招呼 1 站");
+  });
+
+  test("小小司機沒有這個任務：喇叭不亮黃圈，結算地標照常上色", async ({ page }) => {
+    await page.addInitScript(() => {
+      window.__orangeExpress = { driver: "little", stationIndex: 2, progress: 0.65, speed: 0 };
+    });
+    await page.goto("/games/orange-express");
+    await startLevel(page, "自己開");
+    await expect(page.getByTestId("orange-express-drive")).toHaveAttribute("data-phase", "stopped");
+    await expect(page.getByTestId("orange-express-horn")).toHaveAttribute("data-hint", "false");
+    await page.getByRole("button", { name: "開門" }).click();
+    const close = page.getByRole("button", { name: "關門" });
+    await expect(close).not.toHaveAttribute("aria-disabled", "true");
+    await close.click();
+    const result = page.getByTestId("orange-express-result");
+    await expect(result.locator('[data-landmark="house"]')).not.toHaveAttribute("data-stamped", /.*/);
   });
 });

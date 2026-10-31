@@ -228,10 +228,20 @@ export function LevelGlyph({ level }: { level: LevelId }) {
  * 站點地標的小圖示（駕駛台「下一站」旁、結算站卡）：跟前窗裡的地標同一個東西，
  * 不識字的孩子看圖就知道下一站是摩天輪那一站。
  */
-export function LandmarkGlyph({ id, className }: { id: LandmarkId; className?: string }) {
+export function LandmarkGlyph({
+  id,
+  className,
+  stamped,
+}: {
+  id: LandmarkId;
+  className?: string;
+  /** 結算的地標章：打過招呼的上色，沒打的灰。沒給（低齡沒有這個任務）就照常上色。 */
+  stamped?: boolean;
+}) {
+  const stamp = stamped === undefined ? undefined : stamped ? "true" : "false";
   if (id === "ferris") {
     return (
-      <svg viewBox="0 0 24 24" aria-hidden className={className} data-landmark={id}>
+      <svg viewBox="0 0 24 24" aria-hidden className={className} data-landmark={id} data-stamped={stamp}>
         <path d="M7 22l5-11 5 11" fill="none" stroke="rgb(150, 124, 196)" strokeWidth="2" strokeLinecap="round" />
         <circle cx="12" cy="10" r="7.5" fill="none" stroke="rgb(58, 46, 40)" strokeWidth="3.2" />
         <circle cx="12" cy="10" r="7.5" fill="none" stroke="rgb(236, 128, 104)" strokeWidth="1.8" />
@@ -248,7 +258,7 @@ export function LandmarkGlyph({ id, className }: { id: LandmarkId; className?: s
   }
   if (id === "orange-tree") {
     return (
-      <svg viewBox="0 0 24 24" aria-hidden className={className} data-landmark={id}>
+      <svg viewBox="0 0 24 24" aria-hidden className={className} data-landmark={id} data-stamped={stamp}>
         <path d="M2 23c2-4 6-5.5 10-5.5s8 1.5 10 5.5z" fill="rgb(118, 184, 108)" />
         <rect x="10.8" y="12" width="2.4" height="7" rx="1" fill="rgb(140, 98, 64)" />
         <circle cx="12" cy="9" r="7.5" fill="rgb(82, 150, 72)" />
@@ -261,7 +271,7 @@ export function LandmarkGlyph({ id, className }: { id: LandmarkId; className?: s
     );
   }
   return (
-    <svg viewBox="0 0 24 24" aria-hidden className={className} data-landmark={id}>
+    <svg viewBox="0 0 24 24" aria-hidden className={className} data-landmark={id} data-stamped={stamp}>
       <rect x="15" y="3" width="2.6" height="5" fill="rgb(184, 70, 56)" />
       <rect x="4.5" y="11" width="15" height="11" rx="1" fill="rgb(255, 244, 224)" stroke="rgb(58, 46, 40)" strokeWidth="1.2" />
       <path d="M2.5 12L12 3.5l9.5 8.5z" fill="rgb(188, 70, 58)" stroke="rgb(58, 46, 40)" strokeWidth="1.2" strokeLinejoin="round" />
