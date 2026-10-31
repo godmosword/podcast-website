@@ -47,6 +47,10 @@ const TREE_RIGHT_NEAR = 18;
 /** 站點地標在停車目標之後多遠（公尺）；右邊這一帶留給地標，不畫樹。 */
 export const LANDMARK_AHEAD = 40;
 const LANDMARK_CLEAR = 30;
+/** 號誌、速限牌前後這麼多公尺不生樹。 */
+const SIGNAL_CLEAR_BEFORE = 30;
+const SIGNAL_CLEAR_AFTER = 20;
+const SIGN_CLEAR = 20;
 const LANDMARK_LEAD = 150;
 const TRUSS_GAP = 9;
 const BUILDING_GAP = 26;
@@ -183,6 +187,11 @@ const CLOUD_LIT = "rgb(255, 255, 252)";
 /** 道碴是中暖灰（不是全黑）：乘客卡與指差確認鈕疊在前窗下緣，要靠它襯。 */
 const BALLAST = "rgb(166, 156, 144)";
 const BALLAST_SHADE = "rgb(136, 126, 114)";
+/** 道碴前景的圓石點：亮度只差一點點，像黏土顆粒，不像水泥板。 */
+const PEBBLE_LIGHT = "rgb(178, 168, 156)";
+const PEBBLE_DARK = "rgb(150, 140, 128)";
+/** 道碴與草地交界的沙色路肩（封面的沙地）。 */
+const SHOULDER = "rgb(222, 200, 160)";
 /** 鋼軌深色、軌頂一條奶油亮線；枕木咖啡色，近緣一道深邊像有厚度。 */
 const RAIL = "rgb(92, 78, 68)";
 const RAIL_SHINE = "rgb(252, 238, 210)";
@@ -256,6 +265,8 @@ export type WindshieldPaint = {
   passing?: number | null;
   /** 這一站的地標（停車目標之後、月台另一側）。 */
   landmark?: LandmarkId | null;
+  /** 直式矮手機（CSS 的 portrait 且高 ≤600）：地標改放停車目標條右邊那一欄。 */
+  compact?: boolean;
 };
 
 export type View = { w: number; h: number; vx: number; hy: number; f: number };
@@ -427,38 +438,68 @@ function drawCloud(ctx: CanvasRenderingContext2D, x: number, y: number, s: numbe
   ctx.fill();
 }
 
-function drawHills(ctx: CanvasRenderingContext2D, view: View, palette: Palette, scene: SceneId): void {
+/** 圓頂山丘：[中心（前窗寬的比例）, 半寬（比例）, 高（前窗高的比例）]。 */
+type Dome = readonly [number, number, number];
+
+/** 兩層圓頂雙綠山丘（封面火車以外第二大的辨識元素）：後層淡、前層綠，海邊只在左半邊，城市壓低。 */
+const HILL_DOMES: Record<SceneId, { back: readonly Dome[]; front: readonly Dome[] }> = {
+  field: {
+    back: [
+      [0.08, 0.16, 0.1],
+      [0.32, 0.2, 0.12],
+      [0.56, 0.18, 0.09],
+      [0.8, 0.2, 0.115],
+      [1.02, 0.14, 0.08],
+    ],
+    front: [
+      [0.02, 0.15, 0.06],
+      [0.24, 0.12, 0.045],
+      [0.88, 0.17, 0.065],
+    ],
+  },
+  city: {
+    back: [
+      [0.15, 0.2, 0.06],
+      [0.5, 0.25, 0.07],
+      [0.86, 0.2, 0.06],
+    ],
+    front: [],
+  },
+  sea: {
+    back: [
+      [0.05, 0.15, 0.1],
+      [0.27, 0.16, 0.08],
+    ],
+    front: [[0.12, 0.11, 0.05]],
+  },
+};
+
+function drawDomes(
+  ctx: CanvasRenderingContext2D,
+  view: View,
+  domes: readonly Dome[],
+  lit: string,
+  base: string,
+): void {
+  if (domes.length === 0) return;
   const { w, h, hy } = view;
-  const right = scene === "sea" ? 0.46 : 1;
-  const far = ctx.createLinearGradient(0, hy - h * 0.12, 0, hy);
-  far.addColorStop(0, palette.hillFarLit);
-  far.addColorStop(1, palette.hillFar);
-  ctx.fillStyle = far;
+  const top = Math.max(...domes.map(([, , dh]) => dh));
+  const fill = ctx.createLinearGradient(0, hy - h * top, 0, hy);
+  fill.addColorStop(0, lit);
+  fill.addColorStop(1, base);
+  ctx.fillStyle = fill;
   ctx.beginPath();
-  ctx.moveTo(0, hy);
-  ctx.quadraticCurveTo(w * 0.18 * right, hy - h * 0.1, w * 0.38 * right, hy - h * 0.02);
-  if (scene !== "sea") {
-    ctx.quadraticCurveTo(w * 0.6, hy - h * 0.12, w * 0.82, hy - h * 0.03);
-    ctx.quadraticCurveTo(w * 0.92, hy - h * 0.07, w, hy - h * 0.04);
-    ctx.lineTo(w, hy + 1);
-  } else {
-    ctx.quadraticCurveTo(w * 0.42, hy - h * 0.01, w * right, hy + 1);
+  for (const [cx, rx, dh] of domes) {
+    ctx.moveTo(w * (cx - rx), hy + 1);
+    ctx.ellipse(w * cx, hy + 1, w * rx, h * dh, 0, Math.PI, Math.PI * 2);
   }
-  ctx.lineTo(0, hy + 1);
-  ctx.closePath();
   ctx.fill();
-  if (scene === "field") {
-    const near = ctx.createLinearGradient(0, hy - h * 0.06, 0, hy);
-    near.addColorStop(0, palette.hillNearLit);
-    near.addColorStop(1, palette.hillNear);
-    ctx.fillStyle = near;
-    ctx.beginPath();
-    ctx.moveTo(w * 0.55, hy + 1);
-    ctx.quadraticCurveTo(w * 0.78, hy - h * 0.06, w, hy - h * 0.01);
-    ctx.lineTo(w, hy + 1);
-    ctx.closePath();
-    ctx.fill();
-  }
+}
+
+function drawHills(ctx: CanvasRenderingContext2D, view: View, palette: Palette, scene: SceneId): void {
+  const domes = HILL_DOMES[scene];
+  drawDomes(ctx, view, domes.back, palette.hillFarLit, palette.hillFar);
+  drawDomes(ctx, view, domes.front, palette.hillNearLit, palette.hillNear);
 }
 
 /** 遠方的城市剪影：圓角色塊與亮窗，沒有招牌、沒有字。 */
@@ -575,7 +616,10 @@ function drawTrack(
   dim = false,
   zFar = Z_FAR,
 ): void {
+  // 半寬 2.35：兩條軌道（中心距 4.6）的路肩接在一起，中間不會露出一條細細的綠線。
+  if (!dim) quad(ctx, view, center - 2.35, center + 2.35, 0, Z_NEAR, zFar, SHOULDER);
   quad(ctx, view, center - 1.7, center + 1.7, 0, Z_NEAR, zFar, dim ? TUNNEL_FLOOR : BALLAST);
+  if (!dim) drawPebbles(ctx, view, center, travel);
   const offset = ((travel % SLEEPER_GAP) + SLEEPER_GAP) % SLEEPER_GAP;
   for (let z = Z_NEAR + SLEEPER_GAP - offset; z < Math.min(70, zFar); z += SLEEPER_GAP) {
     quad(ctx, view, center - 1.25, center + 1.25, 0, z, z + 0.24, dim ? TUNNEL_DARK : SLEEPER);
@@ -607,6 +651,10 @@ export type TreeSpot = {
   scene: SceneId;
   tunnel: Span | null;
   bridge: Span | null;
+  /** 直式矮手機：地標放右邊，地標那一帶右邊不生樹。 */
+  compact?: boolean;
+  /** 路旁速限牌（立在左邊）：牌子前後左邊不生樹。 */
+  signs?: readonly SpeedSign[];
 };
 
 /**
@@ -617,6 +665,9 @@ export type TreeSpot = {
 export function treeVisible(spot: TreeSpot): boolean {
   const { side, world, z, targetWorld, scene, tunnel, bridge } = spot;
   if (z < TREE_NEAR || z > TREE_FAR) return false;
+  // 出發號誌前後兩側淨空：綠燈落在綠樹冠前面最容易看不出來。
+  if (world >= SIGNAL_WORLD - SIGNAL_CLEAR_BEFORE && world <= SIGNAL_WORLD + SIGNAL_CLEAR_AFTER) return false;
+  if (side < 0 && (spot.signs ?? []).some((sign) => Math.abs(world - sign.at * STATION_WORLD) <= SIGN_CLEAR)) return false;
   if (scene === "city") return false;
   if (scene === "sea" && side > 0) return false;
   for (const span of [tunnel, bridge]) {
@@ -624,10 +675,10 @@ export function treeVisible(spot: TreeSpot): boolean {
   }
   if (side < 0) {
     if (world >= targetWorld - PLATFORM_BEFORE - 10 && world <= targetWorld + PLATFORM_AFTER + 10) return false;
-    if (side === landmarkSide(scene) && inLandmarkBand(world, targetWorld)) return false;
+    if (side === landmarkSide(scene, spot.compact) && inLandmarkBand(world, targetWorld)) return false;
     return true;
   }
-  if (side === landmarkSide(scene) && inLandmarkBand(world, targetWorld)) return false;
+  if (side === landmarkSide(scene, spot.compact) && inLandmarkBand(world, targetWorld)) return false;
   return z >= TREE_RIGHT_NEAR;
 }
 
@@ -686,7 +737,7 @@ function drawTrees(
   ctx: CanvasRenderingContext2D,
   view: View,
   travel: number,
-  paint: Pick<WindshieldPaint, "scene" | "tunnel" | "bridge" | "target">,
+  paint: Pick<WindshieldPaint, "scene" | "tunnel" | "bridge" | "target" | "compact" | "signs">,
   nearerThan = TREE_FAR,
 ): void {
   const scene = paint.scene ?? "field";
@@ -696,22 +747,52 @@ function drawTrees(
     const row = Math.round(world / TREE_GAP);
     for (const side of [-1, 1] as const) {
       const seed = row * 2 + (side > 0 ? 1 : 0);
-      if (!treeVisible({ side, world, z, targetWorld, scene, tunnel: paint.tunnel ?? null, bridge: paint.bridge ?? null })) {
+      const spot = {
+        side,
+        world,
+        z,
+        targetWorld,
+        scene,
+        tunnel: paint.tunnel ?? null,
+        bridge: paint.bridge ?? null,
+        compact: paint.compact,
+        signs: paint.signs,
+      };
+      if (!treeVisible(spot)) {
         continue;
       }
-      const x = side < 0 ? -(8 + hashAt(seed) * 6) : 11 + hashAt(seed) * 6;
+      // 寬畫面（桌機）同樣的公尺離中間比較近，樹往外推，不擠在軌道兩旁的中距離。
+      const spread = view.w / view.h > 1.8 ? 1.7 : 1;
+      const x = side < 0 ? -(8 + hashAt(seed) * 6) * spread : (11 + hashAt(seed) * 6) * spread;
       drawTree(ctx, view, x, z, seed);
     }
   }
 }
 
-/** 地標在哪一邊：回家站右邊是海，小房子放左邊陸地上；其他站放月台另一側（右邊）。 */
-export function landmarkSide(scene: SceneId): -1 | 1 {
+/**
+ * 地標在哪一邊：回家站右邊是海，小房子放左邊陸地上；其他站放月台另一側（右邊）。
+ * 直式矮手機（compact）一律放右邊那一欄：見 landmarkX。
+ */
+export function landmarkSide(scene: SceneId, compact = false): -1 | 1 {
+  if (compact) return 1;
   return scene === "sea" ? -1 : 1;
 }
 
-/** 地標離軌道多遠（公尺）。回家站放更外面，不跟停車柱疊在一起。 */
-function landmarkX(scene: SceneId): number {
+/** 直式矮手機停好時，地標中心落在前窗這個位置（停車目標條右緣在 74%，右邊那一欄是空的）。 */
+const COMPACT_LANDMARK_AT = 0.87;
+
+/** 直式矮手機上小房子放大：原本只有摩天輪、橘子樹一半高，最後一站卻最不起眼。 */
+function landmarkScale(id: LandmarkId, compact: boolean): number {
+  return compact && id === "house" ? 1.5 : 1;
+}
+
+/**
+ * 地標離軌道多遠（公尺）。回家站放更外面，不跟停車柱疊在一起。
+ * 直式矮手機（高 ≤600，CSS 同一個斷點）前窗只剩一兩百 px，停車目標條佔掉上方大半寬，
+ * 站在地平線上的地標整個在條子底下；改放進條子右邊讓出來的那一欄（回家站是海中的小草坡）。
+ */
+function landmarkX(view: View, scene: SceneId, compact: boolean): number {
+  if (compact) return (view.w * COMPACT_LANDMARK_AT - view.vx) / (view.f / LANDMARK_AHEAD);
   return scene === "sea" ? -24 : 17;
 }
 
@@ -731,13 +812,15 @@ export function landmarkBox(
   targetWorld: number,
   scene: SceneId,
   id: LandmarkId,
+  compact = false,
 ): ScreenBox | null {
   const z = targetWorld + LANDMARK_AHEAD - travel;
   if (z <= Z_NEAR + 2 || z > 900) return null;
   const s = view.f / z;
-  const foot = project(view, landmarkX(scene), 0, z);
+  const foot = project(view, landmarkX(view, scene, compact), 0, z);
+  const k = landmarkScale(id, compact);
   const { w, h } = LANDMARK_SIZE[id];
-  return { left: foot.x - (w / 2) * s, right: foot.x + (w / 2) * s, top: foot.y - h * s, bottom: foot.y };
+  return { left: foot.x - (w / 2) * s * k, right: foot.x + (w / 2) * s * k, top: foot.y - h * s * k, bottom: foot.y };
 }
 
 /** 停車柱（含圓牌）在前窗上佔的框，地標不能疊上去。 */
@@ -873,8 +956,8 @@ function drawOrangeTree(ctx: CanvasRenderingContext2D, x: number, ground: number
 }
 
 /** 回家：草坡上的紅屋頂小房子，有煙囪和黃色亮窗。 */
-function drawHouse(ctx: CanvasRenderingContext2D, x: number, ground: number, s: number): void {
-  mound(ctx, x, ground, 4.6 * s, 1.4 * s);
+function drawHouse(ctx: CanvasRenderingContext2D, x: number, ground: number, s: number, moundHeight = 1.4): void {
+  mound(ctx, x, ground, 4.6 * s, moundHeight * s);
   const base = ground - 0.9 * s;
   const top = base - 4 * s;
   ctx.fillStyle = HOUSE_ROOF_DARK;
@@ -903,14 +986,33 @@ function drawLandmark(
   targetWorld: number,
   scene: SceneId,
   id: LandmarkId,
+  compact: boolean,
 ): void {
   const z = targetWorld + LANDMARK_AHEAD - travel;
   if (z <= Z_NEAR + 2 || z > 900) return;
   const s = view.f / z;
-  const foot = project(view, landmarkX(scene), 0, z);
+  const foot = project(view, landmarkX(view, scene, compact), 0, z);
   if (id === "ferris") drawFerris(ctx, foot.x, foot.y, s);
   else if (id === "orange-tree") drawOrangeTree(ctx, foot.x, foot.y, s);
-  else drawHouse(ctx, foot.x, foot.y, s);
+  // 矮手機的回家站在海那一側：小房子放大，草坡墊高，像遠方小島上的家。
+  else drawHouse(ctx, foot.x, foot.y, s * landmarkScale(id, compact), compact ? 2.4 : 1.4);
+}
+
+/** 道碴前景（16 公尺內）撒兩色圓石點，越遠越小；鋼軌那條不撒。位置跟著世界走，不會閃。 */
+function drawPebbles(ctx: CanvasRenderingContext2D, view: View, center: number, travel: number): void {
+  for (const z of repeats(travel, 0.8, Z_NEAR, 16)) {
+    const row = Math.round((travel + z) / 0.8);
+    for (let i = 0; i < 4; i += 1) {
+      const seed = row * 7 + i + center * 13;
+      const x = center - 1.55 + hashAt(seed) * 3.1;
+      if (Math.abs(Math.abs(x - center) - 0.75) < 0.12) continue;
+      const p = project(view, x, 0.01, z + hashAt(seed + 5) * 0.6);
+      ctx.fillStyle = hashAt(seed + 9) > 0.5 ? PEBBLE_LIGHT : PEBBLE_DARK;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, widthAt(view, z, 0.07, 0.8), 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
 }
 
 function drawPortals(
@@ -1285,7 +1387,9 @@ export function drawWindshield(
     if (bridgeZ) drawWater(ctx, view, bridgeZ[0], bridgeZ[1]);
     if (scene === "city") drawBuildings(ctx, view, travel);
     drawTrees(ctx, view, travel, paint);
-    if (paint.landmark) drawLandmark(ctx, view, travel, paint.target * STATION_WORLD, scene, paint.landmark);
+    if (paint.landmark) {
+      drawLandmark(ctx, view, travel, paint.target * STATION_WORLD, scene, paint.landmark, paint.compact === true);
+    }
     drawTrack(ctx, view, OTHER_TRACK, travel);
     drawTrack(ctx, view, 0, travel);
     drawPlatform(ctx, view, travel, paint.target * STATION_WORLD);

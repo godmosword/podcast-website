@@ -334,3 +334,65 @@ describe("前窗：站點地標", () => {
     expect(treeVisible({ ...base, scene: "sea", side: -1, world: targetWorld + LANDMARK_AHEAD })).toBe(false);
   });
 });
+
+describe("前窗：直式矮手機的地標", () => {
+  const targetWorld = 0.65 * STATION_WORLD;
+  /** 直式高 ≤600 時停車目標條右緣在前窗 74%，右邊那一欄讓給指差確認鈕。 */
+  const barRight = 0.74;
+
+  for (const [w, h] of [
+    [339, 110],
+    [339, 179],
+    [284, 129],
+  ] as const) {
+    it(`${w}×${h}：三個地標都在停車目標條右邊那一欄，不被條子蓋住`, () => {
+      const view = viewFor(w, h);
+      for (const [scene, id] of [
+        ["field", "ferris"],
+        ["city", "orange-tree"],
+        ["sea", "house"],
+      ] as const) {
+        const box = landmarkBox(view, targetWorld, targetWorld, scene, id, true)!;
+        expect(box.left, id).toBeGreaterThanOrEqual(w * barRight);
+        expect(box.right, id).toBeLessThanOrEqual(w);
+        expect(box.top, id).toBeGreaterThanOrEqual(8);
+      }
+    });
+  }
+
+  it("進站途中地標跟著透視從中間往右靠、越來越大，停好時剛好落在右邊那一欄，整段不出前窗", () => {
+    const view = viewFor(339, 110);
+    let lastRight = -Infinity;
+    let lastWidth = 0;
+    for (let travel = targetWorld - 200; travel <= targetWorld; travel += 20) {
+      const box = landmarkBox(view, travel, targetWorld, "field", "ferris", true)!;
+      expect(box.right).toBeLessThanOrEqual(339);
+      expect(box.right).toBeGreaterThanOrEqual(lastRight);
+      expect(box.right - box.left).toBeGreaterThanOrEqual(lastWidth);
+      lastRight = box.right;
+      lastWidth = box.right - box.left;
+    }
+  });
+
+  it("一般手機照舊：摩天輪在右、回家的小房子在左邊陸地", () => {
+    const view = viewFor(354, 330);
+    expect(landmarkBox(view, targetWorld, targetWorld, "sea", "house", false)!.right).toBeLessThan(354 / 2);
+    expect(landmarkBox(view, targetWorld, targetWorld, "field", "ferris", false)!.left).toBeGreaterThan(354 / 2);
+  });
+});
+
+describe("前窗：號誌與速限牌附近不長樹", () => {
+  const base = { targetWorld: 0.65 * STATION_WORLD, scene: "field" as const, tunnel: null, bridge: null, z: 40 };
+
+  it("出發號誌前後兩側都不長樹：綠燈不會落在綠樹冠前面", () => {
+    expect(treeVisible({ ...base, side: -1, world: SIGNAL_WORLD })).toBe(false);
+    expect(treeVisible({ ...base, side: 1, world: SIGNAL_WORLD + 10 })).toBe(false);
+    expect(treeVisible({ ...base, side: -1, world: SIGNAL_WORLD + 60 })).toBe(true);
+  });
+
+  it("速限牌（立在左邊）前後左邊不長樹，右邊照常", () => {
+    const signs = [{ at: 0.2, limit: 0.5 }];
+    expect(treeVisible({ ...base, signs, side: -1, world: 0.2 * STATION_WORLD + 5 })).toBe(false);
+    expect(treeVisible({ ...base, signs, side: 1, world: 0.2 * STATION_WORLD + 5 })).toBe(true);
+  });
+});

@@ -722,6 +722,19 @@ test("visual：小橘特快車速度表數字 390 light（家長打開）", asyn
   await expect(gauge).toHaveScreenshot("orange-express-gauge-numbers-390-light.png", orangeShot("light"));
 });
 
+/** 直式矮手機：地標站在停車目標條右邊那一欄，不被條子蓋住（大司機，前窗只剩約 110px）。 */
+test("visual：小橘特快車停好開門 375×553 light（矮手機地標）", async ({ page }) => {
+  await openOrangeExpress(page, [375, 553, "light"], { progress: 0.65, speed: 0, freeze: false });
+  await startOrangeExpress(page, "自己開");
+  await expect(page.getByTestId("orange-express-drive")).toHaveAttribute("data-phase", "stopped");
+  await page.getByRole("button", { name: "開門" }).click();
+  const close = page.getByRole("button", { name: "關門" });
+  await expect(close).toBeVisible();
+  await expect(close).not.toHaveAttribute("aria-disabled", "true");
+  await settleOrangeExpress(page);
+  await expect(page).toHaveScreenshot("orange-express-doors-375x553-light.png", orangeShot("light"));
+});
+
 test("visual：小橘特快車停好開門 390 light（乘客上完車）", async ({ page }) => {
   await openOrangeExpress(page, PHONE, { progress: 0.65, speed: 0, freeze: false });
   await startOrangeExpress(page, "自己開");
