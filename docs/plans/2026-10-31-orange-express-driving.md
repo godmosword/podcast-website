@@ -57,7 +57,7 @@
 
 ### PR-E-1 作用漸進
 
-- [ ] **E1 作用漸進（物理）**（L2）
+- [x] **E1 作用漸進（物理）**（L2）
   - `RunState` 加 `tractive`（實際動力加速度）與 `braking`（實際煞車減速度）。桿位一變，作用**先跳到目標的約 35%**，剩下用一階延遲補上（沒有零反應的死區）。
   - 時間常數集中在新檔 `lib/games/orange-express/physics.ts`（D1），可全部調成 0 退回現況。煞車上升不慢於動力；慢慢看全部為 0（由輔助主導）。
   - 抽出無副作用的單步運動 `motionStep(state, dt)`（只算 tractive／braking／speed／progress／限速收回），`applyMotion` 與停車預測共用；`autoBrakeCount`、passing、phase、miss 這些副作用留在 `applyMotion`。
@@ -67,13 +67,13 @@
     - 速度旗收回 `BLEED`、`LOOK_CREEP` 照舊（慢慢看沒有延遲，桿位就是作用）。
     - `stopHere`、轉倒車、倒車結束、`close-doors` 換站、`createRun`：`tractive`、`braking` 歸零或設成當時桿位的目標。
     - `withHook`：有給 power／brake 就把作用直接設成目標（測試的 `jump` 不受延遲影響）；沒給就保留。
-- [ ] **E2 停車預測重寫**（L2）
+- [x] **E2 停車預測重寫**（L2）
   - `predictStop` 改用 `motionStep` 固定步長 1/30 秒往前推，最多 600 步（20 秒）。
   - 終止條件與 reducer 同語義：在窗內速度 ≤ `stopEpsilon` → 停在該點；跨過窗尾 → 回窗尾（會開過頭）；600 步內沒停 → null（不畫三角）。
   - 「實際停點」定義為同一初始狀態、同一步長逐 tick 前進的結果；差分測試誤差 < 0.005，涵蓋窗前、窗內、窗尾、`stopEpsilon` 臨界、慢慢看爬行。
   - `coachBeat` 的假設狀態「現在拉『停』」用同一套模擬（從當下作用值開始、桿位設成 B3），不再覆寫成即時加速度。
   - 成本：4 倍 CPU 節流量影格；超標就每 3 幀算一次並沿用上次結果。
-- [ ] **E3 看得到、聽得到實際作用**（L2＋UI 風險）
+- [x] **E3 看得到、聽得到實際作用**（L2＋UI 風險）
   - 桿槽填色：動力桿、煞車桿左邊的凹槽從底往上填色到實際作用的位置（動力橘、煞車藍綠）；握把立即到位，填色追上去。只給大司機、小站長；減少動態照常更新（是狀態不是裝飾）。不畫第二個握把。
   - 聲音：桿位一變先給一聲小小的即時音（動力「嗡」、煞車進氣「噗」），之後馬達聲、煞車嘶聲跟著 `tractive`／`braking` 漸強（`driveMix` 改吃作用值）。
   - 速度表指針的 CSS 過渡縮短或拿掉，避免雙重延遲。
@@ -142,6 +142,14 @@ npm run build
   - 關門到轉綠 ≤ 3 秒；暫停時計時不前進；`withHook` 跳站重設；不雙重發車。
   - 提前減速的判準容得下延遲；來不及時自動輕煞仍在。
 - 新文案的字都要在字型子集裡（`app/fonts/*-subset.woff2`，fontTools 比對）。
+
+### PR-E-1 執行紀錄（2026-10-31）
+
+- 物理／預測／音效單元測試：179 passed；`typecheck`、`lint`、`audit:colors` 通過。
+- `e2e/orange-express.spec.ts` + `e2e/games.spec.ts`：146 passed。
+- 小橘視覺組：33 passed；新增的大司機桿槽填色截圖連錄兩次 SHA-256 相同，並已人工目檢。
+- 4 倍 CPU 節流量測：田野、隧道、海邊各 1.2 秒，平均 60–61 fps，p95 17.6ms。
+- Production build 通過。iPhone 真機手感列為 E-1 合併後、開始 E-2 前的人工確認。
 
 ## Risks & rollback
 

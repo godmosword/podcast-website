@@ -1,5 +1,4 @@
 import { noiseBuffer } from "@/lib/gamekit/runtime/synth";
-import type { BrakeNotch, PowerNotch } from "@/lib/games/orange-express/types";
 
 /**
  * 駕駛中持續的聲音：馬達低鳴、加速時的高音、煞車嘶聲、隧道轟聲。
@@ -23,17 +22,20 @@ export const JOINT_SPACING = 0.05;
 
 export function driveMix(
   speed: number,
-  power: PowerNotch,
-  brake: BrakeNotch,
+  tractive: number,
+  braking: number,
   tunnel = false,
 ): DriveMix {
   const s = Math.min(1, Math.max(0, Number.isFinite(speed) ? speed : 0));
+  const t = Math.min(0.52, Math.max(0, Number.isFinite(tractive) ? tractive : 0));
+  const b = Math.min(1.6, Math.max(0, Number.isFinite(braking) ? braking : 0));
   const moving = s > 0.005;
-  const traction = brake === 0 && power > 0;
-  const humVol = moving || traction ? Math.min(0.08, 0.025 + s * 0.05 + (traction ? 0.008 : 0)) : 0;
-  const whineVol = traction ? Math.min(0.04, 0.01 + power * 0.004 + s * 0.012) : moving ? s * 0.006 : 0;
+  // 換桿時牽引已即時切斷；這裡只看實際出力，不讓聲音超前於物理。
+  const traction = b <= 0.001 && t > 0.001;
+  const humVol = moving || traction ? Math.min(0.08, 0.025 + s * 0.05 + t * 0.015) : 0;
+  const whineVol = traction ? Math.min(0.04, 0.008 + t * 0.06 + s * 0.012) : moving ? s * 0.006 : 0;
   let hissVol = 0;
-  if (brake > 0 && moving) hissVol = Math.min(0.07, 0.014 + brake * 0.008 + s * 0.02);
+  if (b > 0.001 && moving) hissVol = Math.min(0.07, 0.012 + b * 0.03 + s * 0.02);
   return {
     humFreq: Math.round(55 + s * 180),
     humVol: round(humVol),

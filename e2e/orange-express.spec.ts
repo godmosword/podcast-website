@@ -651,6 +651,29 @@ test.describe("小橘特快車：桌面從 P0 推動力，車真的會走", () =
     await page.mouse.up();
     await expect(power).toHaveAttribute("aria-valuenow", "4");
   });
+
+  test("大司機的桿槽跟著實際出力填色，煞車能立刻切掉動力", async ({ page }) => {
+    await page.addInitScript(() => {
+      window.__orangeExpress = { driver: "big" };
+    });
+    await page.goto("/games/orange-express");
+    await startLevel(page, "自己開");
+
+    const power = page.getByRole("slider", { name: "動力" });
+    const powerFill = page.getByTestId("orange-express-power-effort");
+    expect(await powerFill.evaluate((el) => el.getBoundingClientRect().height)).toBe(0);
+    await power.locator('[data-notch="2"]').click();
+    await expect(power).toHaveAttribute("aria-valuenow", "2");
+    await expect.poll(() => powerFill.evaluate((el) => el.getBoundingClientRect().height)).toBeGreaterThan(0);
+    const kickedHeight = await powerFill.evaluate((el) => el.getBoundingClientRect().height);
+    await expect.poll(() => powerFill.evaluate((el) => el.getBoundingClientRect().height)).toBeGreaterThan(kickedHeight);
+
+    const brake = page.getByRole("slider", { name: "煞車" });
+    const brakeFill = page.getByTestId("orange-express-brake-effort");
+    await brake.locator('[data-notch="1"]').click();
+    await expect.poll(() => powerFill.evaluate((el) => el.getBoundingClientRect().height)).toBe(0);
+    await expect.poll(() => brakeFill.evaluate((el) => el.getBoundingClientRect().height)).toBeGreaterThan(0);
+  });
 });
 
 test.describe("小橘特快車：版面", () => {

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CHIME_SETS, chimeWithinLimits, jointClack } from "@/lib/games/orange-express/chime";
 import { MIX_CEILING, driveMix, jointsCrossed } from "@/lib/games/orange-express/sound";
+import { BRAKE_ACCEL, EFFORT_KICK, POWER_ACCEL } from "@/lib/games/orange-express/physics";
 import type { BrakeNotch, PowerNotch } from "@/lib/games/orange-express/types";
 
 describe("駕駛聲音", () => {
@@ -25,19 +26,26 @@ describe("駕駛聲音", () => {
   });
 
   it("推動力時有加速的高音，煞車一拉就收掉並出現嘶聲", () => {
-    const pushing = driveMix(0.5, 3, 0);
-    const braking = driveMix(0.5, 3, 2);
+    const pushing = driveMix(0.5, POWER_ACCEL[3], 0);
+    const braking = driveMix(0.5, 0, BRAKE_ACCEL[2]);
     expect(pushing.whineVol).toBeGreaterThan(braking.whineVol);
     expect(pushing.hissVol).toBe(0);
     expect(braking.hissVol).toBeGreaterThan(0);
-    expect(driveMix(0, 0, 4).hissVol).toBe(0);
+    expect(driveMix(0, 0, BRAKE_ACCEL[4]).hissVol).toBe(0);
+  });
+
+  it("持續馬達與煞車聲跟著實際作用增加，不跟桿位提前", () => {
+    const tractionKick = POWER_ACCEL[1] * EFFORT_KICK;
+    const brakeKick = BRAKE_ACCEL[1] * EFFORT_KICK;
+    expect(driveMix(0, tractionKick, 0).whineVol).toBeLessThan(driveMix(0, POWER_ACCEL[1], 0).whineVol);
+    expect(driveMix(0.5, 0, brakeKick).hissVol).toBeLessThan(driveMix(0.5, 0, BRAKE_ACCEL[1]).hissVol);
   });
 
   it("每一層都不超過音量上限", () => {
     for (const speed of [0, 0.3, 0.6, 1, 2]) {
       for (const power of [0, 1, 2, 3, 4] as PowerNotch[]) {
         for (const brake of [0, 1, 2, 3, 4, 5] as BrakeNotch[]) {
-          const mix = driveMix(speed, power, brake);
+          const mix = driveMix(speed, POWER_ACCEL[power], BRAKE_ACCEL[brake]);
           expect(mix.humVol).toBeLessThanOrEqual(MIX_CEILING);
           expect(mix.whineVol).toBeLessThanOrEqual(MIX_CEILING);
           expect(mix.hissVol).toBeLessThanOrEqual(MIX_CEILING);

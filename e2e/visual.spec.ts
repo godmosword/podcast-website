@@ -678,6 +678,17 @@ for (const shot of ORANGE_DRIVE_SHOTS) {
   }
 }
 
+test("visual：小橘特快車大司機實際動力填色 390 light", async ({ page }) => {
+  await openOrangeExpress(page, PHONE);
+  await startOrangeExpress(page, "自己開");
+  await page.getByRole("slider", { name: "動力" }).locator('[data-notch="2"]').click();
+  await settleOrangeExpress(page);
+  await expect(page.getByTestId("orange-express-power-lever")).toHaveScreenshot(
+    "orange-express-power-effort-390-light.png",
+    { maxDiffPixelRatio: 0.02, animations: "disabled" },
+  );
+});
+
 /** 低齡桿面（小小司機）：兩根桿各三格、圖示加常駐底色、中間格只留兩盞燈；矮手機的前窗要變高。 */
 for (const size of [PHONE, PHONE_NIGHT, [375, 553, "light"] as const]) {
   const [width, height, theme] = size;

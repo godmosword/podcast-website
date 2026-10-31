@@ -15,6 +15,7 @@ import {
 import { gaugeZone } from "@/lib/games/orange-express/gauge";
 import { xiaojuMood } from "@/lib/games/orange-express/mood";
 import { dragIndex, grabOffset, sliderKeyTarget, type LeverFrame, type LeverKind } from "@/lib/games/orange-express/lever";
+import { BRAKE_ACCEL, POWER_ACCEL, effortNotch } from "@/lib/games/orange-express/physics";
 import {
   brakeNotches,
   currentLimit,
@@ -72,6 +73,8 @@ function Lever({
   notch,
   notches,
   simple,
+  effort,
+  effortScale,
   coach = false,
   release = false,
   onChange,
@@ -81,6 +84,9 @@ function Lever({
   notches: readonly number[];
   /** 低齡桿面：格上畫圖示、常駐底色，字縮小放圖下，不寫 P／B 代碼。 */
   simple: boolean;
+  /** 實際出力；只在大司機與小站長顯示，不把延遲再加到低齡桿面。 */
+  effort: number;
+  effortScale: readonly number[];
   /** 第一次進站示範的煞車強調：低齡亮「停」那一格，大司機與小站長亮整根桿。 */
   coach?: boolean;
   /** 推了動力、煞車沒放、車不走：煞車桿亮「鬆」那一格（與桿頂的狀態小牌）。 */
@@ -104,6 +110,8 @@ function Lever({
   const last = notches.length - 1;
   const found = notches.indexOf(notch);
   const index = found >= 0 ? found : 0;
+  const effortIndex = effortNotch(effortScale, effort);
+  const effortFill = `${Math.max(0, Math.min(100, (effortIndex / last) * 100))}%`;
   const rows = Array.from({ length: notches.length }, (_, i) => last - i);
   const pick = (i: number) => onChange(notches[Math.min(last, Math.max(0, i))]!);
   // 拖曳中的換檔要跟最新的格比；換檔被擋下（例如門開著推不動）時下一次移動再試。
@@ -118,7 +126,7 @@ function Lever({
   };
 
   return (
-    <div className={styles.leverColumn} data-kind={kind}>
+    <div className={styles.leverColumn} data-kind={kind} data-testid={`orange-express-${kind}-lever`}>
       <span className={styles.leverTitle}>
         {label}
         <b
@@ -143,7 +151,7 @@ function Lever({
         aria-valuenow={index}
         aria-valuetext={valueText}
         tabIndex={0}
-        style={{ "--notches": notches.length, "--at": last - index } as CSSProperties}
+        style={{ "--notches": notches.length, "--at": last - index, "--effort-fill": effortFill } as CSSProperties}
         aria-keyshortcuts={kind === "power" ? "ArrowUp ArrowDown Home End" : "ArrowLeft ArrowRight Home End"}
         aria-describedby={keysId}
         onPointerDown={(event) => {
@@ -193,7 +201,9 @@ function Lever({
         <span id={keysId} className={styles.srOnly}>
           {COPY.leverKeys}
         </span>
-        <span className={styles.leverSlot} aria-hidden />
+        <span className={styles.leverSlot} aria-hidden>
+          <span className={styles.leverEffort} data-testid={`orange-express-${kind}-effort`} />
+        </span>
         <span className={styles.leverHandle} aria-hidden>
           <span className={styles.leverGrip} />
         </span>
@@ -443,6 +453,8 @@ export function OrangeExpressCab({
         notch={run.power}
         notches={powerNotches(run.course)}
         simple={simple}
+        effort={run.tractive}
+        effortScale={POWER_ACCEL}
         onChange={onPower}
       />
       <Lever
@@ -450,6 +462,8 @@ export function OrangeExpressCab({
         notch={run.brake}
         notches={brakeNotches(run.course)}
         simple={simple}
+        effort={run.braking}
+        effortScale={BRAKE_ACCEL}
         coach={coachBrake}
         release={releaseBrake}
         onChange={onBrake}

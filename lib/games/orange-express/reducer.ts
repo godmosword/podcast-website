@@ -1,3 +1,15 @@
+import {
+  BRAKE_ACCEL,
+  kickEffort,
+  limitAt,
+  lookAssist,
+  motionStep,
+  netAccel,
+  quant,
+  restEffort,
+  targetEffort,
+  type Motion,
+} from "@/lib/games/orange-express/physics";
 import { COURSE_RULES, courseFor, stationsFor, stopEpsilon } from "@/lib/games/orange-express/routes";
 import {
   BRAKE_MAX,
@@ -16,38 +28,31 @@ import {
   type StopGrade,
 } from "@/lib/games/orange-express/types";
 
-/** 每秒加多少速度（速度是 0–1，不是公里）。 */
-export const POWER_ACCEL = [0, 0.16, 0.28, 0.4, 0.52] as const;
-/** 每秒減多少速度。最後一格是緊急。 */
-export const BRAKE_ACCEL = [0, 0.22, 0.4, 0.6, 0.8, 1.6] as const;
-/** 什麼都不推時，車自己慢慢變慢。 */
-export const COAST_DRAG = 0.03;
-/** 沒有自動輕煞的規則組：高出速度旗的部分用這個速率收回。 */
-export const BLEED = 0.8;
-export const CRUISE_LIMIT = 0.82;
-export const PROGRESS_RATE = 0.18;
+export {
+  AUTO_BRAKE_DECEL,
+  AUTO_BRAKE_MARGIN,
+  BLEED,
+  BRAKE_ACCEL,
+  COAST_DRAG,
+  CRUISE_LIMIT,
+  LOOK_CREEP,
+  POWER_ACCEL,
+  PROGRESS_RATE,
+  limitAt,
+} from "@/lib/games/orange-express/physics";
+
 export const DT_CAP = 0.1;
 export const BOARD_STEP = 0.4;
 /** 倒車每秒退多少進度。約兩到三秒退回窗前。 */
 export const REVERSE_RATE = 0.16;
 /** 倒車退到窗頭前面多少。 */
 export const REVERSE_TO = 0.08;
-/**
- * 慢慢看在進站後至少保持這個速度，不會停在月台前面。
- * 必須大於慢慢看的「算停住」門檻（stopEpsilon("look")），不然一拉煞車就在區間最前面（黃區）停下。
- */
-export const LOOK_CREEP = 0.1;
-/** 自動輕煞的減速度，約等於 B2。 */
-export const AUTO_BRAKE_DECEL = 0.4;
-/** 超過速度旗這麼多才算超速，避免在旗子上下抖。 */
-export const AUTO_BRAKE_MARGIN = 0.01;
 /** 對向列車從遠方出現到車尾過去的秒數。 */
 export const PASS_DURATION = 2.9;
 const GRADE_EPSILON = 1e-6;
-
-function quant(n: number): number {
-  return Math.round(n * 1e6) / 1e6;
-}
+/** 停車預測的固定步長與上限（20 秒內沒停就不畫三角）。 */
+export const PREDICT_DT = 1 / 30;
+export const PREDICT_STEPS = 600;
 
 const POWER_ALL: readonly PowerNotch[] = [0, 1, 2, 3, 4];
 /** 慢慢看：P0–P2，小橘幫忙停，只開得到慢慢的。 */
@@ -132,16 +137,6 @@ export function currentStation(state: RunState): Station {
   return state.stations[state.stationIndex] ?? state.stations[0]!;
 }
 
-/** 速度旗：路上看最後經過的速限牌，進站後不高於進站旗。 */
-export function limitAt(station: Station, progress: number): number {
-  let limit = CRUISE_LIMIT;
-  for (const sign of station.signs) {
-    if (progress >= sign.at) limit = sign.limit;
-  }
-  if (progress >= station.approachAt) limit = Math.min(limit, station.approachLimit);
-  return limit;
-}
-
 export function currentLimit(state: RunState): number {
   return limitAt(currentStation(state), state.progress);
 }
@@ -190,6 +185,7 @@ export function createRun(level: LevelId, driver: DriverId = "big"): RunState {
     phase: "running",
     power: level === "look" ? 1 : 0,
     brake: 0,
+    ...restEffort(0),
     speed: 0,
     progress: 0,
     boarded: 0,
@@ -222,55 +218,75 @@ function withGrade(state: RunState, progress: number): readonly StopGrade[] {
   return next;
 }
 
+/** 停好、倒車、出站：作用回到「車停著」（沒有動力，煞車就是桿位）。 */
 function stopHere(state: RunState, progress: number): RunState {
-  return { ...state, progress, speed: 0, autoBrake: false, phase: "stopped", grades: withGrade(state, progress) };
+  return {
+    ...state,
+    ...restEffort(state.brake),
+    progress,
+    speed: 0,
+    autoBrake: false,
+    phase: "stopped",
+    grades: withGrade(state, progress),
+  };
 }
 
-/** 慢慢看進站後由小橘自己算煞車，目標是綠區中心。 */
-function lookAssist(state: RunState, station: Station): number | null {
-  if (state.level !== "look" || state.progress < station.approachAt) return null;
-  const remaining = (station.target - state.progress) / PROGRESS_RATE;
-  if (remaining <= 0.002) return -BRAKE_ACCEL[4];
-  const needed = (state.speed * state.speed) / (2 * remaining);
-  return -Math.min(BRAKE_ACCEL[4], needed);
-}
-
-/** 目前這一秒的加速度。煞車一拉，動力就斷開；自動輕煞時動力也斷開。 */
+/**
+ * 桿位的目標加速度（作用都跟上之後）。煞車一拉，動力就斷開；自動輕煞時動力也斷開。
+ * 實際每一幀用的是延遲後的作用，見 physics.ts 的 motionStep。
+ */
 export function accelFor(state: RunState): number {
   const station = currentStation(state);
-  const assist = lookAssist(state, station);
+  const assist = lookAssist(state.level, station, state.progress, state.speed);
   if (assist !== null) return Math.min(assist, -BRAKE_ACCEL[state.brake]);
-  if (state.autoBrake) return -Math.max(AUTO_BRAKE_DECEL, BRAKE_ACCEL[state.brake]);
-  if (state.brake > 0) return -BRAKE_ACCEL[state.brake];
-  if (state.power > 0) return POWER_ACCEL[state.power];
-  return -COAST_DRAG;
+  return netAccel(targetEffort(state));
+}
+
+function motionOf(state: RunState): Motion {
+  return {
+    course: state.course,
+    level: state.level,
+    station: currentStation(state),
+    power: state.power,
+    brake: state.brake,
+    autoBrake: state.autoBrake,
+    tractive: state.tractive,
+    braking: state.braking,
+    speed: state.speed,
+    progress: state.progress,
+    autoBrakeRule: COURSE_RULES[state.course].autoBrake,
+  };
 }
 
 /**
  * 照現在的桿位，車會停在哪裡（這一站的 0–1）。
- * 還在加速或沒有減速時回傳 null，畫面就不畫預測點。
+ * 用跟 reducer 同一個 motionStep、固定步長往前推（含作用延遲、速度旗、慢慢看爬行），停的判定也一樣：
+ * 在區間裡慢到「算停住」就停在那；區間前就停住則停在那；會開過頭時照樣往後推，回傳窗尾後面的點（畫面顯示超過）。
+ * 沒拉煞車（推動力、滑行、只有自動輕煞）或 20 秒內停不下來：null，不畫預測點。
  */
 export function predictStop(state: RunState): number | null {
   if (state.phase === "stopped" || state.phase === "doors-open") return state.progress;
   if (state.phase !== "running" && state.phase !== "in-window") return null;
   if (state.speed <= 0) return state.progress;
-  const accel = accelFor(state);
-  if (accel >= -COAST_DRAG) return null;
-  const distance = ((state.speed * state.speed) / (2 * -accel)) * PROGRESS_RATE;
-  let stop = state.progress + distance;
-  // 慢慢看進站後車會爬到爬行區尾端才放開，再用同樣的減速度停下；三角要畫在那裡，不然會指在黃區。
   const station = currentStation(state);
-  const creepEnd = station.target - station.greenHalf / 2;
-  if (
-    state.level === "look" &&
-    state.brake < EMERGENCY &&
-    state.progress >= station.approachAt &&
-    state.progress < creepEnd &&
-    stop < creepEnd
-  ) {
-    stop = creepEnd + ((LOOK_CREEP * LOOK_CREEP) / (2 * -accel)) * PROGRESS_RATE;
+  if (state.brake === 0 && lookAssist(state.level, station, state.progress, state.speed) === null) return null;
+  const epsilon = stopEpsilon(state.course);
+  let motion = motionOf(state);
+  let overrun = false;
+  for (let i = 0; i < PREDICT_STEPS; i += 1) {
+    const next = motionStep(motion, PREDICT_DT);
+    motion = { ...motion, ...next };
+    if (!overrun && next.progress > station.window.end) {
+      if (next.speed <= epsilon) return station.window.end;
+      overrun = true;
+    }
+    if (overrun) {
+      if (next.speed <= epsilon || next.progress >= 1.2) return quant(Math.min(1.2, next.progress));
+    } else if (next.speed <= 0 || (inWindow(station, next.progress) && next.speed <= epsilon)) {
+      return next.progress;
+    }
   }
-  return quant(Math.min(1.2, stop));
+  return null;
 }
 
 /** 速度 0 又在窗裡，就當成已經停好。 */
@@ -308,6 +324,11 @@ export function withHook(state: RunState, hook: OrangeExpressHook | null | undef
   const misses = Math.max(0, Math.floor(finiteOr(hook.misses, state.misses)));
   const power = snapPower(state.course, finiteOr(hook.power, state.power));
   const brake = snapBrake(state.course, finiteOr(hook.brake, state.brake));
+  // 測試直接跳桿位時作用也直接到位，不用等延遲；沒給桿位就保留原本的作用。
+  const leversGiven = hook.power !== undefined || hook.brake !== undefined;
+  const effort = leversGiven
+    ? targetEffort({ course: state.course, power, brake, autoBrake: false })
+    : { tractive: state.tractive, braking: state.braking };
   const sameStation = stationIndex === state.stationIndex;
   const grades = sameStation ? state.grades : state.grades.slice(0, stationIndex);
   const passing =
@@ -324,6 +345,7 @@ export function withHook(state: RunState, hook: OrangeExpressHook | null | undef
     misses,
     power,
     brake,
+    ...effort,
     grades,
     passing,
     passedTrain: passing !== null || (sameStation && state.passedTrain),
@@ -359,40 +381,10 @@ export function honk(state: RunState): RunState {
 
 function applyMotion(state: RunState, dt: number): RunState {
   const station = currentStation(state);
-  const rules = COURSE_RULES[state.course];
   const epsilon = stopEpsilon(state.course);
-  const limit = currentLimit(state);
-
-  let autoBrake = state.autoBrake;
-  let autoBrakeCount = state.autoBrakeCount;
-  if (rules.autoBrake && !autoBrake && state.speed > limit + AUTO_BRAKE_MARGIN) {
-    autoBrake = true;
-    autoBrakeCount += 1;
-  }
-
-  let speed = state.speed + accelFor({ ...state, autoBrake }) * dt;
-  if (autoBrake) {
-    if (speed <= limit) {
-      autoBrake = false;
-      speed = Math.min(speed, limit);
-    }
-  } else if (speed > limit) {
-    // 桿子推不過速度旗；沒有自動輕煞的規則組，旗子降下來時也安靜地收回。
-    speed = state.speed <= limit + AUTO_BRAKE_MARGIN ? limit : Math.max(limit, speed - BLEED * dt);
-  }
-  if (
-    state.level === "look" &&
-    state.progress >= station.approachAt &&
-    state.progress < station.target - station.greenHalf / 2 &&
-    state.brake < EMERGENCY &&
-    speed < LOOK_CREEP
-  ) {
-    speed = LOOK_CREEP;
-  }
-  if (speed < 0) speed = 0;
-  speed = quant(speed);
-
-  const progress = quant(state.progress + ((state.speed + speed) / 2) * PROGRESS_RATE * dt);
+  const motion = motionStep(motionOf(state), dt);
+  const { speed, progress } = motion;
+  const autoBrakeCount = state.autoBrakeCount + (motion.autoBrakeStarted ? 1 : 0);
 
   let passing = state.passing;
   let passedTrain = state.passedTrain;
@@ -404,12 +396,21 @@ function applyMotion(state: RunState, dt: number): RunState {
     passedTrain = true;
   }
 
-  const moved = { ...state, autoBrake, autoBrakeCount, passing, passedTrain };
+  const moved = {
+    ...state,
+    autoBrake: motion.autoBrake,
+    autoBrakeCount,
+    tractive: motion.tractive,
+    braking: motion.braking,
+    passing,
+    passedTrain,
+  };
 
   if (progress > station.window.end) {
     if (speed <= epsilon) return stopHere(moved, station.window.end);
     return {
       ...moved,
+      ...restEffort(state.brake),
       progress: station.window.end,
       speed: 0,
       power: 0,
@@ -430,8 +431,14 @@ function applyReverse(state: RunState, dt: number): RunState {
   const station = currentStation(state);
   const stopAt = quant(Math.max(0, station.window.start - REVERSE_TO));
   const progress = quant(Math.max(stopAt, state.progress - REVERSE_RATE * dt));
-  if (progress <= stopAt) return { ...state, progress, speed: 0, phase: "running" };
+  if (progress <= stopAt) return { ...state, ...restEffort(state.brake), progress, speed: 0, phase: "running" };
   return { ...state, progress };
+}
+
+/** 換桿：桿位立刻變，實際作用先跳一點再慢慢跟上（見 physics.ts）。 */
+function withLevers(state: RunState, patch: { power?: PowerNotch; brake?: BrakeNotch }): RunState {
+  const next = { ...state, ...patch };
+  return { ...next, ...kickEffort(state, state, next) };
 }
 
 function unchanged(state: RunState, next: RunState): boolean {
@@ -439,6 +446,8 @@ function unchanged(state: RunState, next: RunState): boolean {
     next.phase === state.phase &&
     next.power === state.power &&
     next.brake === state.brake &&
+    next.tractive === state.tractive &&
+    next.braking === state.braking &&
     next.speed === state.speed &&
     next.progress === state.progress &&
     next.boarded === state.boarded &&
@@ -459,13 +468,13 @@ export function step(state: RunState, action: RunAction): RunState {
     if (notch === state.power) return state;
     if (state.phase === "route-done" || state.phase === "reversing") return state;
     if (state.phase === "doors-open" && notch > state.power) return state;
-    return { ...state, power: notch };
+    return withLevers(state, { power: notch });
   }
 
   if (action.type === "set-brake") {
     const notch = snapBrake(state.course, action.notch);
     if (notch === state.brake || state.phase === "route-done") return state;
-    return { ...state, brake: notch };
+    return withLevers(state, { brake: notch });
   }
 
   if (action.type === "honk") return honk(state);
@@ -492,10 +501,11 @@ export function step(state: RunState, action: RunAction): RunState {
     const station = currentStation(state);
     if (state.boarded < station.passengers.length) return state;
     if (state.stationIndex >= state.stations.length - 1) {
-      return { ...state, phase: "route-done", speed: 0, power: 0, brake: 0 };
+      return { ...state, ...restEffort(0), phase: "route-done", speed: 0, power: 0, brake: 0 };
     }
     return {
       ...state,
+      ...restEffort(state.brake),
       stationIndex: state.stationIndex + 1,
       phase: "running",
       progress: 0,
