@@ -7,6 +7,7 @@ import type {
   LevelId,
   PointKind,
   PowerNotch,
+  RunState,
   StopGrade,
 } from "@/lib/games/orange-express/types";
 
@@ -33,6 +34,12 @@ export const COPY = {
   again: "再開一次",
   backTitle: "回標題",
   arrivedHome: "到家了",
+  /** 小橘結算時只說一句；低齡規則組只用保底句。 */
+  resultSmooth: "輕輕停，朋友站得穩穩的",
+  resultAllGreen: "三站都剛剛好",
+  resultLandmark: "你跟地標打招呼了",
+  resultSafe: "朋友都平安到家了",
+  resultLowAge: "你把朋友載到了",
   nextStop: "下一站",
   atStation: "到站了",
   tryStopAgain: "再停一次",
@@ -143,6 +150,19 @@ export function bridgeResultText(count: number): string {
 /** 有打才顯示，跟鐵橋那顆一樣只加不減；讀屏也讀得到地標章。 */
 export function landmarkResultText(count: number): string {
   return `跟地標打招呼 ${count} 站`;
+}
+
+/** 結算只挑一句正面的話；低齡不提技巧，依優先序選本趟最值得記住的事。 */
+export function resultComment(
+  state: Pick<RunState, "course" | "smoothStops" | "grades" | "stations" | "landmarkGreets">,
+): string {
+  if (state.course === "look" || state.course === "little") return COPY.resultLowAge;
+  if (state.smoothStops >= 2) return COPY.resultSmooth;
+  if (state.stations.length === 3 && state.grades.length >= 3 && state.grades.slice(0, 3).every((grade) => grade === "green")) {
+    return COPY.resultAllGreen;
+  }
+  if (state.landmarkGreets.length > 0) return COPY.resultLandmark;
+  return COPY.resultSafe;
 }
 
 /**

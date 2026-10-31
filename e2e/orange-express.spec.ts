@@ -32,6 +32,7 @@ test.describe("小橘特快車", () => {
     await expect(page.getByRole("heading", { name: "到家了" })).toBeVisible();
     // 星星只算整趟；每站是色塊加「剛剛好／停到了」，結算不再出現 ★。
     const result = page.getByTestId("orange-express-result");
+    await expect(result.getByTestId("orange-express-result-line")).toHaveText("你把朋友載到了");
     await expect(result.locator("li[data-grade='green']")).toContainText("剛剛好");
     await expect(result).not.toContainText("★");
     // 到家的小橘（貼紙生好前是向量小橘臉）。
@@ -43,6 +44,89 @@ test.describe("小橘特快車", () => {
     }, PROGRESS_STORAGE_KEY);
     expect(saved.gameProfile.stickers).toContain("played-orange-express");
     expect(saved.gameProfile.medals["orange-express"][0] & 1).toBe(1);
+  });
+
+  test("大司機：兩站平穩停車後，結算優先說平穩停車且計數只佔一列", async ({ page }) => {
+    await page.addInitScript(() => {
+      class FakeUtterance {
+        text: string;
+        lang = "";
+        rate = 1;
+        pitch = 1;
+        volume = 1;
+        onend: (() => void) | null = null;
+        onerror: (() => void) | null = null;
+        constructor(text: string) {
+          this.text = text;
+        }
+      }
+      const state = window as unknown as { __spoken: string[] };
+      state.__spoken = [];
+      Object.defineProperty(window, "SpeechSynthesisUtterance", { configurable: true, value: FakeUtterance });
+      Object.defineProperty(window, "speechSynthesis", {
+        configurable: true,
+        value: {
+          speak: (utterance: FakeUtterance) => {
+            state.__spoken.push(utterance.text);
+            utterance.onend?.();
+          },
+          cancel: () => {},
+          speaking: false,
+          pending: false,
+        },
+      });
+      window.__orangeExpress = { driver: "big" };
+    });
+    await page.goto("/games/orange-express");
+    await startLevel(page, "自己開");
+    const drive = page.getByTestId("orange-express-drive");
+    for (let stationIndex = 0; stationIndex < 3; stationIndex += 1) {
+      await jump(page, { stationIndex, progress: 0.65, speed: 0, brake: 0 });
+      await expect(drive).toHaveAttribute("data-phase", "stopped");
+      await expect(drive).toHaveAttribute("data-smooth-stops", String(stationIndex + 1));
+      await page.getByRole("button", { name: "開門" }).click();
+      const close = page.getByRole("button", { name: "關門" });
+      await expect(close).not.toHaveAttribute("aria-disabled", "true");
+      await close.click();
+    }
+    const result = page.getByTestId("orange-express-result");
+    await expect(result.getByTestId("orange-express-result-line")).toHaveText("輕輕停，朋友站得穩穩的");
+    const spokenResultLines = await page.evaluate(() => {
+      const spoken = (window as unknown as { __spoken: string[] }).__spoken;
+      return spoken.filter((text) => text === "輕輕停，朋友站得穩穩的").length;
+    });
+    expect(spokenResultLines).toBe(1);
+    const stats = result.getByTestId("orange-express-extras");
+    await expect(stats.locator("li")).toHaveCount(1);
+    await expect(stats).toContainText("輕停 3");
+  });
+
+  test("大司機頓停：畫面晃動開啟時點頭不超過 2px", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.addInitScript(() => {
+      const key = "cheche:progress";
+      const raw = JSON.parse(localStorage.getItem(key) ?? "{}");
+      raw.preferences = {
+        ...(raw.preferences ?? {}),
+        gameKit: { ...raw.preferences?.gameKit, orangeExpressSway: true },
+      };
+      localStorage.setItem(key, JSON.stringify(raw));
+      window.__orangeExpress = { driver: "big" };
+    });
+    await page.goto("/games/orange-express");
+    await startLevel(page, "自己開");
+    const drive = page.getByTestId("orange-express-drive");
+    await expect(drive).toHaveAttribute("data-sway", "true");
+    await jump(page, { progress: 0.6, speed: 0.25, brake: 4 });
+    await expect(drive).toHaveAttribute("data-phase", "stopped");
+    const windshield = page.getByTestId("orange-express-windshield");
+    await expect(windshield).toHaveAttribute("data-nod", "true");
+    const nod = await windshield.locator("div").first().evaluate((element) => getComputedStyle(element).animationDuration);
+    expect(nod).toBe("0.18s");
+    const xiaoju = page.getByTestId("orange-express-stop-train");
+    await expect(xiaoju).toHaveAttribute("data-nod-before", "true");
+    const happyDelay = await xiaoju.evaluate((element) => getComputedStyle(element).animationDelay);
+    expect(happyDelay).toBe("0.18s");
   });
 
   test("慢慢看：門還沒亮就按，當下說門亮了再按，到家還是三顆星", async ({ page }) => {
@@ -1088,7 +1172,7 @@ test.describe("小橘特快車：停好後跟地標打招呼、朋友上車的�
     await expect(result.locator('[data-landmark="ferris"]')).toHaveAttribute("data-stamped", "false");
     // 只加不減：沒打招呼的地標照常上色，不變灰。
     expect(await result.locator('[data-landmark="ferris"]').evaluate((el) => getComputedStyle(el).filter)).toBe("none");
-    await expect(result.getByTestId("orange-express-extras")).toContainText("跟地標打招呼 1 站");
+    await expect(result.getByTestId("orange-express-extras")).toHaveAttribute("aria-label", /跟地標打招呼 1 站/);
   });
 
   test("小小司機沒有這個任務：喇叭不亮黃圈，結算地標照常上色", async ({ page }) => {

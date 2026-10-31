@@ -26,10 +26,12 @@ type StopBarProps = {
   hint?: string | null;
   /** 第一次進站示範：watch 只亮外圈；brake 再把字換成「右邊拉，停在綠區」。 */
   coach?: CoachBeat;
+  /** 頓停點頭完成後才讓小橘開始開心放大。 */
+  nodBeforeHappy?: boolean;
 };
 
 /** 前窗上方的停車目標條：黃區、綠區、目標線、預測停車點、小橘現在的位置。 */
-export function OrangeExpressStopBar({ run, numbers, hint = null, coach = "none" }: StopBarProps) {
+export function OrangeExpressStopBar({ run, numbers, hint = null, coach = "none", nodBeforeHappy = false }: StopBarProps) {
   const bar = stopBarFor(run);
   if (!bar) return null;
   const grade = run.grades[run.stationIndex];
@@ -66,6 +68,7 @@ export function OrangeExpressStopBar({ run, numbers, hint = null, coach = "none"
         <span
           className={styles.stopTrain}
           data-mood={xiaojuMood(run)}
+          data-nod-before={nodBeforeHappy ? "true" : "false"}
           data-testid="orange-express-stop-train"
           style={{ left: `${bar.train}%` }}
         >

@@ -64,6 +64,18 @@ export const ARRIVAL_MELODY: readonly SynthVoice[] = [
   { wave: "triangle", freq: 1047, dur: 0.25, vol: 0.08, at: 0.4, attack: 0.01 },
 ];
 
+/** 大司機、小站長輕輕停好時，柔柔的放氣聲。 */
+export const SMOOTH_STOP_SOUND: readonly SynthVoice[] = [
+  { wave: "noise", dur: 0.2, vol: 0.045, attack: 0.025, filter: { type: "bandpass", freq: 850, q: 0.8 } },
+  { wave: "sine", freq: 620, freqEnd: 470, dur: 0.22, vol: 0.04, attack: 0.015 },
+];
+
+/** 大司機、小站長停得比較急時，輕輕的「咚」。 */
+export const BUMP_STOP_SOUND: readonly SynthVoice[] = [
+  { wave: "sine", freq: 190, freqEnd: 120, dur: 0.16, vol: 0.065, attack: 0.004 },
+  { wave: "noise", dur: 0.1, vol: 0.035, attack: 0.004, filter: { type: "lowpass", freq: 500 } },
+];
+
 /** 廣播前的「叮咚」。 */
 export const ANNOUNCE_CHIME: readonly SynthVoice[] = [
   { wave: "sine", freq: 880, dur: 0.22, vol: 0.08, attack: 0.01 },
@@ -93,6 +105,8 @@ export const CHIME_SETS = [
   EMERGENCY_CLICK,
   AUTO_BRAKE_DING,
   ARRIVAL_MELODY,
+  SMOOTH_STOP_SOUND,
+  BUMP_STOP_SOUND,
   ANNOUNCE_CHIME,
   PASS_WHOOSH,
   POINT_OK,

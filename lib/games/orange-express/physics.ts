@@ -179,6 +179,8 @@ export type Motion = Levers &
 export type MotionResult = Effort & {
   speed: number;
   progress: number;
+  /** 速度旗、速度下限等處理前，實際使用的減速度。 */
+  deceleration: number;
   autoBrake: boolean;
   /** 這一步剛觸發自動輕煞（reducer 拿來數次數、響叮叮）。 */
   autoBrakeStarted: boolean;
@@ -229,7 +231,7 @@ export function motionStep(m: Motion, dt: number): MotionResult {
   speed = quant(speed);
 
   const progress = quant(m.progress + ((m.speed + speed) / 2) * PROGRESS_RATE * dt);
-  return { tractive, braking, speed, progress, autoBrake, autoBrakeStarted };
+  return { tractive, braking, speed, progress, deceleration: Math.max(0, -accel), autoBrake, autoBrakeStarted };
 }
 
 /** 作用換成桿上的位置（0 到最後一格，可以有小數），給桿槽填色用。 */

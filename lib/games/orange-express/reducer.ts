@@ -11,6 +11,7 @@ import {
   type Motion,
 } from "@/lib/games/orange-express/physics";
 import { COURSE_RULES, courseFor, stationsFor, stopEpsilon } from "@/lib/games/orange-express/routes";
+import { isSmoothStop } from "@/lib/games/orange-express/medals";
 import {
   BRAKE_MAX,
   EMERGENCY,
@@ -186,6 +187,8 @@ export function createRun(level: LevelId, driver: DriverId = "big"): RunState {
     power: level === "look" ? 1 : 0,
     brake: 0,
     ...restEffort(0),
+    stopJerk: 0,
+    smoothStops: 0,
     speed: 0,
     progress: 0,
     boarded: 0,
@@ -219,10 +222,18 @@ function withGrade(state: RunState, progress: number): readonly StopGrade[] {
 }
 
 /** 停好、倒車、出站：作用回到「車停著」（沒有動力，煞車就是桿位）。 */
-function stopHere(state: RunState, progress: number): RunState {
+function stopHere(state: RunState, progress: number, stopJerk = 0): RunState {
+  const firstStop = state.grades[state.stationIndex] === undefined;
+  const measuredJerk = quant(Math.max(0, stopJerk));
+  const smoothStops =
+    firstStop && isSmoothStop({ ...state, stopJerk: measuredJerk })
+      ? state.smoothStops + 1
+      : state.smoothStops;
   return {
     ...state,
     ...restEffort(state.brake),
+    stopJerk: measuredJerk,
+    smoothStops,
     progress,
     speed: 0,
     autoBrake: false,
@@ -407,7 +418,7 @@ function applyMotion(state: RunState, dt: number): RunState {
   };
 
   if (progress > station.window.end) {
-    if (speed <= epsilon) return stopHere(moved, station.window.end);
+    if (speed <= epsilon) return stopHere(moved, station.window.end, motion.deceleration);
     return {
       ...moved,
       ...restEffort(state.brake),
@@ -422,7 +433,9 @@ function applyMotion(state: RunState, dt: number): RunState {
     };
   }
 
-  if (inWindow(station, progress) && speed <= epsilon) return stopHere(moved, progress);
+  if (inWindow(station, progress) && speed <= epsilon) {
+    return stopHere(moved, progress, motion.deceleration);
+  }
   if (inWindow(station, progress)) return { ...moved, progress, speed, phase: "in-window" };
   return { ...moved, progress, speed, phase: "running" };
 }
@@ -453,6 +466,8 @@ function unchanged(state: RunState, next: RunState): boolean {
     next.boarded === state.boarded &&
     next.boardTimer === state.boardTimer &&
     next.misses === state.misses &&
+    next.stopJerk === state.stopJerk &&
+    next.smoothStops === state.smoothStops &&
     next.stationIndex === state.stationIndex &&
     next.grades === state.grades &&
     next.autoBrake === state.autoBrake &&
@@ -510,6 +525,7 @@ export function step(state: RunState, action: RunAction): RunState {
       phase: "running",
       progress: 0,
       speed: 0,
+      stopJerk: 0,
       boarded: 0,
       boardTimer: 0,
       autoBrake: false,

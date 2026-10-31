@@ -12,8 +12,9 @@ import {
   powerLampLabel,
   powerValueText,
   powerWord,
+  resultComment,
 } from "@/lib/games/orange-express/copy";
-import { powerNotches } from "@/lib/games/orange-express/reducer";
+import { createRun, powerNotches } from "@/lib/games/orange-express/reducer";
 import { stationsFor } from "@/lib/games/orange-express/routes";
 
 const BANNED = [
@@ -111,6 +112,17 @@ describe("每站停車等級與結算小字", () => {
 
   it("指差確認只數做到的次數", () => {
     expect(pointsResultText(1)).toBe("指差確認 1 次");
+  });
+
+  it("結算句只挑一句正面回饋，依照平穩、三站綠區、地標、保底的優先序", () => {
+    const big = { ...createRun("drive"), grades: ["green", "green", "green"] as const };
+    expect(resultComment({ ...big, smoothStops: 2 })).toBe(COPY.resultSmooth);
+    expect(resultComment({ ...big, smoothStops: 1 })).toBe(COPY.resultAllGreen);
+    expect(resultComment({ ...big, grades: ["green", "yellow", "green"], smoothStops: 1, landmarkGreets: [1] })).toBe(
+      COPY.resultLandmark,
+    );
+    expect(resultComment({ ...big, grades: ["green", "yellow", "green"], smoothStops: 1 })).toBe(COPY.resultSafe);
+    expect(resultComment({ ...big, course: "little", smoothStops: 3 })).toBe(COPY.resultLowAge);
   });
 });
 

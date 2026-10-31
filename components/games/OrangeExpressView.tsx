@@ -27,18 +27,20 @@ import {
   ARRIVE_CHIME,
   AUTO_BRAKE_DING,
   BRAKE_LEVER_SOUND,
+  BUMP_STOP_SOUND,
   DOOR_CHIME,
   EMERGENCY_CLICK,
   HORN,
   PASS_WHOOSH,
   POINT_OK,
   POWER_LEVER_SOUND,
+  SMOOTH_STOP_SOUND,
   jointClack,
 } from "@/lib/games/orange-express/chime";
 import { coachBeat, type CoachBeat } from "@/lib/games/orange-express/coach";
 import { coachThisRun, learnCoach, startCoachRun } from "@/lib/games/orange-express/coach-record";
-import { COPY, DRIVER_HINT, DRIVER_NAME, GRADE_TEXT, LEVEL_DOTS } from "@/lib/games/orange-express/copy";
-import { medalsFor, starMissReason } from "@/lib/games/orange-express/medals";
+import { COPY, DRIVER_HINT, DRIVER_NAME, GRADE_TEXT, LEVEL_DOTS, resultComment } from "@/lib/games/orange-express/copy";
+import { isSmoothStop, medalsFor, starMissReason } from "@/lib/games/orange-express/medals";
 import { COURSE_RULES } from "@/lib/games/orange-express/routes";
 import { nextSpeech, type SpeechItem } from "@/lib/games/orange-express/notice";
 import {
@@ -150,6 +152,7 @@ export function OrangeExpressView({
   const [level, setLevel] = useState<LevelId>("look");
   const [run, setRun] = useState<RunState | null>(null);
   const [shake, setShake] = useState(false);
+  const [arrivalNod, setArrivalNod] = useState(false);
   /** 門還沒亮就按了：前窗（或停車目標條）當下說「門亮了再按」，不等到結算。 */
   const [doorHint, setDoorHint] = useState(false);
   /** 「先把煞車放開」等夠久了沒（看桿位）；真的顯示還要條件仍成立。 */
@@ -184,6 +187,7 @@ export function OrangeExpressView({
   const releaseSpeech = useRef<SpeechItem | null>(null);
   /** 這一趟示範過了沒（小小司機的趟數只加一次）。 */
   const coachCounted = useRef(false);
+  const resultSpoken = useRef(false);
   /** 示範在哪一站真的出現過；停好時要是這一站才算學會（直接跳到停好、示範沒出現過不算）。 */
   const coachShownAt = useRef<number | null>(null);
   const driver = resolveOrangeExpressDriver(display.driver, kidsMode);
@@ -255,6 +259,7 @@ export function OrangeExpressView({
     const next = withHook(createRun(nextLevel, nextDriver), hook);
     phaseRef.current = next.phase;
     spoken.current = new Set();
+    resultSpoken.current = false;
     doorSpeech.current = null;
     setDoorHint(false);
     // 掛鉤在（測試、視覺基準）時不示範，除非掛鉤寫 coach: true。
@@ -273,6 +278,7 @@ export function OrangeExpressView({
 
   const goTitle = useCallback(() => {
     runRef.current = null;
+    resultSpoken.current = false;
     phaseRef.current = null;
     doorSpeech.current = null;
     setDoorHint(false);
@@ -529,6 +535,12 @@ export function OrangeExpressView({
     return () => window.clearTimeout(timer);
   }, [shake]);
 
+  useEffect(() => {
+    if (!arrivalNod) return;
+    const timer = window.setTimeout(() => setArrivalNod(false), 200);
+    return () => window.clearTimeout(timer);
+  }, [arrivalNod]);
+
   // 再按一次會重新顯示：shake 每按一次都會變，計時跟著重來。
   useEffect(() => {
     if (!doorHint) return;
@@ -543,7 +555,16 @@ export function OrangeExpressView({
       audio?.voices?.(ARRIVE_CHIME);
     }
     if (prev !== "stopped" && run.phase === "stopped") {
-      audio?.voices?.(ARRIVAL_MELODY);
+      if (run.course === "big" || run.course === "captain") {
+        const smooth = isSmoothStop(run);
+        audio?.voices?.(smooth ? SMOOTH_STOP_SOUND : BUMP_STOP_SOUND);
+        if (!smooth && swayOn) {
+          setArrivalNod(false);
+          window.requestAnimationFrame(() => setArrivalNod(true));
+        }
+      } else {
+        audio?.voices?.(ARRIVAL_MELODY);
+      }
       // 示範中停在綠區或黃區才算學會；停太早、開過頭倒車都不算，下一站或下一趟再示範。
       if (coachOn && coachShownAt.current === run.stationIndex && run.grades[run.stationIndex]) {
         saveOrangeExpressCoach(learnCoach(run.course, loadOrangeExpressCoach()));
@@ -558,13 +579,19 @@ export function OrangeExpressView({
       setScreen("result");
       syncHost();
     }
-  }, [audio, coachOn, instance, run, screen, stopSound, syncHost]);
+  }, [audio, coachOn, instance, run, screen, stopSound, swayOn, syncHost]);
 
   const driving = status === "playing" && screen === "drive" && run?.phase !== "route-done";
 
   useEffect(() => {
     if (!driving) stopSound();
   }, [driving, stopSound]);
+
+  useEffect(() => {
+    if (!run || screen !== "result" || !voiceRef.current || resultSpoken.current) return;
+    resultSpoken.current = true;
+    speakText(resultComment(run), { interrupt: false, volume: volumeRef.current });
+  }, [gameVolume, run, screen, soundOn, voiceEnabled]);
 
   // 每位朋友上車：等乘客卡滑完、愛心泡泡冒出來時叮一聲（現有的輕鈴，不念角色台詞）。
   // 上車時每一幀 run 都在變，timer 不能跟著 effect 清掉，不然 0.4 秒上一位、0.64 秒才響的鈴會被下一幀取消；
@@ -713,6 +740,8 @@ export function OrangeExpressView({
       <div className={styles.screen} data-screen="result">
         <OrangeExpressResult
           stars={medals.stars}
+          resultLine={resultComment(run)}
+          smoothStops={medals.smoothStops}
           missReason={starMissReason(run, earlyDoors)}
           reduced={reducedMotion}
           stations={run.stations}
@@ -745,6 +774,7 @@ export function OrangeExpressView({
       data-points={run.pointsDone.length}
       data-bridge-greets={run.bridgeGreets}
       data-misses={run.misses}
+      data-smooth-stops={run.smoothStops}
     >
       <OrangeExpressWindshield
         run={run}
@@ -753,6 +783,13 @@ export function OrangeExpressView({
         swayRef={swayRef}
         doorHint={doorHint}
         coach={{ beat, on: coachOn }}
+        nod={arrivalNod && swayOn}
+        nodBeforeHappy={
+          swayOn &&
+          run.phase === "stopped" &&
+          (run.course === "big" || run.course === "captain") &&
+          !isSmoothStop(run)
+        }
         onPoint={pointCheck}
       />
       <p className={styles.live} aria-live="polite">
