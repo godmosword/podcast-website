@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, type CSSProperties, type ReactNode } from "react";
+import { useId, useRef, type CSSProperties, type ReactNode } from "react";
 import { OrangeExpressGauge } from "@/components/games/OrangeExpressGauge";
 import { HornIcon, LandmarkGlyph, XiaojuFace } from "@/components/games/OrangeExpressGlyphs";
 import {
@@ -14,7 +14,7 @@ import {
 } from "@/lib/games/orange-express/copy";
 import { gaugeZone } from "@/lib/games/orange-express/gauge";
 import { xiaojuMood } from "@/lib/games/orange-express/mood";
-import { sliderKeyTarget } from "@/lib/games/orange-express/lever";
+import { dragIndex, grabOffset, sliderKeyTarget, type LeverFrame, type LeverKind } from "@/lib/games/orange-express/lever";
 import {
   brakeNotches,
   currentLimit,
@@ -32,16 +32,6 @@ import {
 } from "@/lib/games/orange-express/types";
 import styles from "./orange-express.module.css";
 
-/** 點或拖到桿上哪一格：回傳格子的索引（0 在最下面）。 */
-function indexFromY(el: HTMLElement, clientY: number, last: number): number {
-  const rect = el.getBoundingClientRect();
-  const span = rect.height <= 0 ? 1 : rect.height;
-  const t = Math.min(0.999, Math.max(0, (clientY - rect.top) / span));
-  const row = Math.floor(t * (last + 1));
-  return last - row;
-}
-
-type LeverKind = "power" | "brake";
 
 /** 動力「慢」「快」：一個、兩個往上的箭頭。不識字的孩子看箭頭多寡就知道快慢。 */
 function PowerArrows({ count }: { count: 1 | 2 }) {
@@ -83,6 +73,7 @@ function Lever({
   notches,
   simple,
   coach = false,
+  release = false,
   onChange,
 }: {
   kind: LeverKind;
@@ -92,10 +83,14 @@ function Lever({
   simple: boolean;
   /** 第一次進站示範的煞車強調：低齡亮「停」那一格，大司機與小站長亮整根桿。 */
   coach?: boolean;
+  /** 推了動力、煞車沒放、車不走：煞車桿亮「鬆」那一格（與桿頂的狀態小牌）。 */
+  release?: boolean;
   onChange: (notch: number) => void;
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
-  const dragging = useRef(false);
+  /** 正在拖的那根手指（只認主要的那一根）與抓取偏移；第二根手指不影響。 */
+  const drag = useRef<{ id: number; offset: number } | null>(null);
+  const keysId = useId();
   const label = kind === "power" ? COPY.power : COPY.brake;
   const simplePowers = kind === "power" && simple ? (notches as readonly PowerNotch[]) : undefined;
   const valueText =
@@ -111,11 +106,15 @@ function Lever({
   const index = found >= 0 ? found : 0;
   const rows = Array.from({ length: notches.length }, (_, i) => last - i);
   const pick = (i: number) => onChange(notches[Math.min(last, Math.max(0, i))]!);
+  // 拖曳中的換檔要跟最新的格比；換檔被擋下（例如門開著推不動）時下一次移動再試。
+  const indexRef = useRef(index);
+  indexRef.current = index;
 
-  const move = (clientY: number) => {
+  const frame = (): LeverFrame | null => {
     const el = ref.current;
-    if (!el) return;
-    pick(indexFromY(el, clientY, last));
+    if (!el) return null;
+    const rect = el.getBoundingClientRect();
+    return { top: rect.top, height: rect.height, last };
   };
 
   return (
@@ -125,8 +124,9 @@ function Lever({
         <b
           className={styles.leverWord}
           data-testid={`orange-express-${kind}-word`}
+          data-release={release ? "true" : "false"}
         >
-          {word}
+          {release ? COPY.releaseWord : word}
         </b>
       </span>
       <div
@@ -144,33 +144,55 @@ function Lever({
         aria-valuetext={valueText}
         tabIndex={0}
         style={{ "--notches": notches.length, "--at": last - index } as CSSProperties}
+        aria-keyshortcuts={kind === "power" ? "ArrowUp ArrowDown Home End" : "ArrowLeft ArrowRight Home End"}
+        aria-describedby={keysId}
         onPointerDown={(event) => {
-          dragging.current = true;
+          // 只認滑鼠左鍵與第一根手指；已經有手指在拖，第二根不接手。
+          if (!event.isPrimary || (event.pointerType === "mouse" && event.button !== 0)) return;
+          if (drag.current) return;
+          const f = frame();
+          if (!f) return;
+          // 按在握把那一格就抓住（記偏移、不換檔）；按在別格或空白處就跳過去。
+          const grab = grabOffset({ ...f, y: event.clientY, current: indexRef.current });
+          if (!grab.grab) pick(grab.index);
+          drag.current = { id: event.pointerId, offset: grab.offset };
           event.currentTarget.setPointerCapture(event.pointerId);
-          move(event.clientY);
         }}
         onPointerMove={(event) => {
-          if (!dragging.current) return;
-          move(event.clientY);
+          const d = drag.current;
+          if (!d || event.pointerId !== d.id) return;
+          const f = frame();
+          if (!f) return;
+          // 扣掉抓取偏移、跨過格線再多一小段才換檔：手指微抖不會跳格。
+          const next = dragIndex({ ...f, y: event.clientY - d.offset, current: indexRef.current });
+          if (next !== indexRef.current) pick(next);
         }}
         onPointerUp={(event) => {
-          dragging.current = false;
+          if (drag.current?.id !== event.pointerId) return;
+          drag.current = null;
           if (event.currentTarget.hasPointerCapture(event.pointerId)) {
             event.currentTarget.releasePointerCapture(event.pointerId);
           }
         }}
-        onPointerCancel={() => {
-          dragging.current = false;
+        onPointerCancel={(event) => {
+          if (drag.current?.id === event.pointerId) drag.current = null;
+        }}
+        // 瀏覽器取消或搶走 capture（例如系統手勢）時也放手，不留著半套拖曳。
+        onLostPointerCapture={(event) => {
+          if (drag.current?.id === event.pointerId) drag.current = null;
         }}
         onKeyDown={(event) => {
-          const next = sliderKeyTarget(event.key, index, last);
+          // ↑↓ 永遠是動力、←→ 永遠是煞車：煞車桿的方向鍵交給整頁；Home／End 作用在這根。
+          const next = sliderKeyTarget(kind, event.key, index, last);
           if (next === null) return;
-          // 焦點在這根桿上時 ↑↓ 只動這根（煞車桿按 ↑ 是加煞車），不要再讓整頁的鍵盤對應動動力桿。
           event.preventDefault();
           event.stopPropagation();
           pick(next);
         }}
       >
+        <span id={keysId} className={styles.srOnly}>
+          {COPY.leverKeys}
+        </span>
         <span className={styles.leverSlot} aria-hidden />
         <span className={styles.leverHandle} aria-hidden>
           <span className={styles.leverGrip} />
@@ -189,6 +211,7 @@ function Lever({
                 data-notch={n}
                 data-step={i}
                 data-coach={coach && simple && i === 1 ? "true" : "false"}
+                data-release={release && n === 0 ? "true" : "false"}
                 data-on={n === notch && n > 0 ? "true" : "false"}
                 data-emergency={
                   kind === "brake" && n === EMERGENCY ? "true" : "false"
@@ -325,12 +348,15 @@ export function OrangeExpressCab({
   onHorn,
   onDoor,
   coachBrake = false,
+  releaseBrake = false,
 }: {
   run: RunState;
   shake: boolean;
   numbers: boolean;
   /** 第一次進站示範的第二拍：強調煞車。 */
   coachBrake?: boolean;
+  /** 推了動力、煞車沒放、車不走：提示先放開煞車。 */
+  releaseBrake?: boolean;
   onPower: (notch: number) => void;
   onBrake: (notch: number) => void;
   onHorn: () => void;
@@ -425,6 +451,7 @@ export function OrangeExpressCab({
         notches={brakeNotches(run.course)}
         simple={simple}
         coach={coachBrake}
+        release={releaseBrake}
         onChange={onBrake}
       />
       <div className={styles.cabBottom}>

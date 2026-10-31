@@ -598,11 +598,16 @@ test.describe("小橘特快車：桌面從 P0 推動力，車真的會走", () =
     await expect.poll(async () => (await windshield(page)).equals(still)).toBe(false);
   });
 
-  test("鍵盤：焦點在桿上時方向鍵只動那根桿", async ({ page }) => {
+  test("鍵盤：↑↓ 永遠是動力、←→ 永遠是煞車，焦點在煞車桿也一樣；Home／End 作用在焦點那根", async ({ page }) => {
+    await page.addInitScript(() => {
+      window.__orangeExpress = { driver: "big" };
+    });
     await page.goto("/games/orange-express");
     await startLevel(page, "自己開");
     const power = page.getByRole("slider", { name: "動力" });
     const brake = page.getByRole("slider", { name: "煞車" });
+    await expect(power).toHaveAttribute("aria-keyshortcuts", /ArrowUp/);
+    await expect(brake).toHaveAttribute("aria-keyshortcuts", /ArrowLeft/);
     await power.focus();
     await page.keyboard.press("ArrowUp");
     await page.keyboard.press("ArrowUp");
@@ -610,10 +615,16 @@ test.describe("小橘特快車：桌面從 P0 推動力，車真的會走", () =
     await expect(brake).toHaveAttribute("aria-valuenow", "0");
     await expect.poll(() => speed(page)).toBeGreaterThan(0);
 
+    // 滑鼠點了煞車格、焦點落在煞車桿，再按 ↑ 仍是加動力，不會動到煞車。
     await brake.focus();
     await page.keyboard.press("ArrowUp");
+    await expect(power).toHaveAttribute("aria-valuenow", "3");
+    await expect(brake).toHaveAttribute("aria-valuenow", "0");
+    await page.keyboard.press("ArrowLeft");
     await expect(brake).toHaveAttribute("aria-valuenow", "1");
-    await expect(power).toHaveAttribute("aria-valuenow", "2");
+    await expect(power).toHaveAttribute("aria-valuenow", "3");
+    await page.keyboard.press("End");
+    await expect(brake).toHaveAttribute("aria-valuetext", "煞車，緊急");
     await page.keyboard.press("Home");
     await expect(brake).toHaveAttribute("aria-valuenow", "0");
   });
@@ -1073,3 +1084,82 @@ test.describe("小橘特快車：停好後跟地標打招呼、朋友上車的�
     await expect(result.locator('[data-landmark="house"]')).not.toHaveAttribute("data-stamped", /.*/);
   });
 });
+
+test.describe("小橘特快車：拖桿手感與「先把煞車放開」", () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test("推了動力、煞車沒放、車不走：一會兒後煞車桿亮「鬆」那格，煞車一放就收", async ({ page }) => {
+    await page.addInitScript(() => {
+      window.__orangeExpress = { driver: "big", freeze: true };
+    });
+    await page.goto("/games/orange-express");
+    await startLevel(page, "自己開");
+    const brake = page.getByRole("slider", { name: "煞車" });
+    const loose = brake.locator('[data-notch="0"]');
+    await jump(page, { progress: 0.2, speed: 0, power: 2, brake: 2 });
+    // 先推動力再鬆煞車是真車的做法：剛推下去不馬上提示。
+    await expect(loose).toHaveAttribute("data-release", "false");
+    await expect(loose).toHaveAttribute("data-release", "true", { timeout: 3000 });
+    await expect(page.getByTestId("orange-express-drive").locator("p[aria-live]")).toHaveText("先把煞車放開");
+    const word = page.getByTestId("orange-express-brake-word");
+    await expect(word).toHaveAttribute("data-release", "true");
+    await expect(word).toHaveText("↓鬆");
+    await jump(page, { brake: 0 });
+    await expect(loose).toHaveAttribute("data-release", "false");
+    await expect(word).toHaveText("鬆");
+  });
+
+  test("停好、門亮著時推動力不提示（該做的是開門）；小小司機也有這個提示", async ({ page }) => {
+    await page.addInitScript(() => {
+      window.__orangeExpress = { driver: "big", freeze: true };
+    });
+    await page.goto("/games/orange-express");
+    await startLevel(page, "自己開");
+    await jump(page, { progress: 0.65, speed: 0, power: 2, brake: 2 });
+    await expect(page.getByTestId("orange-express-drive")).toHaveAttribute("data-phase", "stopped");
+    await page.waitForTimeout(1500);
+    await expect(page.getByRole("slider", { name: "煞車" }).locator('[data-notch="0"]')).toHaveAttribute("data-release", "false");
+
+    await page.addInitScript(() => {
+      window.__orangeExpress = { driver: "little", freeze: true };
+    });
+    await page.goto("/games/orange-express");
+    await startLevel(page, "自己開");
+    await jump(page, { progress: 0.2, speed: 0, power: 2, brake: 3 });
+    await expect(page.getByRole("slider", { name: "煞車" }).locator('[data-notch="0"]')).toHaveAttribute(
+      "data-release",
+      "true",
+      { timeout: 3000 },
+    );
+  });
+
+  test("滑鼠拖桿：按在握把上不換檔；在格線附近微動不跳格，跨過一格多一點才換", async ({ page }) => {
+    await page.addInitScript(() => {
+      window.__orangeExpress = { driver: "big", freeze: true };
+    });
+    await page.goto("/games/orange-express");
+    await startLevel(page, "自己開");
+    const power = page.getByRole("slider", { name: "動力" });
+    await jump(page, { power: 2 });
+    await expect(power).toHaveAttribute("aria-valuenow", "2");
+    const box = (await power.boundingBox())!;
+    const row = box.height / 5;
+    const x = box.x + box.width * 0.27;
+    // P2 那一列（由上數第 3 列）的下緣附近按住：抓住握把，不換檔。
+    const grabY = box.y + row * 2.85;
+    await page.mouse.move(x, grabY);
+    await page.mouse.down();
+    await expect(power).toHaveAttribute("aria-valuenow", "2");
+    // 握把中心往上拖過格線但還沒多出容差（半格多一點）：維持原檔。
+    await page.mouse.move(x, grabY - row * 0.55, { steps: 4 });
+    await expect(power).toHaveAttribute("aria-valuenow", "2");
+    // 往上拖超過一格又多一點：換到 P3。
+    await page.mouse.move(x, grabY - row * 1.4, { steps: 4 });
+    await expect(power).toHaveAttribute("aria-valuenow", "3");
+    await page.mouse.up();
+    // 點別的格：當場跳過去。
+    await power.locator('[data-notch="0"]').click();
+    await expect(power).toHaveAttribute("aria-valuenow", "0");
+  });
+});
+

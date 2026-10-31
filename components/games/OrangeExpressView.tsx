@@ -91,6 +91,8 @@ const SOUND_RETRY_MS = 1000;
 const ANNOUNCE_DELAY_MS = 650;
 /** 乘客卡滑完（600ms）、愛心泡泡冒出來的時候。 */
 const BOARD_CHIME_DELAY_MS = 640;
+/** 推了動力、煞車沒放、車不走這麼久才提示「先把煞車放開」：先推動力再鬆煞車是真車的做法，不打斷。 */
+const RELEASE_HINT_DELAY_MS = 900;
 /** 門還沒亮就按：前窗提示留這麼久。 */
 const DOOR_HINT_MS = 2400;
 /** 「門亮了再按」排在廣播後面；等太久才輪到就不念了，孩子早就不記得剛剛按過。 */
@@ -106,9 +108,10 @@ const DRIVE_KEYS: ReadonlySet<GameAction> = new Set([
   "action",
 ]);
 
-function liveText(run: RunState, doorHint: boolean, coach: CoachBeat): string {
+function liveText(run: RunState, doorHint: boolean, coach: CoachBeat, releaseHint: boolean): string {
   if (run.phase === "reversing") return COPY.reversing;
   if (doorHint) return COPY.earlyDoorHint;
+  if (releaseHint) return COPY.releaseBrake;
   if (coach === "brake") return COPY.coachBrake;
   if (run.autoBrake) return COPY.autoBrakeOn;
   if (run.phase === "doors-open") {
@@ -148,6 +151,8 @@ export function OrangeExpressView({
   const [shake, setShake] = useState(false);
   /** 門還沒亮就按了：前窗（或停車目標條）當下說「門亮了再按」，不等到結算。 */
   const [doorHint, setDoorHint] = useState(false);
+  /** 「先把煞車放開」等夠久了沒（看桿位）；真的顯示還要條件仍成立。 */
+  const [releaseReady, setReleaseReady] = useState(false);
   /** 這一趟要不要做第一次進站的停車示範；停好學會了就關掉。 */
   const [coachOn, setCoachOn] = useState(false);
   const [honked, setHonked] = useState(0);
@@ -174,6 +179,8 @@ export function OrangeExpressView({
   const doorSpeech = useRef<{ item: SpeechItem; at: number } | null>(null);
   /** 等著念的「右邊拉，停在綠區」：一站一次，排在最前面，不套逾時（還在第二拍就念）。 */
   const coachSpeech = useRef<SpeechItem | null>(null);
+  /** 等著念的「先把煞車放開」：一趟只念一次。 */
+  const releaseSpeech = useRef<SpeechItem | null>(null);
   /** 這一趟示範過了沒（小小司機的趟數只加一次）。 */
   const coachCounted = useRef(false);
   /** 示範在哪一站真的出現過；停好時要是這一站才算學會（直接跳到停好、示範沒出現過不算）。 */
@@ -192,6 +199,19 @@ export function OrangeExpressView({
   /** 第一次進站示範的這一拍；暫停、離開駕駛畫面、這一趟不示範時都是 none。 */
   const beat: CoachBeat =
     run && coachOn && status === "playing" && screen === "drive" ? coachBeat(run) : "none";
+  /**
+   * 「先把煞車放開」看桿位，不看車實際的反應：動力推了、煞車沒放、車停著，在開車中（不是停好、
+   * 門開著、倒車）才算。停好門亮著時孩子推動力是想走，但該做的是開門，那時不提示。
+   */
+  const releaseWanted =
+    run !== null &&
+    status === "playing" &&
+    screen === "drive" &&
+    (run.phase === "running" || run.phase === "in-window") &&
+    run.power > 0 &&
+    run.brake > 0 &&
+    run.speed <= 0.001;
+  const releaseHint = releaseWanted && releaseReady;
 
   const apply = useCallback((next: RunState) => {
     runRef.current = next;
@@ -242,6 +262,7 @@ export function OrangeExpressView({
     coachCounted.current = false;
     coachShownAt.current = null;
     coachSpeech.current = null;
+    releaseSpeech.current = null;
     apply(next);
     announceNext(next);
     setScreen("drive");
@@ -257,6 +278,7 @@ export function OrangeExpressView({
     setCoachOn(false);
     coachShownAt.current = null;
     coachSpeech.current = null;
+    releaseSpeech.current = null;
     setRun(null);
     setScreen("title");
     stopSound();
@@ -446,10 +468,17 @@ export function OrangeExpressView({
     const coach = coachSpeech.current;
     coachSpeech.current = null;
     const freshCoach = coach && beat === "brake" ? coach : null;
-    const door = freshCoach ? null : doorSpeech.current;
-    if (!freshCoach) doorSpeech.current = null;
+    const release = freshCoach ? null : releaseSpeech.current;
+    if (!freshCoach) releaseSpeech.current = null;
+    const freshRelease = release && releaseHint ? release : null;
+    const door = freshCoach || freshRelease ? null : doorSpeech.current;
+    if (!freshCoach && !freshRelease) doorSpeech.current = null;
     const freshDoor = door && performance.now() - door.at <= DOOR_SPEECH_STALE_MS ? door.item : null;
-    const item = freshCoach ?? freshDoor ?? nextSpeech(run, display.gaugeNumbers, spoken.current, { skipPlatform: coachOn });
+    const item =
+      freshCoach ??
+      freshRelease ??
+      freshDoor ??
+      nextSpeech(run, display.gaugeNumbers, spoken.current, { skipPlatform: coachOn });
     if (!item) return;
     spoken.current.add(item.key);
     const ms = speechMs(item.text);
@@ -457,7 +486,26 @@ export function OrangeExpressView({
     speakText(item.text, { interrupt: false, volume: volumeRef.current });
     // 車停著時 run 不會變；念完再看一次，同一刻還有下一句（例如提示）就接著念。
     return recheck(ms);
-  }, [beat, coachOn, display.gaugeNumbers, run, screen, status, voiceTick]);
+  }, [beat, coachOn, display.gaugeNumbers, releaseHint, run, screen, status, voiceTick]);
+
+  // 條件成立超過一小段才亮；條件一不成立（例如煞車一回 0）就收。
+  useEffect(() => {
+    if (!releaseWanted) return;
+    const timer = window.setTimeout(() => setReleaseReady(true), RELEASE_HINT_DELAY_MS);
+    return () => {
+      window.clearTimeout(timer);
+      setReleaseReady(false);
+    };
+  }, [releaseWanted]);
+
+  // 一趟只念一次「先把煞車放開」。
+  useEffect(() => {
+    if (!releaseHint) return;
+    const key = "run:release";
+    if (spoken.current.has(key) || releaseSpeech.current) return;
+    releaseSpeech.current = { key, text: COPY.releaseBrake };
+    setVoiceTick((tick) => tick + 1);
+  }, [releaseHint]);
 
   // 示範真的出現了才算一趟（開局就離開的不算）；到第二拍排一句「右邊拉，停在綠區」，一站一次。
   useEffect(() => {
@@ -707,7 +755,7 @@ export function OrangeExpressView({
         onPoint={pointCheck}
       />
       <p className={styles.live} aria-live="polite">
-        {liveText(run, doorHint, beat)}
+        {liveText(run, doorHint, beat, releaseHint)}
       </p>
       <OrangeExpressCab
         run={run}
@@ -718,6 +766,7 @@ export function OrangeExpressView({
         onHorn={pressHorn}
         onDoor={tryDoors}
         coachBrake={beat === "brake"}
+        releaseBrake={releaseHint}
       />
       {status === "paused" ? (
         <div className={styles.paused}>
