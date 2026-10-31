@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type Ref } from "react";
+import { useEffect, useRef, useSyncExternalStore, type Ref } from "react";
 import { DoorIcon } from "@/components/games/OrangeExpressCab";
 import { NoticeGlyph } from "@/components/games/OrangeExpressGlyphs";
 import { OrangeExpressStopBar } from "@/components/games/OrangeExpressStopBar";
@@ -13,6 +13,23 @@ import type { PassengerId, RunState } from "@/lib/games/orange-express/types";
 import styles from "./orange-express.module.css";
 
 type RiderProps = { id: PassengerId };
+
+/** 跟 CSS 的直式矮螢幕斷點同一個條件：停車目標條讓出右邊一欄，地標改放那裡。 */
+const COMPACT_QUERY = "(orientation: portrait) and (max-height: 600px)";
+
+function subscribeCompact(onChange: () => void): () => void {
+  const media = window.matchMedia(COMPACT_QUERY);
+  media.addEventListener("change", onChange);
+  return () => media.removeEventListener("change", onChange);
+}
+
+function useCompactWindshield(): boolean {
+  return useSyncExternalStore(
+    subscribeCompact,
+    () => window.matchMedia(COMPACT_QUERY).matches,
+    () => false,
+  );
+}
 
 function RiderFace({ id }: RiderProps) {
   if (id === "mami") {
@@ -120,6 +137,7 @@ export function OrangeExpressWindshield({
   onPoint: () => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const compact = useCompactWindshield();
   const frame = windshieldFrame(run.progress, run.phase);
   const station = run.stations[run.stationIndex];
   const here = currentStation(run);
@@ -161,13 +179,14 @@ export function OrangeExpressWindshield({
         signs: here.signs,
         passing: run.passing,
         landmark: here.landmark,
+        compact,
       });
     };
     draw();
     const observer = new ResizeObserver(draw);
     observer.observe(canvas);
     return () => observer.disconnect();
-  }, [reduced, run.phase, run.progress, run.passing, here, target]);
+  }, [compact, reduced, run.phase, run.progress, run.passing, here, target]);
 
   return (
     <div
