@@ -359,10 +359,13 @@ export function OrangeExpressCab({
   onDoor,
   coachBrake = false,
   releaseBrake = false,
+  cheer = false,
 }: {
   run: RunState;
   shake: boolean;
   numbers: boolean;
+  /** 剛在降速牌前提前慢下來：小橘開心一秒。 */
+  cheer?: boolean;
   /** 第一次進站示範的第二拍：強調煞車。 */
   coachBrake?: boolean;
   /** 推了動力、煞車沒放、車不走：提示先放開煞車。 */
@@ -408,7 +411,7 @@ export function OrangeExpressCab({
       {/* 站名、速度表、指示燈收在兩根桿中間那一格；不另佔一列，高度留給前窗。DOM 放最前，讀屏先聽到站名。 */}
       <div className={styles.dash}>
         <div className={styles.dashHead}>
-          <XiaojuFace className={styles.badge} mood={xiaojuMood(run)} />
+          <XiaojuFace className={styles.badge} mood={xiaojuMood(run, cheer)} />
           <p className={styles.stationName}>
             <span className={styles.stationLead}>
               {station ? <LandmarkGlyph id={station.landmark} className={styles.stationLandmark} /> : null}

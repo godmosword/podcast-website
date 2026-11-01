@@ -28,12 +28,22 @@ type StopBarProps = {
   coach?: CoachBeat;
   /** 頓停點頭完成後才讓小橘開始開心放大。 */
   nodBeforeHappy?: boolean;
+  /** 剛在進站速限牌前提前慢下來：小橘開心一秒。 */
+  cheer?: boolean;
 };
 
 /** 前窗上方的停車目標條：黃區、綠區、目標線、預測停車點、小橘現在的位置。 */
-export function OrangeExpressStopBar({ run, numbers, hint = null, coach = "none", nodBeforeHappy = false }: StopBarProps) {
+export function OrangeExpressStopBar({
+  run,
+  numbers,
+  hint = null,
+  coach = "none",
+  nodBeforeHappy = false,
+  cheer = false,
+}: StopBarProps) {
   const bar = stopBarFor(run);
   if (!bar) return null;
+  const mood = xiaojuMood(run, cheer);
   const grade = run.grades[run.stationIndex];
   const atStation = run.phase === "stopped" || run.phase === "doors-open";
   let words: string = numbers ? distanceText(bar.remainingMeters) : bar.words;
@@ -67,12 +77,12 @@ export function OrangeExpressStopBar({ run, numbers, hint = null, coach = "none"
         {/* 停好那一刻小橘放大一下再回原位、換開心臉：直式矮手機收起了儀表徽章，這裡是看得到表情的地方。 */}
         <span
           className={styles.stopTrain}
-          data-mood={xiaojuMood(run)}
+          data-mood={mood}
           data-nod-before={nodBeforeHappy ? "true" : "false"}
           data-testid="orange-express-stop-train"
           style={{ left: `${bar.train}%` }}
         >
-          <XiaojuFace mood={xiaojuMood(run)} />
+          <XiaojuFace mood={mood} />
         </span>
       </div>
       <p className={styles.stopWords} data-testid="orange-express-stop-words">

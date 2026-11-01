@@ -1270,3 +1270,57 @@ test.describe("小橘特快車：拖桿手感與「先把煞車放開」", () =>
   });
 });
 
+
+test.describe("小橘特快車：紅燈等對向列車、提前減速", () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test("小站長第二站：關門後紅燈，推動力不走、號誌亮一圈、不提示鬆煞車；對向列車過去就轉綠、再出號誌題", async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      window.__orangeExpress = { progress: 0.65, speed: 0 };
+    });
+    await page.goto("/games/orange-express");
+    await startLevel(page, "小站長");
+    const drive = page.getByTestId("orange-express-drive");
+    const windshield = page.getByTestId("orange-express-windshield");
+    await expect(drive).toHaveAttribute("data-phase", "stopped");
+    await page.getByRole("button", { name: "開門" }).click();
+    await page.getByRole("button", { name: "關門" }).click();
+    await expect(drive).toHaveAttribute("data-station-index", "1");
+    await expect(drive).toHaveAttribute("data-signal", "red");
+    await expect(page.getByTestId("orange-express-notice")).toHaveAttribute("data-kind", "red");
+    await expect(page.getByTestId("orange-express-notice")).toContainText("紅燈，等一下");
+    await expect(drive.locator("p[aria-live]")).toHaveText("紅燈，等一下");
+    await expect(page.getByTestId("orange-express-point")).toHaveCount(0);
+
+    await jump(page, { brake: 2, power: 3 });
+    await expect(drive).toHaveAttribute("data-signal", "red");
+    await expect(windshield).toHaveAttribute("data-signal-halo", "true");
+    // 「先把煞車放開」要條件成立 0.9 秒才亮；等過門檻還是不亮。
+    await page.waitForTimeout(1000);
+    await expect(page.getByRole("slider", { name: "煞車" }).locator('[data-notch="0"]')).toHaveAttribute(
+      "data-release",
+      "false",
+    );
+    await jump(page, { brake: 0, power: 3 });
+
+    await expect(drive).toHaveAttribute("data-signal", "green", { timeout: 3500 });
+    await expect(page.getByTestId("orange-express-point")).toHaveAttribute("data-kind", "signal");
+    await expect(drive).toHaveAttribute("data-phase", "running");
+    await expect(page.getByTestId("orange-express-notice")).not.toHaveAttribute("data-kind", "red");
+  });
+
+  test("大司機：進站速限牌前先拉煞車，過牌時不太快就記一次、小橘開心一下，不響自動輕煞", async ({ page }) => {
+    await page.addInitScript(() => {
+      window.__orangeExpress = { driver: "big" };
+    });
+    await page.goto("/games/orange-express");
+    await startLevel(page, "自己開");
+    const drive = page.getByTestId("orange-express-drive");
+    await jump(page, { progress: 0.29, speed: 0.6, power: 0, brake: 3 });
+    await expect(drive).toHaveAttribute("data-early-slows", "1", { timeout: 3000 });
+    await expect(page.getByTestId("orange-express-stop-train")).toHaveAttribute("data-mood", "happy");
+    await expect(drive).toHaveAttribute("data-auto-brake-count", "0");
+  });
+});

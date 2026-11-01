@@ -7,13 +7,14 @@ import {
   nextSign,
   onBridge,
   pendingPoint,
+  signalRed,
 } from "@/lib/games/orange-express/reducer";
 import { stopBarFor } from "@/lib/games/orange-express/stop-target";
 import { signBars } from "@/lib/games/orange-express/windshield";
 import type { RunState } from "@/lib/games/orange-express/types";
 
 /** door：門還沒亮就按了，只在按下後短暫出現，不念進 speechCandidates（畫面另外排）。 */
-export type NoticeKind = "bridge" | "greeted" | "sign" | "passing" | "tunnel" | "door";
+export type NoticeKind = "red" | "bridge" | "greeted" | "sign" | "passing" | "tunnel" | "door";
 
 export type WindowNotice = {
   kind: NoticeKind;
@@ -38,11 +39,12 @@ function recentSign(state: RunState): { at: number; limit: number } | null {
 }
 
 /**
- * 前窗右上一次只說一件事（速限牌立在左邊，不擋）：鐵橋（請按喇叭）＞剛打完招呼＞對向列車＞速限牌＞隧道。
+ * 前窗右上一次只說一件事（速限牌立在左邊，不擋）：紅燈＞鐵橋（請按喇叭）＞剛打完招呼＞對向列車＞速限牌＞隧道。
  * 進站區間開始後換停車目標條佔上方；停好、開門、倒車時也不說。
  */
 export function windowNotice(state: RunState, numbers: boolean): WindowNotice | null {
   if (state.phase !== "running") return null;
+  if (signalRed(state)) return { kind: "red", text: COPY.redWait };
   if (state.progress >= currentStation(state).approachAt) return null;
   if (onBridge(state)) {
     return state.bridgeGreeted
@@ -102,7 +104,8 @@ export function speechCandidates(state: RunState, numbers: boolean, options: Spe
     out.push({ key: `${station}:landmark`, text: LANDMARK_GREET[currentStation(state).landmark] });
   }
   const notice = windowNotice(state, numbers);
-  if (!notice || notice.kind === "greeted") return out;
+  // 紅燈那句已經併在「下一站」廣播前面念過。
+  if (!notice || notice.kind === "greeted" || notice.kind === "red") return out;
   // 這面牌有「速限牌，確認！」題的話，只念題目那句；題目還沒出、已經做完都一樣，不然同一面牌會念兩次。
   if (notice.kind === "sign" && signHasTask(state, notice.at)) return out;
   const where = notice.kind === "sign" ? `:${notice.at ?? 0}` : "";

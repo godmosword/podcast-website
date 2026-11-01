@@ -57,6 +57,17 @@ export const AUTO_BRAKE_DING: readonly SynthVoice[] = [
   { wave: "sine", freq: 1175, dur: 0.14, vol: 0.06, at: 0.2, attack: 0.005 },
 ];
 
+/** 降速牌前提前慢下來：一聲高高的輕鈴（單音，跟自動輕煞的「叮叮」分得出來）。 */
+export const EARLY_SLOW_BELL: readonly SynthVoice[] = [
+  { wave: "triangle", freq: 1568, dur: 0.22, vol: 0.06, attack: 0.004 },
+];
+
+/** 出發號誌轉綠：一聲亮亮的「叮」。 */
+export const SIGNAL_GREEN_CHIME: readonly SynthVoice[] = [
+  { wave: "sine", freq: 1047, dur: 0.22, vol: 0.08, attack: 0.006 },
+  { wave: "sine", freq: 2094, dur: 0.16, vol: 0.025, attack: 0.006 },
+];
+
 /** 停好時的原創到站短旋律：上行三音。 */
 export const ARRIVAL_MELODY: readonly SynthVoice[] = [
   { wave: "triangle", freq: 659, dur: 0.18, vol: 0.09, attack: 0.01 },
@@ -104,6 +115,8 @@ export const CHIME_SETS = [
   BRAKE_LEVER_SOUND,
   EMERGENCY_CLICK,
   AUTO_BRAKE_DING,
+  EARLY_SLOW_BELL,
+  SIGNAL_GREEN_CHIME,
   ARRIVAL_MELODY,
   SMOOTH_STOP_SOUND,
   BUMP_STOP_SOUND,

@@ -1,4 +1,5 @@
 import { speakText } from "@/lib/games/shared/speech";
+import { COPY } from "@/lib/games/orange-express/copy";
 import type { Station } from "@/lib/games/orange-express/types";
 
 /**
@@ -36,8 +37,13 @@ export function speechMs(text: string): number {
   return 600 + text.length * 300;
 }
 
-export function nextStationAnnouncement(station: Pick<Station, "id" | "name">): Announcement {
-  return { id: `next-${station.id}`, text: `下一站，${station.name}站` };
+/** 紅燈的站先預告要等對向列車，再報站名；錄音另用一個 id。 */
+export function nextStationAnnouncement(
+  station: Pick<Station, "id" | "name"> & Partial<Pick<Station, "holdAtStart">>,
+): Announcement {
+  const next = `下一站，${station.name}站`;
+  if (station.holdAtStart) return { id: `next-${station.id}-wait`, text: `${COPY.redWaitAnnounce}。${next}` };
+  return { id: `next-${station.id}`, text: next };
 }
 
 function browserCanSpeak(): boolean {

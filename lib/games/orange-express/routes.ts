@@ -33,13 +33,15 @@ export type CourseRules = {
   earlyDoorCosts: boolean;
   /** 停好後按喇叭跟這一站的地標打招呼（不影響星星，結算蓋地標章）。 */
   landmarkGreet: boolean;
+  /** 第二站起關門時出發號誌是紅燈，等對向列車過去才轉綠。 */
+  redSignal: boolean;
 };
 
 export const COURSE_RULES: Record<CourseId, CourseRules> = {
-  look: { signs: false, autoBrake: false, pointing: false, earlyDoorCosts: false, landmarkGreet: false },
-  little: { signs: false, autoBrake: false, pointing: false, earlyDoorCosts: false, landmarkGreet: false },
-  big: { signs: true, autoBrake: true, pointing: true, earlyDoorCosts: true, landmarkGreet: true },
-  captain: { signs: true, autoBrake: true, pointing: true, earlyDoorCosts: true, landmarkGreet: true },
+  look: { signs: false, autoBrake: false, pointing: false, earlyDoorCosts: false, landmarkGreet: false, redSignal: false },
+  little: { signs: false, autoBrake: false, pointing: false, earlyDoorCosts: false, landmarkGreet: false, redSignal: false },
+  big: { signs: true, autoBrake: true, pointing: true, earlyDoorCosts: true, landmarkGreet: true, redSignal: false },
+  captain: { signs: true, autoBrake: true, pointing: true, earlyDoorCosts: true, landmarkGreet: true, redSignal: true },
 };
 
 type WindowSpec = Pick<Station, "window" | "target" | "greenHalf" | "approachAt" | "approachLimit">;
@@ -152,6 +154,7 @@ function station(
   id: Station["id"],
   name: string,
   passengers: readonly Passenger[],
+  index = 0,
 ): Station {
   const spec = WINDOWS[course];
   const rules = COURSE_RULES[course];
@@ -169,6 +172,8 @@ function station(
     tunnel: scenery.tunnel,
     bridge: scenery.bridge,
     passAt: scenery.passAt,
+    // 第一站不放：開局推動力不走最像壞掉。有對向列車的站才放，等待時有東西看。
+    holdAtStart: rules.redSignal && index > 0 && scenery.passAt !== null,
     signs,
     points: rules.pointing ? pointsFor(id, spec, scenery.signs) : [],
   };
@@ -183,8 +188,8 @@ export function stationsFor(level: LevelId, driver: DriverId = "big"): readonly 
   const many = course === "captain";
   return [
     station(course, "orange-park", "遊樂園", many ? [BONBON, MAMI] : [BONBON]),
-    station(course, "orange-slope", "橘子坡", many ? [XIAONAN, DOT] : [XIAONAN]),
-    station(course, "orange-home", "回家", many ? [MAMI, BONBON] : [MAMI]),
+    station(course, "orange-slope", "橘子坡", many ? [XIAONAN, DOT] : [XIAONAN], 1),
+    station(course, "orange-home", "回家", many ? [MAMI, BONBON] : [MAMI], 2),
   ];
 }
 

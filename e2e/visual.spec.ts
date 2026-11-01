@@ -733,6 +733,16 @@ test("visual：小橘特快車速度表數字 390 light（家長打開）", asyn
   await expect(gauge).toHaveScreenshot("orange-express-gauge-numbers-390-light.png", orangeShot("light"));
 });
 
+/** 小站長第二站紅燈：號誌下面紅燈亮、推著動力時燈箱外亮一圈，右上「紅燈，等一下」，對向列車開過來。 */
+test("visual：小橘特快車小站長紅燈 390 light（定格）", async ({ page }) => {
+  await openOrangeExpress(page, PHONE);
+  await startOrangeExpress(page, "小站長");
+  await jumpOrangeExpress(page, { stationIndex: 1, signal: "red", passing: 1.2, power: 3 });
+  await expect(page.getByTestId("orange-express-windshield")).toHaveAttribute("data-signal-halo", "true");
+  await settleOrangeExpress(page);
+  await expect(page).toHaveScreenshot("orange-express-red-390x844-light.png", orangeShot("light"));
+});
+
 /** 推了動力、煞車沒放、車不走：煞車桿「鬆」那格亮實線框、桿頂的字跟著亮（大司機）。 */
 test("visual：小橘特快車先鬆煞車 390 light", async ({ page }) => {
   await openOrangeExpress(page, PHONE);

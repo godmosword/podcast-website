@@ -1,6 +1,6 @@
 import { PASS_DURATION } from "@/lib/games/orange-express/reducer";
 import { SIGNAL_UNTIL } from "@/lib/games/orange-express/routes";
-import type { LandmarkId, Phase, SceneId, SpeedSign, Span } from "@/lib/games/orange-express/types";
+import type { LandmarkId, Phase, SceneId, SignalAspect, SpeedSign, Span } from "@/lib/games/orange-express/types";
 
 /** 一站的 0–1 在前窗裡等於幾公尺的世界。只影響畫面，不影響判定。 */
 export const STATION_WORLD = 600;
@@ -233,6 +233,11 @@ const SIGNAL_BOX = "rgb(52, 50, 62)";
 const SIGNAL_GO = "rgb(96, 214, 120)";
 const SIGNAL_GLOW = "rgb(196, 246, 196)";
 const SIGNAL_OFF = "rgb(120, 72, 70)";
+const SIGNAL_STOP = "rgb(232, 72, 60)";
+const SIGNAL_STOP_GLOW = "rgb(255, 196, 186)";
+const SIGNAL_GO_OFF = "rgb(70, 96, 82)";
+/** 紅燈時推了動力：燈箱外面亮一圈，跟示範外框同一個黃。 */
+const SIGNAL_HALO = "rgb(255, 214, 90)";
 const SIGNAL_RIM = "rgb(236, 232, 224)";
 const INK = "rgb(58, 46, 40)";
 const TRAIN_BODY = "rgb(252, 248, 238)";
@@ -263,6 +268,10 @@ export type WindshieldPaint = {
   signs?: readonly SpeedSign[];
   /** 對向列車擦身的秒數；null 表示沒有。 */
   passing?: number | null;
+  /** 出發號誌；沒給是綠燈。 */
+  signal?: SignalAspect;
+  /** 紅燈時推了動力：號誌燈箱外亮一圈。 */
+  signalHalo?: boolean;
   /** 這一站的地標（停車目標之後、月台另一側）。 */
   landmark?: LandmarkId | null;
   /** 直式矮手機（CSS 的 portrait 且高 ≤600）：地標改放停車目標條右邊那一欄。 */
@@ -1131,10 +1140,16 @@ function drawSigns(
 }
 
 /**
- * 出發號誌：灰桿上一個深色圓角燈箱，上面亮綠燈、下面紅燈不亮。
- * 燈箱比真的大，遠處也看得出上下兩顆燈；圖內不寫字。
+ * 出發號誌：灰桿上一個深色圓角燈箱，綠燈時上面亮綠、下面紅燈不亮；紅燈時反過來。
+ * 燈箱比真的大，遠處也看得出上下兩顆燈；圖內不寫字。halo：紅燈時推了動力，燈箱外亮一圈。
  */
-function drawSignal(ctx: CanvasRenderingContext2D, view: View, travel: number): void {
+function drawSignal(
+  ctx: CanvasRenderingContext2D,
+  view: View,
+  travel: number,
+  aspect: SignalAspect = "green",
+  halo = false,
+): void {
   const z = SIGNAL_WORLD - travel;
   if (z <= Z_NEAR + 0.6 || z >= Z_FAR) return;
   const foot = project(view, SIGNAL_X, 0, z);
@@ -1153,23 +1168,30 @@ function drawSignal(ctx: CanvasRenderingContext2D, view: View, travel: number): 
   ctx.lineTo(head.x + r, bottom - r);
   ctx.arc(head.x, bottom - r, r, 0, Math.PI);
   ctx.closePath();
+  if (halo) {
+    ctx.strokeStyle = SIGNAL_HALO;
+    ctx.lineWidth = Math.max(4, w * 0.7);
+    ctx.stroke();
+  }
   ctx.fill();
   // 淺色邊：燈箱背後常是隧道口或遠山，深色疊深色會糊在一起。
   ctx.strokeStyle = SIGNAL_RIM;
   ctx.lineWidth = Math.max(1, w * 0.1);
   ctx.stroke();
   const lamp = r * 0.62;
-  ctx.fillStyle = SIGNAL_GLOW;
+  const red = aspect === "red";
+  const litY = red ? bottom - r : top + r;
+  ctx.fillStyle = red ? SIGNAL_STOP_GLOW : SIGNAL_GLOW;
   ctx.beginPath();
-  ctx.arc(head.x, top + r, lamp * 1.25, 0, Math.PI * 2);
+  ctx.arc(head.x, litY, lamp * 1.25, 0, Math.PI * 2);
   ctx.fill();
-  ctx.fillStyle = SIGNAL_GO;
+  ctx.fillStyle = red ? SIGNAL_STOP : SIGNAL_GO;
   ctx.beginPath();
-  ctx.arc(head.x, top + r, lamp, 0, Math.PI * 2);
+  ctx.arc(head.x, litY, lamp, 0, Math.PI * 2);
   ctx.fill();
-  ctx.fillStyle = SIGNAL_OFF;
+  ctx.fillStyle = red ? SIGNAL_GO_OFF : SIGNAL_OFF;
   ctx.beginPath();
-  ctx.arc(head.x, bottom - r, lamp, 0, Math.PI * 2);
+  ctx.arc(head.x, red ? top + r : bottom - r, lamp, 0, Math.PI * 2);
   ctx.fill();
 }
 
@@ -1398,7 +1420,7 @@ export function drawWindshield(
     if (bridgeZ) drawBridge(ctx, view, bridgeZ[0], bridgeZ[1]);
     drawPortals(ctx, view, travel, tunnelZ, stopPostWorld(paint.target));
     // 號誌最後畫：看得到它的時候，門形線柱、架空線、鐵橋都比它遠，不能從燈上劃過去。
-    drawSignal(ctx, view, travel);
+    drawSignal(ctx, view, travel, paint.signal, paint.signalHalo === true);
   };
 
   ctx.clearRect(0, 0, width, height);
@@ -1413,6 +1435,6 @@ export function drawWindshield(
     drawSigns(ctx, view, travel, nearSigns);
     // 隧道山體很寬，比山腳近的樹也會被它蓋掉只剩一條扁餅；比隧道口近的樹再畫一次。
     drawTrees(ctx, view, travel, paint, tunnelZ[0]);
-    if (SIGNAL_WORLD - travel < tunnelZ[0]) drawSignal(ctx, view, travel);
+    if (SIGNAL_WORLD - travel < tunnelZ[0]) drawSignal(ctx, view, travel, paint.signal, paint.signalHalo === true);
   }
 }

@@ -53,8 +53,8 @@
   - ✅ **PR-F 拖桿容差、握把偏移、先鬆煞車、鍵盤一致**：拖曳要跨過格線再多 max(格高 15%, 10px) 才換檔；按在握把那一格記下偏移、不換檔，按別格當場跳；只認主指標、跟著 pointerId、處理 pointercancel。推了動力、煞車沒放、車不走 0.9 秒後亮煞車桿「鬆」那格（跟示範同一個黃框，脈動三下後靜止、減少動態只留外框）、桿頂小牌改「↓鬆」、朗讀一次「先把煞車放開」，所有規則組都有；停好門亮、門開著、暫停時不出現。↑↓ 永遠動力、←→ 永遠煞車，`aria-keyshortcuts` 與讀屏說明。新增 darwin 基準 2 張（先鬆煞車大司機、小小司機 390 日間）。見本 commit。
   - ✅ **PR-E-1 動力與煞車的反應時間**：分級時間常數（慢慢看即時），`physics.ts` 共用 `motionStep`，`predictStop` 改固定步長模擬，桿槽填色、速度表與馬達／煞車聲都顯示實際出力。單元 179 passed、e2e 146 passed、視覺 33 passed、4 倍 CPU 三場景 60–61 fps、production build 通過。iPhone 真機手感本輪依使用者決定先略過，保留日後實機調整 TODO。見 PR #287。
   - ✅ **PR-E-2 停車平順度**：大司機／小站長以 B2 以下或最後一段減速度低於 0.32 判平順；停好時播放「噗咻」或輕「咚」，急停只在畫面晃動開啟且未減少動態時點頭。結算只說一句正面回饋，低齡用保底句，統計合併成單列。單元 183 passed、e2e 148 passed；typecheck、lint、色彩稽核通過。見 PR-E-2。
-  - **PR-G 提前減速與紅燈**：既有速限牌前提前收動力或輕煞算一次；小站長第二站起出站可能紅燈、對向車開過來、≤3 秒轉綠。`game · M`
-- **小橘特快車車內廣播錄音**（2026-10-31 使用者決定先擺著）：結構已留好（`lib/games/orange-express/announce.ts` 的 `ANNOUNCE_CLIPS`）。家人或小橘錄「下一站，遊樂園站／橘子坡站／回家站」三句，放 `public/games/v2/orange-express/voice/next-<站 id>.m4a` 並登記；錄好前用瀏覽器朗讀暫代。也要在 iPhone／Android 實機各聽一次朗讀與「叮叮」輕煞聲。`content · S · 需真人`
+  - ✅ **PR-G 提前減速與紅燈**：大司機／小站長在降速牌提示出現後、車比牌子快時先放動力或拉煞車，過牌時 ≤ 限速 × 1.1 記一次（輕鈴＋小橘開心一秒，結算一句話第一優先，≥2 次）；小站長第二站起關門即紅燈，對向列車由關門觸發（不再看 `passAt`），車尾過去轉綠＋叮（2.9 秒）；紅燈時推動力不走、號誌亮一圈、不出「先鬆煞車」與號誌題。見 PR-G。
+- **小橘特快車車內廣播錄音**（2026-10-31 使用者決定先擺著）：結構已留好（`lib/games/orange-express/announce.ts` 的 `ANNOUNCE_CLIPS`）。家人或小橘錄「下一站，遊樂園站／橘子坡站／回家站」三句，以及小站長紅燈站的「紅燈，等一下，對向列車要先過去喔。下一站，橘子坡站／回家站」兩句（`next-<站 id>-wait`），放 `public/games/v2/orange-express/voice/next-<站 id>.m4a` 並登記；錄好前用瀏覽器朗讀暫代。也要在 iPhone／Android 實機各聽一次朗讀與「叮叮」輕煞聲。`content · S · 需真人`
 - **重錄 darwin 視覺基準（2026-10 稽核修正）**：Linux 不能改 `-chromium-darwin`。請在 Mac 跑 `npm run test:visual:trusted -- --update-snapshots`，只接受下面這些有意的差異後再更新。320 沒有基準。
   - 睡前 390 日間／夜間：`landing-bedtime-390-light-chromium-darwin.png`、`landing-bedtime-390-night-chromium-darwin.png`（只縮小「數綿羊123．睡前故事」。1280 與其他段不動）。
   - 遊樂園 390：`games-390-light-chromium-darwin.png`、`games-390-night-chromium-darwin.png`（手機海報改 16:9。桌面 `games-chromium-darwin.png`、`games-1280-night-chromium-darwin.png` 不該變）。

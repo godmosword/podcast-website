@@ -29,6 +29,9 @@ export type Phase =
 /** 停在哪一區：綠區「剛剛好」、黃區「停到了」。星星只算整趟，不算每站。 */
 export type StopGrade = "green" | "yellow";
 
+/** 出發號誌。紅燈時推動力車也不走。 */
+export type SignalAspect = "red" | "green";
+
 export type PassengerId = "bonbon" | "mami" | "xiaonan" | "dot";
 
 export type Passenger = {
@@ -76,6 +79,11 @@ export type Station = {
   bridge: Span | null;
   /** 對向列車在這裡出發迎面擦身；null 表示這一站沒有。 */
   passAt: number | null;
+  /**
+   * 小站長第二站起：關門時出發號誌是紅燈，對向列車一關門就從遠方開過來，車尾過去才轉綠。
+   * 這一站的對向列車改由關門觸發，不看 passAt。
+   */
+  holdAtStart: boolean;
   /** 有速限牌的規則組才有；沒有時只剩進站的速度旗。 */
   signs: readonly SpeedSign[];
   points: readonly PointTask[];
@@ -113,6 +121,12 @@ export type RunState = {
   passing: number | null;
   /** 這一站的對向列車已經來過。 */
   passedTrain: boolean;
+  /** 出發號誌；紅燈只出現在 holdAtStart 的站，對向列車車尾過去就轉綠。 */
+  signal: SignalAspect;
+  /** 降速的速限牌前先放動力或拉煞車、過牌時不太快的次數（大司機、小站長）。 */
+  earlySlows: number;
+  /** 前面那面降速牌已經先慢下來準備好了（記牌子的位置）；過牌或換站就清掉。 */
+  slowPrep: number | null;
   /** 這一站在鐵橋上按過喇叭。 */
   bridgeGreeted: boolean;
   bridgeGreets: number;
@@ -141,6 +155,8 @@ export type OrangeExpressHook = {
   brake?: number;
   /** 對向列車擦身的秒數。 */
   passing?: number;
+  /** 出發號誌。跳站時沒寫就是綠燈；寫 red 會從這一站起點、對向列車剛出現開始等。 */
+  signal?: SignalAspect;
   /** 讓前窗迴圈停住，截圖時畫面不會再往前跑。 */
   freeze?: boolean;
   /** 只在開局時讀：蓋過家長設定的司機。 */

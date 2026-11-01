@@ -25,6 +25,7 @@ import {
   type PowerNotch,
   type RunAction,
   type RunState,
+  type SpeedSign,
   type Station,
   type StopGrade,
 } from "@/lib/games/orange-express/types";
@@ -51,6 +52,8 @@ export const REVERSE_TO = 0.08;
 /** 對向列車從遠方出現到車尾過去的秒數。 */
 export const PASS_DURATION = 2.9;
 const GRADE_EPSILON = 1e-6;
+/** 過降速牌時不高於限速的這麼多倍，就算提前慢下來（容得下作用延遲）。 */
+export const EARLY_SLOW_SLACK = 1.1;
 /** 停車預測的固定步長與上限（20 秒內沒停就不畫三角）。 */
 export const PREDICT_DT = 1 / 30;
 export const PREDICT_STEPS = 600;
@@ -151,6 +154,22 @@ export function nextSign(state: RunState, ahead = 0.08): { at: number; limit: nu
   return null;
 }
 
+/** 出發號誌是紅燈：推動力車也不走，等對向列車過去。 */
+export function signalRed(state: RunState): boolean {
+  return state.signal === "red";
+}
+
+/**
+ * 前面要降速的那面牌（提示已經出現、比現在的速度旗低）。只有看速限牌的規則組（大司機、小站長）才有。
+ * 提前慢下來就是在這面牌提示出現後、過牌之前先放動力或拉煞車。
+ */
+export function slowingSignAhead(state: RunState): SpeedSign | null {
+  if (!COURSE_RULES[state.course].signs) return null;
+  const sign = nextSign(state);
+  if (!sign) return null;
+  return sign.limit < currentLimit(state) ? sign : null;
+}
+
 export function inTunnel(state: RunState): boolean {
   const tunnel = currentStation(state).tunnel;
   return tunnel !== null && state.progress >= tunnel.from && state.progress <= tunnel.to;
@@ -168,6 +187,8 @@ export function pendingPoint(state: RunState): PointTask | null {
   }
   for (const task of currentStation(state).points) {
     if (state.pointsDone.includes(task.id)) continue;
+    // 紅燈時不出「號誌，綠燈！」：轉綠了才確認。
+    if (task.kind === "signal" && signalRed(state)) continue;
     if (state.progress >= task.at && state.progress <= task.until) return task;
   }
   return null;
@@ -199,6 +220,9 @@ export function createRun(level: LevelId, driver: DriverId = "big"): RunState {
     autoBrakeCount: 0,
     passing: null,
     passedTrain: false,
+    signal: "green",
+    earlySlows: 0,
+    slowPrep: null,
     bridgeGreeted: false,
     bridgeGreets: 0,
     landmarkGreets: [],
@@ -342,23 +366,30 @@ export function withHook(state: RunState, hook: OrangeExpressHook | null | undef
     : { tractive: state.tractive, braking: state.braking };
   const sameStation = stationIndex === state.stationIndex;
   const grades = sameStation ? state.grades : state.grades.slice(0, stationIndex);
-  const passing =
+  // 跳站預設綠燈（測試與基準不會卡在紅燈）；寫 red 才從起點等對向列車。
+  const signal =
+    hook.signal === "red" || hook.signal === "green" ? hook.signal : sameStation ? state.signal : "green";
+  const hookPassing =
     typeof hook.passing === "number" && Number.isFinite(hook.passing)
       ? quant(Math.min(PASS_DURATION, Math.max(0, hook.passing)))
       : sameStation
         ? state.passing
         : null;
+  const passing = signal === "red" ? (hookPassing ?? 0) : hookPassing;
+  const red = signal === "red";
   return normalizePhase({
     ...state,
     stationIndex,
-    progress,
-    speed,
+    progress: red ? 0 : progress,
+    speed: red ? 0 : speed,
     misses,
     power,
     brake,
-    ...effort,
+    ...(red ? restEffort(brake) : effort),
     grades,
     passing,
+    signal,
+    slowPrep: null,
     passedTrain: passing !== null || (sameStation && state.passedTrain),
     bridgeGreeted: sameStation && state.bridgeGreeted,
     autoBrake: false,
@@ -409,6 +440,7 @@ function applyMotion(state: RunState, dt: number): RunState {
 
   const moved = {
     ...state,
+    ...earlySlowAfter(state, progress, speed),
     autoBrake: motion.autoBrake,
     autoBrakeCount,
     tractive: motion.tractive,
@@ -438,6 +470,44 @@ function applyMotion(state: RunState, dt: number): RunState {
   }
   if (inWindow(station, progress)) return { ...moved, progress, speed, phase: "in-window" };
   return { ...moved, progress, speed, phase: "running" };
+}
+
+/**
+ * 提前慢下來：降速牌的提示出現後、車比牌子的速度快時先放動力或拉煞車，記下準備好了；
+ * 過牌那一幀速度不高於限速 × EARLY_SLOW_SLACK 就加一次。來不及也沒關係，自動輕煞照樣幫忙。
+ */
+function earlySlowAfter(
+  state: RunState,
+  progress: number,
+  speed: number,
+): Pick<RunState, "earlySlows" | "slowPrep"> {
+  let slowPrep = state.slowPrep;
+  let earlySlows = state.earlySlows;
+  const ahead = slowingSignAhead(state);
+  if (ahead && slowPrep !== ahead.at && state.speed > ahead.limit && (state.power === 0 || state.brake > 0)) {
+    slowPrep = ahead.at;
+  }
+  for (const sign of currentStation(state).signs) {
+    if (state.progress >= sign.at || progress < sign.at) continue;
+    if (slowPrep === sign.at) {
+      if (speed <= sign.limit * EARLY_SLOW_SLACK) earlySlows += 1;
+      slowPrep = null;
+    }
+  }
+  return { earlySlows, slowPrep };
+}
+
+/**
+ * 紅燈等對向列車：車不走、動力不作用；對向列車車尾過去的那一刻轉綠。
+ * 動力桿已經推著的話，轉綠時跟剛推下去一樣先跳一點再跟上，不必再推一次。
+ */
+function holdAtSignal(state: RunState, dt: number): RunState {
+  const passing = quant((state.passing ?? 0) + dt);
+  if (passing < PASS_DURATION) {
+    return { ...state, ...restEffort(state.brake), speed: 0, passing, passedTrain: true };
+  }
+  const green: RunState = { ...state, ...restEffort(state.brake), speed: 0, signal: "green", passing: null, passedTrain: true };
+  return { ...green, ...kickEffort(green, { ...green, power: 0 }, green) };
 }
 
 function applyReverse(state: RunState, dt: number): RunState {
@@ -473,7 +543,10 @@ function unchanged(state: RunState, next: RunState): boolean {
     next.autoBrake === state.autoBrake &&
     next.autoBrakeCount === state.autoBrakeCount &&
     next.passing === state.passing &&
-    next.passedTrain === state.passedTrain
+    next.passedTrain === state.passedTrain &&
+    next.signal === state.signal &&
+    next.earlySlows === state.earlySlows &&
+    next.slowPrep === state.slowPrep
   );
 }
 
@@ -483,7 +556,9 @@ export function step(state: RunState, action: RunAction): RunState {
     if (notch === state.power) return state;
     if (state.phase === "route-done" || state.phase === "reversing") return state;
     if (state.phase === "doors-open" && notch > state.power) return state;
-    return withLevers(state, { power: notch });
+    const next = withLevers(state, { power: notch });
+    // 紅燈時桿子推得下去，但動力不作用。
+    return signalRed(next) ? { ...next, tractive: 0 } : next;
   }
 
   if (action.type === "set-brake") {
@@ -518,6 +593,8 @@ export function step(state: RunState, action: RunAction): RunState {
     if (state.stationIndex >= state.stations.length - 1) {
       return { ...state, ...restEffort(0), phase: "route-done", speed: 0, power: 0, brake: 0 };
     }
+    // 紅燈的站：一關門對向列車就從遠方開過來（不再等 passAt），車尾過去才轉綠。
+    const hold = state.stations[state.stationIndex + 1]!.holdAtStart;
     return {
       ...state,
       ...restEffort(state.brake),
@@ -529,8 +606,10 @@ export function step(state: RunState, action: RunAction): RunState {
       boarded: 0,
       boardTimer: 0,
       autoBrake: false,
-      passing: null,
-      passedTrain: false,
+      passing: hold ? 0 : null,
+      passedTrain: hold,
+      signal: hold ? "red" : "green",
+      slowPrep: null,
       bridgeGreeted: false,
     };
   }
@@ -552,6 +631,11 @@ export function step(state: RunState, action: RunAction): RunState {
 
   if (state.phase === "stopped") return state;
 
-  const next = state.phase === "reversing" ? applyReverse(state, dt) : applyMotion(state, dt);
+  const next =
+    state.phase === "reversing"
+      ? applyReverse(state, dt)
+      : signalRed(state)
+        ? holdAtSignal(state, dt)
+        : applyMotion(state, dt);
   return unchanged(state, next) ? state : next;
 }

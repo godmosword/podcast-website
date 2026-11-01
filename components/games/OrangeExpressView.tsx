@@ -29,11 +29,13 @@ import {
   BRAKE_LEVER_SOUND,
   BUMP_STOP_SOUND,
   DOOR_CHIME,
+  EARLY_SLOW_BELL,
   EMERGENCY_CLICK,
   HORN,
   PASS_WHOOSH,
   POINT_OK,
   POWER_LEVER_SOUND,
+  SIGNAL_GREEN_CHIME,
   SMOOTH_STOP_SOUND,
   jointClack,
 } from "@/lib/games/orange-express/chime";
@@ -49,6 +51,7 @@ import {
   currentStation,
   inTunnel,
   onBridge,
+  signalRed,
   step,
   stepBrake,
   stepPower,
@@ -100,6 +103,8 @@ const RELEASE_HINT_DELAY_MS = 900;
 const DOOR_HINT_MS = 2400;
 /** 「門亮了再按」排在廣播後面；等太久才輪到就不念了，孩子早就不記得剛剛按過。 */
 const DOOR_SPEECH_STALE_MS = 4000;
+/** 降速牌前提前慢下來：小橘開心這麼久。 */
+const CHEER_MS = 1000;
 /** 對向列車擦身時「咻」的時間點（秒）。 */
 const WHOOSH_AT = 1.45;
 const DRIVE_KEYS: ReadonlySet<GameAction> = new Set([
@@ -113,6 +118,7 @@ const DRIVE_KEYS: ReadonlySet<GameAction> = new Set([
 
 function liveText(run: RunState, doorHint: boolean, coach: CoachBeat, releaseHint: boolean): string {
   if (run.phase === "reversing") return COPY.reversing;
+  if (signalRed(run)) return COPY.redWait;
   if (doorHint) return COPY.earlyDoorHint;
   if (releaseHint) return COPY.releaseBrake;
   if (coach === "brake") return COPY.coachBrake;
@@ -160,6 +166,9 @@ export function OrangeExpressView({
   /** 這一趟要不要做第一次進站的停車示範；停好學會了就關掉。 */
   const [coachOn, setCoachOn] = useState(false);
   const [honked, setHonked] = useState(0);
+  /** 提前慢下來的次數變多時加一：小橘開心一秒，連續兩次時計時重來。 */
+  const [cheerTick, setCheerTick] = useState(0);
+  const [cheer, setCheer] = useState(false);
   /** 車停著時 run 不會變；廣播念完後用它叫朗讀再看一次前窗。 */
   const [voiceTick, setVoiceTick] = useState(0);
   const [display] = useOrangeExpressDisplay();
@@ -213,6 +222,8 @@ export function OrangeExpressView({
     status === "playing" &&
     screen === "drive" &&
     (run.phase === "running" || run.phase === "in-window") &&
+    // 紅燈時推動力不走是在等車，不是煞車沒放。
+    !signalRed(run) &&
     run.power > 0 &&
     run.brake > 0 &&
     run.speed <= 0.001;
@@ -536,6 +547,13 @@ export function OrangeExpressView({
   }, [shake]);
 
   useEffect(() => {
+    if (cheerTick === 0) return;
+    setCheer(true);
+    const timer = window.setTimeout(() => setCheer(false), CHEER_MS);
+    return () => window.clearTimeout(timer);
+  }, [cheerTick]);
+
+  useEffect(() => {
     if (!arrivalNod) return;
     const timer = window.setTimeout(() => setArrivalNod(false), 200);
     return () => window.clearTimeout(timer);
@@ -652,6 +670,11 @@ export function OrangeExpressView({
 
       const sameStation = next.stationIndex === cur.stationIndex;
       if (next.autoBrakeCount > cur.autoBrakeCount) audio?.voices?.(AUTO_BRAKE_DING);
+      if (next.earlySlows > cur.earlySlows) {
+        audio?.voices?.(EARLY_SLOW_BELL);
+        setCheerTick((tick) => tick + 1);
+      }
+      if (signalRed(cur) && !signalRed(next)) audio?.voices?.(SIGNAL_GREEN_CHIME);
       if (
         next.passing !== null &&
         next.passing >= WHOOSH_AT &&
@@ -775,6 +798,8 @@ export function OrangeExpressView({
       data-bridge-greets={run.bridgeGreets}
       data-misses={run.misses}
       data-smooth-stops={run.smoothStops}
+      data-signal={run.signal}
+      data-early-slows={run.earlySlows}
     >
       <OrangeExpressWindshield
         run={run}
@@ -790,6 +815,7 @@ export function OrangeExpressView({
           (run.course === "big" || run.course === "captain") &&
           !isSmoothStop(run)
         }
+        cheer={cheer}
         onPoint={pointCheck}
       />
       <p className={styles.live} aria-live="polite">
@@ -805,6 +831,7 @@ export function OrangeExpressView({
         onDoor={tryDoors}
         coachBrake={beat === "brake"}
         releaseBrake={releaseHint}
+        cheer={cheer}
       />
       {status === "paused" ? (
         <div className={styles.paused}>

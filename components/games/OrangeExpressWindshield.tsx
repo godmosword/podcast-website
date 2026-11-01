@@ -126,6 +126,7 @@ export function OrangeExpressWindshield({
   coach,
   nod,
   nodBeforeHappy,
+  cheer = false,
   onPoint,
 }: {
   run: RunState;
@@ -139,6 +140,8 @@ export function OrangeExpressWindshield({
   /** 頓停時在畫面晃動已開啟的情況下，輕輕點頭一次。 */
   nod: boolean;
   nodBeforeHappy: boolean;
+  /** 剛在降速牌前提前慢下來：小橘開心一秒。 */
+  cheer?: boolean;
   onPoint: () => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -151,6 +154,7 @@ export function OrangeExpressWindshield({
   const notice = noticeWithDoorHint(run, numbers, doorHint);
   const pending = pendingPoint(run);
   const task = coach.on && pending?.kind === "platform" ? null : pending;
+  const signalHalo = run.signal === "red" && run.power > 0;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -183,6 +187,8 @@ export function OrangeExpressWindshield({
         bridge: here.bridge,
         signs: here.signs,
         passing: run.passing,
+        signal: run.signal,
+        signalHalo,
         landmark: here.landmark,
         compact,
       });
@@ -191,7 +197,7 @@ export function OrangeExpressWindshield({
     const observer = new ResizeObserver(draw);
     observer.observe(canvas);
     return () => observer.disconnect();
-  }, [compact, reduced, run.phase, run.progress, run.passing, here, target]);
+  }, [compact, reduced, run.phase, run.progress, run.passing, run.signal, signalHalo, here, target]);
 
   return (
     <div
@@ -200,6 +206,8 @@ export function OrangeExpressWindshield({
       data-scene={here.scene}
       data-notice={notice?.kind ?? "none"}
       data-nod={nod ? "true" : "false"}
+      data-signal={run.signal}
+      data-signal-halo={signalHalo ? "true" : "false"}
     >
       <div ref={swayRef} className={styles.glassWrap}>
         <canvas ref={canvasRef} className={styles.glass} aria-hidden />
@@ -212,6 +220,7 @@ export function OrangeExpressWindshield({
         hint={doorHint ? COPY.earlyDoorHint : null}
         coach={coach.beat}
         nodBeforeHappy={nodBeforeHappy}
+        cheer={cheer}
       />
       {notice && !showRiders ? (
         <p className={styles.notice} data-kind={notice.kind} data-testid="orange-express-notice">

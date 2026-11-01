@@ -45,6 +45,7 @@ describe("路線：四組規則", () => {
         pointing: false,
         earlyDoorCosts: false,
         landmarkGreet: false,
+        redSignal: false,
       });
     }
     for (const course of ["big", "captain"] as const) {

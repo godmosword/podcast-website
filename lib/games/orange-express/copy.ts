@@ -35,6 +35,7 @@ export const COPY = {
   backTitle: "回標題",
   arrivedHome: "到家了",
   /** 小橘結算時只說一句；低齡規則組只用保底句。 */
+  resultEarlySlow: "看到速限牌，早早就慢下來",
   resultSmooth: "輕輕停，朋友站得穩穩的",
   resultAllGreen: "三站都剛剛好",
   resultLandmark: "你跟地標打招呼了",
@@ -89,6 +90,9 @@ export const COPY = {
   bridge: "鐵橋！按喇叭打招呼",
   bridgeGreeted: "叭叭！跟鐵橋打招呼了",
   passing: "對向列車來了，揮揮手",
+  /** 小站長第二站起關門時的紅燈：前窗右上看得到這句，朗讀併在「下一站」廣播前面說。 */
+  redWait: "紅燈，等一下",
+  redWaitAnnounce: "紅燈，等一下，對向列車要先過去喔",
   friendsAboard: "朋友上車了",
   point: "指差確認",
   pointDone: "確認好了",
@@ -152,11 +156,15 @@ export function landmarkResultText(count: number): string {
   return `跟地標打招呼 ${count} 站`;
 }
 
+/** 一趟有這麼多面降速牌前提前慢下來，結算就說這件事（一趟共六面降速牌）。 */
+export const EARLY_SLOW_RESULT = 2;
+
 /** 結算只挑一句正面的話；低齡不提技巧，依優先序選本趟最值得記住的事。 */
 export function resultComment(
-  state: Pick<RunState, "course" | "smoothStops" | "grades" | "stations" | "landmarkGreets">,
+  state: Pick<RunState, "course" | "earlySlows" | "smoothStops" | "grades" | "stations" | "landmarkGreets">,
 ): string {
   if (state.course === "look" || state.course === "little") return COPY.resultLowAge;
+  if (state.earlySlows >= EARLY_SLOW_RESULT) return COPY.resultEarlySlow;
   if (state.smoothStops >= 2) return COPY.resultSmooth;
   if (state.stations.length === 3 && state.grades.length >= 3 && state.grades.slice(0, 3).every((grade) => grade === "green")) {
     return COPY.resultAllGreen;

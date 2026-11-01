@@ -144,6 +144,19 @@ function OncomingGlyph() {
   );
 }
 
+/** 紅燈：前窗那座出發號誌的燈箱，下面紅燈亮、上面綠燈暗。 */
+function RedSignalGlyph() {
+  return (
+    <svg viewBox="0 0 32 32" aria-hidden className={styles.noticeGlyph}>
+      <rect x="14.5" y="24" width="3" height="7" rx="1" fill="rgb(170, 134, 104)" />
+      <rect x="9" y="2" width="14" height="24" rx="7" fill="rgb(52, 50, 62)" stroke="rgb(236, 232, 224)" strokeWidth="1.5" />
+      <circle cx="16" cy="9" r="4" fill="rgb(70, 96, 82)" />
+      <circle cx="16" cy="19" r="5.4" fill="rgb(255, 196, 186)" />
+      <circle cx="16" cy="19" r="4" fill="rgb(232, 72, 60)" />
+    </svg>
+  );
+}
+
 /** 隧道：山丘上的拱形洞口，裡面暗、兩盞小燈。 */
 function TunnelGlyph() {
   return (
@@ -164,6 +177,7 @@ export function NoticeGlyph({ notice }: { notice: WindowNotice }) {
   if (notice.kind === "sign") return <SignGlyph bars={notice.bars ?? 1} />;
   if (notice.kind === "bridge" || notice.kind === "greeted") return <HornBadge />;
   if (notice.kind === "passing") return <OncomingGlyph />;
+  if (notice.kind === "red") return <RedSignalGlyph />;
   return <TunnelGlyph />;
 }
 
