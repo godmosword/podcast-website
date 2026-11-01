@@ -112,7 +112,7 @@ export const DRIVER_NAME: Record<DriverId, string> = {
 
 export const DRIVER_HINT: Record<DriverId, string> = {
   little: "3–4 歲：桿子自動限速，只學開和停",
-  big: "5–7 歲：速限牌、停準拿星星、指差確認",
+  big: "5–7 歲：停準拿星星、輕輕停、跟地標打招呼",
 };
 
 /** 停好後跟地標打招呼（大司機、小站長）：朗讀與讀屏說這句，喇叭亮黃圈。 */
@@ -164,7 +164,8 @@ export function resultComment(
   state: Pick<RunState, "course" | "earlySlows" | "smoothStops" | "grades" | "stations" | "landmarkGreets">,
 ): string {
   if (state.course === "look" || state.course === "little") return COPY.resultLowAge;
-  if (state.earlySlows >= EARLY_SLOW_RESULT) return COPY.resultEarlySlow;
+  // 「看到速限牌」只對有速限牌的小站長說；大司機（2026-11-01 起沒有牌）之後改說小鴨事件（PR-H3）。
+  if (state.course === "captain" && state.earlySlows >= EARLY_SLOW_RESULT) return COPY.resultEarlySlow;
   if (state.smoothStops >= 2) return COPY.resultSmooth;
   if (state.stations.length === 3 && state.grades.length >= 3 && state.grades.slice(0, 3).every((grade) => grade === "green")) {
     return COPY.resultAllGreen;

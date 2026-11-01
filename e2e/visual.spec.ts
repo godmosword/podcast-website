@@ -797,14 +797,17 @@ test("visual：小橘特快車停好開門 390 light（乘客上完車）", asyn
   await expect(page).toHaveScreenshot("orange-express-doors-390x844-light.png", orangeShot("light"));
 });
 
-test("visual：小橘特快車結算 390 light（指差確認、鐵橋打招呼、三站綠區）", async ({ page }) => {
+/** 大司機（2026-11-01 起沒有指差、鐵橋招呼）：第一站開門時按喇叭跟地標打招呼，三站綠區。 */
+test("visual：小橘特快車結算 390 light（地標打招呼、三站綠區）", async ({ page }) => {
   await openOrangeExpress(page, PHONE, { freeze: false });
   await startOrangeExpress(page, "自己開");
-  await page.getByTestId("orange-express-point").click();
-  await serveOrangeStation(page);
-  await jumpOrangeExpress(page, { progress: 0.14, speed: 0.4, freeze: true });
+  await jumpOrangeExpress(page, { progress: 0.65, speed: 0, freeze: false });
+  await expect(page.getByTestId("orange-express-drive")).toHaveAttribute("data-phase", "stopped");
+  await page.getByRole("button", { name: "開門" }).click();
   await page.getByTestId("orange-express-horn").click();
-  await expect(page.getByTestId("orange-express-drive")).toHaveAttribute("data-bridge-greets", "1");
+  const close = page.getByRole("button", { name: "關門" });
+  await expect(close).not.toHaveAttribute("aria-disabled", "true");
+  await close.click();
   await serveOrangeStation(page);
   await serveOrangeStation(page);
   const result = page.getByTestId("orange-express-result");

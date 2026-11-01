@@ -1025,7 +1025,7 @@
   background: var(--landing-brand);
 }
 
-.lever[data-simple="true"] .leverEffort {
+.lever[data-effort="false"] .leverEffort {
   display: none;
 }
 
@@ -1220,12 +1220,21 @@
 }
 
 /* 「停」是要按的那格：底色與框都比「緊急」重，孩子的眼睛先落在這裡。 */
-.lever[data-simple="true"][data-kind="brake"] .notchLamp[data-step="1"] {
+.lever[data-simple="true"][data-kind="brake"] .notchLamp[data-notch="3"] {
   border-color: color-mix(in srgb, var(--ink) 50%, transparent);
   background: color-mix(in srgb, var(--c-teal) 45%, var(--card));
 }
 
-.lever[data-simple="true"][data-kind="brake"] .notchLamp[data-step="1"][data-on="true"] {
+/* 大司機的「輕」：比「停」淡、圖是矮一半的停車柱（靠形狀分，不只靠深淺）。 */
+.lever[data-simple="true"][data-kind="brake"] .notchLamp[data-notch="2"] {
+  background: color-mix(in srgb, var(--c-teal) 20%, var(--card));
+}
+
+.lever[data-simple="true"][data-kind="brake"] .notchLamp[data-notch="2"][data-on="true"] {
+  background: color-mix(in srgb, var(--c-teal) 50%, var(--card));
+}
+
+.lever[data-simple="true"][data-kind="brake"] .notchLamp[data-notch="3"][data-on="true"] {
   background: color-mix(in srgb, var(--c-teal) 78%, var(--card));
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-teal) 40%, transparent);
 }

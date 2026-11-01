@@ -69,20 +69,21 @@ describe("作用的時間常數（D1）", () => {
     expect(look.tractive).toBe(POWER_ACCEL[2]);
   });
 
-  it("從停住推 P1：大司機 300ms、小站長 400ms 內指針離開 0 至少 3°", () => {
-    for (const [course, ms] of [
-      ["big", 300],
-      ["captain", 400],
+  it("從停住推最小那格（大司機 P2「慢」、小站長 P1）：大司機 300ms、小站長 400ms 內指針離開 0 至少 3°", () => {
+    for (const [course, ms, notch] of [
+      ["big", 300, 2],
+      ["captain", 400, 1],
     ] as const) {
-      const moving = tick(step(RUNS[course](), { type: "set-power", notch: 1 }), ms / 1000);
+      const moving = tick(step(RUNS[course](), { type: "set-power", notch }), ms / 1000);
+      expect(moving.power).toBe(notch);
       expect(speedToAngle(moving.speed) - speedToAngle(0)).toBeGreaterThanOrEqual(3);
     }
   });
 
   it("放開動力也有延遲（車還在推一下），放開煞車用比較短的放開時間", () => {
-    const pushing = withHook(RUNS.big(), { power: 3, speed: 0.3, progress: 0.2 });
+    const pushing = withHook(RUNS.big(), { power: 4, speed: 0.3, progress: 0.2 });
     const eased = step(pushing, { type: "set-power", notch: 0 });
-    expect(eased.tractive).toBeCloseTo(POWER_ACCEL[3] * (1 - EFFORT_KICK), 6);
+    expect(eased.tractive).toBeCloseTo(POWER_ACCEL[4] * (1 - EFFORT_KICK), 6);
 
     const held = withHook(RUNS.captain(), { brake: 3, speed: 0.3, progress: 0.2 });
     const released = step(held, { type: "set-brake", notch: 0 });
@@ -95,9 +96,9 @@ describe("作用的時間常數（D1）", () => {
 describe("作用的同步與歸零", () => {
   it("煞車一拉動力立刻斷；緊急煞車立刻全力", () => {
     const pushing = withHook(RUNS.big(), { power: 4, speed: 0.3, progress: 0.2 });
-    const braked = step(pushing, { type: "set-brake", notch: 1 });
+    const braked = step(pushing, { type: "set-brake", notch: 2 });
     expect(braked.tractive).toBe(0);
-    expect(braked.braking).toBeCloseTo(BRAKE_ACCEL[1] * EFFORT_KICK, 6);
+    expect(braked.braking).toBeCloseTo(BRAKE_ACCEL[2] * EFFORT_KICK, 6);
     expect(netAccel(braked)).toBeLessThan(0);
 
     const emergency = step(pushing, { type: "set-brake", notch: EMERGENCY });
@@ -164,12 +165,12 @@ describe("停車預測跟真的停點一樣", () => {
   // 第一站：大司機區間 0.5–0.8、小站長 0.58–0.72、小小司機 0.42–0.88、慢慢看 0.36–0.92。
   const station = currentStation(RUNS.big());
   const cases: Case[] = [
-    { name: "大司機窗前拉 B1、停進區間", level: "drive", patch: { progress: 0.45, speed: 0.4 }, brakeTo: 1 },
-    { name: "大司機拉太早、停在區間前", level: "drive", patch: { progress: 0.4, speed: 0.4 }, brakeTo: 1 },
+    { name: "大司機窗前拉「輕」（B2）、停進區間", level: "drive", patch: { progress: 0.47, speed: 0.4 }, brakeTo: 2 },
+    { name: "大司機拉太早、停在區間前", level: "drive", patch: { progress: 0.4, speed: 0.4 }, brakeTo: 2 },
     { name: "大司機窗內拉 B2", level: "drive", patch: { progress: 0.55, speed: 0.3, phase: "in-window" }, brakeTo: 2 },
     { name: "小站長窗內拉 B1（作用還在爬）", level: "captain", patch: { progress: 0.58, speed: 0.33, phase: "in-window" }, brakeTo: 1 },
     { name: "小小司機拉停", level: "drive", driver: "little", patch: { progress: 0.45, speed: 0.4, phase: "in-window" }, brakeTo: 3 },
-    { name: "剛好慢到門檻", level: "drive", patch: { progress: 0.52, speed: stopEpsilon("big") + 0.01, phase: "in-window" }, brakeTo: 1 },
+    { name: "剛好慢到門檻", level: "drive", patch: { progress: 0.52, speed: stopEpsilon("big") + 0.01, phase: "in-window" }, brakeTo: 2 },
     { name: "慢慢看進站爬行", level: "look", patch: { progress: 0.4, speed: 0.1, phase: "in-window" }, brakeTo: 3 },
   ];
   const settled = (s: RunState) => s.phase === "stopped" || s.phase === "reversing" || s.speed === 0;
@@ -206,10 +207,10 @@ describe("停車預測跟真的停點一樣", () => {
     const rolling = withHook(RUNS.big(), { progress: station.approachAt + 0.05, speed: 0.3 });
     expect(predictStop(rolling)).toBeNull();
     expect(predictStop(step(rolling, { type: "set-power", notch: 2 }))).toBeNull();
-    const b1 = step(rolling, { type: "set-brake", notch: 1 });
-    const b3 = step(b1, { type: "set-brake", notch: 3 });
-    expect(predictStop(b1)).not.toBeNull();
-    expect(predictStop(b3)!).toBeLessThan(predictStop(b1)!);
+    const b2 = step(rolling, { type: "set-brake", notch: 2 });
+    const b3 = step(b2, { type: "set-brake", notch: 3 });
+    expect(predictStop(b2)).not.toBeNull();
+    expect(predictStop(b3)!).toBeLessThan(predictStop(b2)!);
   });
 });
 

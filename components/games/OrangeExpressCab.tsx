@@ -14,14 +14,22 @@ import {
 } from "@/lib/games/orange-express/copy";
 import { gaugeZone } from "@/lib/games/orange-express/gauge";
 import { xiaojuMood } from "@/lib/games/orange-express/mood";
-import { dragIndex, grabOffset, sliderKeyTarget, type LeverFrame, type LeverKind } from "@/lib/games/orange-express/lever";
+import {
+  dragIndex,
+  grabOffset,
+  notchToStep,
+  sliderKeyTarget,
+  type LeverFrame,
+  type LeverKind,
+} from "@/lib/games/orange-express/lever";
 import { BRAKE_ACCEL, POWER_ACCEL, effortNotch } from "@/lib/games/orange-express/physics";
+import { COURSE_RULES } from "@/lib/games/orange-express/routes";
 import {
   brakeNotches,
+  bridgeGreetPending,
   currentLimit,
   inTunnel,
   landmarkTaskPending,
-  onBridge,
   powerNotches,
   simpleLevers,
 } from "@/lib/games/orange-express/reducer";
@@ -48,24 +56,29 @@ function PowerArrows({ count }: { count: 1 | 2 }) {
 }
 
 /**
- * 低齡桿面每格的圖：歸零格是虛線空格（不畫圖）；動力一個、兩個箭頭；
- * 煞車「停」用停車柱（跟前窗的停車柱、駕駛台的停車燈同一個符號）；「緊急」靠紅底，不另畫圖。
+ * 圖示桿面每格的圖：歸零格是虛線空格（不畫圖）；動力一個、兩個箭頭；
+ * 煞車「停」（B3）用停車柱（跟前窗的停車柱、駕駛台的停車燈同一個符號），大司機的「輕」（B2）是矮一半的停車柱，
+ * 靠形狀跟「停」分開，不只靠顏色深淺；「緊急」靠紅底，不另畫圖。
  */
-function NotchGlyph({ kind, step }: { kind: LeverKind; step: number }) {
+function NotchGlyph({ kind, step, notch }: { kind: LeverKind; step: number; notch: number }) {
   if (step === 0) return null;
   if (kind === "power") return <PowerArrows count={step >= 2 ? 2 : 1} />;
-  if (step === 1) {
+  if (notch === STOP_NOTCH || notch === LIGHT_NOTCH) {
     return (
       <span className={styles.notchGlyph} aria-hidden>
-        <StopIcon />
+        {notch === STOP_NOTCH ? <StopIcon /> : <LightStopIcon />}
       </span>
     );
   }
   return null;
 }
 
+/** 煞車「停」與「輕」的格號（圖示桿面）。 */
+const STOP_NOTCH = 3;
+const LIGHT_NOTCH = 2;
+
 /**
- * 桿上只排這一組摸得到的格：低齡（慢慢看、小小司機）兩根桿各三格，大司機與小站長是 P0–P4、B0–B4＋緊急。
+ * 桿上只排這一組摸得到的格：低齡（慢慢看、小小司機）兩根桿各三格，大司機動力三格、煞車四格，小站長是 P0–P4、B0–B4＋緊急。
  * 位置、aria、拖曳與方向鍵都用格子的索引；`data-notch` 留真正的格號，`data-step` 是由下往上第幾格。
  */
 function Lever({
@@ -75,6 +88,7 @@ function Lever({
   simple,
   effort,
   effortScale,
+  showEffort,
   coach = false,
   release = false,
   onChange,
@@ -87,7 +101,8 @@ function Lever({
   /** 實際出力；只在大司機與小站長顯示，不把延遲再加到低齡桿面。 */
   effort: number;
   effortScale: readonly number[];
-  /** 第一次進站示範的煞車強調：低齡亮「停」那一格，大司機與小站長亮整根桿。 */
+  showEffort: boolean;
+  /** 第一次進站示範的煞車強調：圖示桿面亮「停」那一格，小站長亮整根桿。 */
   coach?: boolean;
   /** 推了動力、煞車沒放、車不走：煞車桿亮「鬆」那一格（與桿頂的狀態小牌）。 */
   release?: boolean;
@@ -110,7 +125,8 @@ function Lever({
   const last = notches.length - 1;
   const found = notches.indexOf(notch);
   const index = found >= 0 ? found : 0;
-  const effortIndex = effortNotch(effortScale, effort);
+  // 作用換成格號，再換成這根桿上的第幾格：大司機煞車只有 0、2、3、5 四格，B2 的作用要填到「輕」那格。
+  const effortIndex = notchToStep(notches, effortNotch(effortScale, effort));
   const effortFill = `${Math.max(0, Math.min(100, (effortIndex / last) * 100))}%`;
   const rows = Array.from({ length: notches.length }, (_, i) => last - i);
   const pick = (i: number) => onChange(notches[Math.min(last, Math.max(0, i))]!);
@@ -142,6 +158,7 @@ function Lever({
         className={styles.lever}
         data-kind={kind}
         data-simple={simple ? "true" : "false"}
+        data-effort={showEffort ? "true" : "false"}
         data-coach={coach && !simple ? "true" : "false"}
         role="slider"
         aria-label={label}
@@ -220,7 +237,7 @@ function Lever({
                 className={styles.notchLamp}
                 data-notch={n}
                 data-step={i}
-                data-coach={coach && simple && i === 1 ? "true" : "false"}
+                data-coach={coach && simple && n === STOP_NOTCH ? "true" : "false"}
                 data-release={release && n === 0 ? "true" : "false"}
                 data-on={n === notch && n > 0 ? "true" : "false"}
                 data-emergency={
@@ -228,7 +245,7 @@ function Lever({
                 }
                 onClick={() => pick(i)}
               >
-                {simple ? <NotchGlyph kind={kind} step={i} /> : null}
+                {simple ? <NotchGlyph kind={kind} step={i} notch={n} /> : null}
                 <span className={styles.notchText}>{text}</span>
               </span>
             );
@@ -306,6 +323,16 @@ export function StopIcon({ size }: GlyphProps) {
         stroke="currentColor"
         strokeWidth="2.4"
       />
+    </svg>
+  );
+}
+
+/** 「輕」：矮一半、圓頭小一點的停車柱。 */
+function LightStopIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden>
+      <path d="M12 21v-4.5" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+      <circle cx="12" cy="13" r="3.8" fill="none" stroke="currentColor" strokeWidth="2.4" />
     </svg>
   );
 }
@@ -390,8 +417,10 @@ export function OrangeExpressCab({
   const atStation = run.phase === "stopped" || run.phase === "doors-open";
   const tunnel = inTunnel(run);
   const simple = simpleLevers(run.course);
+  // 桿槽填色看實際出力：只有有重量感的大司機、小站長才畫（低齡幾乎即時，畫了只是多一樣東西）。
+  const showEffort = run.course === "big" || run.course === "captain";
   // 鐵橋上，或停好後還沒跟地標打招呼（大司機、小站長）：喇叭亮黃圈。
-  const hornHint = (onBridge(run) && !run.bridgeGreeted && run.phase === "running") || landmarkTaskPending(run);
+  const hornHint = (bridgeGreetPending(run) && run.phase === "running") || landmarkTaskPending(run);
   const flagLamp: LampState = run.autoBrake
     ? "orange"
     : run.speed <= 0.001
@@ -422,7 +451,7 @@ export function OrangeExpressCab({
             ) : null}
           </p>
         </div>
-        <OrangeExpressGauge speed={run.speed} limit={limit} numbers={numbers} />
+        <OrangeExpressGauge speed={run.speed} limit={limit} numbers={numbers} flag={COURSE_RULES[run.course].speedFlag} />
         {/* 低齡只留「門」「停車」：桿子自己限速，速度旗燈不會亮橘；車內燈是裝飾。省下一列給前窗。 */}
         <ul className={styles.lamps} aria-label={COPY.lampsLabel}>
           {simple ? null : (
@@ -458,6 +487,7 @@ export function OrangeExpressCab({
         simple={simple}
         effort={run.tractive}
         effortScale={POWER_ACCEL}
+        showEffort={showEffort}
         onChange={onPower}
       />
       <Lever
@@ -467,6 +497,7 @@ export function OrangeExpressCab({
         simple={simple}
         effort={run.braking}
         effortScale={BRAKE_ACCEL}
+        showEffort={showEffort}
         coach={coachBrake}
         release={releaseBrake}
         onChange={onBrake}

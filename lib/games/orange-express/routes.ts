@@ -35,13 +35,54 @@ export type CourseRules = {
   landmarkGreet: boolean;
   /** 第二站起關門時出發號誌是紅燈，等對向列車過去才轉綠。 */
   redSignal: boolean;
+  /** 在鐵橋上按喇叭打招呼（大司機沒有：喇叭任務太多會一路狂按）。 */
+  bridgeGreet: boolean;
+  /** 速度表上畫速度旗（大司機沒有：看不到牌子，旗子只是多一個要讀的符號）。 */
+  speedFlag: boolean;
 };
 
 export const COURSE_RULES: Record<CourseId, CourseRules> = {
-  look: { signs: false, autoBrake: false, pointing: false, earlyDoorCosts: false, landmarkGreet: false, redSignal: false },
-  little: { signs: false, autoBrake: false, pointing: false, earlyDoorCosts: false, landmarkGreet: false, redSignal: false },
-  big: { signs: true, autoBrake: true, pointing: true, earlyDoorCosts: true, landmarkGreet: true, redSignal: false },
-  captain: { signs: true, autoBrake: true, pointing: true, earlyDoorCosts: true, landmarkGreet: true, redSignal: true },
+  look: {
+    signs: false,
+    autoBrake: false,
+    pointing: false,
+    earlyDoorCosts: false,
+    landmarkGreet: false,
+    redSignal: false,
+    bridgeGreet: true,
+    speedFlag: true,
+  },
+  little: {
+    signs: false,
+    autoBrake: false,
+    pointing: false,
+    earlyDoorCosts: false,
+    landmarkGreet: false,
+    redSignal: false,
+    bridgeGreet: true,
+    speedFlag: true,
+  },
+  // 大司機（2026-11-01 減法）：拿掉速限牌、指差、鐵橋招呼；進站速度旗看不到，超過照樣自動輕煞。
+  big: {
+    signs: false,
+    autoBrake: true,
+    pointing: false,
+    earlyDoorCosts: true,
+    landmarkGreet: true,
+    redSignal: false,
+    bridgeGreet: false,
+    speedFlag: false,
+  },
+  captain: {
+    signs: true,
+    autoBrake: true,
+    pointing: true,
+    earlyDoorCosts: true,
+    landmarkGreet: true,
+    redSignal: true,
+    bridgeGreet: true,
+    speedFlag: true,
+  },
 };
 
 type WindowSpec = Pick<Station, "window" | "target" | "greenHalf" | "approachAt" | "approachLimit">;
@@ -172,6 +213,7 @@ function station(
     tunnel: scenery.tunnel,
     bridge: scenery.bridge,
     passAt: scenery.passAt,
+    slowZones: [],
     // 第一站不放：開局推動力不走最像壞掉。有對向列車的站才放，等待時有東西看。
     holdAtStart: rules.redSignal && index > 0 && scenery.passAt !== null,
     signs,

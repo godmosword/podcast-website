@@ -76,3 +76,20 @@ export function grabOffset(input: LeverFrame & { y: number; current: number }): 
     offset: input.y - rowCenter(input, row),
   };
 }
+
+/**
+ * 格號（可以有小數，例如作用換成的 1.4）換成桿上第幾格（也可以有小數）。
+ * 桿上只排這一組有的格（大司機煞車是 0、2、3、5），兩格之間照比例內插；超出夾在頭尾。
+ */
+export function notchToStep(notches: readonly number[], value: number): number {
+  const last = notches.length - 1;
+  if (last <= 0 || !(value > notches[0]!)) return 0;
+  for (let i = 1; i <= last; i += 1) {
+    const hi = notches[i]!;
+    if (value <= hi) {
+      const lo = notches[i - 1]!;
+      return i - 1 + (value - lo) / (hi - lo);
+    }
+  }
+  return last;
+}

@@ -1,5 +1,6 @@
 import { COPY, LANDMARK_GREET, POINT_CALL, signWord } from "@/lib/games/orange-express/copy";
 import { kmh } from "@/lib/games/orange-express/gauge";
+import { COURSE_RULES } from "@/lib/games/orange-express/routes";
 import {
   currentStation,
   inTunnel,
@@ -46,7 +47,7 @@ export function windowNotice(state: RunState, numbers: boolean): WindowNotice | 
   if (state.phase !== "running") return null;
   if (signalRed(state)) return { kind: "red", text: COPY.redWait };
   if (state.progress >= currentStation(state).approachAt) return null;
-  if (onBridge(state)) {
+  if (onBridge(state) && COURSE_RULES[state.course].bridgeGreet) {
     return state.bridgeGreeted
       ? { kind: "greeted", text: COPY.bridgeGreeted }
       : { kind: "bridge", text: COPY.bridge };

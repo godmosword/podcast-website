@@ -188,7 +188,7 @@ describe("前窗：停車柱與門形線柱", () => {
 });
 
 describe("前窗：指差確認的東西要看得到（B19）", () => {
-  const pointingStations = (["drive", "captain"] as const).flatMap((level) => stationsFor(level, "big"));
+  const pointingStations = stationsFor("captain");
 
   it("號誌題整段，出發號誌都在前窗裡；減少動態時停在起點", () => {
     expect(pointingStations.length).toBeGreaterThan(0);

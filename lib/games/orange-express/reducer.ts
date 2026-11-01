@@ -61,14 +61,14 @@ export const PREDICT_STEPS = 600;
 const POWER_ALL: readonly PowerNotch[] = [0, 1, 2, 3, 4];
 /** 慢慢看：P0–P2，小橘幫忙停，只開得到慢慢的。 */
 const LOOK_POWERS: readonly PowerNotch[] = [0, 1, 2];
-/** 小小司機：鬆、慢、快三格（P0／P2／P4）。最快仍被速度旗壓住，只是起步沒有 P1 那麼慢。 */
-const LITTLE_POWERS: readonly PowerNotch[] = [0, 2, POWER_MAX];
+/** 小小司機與大司機：鬆、慢、快三格（P0／P2／P4）。最快仍被速度旗壓住，只是起步沒有 P1 那麼慢。 */
+const THREE_POWERS: readonly PowerNotch[] = [0, 2, POWER_MAX];
 
-/** 動力桿上排的格，跟規則組走（小小司機與大司機都是「自己開」，桿面不一樣）。 */
+/** 動力桿上排的格，跟規則組走。只有小站長留 P0–P4 五格。 */
 export function powerNotches(course: CourseId): readonly PowerNotch[] {
   if (course === "look") return LOOK_POWERS;
-  if (course === "little") return LITTLE_POWERS;
-  return POWER_ALL;
+  if (course === "captain") return POWER_ALL;
+  return THREE_POWERS;
 }
 
 export function powerCap(course: CourseId): PowerNotch {
@@ -76,9 +76,12 @@ export function powerCap(course: CourseId): PowerNotch {
   return notches[notches.length - 1]!;
 }
 
-/** 低齡桿面（慢慢看、小小司機）：兩根桿各三格，格上畫圖示、寫字，不寫 P／B 代碼。 */
+/**
+ * 圖示桿面（慢慢看、小小司機、大司機）：格上畫圖示、寫字，不寫 P／B 代碼，駕駛台只留門、停車兩盞燈。
+ * 格數另外看 powerNotches／brakeNotches；只有小站長是寫代碼的完整桿面。
+ */
 export function simpleLevers(course: CourseId): boolean {
-  return course === "look" || course === "little";
+  return course !== "captain";
 }
 
 /** 吸到最近的一格；等距時取小的（小小司機的 P1 吸到「鬆」、P3 吸到「慢」，不會一推就最快）。 */
@@ -117,15 +120,19 @@ export function clampBrake(n: number): BrakeNotch {
   return next as BrakeNotch;
 }
 
-/** 低齡的煞車桿只排三格：鬆、停（B3）、緊急。大司機與小站長六格都在。 */
+/** 低齡的煞車桿只排三格：鬆、停（B3）、緊急。 */
 const SIMPLE_BRAKES: readonly BrakeNotch[] = [0, 3, EMERGENCY];
+/** 大司機四格：鬆、輕（B2）、停（B3）、緊急。留「輕」才學得到平穩停車。 */
+const BIG_BRAKES: readonly BrakeNotch[] = [0, 2, 3, EMERGENCY];
 const ALL_BRAKES: readonly BrakeNotch[] = [0, 1, 2, 3, 4, EMERGENCY];
 
 export function brakeNotches(course: CourseId): readonly BrakeNotch[] {
-  return simpleLevers(course) ? SIMPLE_BRAKES : ALL_BRAKES;
+  if (course === "big") return BIG_BRAKES;
+  if (course === "captain") return ALL_BRAKES;
+  return SIMPLE_BRAKES;
 }
 
-/** 吸到這一組有的最近一格；等距時取小的（低齡的 B4 吸到「停」，不會誤拉緊急）。 */
+/** 吸到這一組有的最近一格；等距時取小的（B4 吸到「停」、B1 吸到「鬆」，不會誤拉緊急）。 */
 export function snapBrake(course: CourseId, n: number): BrakeNotch {
   return snapTo(brakeNotches(course), clampBrake(n));
 }
@@ -178,6 +185,11 @@ export function inTunnel(state: RunState): boolean {
 export function onBridge(state: RunState): boolean {
   const bridge = currentStation(state).bridge;
   return bridge !== null && state.progress >= bridge.from && state.progress <= bridge.to;
+}
+
+/** 在鐵橋上、這一組有鐵橋打招呼、還沒按過（大司機沒有：喇叭留給地標招呼）。 */
+export function bridgeGreetPending(state: RunState): boolean {
+  return COURSE_RULES[state.course].bridgeGreet && !state.bridgeGreeted && onBridge(state);
 }
 
 /** 現在可以做的指差確認。倒車、開門、到終點時不出題。 */
@@ -417,7 +429,7 @@ export function honk(state: RunState): RunState {
   if (landmarkTaskPending(state)) {
     return { ...state, landmarkGreets: [...state.landmarkGreets, state.stationIndex] };
   }
-  if (state.bridgeGreeted || !onBridge(state)) return state;
+  if (!bridgeGreetPending(state)) return state;
   return { ...state, bridgeGreeted: true, bridgeGreets: state.bridgeGreets + 1 };
 }
 

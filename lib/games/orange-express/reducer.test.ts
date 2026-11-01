@@ -241,11 +241,16 @@ describe("小橘特快車 step", () => {
       expect(stepBrake(course, 5, 1)).toBe(5);
       expect(stepBrake(course, 5, -1)).toBe(3);
     }
-    for (const course of ["big", "captain"] as const) {
-      expect(brakeNotches(course)).toEqual([0, 1, 2, 3, 4, 5]);
-      expect(snapBrake(course, 4)).toBe(4);
-      expect(stepBrake(course, 2, -1)).toBe(1);
-    }
+    // 大司機四格：鬆、輕（B2）、停（B3）、緊急；B1 吸到鬆、B4 吸到停，不會誤拉緊急。
+    expect(brakeNotches("big")).toEqual([0, 2, 3, 5]);
+    expect(snapBrake("big", 1)).toBe(0);
+    expect(snapBrake("big", 4)).toBe(3);
+    expect(stepBrake("big", 0, 1)).toBe(2);
+    expect(stepBrake("big", 2, 1)).toBe(3);
+    expect(stepBrake("big", 3, 1)).toBe(5);
+    expect(brakeNotches("captain")).toEqual([0, 1, 2, 3, 4, 5]);
+    expect(snapBrake("captain", 4)).toBe(4);
+    expect(stepBrake("captain", 2, -1)).toBe(1);
 
     const look = createRun("look");
     expect(step(look, { type: "set-brake", notch: 2 }).brake).toBe(3);
@@ -253,13 +258,14 @@ describe("小橘特快車 step", () => {
     const little = createRun("drive", "little");
     expect(step(little, { type: "set-brake", notch: 2 }).brake).toBe(3);
     expect(withHook(little, { brake: 4 }).brake).toBe(3);
-    expect(withHook(createRun("drive", "big"), { brake: 4 }).brake).toBe(4);
+    expect(withHook(createRun("drive", "big"), { brake: 4 }).brake).toBe(3);
+    expect(withHook(createRun("captain"), { brake: 4 }).brake).toBe(4);
   });
 
-  it("動力桿的格跟規則組走：慢慢看 P0–P2，小小司機 P0／P2／P4，大司機與小站長五格", () => {
+  it("動力桿的格跟規則組走：慢慢看 P0–P2，小小司機與大司機 P0／P2／P4，小站長五格", () => {
     expect(powerNotches("look")).toEqual([0, 1, 2]);
     expect(powerNotches("little")).toEqual([0, 2, 4]);
-    expect(powerNotches("big")).toEqual([0, 1, 2, 3, 4]);
+    expect(powerNotches("big")).toEqual([0, 2, 4]);
     expect(powerNotches("captain")).toEqual([0, 1, 2, 3, 4]);
     expect(powerCap("look")).toBe(2);
     expect(powerCap("little")).toBe(4);
@@ -272,13 +278,15 @@ describe("小橘特快車 step", () => {
     expect(stepPower("little", 2, 1)).toBe(4);
     expect(stepPower("little", 4, 1)).toBe(4);
     expect(stepPower("little", 4, -1)).toBe(2);
-    expect(stepPower("big", 2, 1)).toBe(3);
+    expect(stepPower("big", 2, 1)).toBe(4);
+    expect(stepPower("captain", 2, 1)).toBe(3);
     expect(stepPower("look", 2, 1)).toBe(2);
 
     const little = createRun("drive", "little");
     expect(step(little, { type: "set-power", notch: 3 }).power).toBe(2);
     expect(withHook(little, { power: 1 }).power).toBe(0);
-    expect(withHook(createRun("drive", "big"), { power: 3 }).power).toBe(3);
+    expect(withHook(createRun("drive", "big"), { power: 3 }).power).toBe(2);
+    expect(withHook(createRun("captain"), { power: 3 }).power).toBe(3);
   });
 
   it("開局動力看 level：慢慢看從 P1 起步，其他從 P0", () => {
@@ -350,7 +358,7 @@ describe("小橘特快車 step", () => {
   });
 
   it("測試鉤子可以設桿位，窗內速度 0 會變成停好", () => {
-    const parked = withHook(createRun("drive"), { progress: 0.65, speed: 0, power: 3, brake: 2 });
+    const parked = withHook(createRun("captain"), { progress: 0.65, speed: 0, power: 3, brake: 2 });
     expect(parked.phase).toBe("stopped");
     expect(parked.power).toBe(3);
     expect(parked.brake).toBe(2);

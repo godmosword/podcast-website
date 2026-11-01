@@ -132,7 +132,7 @@ function liveText(run: RunState, doorHint: boolean, coach: CoachBeat, releaseHin
     return grade ? `${COPY.atStation}，${GRADE_TEXT[grade]}` : COPY.atStation;
   }
   if (run.misses > 0 && run.phase === "running" && run.speed === 0) return COPY.tryStopAgain;
-  if (onBridge(run)) return run.bridgeGreeted ? COPY.bridgeGreeted : COPY.bridge;
+  if (onBridge(run) && COURSE_RULES[run.course].bridgeGreet) return run.bridgeGreeted ? COPY.bridgeGreeted : COPY.bridge;
   if (inTunnel(run)) return COPY.tunnel;
   return "";
 }

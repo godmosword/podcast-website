@@ -55,6 +55,9 @@ export type Span = { from: number; to: number };
 /** 路旁速限牌：過了 at 之後，速度旗變成 limit。 */
 export type SpeedSign = { at: number; limit: number };
 
+/** 看不到的降速區：from–to 之間速度旗不高於 limit，超過照樣自動輕煞。降速的理由由沿途事件說（PR-H3）。 */
+export type SlowZone = { from: number; to: number; limit: number };
+
 export type PointKind = "signal" | "sign" | "platform";
 
 /** 指差確認小任務：在 at–until 之間出現，按了就算完成；錯過不扣分。 */
@@ -86,6 +89,8 @@ export type Station = {
   holdAtStart: boolean;
   /** 有速限牌的規則組才有；沒有時只剩進站的速度旗。 */
   signs: readonly SpeedSign[];
+  /** 看不到的降速區（事件前）；還沒有事件時是空的。 */
+  slowZones: readonly SlowZone[];
   points: readonly PointTask[];
 };
 

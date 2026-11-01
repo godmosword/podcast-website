@@ -37,7 +37,7 @@ describe("路線：四組規則", () => {
     expect(createRun("drive", "little").course).toBe("little");
   });
 
-  it("只有大司機與小站長有速限牌與指差確認，提早按門也只有他們扣星", () => {
+  it("只有小站長有速限牌與指差確認；提早按門只有大司機與小站長扣星", () => {
     for (const course of ["look", "little"] as const) {
       expect(COURSE_RULES[course]).toEqual({
         signs: false,
@@ -46,6 +46,8 @@ describe("路線：四組規則", () => {
         earlyDoorCosts: false,
         landmarkGreet: false,
         redSignal: false,
+        bridgeGreet: true,
+        speedFlag: true,
       });
     }
     for (const course of ["big", "captain"] as const) {
@@ -56,7 +58,13 @@ describe("路線：四組規則", () => {
       expect(station.signs).toHaveLength(0);
       expect(station.points).toHaveLength(0);
     }
+    // 大司機減法（2026-11-01）：沒有速限牌、指差、鐵橋招呼、速度旗；自動輕煞還在。
+    expect(COURSE_RULES.big).toMatchObject({ signs: false, pointing: false, bridgeGreet: false, speedFlag: false, autoBrake: true });
     for (const station of stationsFor("drive", "big")) {
+      expect(station.signs).toHaveLength(0);
+      expect(station.points).toHaveLength(0);
+    }
+    for (const station of stationsFor("captain")) {
       expect(station.signs.length).toBeGreaterThanOrEqual(3);
       expect(station.points.map((p) => p.kind)).toEqual(["signal", "sign", "platform"]);
     }
@@ -88,7 +96,7 @@ describe("路線：四組規則", () => {
 
 describe("速限牌與自動輕煞", () => {
   it("速度旗跟著經過的速限牌變，進站後不高於進站旗", () => {
-    const base = createRun("drive", "big");
+    const base = createRun("captain");
     const station = currentStation(base);
     const first = station.signs[0]!;
     expect(currentLimit(at(base, { progress: first.at - 0.01 }))).toBe(CRUISE_LIMIT);
@@ -104,8 +112,34 @@ describe("速限牌與自動輕煞", () => {
     expect(currentLimit(at(base, { progress: 0.31 }))).toBe(currentStation(base).approachLimit);
   });
 
-  it("大司機超過速度旗：叮叮一次、自動輕煞到旗子下面就放開，不扣分", () => {
+  it("大司機沒有牌子：路上都是巡航旗，進站旗看不到但還在", () => {
     const base = createRun("drive", "big");
+    expect(currentLimit(at(base, { progress: 0.1 }))).toBe(CRUISE_LIMIT);
+    expect(currentLimit(at(base, { progress: currentStation(base).approachAt }))).toBe(currentStation(base).approachLimit);
+  });
+
+  it("大司機進站太快：看不到的進站旗照樣叮叮、自動輕煞", () => {
+    const base = createRun("drive", "big");
+    const station = currentStation(base);
+    const fast = at(base, { progress: station.approachAt + 0.001, speed: 0.8, power: 4 });
+    const first = step(fast, { type: "tick", dt: 0.05 });
+    expect(first.autoBrake).toBe(true);
+    expect(first.autoBrakeCount).toBe(1);
+  });
+
+  it("降速區（事件前）在區裡壓低速度旗，超過照樣自動輕煞", () => {
+    const base = createRun("drive", "big");
+    const zone = { from: 0.1, to: 0.15, limit: 0.3 };
+    const stations = base.stations.map((station, i) => (i === 0 ? { ...station, slowZones: [zone] } : station));
+    const zoned = at(base, { stations });
+    expect(currentLimit(at(zoned, { progress: 0.09 }))).toBe(CRUISE_LIMIT);
+    expect(currentLimit(at(zoned, { progress: 0.12 }))).toBe(0.3);
+    expect(currentLimit(at(zoned, { progress: 0.16 }))).toBe(CRUISE_LIMIT);
+    expect(step(at(zoned, { progress: 0.12, speed: 0.6, power: 4 }), { type: "tick", dt: 0.05 }).autoBrake).toBe(true);
+  });
+
+  it("小站長超過速度旗：叮叮一次、自動輕煞到旗子下面就放開，不扣分", () => {
+    const base = createRun("captain");
     const sign = currentStation(base).signs[0]!;
     const fast = at(base, { progress: sign.at + 0.001, speed: 0.8, power: 4 });
     const first = step(fast, { type: "tick", dt: 0.05 });
@@ -121,7 +155,7 @@ describe("速限牌與自動輕煞", () => {
   });
 
   it("推動力推不過速度旗，不會因此叮叮", () => {
-    const base = at(createRun("drive", "big"), { progress: 0.01, speed: CRUISE_LIMIT - 0.005, power: 4 });
+    const base = at(createRun("captain"), { progress: 0.01, speed: CRUISE_LIMIT - 0.005, power: 4 });
     const next = run(base, 0.3);
     expect(next.autoBrakeCount).toBe(0);
     expect(next.speed).toBeLessThanOrEqual(currentLimit(next) + 1e-6);
@@ -159,8 +193,14 @@ describe("窗外事件", () => {
     expect(onBridge(slope)).toBe(true);
   });
 
+  it("大司機沒有鐵橋招呼：橋上按喇叭不記", () => {
+    const bridge = withHook(createRun("drive", "big"), { stationIndex: 1, progress: 0.15 });
+    expect(onBridge(bridge)).toBe(true);
+    expect(step(bridge, { type: "honk" })).toBe(bridge);
+  });
+
   it("鐵橋上按喇叭記一次打招呼；同一座橋再按不重複；橋外按不改狀態", () => {
-    const base = createRun("drive", "big");
+    const base = createRun("captain");
     const off = at(base, { progress: 0.02 });
     expect(step(off, { type: "honk" })).toBe(off);
     const bridge = withHook(base, { stationIndex: 1, progress: 0.15 });
@@ -187,7 +227,7 @@ describe("窗外事件", () => {
 
 describe("指差確認", () => {
   it("出發時先確認號誌；按了就記一筆，同一題不重複", () => {
-    const base = createRun("drive", "big");
+    const base = createRun("captain");
     expect(pendingPoint(base)?.kind).toBe("signal");
     const done = step(base, { type: "point" });
     expect(done.pointsDone).toEqual(["orange-park-signal"]);
@@ -196,14 +236,14 @@ describe("指差確認", () => {
   });
 
   it("錯過不扣分，題目過了就安靜消失", () => {
-    const base = at(createRun("drive", "big"), { progress: 0.3 });
+    const base = at(createRun("captain"), { progress: 0.3 });
     expect(pendingPoint(base)).toBeNull();
     const done = at(base, { phase: "route-done", grades: ["green", "green", "green"] });
     expect(medalsFor(done, 0).stars).toBe(3);
   });
 
   it("速限牌前與進站時各有一題；總題數三站加起來", () => {
-    const base = createRun("drive", "big");
+    const base = createRun("captain");
     const sign = currentStation(base).signs[0]!;
     expect(pendingPoint(at(base, { progress: sign.at }))?.kind).toBe("sign");
     const platform = currentStation(base).points.find((task) => task.kind === "platform")!;
@@ -211,10 +251,11 @@ describe("指差確認", () => {
     expect(pendingPoint(at(base, { progress: platform.at + 0.01 }))?.kind).toBe("platform");
     expect(pointTotal(base)).toBe(9);
     expect(pointTotal(createRun("drive", "little"))).toBe(0);
+    expect(pointTotal(createRun("drive", "big"))).toBe(0);
   });
 
   it("倒車或開門時不出題", () => {
-    const base = createRun("drive", "big");
+    const base = createRun("captain");
     expect(pendingPoint(at(base, { phase: "reversing" }))).toBeNull();
     expect(pendingPoint(at(base, { phase: "doors-open" }))).toBeNull();
   });

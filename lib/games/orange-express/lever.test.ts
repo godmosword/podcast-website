@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dragIndex, grabOffset, sliderKeyTarget } from "@/lib/games/orange-express/lever";
+import { dragIndex, grabOffset, notchToStep, sliderKeyTarget } from "@/lib/games/orange-express/lever";
 
 describe("桿子的按鍵", () => {
   it("動力桿：↑ 加一格、↓ 減一格，不超出 0 與最大格", () => {
@@ -66,5 +66,25 @@ describe("握把抓取偏移", () => {
     expect(dragIndex({ ...five, y: 212 - offset, current: 2 })).toBe(2);
     expect(dragIndex({ ...five, y: 184 - offset, current: 2 })).toBe(2);
     expect(dragIndex({ ...five, y: 165 - offset, current: 2 })).toBe(3);
+  });
+});
+
+describe("作用填色：格號換成桿上第幾格", () => {
+  it("大司機煞車 0、2、3、5：B2 填到「輕」、B3 填到「停」、中間照比例", () => {
+    const big = [0, 2, 3, 5];
+    expect(notchToStep(big, 0)).toBe(0);
+    expect(notchToStep(big, 1)).toBe(0.5);
+    expect(notchToStep(big, 2)).toBe(1);
+    expect(notchToStep(big, 3)).toBe(2);
+    expect(notchToStep(big, 4)).toBe(2.5);
+    expect(notchToStep(big, 5)).toBe(3);
+    expect(notchToStep(big, 9)).toBe(3);
+  });
+
+  it("動力 0、2、4：P2 在「慢」；五格桿面格號就是格", () => {
+    expect(notchToStep([0, 2, 4], 2)).toBe(1);
+    expect(notchToStep([0, 2, 4], 3)).toBe(1.5);
+    expect(notchToStep([0, 1, 2, 3, 4], 3)).toBe(3);
+    expect(notchToStep([0, 1, 2, 3, 4], -1)).toBe(0);
   });
 });

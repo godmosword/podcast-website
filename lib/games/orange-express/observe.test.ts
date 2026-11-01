@@ -144,9 +144,9 @@ describe("G2 小站長紅燈等對向列車", () => {
   });
 });
 
-/** 大司機在進站速限牌前 at - lead 的地方，用這個速度與桿位。 */
-function bigBeforeApproach(lead: number, speed: number, power: number, brake: number): RunState {
-  const base = createRun("drive", "big");
+/** 小站長在進站速限牌前 at - lead 的地方，用這個速度與桿位（大司機 2026-11-01 起沒有速限牌）。 */
+function captainBeforeApproach(lead: number, speed: number, power: number, brake: number): RunState {
+  const base = createRun("captain");
   const at = currentStation(base).approachAt;
   return withHook(base, { progress: at - lead, speed, power, brake });
 }
@@ -160,7 +160,7 @@ function crossApproach(state: RunState): RunState {
 
 describe("G1 提前減速", () => {
   it("提示出現後先拉煞車、過牌時不太快：記一次", () => {
-    const start = bigBeforeApproach(0.05, 0.6, 0, 3);
+    const start = captainBeforeApproach(0.05, 0.6, 0, 3);
     expect(slowingSignAhead(start)?.at).toBe(currentStation(start).approachAt);
     const after = crossApproach(start);
     expect(after.speed).toBeLessThanOrEqual(currentStation(after).approachLimit * EARLY_SLOW_SLACK);
@@ -169,25 +169,25 @@ describe("G1 提前減速", () => {
   });
 
   it("容得下延遲：過牌時比限速快一點點（≤1.1 倍）也算，自動輕煞照樣協助", () => {
-    const limit = createRun("drive", "big").stations[0]!.approachLimit;
-    let s = bigBeforeApproach(0.05, limit * 1.06, 0, 0);
+    const limit = createRun("captain").stations[0]!.approachLimit;
+    let s = captainBeforeApproach(0.05, limit * 1.06, 0, 0);
     s = crossApproach(s);
     expect(s.earlySlows).toBe(1);
   });
 
   it("一直推著動力：不算，自動輕煞來幫忙", () => {
-    const after = tick(crossApproach(bigBeforeApproach(0.05, 0.6, 3, 0)), 0.1);
+    const after = tick(crossApproach(captainBeforeApproach(0.05, 0.6, 3, 0)), 0.1);
     expect(after.earlySlows).toBe(0);
     expect(after.autoBrakeCount).toBeGreaterThan(0);
   });
 
   it("放了動力但過牌時還太快：不算", () => {
-    const after = crossApproach(bigBeforeApproach(0.03, 0.8, 0, 0));
+    const after = crossApproach(captainBeforeApproach(0.03, 0.8, 0, 0));
     expect(after.earlySlows).toBe(0);
   });
 
   it("本來就比牌子慢（例如剛出發）：不算準備，不會白送", () => {
-    const base = createRun("drive", "big");
+    const base = createRun("captain");
     const first = currentStation(base).signs[0]!;
     let s = withHook(base, { progress: first.at - 0.05, speed: first.limit * 0.8, power: 0, brake: 0 });
     while (s.progress < first.at + 0.001) s = step(s, { type: "tick", dt: DT });
@@ -195,10 +195,17 @@ describe("G1 提前減速", () => {
   });
 
   it("升速的牌子不算", () => {
-    const base = createRun("drive", "big");
+    const base = createRun("captain");
     const raise = currentStation(base).signs[1]!;
     const s = withHook(base, { progress: raise.at - 0.03, speed: 0.6, power: 0, brake: 2 });
     expect(slowingSignAhead(s)).toBeNull();
+  });
+
+  it("大司機（2026-11-01 起）沒有速限牌，不算；事件上線前不會有提前慢下來", () => {
+    const base = createRun("drive", "big");
+    const s = withHook(base, { progress: currentStation(base).approachAt - 0.05, speed: 0.6, power: 0, brake: 3 });
+    expect(slowingSignAhead(s)).toBeNull();
+    expect(tick(s, 1).earlySlows).toBe(0);
   });
 
   it("低齡規則組沒有速限牌，不算", () => {
@@ -209,16 +216,18 @@ describe("G1 提前減速", () => {
   });
 
   it("跳站或換站清掉準備", () => {
-    const start = bigBeforeApproach(0.05, 0.6, 0, 3);
+    const start = captainBeforeApproach(0.05, 0.6, 0, 3);
     const prepped = step(start, { type: "tick", dt: DT });
     expect(prepped.slowPrep).not.toBeNull();
     expect(withHook(prepped, { stationIndex: 1 }).slowPrep).toBeNull();
   });
 
-  it("結算一句話：提前慢下來排第一；低齡仍只用保底句", () => {
+  it("結算一句話：小站長提前慢下來排第一；大司機沒有速限牌不說這句；低齡仍只用保底句", () => {
+    const captain = { ...createRun("captain"), grades: ["green", "green", "green"] as const };
+    expect(resultComment({ ...captain, earlySlows: EARLY_SLOW_RESULT, smoothStops: 3 })).toBe(COPY.resultEarlySlow);
+    expect(resultComment({ ...captain, earlySlows: EARLY_SLOW_RESULT - 1, smoothStops: 3 })).toBe(COPY.resultSmooth);
     const big = { ...createRun("drive", "big"), grades: ["green", "green", "green"] as const };
-    expect(resultComment({ ...big, earlySlows: EARLY_SLOW_RESULT, smoothStops: 3 })).toBe(COPY.resultEarlySlow);
-    expect(resultComment({ ...big, earlySlows: EARLY_SLOW_RESULT - 1, smoothStops: 3 })).toBe(COPY.resultSmooth);
+    expect(resultComment({ ...big, earlySlows: EARLY_SLOW_RESULT, smoothStops: 3 })).toBe(COPY.resultSmooth);
     expect(resultComment({ ...big, course: "little", earlySlows: 6 })).toBe(COPY.resultLowAge);
   });
 

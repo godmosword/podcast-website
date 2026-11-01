@@ -25,10 +25,13 @@ export function OrangeExpressGauge({
   speed,
   limit,
   numbers,
+  flag: showFlag = true,
 }: {
   speed: number;
   limit: number;
   numbers: boolean;
+  /** 畫速度旗（大司機不畫：看不到牌子，旗子只是多一個要讀的符號）。 */
+  flag?: boolean;
 }) {
   const bands = gaugeBands(limit);
   const zone = gaugeZone(speed, limit);
@@ -96,19 +99,21 @@ export function OrangeExpressGauge({
                 );
               })
           : null}
-        <g data-testid="orange-express-gauge-flag">
-          <line
-            x1={flag.foot.x}
-            y1={flag.foot.y}
-            x2={flag.tip.x}
-            y2={flag.tip.y}
-            className={styles.gaugeFlagPole}
-          />
-          <polygon
-            points={flag.cloth.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ")}
-            className={styles.gaugeFlag}
-          />
-        </g>
+        {showFlag ? (
+          <g data-testid="orange-express-gauge-flag">
+            <line
+              x1={flag.foot.x}
+              y1={flag.foot.y}
+              x2={flag.tip.x}
+              y2={flag.tip.y}
+              className={styles.gaugeFlagPole}
+            />
+            <polygon
+              points={flag.cloth.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ")}
+              className={styles.gaugeFlag}
+            />
+          </g>
+        ) : null}
         <g className={styles.needle} style={{ transform: `rotate(${angle}deg)` }}>
           <path d="M96 104L100 26L104 104Z" className={styles.needleBody} />
         </g>

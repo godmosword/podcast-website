@@ -55,11 +55,14 @@ export function quant(n: number): number {
   return Math.round(n * 1e6) / 1e6;
 }
 
-/** 速度旗：路上看最後經過的速限牌，進站後不高於進站旗。 */
+/** 速度旗：路上看最後經過的速限牌，在降速區裡不高於區的旗，進站後不高於進站旗。 */
 export function limitAt(station: Station, progress: number): number {
   let limit = CRUISE_LIMIT;
   for (const sign of station.signs) {
     if (progress >= sign.at) limit = sign.limit;
+  }
+  for (const zone of station.slowZones) {
+    if (progress >= zone.from && progress <= zone.to) limit = Math.min(limit, zone.limit);
   }
   if (progress >= station.approachAt) limit = Math.min(limit, station.approachLimit);
   return limit;

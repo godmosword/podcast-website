@@ -5,7 +5,7 @@ import { createRun, currentStation, withHook } from "@/lib/games/orange-express/
 
 describe("門還沒亮就按", () => {
   it("剛出發按了：前窗右上馬上說「門亮了再按」，蓋過速限牌", () => {
-    const base = createRun("drive", "big");
+    const base = createRun("captain");
     const sign = currentStation(base).signs[0]!;
     const near = withHook(base, { progress: sign.at - 0.03, speed: 0.4 });
     expect(noticeWithDoorHint(near, false, true)).toEqual({ kind: "door", text: "門亮了再按" });
@@ -21,7 +21,7 @@ describe("門還沒亮就按", () => {
 
 describe("前窗提示", () => {
   it("快到速限牌時提醒，牌子畫幾條、文字說快慢；家長開數字時說速限多少", () => {
-    const base = createRun("drive", "big");
+    const base = createRun("captain");
     const sign = currentStation(base).signs[0]!;
     const near = withHook(base, { progress: sign.at - 0.03, speed: 0.4 });
     expect(windowNotice(near, false)).toEqual({ kind: "sign", text: "速限牌：開中速", bars: 2, at: sign.at });
@@ -29,7 +29,7 @@ describe("前窗提示", () => {
   });
 
   it("鐵橋上請按喇叭；按過換成打招呼了", () => {
-    const bridge = withHook(createRun("drive", "big"), { stationIndex: 1, progress: 0.15, speed: 0.4 });
+    const bridge = withHook(createRun("captain"), { stationIndex: 1, progress: 0.15, speed: 0.4 });
     expect(windowNotice(bridge, false)?.kind).toBe("bridge");
     expect(windowNotice({ ...bridge, bridgeGreeted: true }, false)?.kind).toBe("greeted");
   });
@@ -44,7 +44,7 @@ describe("前窗提示", () => {
   });
 
   it("對向列車比速限牌優先；進站區間交給停車目標條", () => {
-    const base = createRun("drive", "big");
+    const base = createRun("captain");
     const sign = currentStation(base).signs[0]!;
     const both = withHook(base, { progress: sign.at - 0.01, speed: 0.4, passing: 1 });
     expect(windowNotice(both, false)?.kind).toBe("passing");
@@ -55,7 +55,7 @@ describe("前窗提示", () => {
 
 describe("前窗提示的朗讀", () => {
   it("指差確認排第一；速限牌提示和「速限牌，確認！」只念要喊的那句", () => {
-    const base = createRun("drive", "big");
+    const base = createRun("captain");
     const signTask = currentStation(base).points.find((task) => task.kind === "sign")!;
     const state = withHook(base, { progress: signTask.at + 0.001, speed: 0.4 });
     const items = speechCandidates(state, false);
@@ -77,7 +77,7 @@ describe("前窗提示的朗讀", () => {
   });
 
   it("速度表數字開關改了字，也不會再念一次", () => {
-    const base = createRun("drive", "big");
+    const base = createRun("captain");
     const sign = currentStation(base).signs[1]!;
     const near = withHook(base, { progress: sign.at - 0.03, speed: 0.4 });
     const words = nextSpeech(near, false, new Set())!;
@@ -98,7 +98,7 @@ describe("前窗提示的朗讀", () => {
 
 describe("前窗提示的朗讀：同一面速限牌不念兩次", () => {
   it("號誌題念完、速限牌題還沒出：速限牌提示先不念，等題目出來只念「速限牌，確認！」", () => {
-    const base = createRun("drive", "big");
+    const base = createRun("captain");
     const early = withHook(base, { progress: 0.02, speed: 0.1 });
     const spoken = new Set(["0:point:orange-park-signal"]);
     expect(windowNotice(early, false)?.kind).toBe("sign");

@@ -136,6 +136,17 @@
 
 - [ ] **H4-1**（L1／L2，依試玩結果定）：段長、段數、排法、造型、事件難度；多排法＋新手腳本量時間（中位數與範圍）；4 倍 CPU 量風景段＋事件＋路線條影格。
 
+### PR-H1 執行紀錄（2026-11-01）
+
+- 格陣列：大司機動力 `[0, 2, 4]`、煞車 `[0, 2, 3, 5]`；`simpleLevers` 改為「除了小站長都是圖示桿面」。CSS 的「停」「輕」改用 `data-notch` 選（原本用 `data-step` 假設三格）。示範強調「停」B3 那格。
+- 桿槽填色原本用格號直接除以格數，大司機 B2 會填到「停」附近；新增 `notchToStep` 換成桿上第幾格。
+- `COURSE_RULES` 加 `bridgeGreet`、`speedFlag`；大司機 `signs`、`pointing`、`bridgeGreet`、`speedFlag` 都 false。`Station.slowZones` 併入 `limitAt`（空）。
+- 結算「看到速限牌，早早就慢下來」只給小站長（Codex 審 MEDIUM），H3 再給大司機小鴨的句子。
+- 「怎麼玩」教學（`data/games.ts` 的 `tutorial`）是三句通用說明（左邊讓車走、右邊讓車停、門亮了再按），沒有速限牌或指差，不用改；只改標題卡的大司機說明。
+- e2e：原本用大司機測完整桿面、速限牌、指差、鐵橋的測試改用小站長；新增大司機減法 3 項；頓停點頭改用 MutationObserver 記錄（0.2 秒點頭會被輪詢漏掉）。
+- 審查：Codex 工程審（gpt-6-luna）MEDIUM 1、LOW 1，皆已處理。
+- 驗證：小橘單元 410 passed；e2e orange-express＋games 153 passed；小橘視覺 34 passed（更新 25 張，大司機畫面人工目檢；標題三張本來就不是逐位元組穩定，不更新重跑在容差內）；完整 `npm run check` 通過（438 檔、3,207 項、build）。
+
 ## Files likely touched
 
 - H1：`reducer.ts`（格陣列）、`routes.ts`（規則、`slowZones`）、`physics.ts`（`limitAt` 吃 `slowZones`）、`copy.ts`、`OrangeExpressCab.tsx`、`OrangeExpressGauge.tsx`、`OrangeExpressResult.tsx`、`orange-express.module.css`、教學資料；F／E／G 相關單元與 e2e、視覺基準。
