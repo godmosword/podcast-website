@@ -138,7 +138,7 @@ test("Landing 滑鼠往下滾用與圓鈕相同的換段", async ({ page }) => {
   await expect
     .poll(
       async () =>
-        (await page.locator("#segment-bedtime").boundingBox())?.y ?? Infinity,
+        (await page.locator("#segment-episode-board").boundingBox())?.y ?? Infinity,
       { timeout: 5_000 },
     )
     .toBeLessThan(200);
@@ -576,7 +576,7 @@ test.describe("頂欄回到 Landing 第一屏", () => {
     await expect
       .poll(
         async () =>
-          (await page.locator("#segment-bedtime").boundingBox())?.y ?? Infinity,
+          (await page.locator("#segment-episode-board").boundingBox())?.y ?? Infinity,
         { timeout: 5_000 },
       )
       .toBeLessThan(200);
@@ -890,10 +890,10 @@ test.describe("首頁手機換段出口", () => {
 
       await skip.click();
       await expect
-        .poll(async () => (await page.getByRole("region", { name: /睡前/ }).first().boundingBox())?.y ?? Infinity, {
+        .poll(async () => (await page.getByRole("region", { name: "這一集的車車" }).boundingBox())?.y ?? Infinity, {
           timeout: 5_000,
         })
-        .toBeLessThan(760);
+        .toBeLessThan(200);
     });
   }
 

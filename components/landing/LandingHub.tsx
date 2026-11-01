@@ -1,11 +1,14 @@
-import { Suspense } from "react";
+import { Fragment, Suspense } from "react";
 import JsonLd from "@/components/JsonLd";
 import LandingScrollView from "@/components/landing/LandingScrollView";
 import LandingSegment from "@/components/landing/LandingSegment";
 import DuduCompanion from "@/components/landing/DuduCompanion";
+import EpisodeBoard from "@/components/landing/EpisodeBoard";
 import LandingEntryFocus from "@/components/landing/LandingEntryFocus";
 import LandingBedtimeLayer from "@/components/landing/LandingBedtimeLayer";
 import { DUDU_EMOTION_BY_SEGMENT } from "@/data/dudu-emotions";
+import { EPISODE_BOARD_ANCHOR_ID } from "@/lib/episode-board-anchor";
+import { loadEpisodeBoard } from "@/lib/episode-board";
 import { homeSiteIntro } from "@/lib/home-geo";
 import { resolveLandingSegments } from "@/lib/landing-query";
 import { podcastSeriesJsonLd } from "@/lib/json-ld";
@@ -14,6 +17,7 @@ import scrollStyles from "./LandingScrollView.module.css";
 export default function LandingHub() {
   const siteIntro = homeSiteIntro();
   const segments = resolveLandingSegments();
+  const episodeBoard = loadEpisodeBoard();
   const duduItems = segments.map((s) => ({
     anchorId: s.anchorId,
     emotion: DUDU_EMOTION_BY_SEGMENT[s.id],
@@ -26,11 +30,14 @@ export default function LandingHub() {
       <LandingEntryFocus />
       <LandingScrollView className={scrollStyles.root}>
         <LandingBedtimeLayer
-          segmentEffects={segments.map((segment) => ({
-            anchorId: segment.anchorId,
-            hideMoon: Boolean(segment.hideBedtimeMoon),
-            veil: segment.bedtimeVeil,
-          }))}
+          segmentEffects={[
+            ...segments.map((segment) => ({
+              anchorId: segment.anchorId,
+              hideMoon: Boolean(segment.hideBedtimeMoon),
+              veil: segment.bedtimeVeil,
+            })),
+            { anchorId: EPISODE_BOARD_ANCHOR_ID, hideMoon: true },
+          ]}
         />
 
         {/* 選擇性 hydration：首段之外的三段與嘟嘟各包一層 Suspense。
@@ -38,29 +45,47 @@ export default function LandingHub() {
             React 會把每個邊界排成獨立 task 來 hydrate，而不是整棵樹一次做完——
             6× CPU 下那一次做完是 178ms 的單一長任務。 */}
         {segments.map((segment, index) => {
+          const nextAnchorId =
+            index === 0
+              ? EPISODE_BOARD_ANCHOR_ID
+              : (segments[index + 1]?.anchorId ?? segments[0]!.anchorId);
           const node = (
             <LandingSegment
               key={segment.id}
               segment={segment}
               index={index}
               siteIntro={index === 0 ? siteIntro : undefined}
-              nextAnchorId={
-                segments[index + 1]?.anchorId ?? segments[0]!.anchorId
-              }
+              nextAnchorId={nextAnchorId}
               loopToFirst={index === segments.length - 1}
             />
           );
-          return index === 0 ? (
-            node
-          ) : (
-            <Suspense key={segment.id} fallback={null}>
-              {node}
-            </Suspense>
+          const wrapped =
+            index === 0 ? (
+              node
+            ) : (
+              <Suspense key={segment.id} fallback={null}>
+                {node}
+              </Suspense>
+            );
+          if (index !== 0) return wrapped;
+          return (
+            <Fragment key="stories-and-board">
+              {wrapped}
+              <Suspense fallback={null}>
+                <EpisodeBoard
+                  actors={episodeBoard.actors}
+                  nextAnchorId={segments[1]?.anchorId ?? segments[0]!.anchorId}
+                />
+              </Suspense>
+            </Fragment>
           );
         })}
 
         <Suspense fallback={null}>
-          <DuduCompanion items={duduItems} />
+          <DuduCompanion
+            items={duduItems}
+            hideAnchorId={EPISODE_BOARD_ANCHOR_ID}
+          />
         </Suspense>
       </LandingScrollView>
     </>

@@ -20,16 +20,27 @@ type DuduCompanionProps = {
   items: DuduCompanionItem[];
   /** 頁尾錨點：進入視窗時夥伴淡出，避免擋住頁尾。 */
   footerId?: string;
+  /** 這一段出現時把夥伴藏起來，避免蓋住車車的點擊範圍。 */
+  hideAnchorId?: string;
 };
 
 /**
  * 角落表情夥伴：固定在右下角，捲動到不同 segment 時切換表情，
  * 點一下循環全部六款表情。整體 pointer-events 關閉、只有車身可點，不擋閱讀。
  */
-export default function DuduCompanion({ items, footerId }: DuduCompanionProps) {
+export default function DuduCompanion({
+  items,
+  footerId,
+  hideAnchorId,
+}: DuduCompanionProps) {
   const landingScroll = useLandingScroll();
   const anchorIds = useMemo(() => items.map((it) => it.anchorId), [items]);
-  const activeAnchorId = useActiveLandingAnchor(anchorIds);
+  const watchIds = useMemo(
+    () => (hideAnchorId ? [...anchorIds, hideAnchorId] : anchorIds),
+    [anchorIds, hideAnchorId],
+  );
+  const activeAnchorId = useActiveLandingAnchor(watchIds);
+  const hiddenByBoard = Boolean(hideAnchorId && activeAnchorId === hideAnchorId);
   const baseEmotion: DuduEmotion =
     items.find((it) => it.anchorId === activeAnchorId)?.emotion ??
     items[0]?.emotion ??
@@ -71,7 +82,7 @@ export default function DuduCompanion({ items, footerId }: DuduCompanionProps) {
         emotion={shown}
         label="小紅豆金龜車"
         interactive
-        hidden={atFooter}
+        hidden={atFooter || hiddenByBoard}
         className={styles.companion}
         onInteract={() =>
           setTap({ anchorId: activeAnchorId, emotion: nextEmotion(tapEmotion ?? baseEmotion) })
