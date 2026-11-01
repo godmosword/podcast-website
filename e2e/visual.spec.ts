@@ -678,6 +678,19 @@ for (const shot of ORANGE_DRIVE_SHOTS) {
   }
 }
 
+/** 大司機的旅程：風景段時前窗上緣是路線條（站點地標章、章上等車的朋友、小橘與車上的 Bonbon）。 */
+for (const size of [PHONE, PHONE_NIGHT, [375, 553, "light"] as const]) {
+  const [width, height, theme] = size;
+  test(`visual：小橘特快車路線條 ${width}×${height} ${theme}（定格）`, async ({ page }) => {
+    await openOrangeExpress(page, size);
+    await startOrangeExpress(page, "自己開");
+    await jumpOrangeExpress(page, { stationIndex: 1, progress: -1, speed: 0.6, power: 4 });
+    await expect(page.getByTestId("orange-express-route")).toBeVisible();
+    await settleOrangeExpress(page);
+    await expect(page).toHaveScreenshot(`orange-express-route-${width}x${height}-${theme}.png`, orangeShot(theme));
+  });
+}
+
 test("visual：小橘特快車大司機實際動力填色 390 light", async ({ page }) => {
   await openOrangeExpress(page, PHONE);
   await startOrangeExpress(page, "自己開");

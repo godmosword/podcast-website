@@ -11,6 +11,7 @@ import {
   type Motion,
 } from "@/lib/games/orange-express/physics";
 import { COURSE_RULES, courseFor, stationsFor, stopEpsilon } from "@/lib/games/orange-express/routes";
+import { legStart, onScenic, sectionStart } from "@/lib/games/orange-express/journey";
 import { isSmoothStop } from "@/lib/games/orange-express/medals";
 import {
   BRAKE_MAX,
@@ -211,10 +212,11 @@ export function pointTotal(state: RunState): number {
 }
 
 export function createRun(level: LevelId, driver: DriverId = "big"): RunState {
+  const stations = stationsFor(level, driver);
   return {
     level,
     course: courseFor(level, driver),
-    stations: stationsFor(level, driver),
+    stations,
     stationIndex: 0,
     phase: "running",
     power: level === "look" ? 1 : 0,
@@ -223,7 +225,8 @@ export function createRun(level: LevelId, driver: DriverId = "big"): RunState {
     stopJerk: 0,
     smoothStops: 0,
     speed: 0,
-    progress: 0,
+    // 有旅程時從第一段風景段出發。
+    progress: legStart(stations[0]!),
     boarded: 0,
     boardTimer: 0,
     misses: 0,
@@ -315,6 +318,8 @@ export function predictStop(state: RunState): number | null {
   if (state.phase === "stopped" || state.phase === "doors-open") return state.progress;
   if (state.phase !== "running" && state.phase !== "in-window") return null;
   if (state.speed <= 0) return state.progress;
+  // 風景段沒有停車窗，不畫預測點。
+  if (onScenic(state.progress)) return null;
   const station = currentStation(state);
   if (state.brake === 0 && lookAssist(state.level, station, state.progress, state.speed) === null) return null;
   const epsilon = stopEpsilon(state.course);
@@ -366,7 +371,16 @@ export function withHook(state: RunState, hook: OrangeExpressHook | null | undef
     stationCount - 1,
     Math.max(0, Math.floor(finiteOr(hook.stationIndex, state.stationIndex))),
   );
-  const progress = quant(Math.min(1, Math.max(0, finiteOr(hook.progress, state.progress))));
+  const target = state.stations[stationIndex]!;
+  // 沒寫 progress、寫了 section：跳到那一段風景段的起點。跳站沒寫的話停在站段（測試與基準不變）。
+  const sectionFrom =
+    hook.progress === undefined && typeof hook.section === "number" && Number.isFinite(hook.section)
+      ? sectionStart(target, Math.max(0, Math.floor(hook.section)))
+      : undefined;
+  const fallback = stationIndex === state.stationIndex ? state.progress : Math.max(0, state.progress);
+  const progress = quant(
+    Math.min(1, Math.max(legStart(target), sectionFrom ?? finiteOr(hook.progress, fallback))),
+  );
   const speed = quant(Math.max(0, finiteOr(hook.speed, state.speed)));
   const misses = Math.max(0, Math.floor(finiteOr(hook.misses, state.misses)));
   const power = snapPower(state.course, finiteOr(hook.power, state.power));
@@ -392,7 +406,8 @@ export function withHook(state: RunState, hook: OrangeExpressHook | null | undef
   return normalizePhase({
     ...state,
     stationIndex,
-    progress: red ? 0 : progress,
+    // 紅燈從這一站出站那一刻等（有風景段時是第一段風景段起點）。
+    progress: red ? legStart(target) : progress,
     speed: red ? 0 : speed,
     misses,
     power,
@@ -612,7 +627,8 @@ export function step(state: RunState, action: RunAction): RunState {
       ...restEffort(state.brake),
       stationIndex: state.stationIndex + 1,
       phase: "running",
-      progress: 0,
+      // 有風景段的站從第一段風景段出發；沒有就直接是站段起點 0。
+      progress: legStart(state.stations[state.stationIndex + 1]!),
       speed: 0,
       stopJerk: 0,
       boarded: 0,

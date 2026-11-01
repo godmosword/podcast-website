@@ -199,7 +199,8 @@ describe("小橘特快車 step", () => {
     const next = step(ready, { type: "close-doors" });
     expect(next.stationIndex).toBe(1);
     expect(next.phase).toBe("running");
-    expect(next.progress).toBe(0);
+    // 大司機有旅程：從下一站的第一段風景段出發（橘子坡前有兩段）。
+    expect(next.progress).toBe(-2);
   });
 
   it("慢慢看不拉煞車也會停在綠區", () => {

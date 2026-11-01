@@ -5,6 +5,7 @@ import type {
   LevelId,
   Passenger,
   PointTask,
+  ScenicSection,
   SceneId,
   SpeedSign,
   Span,
@@ -39,6 +40,8 @@ export type CourseRules = {
   bridgeGreet: boolean;
   /** 速度表上畫速度旗（大司機沒有：看不到牌子，旗子只是多一個要讀的符號）。 */
   speedFlag: boolean;
+  /** 旅程：站前插風景段、前窗上緣有路線條（只有大司機）。關掉就回到只有三個站段。 */
+  journey: boolean;
 };
 
 export const COURSE_RULES: Record<CourseId, CourseRules> = {
@@ -51,6 +54,7 @@ export const COURSE_RULES: Record<CourseId, CourseRules> = {
     redSignal: false,
     bridgeGreet: true,
     speedFlag: true,
+    journey: false,
   },
   little: {
     signs: false,
@@ -61,6 +65,7 @@ export const COURSE_RULES: Record<CourseId, CourseRules> = {
     redSignal: false,
     bridgeGreet: true,
     speedFlag: true,
+    journey: false,
   },
   // 大司機（2026-11-01 減法）：拿掉速限牌、指差、鐵橋招呼；進站速度旗看不到，超過照樣自動輕煞。
   big: {
@@ -72,6 +77,7 @@ export const COURSE_RULES: Record<CourseId, CourseRules> = {
     redSignal: false,
     bridgeGreet: false,
     speedFlag: false,
+    journey: true,
   },
   captain: {
     signs: true,
@@ -82,6 +88,7 @@ export const COURSE_RULES: Record<CourseId, CourseRules> = {
     redSignal: true,
     bridgeGreet: true,
     speedFlag: true,
+    journey: false,
   },
 };
 
@@ -169,6 +176,20 @@ const SCENERY: Record<Station["id"], Scenery> = {
   },
 };
 
+/** 一段風景段的長度（一站的 0–1 為單位）：巡航約 6.8 秒。 */
+export const SCENIC_LENGTH = 1;
+
+/**
+ * 每一站前面幾段風景段：〔風景、站、風景、風景、站、風景、風景、站〕。
+ * 第一站只有一段，第一次停車（示範）不會等太久。
+ */
+const SCENIC_BEFORE = [1, 2, 2] as const;
+
+function scenicFor(id: Station["id"], index: number): ScenicSection[] {
+  const count = SCENIC_BEFORE[index] ?? 0;
+  return Array.from({ length: count }, (_, k) => ({ id: `${id}-scenic-${k}`, length: SCENIC_LENGTH }));
+}
+
 /** 出發號誌那題到這裡為止。前窗的出發號誌立得比這遠，整段題目都看得到它。 */
 export const SIGNAL_UNTIL = 0.04;
 
@@ -218,6 +239,7 @@ function station(
     holdAtStart: rules.redSignal && index > 0 && scenery.passAt !== null,
     signs,
     points: rules.pointing ? pointsFor(id, spec, scenery.signs) : [],
+    scenic: rules.journey ? scenicFor(id, index) : [],
   };
 }
 

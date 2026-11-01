@@ -53,6 +53,8 @@ export const COPY = {
   speedFlag: "速度旗",
   stopTarget: "停車目標",
   predicted: "會停在這裡",
+  /** 路線條的讀屏名稱；後面接站名與「下一站」。 */
+  routeStrip: "這趟的路",
   stopWord: "停",
   slowWord: "慢",
   fastWord: "快",

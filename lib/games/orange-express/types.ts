@@ -58,6 +58,12 @@ export type SpeedSign = { at: number; limit: number };
 /** 看不到的降速區：from–to 之間速度旗不高於 limit，超過照樣自動輕煞。降速的理由由沿途事件說（PR-H3）。 */
 export type SlowZone = { from: number; to: number; limit: number };
 
+/**
+ * 站前的風景段（大司機的旅程）：沒有停車窗、上車、示範，只有窗外的風景（沿途事件在 PR-H3）。
+ * 長度跟站段同一個單位（一站的 0–1），1 約等於巡航 6.8 秒。
+ */
+export type ScenicSection = { id: string; length: number };
+
 export type PointKind = "signal" | "sign" | "platform";
 
 /** 指差確認小任務：在 at–until 之間出現，按了就算完成；錯過不扣分。 */
@@ -92,6 +98,8 @@ export type Station = {
   /** 看不到的降速區（事件前）；還沒有事件時是空的。 */
   slowZones: readonly SlowZone[];
   points: readonly PointTask[];
+  /** 這一站前面的風景段，依序開過才到站段；沒有旅程的規則組是空的。 */
+  scenic: readonly ScenicSection[];
 };
 
 export type RunState = {
@@ -111,7 +119,10 @@ export type RunState = {
   /** 第一次停靠時平穩停下的站數。 */
   smoothStops: number;
   speed: number;
-  /** 這一站的 0–1。到站窗用這個判斷，不看畫面上的像素。 */
+  /**
+   * 這一站的 0–1。到站窗用這個判斷，不看畫面上的像素。
+   * 風景段時是負的：從 -（風景段總長）開到 0 才進站段，所以站段的判定都不必知道風景段。
+   */
   progress: number;
   boarded: number;
   boardTimer: number;
@@ -155,6 +166,8 @@ export type OrangeExpressHook = {
   progress?: number;
   speed?: number;
   stationIndex?: number;
+  /** 跳到這一站第幾段風景段的起點（沒寫 progress 時才用）；站段是 scenic.length。 */
+  section?: number;
   misses?: number;
   power?: number;
   brake?: number;

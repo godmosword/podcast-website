@@ -147,6 +147,16 @@
 - 審查：Codex 工程審（gpt-6-luna）MEDIUM 1、LOW 1，皆已處理。
 - 驗證：小橘單元 410 passed；e2e orange-express＋games 153 passed；小橘視覺 34 passed（更新 25 張，大司機畫面人工目檢；標題三張本來就不是逐位元組穩定，不更新重跑在容差內）；完整 `npm run check` 通過（438 檔、3,207 項、build）。
 
+### PR-H2 執行紀錄（2026-11-01）
+
+- **跟計畫不同**：沒有 `RunState.sectionIndex` 欄位，也沒有「風景→風景 progress 歸 0」。風景段用站段前的負 `progress` 表示（出站 = -風景段總長，站段起點 = 0），段號由 `sectionAt` 推導。站段判定都是「過了某個正值」，負的時候自然不觸發；速度、作用、前窗 travel 跨段連續。Codex 工程審認可這個表示法，沒有找到其他負 progress 的錯誤。旗標是 `COURSE_RULES.big.journey`（計畫寫 `COURSE_JOURNEY`）。
+- 重設表四列都有單元測試（`journey.test.ts`）：風景→風景、風景→站段、關門→下一站、掛鉤跳站／跳段（新增 `section` 欄位）／紅燈。三個不開旅程的規則組用自動駕駛跑完整趟。
+- 路線條（`route-strip.ts`、`OrangeExpressRouteStrip.tsx`）：章像地圖釘插在軌道上方，小橘走在軌道上不蓋章；下一站章外黃圈、停過的章填黃底、走過的軌道塗實黃；等車朋友在章右上，上車後坐進小橘後面的車廂膠囊；頭像墊圓底（小南白臉在地圖紙上看不見）；地圖紙淡黃底，跟停車目標條的白底分開；桌機收窄置中並放大。
+- 審查：
+  - Codex 工程審（gpt-6-luna）HIGH 1：掛鉤寫紅燈時 progress 固定 0、會跳過風景段，改成 `legStart`。MEDIUM 1：鐵軌接縫聲在段界會不會多響；段界剛好是一般接縫（間距 0.05 整除 1），只響一聲，補測試。
+  - Opus 設計審：HIGH 2（小橘蓋住站章、沒有下一站與停過的編碼）、MEDIUM 4（小南頭像、兩條帶子外框一樣、桌機太空、車上朋友與等車朋友同形）、LOW 1（矮手機頭像頂框）都已處理。LOW「前窗提示一出現路線條整條消失、H3 事件時會閃」留給 H3（事件提示接手上緣時一起處理）；LOW「夜間截圖跟白天一樣」是這個遊戲的前窗本來就用固定美術色。進站時路線條換成停車目標條、小橘位置看起來往回跳：這一版靠外框底色區分，停車目標條上放站章留給 H3 一起看。
+- 驗證：小橘單元＋components 427 passed；typecheck、lint、audit:colors；e2e orange-express＋games 153 passed；小橘視覺 37 passed（7 張大司機基準多了路線條、新增 3 張路線條基準，人工目檢；標題基準不是逐位元組穩定，不更新）。
+
 ## Files likely touched
 
 - H1：`reducer.ts`（格陣列）、`routes.ts`（規則、`slowZones`）、`physics.ts`（`limitAt` 吃 `slowZones`）、`copy.ts`、`OrangeExpressCab.tsx`、`OrangeExpressGauge.tsx`、`OrangeExpressResult.tsx`、`orange-express.module.css`、教學資料；F／E／G 相關單元與 e2e、視覺基準。

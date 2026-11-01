@@ -1,6 +1,15 @@
+import { sectionAt, sectionStart } from "@/lib/games/orange-express/journey";
 import { PASS_DURATION } from "@/lib/games/orange-express/reducer";
 import { SIGNAL_UNTIL } from "@/lib/games/orange-express/routes";
-import type { LandmarkId, Phase, SceneId, SignalAspect, SpeedSign, Span } from "@/lib/games/orange-express/types";
+import type {
+  LandmarkId,
+  Phase,
+  ScenicSection,
+  SceneId,
+  SignalAspect,
+  SpeedSign,
+  Span,
+} from "@/lib/games/orange-express/types";
 
 /** 一站的 0–1 在前窗裡等於幾公尺的世界。只影響畫面，不影響判定。 */
 export const STATION_WORLD = 600;
@@ -68,17 +77,24 @@ function within(span: Span | null | undefined, progress: number): span is Span {
 }
 
 /**
- * 前窗用的世界位置（公尺）。減少動態時只回幾個固定值：
- * 在隧道或鐵橋上時停在那一段的中間，其餘是遠、近、停好三格。
+ * 前窗用的世界位置（公尺），以站段起點為 0；風景段是負的，開到站段時不跳。
+ * 減少動態時只回幾個固定值：風景段每段一格（那一段的中間）；
+ * 站段在隧道或鐵橋上時停在那一段的中間，其餘是遠、近、停好三格。
  */
 export function cameraTravel(
   reduced: boolean,
   progress: number,
   phase: Phase,
   target: number,
-  spans: { tunnel?: Span | null; bridge?: Span | null } = {},
+  spans: { tunnel?: Span | null; bridge?: Span | null; scenic?: readonly ScenicSection[] } = {},
 ): number {
   if (!reduced) return progress * STATION_WORLD;
+  if (progress < 0) {
+    const track = { scenic: spans.scenic ?? [] };
+    const k = sectionAt(track, progress);
+    const length = track.scenic[k]?.length ?? 0;
+    return (sectionStart(track, k) + length / 2) * STATION_WORLD;
+  }
   const frame = windshieldFrame(progress, phase);
   // 剛出發、號誌題還在：停在起點，前窗看得到出發號誌。
   if (frame === 0 && progress < SIGNAL_UNTIL) return 0;
@@ -265,6 +281,8 @@ export type WindshieldPaint = {
   scene?: SceneId;
   tunnel?: Span | null;
   bridge?: Span | null;
+  /** 這一站前面的風景段；減少動態時每段一格。 */
+  scenic?: readonly ScenicSection[];
   signs?: readonly SpeedSign[];
   /** 對向列車擦身的秒數；null 表示沒有。 */
   passing?: number | null;
@@ -1391,6 +1409,7 @@ export function drawWindshield(
   const travel = cameraTravel(paint.reduced, paint.progress, paint.phase, paint.target, {
     tunnel: paint.tunnel,
     bridge: paint.bridge,
+    scenic: paint.scenic,
   });
   const tunnelZ = paint.tunnel
     ? ([paint.tunnel.from * STATION_WORLD - travel, paint.tunnel.to * STATION_WORLD - travel] as const)

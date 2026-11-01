@@ -1,6 +1,6 @@
 import type { XiaojuMood } from "@/lib/games/orange-express/mood";
 import type { WindowNotice } from "@/lib/games/orange-express/notice";
-import type { LandmarkId, LevelId } from "@/lib/games/orange-express/types";
+import type { LandmarkId, LevelId, PassengerId } from "@/lib/games/orange-express/types";
 import { signCells } from "@/lib/games/orange-express/windshield";
 import styles from "./orange-express.module.css";
 
@@ -295,3 +295,52 @@ export function LandmarkGlyph({
   );
 }
 
+/** 要接的朋友的頭像（月台上的乘客卡、路線條上等車的朋友）。 */
+export function RiderFace({ id }: { id: PassengerId }) {
+  if (id === "mami") {
+    return (
+      <svg viewBox="0 0 48 48" aria-hidden>
+        <circle cx="24" cy="26" r="14" fill="rgb(255, 224, 196)" />
+        <path d="M10 24c2-12 26-12 28 0" fill="rgb(120, 78, 52)" />
+        <rect x="8" y="20" width="6" height="10" rx="3" fill="rgb(255, 150, 80)" />
+        <rect x="34" y="20" width="6" height="10" rx="3" fill="rgb(255, 150, 80)" />
+        <circle cx="19" cy="26" r="2" fill="rgb(50, 42, 36)" />
+        <circle cx="29" cy="26" r="2" fill="rgb(50, 42, 36)" />
+        <path d="M20 32c2 2 6 2 8 0" fill="none" stroke="rgb(50, 42, 36)" strokeWidth="1.6" />
+      </svg>
+    );
+  }
+  if (id === "xiaonan") {
+    return (
+      <svg viewBox="0 0 48 48" aria-hidden>
+        <rect x="8" y="16" width="32" height="20" rx="8" fill="rgb(236, 240, 244)" />
+        <rect x="8" y="24" width="32" height="5" fill="rgb(90, 160, 210)" />
+        <rect x="8" y="29" width="32" height="3" fill="rgb(120, 190, 140)" />
+        <circle cx="18" cy="22" r="2" fill="rgb(50, 42, 36)" />
+        <circle cx="30" cy="22" r="2" fill="rgb(50, 42, 36)" />
+        <path d="M20 31c2 2 6 2 8 0" fill="none" stroke="rgb(50, 42, 36)" strokeWidth="1.6" />
+      </svg>
+    );
+  }
+  if (id === "dot") {
+    return (
+      <svg viewBox="0 0 48 48" aria-hidden>
+        <rect x="10" y="12" width="28" height="28" rx="8" fill="rgb(190, 160, 230)" />
+        <circle cx="19" cy="24" r="2" fill="rgb(50, 42, 36)" />
+        <circle cx="29" cy="24" r="2" fill="rgb(50, 42, 36)" />
+        <path d="M20 30c2 2 6 2 8 0" fill="none" stroke="rgb(50, 42, 36)" strokeWidth="1.6" />
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 48 48" aria-hidden>
+      <circle cx="24" cy="28" r="13" fill="rgb(255, 224, 196)" />
+      <circle cx="24" cy="16" r="10" fill="rgb(140, 96, 64)" />
+      <circle cx="19" cy="28" r="2" fill="rgb(50, 42, 36)" />
+      <circle cx="29" cy="28" r="2" fill="rgb(50, 42, 36)" />
+      <circle cx="15" cy="32" r="2.4" fill="rgb(255, 170, 180)" />
+      <circle cx="33" cy="32" r="2.4" fill="rgb(255, 170, 180)" />
+      <path d="M20 33c2 3 6 3 8 0" fill="none" stroke="rgb(50, 42, 36)" strokeWidth="1.6" />
+    </svg>
+  );
+}
