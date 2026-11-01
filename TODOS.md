@@ -54,6 +54,12 @@
   - ✅ **PR-E-1 動力與煞車的反應時間**：分級時間常數（慢慢看即時），`physics.ts` 共用 `motionStep`，`predictStop` 改固定步長模擬，桿槽填色、速度表與馬達／煞車聲都顯示實際出力。單元 179 passed、e2e 146 passed、視覺 33 passed、4 倍 CPU 三場景 60–61 fps、production build 通過。iPhone 真機手感本輪依使用者決定先略過，保留日後實機調整 TODO。見 PR #287。
   - ✅ **PR-E-2 停車平順度**：大司機／小站長以 B2 以下或最後一段減速度低於 0.32 判平順；停好時播放「噗咻」或輕「咚」，急停只在畫面晃動開啟且未減少動態時點頭。結算只說一句正面回饋，低齡用保底句，統計合併成單列。單元 183 passed、e2e 148 passed；typecheck、lint、色彩稽核通過。見 PR-E-2。
   - ✅ **PR-G 提前減速與紅燈**：大司機／小站長在降速牌提示出現後、車比牌子快時先放動力或拉煞車，過牌時 ≤ 限速 × 1.1 記一次（輕鈴＋小橘開心一秒，結算一句話第一優先，≥2 次）；小站長第二站起關門即紅燈，對向列車由關門觸發（不再看 `passAt`），車尾過去轉綠＋叮（2.9 秒）；紅燈時推動力不走、號誌亮一圈、不出「先鬆煞車」與號誌題。見 PR-G。
+- **小橘特快車減法與旅程**（2026-11-01 兒童試玩：大司機不到 2 分鐘到家、無感；計畫 `docs/plans/2026-11-01-orange-express-journey.md` 已核准，順序 H1 → H2 → H3 → 第二次試玩 → H4）：
+  - **PR-H1 大司機減法**：圖示桿面（動力三格、煞車四格）、兩盞燈、拿掉速限牌／指差／鐵橋招呼。`game · M`
+  - **PR-H2 風景段與路線條**：站前插入風景段（`COURSE_JOURNEY` 旗標）、全程座標、上緣一條帶子。`game · L`
+  - **PR-H3 沿途事件、任務卡、結算事件章**：小鴨（慢）、平交道（喇叭）、揮手（喇叭）、賽跑（加速）；之後第二次試玩。`game · L`
+  - **PR-H4 依試玩調校**。`game · M`
+  - 第二次試玩後評估：任務卡與路線條給小小司機。
 - **小橘特快車車內廣播錄音**（2026-10-31 使用者決定先擺著）：結構已留好（`lib/games/orange-express/announce.ts` 的 `ANNOUNCE_CLIPS`）。家人或小橘錄「下一站，遊樂園站／橘子坡站／回家站」三句，以及小站長紅燈站的「紅燈，等一下，對向列車要先過去喔。下一站，橘子坡站／回家站」兩句（`next-<站 id>-wait`），放 `public/games/v2/orange-express/voice/next-<站 id>.m4a` 並登記；錄好前用瀏覽器朗讀暫代。也要在 iPhone／Android 實機各聽一次朗讀與「叮叮」輕煞聲。`content · S · 需真人`
 - **重錄 darwin 視覺基準（2026-10 稽核修正）**：Linux 不能改 `-chromium-darwin`。請在 Mac 跑 `npm run test:visual:trusted -- --update-snapshots`，只接受下面這些有意的差異後再更新。320 沒有基準。
   - 睡前 390 日間／夜間：`landing-bedtime-390-light-chromium-darwin.png`、`landing-bedtime-390-night-chromium-darwin.png`（只縮小「數綿羊123．睡前故事」。1280 與其他段不動）。
