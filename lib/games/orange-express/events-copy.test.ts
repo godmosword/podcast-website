@@ -1,0 +1,120 @@
+import { describe, expect, it } from "vitest";
+import { chimeWithinLimits, CROSSING_BELL, AUTO_BRAKE_DING } from "@/lib/games/orange-express/chime";
+import { eventHint, missionLine, resultComment } from "@/lib/games/orange-express/copy";
+import { routeEvents, sectionEvent } from "@/lib/games/orange-express/events";
+import { nextSpeech, windowNotice } from "@/lib/games/orange-express/notice";
+import { createRun, withHook } from "@/lib/games/orange-express/reducer";
+import { stationsFor } from "@/lib/games/orange-express/routes";
+import { crossingLamps, duckCross, duckXs, raceGap, RACE_AHEAD } from "@/lib/games/orange-express/windshield-events";
+import type { RunState, ScenicEventKind } from "@/lib/games/orange-express/types";
+
+function seedFor(kind: ScenicEventKind): { seed: number; stationIndex: number; section: number } {
+  for (let seed = 0; seed < 200; seed += 1) {
+    const found = routeEvents(stationsFor("drive", "big", seed)).find((event) => event.kind === kind);
+    if (found) return { seed, stationIndex: found.stationIndex, section: found.section };
+  }
+  throw new Error(kind);
+}
+
+function atHint(kind: ScenicEventKind): RunState {
+  const { seed, stationIndex, section } = seedFor(kind);
+  const run = withHook(createRun("drive", "big", seed), { stationIndex, section, speed: 0.6, power: 4 });
+  const event = sectionEvent(run)!;
+  return { ...run, progress: event.hintAt + 0.01 };
+}
+
+describe("沿途事件：文案", () => {
+  it("提示依場景換動物：海邊是螃蟹與海鷗、城市賽跑是小狗", () => {
+    expect(eventHint("ducks", "field")).toBe("小鴨要過鐵軌，慢下來");
+    expect(eventHint("ducks", "sea")).toBe("螃蟹要過鐵軌，慢下來");
+    expect(eventHint("race", "city")).toBe("跟小狗賽跑，推到快");
+    expect(eventHint("race", "sea")).toBe("跟海鷗賽跑，推到快");
+    expect(eventHint("crossing", "city")).toBe("平交道，按喇叭");
+  });
+
+  it("任務卡那句", () => {
+    expect(missionLine(["Bonbon", "小南", "馬米"])).toBe("今天要去接Bonbon、小南、馬米回家");
+  });
+
+  it("結算一句話優先說事件：小動物過鐵軌每次都做到時說它；都沒做到就照舊", () => {
+    const run = createRun("drive", "big", 4);
+    const events = routeEvents(run.stations);
+    const ducks = events.filter((event) => event.kind === "ducks");
+    const allDucks = Object.fromEntries(events.map((event) => [event.key, event.kind === "ducks" ? "done" : "met"])) as RunState["events"];
+    const line = resultComment({ ...run, events: allDucks });
+    expect(line).toMatch(/都平安過鐵軌了$/);
+    expect(ducks.length).toBeGreaterThan(0);
+    const none = Object.fromEntries(events.map((event) => [event.key, "met"])) as RunState["events"];
+    expect(resultComment({ ...run, events: none })).toBe("朋友都平安到家了");
+    // 小站長沒有事件，照舊。
+    expect(resultComment(createRun("captain"))).toBe("朋友都平安到家了");
+  });
+});
+
+describe("沿途事件：前窗提示與朗讀", () => {
+  it("提示出現時前窗上緣說要做什麼，朗讀一次（key 是站:段:事件）", () => {
+    const s = atHint("crossing");
+    const notice = windowNotice(s, false)!;
+    expect(notice.kind).toBe("event");
+    expect(notice.text).toBe("平交道，按喇叭");
+    const item = nextSpeech(s, false, new Set())!;
+    const event = sectionEvent(s)!;
+    expect(item.key).toBe(`${event.key}:crossing`);
+    expect(nextSpeech(s, false, new Set([item.key]))).toBeNull();
+  });
+
+  it("做到了換成回應那句、不念；沒做到到時間就收", () => {
+    const s = atHint("wave");
+    const event = sectionEvent(s)!;
+    const done = { ...s, events: { [event.key]: "done" as const } };
+    expect(windowNotice(done, false)?.text).toBe("叭叭！朋友好開心");
+    expect(windowNotice(done, false)?.event?.done).toBe(true);
+    expect(nextSpeech(done, false, new Set())).toBeNull();
+    const met = { ...s, progress: event.until + 0.01, events: { [event.key]: "met" as const } };
+    expect(windowNotice(met, false)).toBeNull();
+  });
+});
+
+describe("沿途事件：前窗畫法的狀態", () => {
+  it("小鴨看車的位置過鐵軌；減少動態只有路邊與對面兩格", () => {
+    const at = -1.4;
+    const event = at * 600;
+    expect(duckCross(false, event - 200, at)).toBe(0);
+    expect(duckCross(false, event - 40, at)).toBeGreaterThan(0);
+    expect(duckCross(false, event, at)).toBe(1);
+    expect(duckCross(true, event - 100, at)).toBe(0);
+    expect(duckCross(true, event - 10, at)).toBe(1);
+  });
+
+  it("小鴨走完時三隻都離開我們的軌道（鋼軌 ±0.75、小鴨身寬約 ±1.65）", () => {
+    for (const x of duckXs(1)) expect(x - 1.65).toBeGreaterThan(0.75);
+    for (const x of duckXs(0)) expect(x + 2.6).toBeLessThan(-0.75);
+  });
+
+  it("賽跑做到了：終點前說「快追上了」，過了終點才說「跑贏了」", () => {
+    const s = atHint("race");
+    const event = sectionEvent(s)!;
+    const done = { ...s, events: { [event.key]: "done" as const } };
+    expect(windowNotice(done, false)?.text).toBe("快追上小狗了");
+    expect(windowNotice({ ...done, progress: event.at + 0.01 }, false)?.text).toBe("跑贏小狗了");
+  });
+
+  it("平交道燈左右輪流、每秒最多換兩次；減少動態常亮", () => {
+    expect(crossingLamps(false, 0)).toEqual([true, false]);
+    expect(crossingLamps(false, 0.6)).toEqual([false, true]);
+    expect(crossingLamps(true, 0.6)).toEqual([true, true]);
+  });
+
+  it("賽跑：終點前小動物跑在前面；做到了被超過，沒做到再往前跑", () => {
+    const at = -1;
+    expect(raceGap(false, at * 600 - 50, at, null)).toBe(RACE_AHEAD);
+    expect(raceGap(false, at * 600 + 10, at, "done")!).toBeLessThan(RACE_AHEAD);
+    expect(raceGap(false, at * 600 + 10, at, "met")!).toBeGreaterThan(RACE_AHEAD);
+    expect(raceGap(true, at * 600 + 10, at, "done")!).toBeLessThan(RACE_AHEAD);
+  });
+
+  it("平交道的噹噹在音量限制內，跟自動輕煞的叮叮不同音", () => {
+    expect(chimeWithinLimits(CROSSING_BELL)).toBe(true);
+    expect(CROSSING_BELL[0]!.freq).not.toBe(AUTO_BRAKE_DING[0]!.freq);
+  });
+});

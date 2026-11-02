@@ -1,5 +1,6 @@
 /** 孩子看得到的句子。禁詞測試掃這一包，也掃遊戲原始碼。 */
 
+import { EVENT_KINDS, routeEvents } from "@/lib/games/orange-express/events";
 import type {
   BrakeNotch,
   DriverId,
@@ -8,6 +9,8 @@ import type {
   PointKind,
   PowerNotch,
   RunState,
+  SceneId,
+  ScenicEventKind,
   StopGrade,
 } from "@/lib/games/orange-express/types";
 
@@ -158,22 +161,91 @@ export function landmarkResultText(count: number): string {
   return `跟地標打招呼 ${count} 站`;
 }
 
+/** 過鐵軌的小動物：海邊是螃蟹，其他是小鴨。 */
+export function crossingCritter(scene: SceneId): string {
+  return scene === "sea" ? "螃蟹" : "小鴨";
+}
+
+/** 賽跑的小動物：海邊是海鷗，其他是小狗（前窗畫布與圖示同一隻）。 */
+export function racer(scene: SceneId): string {
+  return scene === "sea" ? "海鷗" : "小狗";
+}
+
+/** 沿途事件的提示：一個動作、一句話（前窗上緣＋朗讀）。 */
+export function eventHint(kind: ScenicEventKind, scene: SceneId): string {
+  if (kind === "ducks") return `${crossingCritter(scene)}要過鐵軌，慢下來`;
+  if (kind === "crossing") return "平交道，按喇叭";
+  if (kind === "wave") return "有朋友在揮手，按喇叭";
+  return `跟${racer(scene)}賽跑，推到快`;
+}
+
+/**
+ * 做到了：前窗上緣換成這句（不念，鈴聲和小橘的笑臉就是回饋）。
+ * 賽跑在終點前做到時說「快追上了」，過了終點小動物真的被超過才說「跑贏了」，字跟畫面一致。
+ */
+export function eventDoneText(kind: ScenicEventKind, scene: SceneId, passed = true): string {
+  if (kind === "ducks") return `${crossingCritter(scene)}慢慢走過去了`;
+  if (kind === "crossing") return "叭叭！平交道";
+  if (kind === "wave") return "叭叭！朋友好開心";
+  return passed ? `跑贏${racer(scene)}了` : `快追上${racer(scene)}了`;
+}
+
+/** 結算事件章的名字（讀屏）。 */
+export const EVENT_NAME: Record<ScenicEventKind, string> = {
+  ducks: "小動物過鐵軌",
+  crossing: "平交道",
+  wave: "揮手的朋友",
+  race: "賽跑",
+};
+
+/** 結算說事件的那一句：這一種事件每次都做到才說。 */
+export function eventResultLine(kind: ScenicEventKind, scenes: readonly SceneId[]): string {
+  if (kind === "ducks") {
+    const critters = new Set(scenes.map(crossingCritter));
+    return `${critters.size === 1 ? [...critters][0] : "小動物"}都平安過鐵軌了`;
+  }
+  if (kind === "crossing") return "平交道前都有按喇叭";
+  if (kind === "wave") return "跟揮手的朋友打招呼了";
+  return `跑贏${racer(scenes[0] ?? "city")}了`;
+}
+
+/** 開局任務卡（大司機）：念完才收，或孩子第一次碰桿子就收。 */
+export function missionLine(names: readonly string[]): string {
+  return `今天要去接${names.join("、")}回家`;
+}
+
 /** 一趟有這麼多面降速牌前提前慢下來，結算就說這件事（一趟共六面降速牌）。 */
 export const EARLY_SLOW_RESULT = 2;
 
 /** 結算只挑一句正面的話；低齡不提技巧，依優先序選本趟最值得記住的事。 */
 export function resultComment(
-  state: Pick<RunState, "course" | "earlySlows" | "smoothStops" | "grades" | "stations" | "landmarkGreets">,
+  state: Pick<RunState, "course" | "earlySlows" | "smoothStops" | "grades" | "stations" | "landmarkGreets" | "events">,
 ): string {
   if (state.course === "look" || state.course === "little") return COPY.resultLowAge;
-  // 「看到速限牌」只對有速限牌的小站長說；大司機（2026-11-01 起沒有牌）之後改說小鴨事件（PR-H3）。
+  // 「看到速限牌」只對有速限牌的小站長說；大司機改說沿途事件。
   if (state.course === "captain" && state.earlySlows >= EARLY_SLOW_RESULT) return COPY.resultEarlySlow;
+  const events = eventResultFor(state);
+  if (events) return events;
   if (state.smoothStops >= 2) return COPY.resultSmooth;
   if (state.stations.length === 3 && state.grades.length >= 3 && state.grades.slice(0, 3).every((grade) => grade === "green")) {
     return COPY.resultAllGreen;
   }
   if (state.landmarkGreets.length > 0) return COPY.resultLandmark;
   return COPY.resultSafe;
+}
+
+/** 沿途事件優先：小動物過鐵軌＞平交道＞揮手的朋友＞賽跑，挑第一種「每次都做到」的。 */
+function eventResultFor(state: Pick<RunState, "stations" | "events">): string | null {
+  const all = routeEvents(state.stations);
+  for (const kind of EVENT_KINDS) {
+    const these = all.filter((event) => event.kind === kind);
+    if (these.length === 0 || !these.every((event) => state.events[event.key] === "done")) continue;
+    return eventResultLine(
+      kind,
+      these.map((event) => state.stations[event.stationIndex]!.scene),
+    );
+  }
+  return null;
 }
 
 /**

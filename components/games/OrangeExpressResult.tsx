@@ -6,11 +6,12 @@ import type { ReactNode } from "react";
 import { ResultStars } from "@/components/games/ResultStars";
 import { IconTrain } from "@/components/games/ClayIcons";
 import { DoorIcon, StopIcon } from "@/components/games/OrangeExpressCab";
+import { OrangeExpressEventStamps } from "@/components/games/OrangeExpressEventStamps";
 import { LandmarkGlyph, XiaojuFace } from "@/components/games/OrangeExpressGlyphs";
 import { XIAOJU_STICKER_SRC } from "@/lib/games/orange-express/art";
 import { COPY, GRADE_WORD, bridgeResultText, landmarkResultText, pointsResultText } from "@/lib/games/orange-express/copy";
 import type { StarMissReason } from "@/lib/games/orange-express/medals";
-import type { Station, StopGrade } from "@/lib/games/orange-express/types";
+import type { RunState, Station, StopGrade } from "@/lib/games/orange-express/types";
 import { getNextGame } from "@/data/games";
 import styles from "./orange-express.module.css";
 
@@ -36,6 +37,7 @@ export function OrangeExpressResult({
   bridgeGreets,
   landmarkGreets,
   landmarkTask,
+  events,
   onReplay,
   onTitle,
 }: {
@@ -52,10 +54,14 @@ export function OrangeExpressResult({
   landmarkGreets: readonly number[];
   /** 這一組有沒有跟地標打招呼的任務（大司機、小站長）；沒有就不蓋章，地標照常上色。 */
   landmarkTask: boolean;
+  /** 沿途事件的結果（大司機）；有事件時事件章列取代計數列。 */
+  events: RunState["events"];
   onReplay: () => void;
   onTitle: () => void;
 }) {
   const next = getNextGame("orange-express");
+  // 大司機有沿途事件：結算版面上限不變，事件章列換掉計數列（不累加一列）。
+  const hasEvents = stations.some((station) => station.scenic.some((section) => section.event !== null));
   const statParts = [
     pointsDone > 0 ? `指差 ${pointsDone}` : null,
     bridgeGreets > 0 ? `鐵橋 ${bridgeGreets}` : null,
@@ -102,7 +108,9 @@ export function OrangeExpressResult({
           );
         })}
       </ol>
-      {statParts.length > 0 ? (
+      {hasEvents ? (
+        <OrangeExpressEventStamps stations={stations} events={events} />
+      ) : statParts.length > 0 ? (
         <ul className={styles.extras} data-testid="orange-express-extras" aria-label={statLabel}>
           <li>{statParts.join("・")}</li>
         </ul>

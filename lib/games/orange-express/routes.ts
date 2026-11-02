@@ -1,3 +1,4 @@
+import { duckZones, eventPlan, scenicEvent } from "@/lib/games/orange-express/events";
 import type {
   CourseId,
   DriverId,
@@ -5,6 +6,7 @@ import type {
   LevelId,
   Passenger,
   PointTask,
+  ScenicEventKind,
   ScenicSection,
   SceneId,
   SpeedSign,
@@ -185,9 +187,14 @@ export const SCENIC_LENGTH = 1;
  */
 const SCENIC_BEFORE = [1, 2, 2] as const;
 
-function scenicFor(id: Station["id"], index: number): ScenicSection[] {
+/** 第 index 站前面的風景段，事件照整趟的排法（攤平成五格）依序放。 */
+function scenicFor(id: Station["id"], index: number, plan: readonly ScenicEventKind[]): ScenicSection[] {
   const count = SCENIC_BEFORE[index] ?? 0;
-  return Array.from({ length: count }, (_, k) => ({ id: `${id}-scenic-${k}`, length: SCENIC_LENGTH }));
+  const first = SCENIC_BEFORE.slice(0, index).reduce<number>((sum, n) => sum + n, 0);
+  return Array.from({ length: count }, (_, k) => {
+    const kind = plan[first + k];
+    return { id: `${id}-scenic-${k}`, length: SCENIC_LENGTH, event: kind ? scenicEvent(kind) : null };
+  });
 }
 
 /** 出發號誌那題到這裡為止。前窗的出發號誌立得比這遠，整段題目都看得到它。 */
@@ -217,6 +224,7 @@ function station(
   name: string,
   passengers: readonly Passenger[],
   index = 0,
+  plan: readonly ScenicEventKind[] = [],
 ): Station {
   const spec = WINDOWS[course];
   const rules = COURSE_RULES[course];
@@ -224,6 +232,7 @@ function station(
   const signs: SpeedSign[] = rules.signs
     ? [...scenery.signs, { at: spec.approachAt, limit: spec.approachLimit }]
     : [];
+  const scenic = rules.journey ? scenicFor(id, index, plan) : [];
   return {
     id,
     name,
@@ -234,26 +243,28 @@ function station(
     tunnel: scenery.tunnel,
     bridge: scenery.bridge,
     passAt: scenery.passAt,
-    slowZones: [],
+    // 小鴨事件前看不到的降速區（在風景段，progress 是負的）。
+    slowZones: duckZones({ scenic }),
     // 第一站不放：開局推動力不走最像壞掉。有對向列車的站才放，等待時有東西看。
     holdAtStart: rules.redSignal && index > 0 && scenery.passAt !== null,
     signs,
     points: rules.pointing ? pointsFor(id, spec, scenery.signs) : [],
-    scenic: rules.journey ? scenicFor(id, index) : [],
+    scenic,
   };
 }
 
-/** 橘色小線。站名都是虛構的，不借用真實路線。 */
-export function stationsFor(level: LevelId, driver: DriverId = "big"): readonly Station[] {
+/** 橘色小線。站名都是虛構的，不借用真實路線。seed：沿途事件的排法（只有旅程的規則組用得到）。 */
+export function stationsFor(level: LevelId, driver: DriverId = "big", seed = 0): readonly Station[] {
   const course = courseFor(level, driver);
+  const plan = COURSE_RULES[course].journey ? eventPlan(seed) : [];
   if (course === "look") {
     return [station(course, "orange-home", "回家", [MAMI, BONBON])];
   }
   const many = course === "captain";
   return [
-    station(course, "orange-park", "遊樂園", many ? [BONBON, MAMI] : [BONBON]),
-    station(course, "orange-slope", "橘子坡", many ? [XIAONAN, DOT] : [XIAONAN], 1),
-    station(course, "orange-home", "回家", many ? [MAMI, BONBON] : [MAMI], 2),
+    station(course, "orange-park", "遊樂園", many ? [BONBON, MAMI] : [BONBON], 0, plan),
+    station(course, "orange-slope", "橘子坡", many ? [XIAONAN, DOT] : [XIAONAN], 1, plan),
+    station(course, "orange-home", "回家", many ? [MAMI, BONBON] : [MAMI], 2, plan),
   ];
 }
 

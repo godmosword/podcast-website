@@ -11,7 +11,8 @@ import {
   type Motion,
 } from "@/lib/games/orange-express/physics";
 import { COURSE_RULES, courseFor, stationsFor, stopEpsilon } from "@/lib/games/orange-express/routes";
-import { legStart, onScenic, sectionStart } from "@/lib/games/orange-express/journey";
+import { eventsBefore, honkEvent, judgeEvents, quietSlow } from "@/lib/games/orange-express/events";
+import { legStart, onScenic, sectionAt, sectionStart } from "@/lib/games/orange-express/journey";
 import { isSmoothStop } from "@/lib/games/orange-express/medals";
 import {
   BRAKE_MAX,
@@ -211,8 +212,9 @@ export function pointTotal(state: RunState): number {
   return state.stations.reduce((sum, station) => sum + station.points.length, 0);
 }
 
-export function createRun(level: LevelId, driver: DriverId = "big"): RunState {
-  const stations = stationsFor(level, driver);
+/** seed：沿途事件的排法（只有大司機的旅程用得到；測試預設 0 固定排法）。 */
+export function createRun(level: LevelId, driver: DriverId = "big", seed = 0): RunState {
+  const stations = stationsFor(level, driver, seed);
   return {
     level,
     course: courseFor(level, driver),
@@ -242,6 +244,7 @@ export function createRun(level: LevelId, driver: DriverId = "big"): RunState {
     bridgeGreets: 0,
     landmarkGreets: [],
     pointsDone: [],
+    events: {},
   };
 }
 
@@ -403,17 +406,24 @@ export function withHook(state: RunState, hook: OrangeExpressHook | null | undef
         : null;
   const passing = signal === "red" ? (hookPassing ?? 0) : hookPassing;
   const red = signal === "red";
+  const landed = red ? legStart(target) : progress;
+  // 跳到別段（或別站）時，目的地這一段以後的事件結果清掉，到了再重新結算。
+  const fromSection = sectionAt(currentStation(state), state.progress);
+  const toSection = sectionAt(target, landed);
+  const events =
+    sameStation && fromSection === toSection ? state.events : eventsBefore(state.events, stationIndex, toSection);
   return normalizePhase({
     ...state,
     stationIndex,
     // 紅燈從這一站出站那一刻等（有風景段時是第一段風景段起點）。
-    progress: red ? legStart(target) : progress,
+    progress: landed,
     speed: red ? 0 : speed,
     misses,
     power,
     brake,
     ...(red ? restEffort(brake) : effort),
     grades,
+    events,
     passing,
     signal,
     slowPrep: null,
@@ -444,6 +454,9 @@ export function honk(state: RunState): RunState {
   if (landmarkTaskPending(state)) {
     return { ...state, landmarkGreets: [...state.landmarkGreets, state.stationIndex] };
   }
+  // 平交道、揮手的朋友（風景段，跟站段的鐵橋不會同時）。
+  const evented = honkEvent(state);
+  if (evented) return evented;
   if (!bridgeGreetPending(state)) return state;
   return { ...state, bridgeGreeted: true, bridgeGreets: state.bridgeGreets + 1 };
 }
@@ -453,7 +466,8 @@ function applyMotion(state: RunState, dt: number): RunState {
   const epsilon = stopEpsilon(state.course);
   const motion = motionStep(motionOf(state), dt);
   const { speed, progress } = motion;
-  const autoBrakeCount = state.autoBrakeCount + (motion.autoBrakeStarted ? 1 : 0);
+  // 小鴨已經做到時，降速區的輕煞是小橘幫忙，不響、不算。
+  const autoBrakeCount = state.autoBrakeCount + (motion.autoBrakeStarted && !quietSlow(state) ? 1 : 0);
 
   let passing = state.passing;
   let passedTrain = state.passedTrain;
@@ -573,7 +587,8 @@ function unchanged(state: RunState, next: RunState): boolean {
     next.passedTrain === state.passedTrain &&
     next.signal === state.signal &&
     next.earlySlows === state.earlySlows &&
-    next.slowPrep === state.slowPrep
+    next.slowPrep === state.slowPrep &&
+    next.events === state.events
   );
 }
 
@@ -659,11 +674,21 @@ export function step(state: RunState, action: RunAction): RunState {
 
   if (state.phase === "stopped") return state;
 
-  const next =
-    state.phase === "reversing"
-      ? applyReverse(state, dt)
-      : signalRed(state)
-        ? holdAtSignal(state, dt)
-        : applyMotion(state, dt);
+  // 走之前先結算一次：這一幀剛做到小鴨的話，降速區的自動輕煞同一幀就不算、不響。
+  const judged = withEventsJudged(state);
+  const moved =
+    judged.phase === "reversing"
+      ? applyReverse(judged, dt)
+      : signalRed(judged)
+        ? holdAtSignal(judged, dt)
+        : applyMotion(judged, dt);
+  const next = withEventsJudged(moved);
   return unchanged(state, next) ? state : next;
+}
+
+/** 走完這一幀後結算沿途事件；小鴨做到也算一次提前慢下來（大司機的 earlySlows 從 H3 起由小鴨計）。 */
+function withEventsJudged(state: RunState): RunState {
+  const { events, duckDone } = judgeEvents(state, powerCap(state.course));
+  if (events === state.events) return state;
+  return { ...state, events, earlySlows: state.earlySlows + (duckDone ? 1 : 0) };
 }

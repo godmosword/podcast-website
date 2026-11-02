@@ -58,11 +58,26 @@ export type SpeedSign = { at: number; limit: number };
 /** 看不到的降速區：from–to 之間速度旗不高於 limit，超過照樣自動輕煞。降速的理由由沿途事件說（PR-H3）。 */
 export type SlowZone = { from: number; to: number; limit: number };
 
+/** 沿途事件：小鴨過鐵軌（慢下來）、平交道（按喇叭）、揮手的朋友（按喇叭）、跟小動物賽跑（推到快）。 */
+export type ScenicEventKind = "ducks" | "crossing" | "wave" | "race";
+
+/** 一段風景段裡的事件。位置都是這一段裡的 0–length。 */
+export type ScenicEvent = {
+  kind: ScenicEventKind;
+  /** 提示出現的位置。 */
+  hint: number;
+  /** 事件發生的位置（小鴨過鐵軌、柵欄、揮手的朋友、賽跑終點）。 */
+  at: number;
+};
+
+/** 遇到了（沒做到也上色）、做到了（多一個黃章）。沒做到不扣星。 */
+export type EventResult = "met" | "done";
+
 /**
- * 站前的風景段（大司機的旅程）：沒有停車窗、上車、示範，只有窗外的風景（沿途事件在 PR-H3）。
+ * 站前的風景段（大司機的旅程）：沒有停車窗、上車、示範，只有窗外的風景和一件沿途事件。
  * 長度跟站段同一個單位（一站的 0–1），1 約等於巡航 6.8 秒。
  */
-export type ScenicSection = { id: string; length: number };
+export type ScenicSection = { id: string; length: number; event: ScenicEvent | null };
 
 export type PointKind = "signal" | "sign" | "platform";
 
@@ -150,6 +165,8 @@ export type RunState = {
   landmarkGreets: readonly number[];
   /** 完成的指差確認 id。 */
   pointsDone: readonly string[];
+  /** 沿途事件的結果，key 是「站號:段號」（見 events.ts 的 eventKey）。一段只結算一次。 */
+  events: Readonly<Record<string, EventResult>>;
 };
 
 export type RunAction =
@@ -181,6 +198,10 @@ export type OrangeExpressHook = {
   driver?: DriverId;
   /** 只在開局時讀：掛鉤在時預設不做第一次進站示範（測試與基準要穩定），寫 true 才做。 */
   coach?: boolean;
+  /** 只在開局時讀：沿途事件排法的種子（測試與基準固定排法）。 */
+  eventSeed?: number;
+  /** 只在開局時讀：掛鉤在時預設不出開局任務卡（測試與基準要穩定），寫 true 才出。 */
+  mission?: boolean;
 };
 
 export const LEVEL_INDEX: Record<LevelId, number> = {

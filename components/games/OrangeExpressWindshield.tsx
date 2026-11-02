@@ -3,10 +3,13 @@
 import { useEffect, useRef, useSyncExternalStore, type Ref } from "react";
 import { DoorIcon } from "@/components/games/OrangeExpressCab";
 import { NoticeGlyph, RiderFace } from "@/components/games/OrangeExpressGlyphs";
+import { OrangeExpressMissionCard } from "@/components/games/OrangeExpressMissionCard";
 import { OrangeExpressRouteStrip } from "@/components/games/OrangeExpressRouteStrip";
+import type { MissionState } from "@/components/games/useOrangeExpressMission";
 import { OrangeExpressStopBar } from "@/components/games/OrangeExpressStopBar";
 import { COPY, POINT_CALL, POINT_WHAT } from "@/lib/games/orange-express/copy";
 import type { CoachBeat } from "@/lib/games/orange-express/coach";
+import { activeEvent } from "@/lib/games/orange-express/events";
 import { noticeWithDoorHint } from "@/lib/games/orange-express/notice";
 import { currentStation, pendingPoint } from "@/lib/games/orange-express/reducer";
 import { routeStripFor } from "@/lib/games/orange-express/route-strip";
@@ -78,6 +81,7 @@ export function OrangeExpressWindshield({
   nod,
   nodBeforeHappy,
   cheer = false,
+  mission = null,
   onPoint,
 }: {
   run: RunState;
@@ -91,8 +95,10 @@ export function OrangeExpressWindshield({
   /** 頓停時在畫面晃動已開啟的情況下，輕輕點頭一次。 */
   nod: boolean;
   nodBeforeHappy: boolean;
-  /** 剛在降速牌前提前慢下來：小橘開心一秒。 */
+  /** 剛在降速牌前提前慢下來（或沿途事件做到了）：小橘開心一秒。 */
   cheer?: boolean;
+  /** 開局任務卡（大司機）。 */
+  mission?: MissionState;
   onPoint: () => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -105,10 +111,15 @@ export function OrangeExpressWindshield({
   const notice = noticeWithDoorHint(run, numbers, doorHint);
   const showNotice = notice !== null && !showRiders;
   // 上緣同一時間只放一樣：停車目標條＞前窗提示＞路線條。
-  const strip = showNotice ? null : routeStripFor(run);
+  // 任務卡在的時候路線條先不出（同一串章與頭像不畫兩次）；任務卡收起時才出現，像是縮進去。
+  const strip = showNotice || mission === "shown" ? null : routeStripFor(run);
   const pending = pendingPoint(run);
   const task = coach.on && pending?.kind === "platform" ? null : pending;
   const signalHalo = run.signal === "red" && run.power > 0;
+  const event = activeEvent(run);
+  const eventKind = event?.kind ?? null;
+  const eventAt = event?.at ?? null;
+  const eventResult = event ? (run.events[event.key] ?? null) : null;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -146,13 +157,30 @@ export function OrangeExpressWindshield({
         signalHalo,
         landmark: here.landmark,
         compact,
+        event:
+          eventKind !== null && eventAt !== null
+            ? { kind: eventKind, scene: here.scene, at: eventAt, result: eventResult, time: performance.now() / 1000 }
+            : null,
       });
     };
     draw();
     const observer = new ResizeObserver(draw);
     observer.observe(canvas);
     return () => observer.disconnect();
-  }, [compact, reduced, run.phase, run.progress, run.passing, run.signal, signalHalo, here, target]);
+  }, [
+    compact,
+    reduced,
+    run.phase,
+    run.progress,
+    run.passing,
+    run.signal,
+    signalHalo,
+    here,
+    target,
+    eventKind,
+    eventAt,
+    eventResult,
+  ]);
 
   return (
     <div
@@ -163,6 +191,8 @@ export function OrangeExpressWindshield({
       data-nod={nod ? "true" : "false"}
       data-signal={run.signal}
       data-signal-halo={signalHalo ? "true" : "false"}
+      data-event={eventKind ?? "none"}
+      data-event-result={eventResult ?? "none"}
     >
       <div ref={swayRef} className={styles.glassWrap}>
         <canvas ref={canvasRef} className={styles.glass} aria-hidden />
@@ -179,7 +209,13 @@ export function OrangeExpressWindshield({
       />
       {strip ? <OrangeExpressRouteStrip strip={strip} /> : null}
       {notice && showNotice ? (
-        <p className={styles.notice} data-kind={notice.kind} data-testid="orange-express-notice">
+        <p
+          className={styles.notice}
+          data-kind={notice.kind}
+          data-event={notice.event?.kind}
+          data-done={notice.event ? (notice.event.done ? "true" : "false") : undefined}
+          data-testid="orange-express-notice"
+        >
           {notice.kind === "door" ? (
             <span className={styles.noticeDoor} aria-hidden>
               <DoorIcon size={20} />
@@ -206,6 +242,7 @@ export function OrangeExpressWindshield({
           </span>
         </button>
       ) : null}
+      {mission ? <OrangeExpressMissionCard stations={run.stations} state={mission} /> : null}
       {showRiders ? (
         <ul className={styles.riders} aria-label="月台上的朋友">
           {station.passengers.map((rider, index) => {

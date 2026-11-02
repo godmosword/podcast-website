@@ -46,7 +46,7 @@ test.describe("小橘特快車", () => {
     expect(saved.gameProfile.medals["orange-express"][0] & 1).toBe(1);
   });
 
-  test("大司機：兩站平穩停車後，結算優先說平穩停車且計數只佔一列", async ({ page }) => {
+  test("大司機：三站平穩停車、沒做沿途事件時，結算說平穩停車；計數列換成一列事件章", async ({ page }) => {
     await page.addInitScript(() => {
       class FakeUtterance {
         text: string;
@@ -96,9 +96,11 @@ test.describe("小橘特快車", () => {
       return spoken.filter((text) => text === "輕輕停，朋友站得穩穩的").length;
     });
     expect(spokenResultLines).toBe(1);
-    const stats = result.getByTestId("orange-express-extras");
-    await expect(stats.locator("li")).toHaveCount(1);
-    await expect(stats).toContainText("輕停 3");
+    // 大司機有沿途事件：事件章列取代計數列（版面不多一列）。四種事件各一個章。
+    await expect(result.getByTestId("orange-express-extras")).toHaveCount(0);
+    const stamps = result.getByTestId("orange-express-event-stamps");
+    await expect(stamps.locator("li")).toHaveCount(4);
+    await expect(stamps.locator('li[data-done="true"]')).toHaveCount(0);
   });
 
   test("大司機頓停：畫面晃動開啟時點頭不超過 2px", async ({ page }) => {
@@ -1186,7 +1188,8 @@ test.describe("小橘特快車：停好後跟地標打招呼、朋友上車的�
     await expect(result.locator('[data-landmark="ferris"]')).toHaveAttribute("data-stamped", "false");
     // 只加不減：沒打招呼的地標照常上色，不變灰。
     expect(await result.locator('[data-landmark="ferris"]').evaluate((el) => getComputedStyle(el).filter)).toBe("none");
-    await expect(result.getByTestId("orange-express-extras")).toHaveAttribute("aria-label", /跟地標打招呼 1 站/);
+    // 大司機的計數列換成事件章列；地標章在站卡上。
+    await expect(result.getByTestId("orange-express-event-stamps")).toBeVisible();
   });
 
   test("小小司機沒有這個任務：喇叭不亮黃圈，結算地標照常上色", async ({ page }) => {
@@ -1406,5 +1409,162 @@ test.describe("小橘特快車：大司機減法（2026-11-01）", () => {
     for (let i = 1; i < tops.length; i += 1) expect(tops[i]! - tops[i - 1]!).toBeGreaterThanOrEqual(40);
     const door = (await page.getByRole("button", { name: "開門" }).boundingBox())!;
     expect(door.y + door.height).toBeLessThanOrEqual(553);
+  });
+});
+
+/**
+ * 沿途事件與任務卡（PR-H3）。種子 0 的排法：遊樂園前小鴨；橘子坡前賽跑（小狗）、小鴨；回家前平交道、揮手的朋友。
+ * 位置都是站的 progress（風景段是負的）：每段的提示在段起點後 0.15（賽跑 0.05）、事件點在 0.62（賽跑 0.75）。
+ */
+test.describe("小橘特快車：沿途事件與任務卡（2026-11-02）", () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  async function startBig(page: Page, extra: Record<string, unknown> = {}) {
+    await page.addInitScript((hook) => {
+      window.__orangeExpress = { driver: "big", eventSeed: 0, freeze: true, ...hook };
+    }, extra);
+    await page.goto("/games/orange-express");
+    await startLevel(page, "自己開");
+  }
+
+  test("小鴨：提示出現後放開動力就做到，小橘開心、算一次提前慢下來，降速區不響叮叮；結算小鴨章墊黃", async ({ page }) => {
+    await startBig(page);
+    const drive = page.getByTestId("orange-express-drive");
+    const notice = page.getByTestId("orange-express-notice");
+    await jump(page, { stationIndex: 0, progress: -0.84, speed: 0.7, power: 4, freeze: false });
+    await expect(notice).toHaveAttribute("data-event", "ducks");
+    await expect(notice).toContainText("小鴨要過鐵軌，慢下來");
+    // 動力的「慢」那格亮黃框。
+    await expect(page.getByRole("slider", { name: "動力" }).locator('[data-notch="2"]')).toHaveAttribute("data-cue", "true");
+    // 提示時路線條讓位給提示（上緣一次一條）。
+    await expect(page.getByTestId("orange-express-route")).toHaveCount(0);
+    await page.getByRole("slider", { name: "動力" }).locator('[data-notch="0"]').click();
+    await expect(drive).toHaveAttribute("data-events-done", "1");
+    await expect(drive).toHaveAttribute("data-early-slows", "1");
+    await expect(notice).toHaveAttribute("data-done", "true");
+    await expect(page.getByTestId("orange-express-windshield")).toHaveAttribute("data-event-result", "done");
+    // 降速區裡小橘照樣輕輕煞車（看不到的旗），但做到了就不響叮叮、不算自動輕煞。
+    await expect(drive).toHaveAttribute("data-events-met", "1");
+    await page.waitForTimeout(1500);
+    await expect(drive).toHaveAttribute("data-auto-brake-count", "0");
+
+    // 開完三站看結算。
+    for (let stationIndex = 0; stationIndex < 3; stationIndex += 1) {
+      await jump(page, { stationIndex, progress: 0.65, speed: 0, brake: 0 });
+      await expect(drive).toHaveAttribute("data-phase", "stopped");
+      await page.getByRole("button", { name: "開門" }).click();
+      const close = page.getByRole("button", { name: "關門" });
+      await expect(close).not.toHaveAttribute("aria-disabled", "true");
+      await close.click();
+    }
+    const stamps = page.getByTestId("orange-express-event-stamps");
+    await expect(stamps.locator('li[data-kind="ducks"]')).toHaveAttribute("data-done", "true");
+    await expect(stamps.locator('li[data-kind="crossing"]')).toHaveAttribute("data-done", "false");
+    await expect(stamps.locator('li[data-kind="ducks"] [data-done]')).toHaveCount(2);
+  });
+
+  test("平交道：柵欄前按喇叭就做到，提示換成回應那句", async ({ page }) => {
+    await startBig(page);
+    const notice = page.getByTestId("orange-express-notice");
+    await jump(page, { stationIndex: 2, progress: -1.8, speed: 0.4, power: 2, freeze: false });
+    await expect(notice).toHaveAttribute("data-event", "crossing");
+    await expect(notice).toContainText("平交道，按喇叭");
+    // 提示掛著時喇叭亮黃圈，跟動作接起來。
+    await expect(page.getByTestId("orange-express-horn")).toHaveAttribute("data-hint", "true");
+    await page.getByTestId("orange-express-horn").click();
+    await expect(page.getByTestId("orange-express-drive")).toHaveAttribute("data-events-done", "1");
+    await expect(notice).toContainText("叭叭！平交道");
+  });
+
+  test("揮手的朋友：沒按喇叭也照樣過去，記「遇到」、不說沒做到", async ({ page }) => {
+    await startBig(page);
+    const drive = page.getByTestId("orange-express-drive");
+    await jump(page, { stationIndex: 2, progress: -0.6, speed: 0.82, power: 4, freeze: false });
+    await expect(page.getByTestId("orange-express-notice")).toHaveAttribute("data-event", "wave");
+    await expect(drive).toHaveAttribute("data-events-met", "1", { timeout: 6000 });
+    await expect(drive).toHaveAttribute("data-events-done", "0");
+    await expect(page.getByTestId("orange-express-notice")).toHaveCount(0);
+  });
+
+  test("賽跑：提示後推到「快」就做到", async ({ page }) => {
+    await startBig(page);
+    await jump(page, { stationIndex: 1, progress: -1.94, speed: 0, power: 0, freeze: false });
+    await expect(page.getByTestId("orange-express-notice")).toContainText("跟小狗賽跑，推到快");
+    await page.getByRole("slider", { name: "動力" }).locator('[data-notch="4"]').click();
+    await expect(page.getByTestId("orange-express-drive")).toHaveAttribute("data-events-done", "1");
+    // 終點前說「快追上了」，過了終點小狗被超過才說「跑贏了」。
+    await expect(page.getByTestId("orange-express-notice")).toContainText("快追上小狗了");
+    await expect(page.getByTestId("orange-express-notice")).toContainText("跑贏小狗了", { timeout: 8000 });
+  });
+
+  test("任務卡：開局先念「今天要去接…回家」再廣播下一站；第一次碰桿子就收，不擋桿子", async ({ page }) => {
+    await page.addInitScript(() => {
+      class FakeUtterance {
+        text: string;
+        lang = "";
+        rate = 1;
+        pitch = 1;
+        volume = 1;
+        onend: (() => void) | null = null;
+        onerror: (() => void) | null = null;
+        constructor(text: string) {
+          this.text = text;
+        }
+      }
+      const state = window as unknown as { __spoken: string[] };
+      state.__spoken = [];
+      Object.defineProperty(window, "SpeechSynthesisUtterance", { configurable: true, value: FakeUtterance });
+      Object.defineProperty(window, "speechSynthesis", {
+        configurable: true,
+        value: {
+          speak: (utterance: FakeUtterance) => {
+            state.__spoken.push(utterance.text);
+            utterance.onend?.();
+          },
+          cancel: () => {},
+          speaking: false,
+          pending: false,
+        },
+      });
+    });
+    await startBig(page, { mission: true, freeze: false });
+    const mission = page.getByTestId("orange-express-mission");
+    await expect(mission).toBeVisible();
+    await expect(mission).toContainText("今天要去接Bonbon、小南、馬米回家");
+    await expect.poll(() => page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken[0])).toBe(
+      "今天要去接Bonbon、小南、馬米回家",
+    );
+    await page.getByRole("slider", { name: "動力" }).locator('[data-notch="4"]').click();
+    await expect(page.getByRole("slider", { name: "動力" })).toHaveAttribute("aria-valuetext", "動力，快");
+    await expect(mission).toHaveCount(0);
+    await expect
+      .poll(() => page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken.join("|")), {
+        timeout: 8000,
+      })
+      .toMatch(/^今天要去接.*\|.*遊樂園/);
+  });
+
+  test("音效關著：任務卡不念，留一會兒自己收", async ({ page }) => {
+    await page.addInitScript(() => {
+      window.__orangeExpress = { driver: "big", eventSeed: 0, mission: true };
+    });
+    await page.goto("/games/orange-express");
+    await page.getByRole("button", { name: "關閉音效" }).click();
+    await startLevel(page, "自己開");
+    const mission = page.getByTestId("orange-express-mission");
+    await expect(mission).toBeVisible();
+    await page.waitForTimeout(2500);
+    await expect(mission).toHaveAttribute("data-state", "shown");
+    await expect(mission).toHaveCount(0, { timeout: 5000 });
+  });
+
+  test("減少動態：任務卡只淡出不縮放", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await startBig(page, { mission: true });
+    const mission = page.getByTestId("orange-express-mission");
+    await expect(mission).toBeVisible();
+    await page.getByRole("slider", { name: "動力" }).locator('[data-notch="2"]').click();
+    await expect(mission).toHaveAttribute("data-state", "leaving");
+    expect(await mission.evaluate((el) => getComputedStyle(el).animationName)).toMatch(/missionFade/);
   });
 });

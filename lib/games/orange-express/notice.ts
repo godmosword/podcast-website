@@ -1,4 +1,5 @@
-import { COPY, LANDMARK_GREET, POINT_CALL, signWord } from "@/lib/games/orange-express/copy";
+import { COPY, LANDMARK_GREET, POINT_CALL, eventDoneText, eventHint, signWord } from "@/lib/games/orange-express/copy";
+import { activeEvent } from "@/lib/games/orange-express/events";
 import { kmh } from "@/lib/games/orange-express/gauge";
 import { COURSE_RULES } from "@/lib/games/orange-express/routes";
 import {
@@ -12,10 +13,10 @@ import {
 } from "@/lib/games/orange-express/reducer";
 import { stopBarFor } from "@/lib/games/orange-express/stop-target";
 import { signBars } from "@/lib/games/orange-express/windshield";
-import type { RunState } from "@/lib/games/orange-express/types";
+import type { RunState, SceneId, ScenicEventKind } from "@/lib/games/orange-express/types";
 
 /** door：門還沒亮就按了，只在按下後短暫出現，不念進 speechCandidates（畫面另外排）。 */
-export type NoticeKind = "red" | "bridge" | "greeted" | "sign" | "passing" | "tunnel" | "door";
+export type NoticeKind = "red" | "event" | "bridge" | "greeted" | "sign" | "passing" | "tunnel" | "door";
 
 export type WindowNotice = {
   kind: NoticeKind;
@@ -24,6 +25,8 @@ export type WindowNotice = {
   bars?: 1 | 2 | 3;
   /** 速限牌在這一站的位置；同一站有好幾面牌，朗讀去重靠它分。 */
   at?: number;
+  /** 沿途事件（kind 是 event 時）：哪一件、在哪個場景（換動物）、做到了沒。 */
+  event?: { key: string; kind: ScenicEventKind; scene: SceneId; done: boolean };
 };
 
 /** 速限牌經過後，提示再留這一小段，孩子才看得到。 */
@@ -46,6 +49,8 @@ function recentSign(state: RunState): { at: number; limit: number } | null {
 export function windowNotice(state: RunState, numbers: boolean): WindowNotice | null {
   if (state.phase !== "running") return null;
   if (signalRed(state)) return { kind: "red", text: COPY.redWait };
+  const event = eventNotice(state);
+  if (event) return event;
   if (state.progress >= currentStation(state).approachAt) return null;
   if (onBridge(state) && COURSE_RULES[state.course].bridgeGreet) {
     return state.bridgeGreeted
@@ -61,6 +66,24 @@ export function windowNotice(state: RunState, numbers: boolean): WindowNotice | 
   }
   if (inTunnel(state)) return { kind: "tunnel", text: COPY.tunnel };
   return null;
+}
+
+/**
+ * 沿途事件（風景段）：提示出現到可以做動作的最後一刻說「要做什麼」；做到了換成回應那句，留到事件的回應結束。
+ * 沒做到時提示到時間就收，不說沒做到。
+ */
+function eventNotice(state: RunState): WindowNotice | null {
+  const event = activeEvent(state);
+  if (!event) return null;
+  const scene = currentStation(state).scene;
+  const result = state.events[event.key];
+  const info = { key: event.key, kind: event.kind, scene };
+  if (result === "done") {
+    const text = eventDoneText(event.kind, scene, state.progress >= event.at);
+    return { kind: "event", text, event: { ...info, done: true } };
+  }
+  if (result || state.progress > event.until) return null;
+  return { kind: "event", text: eventHint(event.kind, scene), event: { ...info, done: false } };
 }
 
 /**
@@ -107,6 +130,13 @@ export function speechCandidates(state: RunState, numbers: boolean, options: Spe
   const notice = windowNotice(state, numbers);
   // 紅燈那句已經併在「下一站」廣播前面念過。
   if (!notice || notice.kind === "greeted" || notice.kind === "red") return out;
+  // 沿途事件只念提示（「站:段:事件」一次）；做到了的回應不念，鈴聲就是回饋。
+  if (notice.kind === "event") {
+    if (notice.event && !notice.event.done) {
+      out.push({ key: `${notice.event.key}:${notice.event.kind}`, text: notice.text });
+    }
+    return out;
+  }
   // 這面牌有「速限牌，確認！」題的話，只念題目那句；題目還沒出、已經做完都一樣，不然同一面牌會念兩次。
   if (notice.kind === "sign" && signHasTask(state, notice.at)) return out;
   const where = notice.kind === "sign" ? `:${notice.at ?? 0}` : "";

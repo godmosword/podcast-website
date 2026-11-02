@@ -62,6 +62,12 @@ export const EARLY_SLOW_BELL: readonly SynthVoice[] = [
   { wave: "triangle", freq: 1568, dur: 0.22, vol: 0.06, attack: 0.004 },
 ];
 
+/** 平交道的「噹噹」：低一點、圓一點的兩下，跟自動輕煞高高的「叮叮」分得出來。 */
+export const CROSSING_BELL: readonly SynthVoice[] = [
+  { wave: "triangle", freq: 740, dur: 0.2, vol: 0.08, attack: 0.004 },
+  { wave: "triangle", freq: 740, dur: 0.2, vol: 0.07, at: 0.45, attack: 0.004 },
+];
+
 /** 出發號誌轉綠：一聲亮亮的「叮」。 */
 export const SIGNAL_GREEN_CHIME: readonly SynthVoice[] = [
   { wave: "sine", freq: 1047, dur: 0.22, vol: 0.08, attack: 0.006 },
@@ -116,6 +122,7 @@ export const CHIME_SETS = [
   EMERGENCY_CLICK,
   AUTO_BRAKE_DING,
   EARLY_SLOW_BELL,
+  CROSSING_BELL,
   SIGNAL_GREEN_CHIME,
   ARRIVAL_MELODY,
   SMOOTH_STOP_SOUND,

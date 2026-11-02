@@ -1,4 +1,28 @@
 import { sectionAt, sectionStart } from "@/lib/games/orange-express/journey";
+import {
+  EVENT_VIEW_BEFORE,
+  drawCrossingRoad,
+  drawEvent,
+  type EventPaint,
+} from "@/lib/games/orange-express/windshield-events";
+import {
+  Z_FAR,
+  Z_NEAR,
+  face,
+  hashAt,
+  line,
+  poly,
+  project,
+  quad,
+  repeats,
+  segment,
+  viewFor,
+  wall,
+  widthAt,
+  type View,
+} from "@/lib/games/orange-express/windshield-geometry";
+
+export { viewFor, type View };
 import { PASS_DURATION } from "@/lib/games/orange-express/reducer";
 import { SIGNAL_UNTIL } from "@/lib/games/orange-express/routes";
 import type {
@@ -13,10 +37,7 @@ import type {
 
 /** 一站的 0–1 在前窗裡等於幾公尺的世界。只影響畫面，不影響判定。 */
 export const STATION_WORLD = 600;
-const Z_NEAR = 2;
-const Z_FAR = 220;
 const Z_HORIZON = 4000;
-const EYE = 1.6;
 const SLEEPER_GAP = 0.9;
 /** 鋼軌與軌頂亮面的半寬（公尺）。比真的粗一些，小前窗上才看得到。 */
 const RAIL_HALF = 0.05;
@@ -78,7 +99,7 @@ function within(span: Span | null | undefined, progress: number): span is Span {
 
 /**
  * 前窗用的世界位置（公尺），以站段起點為 0；風景段是負的，開到站段時不跳。
- * 減少動態時只回幾個固定值：風景段每段一格（那一段的中間）；
+ * 減少動態時只回幾個固定值：風景段每段一格（那一段的中間；事件進行中改成看得到事件的那一格）；
  * 站段在隧道或鐵橋上時停在那一段的中間，其餘是遠、近、停好三格。
  */
 export function cameraTravel(
@@ -86,9 +107,16 @@ export function cameraTravel(
   progress: number,
   phase: Phase,
   target: number,
-  spans: { tunnel?: Span | null; bridge?: Span | null; scenic?: readonly ScenicSection[] } = {},
+  spans: {
+    tunnel?: Span | null;
+    bridge?: Span | null;
+    scenic?: readonly ScenicSection[];
+    /** 進行中的沿途事件的事件點（站的 progress）。 */
+    eventAt?: number | null;
+  } = {},
 ): number {
   if (!reduced) return progress * STATION_WORLD;
+  if (progress < 0 && spans.eventAt != null) return spans.eventAt * STATION_WORLD - EVENT_VIEW_BEFORE;
   if (progress < 0) {
     const track = { scenic: spans.scenic ?? [] };
     const k = sectionAt(track, progress);
@@ -283,6 +311,8 @@ export type WindshieldPaint = {
   bridge?: Span | null;
   /** 這一站前面的風景段；減少動態時每段一格。 */
   scenic?: readonly ScenicSection[];
+  /** 進行中的沿途事件（提示出現到回應結束）；沒有是 null。 */
+  event?: EventPaint | null;
   signs?: readonly SpeedSign[];
   /** 對向列車擦身的秒數；null 表示沒有。 */
   passing?: number | null;
@@ -295,130 +325,6 @@ export type WindshieldPaint = {
   /** 直式矮手機（CSS 的 portrait 且高 ≤600）：地標改放停車目標條右邊那一欄。 */
   compact?: boolean;
 };
-
-export type View = { w: number; h: number; vx: number; hy: number; f: number };
-
-/** 前窗的投影：消失點在中間、地平線在四成二高。 */
-export function viewFor(width: number, height: number): View {
-  return { w: width, h: height, vx: width * 0.5, hy: height * 0.42, f: (height * 0.58 * Z_NEAR) / EYE };
-}
-
-type Pt = { x: number; y: number };
-
-function project(view: View, x: number, y: number, z: number): Pt {
-  const s = view.f / z;
-  return { x: view.vx + x * s, y: view.hy + (EYE - y) * s };
-}
-
-function poly(ctx: CanvasRenderingContext2D, pts: readonly Pt[], color: string): void {
-  ctx.fillStyle = color;
-  ctx.beginPath();
-  pts.forEach((p, i) => (i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)));
-  ctx.closePath();
-  ctx.fill();
-}
-
-/** 水平面（地面、月台頂、車頂）。 */
-function quad(
-  ctx: CanvasRenderingContext2D,
-  view: View,
-  x0: number,
-  x1: number,
-  y: number,
-  z0: number,
-  z1: number,
-  color: string,
-): void {
-  poly(
-    ctx,
-    [project(view, x0, y, z0), project(view, x1, y, z0), project(view, x1, y, z1), project(view, x0, y, z1)],
-    color,
-  );
-}
-
-/** 跟軌道平行的直牆（建築側面、車身側面）。 */
-function wall(
-  ctx: CanvasRenderingContext2D,
-  view: View,
-  x: number,
-  y0: number,
-  y1: number,
-  z0: number,
-  z1: number,
-  color: string,
-): void {
-  poly(
-    ctx,
-    [project(view, x, y0, z0), project(view, x, y1, z0), project(view, x, y1, z1), project(view, x, y0, z1)],
-    color,
-  );
-}
-
-/** 面向鏡頭的直牆（建築正面、車頭）。 */
-function face(
-  ctx: CanvasRenderingContext2D,
-  view: View,
-  x0: number,
-  x1: number,
-  y0: number,
-  y1: number,
-  z: number,
-  color: string,
-): void {
-  const a = project(view, x0, y1, z);
-  const b = project(view, x1, y0, z);
-  ctx.fillStyle = color;
-  ctx.fillRect(a.x, a.y, b.x - a.x, b.y - a.y);
-}
-
-function line(
-  ctx: CanvasRenderingContext2D,
-  view: View,
-  x: number,
-  y: number,
-  z0: number,
-  z1: number,
-  color: string,
-  width: number,
-): void {
-  const a = project(view, x, y, z0);
-  const b = project(view, x, y, z1);
-  ctx.strokeStyle = color;
-  ctx.lineWidth = width;
-  ctx.beginPath();
-  ctx.moveTo(a.x, a.y);
-  ctx.lineTo(b.x, b.y);
-  ctx.stroke();
-}
-
-function segment(ctx: CanvasRenderingContext2D, a: Pt, b: Pt, color: string, width: number): void {
-  ctx.strokeStyle = color;
-  ctx.lineWidth = width;
-  ctx.beginPath();
-  ctx.moveTo(a.x, a.y);
-  ctx.lineTo(b.x, b.y);
-  ctx.stroke();
-}
-
-function widthAt(view: View, z: number, meters: number, min = 1): number {
-  return Math.max(min, (view.f / z) * meters);
-}
-
-/** 世界裡每隔 gap 公尺重複的東西，回傳這一幀看得到的 z（由遠到近）。 */
-function repeats(travel: number, gap: number, near: number, far: number): number[] {
-  const offset = ((travel % gap) + gap) % gap;
-  const out: number[] = [];
-  for (let z = gap - offset; z < far; z += gap) {
-    if (z > near) out.push(z);
-  }
-  return out.reverse();
-}
-
-/** 用世界位置挑一個穩定的小變化（建築高度、顏色）。 */
-function hashAt(n: number): number {
-  const x = Math.sin(n * 12.9898) * 43758.5453;
-  return x - Math.floor(x);
-}
 
 function drawSky(ctx: CanvasRenderingContext2D, view: View, palette: Palette, scene: SceneId): void {
   const { w, h, hy } = view;
@@ -1410,6 +1316,7 @@ export function drawWindshield(
     tunnel: paint.tunnel,
     bridge: paint.bridge,
     scenic: paint.scenic,
+    eventAt: paint.event?.at ?? null,
   });
   const tunnelZ = paint.tunnel
     ? ([paint.tunnel.from * STATION_WORLD - travel, paint.tunnel.to * STATION_WORLD - travel] as const)
@@ -1431,10 +1338,12 @@ export function drawWindshield(
     if (paint.landmark) {
       drawLandmark(ctx, view, travel, paint.target * STATION_WORLD, scene, paint.landmark, paint.compact === true);
     }
+    if (paint.event) drawCrossingRoad(ctx, view, travel, paint.event);
     drawTrack(ctx, view, OTHER_TRACK, travel);
     drawTrack(ctx, view, 0, travel);
     drawPlatform(ctx, view, travel, paint.target * STATION_WORLD);
     drawSigns(ctx, view, travel, paint.signs ?? []);
+    if (paint.event) drawEvent(ctx, view, travel, paint.progress * STATION_WORLD, paint.event, paint.reduced);
     if (passing !== null) drawOncoming(ctx, view, passing);
     if (bridgeZ) drawBridge(ctx, view, bridgeZ[0], bridgeZ[1]);
     drawPortals(ctx, view, travel, tunnelZ, stopPostWorld(paint.target));

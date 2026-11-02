@@ -19,6 +19,8 @@ import { LevelGlyph, XiaojuFace } from "@/components/games/OrangeExpressGlyphs";
 import { OrangeExpressResult } from "@/components/games/OrangeExpressResult";
 import { useOrangeExpressDisplay } from "@/components/games/OrangeExpressSettings";
 import { OrangeExpressWindshield } from "@/components/games/OrangeExpressWindshield";
+import { missionNames } from "@/components/games/OrangeExpressMissionCard";
+import { MISSION_SILENT_MS, useOrangeExpressMission } from "@/components/games/useOrangeExpressMission";
 import type { OrangeExpressInstance } from "@/lib/gamekit/games/orange-express/adapter";
 import { announce, nextStationAnnouncement, speechMs } from "@/lib/games/orange-express/announce";
 import {
@@ -28,6 +30,7 @@ import {
   AUTO_BRAKE_DING,
   BRAKE_LEVER_SOUND,
   BUMP_STOP_SOUND,
+  CROSSING_BELL,
   DOOR_CHIME,
   EARLY_SLOW_BELL,
   EMERGENCY_CLICK,
@@ -41,7 +44,16 @@ import {
 } from "@/lib/games/orange-express/chime";
 import { coachBeat, type CoachBeat } from "@/lib/games/orange-express/coach";
 import { coachThisRun, learnCoach, startCoachRun } from "@/lib/games/orange-express/coach-record";
-import { COPY, DRIVER_HINT, DRIVER_NAME, GRADE_TEXT, LEVEL_DOTS, resultComment } from "@/lib/games/orange-express/copy";
+import {
+  COPY,
+  DRIVER_HINT,
+  DRIVER_NAME,
+  GRADE_TEXT,
+  LEVEL_DOTS,
+  missionLine,
+  resultComment,
+} from "@/lib/games/orange-express/copy";
+import { activeEvent, doneCount } from "@/lib/games/orange-express/events";
 import { isSmoothStop, medalsFor, starMissReason } from "@/lib/games/orange-express/medals";
 import { COURSE_RULES } from "@/lib/games/orange-express/routes";
 import { nextSpeech, type SpeechItem } from "@/lib/games/orange-express/notice";
@@ -105,6 +117,8 @@ const DOOR_HINT_MS = 2400;
 const DOOR_SPEECH_STALE_MS = 4000;
 /** 降速牌前提前慢下來：小橘開心這麼久。 */
 const CHEER_MS = 1000;
+/** 任務卡收起前，前窗提示最多先等這麼久（收起時會改成真正的時間）。 */
+const MISSION_HOLD_MS = 60_000;
 /** 對向列車擦身時「咻」的時間點（秒）。 */
 const WHOOSH_AT = 1.45;
 const DRIVE_KEYS: ReadonlySet<GameAction> = new Set([
@@ -172,6 +186,7 @@ export function OrangeExpressView({
   /** 車停著時 run 不會變；廣播念完後用它叫朗讀再看一次前窗。 */
   const [voiceTick, setVoiceTick] = useState(0);
   const [display] = useOrangeExpressDisplay();
+  const { mission, start: startMission, dismiss: dismissMission, clear: clearMission } = useOrangeExpressMission();
   const runRef = useRef<RunState | null>(null);
   const levelRef = useRef(level);
   const screenRef = useRef(screen);
@@ -267,7 +282,9 @@ export function OrangeExpressView({
     const hook = typeof window === "undefined" ? undefined : window.__orangeExpress;
     frozen.current = hook?.freeze === true;
     const nextDriver = hook?.driver ?? driverRef.current;
-    const next = withHook(createRun(nextLevel, nextDriver), hook);
+    // 沿途事件每趟換排法；掛鉤在時固定（測試與基準要穩定），可用 eventSeed 指定。
+    const seed = hook ? (hook.eventSeed ?? 0) : Math.floor(Math.random() * 1_000_000);
+    const next = withHook(createRun(nextLevel, nextDriver, seed), hook);
     phaseRef.current = next.phase;
     spoken.current = new Set();
     resultSpoken.current = false;
@@ -281,11 +298,34 @@ export function OrangeExpressView({
     coachSpeech.current = null;
     releaseSpeech.current = null;
     apply(next);
-    announceNext(next);
+    // 大司機開局先出任務卡、念「今天要去接…回家」，念完才廣播下一站。掛鉤在時不出，除非寫 mission: true。
+    const missionOn = COURSE_RULES[next.course].journey && (!hook || hook.mission === true);
+    if (missionOn) {
+      const line = missionLine(missionNames(next.stations));
+      const voice = voiceRef.current;
+      const speechEnd = performance.now() + (voice ? speechMs(line) : 0);
+      if (voice) speakText(line, { interrupt: true, volume: volumeRef.current });
+      clearAnnounce();
+      // 任務卡收起（念完、碰桿子或音效關著時 4.5 秒）才廣播下一站；碰得早的話等這句念完。
+      // 收起前不念前窗提示（有限的數：setTimeout 收到 Infinity 會當成 0、變成一直重排）。
+      voiceBusyUntil.current = performance.now() + MISSION_HOLD_MS;
+      startMission(voice ? speechEnd - performance.now() + 300 : MISSION_SILENT_MS, () => {
+        const wait = Math.max(0, speechEnd - performance.now());
+        voiceBusyUntil.current = performance.now() + wait + ANNOUNCE_DELAY_MS;
+        announceTimer.current = window.setTimeout(() => {
+          announceTimer.current = null;
+          announceNext(next);
+        }, wait);
+        setVoiceTick((tick) => tick + 1);
+      });
+    } else {
+      clearMission();
+      announceNext(next);
+    }
     setScreen("drive");
     instance.notifyPlaying(nextLevel);
     syncHost();
-  }, [announceNext, apply, instance, syncHost]);
+  }, [announceNext, apply, clearAnnounce, clearMission, instance, startMission, syncHost]);
 
   const goTitle = useCallback(() => {
     runRef.current = null;
@@ -301,9 +341,10 @@ export function OrangeExpressView({
     setScreen("title");
     stopSound();
     clearAnnounce();
+    clearMission();
     instance.notifyReady();
     syncHost();
-  }, [clearAnnounce, instance, stopSound, syncHost]);
+  }, [clearAnnounce, clearMission, instance, stopSound, syncHost]);
 
   const tryDoors = useCallback(() => {
     const cur = runRef.current;
@@ -336,6 +377,8 @@ export function OrangeExpressView({
     (notch: number) => {
       const cur = runRef.current;
       if (!cur) return;
+      // 孩子第一次碰桿子就收任務卡。
+      dismissMission();
       const target = clampPower(notch);
       const next = step(cur, { type: "set-power", notch: target });
       if (next === cur) {
@@ -347,13 +390,14 @@ export function OrangeExpressView({
       audio?.voices?.(POWER_LEVER_SOUND);
       apply(next);
     },
-    [apply, audio],
+    [apply, audio, dismissMission],
   );
 
   const setBrake = useCallback(
     (notch: number) => {
       const cur = runRef.current;
       if (!cur) return;
+      dismissMission();
       // 吸到這一檔有的格子在 step 裡做（慢慢看只有鬆、停、緊急）。
       const next = step(cur, { type: "set-brake", notch });
       if (next === cur) return;
@@ -361,7 +405,7 @@ export function OrangeExpressView({
       audio?.voices?.(next.brake === EMERGENCY ? EMERGENCY_CLICK : BRAKE_LEVER_SOUND);
       apply(next);
     },
-    [apply, audio],
+    [apply, audio, dismissMission],
   );
 
   const pressHorn = useCallback(() => {
@@ -670,10 +714,13 @@ export function OrangeExpressView({
 
       const sameStation = next.stationIndex === cur.stationIndex;
       if (next.autoBrakeCount > cur.autoBrakeCount) audio?.voices?.(AUTO_BRAKE_DING);
-      if (next.earlySlows > cur.earlySlows) {
+      // 提前慢下來（小站長的速限牌）或沿途事件做到了：一聲輕鈴、小橘開心一秒。小鴨兩個都會加，只響一次。
+      if (next.earlySlows > cur.earlySlows || doneCount(next.events) > doneCount(cur.events)) {
         audio?.voices?.(EARLY_SLOW_BELL);
         setCheerTick((tick) => tick + 1);
       }
+      const crossing = activeEvent(next);
+      if (crossing?.kind === "crossing" && activeEvent(cur)?.key !== crossing.key) audio?.voices?.(CROSSING_BELL);
       if (signalRed(cur) && !signalRed(next)) audio?.voices?.(SIGNAL_GREEN_CHIME);
       if (
         next.passing !== null &&
@@ -773,6 +820,7 @@ export function OrangeExpressView({
           bridgeGreets={run.bridgeGreets}
           landmarkGreets={run.landmarkGreets}
           landmarkTask={COURSE_RULES[run.course].landmarkGreet}
+          events={run.events}
           onReplay={begin}
           onTitle={goTitle}
         />
@@ -800,6 +848,8 @@ export function OrangeExpressView({
       data-smooth-stops={run.smoothStops}
       data-signal={run.signal}
       data-early-slows={run.earlySlows}
+      data-events-done={doneCount(run.events)}
+      data-events-met={Object.keys(run.events).length}
     >
       <OrangeExpressWindshield
         run={run}
@@ -816,6 +866,7 @@ export function OrangeExpressView({
           !isSmoothStop(run)
         }
         cheer={cheer}
+        mission={mission}
         onPoint={pointCheck}
       />
       <p className={styles.live} aria-live="polite">

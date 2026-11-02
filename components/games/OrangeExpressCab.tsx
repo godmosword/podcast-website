@@ -24,6 +24,7 @@ import {
 } from "@/lib/games/orange-express/lever";
 import { BRAKE_ACCEL, POWER_ACCEL, effortNotch } from "@/lib/games/orange-express/physics";
 import { COURSE_RULES } from "@/lib/games/orange-express/routes";
+import { eventCue } from "@/lib/games/orange-express/events";
 import {
   brakeNotches,
   bridgeGreetPending,
@@ -91,6 +92,7 @@ function Lever({
   showEffort,
   coach = false,
   release = false,
+  cue = null,
   onChange,
 }: {
   kind: LeverKind;
@@ -106,6 +108,8 @@ function Lever({
   coach?: boolean;
   /** 推了動力、煞車沒放、車不走：煞車桿亮「鬆」那一格（與桿頂的狀態小牌）。 */
   release?: boolean;
+  /** 沿途事件提示掛著時亮這一格（真正的格號）：小鴨亮「慢」、賽跑亮「快」。 */
+  cue?: number | null;
   onChange: (notch: number) => void;
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -239,6 +243,7 @@ function Lever({
                 data-step={i}
                 data-coach={coach && simple && n === STOP_NOTCH ? "true" : "false"}
                 data-release={release && n === 0 ? "true" : "false"}
+                data-cue={cue === n && n !== notch ? "true" : "false"}
                 data-on={n === notch && n > 0 ? "true" : "false"}
                 data-emergency={
                   kind === "brake" && n === EMERGENCY ? "true" : "false"
@@ -419,8 +424,13 @@ export function OrangeExpressCab({
   const simple = simpleLevers(run.course);
   // 桿槽填色看實際出力：只有有重量感的大司機、小站長才畫（低齡幾乎即時，畫了只是多一樣東西）。
   const showEffort = run.course === "big" || run.course === "captain";
-  // 鐵橋上，或停好後還沒跟地標打招呼（大司機、小站長）：喇叭亮黃圈。
-  const hornHint = (bridgeGreetPending(run) && run.phase === "running") || landmarkTaskPending(run);
+  // 鐵橋上，或停好後還沒跟地標打招呼（大司機、小站長），或平交道、揮手的朋友：喇叭亮黃圈。
+  const cue = eventCue(run);
+  const hornHint =
+    (bridgeGreetPending(run) && run.phase === "running") || landmarkTaskPending(run) || cue === "horn";
+  // 小鴨亮動力的「慢」、賽跑亮「快」（已經在那一格就不亮）。
+  const powers = powerNotches(run.course);
+  const powerCue = cue === "slow" ? (powers[1] ?? null) : cue === "fast" ? (powers[powers.length - 1] ?? null) : null;
   const flagLamp: LampState = run.autoBrake
     ? "orange"
     : run.speed <= 0.001
@@ -483,11 +493,12 @@ export function OrangeExpressCab({
       <Lever
         kind="power"
         notch={run.power}
-        notches={powerNotches(run.course)}
+        notches={powers}
         simple={simple}
         effort={run.tractive}
         effortScale={POWER_ACCEL}
         showEffort={showEffort}
+        cue={powerCue}
         onChange={onPower}
       />
       <Lever

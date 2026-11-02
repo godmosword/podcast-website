@@ -157,6 +157,22 @@
   - Opus 設計審：HIGH 2（小橘蓋住站章、沒有下一站與停過的編碼）、MEDIUM 4（小南頭像、兩條帶子外框一樣、桌機太空、車上朋友與等車朋友同形）、LOW 1（矮手機頭像頂框）都已處理。LOW「前窗提示一出現路線條整條消失、H3 事件時會閃」留給 H3（事件提示接手上緣時一起處理）；LOW「夜間截圖跟白天一樣」是這個遊戲的前窗本來就用固定美術色。進站時路線條換成停車目標條、小橘位置看起來往回跳：這一版靠外框底色區分，停車目標條上放站章留給 H3 一起看。
 - 驗證：小橘單元＋components 427 passed；typecheck、lint、audit:colors；e2e orange-express＋games 153 passed；小橘視覺 37 passed（7 張大司機基準多了路線條、新增 3 張路線條基準，人工目檢；標題基準不是逐位元組穩定，不更新）。
 
+### PR-H3 執行紀錄（2026-11-02）
+
+- 事件模型 `events.ts`：`ScenicSection.event`、`RunState.events`（「站:段」→ met／done）、`eventPlan(seed)`（五段各一件、四種都有、賽跑只在出站後第一段、相鄰不重複）、小鴨降速區併入 `Station.slowZones`（負 progress）。掛鉤加 `eventSeed`、`mission`。
+- 前窗：`windshield.ts`（1450 行）先拆出 `windshield-geometry.ts`，事件畫法在 `windshield-events.ts`；減少動態時事件那一格的鏡頭用 `cameraTravel` 的 `eventAt`，狀態看車真正的位置。
+- 任務卡 `OrangeExpressMissionCard` ＋ `useOrangeExpressMission`；結算 `OrangeExpressEventStamps`；事件圖示 `OrangeExpressEventGlyphs`。字型子集重跑（新增「狗螃鷗」）。
+- 第二次試玩觀察表：`docs/qa/orange-express-playtest/second-round.md`。
+- **跟計畫不同**：
+  - 小鴨的判準從「放開動力或拉煞車」放寬成「動力拉到快以下（慢或鬆）或拉煞車」——桿上寫著「慢」，拉到慢沒反應等於懲罰照指令做的孩子（Opus 設計審 HIGH）。
+  - 小鴨降速區沒做到時也不響叮叮（計畫原本是沒做到才自動輕煞＋叮叮）：沒做到不能聽起來像被糾正（Opus MEDIUM）。
+  - 賽跑提示改在出站那一刻；提示時已經在「快」也算做到（Codex MEDIUM 建議記提示時的桿位、要求之後才推；判斷是車已經跑最快卻判輸會更矛盾，改成從停著起跑讓動作有意義）。
+  - 計畫結算的「一列朋友頭像」先不放（站卡會變三列）。
+- 審查：
+  - Codex 工程審（gpt-6-luna）MEDIUM 3：賽跑判準（見上）；做到小鴨與自動輕煞同一幀仍會計數 → 走之前先結算一次；音效關著時下一站廣播跟任務卡重疊 → 改成任務卡收起後才廣播。都已處理並補測試。
+  - Opus 設計審 HIGH 5、MEDIUM 6、LOW 4：慢也算（H1）、最後一隻小鴨停在軌道上（H2，改路徑並提早走完）、柵欄橫過我們的軌道（H3，改往外伸）、提示跟駕駛台接不起來（H4，喇叭／慢／快格亮黃框）、結算空心點像空格（H5，實心點＋黃星＋鋸齒黃章）；小狗被電桿穿身、側身朝軌道（M1，移到電桿外側、背面）、賽跑字跟畫面矛盾（M2）、平交道做到沒有場景回應（M3，等車的小汽車）、做到只換底色（M4，黃章＋彈一下）、小鴨沒做到響叮叮（M5）、任務卡跟路線條重複（M6，任務卡在時路線條不出、收起時壓成路線條）；小鴨小（L1，放大＋灰色小路）、田野賽跑圖文不符與減少動態看不出輸贏（L2）。未處理：L3 夜間基準（這個遊戲的前窗與卡片用固定美術色，夜間跟白天一樣，H2 已確認）；L4 朋友頭像列（見上）；M4 的小橘開心延長到 1.5–2 秒先不改（跟小站長提前減速共用 1 秒，第二次試玩再看）。
+- 驗證：小橘單元＋components 455 passed；typecheck、lint、audit:colors；e2e orange-express＋games 160 passed（新增 10 項）；小橘視覺 44 passed（新增 7 張、結算基準更新，人工目檢；標題基準不是逐位元組穩定，不更新）。自動駕駛整趟約 55–59 秒。
+
 ## Files likely touched
 
 - H1：`reducer.ts`（格陣列）、`routes.ts`（規則、`slowZones`）、`physics.ts`（`limitAt` 吃 `slowZones`）、`copy.ts`、`OrangeExpressCab.tsx`、`OrangeExpressGauge.tsx`、`OrangeExpressResult.tsx`、`orange-express.module.css`、教學資料；F／E／G 相關單元與 e2e、視覺基準。

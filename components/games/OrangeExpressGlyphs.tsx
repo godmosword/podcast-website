@@ -1,3 +1,4 @@
+import { EventGlyph } from "@/components/games/OrangeExpressEventGlyphs";
 import type { XiaojuMood } from "@/lib/games/orange-express/mood";
 import type { WindowNotice } from "@/lib/games/orange-express/notice";
 import type { LandmarkId, LevelId, PassengerId } from "@/lib/games/orange-express/types";
@@ -174,6 +175,9 @@ function TunnelGlyph() {
 
 /** 前窗提示前面那顆圖示：先看圖，字是給大人看的。 */
 export function NoticeGlyph({ notice }: { notice: WindowNotice }) {
+  if (notice.kind === "event" && notice.event) {
+    return <EventGlyph kind={notice.event.kind} scene={notice.event.scene} className={styles.noticeGlyph} />;
+  }
   if (notice.kind === "sign") return <SignGlyph bars={notice.bars ?? 1} />;
   if (notice.kind === "bridge" || notice.kind === "greeted") return <HornBadge />;
   if (notice.kind === "passing") return <OncomingGlyph />;
