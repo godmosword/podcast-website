@@ -99,13 +99,13 @@ describe("ParentArticlesMasthead", () => {
   it("署名、篇數、最近更新與方格子連結", () => {
     render(
       <ParentArticlesMasthead
-        title="育兒文章分享"
+        title="育兒文章"
         count={4}
         latestPublishedAt="2026-10-15"
         longestMinutes={1}
       />,
     );
-    expect(screen.getByRole("heading", { level: 1, name: "育兒文章分享" })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 1, name: "育兒文章" })).toBeTruthy();
     expect(screen.getByText("馬米寫給爸媽的育兒心得，每篇約一分鐘讀完。")).toBeTruthy();
     expect(screen.getByText(/4 篇 · 最近更新 2026年10月15日/)).toBeTruthy();
     const vocus = screen.getByRole("link", { name: "在方格子追蹤（另開視窗）" });
@@ -119,7 +119,7 @@ describe("ParentArticlesMasthead", () => {
   it("有篇幅較長的文章時改說幾分鐘內讀完；沒有文章時不寫最近更新", () => {
     render(
       <ParentArticlesMasthead
-        title="育兒文章分享"
+        title="育兒文章"
         count={0}
         latestPublishedAt={null}
         longestMinutes={4}

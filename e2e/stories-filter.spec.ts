@@ -29,10 +29,23 @@ test.describe("/stories 可分享篩選", () => {
   });
 
   test("tag deep link 與 q 搜尋可分享", async ({ page }) => {
-    await page.goto("/stories?tag=%E5%90%88%E4%BD%9C");
+    await page.goto("/stories?tag=%E6%88%90%E9%95%B7%E5%8B%87%E6%B0%A3");
     await expect(page.getByRole("button", { name: "選擇主題" })).toContainText(
-      "合作",
+      "成長勇氣",
     );
+    await page.getByRole("button", { name: "選擇主題" }).click();
+    const options = page.getByRole("option");
+    await expect(options).toHaveText([
+      "全部主題",
+      "成長勇氣",
+      "責任品格",
+      "生活好習慣",
+      "情緒管理",
+      "交友與合作助人",
+      "安全與自我保護",
+      "思考與創造",
+    ]);
+    await page.keyboard.press("Escape");
 
     await page.goto("/stories?q=%E8%B3%BD%E8%BB%8A");
     await expect(page.getByText(/搜尋「賽車」/)).toBeVisible();

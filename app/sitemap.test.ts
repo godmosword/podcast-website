@@ -21,13 +21,14 @@ describe("sitemap freshness", () => {
     // 親子指南已併進關於頁並轉址，不再列進 sitemap；子頁照舊
     expect(urls).not.toContain("https://example.com/for-parents");
     expect(urls).toContain("https://example.com/about");
-    expect(urls).toContain("https://example.com/for-parents/dashboard");
+    expect(urls).not.toContain("https://example.com/for-parents/dashboard");
     expect(urls).toContain("https://example.com/for-parents/play-map");
     expect(urls).toContain("https://example.com/for-parents/articles");
-    expect(urls).toContain("https://example.com/for-parents/travel-abroad");
+    expect(urls).toContain("https://example.com/for-parents/overseas-travel");
     expect(urls).toContain(
-      "https://example.com/for-parents/travel-abroad/vocus-6ae34027fd897800012f3e51",
+      "https://example.com/for-parents/overseas-travel/vocus-6ae34027fd897800012f3e51",
     );
+    expect(urls).not.toContain("https://example.com/for-parents/travel-abroad");
     expect(urls).not.toContain(
       "https://example.com/for-parents/articles/vocus-6ae34027fd897800012f3e51",
     );

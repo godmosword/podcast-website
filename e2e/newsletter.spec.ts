@@ -29,6 +29,10 @@ test("選單有電子報入口，連到列表並看到這一期", async ({ page 
   await item.click();
   await expect(page).toHaveURL(/\/newsletter$/);
   await expect(page.getByRole("heading", { level: 1, name: "電子報" })).toBeVisible();
+  await expect(page.getByRole("form", { name: "訂閱電子報" })).toBeVisible();
+  await page.getByLabel("電子信箱").fill("parent@example.com");
+  await page.getByRole("button", { name: "訂閱" }).click();
+  await expect(page.getByRole("status")).toContainText("暫時沒有開放");
   await expect(page.getByRole("heading", { level: 2, name: issue.title })).toBeVisible();
   await expect(page.getByText(issue.description)).toBeVisible();
   const older = page.getByRole("region", { name: "更多文章" }).getByRole("link");

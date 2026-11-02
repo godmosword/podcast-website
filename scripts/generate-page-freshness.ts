@@ -20,14 +20,6 @@ const ROUTE_SOURCES: Record<string, string[]> = {
     "app/characters/page.module.css",
     "data/characters.json",
   ],
-  "/for-parents/dashboard": [
-    "app/for-parents/dashboard/page.tsx",
-    "app/for-parents/dashboard/page.module.css",
-    "components/for-parents/ParentDashboard.tsx",
-    "components/for-parents/parent-dashboard.module.css",
-    "lib/for-parents/dashboard.ts",
-    "lib/for-parents/dashboard-next-up.ts",
-  ],
   "/for-parents/play-map": [
     "app/for-parents/play-map/page.tsx",
     "app/for-parents/play-map/page.module.css",

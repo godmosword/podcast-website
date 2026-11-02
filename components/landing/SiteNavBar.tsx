@@ -39,7 +39,6 @@ type NavItemId =
   | "games"
   | "adventures"
   | "about"
-  | "parent-progress"
   | "play-map"
   | "feedback"
   | ParentSectionId;
@@ -51,14 +50,12 @@ type NavItem = {
 };
 
 /** 抽屜家長組 id（小標「給爸媽」落在實際首個可見項）。 */
-const MOBILE_PARENT_GROUP_IDS = new Set<NavItemId>([
-  "parent-progress",
-  "play-map",
-]);
+const MOBILE_PARENT_GROUP_IDS = new Set<NavItemId>(["play-map"]);
 
 /**
- * 抽屜主列：探索 5 ＋家長 2（著色本在遊樂園內）。給爸媽小字不佔主列。
+ * 抽屜主列：探索 5 ＋家長 1（著色本在遊樂園內）。給爸媽小字不佔主列。
  * 「親子指南」（/for-parents）2026-10-18 併進關於頁，已不在選單。
+ * 「親子進度」已移除。
  * 圖示用全站線條 Icon（不用 emoji：各裝置長相不同、夜間只能降飽和，和頁面配色對不上）。
  */
 const MENU_ROWS: readonly {
@@ -70,7 +67,6 @@ const MENU_ROWS: readonly {
   { id: "games", icon: "ferris-wheel" },
   { id: "adventures", icon: "map" },
   { id: "about", icon: "heart" },
-  { id: "parent-progress", icon: "notebook-check" },
   { id: "play-map", icon: "map-pin" },
 ] as const;
 
@@ -86,7 +82,6 @@ function navItems(): NavItem[] {
     { id: "games", label: "遊樂園", href: "/games" },
     { id: "adventures", label: "宇宙地圖", href: "/adventures" },
     { id: "about", label: "關於我們", href: "/about" },
-    { id: "parent-progress", label: "親子進度", href: "/for-parents/dashboard" },
     { id: "play-map", label: "親子景點", href: "/for-parents/play-map" },
     ...PARENT_SECTION_ITEMS.map((item) => ({
       id: item.id,

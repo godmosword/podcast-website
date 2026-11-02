@@ -3,17 +3,18 @@ import { PARENT_TRAVEL_ABROAD_ARTICLES } from "../data/parent-travel-abroad-arti
 
 // `next.config.ts` 會載入轉址。設定檔編譯不會套 `@/`，所以這個檔用相對路徑。
 
-const SECTION_HREF = "/for-parents/travel-abroad";
+const SECTION_HREF = "/for-parents/overseas-travel";
+const LEGACY_HREF = "/for-parents/travel-abroad";
 
 /** 列表導言。沿用這一區原本的說明，拿掉「內容整理中」。 */
-export const TRAVEL_ABROAD_LEDE = "親子出國的準備與行程。";
+export const TRAVEL_ABROAD_LEDE = "國外旅遊的準備與行程。";
 
 function assertDistinctFromParentArticles(): void {
   const slugs = new Set(PARENT_ARTICLES.map((article) => article.slug));
   const urls = new Set(PARENT_ARTICLES.map((article) => article.sourceUrl));
   for (const article of PARENT_TRAVEL_ABROAD_ARTICLES) {
     if (slugs.has(article.slug) || urls.has(article.sourceUrl)) {
-      throw new Error(`親子出國與育兒文章重複：${article.slug}`);
+      throw new Error(`國外旅遊與育兒文章重複：${article.slug}`);
     }
   }
 }
@@ -84,9 +85,20 @@ export function travelAbroadLocationRedirects(): Array<{
       permanent: true,
     })),
     ...PARENT_ARTICLES.map((article) => ({
+      source: `${LEGACY_HREF}/${article.slug}`,
+      destination: `/for-parents/articles/${article.slug}`,
+      permanent: true,
+    })),
+    ...PARENT_ARTICLES.map((article) => ({
       source: `${SECTION_HREF}/${article.slug}`,
       destination: `/for-parents/articles/${article.slug}`,
       permanent: true,
     })),
+    { source: LEGACY_HREF, destination: SECTION_HREF, permanent: true },
+    {
+      source: `${LEGACY_HREF}/:slug`,
+      destination: `${SECTION_HREF}/:slug`,
+      permanent: true,
+    },
   ];
 }

@@ -65,7 +65,7 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
 
   await menuBtn.click();
   const desktopDrawer = page.getByRole("navigation", { name: "網站選單" });
-  await expect(desktopDrawer.getByRole("link", { name: "親子進度" })).toBeVisible();
+  await expect(desktopDrawer.getByRole("link", { name: "親子進度" })).toHaveCount(0);
   await expect(desktopDrawer.getByRole("link", { name: "親子指南" })).toHaveCount(0);
   await expect(desktopDrawer.getByRole("link", { name: "親子景點" })).toBeVisible();
   await expect(desktopDrawer.getByRole("link", { name: "首頁" })).toHaveCount(0);
@@ -82,8 +82,8 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
   expect(capsuleRight - panelRight).toBeLessThanOrEqual(20);
 
   // 面板必須真的可點（landing 桌面 .bar 為 pointer-events: none）
-  await desktopDrawer.getByRole("link", { name: "親子進度" }).click();
-  await expect(page).toHaveURL(/\/for-parents\/dashboard$/);
+  await desktopDrawer.getByRole("link", { name: "親子景點" }).click();
+  await expect(page).toHaveURL(/\/for-parents\/play-map$/);
   await page.goto("/");
   // 首段標題與 GEO 導言都維持 clip，不得再被 #segment-stories 解除隱藏
   const storiesHeading = page.getByRole("heading", {
@@ -219,9 +219,12 @@ test("Landing Hub 在手機尺寸維持四段可見", async ({ page }) => {
   await expect(drawerNav.getByRole("link", { name: "遊樂園" })).toBeVisible();
   await expect(drawerNav.getByRole("link", { name: "繪本塗塗鴉" })).toHaveCount(0);
   await expect(drawerNav.getByRole("link", { name: "親子指南" })).toHaveCount(0);
-  const drawerProgress = drawerNav.getByRole("link", { name: "親子進度" });
-  await expect(drawerProgress).toBeVisible();
-  await expect(drawerProgress).toHaveAttribute("href", "/for-parents/dashboard");
+  await expect(drawerNav.getByRole("link", { name: "親子進度" })).toHaveCount(0);
+  await expect(drawerNav.getByRole("link", { name: "育兒文章" })).toBeVisible();
+  await expect(drawerNav.getByRole("link", { name: "國外旅遊" })).toHaveAttribute(
+    "href",
+    "/for-parents/overseas-travel",
+  );
   const drawerPlayMap = drawerNav.getByRole("link", { name: "親子景點" });
   await expect(drawerPlayMap).toBeVisible();
   await expect(drawerPlayMap).toHaveAttribute("href", /\/for-parents\/play-map/);
@@ -482,9 +485,8 @@ test("親子指南舊網址永久轉到關於頁，家長常見問題在那裡",
   expect(starterHrefs.slice(0, 4)).toEqual(newestHrefs);
   expect(starterHrefs).toEqual(expectedHrefs);
 
-  // 子頁不受影響
-  const dashboard = await request.get("/for-parents/dashboard", { maxRedirects: 0 });
-  expect(dashboard.status()).toBe(200);
+  const removedDashboard = await request.get("/for-parents/dashboard", { maxRedirects: 0 });
+  expect(removedDashboard.status()).toBe(404);
 
   // 舊的共讀總表錨點落在「如何陪孩子一起聽？」，且不被 sticky 導覽列蓋住
   await page.goto("/for-parents#co-listen");
@@ -494,20 +496,6 @@ test("親子指南舊網址永久轉到關於頁，家長常見問題在那裡",
   const navBox = await page.locator("header").first().boundingBox();
   const headingBox = await listenHeading.boundingBox();
   expect(headingBox!.y).toBeGreaterThanOrEqual(navBox!.y + navBox!.height - 1);
-});
-
-test("家庭儀表板頁面可載入", async ({ page }) => {
-  await page.goto("/for-parents/dashboard");
-  const main = page.getByRole("main");
-  await expect(main.getByRole("heading", { name: "家庭儀表板" })).toBeVisible();
-  // 新裝置：接著聽的位置是「從這裡開始」，主按鈕推最新一集。
-  await expect(main.getByRole("heading", { name: "從這裡開始" })).toBeVisible();
-  await expect(main.getByRole("link", { name: /^聽最新一集：/ })).toBeVisible();
-  await expect(main.getByRole("heading", { name: "小遊戲" })).toBeVisible();
-  await expect(main.getByRole("link", { name: "隱私說明" })).toHaveAttribute(
-    "href",
-    "/legal#privacy",
-  );
 });
 
 test("車車消消樂：標題 → 地圖 → 第 1 關棋盤", async ({ page }) => {

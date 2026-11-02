@@ -1,0 +1,80 @@
+.form {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 640px;
+  margin: 0 auto var(--space-6);
+}
+
+.lead {
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+}
+
+.label {
+  font-size: var(--fs-control);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 var(--space-4);
+  border: 2px solid color-mix(in srgb, var(--ink) 14%, var(--card));
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  color: var(--ink);
+  font-size: var(--fs-body);
+  font-family: inherit;
+}
+
+.input:focus-visible,
+.submit:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.submit {
+  justify-self: start;
+  min-height: 48px;
+  padding: 0 var(--space-4);
+  border: 2px solid color-mix(in srgb, var(--on-dark) 88%, transparent);
+  border-radius: var(--radius-sm);
+  background: var(--landing-brand-ink);
+  color: var(--on-dark);
+  font-size: var(--fs-control);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.submit:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.status {
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .submit:active:not(:disabled) {
+    transform: none;
+  }
+}

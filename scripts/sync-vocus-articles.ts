@@ -75,7 +75,7 @@ type SyncReport = {
 
 const DESTINATION_LABEL: Record<VocusArticleDestination, string> = {
   "parent-articles": "育兒文章分享",
-  "travel-abroad": "親子出國",
+  "travel-abroad": "國外旅遊",
 };
 
 function sleep(ms: number): Promise<void> {

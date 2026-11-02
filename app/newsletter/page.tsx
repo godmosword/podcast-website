@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import SiteFooter from "@/components/SiteFooter";
 import { ParentArticleList } from "@/components/for-parents/ParentArticleList";
 import { ParentArticlesMasthead } from "@/components/for-parents/ParentArticlesMasthead";
+import { NewsletterSubscribeForm } from "@/components/newsletter/NewsletterSubscribeForm";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbListJsonLd } from "@/lib/json-ld";
 import {
@@ -47,6 +48,7 @@ export default function NewsletterIndexPage() {
         longestMinutes={longestMinutes}
         variant="newsletter"
       />
+      <NewsletterSubscribeForm />
       <ParentArticleList layout={layout} hrefFor={newsletterPath} />
       <SiteFooter compact showPlatformSubscribe={false} />
     </main>

@@ -45,7 +45,6 @@
 |------|------|
 | 信任文案 | `components/ParentTrustStrip.tsx` |
 | GEO 家長常見問題 | `/about`（`lib/for-parents.ts`、`components/about/AboutParentFaq.tsx`）；舊 `/for-parents` 永久轉址 |
-| 家庭儀表板 MVP | `/for-parents/dashboard` |
 | 隱私 | `/legal#privacy` |
 
 ## 尚未有、P3 後續可接

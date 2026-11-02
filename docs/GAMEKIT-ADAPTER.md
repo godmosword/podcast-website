@@ -72,7 +72,7 @@ No new chrome / audio / progress code required.
 
 1. `lib/gamekit/types.ts` 的 `GAMEKIT_GAME_IDS` 加 id。TS 會強制補齊：`GameLoadingGate.tsx` 的 `LABELS`、`runtime/preload.ts` 的 `GAME_PRELOAD_SHEETS`、`runtime/chiptune-bgm.ts` 的 `BGM_THEMES`。
 2. `data/games.ts`：新 `GameMeta`（新的 `GameType` 要補 `app/games/page.tsx` 的 `GAME_TYPE_LABEL` 與 `components/games/GamePlayIcon.tsx`）、`GAME_NEXT` 單環插入。
-3. 不會編譯失敗、漏加只會靜默失效的名單，由 `lib/gamekit/progress/game-id-registry.test.ts` 對照 `GAMEKIT_GAME_IDS`：`lib/activity-log.ts`（已直接用 `GAMEKIT_GAME_IDS`）、`lib/for-parents/dashboard.ts` 遊戲列、`lib/gamekit/progress/stickers.ts` 的 `played-<id>` 貼紙名。
+3. 不會編譯失敗、漏加只會靜默失效的名單，由 `lib/gamekit/progress/game-id-registry.test.ts` 對照 `GAMEKIT_GAME_IDS`：`lib/activity-log.ts`（已直接用 `GAMEKIT_GAME_IDS`）、`lib/gamekit/progress/stickers.ts` 的 `played-<id>` 貼紙名。親子進度儀表板已移除。
 4. 手寫清單：`app/games/page.tsx` 的 `HUB_STATION_ORDER`、`app/sitemap.ts`、`scripts/generate-page-freshness.ts`（route 第一次 commit 後跑 `npm run generate:page-freshness`）、`components/games/GamePageShell.tsx` 的 `CONTROL_ICONS`（對齊 `controls` 文案）、`GamePageShell.module.css` 的版面與夜間覆寫。
 5. e2e：`e2e/games.spec.ts` 的 `SHELL_ROUTES`、`e2e/a11y.spec.ts` 的 `PAGES`、`e2e/smoke.spec.ts`、`e2e/games-lifecycle.spec.ts`；視覺 baseline 由使用者在 Mac 補錄。
 6. 新文案重跑 `npm run font:subset`；遊樂園卡片封面放 `public/games/v2/<id>/cover.webp`（1448×1086）。

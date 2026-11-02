@@ -32,7 +32,6 @@ type StoryFilterProps = StoryFilterDataProps & {
 export function StoryFilter({
   stories,
   vehicles,
-  tags,
   featuredStorySlug = null,
   vehicle,
   tag,
@@ -89,7 +88,7 @@ export function StoryFilter({
             />
           </div>
           <div className={styles.filterField}>
-            <TopicSelect tags={tags} value={tag} onChange={updateTag} />
+            <TopicSelect value={tag} onChange={updateTag} />
           </div>
         </div>
 

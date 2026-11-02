@@ -31,7 +31,6 @@ const CASES: readonly { file: string; glyphs: readonly string[]; icon: string }[
 const BATCH_2: readonly { file: string; glyphs: string; icons: readonly string[] }[] = [
   { file: "app/about/page.tsx", glyphs: "←", icons: ["arrow-left"] },
   { file: "app/feedback/page.tsx", glyphs: "←", icons: ["arrow-left"] },
-  { file: "app/for-parents/dashboard/page.tsx", glyphs: "←", icons: ["arrow-left"] },
   { file: "app/for-parents/play-map/page.tsx", glyphs: "→", icons: ["arrow-right"] },
   { file: "app/for-parents/play-map/[placeId]/page.tsx", glyphs: "←→", icons: ["arrow-left", "chevron-right"] },
   { file: "app/for-parents/play-map/[placeId]/page.module.css", glyphs: "→", icons: [] },

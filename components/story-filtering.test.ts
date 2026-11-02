@@ -1,6 +1,14 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { Story } from "@/data/content";
 import { filterStories } from "./story-filtering";
+
+vi.mock("@/data/episode-themes", () => ({
+  episodeFinderTheme: (slug: string) => {
+    if (slug === "ep-11") return "成長勇氣";
+    if (slug === "ep-12") return "交友與合作助人";
+    return "";
+  },
+}));
 
 function story(
   slug: string,
@@ -45,12 +53,15 @@ describe("filterStories", () => {
     ).toEqual(["ep-12"]);
   });
 
-  it("filters by tag", () => {
+  it("filters by the episode theme map, not the old tags", () => {
     expect(
-      filterStories(stories, { vehicle: null, tag: "勇氣", featuredStorySlug: "ep-12" }).map(
+      filterStories(stories, { vehicle: null, tag: "成長勇氣", featuredStorySlug: "ep-12" }).map(
         (s) => s.slug,
       ),
     ).toEqual(["ep-11"]);
+    expect(
+      filterStories(stories, { vehicle: null, tag: "勇氣", featuredStorySlug: "ep-12" }),
+    ).toEqual([]);
   });
 
   it("filters by free-text query", () => {
@@ -68,7 +79,7 @@ describe("filterStories", () => {
     expect(
       filterStories(stories, {
         vehicle: "警車",
-        tag: "合作",
+        tag: "交友與合作助人",
         featuredStorySlug: "ep-12",
       }).map((s) => s.slug),
     ).toEqual(["ep-12"]);

@@ -67,7 +67,7 @@ export default async function ParentTravelAbroadArticlePage({ params }: ArticleP
         previous={previous}
         next={next}
         indexHref={travelAbroadIndexPath()}
-        indexLabel="回到親子出國"
+        indexLabel="回到國外旅遊"
         hrefFor={travelAbroadArticlePath}
       />
       <SiteFooter />

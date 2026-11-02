@@ -3,7 +3,7 @@ import React from "react";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ParentArticle } from "@/data/parent-articles";
-import ParentTravelAbroadPage from "@/app/for-parents/travel-abroad/page";
+import ParentTravelAbroadPage from "@/app/for-parents/overseas-travel/page";
 import { getTravelAbroadArticle, travelAbroadArticlePath } from "@/lib/parent-travel-abroad";
 import { pinnedVocusExcerpt } from "../../scripts/lib/vocus-article-excerpts";
 import { ParentArticleView } from "./ParentArticleView";
@@ -38,13 +38,13 @@ const fixture: ParentArticle = {
   blocks: [{ type: "paragraph", text: "這篇只存在測試裡。" }],
 };
 
-describe("親子出國列表", () => {
+describe("國外旅遊列表", () => {
   it("測試文章出現在列表上", () => {
     render(
       <ParentSectionArticleList articles={[fixture]} hrefFor={travelAbroadArticlePath} />,
     );
     const link = screen.getByRole("link", { name: /測試用出國文章/ });
-    expect(link.getAttribute("href")).toBe("/for-parents/travel-abroad/fixture-trip");
+    expect(link.getAttribute("href")).toBe("/for-parents/overseas-travel/fixture-trip");
     expect(screen.getByText("2026年10月29日")).toBeTruthy();
     expect(screen.getByText("這篇只存在測試裡。")).toBeTruthy();
   });
@@ -67,25 +67,25 @@ describe("親子出國列表", () => {
     expect(screen.queryByRole("img")).toBeNull();
     expect(screen.queryByAltText("小松 PC4000 大型怪手前，大人與小孩的背影")).toBeNull();
     expect(screen.getByRole("link", { name: /測試用出國文章/ }).getAttribute("href")).toBe(
-      "/for-parents/travel-abroad/fixture-trip",
+      "/for-parents/overseas-travel/fixture-trip",
     );
     expect(screen.getByText("2026年10月29日")).toBeTruthy();
     expect(screen.getByText("這篇只存在測試裡。")).toBeTruthy();
   });
 
-  it("內頁回到親子出國", () => {
+  it("內頁回到國外旅遊", () => {
     render(
       <ParentArticleView
         article={fixture}
         previous={null}
         next={null}
-        indexHref="/for-parents/travel-abroad"
-        indexLabel="回到親子出國"
+        indexHref="/for-parents/overseas-travel"
+        indexLabel="回到國外旅遊"
         hrefFor={travelAbroadArticlePath}
       />,
     );
-    expect(screen.getByRole("link", { name: "回到親子出國" }).getAttribute("href")).toBe(
-      "/for-parents/travel-abroad",
+    expect(screen.getByRole("link", { name: "回到國外旅遊" }).getAttribute("href")).toBe(
+      "/for-parents/overseas-travel",
     );
     expect(screen.queryByText("同步更新至親子出國專欄")).toBeNull();
   });
@@ -135,7 +135,7 @@ describe("親子出國列表", () => {
 
   it("小松那篇出現在親子出國列表，標記沒有留在頁面上", () => {
     render(<ParentTravelAbroadPage />);
-    expect(screen.getByRole("heading", { name: "親子出國" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "國外旅遊" })).toBeTruthy();
     expect(screen.getByRole("link", { name: /小松之杜/ })).toBeTruthy();
     const komatsuExcerpt = pinnedVocusExcerpt("vocus-6ae34027fd897800012f3e51");
     expect(komatsuExcerpt).toBeTruthy();
@@ -158,8 +158,8 @@ describe("親子出國列表", () => {
         article={article}
         previous={null}
         next={null}
-        indexHref="/for-parents/travel-abroad"
-        indexLabel="回到親子出國"
+        indexHref="/for-parents/overseas-travel"
+        indexLabel="回到國外旅遊"
         hrefFor={travelAbroadArticlePath}
       />,
     );

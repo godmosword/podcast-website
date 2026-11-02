@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { allTags, allVehicles, storiesByNewest } from "@/data/content";
+import { allVehicles, storiesByNewest } from "@/data/content";
+import { STORY_FINDER_THEMES } from "@/data/episode-themes";
 import { HomeSectionList } from "@/components/home/HomeSectionRenderer";
 import type { HomeSectionProps } from "@/components/home/HomeSectionRenderer";
 import JsonLd from "@/components/JsonLd";
@@ -14,7 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const stories = storiesByNewest();
   const description = storiesCatalogSummary(
     stories,
-    allTags().length,
+    STORY_FINDER_THEMES.length,
     allVehicles().length,
   );
   return {
@@ -32,7 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function StoriesPage() {
   const vehicles = allVehicles();
-  const tags = allTags();
+  const tags = [...STORY_FINDER_THEMES];
   const stories = storiesByNewest();
   const latest = stories[0];
   const lede = storiesCatalogSummary(stories, tags.length, vehicles.length);
