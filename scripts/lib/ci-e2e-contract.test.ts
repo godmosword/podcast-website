@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -48,6 +48,27 @@ describe("P3 Playwright E2E CI 契約", () => {
     expect(config).toContain(
       "process.env.NEXT_PUBLIC_SITE_URL ?? CANONICAL_SITE_URL",
     );
+  });
+
+  it("會執行 playwright install 的 job 固定 ubuntu-24.04", () => {
+    const dir = join(ROOT, ".github/workflows");
+    const found: string[] = [];
+    for (const file of readdirSync(dir)) {
+      if (!file.endsWith(".yml") && !file.endsWith(".yaml")) continue;
+      const chunks = readWorkflow(file).split(/\n(?=  [a-z0-9-]+:\n)/);
+      for (const chunk of chunks) {
+        if (!/^\s+run:.*playwright install/m.test(chunk)) continue;
+        const name = chunk.match(/^  ([a-z0-9-]+):/m)?.[1];
+        expect(name, file).toBeTruthy();
+        found.push(`${file}:${name}`);
+        expect(chunk, `${file}:${name}`).toMatch(/runs-on:\s*ubuntu-24\.04\b/);
+        expect(chunk, `${file}:${name}`).not.toMatch(/runs-on:\s*ubuntu-latest\b/);
+      }
+    }
+    expect(found.sort()).toEqual([
+      "ci.yml:build-and-public-e2e",
+      "ci.yml:e2e-child-path",
+    ]);
   });
 
   it("Apple sync／watchdog workflow 不得接入 Playwright（紅線）", () => {
