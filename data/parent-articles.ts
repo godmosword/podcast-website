@@ -16,6 +16,7 @@
  *   `/parent-articles/example.webp`）。`coverImage` 是列表封面；內文圖放 `image` block。
  * - `excerpt` 請從開頭原文摘一句或一小段，不要改寫。
  *   同步腳本沿用「第一個 spacer 之前的 paragraph」。
+ *   要凍結列表摘要時寫進 `scripts/lib/vocus-article-excerpts.ts`，重寫時沿用。
  * - `slug`：手寫篇用英文短名；同步篇為 `vocus-<方格子 contentId>`。
  * - 新增中文後若字型缺字，執行 `npm run font:subset`。
  *   手動：`npm run sync:vocus -- --dry-run`，確認後再 `npm run sync:vocus`。

@@ -5,6 +5,7 @@ import nextConfig from "../next.config";
 import type { ParentArticle } from "@/data/parent-articles";
 import { PARENT_ARTICLES } from "@/data/parent-articles";
 import { listParentArticles } from "./parent-articles";
+import { pinnedVocusExcerpt } from "../scripts/lib/vocus-article-excerpts";
 import {
   getTravelAbroadArticle,
   listTravelAbroadArticles,
@@ -39,6 +40,18 @@ describe("親子出國文章", () => {
     expect(article?.coverAlt).toBe("小松 PC4000 大型怪手前，大人與小孩的背影");
     expect(article?.coverWidth).toBe(1600);
     expect(article?.coverHeight).toBe(2133);
+    expect(article?.excerpt).toBe(
+      "帶孩子到 JR 小松站旁的小松之杜，近看超大自卸卡車 930E 與巨型挖土機 PC4000，還親手操作了小型挖土機。雨停後大機具真的動起來，車車遊樂園又解鎖一種特殊車子！",
+    );
+    expect(article?.excerpt).toBe(pinnedVocusExcerpt(article?.slug ?? ""));
+    expect(article?.blocks[0]).toEqual({
+      type: "paragraph",
+      text: "這次名古屋北陸之旅帶孩子到了小松，參觀了當地非常有名的小松之杜。",
+    });
+    expect(article?.blocks.at(-1)).toEqual({
+      type: "paragraph",
+      text: "車車遊樂園又解鎖了一種特殊車子囉！",
+    });
     expect(getTravelAbroadArticle("travel-abroad-sample")).toBeUndefined();
     for (const entry of listTravelAbroadArticles()) {
       expect(parentSlugs.has(entry.slug)).toBe(false);

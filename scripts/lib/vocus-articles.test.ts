@@ -27,6 +27,7 @@ import {
   type VocusListItem,
 } from "./vocus-articles";
 import { coverForVocusArticle } from "./vocus-article-covers";
+import { excerptForVocusArticle, pinnedVocusExcerpt } from "./vocus-article-excerpts";
 
 const fixtures = join(dirname(fileURLToPath(import.meta.url)), "../fixtures/vocus");
 
@@ -475,6 +476,8 @@ describe("方格子 article 型別", () => {
     expect(article.blocks).toEqual([
       { type: "paragraph", text: "帶孩子去小松看挖土機。" },
     ]);
+    expect(article.excerpt).toBe(pinnedVocusExcerpt(article.slug));
+    expect(article.excerpt).not.toBe(excerptFromBlocks(article.blocks));
     expect(JSON.stringify(article)).not.toContain(TRAVEL_ABROAD_MARKER);
 
     const plan = planVocusArticleSync([merged], []);
@@ -514,5 +517,24 @@ describe("方格子 article 型別", () => {
       coverImage: "/parent-articles/vocus-aaaaaaaaaaaaaaaaaaaaaaaa-cover.webp",
       downloadOg: true,
     });
+  });
+
+  it("沒有指定摘要的文章仍用開頭原文", () => {
+    const post: VocusListItem = {
+      contentId: "aaaaaaaaaaaaaaaaaaaaaaaa",
+      title: "測試",
+      publishAt: "2026-10-15T05:23:44.009Z",
+      sourceUrl: "https://vocus.cc/post/aaaaaaaaaaaaaaaaaaaaaaaa",
+      html: '<p class="graf--p"><span style="white-space: pre-wrap;">開頭原文</span></p>',
+      ogImageURL: null,
+      isPay: false,
+      adult: false,
+      spam: 0,
+      type: "post",
+    };
+    const article = articleFromVocusPost(post, new Set());
+    expect(pinnedVocusExcerpt(article.slug)).toBeUndefined();
+    expect(article.excerpt).toBe("開頭原文");
+    expect(excerptForVocusArticle(article.slug, "開頭原文")).toBe("開頭原文");
   });
 });

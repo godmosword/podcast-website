@@ -6,6 +6,7 @@
 import { JSDOM } from "jsdom";
 import { z } from "zod";
 import type { ParentArticle, ParentArticleBlock } from "../../data/parent-articles";
+import { excerptForVocusArticle } from "./vocus-article-excerpts";
 
 export const VOCUS_CREATOR_ID = "6aa4a7adaa92714642f625a3";
 
@@ -774,9 +775,10 @@ export function articleFromVocusPost(
   slug?: string,
 ): ParentArticle {
   const blocks = stripTravelAbroadMarker(htmlToParentBlocks(post.html));
-  const excerpt = excerptFromBlocks(blocks);
+  const resolvedSlug = slug ?? slugForVocusPost(post.contentId, existingSlugs);
+  const excerpt = excerptForVocusArticle(resolvedSlug, excerptFromBlocks(blocks));
   return {
-    slug: slug ?? slugForVocusPost(post.contentId, existingSlugs),
+    slug: resolvedSlug,
     title: post.title,
     publishedAt: publishedAtTaipei(post.publishAt),
     sourceUrl: post.sourceUrl,
