@@ -1478,6 +1478,22 @@ test.describe("小橘特快車：沿途事件與任務卡（2026-11-02）", () =
     await page.getByTestId("orange-express-horn").click();
     await expect(page.getByTestId("orange-express-drive")).toHaveAttribute("data-events-done", "1");
     await expect(notice).toContainText("叭叭！平交道");
+    // 按喇叭當下做到：駕駛台的小橘也要開心（約 1.6 秒），之後回平常的臉。
+    const xiaoju = page.getByTestId("orange-express-cab").locator("svg[data-mood]").first();
+    await expect(xiaoju).toHaveAttribute("data-mood", "happy");
+    await expect(xiaoju).toHaveAttribute("data-mood", "calm", { timeout: 4000 });
+  });
+
+  test("揮手的朋友：按喇叭做到，小橘一樣開心", async ({ page }) => {
+    await startBig(page);
+    await jump(page, { stationIndex: 2, progress: -1.1, speed: 0.4, power: 2, freeze: false });
+    await expect(page.getByTestId("orange-express-notice")).toHaveAttribute("data-event", "wave");
+    await page.getByTestId("orange-express-horn").click();
+    await expect(page.getByTestId("orange-express-drive")).toHaveAttribute("data-events-done", "1");
+    await expect(page.getByTestId("orange-express-cab").locator("svg[data-mood]").first()).toHaveAttribute(
+      "data-mood",
+      "happy",
+    );
   });
 
   test("揮手的朋友：沒按喇叭也照樣過去，記「遇到」、不說沒做到", async ({ page }) => {
@@ -1498,7 +1514,8 @@ test.describe("小橘特快車：沿途事件與任務卡（2026-11-02）", () =
     await expect(page.getByTestId("orange-express-drive")).toHaveAttribute("data-events-done", "1");
     // 終點前說「快追上了」，過了終點小狗被超過才說「跑贏了」。
     await expect(page.getByTestId("orange-express-notice")).toContainText("快追上小狗了");
-    await expect(page.getByTestId("orange-express-notice")).toContainText("跑贏小狗了", { timeout: 8000 });
+    // 從停著起跑到終點（段長 1.4 的 75%）約 8 秒。
+    await expect(page.getByTestId("orange-express-notice")).toContainText("跑贏小狗了", { timeout: 15000 });
   });
 
   test("任務卡：開局先念「今天要去接…回家」再廣播下一站；第一次碰桿子就收，不擋桿子", async ({ page }) => {
@@ -1548,6 +1565,59 @@ test.describe("小橘特快車：沿途事件與任務卡（2026-11-02）", () =
         timeout: 8000,
       })
       .toMatch(/^今天要去接.*\|.*遊樂園/);
+  });
+
+  test("開局一碰就推到快：任務卡那句 → 第一件事件的提示（還來得及做時）→ 下一站", async ({ page }) => {
+    await page.addInitScript(() => {
+      class FakeUtterance {
+        text: string;
+        lang = "";
+        rate = 1;
+        pitch = 1;
+        volume = 1;
+        onend: (() => void) | null = null;
+        onerror: (() => void) | null = null;
+        constructor(text: string) {
+          this.text = text;
+        }
+      }
+      const state = window as unknown as { __spoken: string[] };
+      state.__spoken = [];
+      Object.defineProperty(window, "SpeechSynthesisUtterance", { configurable: true, value: FakeUtterance });
+      Object.defineProperty(window, "speechSynthesis", {
+        configurable: true,
+        value: {
+          speak: (utterance: FakeUtterance) => {
+            // 記下念的那一刻這段事件結算了沒（0 表示還能做）。
+            const met = document.querySelector('[data-testid="orange-express-drive"]')?.getAttribute("data-events-met");
+            state.__spoken.push(`${utterance.text}@${met}`);
+            utterance.onend?.();
+          },
+          cancel: () => {},
+          speaking: false,
+          pending: false,
+        },
+      });
+    });
+    // 種子 3：遊樂園前那一段是平交道。
+    await startBig(page, { mission: true, freeze: false, eventSeed: 3 });
+    await page.getByRole("slider", { name: "動力" }).locator('[data-notch="4"]').click();
+    const drive = page.getByTestId("orange-express-drive");
+    await expect(drive).toHaveAttribute("data-events-met", "1", { timeout: 15000 });
+    await expect
+      .poll(() => page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken.join("|")), {
+        timeout: 8000,
+      })
+      .toMatch(/遊樂園/);
+    const spoken = await page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken);
+    const texts = spoken.map((entry) => entry.split("@")[0]);
+    const mission = texts.indexOf("今天要去接Bonbon、小南、馬米回家");
+    const hint = texts.indexOf("平交道，按喇叭");
+    const next = texts.findIndex((text) => text?.includes("遊樂園"));
+    expect(mission).toBe(0);
+    expect(hint).toBeGreaterThan(mission);
+    expect(next).toBeGreaterThan(hint);
+    expect(spoken[hint]).toBe("平交道，按喇叭@0");
   });
 
   test("音效關著：任務卡不念，留一會兒自己收", async ({ page }) => {

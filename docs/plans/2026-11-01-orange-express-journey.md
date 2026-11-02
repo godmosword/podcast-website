@@ -188,6 +188,14 @@
 - 只做 H3 Opus 設計審已給出明確建議、當時留給 H4 的三件：事件做到小橘開心 1.6 秒（M4）、任務卡收好後路線條章依序彈一下（M6）、結算朋友頭像靠在小橘旁不多一列（L4）。
 - 驗證：e2e orange-express＋games 160 passed（任務卡收好後 `data-arrive`、結算三位朋友）；小橘視覺 46 passed（只有結算基準更新；事件揮手、賽跑基準的動畫跟著時間走，不是逐位元組穩定，在容差內，不更新）；完整 `npm run check`。
 
+### 上線後修正（2026-11-02，外部審查兩個 P2）
+
+- **開局事件提示被吃掉**：任務卡那句（`speechMs` 約 6 秒）念完立刻排「叮咚＋下一站」（約 3.7 秒），開局就推到快時第一段的提示（約第 2–3 秒出現、約第 6 秒過期）輪不到。改成任務卡收起後的「下一站」記在 `pendingAnnounce`，念提示的 effect 排序：示範 → 先鬆煞車 → 沿途事件提示（`eventSpeech`）→ 下一站 → 門 → 其他；孩子在那句念完前碰桿子時，事件提示可以打斷它。
+- **喇叭事件沒回饋**：回饋改在 View 的 `apply` 用 `cheerFor(prev, next)` 判斷，每一次狀態轉換都比，刪掉每幀迴圈裡的判斷。
+- 測試：`cheerFor` 四種事件、`eventSpeech`；e2e 開局立即加速的朗讀順序（任務卡 → 「平交道，按喇叭」在事件結算前 → 下一站）、平交道與揮手按喇叭後小橘開心、1.6 秒後回平常。
+- Codex 工程審 MEDIUM 2、LOW 1，逐條查證都不成立：碰桿子時任務卡收起、`voiceBusyUntil` 改成那句的結束時間，晚出現的提示走一般路徑仍排在下一站前；`eventSpeech` 不經 `nextSpeech` 排序，指差／地標提示擠不掉它（大司機開局風景段也沒有這兩種）；`withHook` 只會清事件結果不會增加。
+- 段長不動（新手腳本中位數 95.8 秒）。上一版 38467a18 的 CI（含 quality、e2e-child-path）已全數通過。
+
 ## Files likely touched
 
 - H1：`reducer.ts`（格陣列）、`routes.ts`（規則、`slowZones`）、`physics.ts`（`limitAt` 吃 `slowZones`）、`copy.ts`、`OrangeExpressCab.tsx`、`OrangeExpressGauge.tsx`、`OrangeExpressResult.tsx`、`orange-express.module.css`、教學資料；F／E／G 相關單元與 e2e、視覺基準。

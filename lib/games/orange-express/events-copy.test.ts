@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { chimeWithinLimits, CROSSING_BELL, AUTO_BRAKE_DING } from "@/lib/games/orange-express/chime";
 import { eventHint, missionLine, resultComment } from "@/lib/games/orange-express/copy";
-import { routeEvents, sectionEvent } from "@/lib/games/orange-express/events";
-import { nextSpeech, windowNotice } from "@/lib/games/orange-express/notice";
-import { createRun, withHook } from "@/lib/games/orange-express/reducer";
+import { cheerFor, routeEvents, sectionEvent } from "@/lib/games/orange-express/events";
+import { eventSpeech, nextSpeech, windowNotice } from "@/lib/games/orange-express/notice";
+import { createRun, step, withHook } from "@/lib/games/orange-express/reducer";
 import { stationsFor } from "@/lib/games/orange-express/routes";
 import { crossingLamps, duckCross, duckXs, raceGap, RACE_AHEAD } from "@/lib/games/orange-express/windshield-events";
 import type { RunState, ScenicEventKind } from "@/lib/games/orange-express/types";
@@ -118,3 +118,45 @@ describe("沿途事件：前窗畫法的狀態", () => {
     expect(CROSSING_BELL[0]!.freq).not.toBe(AUTO_BRAKE_DING[0]!.freq);
   });
 });
+
+describe("沿途事件：回饋與朗讀的時效", () => {
+  it("四種事件做到時都回饋一次：喇叭當下寫入的平交道、揮手也算；小鴨同時加提前慢下來只算事件", () => {
+    for (const kind of ["crossing", "wave"] as const) {
+      const s = atHint(kind);
+      const honked = step(s, { type: "honk" });
+      expect(cheerFor(s, honked)).toBe("event");
+      // 同一件不會再回饋一次。
+      expect(cheerFor(honked, step(honked, { type: "honk" }))).toBeNull();
+    }
+    const ducks = atHint("ducks");
+    const slowed = step(step(ducks, { type: "set-power", notch: 0 }), { type: "tick", dt: 1 / 30 });
+    expect(slowed.earlySlows).toBe(ducks.earlySlows + 1);
+    expect(cheerFor(ducks, slowed)).toBe("event");
+    const race = atHint("race");
+    const raced = step(step(race, { type: "set-power", notch: 4 }), { type: "tick", dt: 1 / 30 });
+    expect(cheerFor(race, raced)).toBe("event");
+  });
+
+  it("提前慢下來（小站長）是 early-slow；開新一趟、跳段讓數字變少都不回饋", () => {
+    const run = createRun("captain");
+    expect(cheerFor(run, { ...run, earlySlows: 1 })).toBe("early-slow");
+    const s = atHint("wave");
+    const event = sectionEvent(s)!;
+    const done = { ...s, events: { [event.key]: "done" as const }, earlySlows: 2 };
+    expect(cheerFor(done, createRun("drive", "big"))).toBeNull();
+    expect(cheerFor(done, done)).toBeNull();
+  });
+
+  it("eventSpeech 只回還能做、還沒念過的事件提示", () => {
+    const s = atHint("crossing");
+    const item = eventSpeech(s, false, new Set())!;
+    expect(item.text).toBe("平交道，按喇叭");
+    expect(eventSpeech(s, false, new Set([item.key]))).toBeNull();
+    const event = sectionEvent(s)!;
+    expect(eventSpeech({ ...s, progress: event.until + 0.01 }, false, new Set())).toBeNull();
+    expect(eventSpeech({ ...s, events: { [event.key]: "done" } }, false, new Set())).toBeNull();
+    // 站段的提示（隧道、對向列車）不算。
+    expect(eventSpeech(withHook(createRun("drive", "big"), { stationIndex: 1, progress: 0.03, passing: 1 }), false, new Set())).toBeNull();
+  });
+});
+

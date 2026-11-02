@@ -132,9 +132,8 @@ export function speechCandidates(state: RunState, numbers: boolean, options: Spe
   if (!notice || notice.kind === "greeted" || notice.kind === "red") return out;
   // 沿途事件只念提示（「站:段:事件」一次）；做到了的回應不念，鈴聲就是回饋。
   if (notice.kind === "event") {
-    if (notice.event && !notice.event.done) {
-      out.push({ key: `${notice.event.key}:${notice.event.kind}`, text: notice.text });
-    }
+    const item = eventItem(notice);
+    if (item) out.push(item);
     return out;
   }
   // 這面牌有「速限牌，確認！」題的話，只念題目那句；題目還沒出、已經做完都一樣，不然同一面牌會念兩次。
@@ -142,6 +141,21 @@ export function speechCandidates(state: RunState, numbers: boolean, options: Spe
   const where = notice.kind === "sign" ? `:${notice.at ?? 0}` : "";
   out.push({ key: `${station}:${notice.kind}${where}`, text: notice.text });
   return out;
+}
+
+function eventItem(notice: WindowNotice): SpeechItem | null {
+  if (notice.kind !== "event" || !notice.event || notice.event.done) return null;
+  return { key: `${notice.event.key}:${notice.event.kind}`, text: notice.text };
+}
+
+/**
+ * 還沒念過、還能做的沿途事件提示（有時效：過了可以做動作的最後一刻就不見）。
+ * 畫面拿它排在「下一站」廣播前面，開局任務卡那句也可以被它打斷（孩子已經在開了）。
+ */
+export function eventSpeech(state: RunState, numbers: boolean, spoken: ReadonlySet<string>): SpeechItem | null {
+  const notice = windowNotice(state, numbers);
+  const item = notice ? eventItem(notice) : null;
+  return item && !spoken.has(item.key) ? item : null;
 }
 
 /**

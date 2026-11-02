@@ -243,6 +243,20 @@ export function eventsBefore(events: RunState["events"], stationIndex: number, s
   return kept.length === Object.keys(events).length ? events : Object.fromEntries(kept);
 }
 
+/**
+ * 這一次狀態轉換要不要響鈴、讓小橘開心：沿途事件多做到一件是 event（小鴨同時加 earlySlows 也只算 event），
+ * 否則提前慢下來多一次是 early-slow。開新一趟、跳段讓數字變少都不算。
+ * 畫面在每一次 apply 比較前後（不只每幀的 tick）：喇叭做到的平交道、揮手是在按下去那一刻寫入的。
+ */
+export function cheerFor(
+  prev: Pick<RunState, "events" | "earlySlows">,
+  next: Pick<RunState, "events" | "earlySlows">,
+): "event" | "early-slow" | null {
+  if (doneCount(next.events) > doneCount(prev.events)) return "event";
+  if (next.earlySlows > prev.earlySlows) return "early-slow";
+  return null;
+}
+
 /** 做到了幾件（畫面響鈴、小橘開心用）。 */
 export function doneCount(events: RunState["events"]): number {
   return Object.values(events).filter((result) => result === "done").length;

@@ -53,10 +53,10 @@ import {
   missionLine,
   resultComment,
 } from "@/lib/games/orange-express/copy";
-import { activeEvent, doneCount } from "@/lib/games/orange-express/events";
+import { activeEvent, cheerFor, doneCount } from "@/lib/games/orange-express/events";
 import { isSmoothStop, medalsFor, starMissReason } from "@/lib/games/orange-express/medals";
 import { COURSE_RULES } from "@/lib/games/orange-express/routes";
-import { nextSpeech, type SpeechItem } from "@/lib/games/orange-express/notice";
+import { eventSpeech, nextSpeech, type SpeechItem } from "@/lib/games/orange-express/notice";
 import {
   clampPower,
   createRun,
@@ -207,6 +207,12 @@ export function OrangeExpressView({
   const spoken = useRef<Set<string>>(new Set());
   /** 車內廣播或上一句提示大約念到這個時間（performance.now）；之前不念新的提示。 */
   const voiceBusyUntil = useRef(0);
+  /** 開局任務卡那句大約念到這個時間；孩子在這之前就碰桿子開車的話，沿途事件提示可以打斷它。 */
+  const missionSpeechUntil = useRef(0);
+  /** 孩子在任務卡那句還沒念完就碰了桿子。 */
+  const missionCut = useRef(false);
+  /** 任務卡收起後等著念的「下一站」：排在沿途事件提示後面（提示有時效、廣播沒有）。 */
+  const pendingAnnounce = useRef<RunState | null>(null);
   /** 等著念的「門亮了再按」：一站只念一次，排在廣播後面。 */
   const doorSpeech = useRef<{ item: SpeechItem; at: number } | null>(null);
   /** 等著念的「右邊拉，停在綠區」：一站一次，排在最前面，不套逾時（還在第二拍就念）。 */
@@ -248,10 +254,23 @@ export function OrangeExpressView({
     run.speed <= 0.001;
   const releaseHint = releaseWanted && releaseReady;
 
-  const apply = useCallback((next: RunState) => {
-    runRef.current = next;
-    setRun(next);
-  }, []);
+  /**
+   * 換成新的狀態。做到沿途事件或提前慢下來的回饋在這裡判斷（不只每幀的 tick）：
+   * 喇叭做到的平交道、揮手是在按下去那一刻寫入的，下一幀再比就看不到變化了。
+   */
+  const apply = useCallback(
+    (next: RunState) => {
+      const prev = runRef.current;
+      runRef.current = next;
+      setRun(next);
+      const cheer = prev ? cheerFor(prev, next) : null;
+      if (!cheer) return;
+      audio?.voices?.(EARLY_SLOW_BELL);
+      cheerMs.current = cheer === "event" ? EVENT_CHEER_MS : CHEER_MS;
+      setCheerTick((tick) => tick + 1);
+    },
+    [audio],
+  );
 
   const stopSound = useCallback(() => {
     sound.current?.stop();
@@ -291,6 +310,9 @@ export function OrangeExpressView({
     const next = withHook(createRun(nextLevel, nextDriver, seed), hook);
     phaseRef.current = next.phase;
     spoken.current = new Set();
+    pendingAnnounce.current = null;
+    missionCut.current = false;
+    missionSpeechUntil.current = 0;
     resultSpoken.current = false;
     doorSpeech.current = null;
     setDoorHint(false);
@@ -302,24 +324,26 @@ export function OrangeExpressView({
     coachSpeech.current = null;
     releaseSpeech.current = null;
     apply(next);
-    // 大司機開局先出任務卡、念「今天要去接…回家」，念完才廣播下一站。掛鉤在時不出，除非寫 mission: true。
+    // 大司機開局先出任務卡、念「今天要去接…回家」。掛鉤在時不出，除非寫 mission: true。
+    // 朗讀順序：任務卡 → 沿途事件提示（有時效，孩子一開始就開快時會先到）→ 下一站。
     const missionOn = COURSE_RULES[next.course].journey && (!hook || hook.mission === true);
     if (missionOn) {
       const line = missionLine(missionNames(next.stations));
       const voice = voiceRef.current;
       const speechEnd = performance.now() + (voice ? speechMs(line) : 0);
       if (voice) speakText(line, { interrupt: true, volume: volumeRef.current });
+      missionSpeechUntil.current = speechEnd;
       clearAnnounce();
-      // 任務卡收起（念完、碰桿子或音效關著時 4.5 秒）才廣播下一站；碰得早的話等這句念完。
       // 收起前不念前窗提示（有限的數：setTimeout 收到 Infinity 會當成 0、變成一直重排）。
       voiceBusyUntil.current = performance.now() + MISSION_HOLD_MS;
       startMission(voice ? speechEnd - performance.now() + 300 : MISSION_SILENT_MS, () => {
-        const wait = Math.max(0, speechEnd - performance.now());
-        voiceBusyUntil.current = performance.now() + wait + ANNOUNCE_DELAY_MS;
-        announceTimer.current = window.setTimeout(() => {
-          announceTimer.current = null;
+        // 音效關著（不念）：照舊直接響叮咚。念得出聲時交給念提示的 effect 排順序。
+        if (!voiceRef.current) {
           announceNext(next);
-        }, wait);
+          return;
+        }
+        pendingAnnounce.current = next;
+        voiceBusyUntil.current = Math.max(performance.now(), speechEnd);
         setVoiceTick((tick) => tick + 1);
       });
     } else {
@@ -336,6 +360,8 @@ export function OrangeExpressView({
     resultSpoken.current = false;
     phaseRef.current = null;
     doorSpeech.current = null;
+    pendingAnnounce.current = null;
+    missionCut.current = false;
     setDoorHint(false);
     setCoachOn(false);
     coachShownAt.current = null;
@@ -381,7 +407,8 @@ export function OrangeExpressView({
     (notch: number) => {
       const cur = runRef.current;
       if (!cur) return;
-      // 孩子第一次碰桿子就收任務卡。
+      // 孩子第一次碰桿子就收任務卡；那句還在念的話，之後的沿途事件提示可以打斷它。
+      if (performance.now() < missionSpeechUntil.current) missionCut.current = true;
       dismissMission();
       const target = clampPower(notch);
       const next = step(cur, { type: "set-power", notch: target });
@@ -401,6 +428,7 @@ export function OrangeExpressView({
     (notch: number) => {
       const cur = runRef.current;
       if (!cur) return;
+      if (performance.now() < missionSpeechUntil.current) missionCut.current = true;
       dismissMission();
       // 吸到這一檔有的格子在 step 裡做（慢慢看只有鬆、停、緊急）。
       const next = step(cur, { type: "set-brake", notch });
@@ -529,7 +557,19 @@ export function OrangeExpressView({
       const timer = window.setTimeout(() => setVoiceTick((tick) => tick + 1), ms + 20);
       return () => window.clearTimeout(timer);
     };
-    const wait = voiceBusyUntil.current - performance.now();
+    const now = performance.now();
+    const hint = eventSpeech(run, display.gaugeNumbers, spoken.current);
+    // 開局就開快：任務卡那句還在念，沿途事件提示等不到它念完（會過期），直接插隊。
+    if (hint && missionCut.current && now < missionSpeechUntil.current) {
+      missionCut.current = false;
+      missionSpeechUntil.current = 0;
+      spoken.current.add(hint.key);
+      const ms = speechMs(hint.text);
+      voiceBusyUntil.current = now + ms;
+      speakText(hint.text, { interrupt: true, volume: volumeRef.current });
+      return recheck(ms);
+    }
+    const wait = voiceBusyUntil.current - now;
     if (wait > 0) return recheck(wait);
     const coach = coachSpeech.current;
     coachSpeech.current = null;
@@ -540,9 +580,17 @@ export function OrangeExpressView({
     const door = freshCoach || freshRelease ? null : doorSpeech.current;
     if (!freshCoach && !freshRelease) doorSpeech.current = null;
     const freshDoor = door && performance.now() - door.at <= DOOR_SPEECH_STALE_MS ? door.item : null;
+    // 待念的「下一站」排在沿途事件提示後面、其他提示前面。
+    const announceState = freshCoach || freshRelease || hint ? null : pendingAnnounce.current;
+    if (announceState) {
+      pendingAnnounce.current = null;
+      announceNext(announceState);
+      return recheck(Math.max(0, voiceBusyUntil.current - performance.now()));
+    }
     const item =
       freshCoach ??
       freshRelease ??
+      hint ??
       freshDoor ??
       nextSpeech(run, display.gaugeNumbers, spoken.current, { skipPlatform: coachOn });
     if (!item) return;
@@ -552,7 +600,7 @@ export function OrangeExpressView({
     speakText(item.text, { interrupt: false, volume: volumeRef.current });
     // 車停著時 run 不會變；念完再看一次，同一刻還有下一句（例如提示）就接著念。
     return recheck(ms);
-  }, [beat, coachOn, display.gaugeNumbers, releaseHint, run, screen, status, voiceTick]);
+  }, [announceNext, beat, coachOn, display.gaugeNumbers, releaseHint, run, screen, status, voiceTick]);
 
   // 條件成立超過一小段才亮；條件一不成立（例如煞車一回 0）就收。
   useEffect(() => {
@@ -718,13 +766,6 @@ export function OrangeExpressView({
 
       const sameStation = next.stationIndex === cur.stationIndex;
       if (next.autoBrakeCount > cur.autoBrakeCount) audio?.voices?.(AUTO_BRAKE_DING);
-      // 提前慢下來（小站長的速限牌）或沿途事件做到了：一聲輕鈴、小橘開心一秒。小鴨兩個都會加，只響一次。
-      const eventDone = doneCount(next.events) > doneCount(cur.events);
-      if (next.earlySlows > cur.earlySlows || eventDone) {
-        audio?.voices?.(EARLY_SLOW_BELL);
-        cheerMs.current = eventDone ? EVENT_CHEER_MS : CHEER_MS;
-        setCheerTick((tick) => tick + 1);
-      }
       const crossing = activeEvent(next);
       if (crossing?.kind === "crossing" && activeEvent(cur)?.key !== crossing.key) audio?.voices?.(CROSSING_BELL);
       if (signalRed(cur) && !signalRed(next)) audio?.voices?.(SIGNAL_GREEN_CHIME);
