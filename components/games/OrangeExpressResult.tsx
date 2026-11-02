@@ -7,7 +7,7 @@ import { ResultStars } from "@/components/games/ResultStars";
 import { IconTrain } from "@/components/games/ClayIcons";
 import { DoorIcon, StopIcon } from "@/components/games/OrangeExpressCab";
 import { OrangeExpressEventStamps } from "@/components/games/OrangeExpressEventStamps";
-import { LandmarkGlyph, XiaojuFace } from "@/components/games/OrangeExpressGlyphs";
+import { LandmarkGlyph, RiderFace, XiaojuFace } from "@/components/games/OrangeExpressGlyphs";
 import { XIAOJU_STICKER_SRC } from "@/lib/games/orange-express/art";
 import { COPY, GRADE_WORD, bridgeResultText, landmarkResultText, pointsResultText } from "@/lib/games/orange-express/copy";
 import type { StarMissReason } from "@/lib/games/orange-express/medals";
@@ -77,12 +77,22 @@ export function OrangeExpressResult({
   return (
     <div className={styles.result} data-testid="orange-express-result" data-reduced={reduced ? "true" : "false"}>
       {/* 到家的小橘（B10）：貼紙生好前用向量小橘臉。 */}
-      <span className={styles.resultXiaoju} data-testid="orange-express-result-xiaoju" aria-hidden>
-        {XIAOJU_STICKER_SRC ? (
-          <Image src={XIAOJU_STICKER_SRC} alt="" width={112} height={112} />
-        ) : (
-          <XiaojuFace />
-        )}
+      <span className={styles.resultArrive}>
+        <span className={styles.resultXiaoju} data-testid="orange-express-result-xiaoju" aria-hidden>
+          {XIAOJU_STICKER_SRC ? (
+            <Image src={XIAOJU_STICKER_SRC} alt="" width={112} height={112} />
+          ) : (
+            <XiaojuFace />
+          )}
+        </span>
+        {/* 大司機：接到的朋友擠在小橘旁邊一起到家（計畫的「一列朋友頭像」，靠在小橘旁，不多一列）。 */}
+        {hasEvents ? (
+          <span className={styles.resultRiders} data-testid="orange-express-result-riders" aria-hidden>
+            {stations.flatMap((station) =>
+              station.passengers.map((rider) => <RiderFace key={rider.id} id={rider.id} />),
+            )}
+          </span>
+        ) : null}
       </span>
       <h2>{COPY.arrivedHome}</h2>
       <p className={styles.resultLine} data-testid="orange-express-result-line">{resultLine}</p>

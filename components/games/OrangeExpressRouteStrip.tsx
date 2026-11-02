@@ -1,5 +1,6 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import { LandmarkGlyph, RiderFace, XiaojuFace } from "@/components/games/OrangeExpressGlyphs";
 import { COPY } from "@/lib/games/orange-express/copy";
 import type { RouteStrip } from "@/lib/games/orange-express/route-strip";
@@ -10,21 +11,28 @@ import styles from "./orange-express.module.css";
  * 要接的朋友從開局就站在章上，上車後坐進小橘後面的小車廂。下一站的章亮黃圈，停過的章填黃底，走過的軌道塗實。
  * 小橘的位置每一幀照算、不做滑動動畫（減少動態也一樣）。
  */
-export function OrangeExpressRouteStrip({ strip }: { strip: RouteStrip }) {
+/** arrive：任務卡剛收進來，站點章依序彈一下（減少動態不彈）。 */
+export function OrangeExpressRouteStrip({ strip, arrive = false }: { strip: RouteStrip; arrive?: boolean }) {
   const label = `${COPY.routeStrip}：${strip.stops.map((stop) => stop.name).join("、")}，下一站${strip.next}`;
   return (
-    <div className={styles.routeStrip} role="img" aria-label={label} data-testid="orange-express-route">
+    <div
+      className={styles.routeStrip}
+      role="img"
+      aria-label={label}
+      data-testid="orange-express-route"
+      data-arrive={arrive ? "true" : "false"}
+    >
       <div className={styles.routeTrack}>
         <span className={styles.routeRail} />
         <span className={styles.routeDone} style={{ width: `${strip.train}%` }} />
-        {strip.stops.map((stop) => (
+        {strip.stops.map((stop, index) => (
           <span
             key={stop.id}
             className={styles.routeStop}
             data-reached={stop.reached ? "true" : "false"}
             data-next={stop.next ? "true" : "false"}
             data-testid="orange-express-route-stop"
-            style={{ left: `${stop.at}%` }}
+            style={{ left: `${stop.at}%`, "--i": index } as CSSProperties}
           >
             <LandmarkGlyph id={stop.landmark} className={styles.routeStamp} />
             {stop.waiting.length > 0 ? (

@@ -1463,6 +1463,8 @@ test.describe("小橘特快車：沿途事件與任務卡（2026-11-02）", () =
     await expect(stamps.locator('li[data-kind="ducks"]')).toHaveAttribute("data-done", "true");
     await expect(stamps.locator('li[data-kind="crossing"]')).toHaveAttribute("data-done", "false");
     await expect(stamps.locator('li[data-kind="ducks"] [data-done]')).toHaveCount(2);
+    // 接到的三位朋友靠在結算的小橘旁邊。
+    await expect(page.getByTestId("orange-express-result-riders").locator("svg")).toHaveCount(3);
   });
 
   test("平交道：柵欄前按喇叭就做到，提示換成回應那句", async ({ page }) => {
@@ -1538,6 +1540,8 @@ test.describe("小橘特快車：沿途事件與任務卡（2026-11-02）", () =
     );
     await page.getByRole("slider", { name: "動力" }).locator('[data-notch="4"]').click();
     await expect(page.getByRole("slider", { name: "動力" })).toHaveAttribute("aria-valuetext", "動力，快");
+    // 收進路線條：任務卡在時路線條不出，收好後站點章依序彈一下。
+    await expect(page.getByTestId("orange-express-route")).toHaveAttribute("data-arrive", "true");
     await expect(mission).toHaveCount(0);
     await expect
       .poll(() => page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken.join("|")), {

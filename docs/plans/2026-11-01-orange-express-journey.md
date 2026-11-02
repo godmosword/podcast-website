@@ -182,6 +182,12 @@
 - 測試裡寫死的段長位置改成用 `SCENIC_LENGTH` 推算；e2e 與視覺基準的掛鉤位置重算（見 `e2e/orange-express.spec.ts` 沿途事件那一段的註解）。
 - 驗證：小橘單元＋components 458 passed；typecheck、lint；e2e orange-express＋games 160 passed；小橘視覺 46 passed（大司機開車中與事件、任務卡、路線條基準更新，新增兩張夜間）。只改常數、新增量測腳本與測試，沒有另開審查。
 
+### PR-H4b 執行紀錄（2026-11-02，跳過第二次試玩）
+
+- 使用者決定跳過第二次兒童試玩。依原計畫要看試玩才能定的（事件難度、造型、排法、提示字、段長）都不動。
+- 只做 H3 Opus 設計審已給出明確建議、當時留給 H4 的三件：事件做到小橘開心 1.6 秒（M4）、任務卡收好後路線條章依序彈一下（M6）、結算朋友頭像靠在小橘旁不多一列（L4）。
+- 驗證：e2e orange-express＋games 160 passed（任務卡收好後 `data-arrive`、結算三位朋友）；小橘視覺 46 passed（只有結算基準更新；事件揮手、賽跑基準的動畫跟著時間走，不是逐位元組穩定，在容差內，不更新）；完整 `npm run check`。
+
 ## Files likely touched
 
 - H1：`reducer.ts`（格陣列）、`routes.ts`（規則、`slowZones`）、`physics.ts`（`limitAt` 吃 `slowZones`）、`copy.ts`、`OrangeExpressCab.tsx`、`OrangeExpressGauge.tsx`、`OrangeExpressResult.tsx`、`orange-express.module.css`、教學資料；F／E／G 相關單元與 e2e、視覺基準。

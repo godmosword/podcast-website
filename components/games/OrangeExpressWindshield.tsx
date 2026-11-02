@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useSyncExternalStore, type Ref } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type Ref } from "react";
 import { DoorIcon } from "@/components/games/OrangeExpressCab";
 import { NoticeGlyph, RiderFace } from "@/components/games/OrangeExpressGlyphs";
 import { OrangeExpressMissionCard } from "@/components/games/OrangeExpressMissionCard";
@@ -16,6 +16,9 @@ import { routeStripFor } from "@/lib/games/orange-express/route-strip";
 import { drawWindshield, windshieldFrame } from "@/lib/games/orange-express/windshield";
 import type { RunState } from "@/lib/games/orange-express/types";
 import styles from "./orange-express.module.css";
+
+/** 任務卡收好後，路線條章依序彈一下的總長（三個章、每個晚 120ms、各 420ms）。 */
+const ROUTE_ARRIVE_MS = 900;
 
 /** 跟 CSS 的直式矮螢幕斷點同一個條件：停車目標條讓出右邊一欄，地標改放那裡。 */
 const COMPACT_QUERY = "(orientation: portrait) and (max-height: 600px)";
@@ -113,6 +116,17 @@ export function OrangeExpressWindshield({
   // 上緣同一時間只放一樣：停車目標條＞前窗提示＞路線條。
   // 任務卡在的時候路線條先不出（同一串章與頭像不畫兩次）；任務卡收起時才出現，像是縮進去。
   const strip = showNotice || mission === "shown" ? null : routeStripFor(run);
+  // 任務卡剛收好：路線條上的站點章依序彈一下，接上「剛剛那張卡變成這一條」。
+  const [arrive, setArrive] = useState(false);
+  const missionBefore = useRef(mission);
+  useEffect(() => {
+    const before = missionBefore.current;
+    missionBefore.current = mission;
+    if (before !== "leaving" || mission !== null) return;
+    setArrive(true);
+    const timer = window.setTimeout(() => setArrive(false), ROUTE_ARRIVE_MS);
+    return () => window.clearTimeout(timer);
+  }, [mission]);
   const pending = pendingPoint(run);
   const task = coach.on && pending?.kind === "platform" ? null : pending;
   const signalHalo = run.signal === "red" && run.power > 0;
@@ -207,7 +221,7 @@ export function OrangeExpressWindshield({
         nodBeforeHappy={nodBeforeHappy}
         cheer={cheer}
       />
-      {strip ? <OrangeExpressRouteStrip strip={strip} /> : null}
+      {strip ? <OrangeExpressRouteStrip strip={strip} arrive={arrive} /> : null}
       {notice && showNotice ? (
         <p
           className={styles.notice}

@@ -117,6 +117,8 @@ const DOOR_HINT_MS = 2400;
 const DOOR_SPEECH_STALE_MS = 4000;
 /** 降速牌前提前慢下來：小橘開心這麼久。 */
 const CHEER_MS = 1000;
+/** 沿途事件做到了：小橘開心久一點（比提前慢下來更大的事，孩子要看得到）。 */
+const EVENT_CHEER_MS = 1600;
 /** 任務卡收起前，前窗提示最多先等這麼久（收起時會改成真正的時間）。 */
 const MISSION_HOLD_MS = 60_000;
 /** 對向列車擦身時「咻」的時間點（秒）。 */
@@ -182,6 +184,8 @@ export function OrangeExpressView({
   const [honked, setHonked] = useState(0);
   /** 提前慢下來的次數變多時加一：小橘開心一秒，連續兩次時計時重來。 */
   const [cheerTick, setCheerTick] = useState(0);
+  /** 這一次開心要多久（事件做到比提前慢下來久）。 */
+  const cheerMs = useRef(CHEER_MS);
   const [cheer, setCheer] = useState(false);
   /** 車停著時 run 不會變；廣播念完後用它叫朗讀再看一次前窗。 */
   const [voiceTick, setVoiceTick] = useState(0);
@@ -593,7 +597,7 @@ export function OrangeExpressView({
   useEffect(() => {
     if (cheerTick === 0) return;
     setCheer(true);
-    const timer = window.setTimeout(() => setCheer(false), CHEER_MS);
+    const timer = window.setTimeout(() => setCheer(false), cheerMs.current);
     return () => window.clearTimeout(timer);
   }, [cheerTick]);
 
@@ -715,8 +719,10 @@ export function OrangeExpressView({
       const sameStation = next.stationIndex === cur.stationIndex;
       if (next.autoBrakeCount > cur.autoBrakeCount) audio?.voices?.(AUTO_BRAKE_DING);
       // 提前慢下來（小站長的速限牌）或沿途事件做到了：一聲輕鈴、小橘開心一秒。小鴨兩個都會加，只響一次。
-      if (next.earlySlows > cur.earlySlows || doneCount(next.events) > doneCount(cur.events)) {
+      const eventDone = doneCount(next.events) > doneCount(cur.events);
+      if (next.earlySlows > cur.earlySlows || eventDone) {
         audio?.voices?.(EARLY_SLOW_BELL);
+        cheerMs.current = eventDone ? EVENT_CHEER_MS : CHEER_MS;
         setCheerTick((tick) => tick + 1);
       }
       const crossing = activeEvent(next);

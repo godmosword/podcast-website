@@ -868,6 +868,28 @@
   background: var(--ink);
 }
 
+/* 任務卡剛收進來：章一個接一個彈一下。 */
+.routeStrip[data-arrive="true"] .routeStop {
+  animation: routeStopPop 420ms ease-out both;
+  animation-delay: calc(var(--i, 0) * 120ms);
+}
+
+@keyframes routeStopPop {
+  50% {
+    transform: scale(1.25);
+  }
+}
+
+.screen[data-reduced="true"] .routeStrip[data-arrive="true"] .routeStop {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .routeStrip[data-arrive="true"] .routeStop {
+    animation: none;
+  }
+}
+
 .routeStop[data-reached="true"] {
   background: color-mix(in srgb, var(--c-yellow) 70%, var(--card));
 }
@@ -1774,6 +1796,32 @@
 }
 
 /* 到家的小橘（B10）。 */
+/* 小橘置中；朋友頭像貼在右下，絕對定位不佔版面，結算不多一列。 */
+.resultArrive {
+  position: relative;
+  display: block;
+}
+
+.resultRiders {
+  position: absolute;
+  bottom: 2px;
+  left: calc(100% - 14px);
+  display: flex;
+}
+
+.resultRiders svg {
+  display: block;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--ink) 10%, var(--card));
+  box-shadow: 0 0 0 1.5px var(--ink);
+}
+
+.resultRiders svg + svg {
+  margin-left: -6px;
+}
+
 .resultXiaoju {
   display: block;
   width: 96px;

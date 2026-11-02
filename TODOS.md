@@ -59,9 +59,9 @@
   - ✅ **PR-H1 大司機減法**：圖示桿面（動力 [0,2,4]、煞車 [0,2,3,5]，「輕」矮停車柱）、兩盞燈、速度表不畫旗；拿掉速限牌／指差／鐵橋招呼（`COURSE_RULES.big`：`signs`、`pointing`、`bridgeGreet`、`speedFlag` 都 false）；`Station.slowZones` 語意上線（空）；桿槽填色改用桿上第幾格（`notchToStep`）。375×553 前窗約 185px。見 PR-H1。
   - ✅ **PR-H2 風景段與路線條**：站前插入風景段（`COURSE_RULES.big.journey`；風景段用站段前的負 `progress`，段號由 `sectionAt` 推導）、全程座標（`routePosition`）、上緣一條帶子（停車目標條＞前窗提示＞路線條）。見 PR-H2。
   - ✅ **PR-H3 沿途事件、任務卡、結算事件章**：小鴨（慢，`slowZones`）、平交道（喇叭）、揮手（喇叭）、賽跑（推到快）；每趟隨機排法（`eventPlan`）；開局任務卡；結算事件章列取代計數列。見 PR-H3。
-  - **第二次兒童試玩**：觀察表 `docs/qa/orange-express-playtest/second-round.md`（一趟多久、說得出要做什麼嗎、路上有沒有指著事件）。`game · S`
+  - ~~第二次兒童試玩~~：使用者 2026-11-02 決定跳過；觀察表留著 `docs/qa/orange-express-playtest/second-round.md`，之後想試再用。
   - ✅ **PR-H4a 不靠試玩的調校**：新手腳本量時間（`novice.ts`：有旅程中位數約 96 秒、沒旅程約 42 秒）→ 風景段從 1 拉長到 1.4（推估真的孩子約 3 分鐘，提示到事件約 4.5 秒）；4 倍 CPU 降速 60fps；夜間基準。見 PR-H4 執行紀錄。
-  - **PR-H4b 依第二次試玩調校**：事件難度、造型、排法、提示字、小橘開心時長、結算朋友頭像列、段長再調。等試玩結果。`game · M`
+  - ✅ **PR-H4b（不試玩）**：只做審查已有明確建議的——事件做到小橘開心 1.6 秒、任務卡收好後路線條章依序彈一下、結算朋友頭像靠在小橘旁（不多一列）。事件難度、造型、提示字、段長維持現狀（沒有孩子的資料不調）。
   - 第二次試玩後評估：任務卡與路線條給小小司機。
 - **小橘特快車車內廣播錄音**（2026-10-31 使用者決定先擺著）：結構已留好（`lib/games/orange-express/announce.ts` 的 `ANNOUNCE_CLIPS`）。家人或小橘錄「下一站，遊樂園站／橘子坡站／回家站」三句，以及小站長紅燈站的「紅燈，等一下，對向列車要先過去喔。下一站，橘子坡站／回家站」兩句（`next-<站 id>-wait`），放 `public/games/v2/orange-express/voice/next-<站 id>.m4a` 並登記；錄好前用瀏覽器朗讀暫代。也要在 iPhone／Android 實機各聽一次朗讀與「叮叮」輕煞聲。`content · S · 需真人`
 - **重錄 darwin 視覺基準（2026-10 稽核修正）**：Linux 不能改 `-chromium-darwin`。請在 Mac 跑 `npm run test:visual:trusted -- --update-snapshots`，只接受下面這些有意的差異後再更新。320 沒有基準。
