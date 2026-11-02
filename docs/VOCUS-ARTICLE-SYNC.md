@@ -34,7 +34,7 @@ Lexical HTML 轉成 `ParentArticleBlock[]`，不改寫文字。
 - `img` 下載成 `public/parent-articles/<slug>-<n>.webp`（最寬 1600、quality 82）。有 `ogImageURL` 時另存封面。
 - U+FFFC（嵌入物件佔位）刪除；它不是作者打的字。
 - 發布日用 `publishAt` 轉台北日曆日。`slug` 為 `vocus-<contentId>`，用 `sourceUrl` 去重。搬走時 slug 不變。
-- 摘要沿用 `lib/parent-articles.test.ts`：第一個 spacer 之前的 paragraph，以換行接起。
+- 摘要沿用 `lib/parent-articles.test.ts`：第一個 spacer 之前的 paragraph，以換行接起。`scripts/lib/vocus-article-excerpts.ts` 有指定時，改用指定的列表摘要，正文不變。
 
 ## 列表頁怎麼排
 
@@ -73,3 +73,5 @@ lint、typecheck、test 或字型子集有一項失敗：仍把新文推上 `syn
 方格子的 `article` 型別（公開網址是 `/article/<id>`，不是 `/post/<id>`）在列表裡沒有內文。同步會再打 `GET https://api.vocus.cc/api/article/<contentId>` 取 HTML。文末若寫成 `<同步更新至親子出國專欄>`，先換成純文字再分類，避免被當成 HTML 標籤吃掉。
 
 `scripts/lib/vocus-article-covers.ts` 裡指定的封面，同步重寫該篇時沿用，不會改去下載方格子縮圖蓋掉檔案。小松之杜這張標了原圖寬高，單篇首圖照直式完整顯示；列表卡仍是 16:9 裁切框。已經在正確區的文章，排程本來就不會重寫。
+
+`scripts/lib/vocus-article-excerpts.ts` 裡指定的列表摘要也一樣：換區重寫會整篇用方格子最新內文重寫，手改過的 `excerpt` 會被蓋掉，所以要留在這個檔。指定摘要只出現在列表卡（以及單篇的 meta description）；`blocks` 仍是方格子原文。小松之杜的列表卡用這份指定摘要。

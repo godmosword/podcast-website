@@ -4,7 +4,8 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ParentArticle } from "@/data/parent-articles";
 import ParentTravelAbroadPage from "@/app/for-parents/travel-abroad/page";
-import { travelAbroadArticlePath } from "@/lib/parent-travel-abroad";
+import { getTravelAbroadArticle, travelAbroadArticlePath } from "@/lib/parent-travel-abroad";
+import { pinnedVocusExcerpt } from "../../scripts/lib/vocus-article-excerpts";
 import { ParentArticleView } from "./ParentArticleView";
 import { ParentSectionArticleList } from "./ParentSectionArticleList";
 import { ParentSectionPage } from "./ParentSectionPage";
@@ -136,9 +137,36 @@ describe("親子出國列表", () => {
     render(<ParentTravelAbroadPage />);
     expect(screen.getByRole("heading", { name: "親子出國" })).toBeTruthy();
     expect(screen.getByRole("link", { name: /小松之杜/ })).toBeTruthy();
+    const komatsuExcerpt = pinnedVocusExcerpt("vocus-6ae34027fd897800012f3e51");
+    expect(komatsuExcerpt).toBeTruthy();
+    expect(screen.getByText(komatsuExcerpt ?? "")).toBeTruthy();
+    expect(
+      screen.queryByText("這次名古屋北陸之旅帶孩子到了小松，參觀了當地非常有名的小松之杜。"),
+    ).toBeNull();
     expect(screen.queryByRole("img")).toBeNull();
     expect(screen.queryByAltText("小松 PC4000 大型怪手前，大人與小孩的背影")).toBeNull();
     expect(screen.queryByText("這一區的內容還在整理。")).toBeNull();
     expect(screen.queryByText("同步更新至親子出國專欄")).toBeNull();
+  });
+
+  it("小松內頁正文仍是原文，列表摘要不出現在內文", () => {
+    const article = getTravelAbroadArticle("vocus-6ae34027fd897800012f3e51");
+    expect(article).toBeDefined();
+    if (!article) return;
+    render(
+      <ParentArticleView
+        article={article}
+        previous={null}
+        next={null}
+        indexHref="/for-parents/travel-abroad"
+        indexLabel="回到親子出國"
+        hrefFor={travelAbroadArticlePath}
+      />,
+    );
+    expect(
+      screen.getByText("這次名古屋北陸之旅帶孩子到了小松，參觀了當地非常有名的小松之杜。"),
+    ).toBeTruthy();
+    expect(screen.getByText("車車遊樂園又解鎖了一種特殊車子囉！")).toBeTruthy();
+    expect(screen.queryByText(article.excerpt)).toBeNull();
   });
 });
