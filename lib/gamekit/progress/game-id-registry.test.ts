@@ -1,8 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GAME_NEXT, GAMES } from "@/data/games";
 import { localDateKey, readActivityLog, recordGameSession } from "@/lib/activity-log";
-import { buildParentDashboardSnapshot } from "@/lib/for-parents/dashboard";
-import { DEFAULT_PROGRESS } from "@/lib/progress-store";
 import { stickerLabel } from "@/lib/gamekit/progress/stickers";
 import { RETIRED_GAME_SLUGS } from "@/lib/retired-game-redirects";
 import { GAMEKIT_GAME_IDS } from "@/lib/gamekit/types";
@@ -12,7 +10,7 @@ const PUBLIC_GAME_IDS = GAMEKIT_GAME_IDS.filter((id) => !RETIRED.has(id));
 
 /**
  * 新增 Game Kit 遊戲時，TS 只會強制補 Record<GameKitGameId, …>；
- * 下面這些手寫名單漏加不會編譯失敗，只會靜默失效（活動不記錄、儀表板缺列、貼紙顯示英文 id）。
+ * 下面這些手寫名單漏加不會編譯失敗，只會靜默失效（活動不記錄、貼紙顯示英文 id）。
  */
 describe("Game Kit 遊戲 id 名單", () => {
   beforeEach(() => {
@@ -61,8 +59,4 @@ describe("Game Kit 遊戲 id 名單", () => {
     });
   });
 
-  it("家長儀表板每款遊戲各一列", () => {
-    const ids = buildParentDashboardSnapshot(DEFAULT_PROGRESS).games.map((g) => g.gameId);
-    expect([...ids].sort()).toEqual([...PUBLIC_GAME_IDS].sort());
-  });
 });

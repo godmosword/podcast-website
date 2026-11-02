@@ -6,7 +6,7 @@ import type { IconName } from "@/data/icons";
 export const PARENT_SECTION_ITEMS = [
   {
     id: "parent-articles",
-    label: "育兒文章分享",
+    label: "育兒文章",
     href: "/for-parents/articles",
     icon: "notebook",
     description:
@@ -21,10 +21,10 @@ export const PARENT_SECTION_ITEMS = [
   },
   {
     id: "parent-travel-abroad",
-    label: "親子出國",
-    href: "/for-parents/travel-abroad",
+    label: "國外旅遊",
+    href: "/for-parents/overseas-travel",
     icon: "plane",
-    description: "親子出國的準備與行程。內容整理中。",
+    description: "國外旅遊的準備與行程。內容整理中。",
   },
   {
     id: "parent-travel-taiwan",

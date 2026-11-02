@@ -1,4 +1,5 @@
 import type { Story } from "@/data/content";
+import { episodeFinderTheme } from "@/data/episode-themes";
 import { searchStories } from "@/lib/story-query";
 
 export type StoryFilterState = {
@@ -17,7 +18,7 @@ export function filterStories(
 
   return searchedStories.filter((story) => {
     if (vehicle && story.vehicle !== vehicle) return false;
-    if (tag && !(story.tags ?? []).includes(tag)) return false;
+    if (tag && episodeFinderTheme(story.slug) !== tag) return false;
     if (!hasFilter && story.slug === featuredStorySlug) return false;
     return true;
   });

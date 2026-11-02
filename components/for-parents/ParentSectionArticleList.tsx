@@ -4,7 +4,7 @@ import { formatParentArticleDate } from "@/lib/parent-articles";
 import styles from "./ParentSectionPage.module.css";
 
 /**
- * 親子出國列表。沿用這一區的欄寬與字級，不套育兒文章的封面／系列版面。
+ * 國外旅遊列表。沿用這一區的欄寬與字級，不套育兒文章的封面／系列版面。
  * 列表卡片不顯示首圖（2026-10-30）；直式首圖只留在單篇文章頁。
  */
 export function ParentSectionArticleList({

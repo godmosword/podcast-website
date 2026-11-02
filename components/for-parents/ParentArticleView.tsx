@@ -54,7 +54,7 @@ export function ParentArticleView({
   previous,
   next,
   indexHref = parentArticlesIndexPath(),
-  indexLabel = "回到育兒文章分享",
+  indexLabel = "回到育兒文章",
   hrefFor = parentArticlePath,
 }: {
   article: ParentArticle;

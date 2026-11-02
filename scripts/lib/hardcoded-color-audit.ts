@@ -126,7 +126,6 @@ export { HARDCODED_COLOR_ALLOWLIST, HARDCODED_COLOR_SOURCE_ALLOWLIST };
 const D3_TOKENIZED_CSS_FILES = [
   "app/characters/page.module.css",
   "components/about/AboutParentFaq.module.css",
-  "app/for-parents/dashboard/page.module.css",
   "app/stories/page.module.css",
   "app/story/[slug]/page.module.css",
   "app/games/page.module.css",

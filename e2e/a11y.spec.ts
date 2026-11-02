@@ -32,7 +32,6 @@ const PAGES: { name: string; path: string; exclude?: string }[] = [
   },
   { name: "宇宙地圖", path: "/adventures" },
   { name: "關於我們（含家長常見問題）", path: "/about" },
-  { name: "家庭儀表板", path: "/for-parents/dashboard" },
   { name: "故事播放", path: "/story/ep-3/play" },
   { name: "親子遊樂地圖", path: "/for-parents/play-map" },
   {
@@ -286,9 +285,8 @@ test("a11y：桌面抽屜展開態（含家長項）無 critical/serious 違規"
 
   await page.getByRole("button", { name: "選單", exact: true }).click();
   const drawer = page.getByRole("navigation", { name: "網站選單" });
-  const parentProgressLink = drawer.getByRole("link", { name: "親子進度" });
-  await expect(parentProgressLink).toBeVisible();
-  await expect(parentProgressLink).toHaveAttribute("href", "/for-parents/dashboard");
+  await expect(drawer.getByRole("link", { name: "親子進度" })).toHaveCount(0);
+  await expect(drawer.getByRole("link", { name: "親子景點" })).toBeVisible();
 
   const results = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])

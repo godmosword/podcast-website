@@ -1,5 +1,6 @@
 "use client";
 
+import { STORY_FINDER_THEMES } from "@/data/episode-themes";
 import FilterSelect, { type FilterSelectOption } from "./FilterSelect";
 import TopicIcon from "./TopicIcon";
 
@@ -7,12 +8,11 @@ const ALL_TOPICS_VALUE = "__all__";
 const ALL_LABEL = "全部主題";
 
 type TopicSelectProps = {
-  tags: string[];
   value: string | null;
   onChange: (tag: string | null) => void;
 };
 
-export default function TopicSelect({ tags, value, onChange }: TopicSelectProps) {
+export default function TopicSelect({ value, onChange }: TopicSelectProps) {
   const currentKey = value ?? ALL_TOPICS_VALUE;
 
   const options: FilterSelectOption[] = [
@@ -21,7 +21,7 @@ export default function TopicSelect({ tags, value, onChange }: TopicSelectProps)
       label: ALL_LABEL,
       icon: <TopicIcon tag={null} />,
     },
-    ...tags.map((tag) => ({
+    ...STORY_FINDER_THEMES.map((tag) => ({
       value: tag,
       label: tag,
       icon: <TopicIcon tag={tag} />,

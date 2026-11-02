@@ -58,7 +58,7 @@ describe("親子出國文章", () => {
       expect(parentUrls.has(entry.sourceUrl)).toBe(false);
       expect(JSON.stringify(entry.blocks)).not.toContain("同步更新至親子出國專欄");
       expect(travelAbroadArticlePath(entry.slug)).toBe(
-        `/for-parents/travel-abroad/${entry.slug}`,
+        `/for-parents/overseas-travel/${entry.slug}`,
       );
     }
   });
@@ -76,7 +76,7 @@ describe("親子出國文章", () => {
       "same-early",
       "older",
     ]);
-    expect(travelAbroadArticlePath("newer")).toBe("/for-parents/travel-abroad/newer");
+    expect(travelAbroadArticlePath("newer")).toBe("/for-parents/overseas-travel/newer");
   });
 
   it("資料檔在陣列後面不再加別的陣列；育兒文章的舊網址轉回育兒文章", () => {
@@ -102,12 +102,27 @@ describe("親子出國文章", () => {
       permanent: true,
     });
     expect(redirects).toContainEqual({
+      source: "/for-parents/overseas-travel/vision-care-1",
+      destination: "/for-parents/articles/vision-care-1",
+      permanent: true,
+    });
+    expect(redirects).toContainEqual({
       source: "/for-parents/articles/vocus-6ae34027fd897800012f3e51",
-      destination: "/for-parents/travel-abroad/vocus-6ae34027fd897800012f3e51",
+      destination: "/for-parents/overseas-travel/vocus-6ae34027fd897800012f3e51",
+      permanent: true,
+    });
+    expect(redirects).toContainEqual({
+      source: "/for-parents/travel-abroad",
+      destination: "/for-parents/overseas-travel",
+      permanent: true,
+    });
+    expect(redirects).toContainEqual({
+      source: "/for-parents/travel-abroad/:slug",
+      destination: "/for-parents/overseas-travel/:slug",
       permanent: true,
     });
     expect(redirects).toHaveLength(
-      PARENT_ARTICLES.length + listTravelAbroadArticles().length,
+      PARENT_ARTICLES.length * 2 + listTravelAbroadArticles().length + 2,
     );
   });
 
@@ -117,7 +132,7 @@ describe("親子出國文章", () => {
       expect.arrayContaining([
         {
           source: "/for-parents/articles/vocus-6ae34027fd897800012f3e51",
-          destination: "/for-parents/travel-abroad/vocus-6ae34027fd897800012f3e51",
+          destination: "/for-parents/overseas-travel/vocus-6ae34027fd897800012f3e51",
           permanent: true,
         },
       ]),

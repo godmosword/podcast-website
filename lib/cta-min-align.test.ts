@@ -101,12 +101,6 @@ describe("主鈕最小 alignment（H1 第一刀）", () => {
     expect(globals).toMatch(/--cta-warm-from:\s*#ffe889/);
     expect(globals).toMatch(/--cta-warm-to:\s*#ffbd6f/);
     expect(globals).toMatch(/--cta-warm-fg:\s*#614018/);
-
-    const sticker = paintRule(
-      readCss("components", "for-parents", "parent-dashboard.module.css"),
-      "sticker",
-    );
-    expect(sticker).toMatch(/color:\s*var\(--cta-warm-fg\)/);
   });
 
   it("遊戲結束站的小 icon 鈕（再玩／去下一站）仍是次行動，不跟主鈕同色", () => {
