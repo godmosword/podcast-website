@@ -173,6 +173,15 @@
   - Opus 設計審 HIGH 5、MEDIUM 6、LOW 4：慢也算（H1）、最後一隻小鴨停在軌道上（H2，改路徑並提早走完）、柵欄橫過我們的軌道（H3，改往外伸）、提示跟駕駛台接不起來（H4，喇叭／慢／快格亮黃框）、結算空心點像空格（H5，實心點＋黃星＋鋸齒黃章）；小狗被電桿穿身、側身朝軌道（M1，移到電桿外側、背面）、賽跑字跟畫面矛盾（M2）、平交道做到沒有場景回應（M3，等車的小汽車）、做到只換底色（M4，黃章＋彈一下）、小鴨沒做到響叮叮（M5）、任務卡跟路線條重複（M6，任務卡在時路線條不出、收起時壓成路線條）；小鴨小（L1，放大＋灰色小路）、田野賽跑圖文不符與減少動態看不出輸贏（L2）。未處理：L3 夜間基準（這個遊戲的前窗與卡片用固定美術色，夜間跟白天一樣，H2 已確認）；L4 朋友頭像列（見上）；M4 的小橘開心延長到 1.5–2 秒先不改（跟小站長提前減速共用 1 秒，第二次試玩再看）。
 - 驗證：小橘單元＋components 455 passed；typecheck、lint、audit:colors；e2e orange-express＋games 160 passed（新增 10 項）；小橘視覺 44 passed（新增 7 張、結算基準更新，人工目檢；標題基準不是逐位元組穩定，不更新）。自動駕駛整趟約 55–59 秒。
 
+### PR-H4 執行紀錄（2026-11-02，H4a：不靠試玩的部分）
+
+- 使用者要求 H3 推上後直接做 H4；第二次試玩還沒做，所以拆成 **H4a**（能用數字決定的：時間、效能、夜間）與 **H4b**（依試玩結果：事件難度、造型、排法、提示字、小橘開心時長、結算朋友頭像列、段長再調）。
+- 新手腳本 `novice.ts`：段長 1 時有旅程約 82 秒、沒旅程約 42 秒；推估真的孩子約 2.3–2.8 分鐘，低於 D1 的「約 3 分鐘起」。**段長從 1 拉長到 1.4**（`SCENIC_LENGTH`），事件位置改成照段長等比例（`scenicEvent(kind, length)`），提示到事件約 4.5 秒。拉長後中位數約 96 秒（24 種排法 92–96 秒），推估約 3 分鐘。`novice.test.ts` 守中位數 90–130 秒、範圍小於 15 秒、有旅程至少是沒旅程的 2.2 倍。
+- 效能：4 倍 CPU 降速 60fps（四個畫面），不用優化。
+- 夜間：補 `event-wave-390x844-night`、`mission-390x844-night` 基準。
+- 測試裡寫死的段長位置改成用 `SCENIC_LENGTH` 推算；e2e 與視覺基準的掛鉤位置重算（見 `e2e/orange-express.spec.ts` 沿途事件那一段的註解）。
+- 驗證：小橘單元＋components 458 passed；typecheck、lint；e2e orange-express＋games 160 passed；小橘視覺 46 passed（大司機開車中與事件、任務卡、路線條基準更新，新增兩張夜間）。只改常數、新增量測腳本與測試，沒有另開審查。
+
 ## Files likely touched
 
 - H1：`reducer.ts`（格陣列）、`routes.ts`（規則、`slowZones`）、`physics.ts`（`limitAt` 吃 `slowZones`）、`copy.ts`、`OrangeExpressCab.tsx`、`OrangeExpressGauge.tsx`、`OrangeExpressResult.tsx`、`orange-express.module.css`、教學資料；F／E／G 相關單元與 e2e、視覺基準。

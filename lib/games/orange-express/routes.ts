@@ -178,8 +178,12 @@ const SCENERY: Record<Station["id"], Scenery> = {
   },
 };
 
-/** 一段風景段的長度（一站的 0–1 為單位）：巡航約 6.8 秒。 */
-export const SCENIC_LENGTH = 1;
+/**
+ * 一段風景段的長度（一站的 0–1 為單位）：巡航約 9.5 秒。
+ * PR-H4 從 1 拉長到 1.4：新手腳本量起來一趟約 1.6 分鐘（沒有旅程約 0.7 分鐘），
+ * 依第一次試玩（舊版不到 2 分鐘）推估真的孩子約 3 分鐘；事件的提示時間也跟著變長。
+ */
+export const SCENIC_LENGTH = 1.4;
 
 /**
  * 每一站前面幾段風景段：〔風景、站、風景、風景、站、風景、風景、站〕。
@@ -193,7 +197,7 @@ function scenicFor(id: Station["id"], index: number, plan: readonly ScenicEventK
   const first = SCENIC_BEFORE.slice(0, index).reduce<number>((sum, n) => sum + n, 0);
   return Array.from({ length: count }, (_, k) => {
     const kind = plan[first + k];
-    return { id: `${id}-scenic-${k}`, length: SCENIC_LENGTH, event: kind ? scenicEvent(kind) : null };
+    return { id: `${id}-scenic-${k}`, length: SCENIC_LENGTH, event: kind ? scenicEvent(kind, SCENIC_LENGTH) : null };
   });
 }
 

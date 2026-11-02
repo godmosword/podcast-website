@@ -14,7 +14,7 @@ import {
 } from "@/lib/games/orange-express/events";
 import { sectionStart } from "@/lib/games/orange-express/journey";
 import { createRun, currentLimit, step, withHook } from "@/lib/games/orange-express/reducer";
-import { stationsFor } from "@/lib/games/orange-express/routes";
+import { SCENIC_LENGTH, stationsFor } from "@/lib/games/orange-express/routes";
 import type { RunState, ScenicEventKind } from "@/lib/games/orange-express/types";
 
 function tick(state: RunState, dt = 1 / 30): RunState {
@@ -74,11 +74,11 @@ describe("沿途事件：排法", () => {
     expect(routeEvents(stationsFor("captain"))).toEqual([]);
   });
 
-  it("提示比事件點早約 3 秒（巡航）以上，容得下作用延遲", () => {
+  it("提示比事件點早 4 秒（巡航）以上：聽完一句還有時間找桿子，也容得下作用延遲", () => {
     const cruise = 0.82 * 0.18;
     for (const kind of ["ducks", "crossing", "wave"] as const) {
       const spot = EVENT_SPOTS[kind];
-      expect((spot.at - spot.hint) / cruise).toBeGreaterThan(3);
+      expect(((spot.at - spot.hint) * SCENIC_LENGTH) / cruise).toBeGreaterThan(4);
     }
   });
 });
@@ -238,7 +238,7 @@ describe("沿途事件：生命週期", () => {
     for (const event of routeEvents(stations)) {
       const station = stations[event.stationIndex]!;
       const spot = EVENT_SPOTS[event.kind];
-      expect(event.at).toBeCloseTo(sectionStart(station, event.section) + spot.at, 9);
+      expect(event.at).toBeCloseTo(sectionStart(station, event.section) + spot.at * SCENIC_LENGTH, 9);
       expect(event.at).toBeLessThan(0);
     }
   });

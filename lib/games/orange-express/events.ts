@@ -22,8 +22,8 @@ import type {
 export const EVENT_KINDS: readonly ScenicEventKind[] = ["ducks", "crossing", "wave", "race"];
 
 /**
- * 每種事件在一段裡的提示點與事件點（段長 1 時）。
- * 提示到事件約 0.47，巡航約 3.2 秒，容得下 0.45 秒作用延遲。
+ * 每種事件在一段裡的提示點與事件點（段長的幾分之幾；段長 1.4 時提示到事件約 0.66，巡航約 4.5 秒）。
+ * 孩子聽完一句提示（約 2 秒）還有時間找桿子、喇叭；也容得下 0.45 秒作用延遲。
  * 賽跑在出站後的第一段、提示在出站那一刻（車還停著）：孩子從停著推到「快」才像起跑。
  * 提示時已經在「快」也算贏（車已經跑最快，判輸反而矛盾）。
  */
@@ -99,8 +99,10 @@ export function eventPlan(seed: number): ScenicEventKind[] {
   return plan;
 }
 
-export function scenicEvent(kind: ScenicEventKind): ScenicEvent {
-  return { kind, ...EVENT_SPOTS[kind] };
+/** 這一段的事件：提示點與事件點照段長等比例放。 */
+export function scenicEvent(kind: ScenicEventKind, length = 1): ScenicEvent {
+  const spot = EVENT_SPOTS[kind];
+  return { kind, hint: spot.hint * length, at: spot.at * length };
 }
 
 /** 小鴨事件前看不到的降速區（站的 progress，風景段是負的）。 */

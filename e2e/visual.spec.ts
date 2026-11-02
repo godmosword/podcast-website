@@ -684,7 +684,8 @@ for (const size of [PHONE, PHONE_NIGHT, [375, 553, "light"] as const]) {
   test(`visual：小橘特快車路線條 ${width}×${height} ${theme}（定格）`, async ({ page }) => {
     await openOrangeExpress(page, size);
     await startOrangeExpress(page, "自己開");
-    await jumpOrangeExpress(page, { stationIndex: 1, progress: -1, speed: 0.6, power: 4 });
+    // 橘子坡前第二段的開頭（賽跑已經過去、小鴨提示還沒出來），上緣是路線條。
+    await jumpOrangeExpress(page, { stationIndex: 1, progress: -1.5, speed: 0.6, power: 4 });
     await expect(page.getByTestId("orange-express-route")).toBeVisible();
     await settleOrangeExpress(page);
     await expect(page).toHaveScreenshot(`orange-express-route-${width}x${height}-${theme}.png`, orangeShot(theme));
@@ -696,10 +697,10 @@ for (const size of [PHONE, PHONE_NIGHT, [375, 553, "light"] as const]) {
  * 車在事件的東西前約 25 公尺，提示掛在前窗上緣。
  */
 const ORANGE_EVENT_SHOTS: readonly { id: string; label: string; patch: OrangeExpressHook }[] = [
-  { id: "ducks", label: "小鴨過鐵軌", patch: { stationIndex: 0, progress: -0.43, speed: 0.2, power: 4 } },
-  { id: "race", label: "跟小狗賽跑", patch: { stationIndex: 1, progress: -1.6, speed: 0.6, power: 2 } },
-  { id: "crossing", label: "平交道", patch: { stationIndex: 2, progress: -1.405, speed: 0.6, power: 4 } },
-  { id: "wave", label: "揮手的朋友", patch: { stationIndex: 2, progress: -0.405, speed: 0.6, power: 4 } },
+  { id: "ducks", label: "小鴨過鐵軌", patch: { stationIndex: 0, progress: -0.582, speed: 0.2, power: 4 } },
+  { id: "race", label: "跟小狗賽跑", patch: { stationIndex: 1, progress: -2.2, speed: 0.6, power: 2 } },
+  { id: "crossing", label: "平交道", patch: { stationIndex: 2, progress: -1.96, speed: 0.6, power: 4 } },
+  { id: "wave", label: "揮手的朋友", patch: { stationIndex: 2, progress: -0.557, speed: 0.6, power: 4 } },
 ];
 
 for (const shot of ORANGE_EVENT_SHOTS) {
@@ -713,18 +714,28 @@ for (const shot of ORANGE_EVENT_SHOTS) {
   });
 }
 
+/** 夜間：提示膠囊、事件圖示的描邊在夜間主題下照樣看得清楚（前窗與卡片用固定美術色）。 */
+test("visual：小橘特快車沿途事件揮手的朋友 390 night（定格）", async ({ page }) => {
+  await openOrangeExpress(page, PHONE_NIGHT, { eventSeed: 0 });
+  await startOrangeExpress(page, "自己開");
+  await jumpOrangeExpress(page, { stationIndex: 2, progress: -0.557, speed: 0.6, power: 4 });
+  await expect(page.getByTestId("orange-express-windshield")).toHaveAttribute("data-event", "wave");
+  await settleOrangeExpress(page);
+  await expect(page).toHaveScreenshot("orange-express-event-wave-390x844-night.png", orangeShot("night"));
+});
+
 test("visual：小橘特快車沿途事件小鴨 375×553（減少動態）", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await openOrangeExpress(page, [375, 553, "light"], { eventSeed: 0 });
   await startOrangeExpress(page, "自己開");
-  await jumpOrangeExpress(page, { stationIndex: 0, progress: -0.43, speed: 0.2, power: 4 });
+  await jumpOrangeExpress(page, { stationIndex: 0, progress: -0.582, speed: 0.2, power: 4 });
   await expect(page.getByTestId("orange-express-windshield")).toHaveAttribute("data-event", "ducks");
   await settleOrangeExpress(page);
   await expect(page).toHaveScreenshot("orange-express-event-ducks-reduced-375x553-light.png", orangeShot("light"));
 });
 
 /** 開局任務卡：每位朋友站在自己那一站的地標章旁，下面一句「今天要去接…回家」。 */
-for (const size of [PHONE, [375, 553, "light"] as const]) {
+for (const size of [PHONE, PHONE_NIGHT, [375, 553, "light"] as const]) {
   const [width, height, theme] = size;
   test(`visual：小橘特快車任務卡 ${width}×${height} ${theme}`, async ({ page }) => {
     await openOrangeExpress(page, size, { mission: true });

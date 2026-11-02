@@ -1414,7 +1414,9 @@ test.describe("小橘特快車：大司機減法（2026-11-01）", () => {
 
 /**
  * 沿途事件與任務卡（PR-H3）。種子 0 的排法：遊樂園前小鴨；橘子坡前賽跑（小狗）、小鴨；回家前平交道、揮手的朋友。
- * 位置都是站的 progress（風景段是負的）：每段的提示在段起點後 0.15（賽跑 0.05）、事件點在 0.62（賽跑 0.75）。
+ * 位置都是站的 progress（風景段是負的，每段長 1.4）：提示在段的 15%（賽跑在段起點）、事件點在 62%（賽跑 75%）。
+ * 遊樂園前：-1.4 起，小鴨提示 -1.19、事件點 -0.53。橘子坡前：賽跑 -2.8 起、終點 -1.75；小鴨同上。
+ * 回家前：平交道提示 -2.59、事件點 -1.93；揮手提示 -1.19、事件點 -0.53。
  */
 test.describe("小橘特快車：沿途事件與任務卡（2026-11-02）", () => {
   test.use({ viewport: { width: 390, height: 844 } });
@@ -1431,7 +1433,7 @@ test.describe("小橘特快車：沿途事件與任務卡（2026-11-02）", () =
     await startBig(page);
     const drive = page.getByTestId("orange-express-drive");
     const notice = page.getByTestId("orange-express-notice");
-    await jump(page, { stationIndex: 0, progress: -0.84, speed: 0.7, power: 4, freeze: false });
+    await jump(page, { stationIndex: 0, progress: -1.15, speed: 0.7, power: 4, freeze: false });
     await expect(notice).toHaveAttribute("data-event", "ducks");
     await expect(notice).toContainText("小鴨要過鐵軌，慢下來");
     // 動力的「慢」那格亮黃框。
@@ -1466,7 +1468,7 @@ test.describe("小橘特快車：沿途事件與任務卡（2026-11-02）", () =
   test("平交道：柵欄前按喇叭就做到，提示換成回應那句", async ({ page }) => {
     await startBig(page);
     const notice = page.getByTestId("orange-express-notice");
-    await jump(page, { stationIndex: 2, progress: -1.8, speed: 0.4, power: 2, freeze: false });
+    await jump(page, { stationIndex: 2, progress: -2.55, speed: 0.4, power: 2, freeze: false });
     await expect(notice).toHaveAttribute("data-event", "crossing");
     await expect(notice).toContainText("平交道，按喇叭");
     // 提示掛著時喇叭亮黃圈，跟動作接起來。
@@ -1488,7 +1490,7 @@ test.describe("小橘特快車：沿途事件與任務卡（2026-11-02）", () =
 
   test("賽跑：提示後推到「快」就做到", async ({ page }) => {
     await startBig(page);
-    await jump(page, { stationIndex: 1, progress: -1.94, speed: 0, power: 0, freeze: false });
+    await jump(page, { stationIndex: 1, progress: -2.75, speed: 0, power: 0, freeze: false });
     await expect(page.getByTestId("orange-express-notice")).toContainText("跟小狗賽跑，推到快");
     await page.getByRole("slider", { name: "動力" }).locator('[data-notch="4"]').click();
     await expect(page.getByTestId("orange-express-drive")).toHaveAttribute("data-events-done", "1");

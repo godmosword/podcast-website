@@ -24,7 +24,7 @@ import {
   stepPower,
   withHook,
 } from "@/lib/games/orange-express/reducer";
-import { stationsFor, stopEpsilon } from "@/lib/games/orange-express/routes";
+import { SCENIC_LENGTH, stationsFor, stopEpsilon } from "@/lib/games/orange-express/routes";
 import { EMERGENCY, type RunState } from "@/lib/games/orange-express/types";
 
 function at(state: RunState, patch: Partial<RunState>): RunState {
@@ -200,7 +200,7 @@ describe("小橘特快車 step", () => {
     expect(next.stationIndex).toBe(1);
     expect(next.phase).toBe("running");
     // 大司機有旅程：從下一站的第一段風景段出發（橘子坡前有兩段）。
-    expect(next.progress).toBe(-2);
+    expect(next.progress).toBeCloseTo(-2 * SCENIC_LENGTH, 9);
   });
 
   it("慢慢看不拉煞車也會停在綠區", () => {

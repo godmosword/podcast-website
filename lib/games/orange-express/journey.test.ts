@@ -11,6 +11,8 @@ import {
 import { windowNotice } from "@/lib/games/orange-express/notice";
 import { createRun, pendingPoint, predictStop, step, withHook } from "@/lib/games/orange-express/reducer";
 import { COURSE_RULES, SCENIC_LENGTH, stationsFor } from "@/lib/games/orange-express/routes";
+
+const L = SCENIC_LENGTH;
 import { jointsCrossed } from "@/lib/games/orange-express/sound";
 import { stopBarFor } from "@/lib/games/orange-express/stop-target";
 import { cameraTravel, STATION_WORLD } from "@/lib/games/orange-express/windshield";
@@ -69,14 +71,14 @@ describe("旅程：風景段的形狀", () => {
 
   it("段的座標：出站是 -總長、站段起點是 0", () => {
     const slope = stationsFor("drive", "big")[1]!;
-    expect(scenicLength(slope)).toBe(2);
-    expect(legStart(slope)).toBe(-2);
-    expect(sectionStart(slope, 0)).toBe(-2);
-    expect(sectionStart(slope, 1)).toBe(-1);
+    expect(scenicLength(slope)).toBeCloseTo(2 * L, 9);
+    expect(legStart(slope)).toBeCloseTo(-2 * L, 9);
+    expect(sectionStart(slope, 0)).toBeCloseTo(-2 * L, 9);
+    expect(sectionStart(slope, 1)).toBeCloseTo(-L, 9);
     expect(sectionStart(slope, 2)).toBe(0);
-    expect(sectionAt(slope, -2)).toBe(0);
-    expect(sectionAt(slope, -1.01)).toBe(0);
-    expect(sectionAt(slope, -1)).toBe(1);
+    expect(sectionAt(slope, -2 * L)).toBe(0);
+    expect(sectionAt(slope, -L - 0.01)).toBe(0);
+    expect(sectionAt(slope, -L + 0.001)).toBe(1);
     expect(sectionAt(slope, -0.001)).toBe(1);
     expect(sectionAt(slope, 0)).toBe(2);
     expect(sectionAt(slope, 0.65)).toBe(2);
@@ -91,7 +93,7 @@ describe("旅程：風景段的形狀", () => {
 
 describe("旅程：重設表", () => {
   it("開局：大司機從第一段風景段出發，其他規則組照舊從 0", () => {
-    expect(createRun("drive", "big").progress).toBe(-1);
+    expect(createRun("drive", "big").progress).toBeCloseTo(-L, 9);
     expect(Object.is(createRun("drive", "little").progress, 0)).toBe(true);
     expect(Object.is(createRun("look").progress, 0)).toBe(true);
     expect(Object.is(createRun("captain").progress, 0)).toBe(true);
@@ -100,7 +102,7 @@ describe("旅程：重設表", () => {
   it("風景→風景：段號加一，速度、作用、桿位都連續，不停車也不廣播", () => {
     const start = withHook(createRun("drive", "big"), { stationIndex: 1, section: 0, speed: 0.82, power: 4 });
     expect(sectionAt(start.stations[1]!, start.progress)).toBe(0);
-    const { before, after } = crossEdge(start, -1);
+    const { before, after } = crossEdge(start, -L);
     expect(sectionAt(after.stations[1]!, after.progress)).toBe(1);
     expect(after.stationIndex).toBe(1);
     expect(after.phase).toBe("running");
@@ -124,7 +126,7 @@ describe("旅程：重設表", () => {
     let s = at(createRun("drive", "big"), { phase: "doors-open", boarded: 1, grades: ["green"] });
     s = step(s, { type: "close-doors" });
     expect(s.stationIndex).toBe(1);
-    expect(s.progress).toBe(-2);
+    expect(s.progress).toBeCloseTo(-2 * L, 9);
     expect(sectionAt(s.stations[1]!, s.progress)).toBe(0);
     expect(s.grades).toEqual(["green"]);
     expect(s.signal).toBe("green");
@@ -135,10 +137,10 @@ describe("旅程：重設表", () => {
     const jumped = withHook(run, { stationIndex: 2 });
     expect(jumped.progress).toBeGreaterThanOrEqual(0);
     const scenic = withHook(run, { stationIndex: 2, section: 1 });
-    expect(scenic.progress).toBe(-1);
+    expect(scenic.progress).toBeCloseTo(-L, 9);
     expect(scenic.slowPrep).toBeNull();
     // 不能跳到這一站出站之前。
-    expect(withHook(run, { stationIndex: 0, progress: -5 }).progress).toBe(-1);
+    expect(withHook(run, { stationIndex: 0, progress: -5 }).progress).toBeCloseTo(-L, 6);
     // 不開旅程的規則組照舊夾在 0。
     expect(withHook(createRun("captain"), { progress: -1 }).progress).toBe(0);
   });
@@ -146,7 +148,7 @@ describe("旅程：重設表", () => {
   it("掛鉤寫紅燈：從這一站出站那一刻（第一段風景段起點）等，不跳過風景段", () => {
     const red = withHook(createRun("drive", "big"), { stationIndex: 1, signal: "red" });
     expect(red.signal).toBe("red");
-    expect(red.progress).toBe(-2);
+    expect(red.progress).toBeCloseTo(-2 * L, 9);
     expect(Object.is(withHook(createRun("captain"), { stationIndex: 1, signal: "red" }).progress, 0)).toBe(true);
   });
 
@@ -182,7 +184,7 @@ describe("旅程：風景段沒有站的東西", () => {
 
 describe("旅程：前窗與路線條的座標", () => {
   it("段界前窗不跳：跨過風景段與站段的那一幀，鏡頭只多走這一幀的路", () => {
-    for (const edge of [-1, 0]) {
+    for (const edge of [-L, 0]) {
       const start = withHook(createRun("drive", "big"), { stationIndex: 1, section: 0, speed: 0.82, power: 4 });
       const { before, after } = crossEdge(start, edge);
       const target = after.stations[1]!.target;
@@ -197,9 +199,9 @@ describe("旅程：前窗與路線條的座標", () => {
 
   it("減少動態：風景段每段一格（那一段中間），站段照舊三格", () => {
     const scenic = stationsFor("drive", "big")[1]!.scenic;
-    expect(cameraTravel(true, -1.9, "running", 0.65, { scenic })).toBe(-1.5 * STATION_WORLD);
-    expect(cameraTravel(true, -1.1, "running", 0.65, { scenic })).toBe(-1.5 * STATION_WORLD);
-    expect(cameraTravel(true, -0.9, "running", 0.65, { scenic })).toBe(-0.5 * STATION_WORLD);
+    expect(cameraTravel(true, -1.9 * L, "running", 0.65, { scenic })).toBeCloseTo(-1.5 * L * STATION_WORLD, 6);
+    expect(cameraTravel(true, -1.1 * L, "running", 0.65, { scenic })).toBeCloseTo(-1.5 * L * STATION_WORLD, 6);
+    expect(cameraTravel(true, -0.9 * L, "running", 0.65, { scenic })).toBeCloseTo(-0.5 * L * STATION_WORLD, 6);
     expect(cameraTravel(true, 0.01, "running", 0.65, { scenic })).toBe(0);
   });
 
@@ -207,9 +209,10 @@ describe("旅程：前窗與路線條的座標", () => {
     const stops = routeStops(stationsFor("drive", "big"));
     expect(stops).toHaveLength(3);
     expect(stops[2]).toBe(1);
-    const total = 1.65 + 2.65 + 2.65;
-    expect(stops[0]).toBeCloseTo(1.65 / total, 6);
-    expect(stops[1]).toBeCloseTo(4.3 / total, 6);
+    const legs = [L + 0.65, 2 * L + 0.65, 2 * L + 0.65];
+    const total = legs[0]! + legs[1]! + legs[2]!;
+    expect(stops[0]).toBeCloseTo(legs[0]! / total, 6);
+    expect(stops[1]).toBeCloseTo((legs[0]! + legs[1]!) / total, 6);
   });
 
   it("小橘的位置：開局 0、停好在站點、倒車與開過頭夾在站點、到家 1", () => {
@@ -218,7 +221,7 @@ describe("旅程：前窗與路線條的座標", () => {
     expect(routePosition(run)).toBe(0);
     expect(routePosition(at(run, { progress: run.stations[0]!.target }))).toBeCloseTo(stops[0]!, 6);
     expect(routePosition(at(run, { progress: 0.79 }))).toBeCloseTo(stops[0]!, 6);
-    expect(routePosition(at(run, { stationIndex: 1, progress: -2 }))).toBeCloseTo(stops[0]!, 6);
+    expect(routePosition(at(run, { stationIndex: 1, progress: -2 * L }))).toBeCloseTo(stops[0]!, 6);
     expect(routePosition(at(run, { phase: "route-done" }))).toBe(1);
   });
 });
