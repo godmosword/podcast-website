@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useSyncExternalStore, type Ref } from "rea
 import { DoorIcon } from "@/components/games/OrangeExpressCab";
 import { NoticeGlyph, RiderFace, XiaojuFace } from "@/components/games/OrangeExpressGlyphs";
 import { OrangeExpressMissionCard } from "@/components/games/OrangeExpressMissionCard";
+import { OrangeExpressNextHand } from "@/components/games/OrangeExpressNextHand";
 import { OrangeExpressRouteStrip } from "@/components/games/OrangeExpressRouteStrip";
 import type { MissionState } from "@/components/games/useOrangeExpressMission";
 import { OrangeExpressStopBar } from "@/components/games/OrangeExpressStopBar";
@@ -11,6 +12,7 @@ import { canvasDpr } from "@/lib/games/orange-express/canvas-dpr";
 import { COPY, POINT_CALL, POINT_WHAT } from "@/lib/games/orange-express/copy";
 import type { CoachBeat } from "@/lib/games/orange-express/coach";
 import { activeEvent } from "@/lib/games/orange-express/events";
+import type { NextAction } from "@/lib/games/orange-express/next-action";
 import { noticeWithDoorHint } from "@/lib/games/orange-express/notice";
 import { currentStation, pendingPoint } from "@/lib/games/orange-express/reducer";
 import { routeStripFor } from "@/lib/games/orange-express/route-strip";
@@ -88,6 +90,7 @@ export function OrangeExpressWindshield({
   missionGoal = null,
   cheer = false,
   mission = null,
+  next = null,
   onPoint,
 }: {
   run: RunState;
@@ -107,6 +110,8 @@ export function OrangeExpressWindshield({
   cheer?: boolean;
   /** 開局任務卡（大司機）。 */
   mission?: MissionState;
+  /** 現在只該亮的那一個控制（PR-J1）：是指差鈕時鈕上加手指與黃框。 */
+  next?: NextAction | null;
   onPoint: () => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -259,6 +264,7 @@ export function OrangeExpressWindshield({
           className={styles.pointTask}
           data-kind={task.kind}
           data-testid="orange-express-point"
+          data-next={next?.control === "point" ? "true" : undefined}
           aria-label={`${COPY.point}：${POINT_CALL[task.kind]}`}
           onClick={onPoint}
         >
@@ -266,6 +272,7 @@ export function OrangeExpressWindshield({
           <span className={styles.pointWhat} aria-hidden>
             {POINT_WHAT[task.kind]}
           </span>
+          {next?.control === "point" ? <OrangeExpressNextHand at="button" /> : null}
         </button>
       ) : null}
       {mission ? <OrangeExpressMissionCard stations={run.stations} state={mission} goal={missionGoal} /> : null}

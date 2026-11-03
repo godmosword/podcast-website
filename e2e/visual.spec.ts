@@ -897,7 +897,7 @@ test("visual：小橘特快車先鬆煞車 390 light", async ({ page }) => {
   await startOrangeExpress(page, "自己開");
   await jumpOrangeExpress(page, { progress: 0.2, speed: 0, power: 2, brake: 2 });
   const brake = page.getByRole("slider", { name: "煞車" });
-  await expect(brake.locator('[data-notch="0"]')).toHaveAttribute("data-release", "true", { timeout: 3000 });
+  await expect(brake.locator('[data-notch="0"]')).toHaveAttribute("data-next", "true", { timeout: 3000 });
   await settleOrangeExpress(page);
   await expect(page.getByTestId("orange-express-cab")).toHaveScreenshot(
     "orange-express-release-390-light.png",
@@ -911,7 +911,7 @@ test("visual：小橘特快車小小司機先鬆煞車 390 light", async ({ page
   await startOrangeExpress(page, "自己開");
   await jumpOrangeExpress(page, { progress: 0.2, speed: 0, power: 2, brake: 3 });
   const brake = page.getByRole("slider", { name: "煞車" });
-  await expect(brake.locator('[data-notch="0"]')).toHaveAttribute("data-release", "true", { timeout: 3000 });
+  await expect(brake.locator('[data-notch="0"]')).toHaveAttribute("data-next", "true", { timeout: 3000 });
   await settleOrangeExpress(page);
   await expect(page.getByTestId("orange-express-cab")).toHaveScreenshot(
     "orange-express-release-little-390-light.png",

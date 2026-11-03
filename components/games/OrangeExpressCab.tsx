@@ -3,6 +3,7 @@
 import { useId, useRef, type CSSProperties, type ReactNode } from "react";
 import { OrangeExpressGauge } from "@/components/games/OrangeExpressGauge";
 import { HornIcon, LandmarkGlyph, XiaojuFace } from "@/components/games/OrangeExpressGlyphs";
+import { OrangeExpressNextHand } from "@/components/games/OrangeExpressNextHand";
 import {
   brakeLampLabel,
   brakeValueText,
@@ -23,14 +24,12 @@ import {
   type LeverKind,
 } from "@/lib/games/orange-express/lever";
 import { BRAKE_ACCEL, POWER_ACCEL, effortNotch } from "@/lib/games/orange-express/physics";
+import type { NextAction } from "@/lib/games/orange-express/next-action";
 import { COURSE_RULES } from "@/lib/games/orange-express/routes";
-import { eventCue } from "@/lib/games/orange-express/events";
 import {
   brakeNotches,
-  bridgeGreetPending,
   currentLimit,
   inTunnel,
-  landmarkTaskPending,
   powerNotches,
   simpleLevers,
 } from "@/lib/games/orange-express/reducer";
@@ -90,9 +89,7 @@ function Lever({
   effort,
   effortScale,
   showEffort,
-  coach = false,
-  release = false,
-  cue = null,
+  next = null,
   onChange,
 }: {
   kind: LeverKind;
@@ -104,12 +101,8 @@ function Lever({
   effort: number;
   effortScale: readonly number[];
   showEffort: boolean;
-  /** 第一次進站示範的煞車強調：圖示桿面亮「停」那一格，小站長亮整根桿。 */
-  coach?: boolean;
-  /** 推了動力、煞車沒放、車不走：煞車桿亮「鬆」那一格（與桿頂的狀態小牌）。 */
-  release?: boolean;
-  /** 沿途事件提示掛著時亮這一格（真正的格號）：小鴨亮「慢」、賽跑亮「快」。 */
-  cue?: number | null;
+  /** 現在該碰這根桿（PR-J1）：notch 是要推到的那一格，null 是整根桿。 */
+  next?: NextAction | null;
   onChange: (notch: number) => void;
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -149,12 +142,8 @@ function Lever({
     <div className={styles.leverColumn} data-kind={kind} data-testid={`orange-express-${kind}-lever`}>
       <span className={styles.leverTitle}>
         {label}
-        <b
-          className={styles.leverWord}
-          data-testid={`orange-express-${kind}-word`}
-          data-release={release ? "true" : "false"}
-        >
-          {release ? COPY.releaseWord : word}
+        <b className={styles.leverWord} data-testid={`orange-express-${kind}-word`}>
+          {word}
         </b>
       </span>
       <div
@@ -163,7 +152,7 @@ function Lever({
         data-kind={kind}
         data-simple={simple ? "true" : "false"}
         data-effort={showEffort ? "true" : "false"}
-        data-coach={coach && !simple ? "true" : "false"}
+        data-next={next && next.notch === null ? "true" : undefined}
         role="slider"
         aria-label={label}
         aria-orientation="vertical"
@@ -228,6 +217,7 @@ function Lever({
         <span className={styles.leverHandle} aria-hidden>
           <span className={styles.leverGrip} />
         </span>
+        {next && next.notch === null ? <OrangeExpressNextHand at="lever" dir={next.dir} /> : null}
         <span className={styles.notchPlate} aria-hidden>
           {rows.map((i) => {
             const n = notches[i]!;
@@ -241,9 +231,7 @@ function Lever({
                 className={styles.notchLamp}
                 data-notch={n}
                 data-step={i}
-                data-coach={coach && simple && n === STOP_NOTCH ? "true" : "false"}
-                data-release={release && n === 0 ? "true" : "false"}
-                data-cue={cue === n && n !== notch ? "true" : "false"}
+                data-next={next?.notch === n ? "true" : undefined}
                 data-on={n === notch && n > 0 ? "true" : "false"}
                 data-emergency={
                   kind === "brake" && n === EMERGENCY ? "true" : "false"
@@ -252,6 +240,7 @@ function Lever({
               >
                 {simple ? <NotchGlyph kind={kind} step={i} notch={n} /> : null}
                 <span className={styles.notchText}>{text}</span>
+                {next?.notch === n ? <OrangeExpressNextHand at="notch" dir={next.dir} /> : null}
               </span>
             );
           })}
@@ -389,8 +378,7 @@ export function OrangeExpressCab({
   onBrake,
   onHorn,
   onDoor,
-  coachBrake = false,
-  releaseBrake = false,
+  next = null,
   cheer = false,
 }: {
   run: RunState;
@@ -398,10 +386,11 @@ export function OrangeExpressCab({
   numbers: boolean;
   /** 剛在降速牌前提前慢下來：小橘開心一秒。 */
   cheer?: boolean;
-  /** 第一次進站示範的第二拍：強調煞車。 */
-  coachBrake?: boolean;
-  /** 推了動力、煞車沒放、車不走：提示先放開煞車。 */
-  releaseBrake?: boolean;
+  /**
+   * 現在只該亮的那一個控制（PR-J1，View 算一次）：那一個帶 data-next 與手指，其他控制淡一點、照樣能按。
+   * 取代原本各自亮的事件格、示範、先鬆煞車、喇叭黃圈、車門光圈。
+   */
+  next?: NextAction | null;
   onPower: (notch: number) => void;
   onBrake: (notch: number) => void;
   onHorn: () => void;
@@ -424,16 +413,7 @@ export function OrangeExpressCab({
   const simple = simpleLevers(run.course);
   // 桿槽填色看實際出力：只有有重量感的大司機、小站長才畫（低齡幾乎即時，畫了只是多一樣東西）。
   const showEffort = run.course === "big" || run.course === "captain";
-  // 鐵橋上，或停好後還沒跟地標打招呼（大司機、小站長），或平交道、揮手的朋友：喇叭亮黃圈。
-  const cue = eventCue(run);
-  const hornHint =
-    (bridgeGreetPending(run) && run.phase === "running") || landmarkTaskPending(run) || cue === "horn";
-  // 小鴨亮動力的「慢」、賽跑亮「快」（已經在那一格就不亮）。
-  // 小站長（完整桿面，沒有慢的目標速度）推 P1／P2 不會變慢：小鴨改亮煞車的 B2（PR-I4）。
   const powers = powerNotches(run.course);
-  const powerCue =
-    cue === "slow" ? (simple ? (powers[1] ?? null) : null) : cue === "fast" ? (powers[powers.length - 1] ?? null) : null;
-  const brakeCue = cue === "slow" && !simple ? 2 : null;
   const flagLamp: LampState = run.autoBrake
     ? "orange"
     : run.speed <= 0.001
@@ -449,6 +429,7 @@ export function OrangeExpressCab({
       data-tunnel={tunnel ? "true" : "false"}
       data-auto-brake={run.autoBrake ? "true" : "false"}
       data-simple={simple ? "true" : "false"}
+      data-focus={next ? next.control : undefined}
     >
       {/* 站名、速度表、指示燈收在兩根桿中間那一格；不另佔一列，高度留給前窗。DOM 放最前，讀屏先聽到站名。 */}
       <div className={styles.dash}>
@@ -501,7 +482,7 @@ export function OrangeExpressCab({
         effort={run.tractive}
         effortScale={POWER_ACCEL}
         showEffort={showEffort}
-        cue={powerCue}
+        next={next?.control === "power" ? next : null}
         onChange={onPower}
       />
       <Lever
@@ -512,9 +493,7 @@ export function OrangeExpressCab({
         effort={run.braking}
         effortScale={BRAKE_ACCEL}
         showEffort={showEffort}
-        coach={coachBrake}
-        release={releaseBrake}
-        cue={brakeCue}
+        next={next?.control === "brake" ? next : null}
         onChange={onBrake}
       />
       <div className={styles.cabBottom}>
@@ -522,22 +501,25 @@ export function OrangeExpressCab({
           type="button"
           className={styles.horn}
           aria-label={COPY.horn}
-          data-hint={hornHint ? "true" : "false"}
+          data-next={next?.control === "horn" ? "true" : undefined}
           data-testid="orange-express-horn"
           onClick={onHorn}
         >
           <HornIcon />
+          {next?.control === "horn" ? <OrangeExpressNextHand at="button" /> : null}
         </button>
         <button
           type="button"
           className={styles.door}
           data-shake={shake ? "true" : "false"}
-          data-ready={doorReady ? "true" : "false"}
+          data-next={next?.control === "door" ? "true" : undefined}
           aria-disabled={doorReady ? undefined : true}
+          data-testid="orange-express-door"
           onClick={onDoor}
         >
           <DoorIcon />
           <span className={styles.doorLabel}>{doorLabel}</span>
+          {next?.control === "door" ? <OrangeExpressNextHand at="button" /> : null}
         </button>
       </div>
     </div>

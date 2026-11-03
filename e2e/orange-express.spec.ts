@@ -477,10 +477,10 @@ test.describe("小橘特快車", () => {
     await expect(drive).toHaveAttribute("data-tunnel", "false");
     await expect(page.getByTestId("orange-express-notice")).toHaveAttribute("data-kind", "bridge");
     const horn = page.getByTestId("orange-express-horn");
-    await expect(horn).toHaveAttribute("data-hint", "true");
+    await expect(horn).toHaveAttribute("data-next", "true");
     await horn.click();
     await expect(drive).toHaveAttribute("data-bridge-greets", "1");
-    await expect(horn).toHaveAttribute("data-hint", "false");
+    await expect(horn).not.toHaveAttribute("data-next", "true");
     await expect(page.getByTestId("orange-express-notice")).toHaveAttribute("data-kind", "greeted");
   });
 
@@ -989,7 +989,7 @@ test.describe("小橘特快車：低齡桿面與第一次進站示範", () => {
     await expect(power.locator("[data-notch]")).toHaveText(["快", "慢", "鬆"]);
     await expect(brake.locator("[data-notch]")).toHaveText(["緊急", "停", "鬆"]);
     // 不識字的孩子看圖：動力一個、兩個箭頭，煞車「停」是停車柱。
-    await expect(power.locator('[data-step="1"] svg, [data-step="2"] svg')).toHaveCount(2);
+    await expect(power.locator('[data-step="1"] > svg, [data-step="2"] > svg')).toHaveCount(2);
     await expect(brake.locator('[data-step="1"] svg')).toHaveCount(1);
     await expect(power).toHaveAttribute("aria-valuetext", "動力，鬆");
     await page.keyboard.press("ArrowUp");
@@ -1048,7 +1048,7 @@ test.describe("小橘特快車：低齡桿面與第一次進站示範", () => {
 
     await jump(page, { progress: 0.32, speed: 0.45 });
     await expect(bar).toHaveAttribute("data-coach", "watch");
-    await expect(stopNotch).toHaveAttribute("data-coach", "false");
+    await expect(stopNotch).not.toHaveAttribute("data-next", "true");
     // 現在拉會停在黃區（區間起點附近）時還不叫拉：照「現在拉」做要停得進綠區（PR-I1）。
     await jump(page, { progress: 0.42, speed: 0.45 });
     await expect(bar).toHaveAttribute("data-coach", "watch");
@@ -1056,7 +1056,7 @@ test.describe("小橘特快車：低齡桿面與第一次進站示範", () => {
     await jump(page, { progress: 0.58, speed: 0.45 });
     await expect(bar).toHaveAttribute("data-coach", "brake");
     await expect(page.getByTestId("orange-express-stop-words")).toContainText("現在拉，停在綠區");
-    await expect(stopNotch).toHaveAttribute("data-coach", "true");
+    await expect(stopNotch).toHaveAttribute("data-next", "true");
     // 停太早不算：車停在區間前，回到只亮目標條。
     await jump(page, { progress: 0.36, speed: 0 });
     await expect(bar).toHaveAttribute("data-coach", "watch");
@@ -1065,11 +1065,12 @@ test.describe("小橘特快車：低齡桿面與第一次進站示範", () => {
     await expect(page.getByTestId("orange-express-drive")).toHaveAttribute("data-phase", "stopped");
     await expect(bar).toHaveAttribute("data-coach", "none");
 
-    // 學會了：重新開一趟不再示範。
+    // 學會了：重新開一趟不再示範（目標條不亮外圈、不念），但該拉的那一刻駕駛台照樣亮「停」（PR-J1）。
     await page.goto("/games/orange-express");
     await startLevel(page, "自己開");
     await jump(page, { progress: 0.58, speed: 0.45 });
     await expect(bar).toHaveAttribute("data-coach", "none");
+    await expect(stopNotch).toHaveAttribute("data-next", "true");
   });
 
   test("示範沒出現過就停好不算學會；暫停時收起示範", async ({ page }) => {
@@ -1104,10 +1105,10 @@ test.describe("小橘特快車：低齡桿面與第一次進站示範", () => {
     await jump(page, { progress: 0.61, speed: 0.3 });
     const brake = page.getByRole("slider", { name: "煞車" });
     // 大司機 2026-11-01 起是圖示桿面：跟小小司機一樣亮「停」（B3）那一格，不亮「輕」。
-    await expect(brake).toHaveAttribute("data-coach", "false");
+    await expect(brake).not.toHaveAttribute("data-next", "true");
     const stopCell = brake.locator('[data-notch="3"]');
-    await expect(stopCell).toHaveAttribute("data-coach", "true");
-    await expect(brake.locator('[data-notch="2"]')).toHaveAttribute("data-coach", "false");
+    await expect(stopCell).toHaveAttribute("data-next", "true");
+    await expect(brake.locator('[data-notch="2"]')).not.toHaveAttribute("data-next", "true");
     await expect(page.getByTestId("orange-express-stop-words")).toContainText("現在拉，停在綠區");
     await expect(page.getByTestId("orange-express-point")).toHaveCount(0);
     expect(await stopCell.evaluate((el) => getComputedStyle(el).animationName)).toBe("none");
@@ -1208,11 +1209,11 @@ test.describe("小橘特快車：停好後跟地標打招呼、朋友上車的�
     const horn = page.getByTestId("orange-express-horn");
     await expect(page.getByTestId("orange-express-drive")).toHaveAttribute("data-phase", "stopped");
     // 停好還沒開門：開門是唯一要按的，喇叭不亮。
-    await expect(horn).toHaveAttribute("data-hint", "false");
+    await expect(horn).not.toHaveAttribute("data-next", "true");
     await page.getByRole("button", { name: "開門" }).click();
-    await expect(horn).toHaveAttribute("data-hint", "true");
+    await expect(horn).toHaveAttribute("data-next", "true");
     await horn.click();
-    await expect(horn).toHaveAttribute("data-hint", "false");
+    await expect(horn).not.toHaveAttribute("data-next", "true");
 
     // 朋友上車：頭像旁冒愛心泡泡，讀屏說朋友上車了。
     await expect(page.getByRole("list", { name: "月台上的朋友" }).locator('li[data-boarded="true"] svg')).not.toHaveCount(0);
@@ -1237,13 +1238,75 @@ test.describe("小橘特快車：停好後跟地標打招呼、朋友上車的�
     await page.goto("/games/orange-express");
     await startLevel(page, "自己開");
     await expect(page.getByTestId("orange-express-drive")).toHaveAttribute("data-phase", "stopped");
-    await expect(page.getByTestId("orange-express-horn")).toHaveAttribute("data-hint", "false");
+    await expect(page.getByTestId("orange-express-horn")).not.toHaveAttribute("data-next", "true");
     await page.getByRole("button", { name: "開門" }).click();
     const close = page.getByRole("button", { name: "關門" });
     await expect(close).not.toHaveAttribute("aria-disabled", "true");
     await close.click();
     const result = page.getByTestId("orange-express-result");
     await expect(result.locator('[data-landmark="house"]')).not.toHaveAttribute("data-stamped", /.*/);
+  });
+});
+
+/** 駕駛台與前窗指差鈕上亮著「現在按這個」的控制（路線條的站點另有自己的 data-next，不算）。 */
+function litControls(page: Page) {
+  return page.locator('[data-testid="orange-express-cab"] [data-next="true"], [data-testid="orange-express-point"][data-next="true"]');
+}
+
+test.describe("小橘特快車：一次只亮一個（PR-J1）", () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test("大司機一站走一遍：出發亮「慢」→ 停好亮開門 → 先打招呼 → 等上車不亮 → 關門；每一刻只有一個，其他淡一點", async ({ page }) => {
+    await page.addInitScript(() => {
+      window.__orangeExpress = { driver: "big", freeze: true };
+    });
+    await page.goto("/games/orange-express");
+    await startLevel(page, "自己開");
+    const lit = litControls(page);
+    const power = page.getByRole("slider", { name: "動力" });
+    // 開局停著、桿都在 0：亮動力的「慢」，旁邊一隻手指。
+    await expect(power.locator('[data-notch="2"]')).toHaveAttribute("data-next", "true");
+    await expect(lit).toHaveCount(1);
+    await expect(page.getByTestId("orange-express-next-hand")).toHaveCount(1);
+    await expect(page.getByTestId("orange-express-cab")).toHaveAttribute("data-focus", "power");
+    await expect(page.getByTestId("orange-express-horn")).toHaveCSS("opacity", "0.7");
+    // 巡航：什麼都不亮，也不淡。
+    await jump(page, { progress: 0.1, speed: 0.6, power: 4 });
+    await expect(lit).toHaveCount(0);
+    await expect(page.getByTestId("orange-express-cab")).not.toHaveAttribute("data-focus", /.*/);
+    // 停好：只亮開門（放開定格，朋友才會一位一位上車）。
+    await jump(page, { progress: 0.65, speed: 0, power: 0, brake: 3, freeze: false });
+    await expect(page.getByTestId("orange-express-drive")).toHaveAttribute("data-phase", "stopped");
+    await expect(page.getByTestId("orange-express-door")).toHaveAttribute("data-next", "true");
+    await expect(lit).toHaveCount(1);
+    await page.getByRole("button", { name: "開門" }).click();
+    // 開門：先跟地標打招呼，車門不亮。
+    const horn = page.getByTestId("orange-express-horn");
+    await expect(horn).toHaveAttribute("data-next", "true");
+    await expect(page.getByTestId("orange-express-door")).not.toHaveAttribute("data-next", "true");
+    await horn.click();
+    // 朋友都上車了：亮關門。
+    await expect(page.getByTestId("orange-express-door")).toHaveAttribute("data-next", "true");
+    await expect(lit).toHaveCount(1);
+  });
+
+  test("小站長進站只亮整根煞車桿（不教什麼時候拉）；慢慢看進站什麼都不亮", async ({ page }) => {
+    await page.addInitScript(() => {
+      window.__orangeExpress = { freeze: true };
+    });
+    await page.goto("/games/orange-express");
+    await startLevel(page, "小站長");
+    await jump(page, { progress: 0.45, speed: 0.6, power: 3 });
+    const brake = page.getByRole("slider", { name: "煞車" });
+    await expect(brake).toHaveAttribute("data-next", "true");
+    await expect(brake.locator('[data-next="true"]')).toHaveCount(0);
+    await jump(page, { brake: 2 });
+    await expect(litControls(page)).toHaveCount(0);
+
+    await page.goto("/games/orange-express");
+    await startLevel(page, "慢慢看");
+    await jump(page, { progress: 0.45, speed: 0.4 });
+    await expect(litControls(page)).toHaveCount(0);
   });
 });
 
@@ -1260,15 +1323,14 @@ test.describe("小橘特快車：拖桿手感與「先把煞車放開」", () =>
     const loose = brake.locator('[data-notch="0"]');
     await jump(page, { progress: 0.2, speed: 0, power: 2, brake: 2 });
     // 先推動力再鬆煞車是真車的做法：剛推下去不馬上提示。
-    await expect(loose).toHaveAttribute("data-release", "false");
-    await expect(loose).toHaveAttribute("data-release", "true", { timeout: 3000 });
+    await expect(loose).not.toHaveAttribute("data-next", "true");
+    await expect(loose).toHaveAttribute("data-next", "true", { timeout: 3000 });
     await expect(page.getByTestId("orange-express-drive").locator("p[aria-live]")).toHaveText("先把煞車放開");
-    const word = page.getByTestId("orange-express-brake-word");
-    await expect(word).toHaveAttribute("data-release", "true");
-    await expect(word).toHaveText("↓鬆");
+    // 一次只亮一個：手指在「鬆」旁邊，動力桿淡下來。
+    await expect(loose.getByTestId("orange-express-next-hand")).toHaveCount(1);
+    await expect(litControls(page)).toHaveCount(1);
     await jump(page, { brake: 0 });
-    await expect(loose).toHaveAttribute("data-release", "false");
-    await expect(word).toHaveText("鬆");
+    await expect(loose).not.toHaveAttribute("data-next", "true");
   });
 
   test("停好、門亮著時推動力不提示（該做的是開門）；小小司機也有這個提示", async ({ page }) => {
@@ -1280,7 +1342,7 @@ test.describe("小橘特快車：拖桿手感與「先把煞車放開」", () =>
     await jump(page, { progress: 0.65, speed: 0, power: 2, brake: 2 });
     await expect(page.getByTestId("orange-express-drive")).toHaveAttribute("data-phase", "stopped");
     await page.waitForTimeout(1500);
-    await expect(page.getByRole("slider", { name: "煞車" }).locator('[data-notch="0"]')).toHaveAttribute("data-release", "false");
+    await expect(page.getByRole("slider", { name: "煞車" }).locator('[data-notch="0"]')).not.toHaveAttribute("data-next", "true");
 
     await page.addInitScript(() => {
       window.__orangeExpress = { driver: "little", freeze: true };
@@ -1289,7 +1351,7 @@ test.describe("小橘特快車：拖桿手感與「先把煞車放開」", () =>
     await startLevel(page, "自己開");
     await jump(page, { progress: 0.2, speed: 0, power: 2, brake: 3 });
     await expect(page.getByRole("slider", { name: "煞車" }).locator('[data-notch="0"]')).toHaveAttribute(
-      "data-release",
+      "data-next",
       "true",
       { timeout: 3000 },
     );
@@ -1354,9 +1416,9 @@ test.describe("小橘特快車：紅燈等對向列車、提前減速", () => {
     await expect(windshield).toHaveAttribute("data-signal-halo", "true");
     // 「先把煞車放開」要條件成立 0.9 秒才亮；等過門檻還是不亮。
     await page.waitForTimeout(1000);
-    await expect(page.getByRole("slider", { name: "煞車" }).locator('[data-notch="0"]')).toHaveAttribute(
-      "data-release",
-      "false",
+    await expect(page.getByRole("slider", { name: "煞車" }).locator('[data-notch="0"]')).not.toHaveAttribute(
+      "data-next",
+      "true",
     );
     await jump(page, { brake: 0, power: 3 });
 
@@ -1423,7 +1485,7 @@ test.describe("小橘特快車：大司機減法（2026-11-01）", () => {
     await expect(page.getByTestId("orange-express-notice")).toHaveCount(0);
     await jump(page, { stationIndex: 1, progress: 0.14, speed: 0.4 });
     await expect(page.getByTestId("orange-express-notice")).toHaveCount(0);
-    await expect(page.getByTestId("orange-express-horn")).toHaveAttribute("data-hint", "false");
+    await expect(page.getByTestId("orange-express-horn")).not.toHaveAttribute("data-next", "true");
     await page.getByTestId("orange-express-horn").click();
     const drive = page.getByTestId("orange-express-drive");
     await expect(drive).toHaveAttribute("data-bridge-greets", "0");
@@ -1489,8 +1551,8 @@ test.describe("小橘特快車：沿途事件與任務卡（2026-11-02）", () =
     await jump(page, { stationIndex: 0, progress: -1.15, speed: 0.7, power: 4, freeze: false });
     await expect(notice).toHaveAttribute("data-event", "ducks");
     await expect(notice).toContainText("小鴨要過鐵軌，慢下來");
-    // 動力的「慢」那格亮黃框。
-    await expect(page.getByRole("slider", { name: "動力" }).locator('[data-notch="2"]')).toHaveAttribute("data-cue", "true");
+    // 動力的「慢」那格亮黃框（一次只亮這一個）。
+    await expect(page.getByRole("slider", { name: "動力" }).locator('[data-notch="2"]')).toHaveAttribute("data-next", "true");
     // 提示時路線條讓位給提示（上緣一次一條）。
     await expect(page.getByTestId("orange-express-route")).toHaveCount(0);
     await page.getByRole("slider", { name: "動力" }).locator('[data-notch="0"]').click();
@@ -1527,7 +1589,7 @@ test.describe("小橘特快車：沿途事件與任務卡（2026-11-02）", () =
     await expect(notice).toHaveAttribute("data-event", "crossing");
     await expect(notice).toContainText("平交道，按喇叭");
     // 提示掛著時喇叭亮黃圈，跟動作接起來。
-    await expect(page.getByTestId("orange-express-horn")).toHaveAttribute("data-hint", "true");
+    await expect(page.getByTestId("orange-express-horn")).toHaveAttribute("data-next", "true");
     await page.getByTestId("orange-express-horn").click();
     await expect(page.getByTestId("orange-express-drive")).toHaveAttribute("data-events-done", "1");
     await expect(notice).toContainText("叭叭！平交道");

@@ -820,11 +820,10 @@
 }
 
 /*
- * 第一次進站示範（只在示範那一趟）：停車目標條外圈一圈黃，讓孩子先看這裡；不動。
- * 第二拍再強調煞車（見 .notchLamp[data-coach]）。用 outline 不改版面、不碰 z-index。
+ * 第一次進站示範（只在示範那一趟）的第一拍：停車目標條外圈一圈黃，讓孩子先看這裡；不動。
+ * 第二拍「現在拉」只亮駕駛台的「停」那格（.notchLamp[data-next]，PR-J1：一次只亮一個）。用 outline 不改版面、不碰 z-index。
  */
-.stopBar[data-coach="watch"],
-.stopBar[data-coach="brake"] {
+.stopBar[data-coach="watch"] {
   outline: 4px solid rgb(255, 216, 102);
   outline-offset: 2px;
 }
@@ -1738,41 +1737,50 @@
 }
 
 /*
- * 「看這裡」的黃框（示範第二拍、先鬆煞車共用）：
- * - 示範：低齡亮「停」那一格，大司機與小站長亮整根煞車桿。
- * - 先鬆煞車：推了動力、煞車沒放、車不走，亮煞車桿「鬆」那一格（低齡的虛線空格改實線）。
- *   不用藍綠：藍綠在低齡桿面是「停」的顏色，選中的格又是天藍外圈，色弱分不出來。
- * 約 1Hz 脈動三下就停成靜態外框；同一時間畫面上只有它在動。減少動態時只留靜態外框。
+ * 「現在按這個」（PR-J1）：nextAction 指的那一個控制——桿格、整根桿、喇叭、車門、指差鈕——一次只有一個。
+ * 黃框＋墨色框，約 1Hz 脈動三下就停成靜態外框，旁邊一隻手指（.nextHand）。減少動態時只留靜態外框與不動的手指。
+ * 不用藍綠：藍綠在低齡桿面是「停」的顏色，選中的格又是天藍外圈，色弱分不出來。
+ * 黃框釘成白天的黃：夜間 --c-yellow 會變成芥末色，疊在白天的前窗與台面上看不出來。
  */
-.notchLamp[data-coach="true"],
-.notchLamp[data-release="true"],
-.notchLamp[data-cue="true"],
-.lever[data-coach="true"] {
-  /* 黃框釘成白天的黃：夜間 --c-yellow 會變成芥末色，疊在白天的前窗與台面上看不出來。 */
+.notchLamp[data-next="true"],
+.lever[data-next="true"],
+.horn[data-next="true"],
+.door[data-next="true"],
+.pointTask[data-next="true"] {
   outline: 4px solid rgb(255, 216, 102);
   outline-offset: var(--pulse-from, 2px);
   animation: coachPulse 1s ease-in-out 3;
 }
 
 /* 黃框對奶油台面亮度差很小：格子本身再加一圈墨色框，跟停車目標條一樣是「深框＋黃框」。 */
-.notchLamp[data-coach="true"],
-.notchLamp[data-release="true"],
-.notchLamp[data-cue="true"] {
+.notchLamp[data-next="true"] {
+  position: relative;
   border-style: solid;
   border-color: var(--ink);
 }
 
 /* 「鬆」在桿子最底下，離桿框只有約 8px：外框收小，脈動時不壓到桿框。 */
-.notchLamp[data-release="true"] {
+.notchLamp[data-next="true"][data-notch="0"] {
   --pulse-from: 1px;
   --pulse-to: 4px;
 }
 
-/* 桿頂小牌改寫「↓鬆」，跟格子同一個黃。 */
-.leverWord[data-release="true"] {
-  color: var(--ink);
-  background: rgb(255, 216, 102);
-  box-shadow: 0 0 0 2px var(--ink);
+/* 車門該按了（開或關）：薄荷底，跟原本「門亮了」同一個顏色。 */
+.door[data-next="true"] {
+  background: var(--c-mint);
+}
+
+/* 手指掛在按鈕右下角。 */
+.horn[data-next="true"],
+.door[data-next="true"] {
+  position: relative;
+}
+
+/* 指差鈕出現時本來就彈一下：彈完再脈動。 */
+.pointTask[data-next="true"] {
+  animation:
+    pointPop 320ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    coachPulse 1s ease-in-out 320ms 3;
 }
 
 @keyframes coachPulse {
@@ -1782,18 +1790,150 @@
   }
 }
 
-.screen[data-reduced="true"] .notchLamp[data-coach="true"],
-.screen[data-reduced="true"] .notchLamp[data-release="true"],
-.screen[data-reduced="true"] .notchLamp[data-cue="true"],
-.screen[data-reduced="true"] .lever[data-coach="true"] {
+/* 有下一步時，其他控制淡到約七成：還是按得到、有反應，只是一眼看得出該按哪一個。 */
+.cab[data-focus] .leverColumn:not(:has([data-next="true"])),
+.cab[data-focus] .horn:not([data-next="true"]),
+.cab[data-focus] .door:not([data-next="true"]) {
+  opacity: 0.7;
+}
+
+.leverColumn,
+.horn,
+.door {
+  transition: opacity 200ms ease;
+}
+
+/*
+ * 手指（共用 TapHand）：指尖（手的 53% 17%）落在目標裡，手身不壓到別顆可點的東西；用 left／top 算位置，
+ * 不用 translate 置中（點按動畫的 transform 會把置中蓋掉）。白暈讓膚色在奶油台面、黃框上看得到。
+ * - 桿格：指尖在格子左緣，手左右翻過來、手身伸到桿槽上（同一根桿），不蓋格子的圖與字。
+ * - 整根桿：指尖在握把上（點握把不換檔），上面一個方向箭頭；減少動態時靠箭頭看方向。
+ * - 按鈕：指尖在按鈕裡偏右，手身往右下；矮手機小站長喇叭與車門只隔 10px，手身伸出不超過 4px。
+ */
+.nextHand {
+  --hand: 32px;
+  --tip-x: 62%;
+  --tip-y: 52%;
+  --tip-at: 0.53;
+  position: absolute;
+  z-index: 3;
+  left: calc(var(--tip-x) - var(--tip-at) * var(--hand));
+  top: calc(var(--tip-y) - 0.17 * var(--hand));
+  width: var(--hand);
+  height: var(--hand);
+  pointer-events: none;
+}
+
+.nextHandSvg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-origin: 53% 17%;
+  filter: drop-shadow(0 0 1.5px rgb(255, 255, 255)) drop-shadow(0 2px 2px rgba(60, 40, 20, 0.35));
+  animation: nextTap 1.6s ease-in-out infinite;
+}
+
+.nextHand[data-at="notch"] {
+  --hand: 28px;
+  --tip-x: 10%;
+  --tip-y: 42%;
+  --tip-at: 0.47;
+}
+
+.nextHand[data-at="notch"] .nextHandSvg {
+  transform: scaleX(-1);
+  transform-origin: 47% 17%;
+  animation-name: nextTapFlip;
+}
+
+/* 指差鈕下半有「月台」「號誌」字：指尖放在圖示右上，手身往右、不蓋字。 */
+.pointTask .nextHand {
+  --tip-x: 70%;
+  --tip-y: 30%;
+}
+
+.nextHand[data-at="lever"] {
+  --tip-x: 50%;
+  --tip-y: 45%;
+}
+
+.nextArrow {
+  position: absolute;
+  left: calc(var(--tip-at) * var(--hand) - 11px);
+  bottom: calc(100% - 0.17 * var(--hand) + 6px);
+  width: 22px;
+  height: 22px;
+  animation: nextArrowBob 1.6s ease-in-out infinite;
+}
+
+.nextHand[data-dir="down"] .nextArrow {
+  top: calc(100% + 2px);
+  bottom: auto;
+  transform: rotate(180deg);
+  animation-name: nextArrowBobDown;
+}
+
+/* 和著色本、壽司屋同一種「點一下」：以指尖為原點縮一下再放開。 */
+@keyframes nextTap {
+  0%,
+  40%,
+  100% {
+    transform: scale(1);
+  }
+  55% {
+    transform: scale(0.88);
+  }
+  70% {
+    transform: scale(1);
+  }
+}
+
+@keyframes nextTapFlip {
+  0%,
+  40%,
+  100% {
+    transform: scale(-1, 1);
+  }
+  55% {
+    transform: scale(-0.88, 0.88);
+  }
+  70% {
+    transform: scale(-1, 1);
+  }
+}
+
+@keyframes nextArrowBob {
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes nextArrowBobDown {
+  0%,
+  100% {
+    transform: rotate(180deg);
+  }
+  50% {
+    transform: rotate(180deg) translateY(-4px);
+  }
+}
+
+.screen[data-reduced="true"] .notchLamp[data-next="true"],
+.screen[data-reduced="true"] .lever[data-next="true"],
+.screen[data-reduced="true"] .horn[data-next="true"],
+.screen[data-reduced="true"] .door[data-next="true"],
+.screen[data-reduced="true"] .pointTask[data-next="true"],
+.screen[data-reduced="true"] .nextHand svg {
   animation: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .notchLamp[data-coach="true"],
-  .notchLamp[data-release="true"],
-  .notchLamp[data-cue="true"],
-  .lever[data-coach="true"] {
+  .notchLamp[data-next="true"],
+  .lever[data-next="true"],
+  .horn[data-next="true"],
+  .door[data-next="true"],
+  .pointTask[data-next="true"],
+  .nextHand svg {
     animation: none;
   }
 }
@@ -2028,14 +2168,6 @@
     inset 0 4px 0 color-mix(in srgb, var(--card) 35%, transparent);
 }
 
-.horn[data-hint="true"] {
-  box-shadow:
-    0 4px 0 var(--ink),
-    0 0 0 5px var(--c-yellow),
-    inset 0 4px 0 color-mix(in srgb, var(--card) 35%, transparent);
-  animation: hornHint 1.2s ease-in-out infinite;
-}
-
 .horn svg {
   width: 30px;
   height: 30px;
@@ -2056,13 +2188,6 @@
 .door svg {
   width: 24px;
   height: 24px;
-}
-
-.door[data-ready="true"] {
-  background: var(--c-mint);
-  box-shadow:
-    0 4px 0 var(--ink),
-    0 0 0 4px color-mix(in srgb, var(--c-mint) 45%, transparent);
 }
 
 .door[aria-disabled="true"] {
@@ -2588,8 +2713,7 @@
     transition: none;
   }
 
-  .door[data-shake="true"],
-  .horn[data-hint="true"] {
+  .door[data-shake="true"] {
     animation: none;
   }
 
@@ -2602,29 +2726,9 @@
   }
 }
 
-.screen[data-reduced="true"] .horn[data-hint="true"] {
-  animation: none;
-}
-
 .screen[data-reduced="true"] .leverHandle,
 .screen[data-reduced="true"] .needle {
   transition: none;
-}
-
-@keyframes hornHint {
-  0%,
-  100% {
-    box-shadow:
-      0 4px 0 var(--ink),
-      0 0 0 5px var(--c-yellow),
-      inset 0 4px 0 color-mix(in srgb, var(--card) 35%, transparent);
-  }
-  50% {
-    box-shadow:
-      0 4px 0 var(--ink),
-      0 0 0 9px color-mix(in srgb, var(--c-yellow) 70%, transparent),
-      inset 0 4px 0 color-mix(in srgb, var(--card) 35%, transparent);
-  }
 }
 
 @keyframes cabShake {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { GameAudioBus, OverlayProps } from "@/lib/gamekit/adapter";
 import type { GameAction } from "@/lib/gamekit/types";
 import { useGameLoop } from "@/lib/gamekit/react/useGameLoop";
@@ -46,6 +46,7 @@ import {
   jointClack,
 } from "@/lib/games/orange-express/chime";
 import { coachBeat, type CoachBeat } from "@/lib/games/orange-express/coach";
+import { nextAction, type NextAction } from "@/lib/games/orange-express/next-action";
 import { coachThisRun, learnCoach, startCoachRun } from "@/lib/games/orange-express/coach-record";
 import {
   COPY,
@@ -149,12 +150,21 @@ const DRIVE_KEYS: ReadonlySet<GameAction> = new Set([
   "action",
 ]);
 
-function liveText(run: RunState, doorHint: boolean, coach: CoachBeat, releaseHint: boolean): string {
+/** 駕駛台亮了、本來沒人說的三步要念的那句（同一站各一次；其他下一步本來就有語音）。 */
+function actionSpeech(run: RunState, next: NextAction | null): SpeechItem | null {
+  if (!next) return null;
+  const text =
+    next.reason === "start" ? COPY.actGo : next.reason === "open" ? COPY.actOpen : next.reason === "close" ? COPY.actClose : null;
+  return text ? { key: `${run.stationIndex}:act-${next.reason}`, text } : null;
+}
+
+function liveText(run: RunState, doorHint: boolean, next: NextAction | null): string {
   if (run.phase === "reversing") return COPY.reversing;
   if (signalRed(run)) return COPY.redWait;
   if (doorHint) return COPY.earlyDoorHint;
-  if (releaseHint) return COPY.releaseBrake;
-  if (coach === "brake") return COPY.coachBrake;
+  if (next?.reason === "release") return COPY.releaseBrake;
+  if (next?.reason === "brake") return COPY.coachBrake;
+  if (next?.reason === "brake-ready") return COPY.coachReady;
   if (run.autoBrake) return COPY.autoBrakeOn;
   if (run.phase === "doors-open") {
     const waiting = run.boarded < currentStation(run).passengers.length;
@@ -268,9 +278,11 @@ export function OrangeExpressView({
   volumeRef.current = gameVolume;
 
   const swayOn = display.sway && !reducedMotion;
-  /** 第一次進站示範的這一拍；暫停、離開駕駛畫面、這一趟不示範時都是 none。 */
-  const beat: CoachBeat =
-    run && coachOn && status === "playing" && screen === "drive" ? coachBeat(run) : "none";
+  const driveOn = run !== null && status === "playing" && screen === "drive";
+  /** 進站的拍子：駕駛台「停」格什麼時候亮（低齡與大司機每一趟都看它）；暫停、離開駕駛畫面時是 none。 */
+  const stopBeat: CoachBeat = driveOn ? coachBeat(run) : "none";
+  /** 第一次進站示範的這一拍（念「快到了」「現在拉」、停車目標條外圈與淡小橘）；這一趟不示範時是 none。 */
+  const beat: CoachBeat = coachOn ? stopBeat : "none";
   /**
    * 「先把煞車放開」看桿位，不看車實際的反應：動力推了、煞車沒放、車停著，在開車中（不是停好、
    * 門開著、倒車）才算。停好門亮著時孩子推動力是想走，但該做的是開門，那時不提示。
@@ -286,6 +298,15 @@ export function OrangeExpressView({
     run.brake > 0 &&
     run.speed <= 0.001;
   const releaseHint = releaseWanted && releaseReady;
+  /**
+   * 現在只該亮的那一個控制（PR-J1）：只在這裡算一次，給駕駛台、前窗指差鈕、讀屏與朗讀。
+   * memo 住：朗讀 effect 依賴它，輸入沒變時同一個物件，不多跑一次、不重排計時器。
+   */
+  const missionShown = mission === "shown";
+  const next: NextAction | null = useMemo(
+    () => (driveOn && run ? nextAction(run, { mission: missionShown, releaseHint, coachOn, beat: stopBeat }) : null),
+    [coachOn, driveOn, missionShown, releaseHint, run, stopBeat],
+  );
 
   /**
    * 換成新的狀態。做到沿途事件或提前慢下來的回饋在這裡判斷（不只每幀的 tick）：
@@ -641,15 +662,16 @@ export function OrangeExpressView({
       freshRelease ??
       hint ??
       freshDoor ??
-      nextSpeech(run, display.gaugeNumbers, spoken.current, { skipPlatform: coachOn });
-    if (!item) return;
+      nextSpeech(run, display.gaugeNumbers, spoken.current, { skipPlatform: coachOn }) ??
+      actionSpeech(run, next);
+    if (!item || spoken.current.has(item.key)) return;
     spoken.current.add(item.key);
     const ms = speechMs(item.text);
     voiceBusyUntil.current = performance.now() + ms;
     speakText(item.text, { interrupt: false, volume: volumeRef.current });
     // 車停著時 run 不會變；念完再看一次，同一刻還有下一句（例如提示）就接著念。
     return recheck(ms);
-  }, [announceNext, beat, coachOn, display.gaugeNumbers, releaseHint, run, screen, status, voiceTick]);
+  }, [announceNext, beat, coachOn, display.gaugeNumbers, next, releaseHint, run, screen, status, voiceTick]);
 
   // 條件成立超過一小段才亮；條件一不成立（例如煞車一回 0）就收。
   useEffect(() => {
@@ -997,10 +1019,11 @@ export function OrangeExpressView({
         cheer={cheer}
         mission={mission}
         missionGoal={missionGoal}
+        next={next}
         onPoint={pointCheck}
       />
       <p className={styles.live} aria-live="polite">
-        {liveText(run, doorHint, beat, releaseHint)}
+        {liveText(run, doorHint, next)}
       </p>
       <OrangeExpressCab
         run={run}
@@ -1010,8 +1033,7 @@ export function OrangeExpressView({
         onBrake={setBrake}
         onHorn={pressHorn}
         onDoor={tryDoors}
-        coachBrake={beat === "brake"}
-        releaseBrake={releaseHint}
+        next={next}
         cheer={cheer}
       />
       {status === "paused" ? (
