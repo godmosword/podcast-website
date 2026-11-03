@@ -2,11 +2,12 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore, type Ref } from "react";
 import { DoorIcon } from "@/components/games/OrangeExpressCab";
-import { NoticeGlyph, RiderFace } from "@/components/games/OrangeExpressGlyphs";
+import { NoticeGlyph, RiderFace, XiaojuFace } from "@/components/games/OrangeExpressGlyphs";
 import { OrangeExpressMissionCard } from "@/components/games/OrangeExpressMissionCard";
 import { OrangeExpressRouteStrip } from "@/components/games/OrangeExpressRouteStrip";
 import type { MissionState } from "@/components/games/useOrangeExpressMission";
 import { OrangeExpressStopBar } from "@/components/games/OrangeExpressStopBar";
+import { canvasDpr } from "@/lib/games/orange-express/canvas-dpr";
 import { COPY, POINT_CALL, POINT_WHAT } from "@/lib/games/orange-express/copy";
 import type { CoachBeat } from "@/lib/games/orange-express/coach";
 import { activeEvent } from "@/lib/games/orange-express/events";
@@ -145,10 +146,7 @@ export function OrangeExpressWindshield({
       const cssH = canvas.clientHeight;
       if (cssW < 2 || cssH < 2) return;
       const nav = navigator as Navigator & { connection?: { saveData?: boolean } };
-      const dpr =
-        cssW < 360 || nav.connection?.saveData === true
-          ? 1
-          : Math.min(window.devicePixelRatio || 1, 1.5);
+      const dpr = canvasDpr(cssW, cssH, window.devicePixelRatio || 1, nav.connection?.saveData === true);
       const nextW = Math.round(cssW * dpr);
       const nextH = Math.round(cssH * dpr);
       if (canvas.width !== nextW || canvas.height !== nextH) {
@@ -215,6 +213,7 @@ export function OrangeExpressWindshield({
       data-signal-halo={signalHalo ? "true" : "false"}
       data-event={eventKind ?? "none"}
       data-event-result={eventResult ?? "none"}
+      data-point={task ? "true" : "false"}
     >
       <div ref={swayRef} className={styles.glassWrap}>
         <canvas ref={canvasRef} className={styles.glass} aria-hidden />
@@ -265,6 +264,12 @@ export function OrangeExpressWindshield({
         </button>
       ) : null}
       {mission ? <OrangeExpressMissionCard stations={run.stations} state={mission} /> : null}
+      {/* 做到事件、提前慢下來：小橘在前窗右下角探頭笑（PR-I2）。矮手機收起了儀表徽章，風景段也沒有停車目標條，這裡是孩子正在看的地方。 */}
+      {cheer && !showRiders ? (
+        <span className={styles.cheerFace} data-testid="orange-express-cheer" aria-hidden>
+          <XiaojuFace mood="happy" />
+        </span>
+      ) : null}
       {showRiders ? (
         <ul className={styles.riders} aria-label="月台上的朋友">
           {station.passengers.map((rider, index) => {

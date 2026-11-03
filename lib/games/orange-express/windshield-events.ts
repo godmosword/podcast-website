@@ -86,9 +86,17 @@ const CAR_ROOF = "rgb(236, 244, 250)";
 const CAR_LAMP = "rgb(255, 236, 160)";
 const CAR_LAMP_OFF = "rgb(214, 206, 190)";
 const WHEEL = "rgb(70, 64, 70)";
-const DOG_EAR = "rgb(140, 96, 64)";
+/** 黏土玩具的亮面（PR-I2）：身體、頭左上一小塊淺色，跟封面小橘的打光同方向。 */
+const DOG_LIGHT = "rgb(226, 184, 140)";
+/** 小狗的肚子與嘴邊：打破「兩顆同色球」的剪影。 */
+const DOG_BELLY = "rgb(236, 204, 160)";
+/** 垂耳比身體深一階，伸出頭的輪廓外。 */
+const DOG_EAR_DARK = "rgb(122, 74, 44)";
+const COLLAR = "rgb(232, 96, 60)";
+const TONGUE = "rgb(240, 128, 140)";
 const GULL = "rgb(255, 255, 252)";
 const GULL_WING = "rgb(176, 186, 196)";
+const GROUND_SHADOW = "rgba(58, 46, 40, 0.16)";
 
 function clamp01(n: number): number {
   return Math.min(1, Math.max(0, n));
@@ -107,6 +115,34 @@ function blob(ctx: CanvasRenderingContext2D, x: number, y: number, rx: number, r
   ctx.lineWidth = edge;
   ctx.strokeStyle = INK;
   ctx.stroke();
+}
+
+/** 有深色描邊、可以轉角度的橢圓（垂耳、翅膀、翹尾巴）。 */
+function tilted(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  rx: number,
+  ry: number,
+  angle: number,
+  fill: string,
+  edge: number,
+) {
+  ctx.beginPath();
+  ctx.ellipse(x, y, Math.max(0.5, rx), Math.max(0.5, ry), angle, 0, Math.PI * 2);
+  ctx.fillStyle = fill;
+  ctx.fill();
+  ctx.lineWidth = edge;
+  ctx.strokeStyle = INK;
+  ctx.stroke();
+}
+
+/** 沒描邊的橢圓：地上的軟影子、黏土的亮面。 */
+function soft(ctx: CanvasRenderingContext2D, x: number, y: number, rx: number, ry: number, fill: string) {
+  ctx.beginPath();
+  ctx.ellipse(x, y, Math.max(0.5, rx), Math.max(0.5, ry), 0, 0, Math.PI * 2);
+  ctx.fillStyle = fill;
+  ctx.fill();
 }
 
 function dot(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, fill: string) {
@@ -351,31 +387,78 @@ function drawRace(ctx: CanvasRenderingContext2D, view: View, train: number, pain
   const edge = Math.max(1, s * 0.07);
   const step = reduced ? 0 : Math.sin(paint.time * 14);
   if (paint.scene === "sea") {
-    const p = project(view, RACE_X, 2.2 + step * 0.15, z);
-    const wing = s * (0.9 + (reduced ? 0 : step * 0.4));
-    poly(ctx, [{ x: p.x, y: p.y }, { x: p.x - s * 1.1, y: p.y - wing }, { x: p.x - s * 0.3, y: p.y }], GULL_WING);
-    poly(ctx, [{ x: p.x, y: p.y }, { x: p.x + s * 1.1, y: p.y - wing }, { x: p.x + s * 0.3, y: p.y }], GULL_WING);
-    blob(ctx, p.x, p.y, s * 0.36, s * 0.3, GULL, edge);
+    drawGull(ctx, view, z, s, edge, step, reduced);
     return;
   }
-  // 小狗從背後看：跟我們同一個方向跑（屁股朝鏡頭、尾巴翹起、兩耳在上、後腿交替）。
+  drawDog(ctx, view, z, s, edge, step);
+}
+
+/**
+ * 海鷗（PR-I2 黏土化）：圓身體、兩片圓翅膀上下拍，地上一小塊影子（飛著也看得出離地多高）。
+ */
+function drawGull(ctx: CanvasRenderingContext2D, view: View, z: number, s: number, edge: number, step: number, reduced: boolean) {
+  const ground = project(view, RACE_X, 0, z);
+  soft(ctx, ground.x, ground.y, s * 0.32, s * 0.08, GROUND_SHADOW);
+  const p = project(view, RACE_X, 2.2 + step * 0.15, z);
+  const flap = reduced ? 0 : step * 0.35;
+  tilted(ctx, p.x - s * 0.55, p.y - s * 0.16, s * 0.6, s * 0.2, -0.35 - flap, GULL_WING, edge);
+  tilted(ctx, p.x + s * 0.55, p.y - s * 0.16, s * 0.6, s * 0.2, 0.35 + flap, GULL_WING, edge);
+  blob(ctx, p.x, p.y, s * 0.36, s * 0.3, GULL, edge);
+  soft(ctx, p.x - s * 0.1, p.y - s * 0.1, s * 0.12, s * 0.07, EYE_WHITE);
+}
+
+/**
+ * 小狗（PR-I2 黏土化，設計審：純背面兩顆球認不出是狗）：側背 3/4，身體橫的、往前跑，頭轉回來看火車，
+ * 露出眼睛、黑鼻頭、粉紅小舌頭；深棕垂耳伸出頭外、C 形尾巴往上翹會搖、四條短腿交替抬、肚子與嘴邊淺色、
+ * 紅項圈掛黃鈴鐺。比其他事件角色大 1.3 倍，整隻塗黑時耳朵、尾巴、腳都在剪影外，48px 高也認得出是狗。
+ */
+function drawDog(ctx: CanvasRenderingContext2D, view: View, z: number, size: number, edge: number, step: number) {
+  const s = size * 1.3;
   const foot = project(view, RACE_X, 0, z);
-  const by = foot.y - s * 0.62 - Math.abs(step) * s * 0.1;
-  for (const [i, dx] of [-0.3, 0.3].entries()) {
-    const lift = (i === 0 ? step : -step) * s * 0.12;
-    const knee = { x: foot.x + dx * s, y: by };
-    const paw = { x: foot.x + dx * s, y: foot.y - Math.max(0, lift) };
-    segment(ctx, knee, paw, INK, s * 0.26);
-    segment(ctx, knee, paw, DOG, s * 0.15);
+  const bounce = Math.abs(step) * s * 0.06;
+  soft(ctx, foot.x, foot.y, s * 0.62, s * 0.12, GROUND_SHADOW);
+  const by = foot.y - s * 0.42 - bounce;
+  // 尾巴（身體後面先畫）：從屁股往上捲的 C 形，跑的時候左右搖。
+  const wag = step * 0.25;
+  const root = { x: foot.x - s * 0.42, y: by - s * 0.08 };
+  const tip = { x: root.x - s * (0.2 + wag * 0.3), y: root.y - s * 0.42 };
+  const bend = { x: root.x - s * 0.34, y: root.y - s * 0.1 };
+  for (const [color, width] of [
+    [INK, s * 0.2],
+    [DOG, s * 0.12],
+  ] as const) {
+    ctx.beginPath();
+    ctx.moveTo(root.x, root.y);
+    ctx.quadraticCurveTo(bend.x, bend.y, tip.x, tip.y);
+    ctx.lineCap = "round";
+    ctx.lineWidth = width;
+    ctx.strokeStyle = color;
+    ctx.stroke();
   }
-  blob(ctx, foot.x, by, s * 0.5, s * 0.42, DOG, edge);
-  const head = { x: foot.x, y: by - s * 0.62 };
-  blob(ctx, head.x - s * 0.26, head.y - s * 0.26, s * 0.13, s * 0.24, DOG_EAR, edge * 0.8);
-  blob(ctx, head.x + s * 0.26, head.y - s * 0.26, s * 0.13, s * 0.24, DOG_EAR, edge * 0.8);
-  blob(ctx, head.x, head.y, s * 0.34, s * 0.3, DOG, edge);
-  const tail = { x: foot.x + s * 0.1, y: by - s * 0.2 };
-  segment(ctx, tail, { x: tail.x + s * 0.3, y: tail.y - s * 0.55 + step * s * 0.08 }, INK, s * 0.16);
-  segment(ctx, tail, { x: tail.x + s * 0.3, y: tail.y - s * 0.55 + step * s * 0.08 }, DOG, s * 0.08);
+  // 四條短腿：後腿一對、前腿一對，對角交替抬。
+  for (const [i, dx] of [-0.34, -0.16, 0.16, 0.34].entries()) {
+    const lift = Math.max(0, i % 3 === 0 ? step : -step) * s * 0.1;
+    blob(ctx, foot.x + dx * s, foot.y - s * 0.1 - lift, s * 0.1, s * 0.13, DOG, edge);
+  }
+  blob(ctx, foot.x, by, s * 0.5, s * 0.32, DOG, edge);
+  soft(ctx, foot.x + s * 0.04, by + s * 0.12, s * 0.32, s * 0.12, DOG_BELLY);
+  soft(ctx, foot.x - s * 0.16, by - s * 0.14, s * 0.18, s * 0.08, DOG_LIGHT);
+  // 項圈與鈴鐺（脖子在身體前上方）。
+  blob(ctx, foot.x + s * 0.3, by - s * 0.24, s * 0.15, s * 0.07, COLLAR, edge * 0.8);
+  blob(ctx, foot.x + s * 0.32, by - s * 0.15, s * 0.05, s * 0.05, BUCK, edge * 0.6);
+  // 頭轉回來看火車：圓頭、嘴邊淺色、兩眼（有高光）、黑鼻頭、小舌頭；垂耳在頭兩側往外伸。
+  const head = { x: foot.x + s * 0.34, y: by - s * 0.5 };
+  blob(ctx, head.x, head.y, s * 0.3, s * 0.28, DOG, edge);
+  soft(ctx, head.x - s * 0.1, head.y - s * 0.13, s * 0.1, s * 0.06, DOG_LIGHT);
+  soft(ctx, head.x, head.y + s * 0.11, s * 0.15, s * 0.1, DOG_BELLY);
+  tilted(ctx, head.x - s * 0.3, head.y + s * 0.02, s * 0.1, s * 0.2, 0.4, DOG_EAR_DARK, edge * 0.8);
+  tilted(ctx, head.x + s * 0.3, head.y + s * 0.02, s * 0.1, s * 0.2, -0.4, DOG_EAR_DARK, edge * 0.8);
+  for (const dx of [-0.11, 0.11]) {
+    dot(ctx, head.x + dx * s, head.y - s * 0.03, s * 0.045, INK);
+    dot(ctx, head.x + dx * s - s * 0.015, head.y - s * 0.045, s * 0.016, EYE_WHITE);
+  }
+  soft(ctx, head.x, head.y + s * 0.08, s * 0.06, s * 0.045, INK);
+  blob(ctx, head.x, head.y + s * 0.17, s * 0.045, s * 0.05, TONGUE, edge * 0.5);
 }
 
 /**

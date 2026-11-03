@@ -533,7 +533,7 @@ export function OrangeExpressCab({
           onClick={onDoor}
         >
           <DoorIcon />
-          {doorLabel}
+          <span className={styles.doorLabel}>{doorLabel}</span>
         </button>
       </div>
     </div>

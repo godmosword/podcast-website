@@ -479,6 +479,57 @@
   }
 }
 
+/* ── 前窗裡的開心小橘（PR-I2）────────────────────────── */
+
+/*
+ * 右下角：沿途事件的小動物、平交道的車、揮手的朋友都在軌道左邊，右邊不擋到正在回應的那一個。
+ * 指差確認鈕在時不出；停好時不出（那時乘客卡與地標是主角）。
+ */
+.cheerFace {
+  position: absolute;
+  right: 8%;
+  bottom: 10px;
+  width: 64px;
+  height: 64px;
+  pointer-events: none;
+  transform-origin: 50% 100%;
+  animation: cheerPop 0.36s ease-out 1;
+}
+
+.cheerFace svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 3px 0 color-mix(in srgb, var(--ink) 35%, transparent));
+}
+
+/* 指差確認鈕在時不出（設計審：兩個東西貼在右下，孩子會去點小橘而不是確認鈕；一次只強調一件事）。 */
+.windshield[data-point="true"] .cheerFace {
+  display: none;
+}
+
+@keyframes cheerPop {
+  0% {
+    transform: translateY(30%) scale(0.6);
+    opacity: 0;
+  }
+
+  70% {
+    transform: translateY(0) scale(1.08);
+    opacity: 1;
+  }
+
+  100% {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cheerFace {
+    animation: none;
+  }
+}
+
 /* ── 前窗提示與指差確認 ─────────────────────────────── */
 
 .notice {
@@ -720,6 +771,49 @@
 
 .stopPredicted[data-grade="none"] {
   border-top-color: var(--ink-soft);
+}
+
+/*
+ * 示範時預測點上的淡小橘（設計審）：跟真的小橘一樣大、位置算法一樣；臉淡、虛線圈清楚，
+ * 中間一條點線從真的小橘拉過去（「會滑到那裡」）。跟真的小橘不到一個頭寬時收起：那時本來就停在這裡了。
+ */
+.stopGhost {
+  position: absolute;
+  top: 50%;
+  width: 26px;
+  height: 26px;
+  margin-left: -13px;
+  border-radius: 50%;
+  outline: 2px dashed color-mix(in srgb, var(--ink) 75%, transparent);
+  outline-offset: -1px;
+  transform: translateY(-55%);
+  transition: opacity 0.15s ease-out;
+}
+
+.stopGhost svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0.45;
+}
+
+.stopGhostPath {
+  position: absolute;
+  top: 50%;
+  height: 0;
+  border-top: 3px dotted color-mix(in srgb, var(--ink) 45%, transparent);
+  transform: translateY(-50%);
+}
+
+.stopGhost[data-near="true"],
+.stopGhostPath[data-near="true"] {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stopGhost {
+    transition: none;
+  }
 }
 
 .stopTrain {
@@ -1128,6 +1222,20 @@
 @supports (height: 1dvh) {
   .cab {
     --lever-h: clamp(276px, 42dvh, 312px);
+  }
+}
+
+/*
+ * 圖示桿面（慢慢看、小小司機、大司機）最多四格，不必跟小站長六格一樣高：煞車四格每格仍有 50px 以上，
+ * 省下的高度還給前窗（PR-I2：390×844 大司機前窗約 337 → 410px）。直式矮手機在檔尾另外收到 180px。
+ */
+.cab[data-simple="true"] {
+  --lever-h: 236px;
+}
+
+@supports (height: 1dvh) {
+  .cab[data-simple="true"] {
+    --lever-h: clamp(216px, 28dvh, 236px);
   }
 }
 
@@ -2072,9 +2180,10 @@
     grid-area: head;
   }
 
+  /* 速度表不跟著螢幕一直放大（PR-I2：桌機 230px 把駕駛台撐高、前窗變成扁扁一條），空間留給窗外。 */
   .gauge {
     grid-area: gauge;
-    width: clamp(140px, 18vw, 230px);
+    width: clamp(140px, 14vw, 184px);
   }
 
   .lamps {
@@ -2434,6 +2543,12 @@
     bottom: 12px;
   }
 
+  .cheerFace {
+    width: 52px;
+    height: 52px;
+    bottom: 6px;
+  }
+
   /* 開車中的提示改靠左、最寬六成：前窗只剩約 104px 高，提示和右下的指差確認鈕上下會疊，左右分開才不會。 */
   .notice {
     right: auto;
@@ -2480,5 +2595,64 @@
   .door {
     min-height: 48px;
     padding-block: 4px;
+  }
+
+  /*
+   * 小站長（煞車六格、每格 40px，桿子不能再矮）：跟桌機一樣兩根桿拉長到兩列，喇叭與車門收進中間那格，
+   * 前窗不用再讓出整條下排（PR-I2：375×553 前窗約 122 → 175px）。中間那格收起燈：車門鈕會變綠、
+   * 停車目標條與速度表的旗都還在，燈的資訊有備援（跟橫拿手機同一套）。
+   */
+  .cab:not([data-simple="true"]) {
+    grid-template-areas:
+      "power dash brake"
+      "power bottom brake";
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+
+  /* 只是看不到：燈的狀態（門、停車、速度旗…）讀屏照樣讀得到。 */
+  .cab:not([data-simple="true"]) .lamps {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* 喇叭的發光圈不要碰到車門鈕（設計審）。 */
+  .cab:not([data-simple="true"]) .cabBottom {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: 10px;
+  }
+
+  .cab:not([data-simple="true"]) .door {
+    width: 100%;
+    padding-inline: 4px;
+    font-size: var(--fs-body);
+    white-space: nowrap;
+  }
+}
+
+/*
+ * 最窄的矮手機（寬不到 360px）小站長：中間那格不到 100px，「等人上車」會斷成兩行。
+ * 留門的圖示放大、字只給讀屏（設計審：不識字又分不出顏色的孩子，圖示是唯一的線索）。
+ */
+@media (orientation: portrait) and (max-height: 600px) and (max-width: 359px) {
+  .cab:not([data-simple="true"]) .door svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .cab:not([data-simple="true"]) .doorLabel {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 }

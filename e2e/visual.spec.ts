@@ -812,6 +812,31 @@ test("visual：小橘特快車小站長紅燈 390 light（定格）", async ({ p
   await expect(page).toHaveScreenshot("orange-express-red-390x844-light.png", orangeShot("light"));
 });
 
+/**
+ * 小站長在很矮的直式手機（PR-I2）：兩根桿拉長到兩列，喇叭與車門收進中間那格、燈收起，前窗從約 122px 變約 176px。
+ * 進站中、指差確認月台題與停車目標條同時在，看兩者左右分開。
+ */
+test("visual：小橘特快車小站長 375×553 light（定格）", async ({ page }) => {
+  await openOrangeExpress(page, [375, 553, "light"]);
+  await startOrangeExpress(page, "小站長");
+  await jumpOrangeExpress(page, { progress: 0.55, speed: 0.3, brake: 2 });
+  await expect(page.getByTestId("orange-express-point")).toBeVisible();
+  await settleOrangeExpress(page);
+  await expect(page).toHaveScreenshot("orange-express-captain-375x553-light.png", orangeShot("light"));
+});
+
+/** 沿途事件做到時，小橘在前窗右下角探頭笑（PR-I2）；矮手機收起了儀表徽章，這是看得到表情的地方。 */
+test("visual：小橘特快車做到事件的開心小橘 375×553 light（減少動態）", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await openOrangeExpress(page, [375, 553, "light"], { eventSeed: 0 });
+  await startOrangeExpress(page, "自己開");
+  await jumpOrangeExpress(page, { stationIndex: 2, progress: -2.55, speed: 0.4, power: 2 });
+  await page.getByTestId("orange-express-horn").click();
+  await expect(page.getByTestId("orange-express-cheer")).toBeVisible();
+  await settleOrangeExpress(page);
+  await expect(page).toHaveScreenshot("orange-express-cheer-375x553-light.png", orangeShot("light"));
+});
+
 /** 推了動力、煞車沒放、車不走：煞車桿「鬆」那格亮實線框、桿頂的字跟著亮（大司機）。 */
 test("visual：小橘特快車先鬆煞車 390 light", async ({ page }) => {
   await openOrangeExpress(page, PHONE);

@@ -902,8 +902,13 @@ test.describe("小橘特快車：版面", () => {
         const tops: number[] = [];
         for (let i = 0; i <= 5; i += 1) tops.push((await brake.locator(`[data-notch="${i}"]`).boundingBox())!.y);
         for (let i = 1; i < tops.length; i += 1) expect(Math.abs(tops[i]! - tops[i - 1]!)).toBeGreaterThanOrEqual(40);
+        // PR-I2：喇叭與車門收進中間那格，前窗 375×553 約 176px、320×568 約 195px（原本約 122／141）。
         const glass = (await page.getByTestId("orange-express-windshield").boundingBox())!;
-        expect(glass.height).toBeGreaterThanOrEqual(110);
+        expect(glass.height).toBeGreaterThanOrEqual(160);
+        // 收進中間那格的喇叭、車門不擠出那一格，車門字不換行。
+        const horn = (await page.getByTestId("orange-express-horn").boundingBox())!;
+        expect(horn.width).toBeGreaterThanOrEqual(48);
+        expect(door.height).toBeLessThanOrEqual(56);
 
         // 出發（號誌題＋速限牌提示）、速限牌、進站（月台題）、停好：提示、停車目標條、指差確認鈕、乘客卡彼此不重疊。
         for (const patch of [
@@ -1097,6 +1102,14 @@ test.describe("小橘特快車：低齡桿面與第一次進站示範", () => {
     await expect(page.getByTestId("orange-express-stop-words")).toContainText("現在拉，停在綠區");
     await expect(page.getByTestId("orange-express-point")).toHaveCount(0);
     expect(await stopCell.evaluate((el) => getComputedStyle(el).animationName)).toBe("none");
+    // 還沒拉煞車：沒有預測點，也沒有淡小橘；拉了之後淡小橘站在預測點上（PR-I2）。
+    // 離真的小橘還遠時看得到；差不到一個頭寬就收起（本來就停在這裡了）。
+    const ghost = page.getByTestId("orange-express-stop-ghost");
+    await expect(ghost).toHaveCount(0);
+    await jump(page, { progress: 0.45, speed: 0.6, brake: 2 });
+    await expect(ghost).toHaveAttribute("data-near", "false");
+    await jump(page, { progress: 0.62, speed: 0.2, brake: 3 });
+    await expect(ghost).toHaveAttribute("data-near", "true");
 
     // 停在黃區還不算學會（PR-I1）：再開一趟大司機還會示範。
     await jump(page, { progress: 0.53, speed: 0, freeze: false });
@@ -1410,6 +1423,21 @@ test.describe("小橘特快車：大司機減法（2026-11-01）", () => {
     await expect(drive).toHaveAttribute("data-auto-brake-count", "1");
   });
 
+  test("一般手機 390×844：圖示桿面比小站長矮，前窗至少 370px，煞車每格至少 48px", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.addInitScript(() => {
+      window.__orangeExpress = { freeze: true, driver: "big" };
+    });
+    await page.goto("/games/orange-express");
+    await startLevel(page, "自己開");
+    const glass = (await page.getByTestId("orange-express-windshield").boundingBox())!;
+    expect(glass.height).toBeGreaterThanOrEqual(370);
+    const brake = page.getByRole("slider", { name: "煞車" });
+    const tops: number[] = [];
+    for (const n of [5, 3, 2, 0]) tops.push((await brake.locator(`[data-notch="${n}"]`).boundingBox())!.y);
+    for (let i = 1; i < tops.length; i += 1) expect(tops[i]! - tops[i - 1]!).toBeGreaterThanOrEqual(48);
+  });
+
   test("矮手機 375×553：圖示桿面讓前窗至少 170px，煞車每格至少 40px", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 553 });
     await page.addInitScript(() => {
@@ -1498,6 +1526,24 @@ test.describe("小橘特快車：沿途事件與任務卡（2026-11-02）", () =
     const xiaoju = page.getByTestId("orange-express-cab").locator("svg[data-mood]").first();
     await expect(xiaoju).toHaveAttribute("data-mood", "happy");
     await expect(xiaoju).toHaveAttribute("data-mood", "calm", { timeout: 4000 });
+  });
+
+  test("做到事件時，小橘在前窗右下角探頭笑一下（矮手機也看得到），之後收起", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 553 });
+    await startBig(page);
+    await jump(page, { stationIndex: 2, progress: -2.55, speed: 0.4, power: 2, freeze: false });
+    const cheer = page.getByTestId("orange-express-cheer");
+    await expect(cheer).toHaveCount(0);
+    await page.getByTestId("orange-express-horn").click();
+    await expect(cheer).toBeVisible();
+    // 探頭動畫約 0.36 秒，量停下來的位置。
+    await page.waitForTimeout(450);
+    const glass = (await page.getByTestId("orange-express-windshield").boundingBox())!;
+    const face = (await cheer.boundingBox())!;
+    expect(face.x + face.width).toBeLessThanOrEqual(glass.x + glass.width);
+    expect(face.y + face.height).toBeLessThanOrEqual(glass.y + glass.height);
+    expect(face.x).toBeGreaterThan(glass.x + glass.width / 2);
+    await expect(cheer).toHaveCount(0, { timeout: 4000 });
   });
 
   test("揮手的朋友：按喇叭做到，小橘一樣開心", async ({ page }) => {

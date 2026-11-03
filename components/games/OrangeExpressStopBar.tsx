@@ -33,6 +33,35 @@ type StopBarProps = {
 };
 
 /** 前窗上方的停車目標條：黃區、綠區、目標線、預測停車點、小橘現在的位置。 */
+/** 跟真的小橘差不到這麼多（條子寬的百分比，約一個頭寬）就收起淡小橘：那時本來就停在這裡了。 */
+const GHOST_NEAR = 10;
+
+/** 淡小橘與從真小橘拉過去的點線。 */
+function GhostPath({ train, predicted }: { train: number; predicted: number }) {
+  const near = Math.abs(predicted - train) < GHOST_NEAR ? "true" : "false";
+  const from = Math.min(train, predicted);
+  const to = Math.max(train, predicted);
+  return (
+    <>
+      <span
+        className={styles.stopGhostPath}
+        data-near={near}
+        style={{ left: `${from}%`, width: `${to - from}%` }}
+        aria-hidden
+      />
+      <span
+        className={styles.stopGhost}
+        data-testid="orange-express-stop-ghost"
+        data-near={near}
+        style={{ left: `${predicted}%` }}
+        aria-hidden
+      >
+        <XiaojuFace />
+      </span>
+    </>
+  );
+}
+
 export function OrangeExpressStopBar({
   run,
   numbers,
@@ -73,6 +102,10 @@ export function OrangeExpressStopBar({
             data-grade={bar.predictedGrade ?? "none"}
             style={{ left: `${bar.predicted}%` }}
           />
+        ) : null}
+        {/* 示範時多一個淡淡的小橘站在預測點上：「小橘會停在這裡」，不用認字也看得懂三角形是什麼（PR-I2）。 */}
+        {coach !== "none" && bar.predicted !== null && !atStation && run.phase !== "reversing" ? (
+          <GhostPath train={bar.train} predicted={bar.predicted} />
         ) : null}
         {/* 停好那一刻小橘放大一下再回原位、換開心臉：直式矮手機收起了儀表徽章，這裡是看得到表情的地方。 */}
         <span
