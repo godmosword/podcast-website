@@ -826,6 +826,19 @@ test("visual：小橘特快車小站長 375×553 light（定格）", async ({ pa
   await expect(page).toHaveScreenshot("orange-express-captain-375x553-light.png", orangeShot("light"));
 });
 
+/**
+ * 小站長矮手機的出發號誌（PR-I5）：紅燈等完、轉綠出「號誌，綠燈！」那一刻。燈箱撐到最小 14px 寬，
+ * 看燈箱頂跟右上提示、號誌題鈕有沒有擠在一起。
+ */
+test("visual：小橘特快車小站長出發號誌 375×553 light（定格）", async ({ page }) => {
+  await openOrangeExpress(page, [375, 553, "light"]);
+  await startOrangeExpress(page, "小站長");
+  await jumpOrangeExpress(page, { stationIndex: 1, section: 0, signal: "green", speed: 0 });
+  await expect(page.getByTestId("orange-express-point")).toBeVisible();
+  await settleOrangeExpress(page);
+  await expect(page).toHaveScreenshot("orange-express-captain-signal-375x553-light.png", orangeShot("light"));
+});
+
 /** 沿途事件做到時，小橘在前窗右下角探頭笑（PR-I2）；矮手機收起了儀表徽章，這是看得到表情的地方。 */
 test("visual：小橘特快車做到事件的開心小橘 375×553 light（減少動態）", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });

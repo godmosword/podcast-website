@@ -153,6 +153,26 @@
   background: transparent;
 }
 
+/*
+ * 剛開完那一趟新拿到的：跟結算地標章同一個蓋章動作，一枚接一枚蓋（數得出拿了幾枚）；
+ * 底色同結算章的濃黃、外面一圈黃光，減少動態時靠這兩個認得出來。
+ */
+.journalStamp[data-fresh="true"] {
+  background: color-mix(in srgb, var(--c-yellow) 75%, var(--card));
+  box-shadow: 0 0 0 2px var(--c-yellow);
+  animation: landmarkStamp 360ms calc(300ms + var(--fresh-i, 0) * 120ms) cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.journal[data-reduced="true"] .journalStamp[data-fresh="true"] {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .journalStamp[data-fresh="true"] {
+    animation: none;
+  }
+}
+
 /* 下趟小目標（結算、任務卡，PR-I3）：圖示＋一句，膠囊樣子跟少星小籤一樣，但不畫 +★。 */
 .goal {
   display: inline-flex;
@@ -1266,7 +1286,7 @@
 
 /*
  * 一站接兩位（小站長，PR-I4）：章與頭像縮一號、第二位疊在第一位後面一半、站間軌道短一點，
- * 整張卡不撐出前窗（390 寬約 300px 內放得下三站六位）。
+ * 整張卡不撐出前窗（390 寬約 300px 內放得下三站五位）。
  */
 .mission[data-crowded="true"] .missionStops {
   gap: 4px;
@@ -1285,6 +1305,12 @@
 .mission[data-crowded="true"] .missionFace svg {
   width: 26px;
   height: 26px;
+}
+
+/* 第一位（有名字、念得到的那位）在上面，不具名的朋友墊在後面（I5 設計審）。 */
+.mission[data-crowded="true"] .missionStamp + .missionFace {
+  position: relative;
+  z-index: 1;
 }
 
 .mission[data-crowded="true"] .missionFace + .missionFace {

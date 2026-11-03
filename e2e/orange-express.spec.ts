@@ -1623,8 +1623,28 @@ test.describe("小橘特快車：沿途事件與任務卡（2026-11-02）", () =
     const journal = page.getByTestId("orange-express-journal");
     await expect(journal).toHaveAttribute("aria-label", /找到 3 個，共 7 個/);
     await expect(journal.locator('[data-got="true"]')).toHaveCount(3);
+    // 三枚地標章第一趟就拿到了，第二趟沒有新章：回標題不彈。
+    await expect(journal.locator("[data-fresh]")).toHaveCount(0);
     // 整排是一顆按鈕，手指點得到。
     expect((await journal.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  });
+
+  test("這一趟新拿到的見聞章，回標題時彈一下；再開一趟就不彈", async ({ page }) => {
+    await startBig(page);
+    for (const stationIndex of [0, 1, 2]) {
+      await jump(page, { stationIndex, progress: 0.65, speed: 0, freeze: false });
+      await expect(page.getByTestId("orange-express-drive")).toHaveAttribute("data-phase", "stopped");
+      await page.getByRole("button", { name: "開門" }).click();
+      await page.getByTestId("orange-express-horn").click();
+      const close = page.getByRole("button", { name: "關門" });
+      await expect(close).not.toHaveAttribute("aria-disabled", "true");
+      await close.click();
+    }
+    await expect(page.getByTestId("orange-express-result")).toBeVisible();
+    await page.getByRole("button", { name: "回標題" }).click();
+    const journal = page.getByTestId("orange-express-journal");
+    await expect(journal.locator('[data-fresh="true"]')).toHaveCount(3);
+    await expect(journal.locator('[data-fresh="true"]').first()).toHaveAttribute("data-got", "true");
   });
 
   test("小站長也有旅程（PR-I4）：路線條；紅燈等對向列車時不出賽跑提示，轉綠、按完號誌題才開始", async ({ page }) => {

@@ -32,7 +32,7 @@ export type StopGrade = "green" | "yellow";
 /** 出發號誌。紅燈時推動力車也不走。 */
 export type SignalAspect = "red" | "green";
 
-export type PassengerId = "bonbon" | "mami" | "xiaonan" | "dot";
+export type PassengerId = "bonbon" | "mami" | "xiaonan" | "dot" | "sprout";
 
 export type Passenger = {
   id: PassengerId;

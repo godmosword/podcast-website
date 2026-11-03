@@ -121,3 +121,13 @@ export function recordRun(journal: OrangeExpressJournal, run: RunSummary, goal: 
     goals,
   };
 }
+
+export type JournalStamps = { events: ScenicEventKind[]; landmarks: LandmarkId[] };
+
+/** 這一趟新拿到的見聞章（after 有、before 沒有）：回標題時那幾枚彈一下（I3 設計審）。 */
+export function freshStamps(before: OrangeExpressJournal, after: OrangeExpressJournal): JournalStamps {
+  return {
+    events: after.eventsDone.filter((kind) => !before.eventsDone.includes(kind)),
+    landmarks: after.landmarks.filter((id) => !before.landmarks.includes(id)),
+  };
+}

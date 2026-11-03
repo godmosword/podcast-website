@@ -20,6 +20,8 @@ const MAMI: Passenger = { id: "mami", name: "馬米" };
 const XIAONAN: Passenger = { id: "xiaonan", name: "小南" };
 /** 小站長多接的一位：節目裡沒有這個角色，卡上只放頭像，不印佔位名字。 */
 const DOT: Passenger = { id: "dot", name: "一位朋友", showName: false };
+/** 小站長第二站多接的另一位（原本回家站又接一次 Bonbon、馬米，同一個人上車兩次）。 */
+const SPROUT: Passenger = { id: "sprout", name: "一位朋友", showName: false };
 
 export function courseFor(level: LevelId, driver: DriverId): CourseId {
   if (level === "drive") return driver;
@@ -271,9 +273,10 @@ export function stationsFor(level: LevelId, driver: DriverId = "big", seed = 0):
   }
   const many = course === "captain";
   return [
-    station(course, "orange-park", "遊樂園", many ? [BONBON, MAMI] : [BONBON], 0, plan),
-    station(course, "orange-slope", "橘子坡", many ? [XIAONAN, DOT] : [XIAONAN], 1, plan),
-    station(course, "orange-home", "回家", many ? [MAMI, BONBON] : [MAMI], 2, plan),
+    // 有名字的朋友跟大司機同站（任務那句一樣）；小站長前兩站各多接一位不具名的朋友。
+    station(course, "orange-park", "遊樂園", many ? [BONBON, DOT] : [BONBON], 0, plan),
+    station(course, "orange-slope", "橘子坡", many ? [XIAONAN, SPROUT] : [XIAONAN], 1, plan),
+    station(course, "orange-home", "回家", [MAMI], 2, plan),
   ];
 }
 

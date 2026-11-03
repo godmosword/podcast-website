@@ -326,6 +326,20 @@ export function RiderFace({ id }: { id: PassengerId }) {
       </svg>
     );
   }
+  if (id === "sprout") {
+    return (
+      <svg viewBox="0 0 48 48" aria-hidden>
+        <path d="M24 15c0-4 2-7 6-8 0 4-2 7-6 8z" fill="rgb(96, 168, 84)" />
+        <path d="M24 15c0-3-2-6-6-6.5 0 3.5 2 6 6 6.5z" fill="rgb(120, 190, 100)" />
+        <circle cx="24" cy="28" r="13" fill="rgb(176, 226, 196)" />
+        <circle cx="19" cy="27" r="2" fill="rgb(50, 42, 36)" />
+        <circle cx="29" cy="27" r="2" fill="rgb(50, 42, 36)" />
+        <circle cx="15.5" cy="31.5" r="2.2" fill="rgb(255, 170, 180)" />
+        <circle cx="32.5" cy="31.5" r="2.2" fill="rgb(255, 170, 180)" />
+        <path d="M20 32c2 2 6 2 8 0" fill="none" stroke="rgb(50, 42, 36)" strokeWidth="1.6" />
+      </svg>
+    );
+  }
   if (id === "dot") {
     return (
       <svg viewBox="0 0 48 48" aria-hidden>

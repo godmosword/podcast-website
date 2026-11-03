@@ -4,6 +4,7 @@ import {
   PASS_FAR,
   PASS_LENGTH,
   PLATFORM_TOP,
+  SIGNAL_MIN_W,
   SIGNAL_WORLD,
   STATION_WORLD,
   cameraTravel,
@@ -15,6 +16,7 @@ import {
   LANDMARK_AHEAD,
   landmarkBox,
   postScreenBox,
+  signalBoxWidth,
   signalWorld,
   stopPostWorld,
   treeVisible,
@@ -186,6 +188,17 @@ describe("前窗：停車柱與門形線柱", () => {
     // 目標 0.65 時停車柱在 399 公尺，400 公尺那一座要拿掉。
     expect(portalVisible(400, stopPostWorld(0.65))).toBe(false);
     expect(portalVisible(350, stopPostWorld(0.65))).toBe(true);
+  });
+});
+
+describe("前窗：出發號誌燈箱不會小成一個點", () => {
+  it("矮前窗遠處撐到最小寬；高前窗近處照比例，不被撐大；對向列車還在時不撐大（不蓋住列車）", () => {
+    const short = viewFor(375, 176);
+    expect(signalBoxWidth(short, SIGNAL_WORLD)).toBe(SIGNAL_MIN_W);
+    expect(signalBoxWidth(short, SIGNAL_WORLD, true)).toBeLessThan(SIGNAL_MIN_W);
+    const tall = viewFor(390, 383);
+    expect(signalBoxWidth(tall, 12)).toBeGreaterThan(SIGNAL_MIN_W);
+    expect(signalBoxWidth(tall, 12)).toBeCloseTo((tall.f / 12) * 1.1, 6);
   });
 });
 

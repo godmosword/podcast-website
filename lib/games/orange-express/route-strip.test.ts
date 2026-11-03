@@ -11,7 +11,7 @@ describe("路線條", () => {
   it("大司機、小站長有（小站長 PR-I4 起）；開局小橘在最左邊，每一站的朋友都站在章上", () => {
     expect(routeStripFor(createRun("drive", "little"))).toBeNull();
     expect(routeStripFor(createRun("look"))).toBeNull();
-    expect(routeStripFor(createRun("captain"))!.stops.map((stop) => stop.waiting.length)).toEqual([2, 2, 2]);
+    expect(routeStripFor(createRun("captain"))!.stops.map((stop) => stop.waiting.length)).toEqual([2, 2, 1]);
     const strip = routeStripFor(createRun("drive", "big"))!;
     expect(strip.train).toBe(0);
     expect(strip.stops.map((stop) => stop.name)).toEqual(["遊樂園", "橘子坡", "回家"]);
@@ -25,6 +25,17 @@ describe("路線條", () => {
     expect(strip.next).toBe("遊樂園");
     expect(strip.stops.map((stop) => stop.next)).toEqual([true, false, false]);
     expect(strip.stops.some((stop) => stop.reached)).toBe(false);
+  });
+
+  it("每位朋友只上車一次（小站長回家站原本又接一次 Bonbon、馬米），車上的人不重複", () => {
+    for (const run of [createRun("captain"), createRun("drive", "big"), createRun("drive", "little"), createRun("look")]) {
+      const ids = run.stations.flatMap((station) => station.passengers.map((rider) => rider.id));
+      expect(new Set(ids).size).toBe(ids.length);
+    }
+    const done = at(createRun("captain"), { stationIndex: 2, phase: "route-done" });
+    expect(routeStripFor(done)?.riding.map((rider) => rider.id) ?? []).toEqual([]);
+    const home = at(createRun("captain"), { stationIndex: 2, phase: "running" });
+    expect(routeStripFor(home)!.riding.map((rider) => rider.id)).toEqual(["bonbon", "dot", "xiaonan", "sprout"]);
   });
 
   it("進站後讓給停車目標條；到終點不出", () => {

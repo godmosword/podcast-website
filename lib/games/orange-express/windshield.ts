@@ -62,6 +62,18 @@ export const SIGNAL_WORLD = 36;
 const SIGNAL_X = 2.3;
 /** 燈箱中心離地多高（公尺）。比真的矮：靠近時燈箱才不會跑到前窗頂端、被提示條蓋住。 */
 const SIGNAL_HEAD = 2.8;
+/**
+ * 燈箱最窄這麼寬（像素）。矮前窗（375×553 小站長約 176px 高）在 36 公尺外照比例只有 6px，
+ * 號誌題要看的燈只剩一個點（I4 設計審）；遠處撐到這麼寬，近了照比例長大。
+ */
+export const SIGNAL_MIN_W = 14;
+/** 對向列車開過來時的下限（原本的）：燈箱立在兩條軌道中間，撐大會把遠處的對向列車整個蓋住（I5 設計審）。 */
+const SIGNAL_MIN_W_PASSING = 6;
+
+/** 出發號誌燈箱在前窗上的寬（像素）。紅燈等的就是對向列車：它還在前窗時燈箱照比例，不撐大。 */
+export function signalBoxWidth(view: View, z: number, passing = false): number {
+  return widthAt(view, z, 1.1, passing ? SIGNAL_MIN_W_PASSING : SIGNAL_MIN_W);
+}
 /** 對向列車：從多遠出現、車身多長。 */
 export const PASS_FAR = 220;
 export const PASS_LENGTH = 110;
@@ -1089,19 +1101,21 @@ function drawSignal(
   at: number,
   aspect: SignalAspect = "green",
   halo = false,
+  passing = false,
 ): void {
   const z = at - travel;
   if (z <= Z_NEAR + 0.6 || z >= Z_FAR) return;
   const foot = project(view, SIGNAL_X, 0, z);
   const head = project(view, SIGNAL_X, SIGNAL_HEAD, z);
-  const w = widthAt(view, z, 1.1, 6);
+  const w = signalBoxWidth(view, z, passing);
   const h = w * 1.9;
   ctx.fillStyle = POLE;
-  const pole = widthAt(view, z, 0.16, 1.5);
+  const pole = widthAt(view, z, 0.16, 2);
   ctx.fillRect(foot.x - pole / 2, head.y, pole, foot.y - head.y);
   const r = w / 2;
-  const top = head.y - h / 2;
-  const bottom = head.y + h / 2;
+  // 撐大時往下長：箱頂留在照比例的位置。矮前窗上緣有路線條，往上長會把上面的綠燈蓋進去（I5）。
+  const top = head.y - (widthAt(view, z, 1.1, 0) * 1.9) / 2;
+  const bottom = top + h;
   ctx.fillStyle = SIGNAL_BOX;
   ctx.beginPath();
   ctx.arc(head.x, top + r, r, Math.PI, 0);
@@ -1365,7 +1379,7 @@ export function drawWindshield(
     if (bridgeZ) drawBridge(ctx, view, bridgeZ[0], bridgeZ[1]);
     drawPortals(ctx, view, travel, tunnelZ, stopPostWorld(paint.target));
     // 號誌最後畫：看得到它的時候，門形線柱、架空線、鐵橋都比它遠，不能從燈上劃過去。
-    drawSignal(ctx, view, travel, signalAt, paint.signal, paint.signalHalo === true);
+    drawSignal(ctx, view, travel, signalAt, paint.signal, paint.signalHalo === true, passing !== null);
   };
 
   ctx.clearRect(0, 0, width, height);
@@ -1380,6 +1394,8 @@ export function drawWindshield(
     drawSigns(ctx, view, travel, nearSigns);
     // 隧道山體很寬，比山腳近的樹也會被它蓋掉只剩一條扁餅；比隧道口近的樹再畫一次。
     drawTrees(ctx, view, travel, paint, tunnelZ[0]);
-    if (signalAt - travel < tunnelZ[0]) drawSignal(ctx, view, travel, signalAt, paint.signal, paint.signalHalo === true);
+    if (signalAt - travel < tunnelZ[0]) {
+      drawSignal(ctx, view, travel, signalAt, paint.signal, paint.signalHalo === true, passing !== null);
+    }
   }
 }

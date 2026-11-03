@@ -3,6 +3,7 @@ import { EVENT_KINDS, routeEvents } from "@/lib/games/orange-express/events";
 import { JOURNAL_EVENT_KINDS } from "@/lib/games/orange-express/journal-record";
 import {
   EMPTY_JOURNAL,
+  freshStamps,
   greensOf,
   nextGoal,
   normalizeOrangeExpressJournal,
@@ -104,6 +105,21 @@ describe("記一趟與沿途見聞", () => {
     expect(journal.landmarks).toEqual(["ferris", "house", "orange-tree"]);
     expect(journal.goals.big).toBeUndefined();
     expect(greensOf(b)).toBe(1);
+  });
+
+  it("這一趟新拿到的章：只算原本沒有的；什麼都沒多就是空的", () => {
+    const a = finished(["green", "green", "green"], { landmarkGreets: [0] });
+    const first = recordRun(EMPTY_JOURNAL, { ...a, events: allEventsDone(a) }, null);
+    expect(freshStamps(EMPTY_JOURNAL, first)).toEqual({
+      events: ["ducks", "crossing", "wave", "race"],
+      landmarks: ["ferris"],
+    });
+    const b = finished(["green", "green", "green"], { landmarkGreets: [0, 2] });
+    expect(freshStamps(first, recordRun(first, { ...b, events: allEventsDone(b) }, null))).toEqual({
+      events: [],
+      landmarks: ["house"],
+    });
+    expect(freshStamps(first, first)).toEqual({ events: [], landmarks: [] });
   });
 
   it("空的紀錄凍住，誰也改不到", () => {

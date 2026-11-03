@@ -8,7 +8,7 @@ import type { RunGoal } from "@/lib/games/orange-express/journal";
 import type { Station } from "@/lib/games/orange-express/types";
 import styles from "./orange-express.module.css";
 
-/** 任務卡上要念的名字（不印名字的朋友不念；小站長同一位朋友接兩次也只念一次）。 */
+/** 任務卡上要念的名字（不印名字的朋友不念；同一個名字只念一次）。 */
 export function missionNames(stations: readonly Station[]): string[] {
   const names = stations.flatMap((station) =>
     station.passengers.filter((rider) => rider.showName !== false).map((rider) => rider.name),
@@ -31,7 +31,7 @@ export function OrangeExpressMissionCard({
   goal?: RunGoal | null;
 }) {
   const line = missionLine(missionNames(stations));
-  // 同一位朋友只畫一次（小站長第一站與回家站都有 Bonbon、馬米）：臉跟念出來的名字對得上（PR-I4 設計審）。
+  // 同一位朋友只畫一次：臉跟念出來的名字對得上（PR-I4 設計審；資料現在不重複，留著當保險）。
   const seen = new Set<string>();
   const faces = stations.map((station) =>
     station.passengers.filter((rider) => {

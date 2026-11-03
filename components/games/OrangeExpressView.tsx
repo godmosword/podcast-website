@@ -61,9 +61,11 @@ import {
 } from "@/lib/games/orange-express/copy";
 import {
   EMPTY_JOURNAL,
+  freshStamps,
   nextGoal,
   progressOf,
   recordRun,
+  type JournalStamps,
   type OrangeExpressJournal,
   type RunGoal,
   type RunProgress,
@@ -195,6 +197,8 @@ export function OrangeExpressView({
   const [missionGoal, setMissionGoal] = useState<RunGoal | null>(null);
   /** 標題的沿途見聞：存檔只在瀏覽器讀得到，掛載後才讀（伺服器先畫空的，避免水合不一致）。 */
   const [journal, setJournal] = useState<OrangeExpressJournal>(EMPTY_JOURNAL);
+  /** 剛開完的那一趟新拿到的章：回標題時彈一下；開下一趟就清掉。 */
+  const [fresh, setFresh] = useState<JournalStamps | null>(null);
   const [level, setLevel] = useState<LevelId>("look");
   const [run, setRun] = useState<RunState | null>(null);
   const [shake, setShake] = useState(false);
@@ -345,6 +349,7 @@ export function OrangeExpressView({
     resultSpoken.current = false;
     journalRecorded.current = false;
     setOutcome({ progress: null, goal: null });
+    setFresh(null);
     doorSpeech.current = null;
     setDoorHint(false);
     // 掛鉤在（測試、視覺基準）時不示範，除非掛鉤寫 coach: true。
@@ -743,7 +748,9 @@ export function OrangeExpressView({
         const earlyDoors = instance.earlyDoorCount();
         const goal = nextGoal(run, starMissReason(run, earlyDoors));
         setOutcome({ progress: progressOf(before, run, earlyDoors), goal });
-        saveOrangeExpressJournal(recordRun(before, run, goal));
+        const after = recordRun(before, run, goal);
+        setFresh(freshStamps(before, after));
+        saveOrangeExpressJournal(after);
       }
       setScreen("result");
       syncHost();
@@ -868,6 +875,8 @@ export function OrangeExpressView({
           <p className={styles.route}>{COPY.routeName}</p>
           <OrangeExpressJournalRow
             journal={journal}
+            fresh={fresh}
+            reduced={reducedMotion}
             onSpeak={(text) => {
               if (voiceRef.current) speakText(text, { interrupt: true, volume: volumeRef.current });
             }}
