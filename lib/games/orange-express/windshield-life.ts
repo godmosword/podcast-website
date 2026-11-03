@@ -3,8 +3,9 @@ import { project, segment, widthAt, Z_NEAR, type Pt, type View } from "@/lib/gam
 import type { PassengerId, SceneId } from "@/lib/games/orange-express/types";
 
 /**
- * 前窗自己會動的小東西（PR-J3）：跟著時鐘（秒）動，不跟著車。時鐘由畫面給：
- * 定格（測試、視覺基準）與減少動態時固定 0，畫面跟以前一樣定住。只畫幾何，不做模糊；同一個畫面新增會動的東西不超過兩樣。
+ * 前窗自己會動的小東西（PR-J3、J4）：跟著時鐘（秒）動，不跟著車。時鐘由畫面給：
+ * 定格（測試、視覺基準）與減少動態時固定 0，畫面跟以前一樣定住。只畫幾何，不做模糊。
+ * 保持克制：雲、樹、浪都是慢的小動作；搶眼的（鳥群、朋友小跳）少而短——鳥在進站與沿途事件時不飛，朋友一次只跳一個。
  */
 
 /** 雲每秒往右飄前窗寬的這麼多（很慢：約 2 分鐘飄過一個前窗）。 */
@@ -180,15 +181,18 @@ export function drawWaiting(
     const z = postWorld - WAIT_BEFORE_POST - i * WAIT_GAP - travel;
     if (z <= Z_NEAR + 1 || z > WAIT_FAR) return;
     const x = WAIT_X - (i % 2) * 0.7;
-    const feet = project(view, x, platformTop, z);
-    const top = project(view, x, platformTop + 1.3, z);
-    const head = project(view, x, platformTop + 1.72, z);
+    const hop = friendHop(clock, i, riders.length, z);
+    const feet = project(view, x, platformTop + hop, z);
+    const top = project(view, x, platformTop + hop + 1.3, z);
+    const head = project(view, x, platformTop + hop + 1.72, z);
     const body = widthAt(view, z, 0.85, 3);
     const r = widthAt(view, z, 0.36, 2);
     const color = WAIT_BODY[id];
+    // 影子留在月台上，跳起來時人離開影子。
+    const ground = project(view, x, platformTop, z);
     ctx.fillStyle = SHADOW;
     ctx.beginPath();
-    ctx.ellipse(feet.x, feet.y, body * 0.75, Math.max(1, body * 0.18), 0, 0, Math.PI * 2);
+    ctx.ellipse(ground.x, ground.y, body * 0.75, Math.max(1, body * 0.18), 0, 0, Math.PI * 2);
     ctx.fill();
     // 揮手：朝軌道那一側（畫面右邊）的肩膀舉高、左右擺；先畫手再畫頭，手不會蓋到臉。
     const shoulder = { x: top.x + body * 0.42, y: top.y + body * 0.25 };
@@ -202,4 +206,59 @@ export function drawWaiting(
     ctx.fill();
     drawHead(ctx, id, head, r);
   });
+}
+
+/** 浪線左右滑（公尺）：每條浪相位不同；時鐘 0 時在原位。 */
+export function waveSlide(clock: number, z: number): number {
+  return (Math.sin(clock * 0.9 + z * 0.37) - Math.sin(z * 0.37)) * 0.8;
+}
+
+/** 煙囪的三團煙：每 SMOKE_CYCLE 秒輪一次，rise 0 → 1 往上飄；剛冒出來先淡入，越高越淡（不會「啵」一下冒出來）。 */
+const SMOKE_CYCLE = 3.6;
+const SMOKE_FADE_IN = 0.15;
+
+export type Puff = { rise: number; alpha: number };
+
+export function smokePuffs(clock: number): Puff[] {
+  return [0, 1, 2].map((k) => {
+    const rise = (((clock / SMOKE_CYCLE + k / 3) % 1) + 1) % 1;
+    return { rise, alpha: 0.85 * Math.min(1, rise / SMOKE_FADE_IN) * (1 - rise) };
+  });
+}
+
+/** 朋友小跳：一跳這麼久（秒）；每人至少隔這麼久才再輪到（一站一位時也不會一直跳）。 */
+const HOP_TIME = 0.4;
+const HOP_TURN = 0.7;
+const HOP_ROUND = 2;
+
+/**
+ * 車開近了（30 公尺內），月台上的朋友開心地小跳（公尺）：一次只有一個人跳、輪流，每人約 2 秒輪到一次（設計審）。
+ * 時鐘 0（定格、減少動態）時大家站好不跳。
+ */
+export function friendHop(clock: number, index: number, count: number, z: number): number {
+  if (z > 30 || clock <= 0 || count <= 0) return 0;
+  const turn = Math.max(HOP_TURN, HOP_ROUND / count);
+  const t = (clock % (turn * count)) - index * turn;
+  if (t < 0 || t >= HOP_TIME) return 0;
+  return Math.sin((Math.PI * t) / HOP_TIME) * 0.22;
+}
+
+/** 比天空深一點的暖灰：淡色煙疊在淺天、淡綠山上會看不見（PR-J4 量過）。 */
+const SMOKE = "rgb(204, 198, 192)";
+
+/** 回家站小房子煙囪冒的煙：圓團往上飄、越飄越大越淡。cx／cy 是煙囪口，s 是一公尺幾個像素。 */
+export function drawSmoke(ctx: CanvasRenderingContext2D, cx: number, cy: number, s: number, clock: number): void {
+  const alpha = ctx.globalAlpha;
+  ctx.fillStyle = SMOKE;
+  try {
+    for (const puff of smokePuffs(clock)) {
+      ctx.globalAlpha = alpha * puff.alpha;
+      ctx.beginPath();
+      ctx.arc(cx + puff.rise * 1.2 * s, cy - puff.rise * 4.5 * s, (0.7 + puff.rise * 1.0) * s, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  } finally {
+    // 不管中間有沒有出錯，都還原成呼叫前的透明度，後面畫的東西不會變淡。
+    ctx.globalAlpha = alpha;
+  }
 }

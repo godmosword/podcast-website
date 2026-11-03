@@ -3,10 +3,14 @@ import {
   boatBob,
   cloudAt,
   drawFlock,
+  drawSmoke,
   drawWaiting,
   ferrisSpin,
   flockAt,
+  friendHop,
+  smokePuffs,
   treeSway,
+  waveSlide,
 } from "@/lib/games/orange-express/windshield-life";
 import { viewFor } from "@/lib/games/orange-express/windshield-geometry";
 
@@ -74,5 +78,43 @@ describe("前窗自己會動的小東西（PR-J3）", () => {
     // 舊 iOS Safari 沒有 roundRect：身體用 arcTo 畫。
     expect(near.calls).not.toContain("roundRect");
     expect(near.calls).toContain("arcTo");
+  });
+
+  it("收尾的小動態（PR-J4）：浪線時鐘 0 在原位；煙三團先淡入、越高越淡；朋友車近了才跳、一次只跳一個", () => {
+    expect(waveSlide(0, 37)).toBe(0);
+    expect(Math.abs(waveSlide(2, 37))).toBeLessThanOrEqual(1.6);
+    const puffs = smokePuffs(1);
+    expect(puffs).toHaveLength(3);
+    for (const puff of puffs) {
+      expect(puff.rise).toBeGreaterThanOrEqual(0);
+      expect(puff.rise).toBeLessThan(1);
+      expect(puff.alpha).toBeCloseTo(0.85 * Math.min(1, puff.rise / 0.15) * (1 - puff.rise), 9);
+    }
+    expect(friendHop(0.1, 0, 2, 60)).toBe(0);
+    // 定格、減少動態（時鐘 0）：就算車很近也站好不跳。
+    for (const index of [0, 1]) expect(friendHop(0, index, 2, 10)).toBe(0);
+    for (let t = 0.01; t < 8; t += 0.02) {
+      const hops = [0, 1].map((i) => friendHop(t, i, 2, 12));
+      for (const hop of hops) {
+        expect(hop).toBeGreaterThanOrEqual(0);
+        expect(hop).toBeLessThanOrEqual(0.22);
+      }
+      // 一次只有一個人在空中。
+      expect(hops.filter((hop) => hop > 0).length).toBeLessThanOrEqual(1);
+    }
+    // 一站只有一位：也是約 2 秒才跳一次，跳 0.4 秒。
+    const airborne = Array.from({ length: 400 }, (_, k) => friendHop(0.005 + k * 0.01, 0, 1, 12) > 0).filter(Boolean).length;
+    expect(airborne).toBeGreaterThan(70);
+    expect(airborne).toBeLessThan(90);
+    const { ctx, calls } = recorder();
+    drawSmoke(ctx, 10, 10, 4, 1);
+    expect(calls.filter((name) => name === "arc")).toHaveLength(3);
+    // 透明度還原成呼叫前的值，畫到一半出錯也一樣。
+    const real = { globalAlpha: 0.5, fillStyle: "", beginPath() {}, arc() {}, fill() {} };
+    drawSmoke(real as unknown as CanvasRenderingContext2D, 10, 10, 4, 1);
+    expect(real.globalAlpha).toBe(0.5);
+    const broken = { ...real, globalAlpha: 0.8, fill() { throw new Error("boom"); } };
+    expect(() => drawSmoke(broken as unknown as CanvasRenderingContext2D, 10, 10, 4, 1)).toThrow("boom");
+    expect(broken.globalAlpha).toBe(0.8);
   });
 });

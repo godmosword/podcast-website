@@ -853,6 +853,18 @@ test("visual：小橘特快車月台上等車的朋友 390 light（時鐘釘住�
   );
 });
 
+/** 回家站（PR-J4）：小房子煙囪冒煙、海上浪線與帆船，月台上馬米（橘耳罩、棕衣服）揮手。時鐘釘 1 秒。 */
+test("visual：小橘特快車回家站煙囪冒煙 390 light（時鐘釘住）", async ({ page }) => {
+  await openOrangeExpress(page, PHONE, { clock: 1 });
+  await startOrangeExpress(page, "自己開");
+  await jumpOrangeExpress(page, { stationIndex: 2, progress: 0.6, speed: 0.25 });
+  await settleOrangeExpress(page);
+  await expect(page.getByTestId("orange-express-windshield")).toHaveScreenshot(
+    "orange-express-home-smoke-390x844-light.png",
+    orangeShot("light"),
+  );
+});
+
 /** 沿途事件做到時，小橘在前窗右下角探頭笑（PR-I2）；矮手機收起了儀表徽章，這是看得到表情的地方。 */
 test("visual：小橘特快車做到事件的開心小橘 375×553 light（減少動態）", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });

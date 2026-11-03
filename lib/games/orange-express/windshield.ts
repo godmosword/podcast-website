@@ -28,9 +28,11 @@ import {
   boatBob,
   cloudAt,
   drawFlock,
+  drawSmoke,
   drawWaiting,
   ferrisSpin,
   treeSway,
+  waveSlide,
 } from "@/lib/games/orange-express/windshield-life";
 import { SIGNAL_UNTIL } from "@/lib/games/orange-express/routes";
 import type {
@@ -524,7 +526,7 @@ function drawGround(
     quad(ctx, view, 8, 3000, 0, Z_NEAR, 90, WATER);
     quad(ctx, view, 6.6, 9, 0.01, Z_NEAR, Z_HORIZON, SAND);
     for (const z of repeats(travel, 12, Z_NEAR, 120)) {
-      const a = project(view, 12 + hashAt(z + travel) * 30, 0.02, z);
+      const a = project(view, 12 + hashAt(z + travel) * 30 + waveSlide(clock, z + travel), 0.02, z);
       const len = widthAt(view, z, 2.4, 3);
       segment(ctx, a, { x: a.x + len, y: a.y }, WAVE, widthAt(view, z, 0.12, 1));
     }
@@ -940,10 +942,19 @@ function drawOrangeTree(ctx: CanvasRenderingContext2D, x: number, ground: number
 }
 
 /** 回家：草坡上的紅屋頂小房子，有煙囪和黃色亮窗。 */
-function drawHouse(ctx: CanvasRenderingContext2D, x: number, ground: number, s: number, moundHeight = 1.4): void {
+function drawHouse(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  ground: number,
+  s: number,
+  moundHeight: number,
+  clock: number,
+): void {
   mound(ctx, x, ground, 4.6 * s, moundHeight * s);
   const base = ground - 0.9 * s;
   const top = base - 4 * s;
+  // 煙囪冒煙（PR-J4）：家裡有人在等。
+  drawSmoke(ctx, x + 1.95 * s, top - 3 * s, s, clock);
   ctx.fillStyle = HOUSE_ROOF_DARK;
   ctx.fillRect(x + 1.5 * s, top - 2.8 * s, 0.9 * s, 1.8 * s);
   ctx.fillStyle = HOUSE_WALL;
@@ -980,7 +991,7 @@ function drawLandmark(
   if (id === "ferris") drawFerris(ctx, foot.x, foot.y, s, ferrisSpin(clock));
   else if (id === "orange-tree") drawOrangeTree(ctx, foot.x, foot.y, s);
   // 矮手機的回家站在海那一側：小房子放大，草坡墊高，像遠方小島上的家。
-  else drawHouse(ctx, foot.x, foot.y, s * landmarkScale(id, compact), compact ? 2.4 : 1.4);
+  else drawHouse(ctx, foot.x, foot.y, s * landmarkScale(id, compact), compact ? 2.4 : 1.4, clock);
 }
 
 /** 道碴前景（16 公尺內）撒兩色圓石點，越遠越小；鋼軌那條不撒。位置跟著世界走，不會閃。 */
