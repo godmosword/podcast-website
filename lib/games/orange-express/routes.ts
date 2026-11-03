@@ -1,4 +1,5 @@
 import { duckZones, eventPlan, scenicEvent } from "@/lib/games/orange-express/events";
+import { legStart } from "@/lib/games/orange-express/journey";
 import type {
   CourseId,
   DriverId,
@@ -42,7 +43,7 @@ export type CourseRules = {
   bridgeGreet: boolean;
   /** 速度表上畫速度旗（大司機沒有：看不到牌子，旗子只是多一個要讀的符號）。 */
   speedFlag: boolean;
-  /** 旅程：站前插風景段、前窗上緣有路線條（只有大司機）。關掉就回到只有三個站段。 */
+  /** 旅程：站前插風景段、前窗上緣有路線條（大司機、小站長）。關掉就回到只有三個站段。 */
   journey: boolean;
 };
 
@@ -82,6 +83,8 @@ export const COURSE_RULES: Record<CourseId, CourseRules> = {
     speedFlag: false,
     journey: true,
   },
+  // 小站長（PR-I4）：也有旅程（風景段、沿途事件、任務卡、路線條）。速限牌、月台指差留在站段；
+  // 出發號誌與號誌指差題在出站處（第一段風景段開頭），風景段裡沒有其他指差題、不放速限牌。
   captain: {
     signs: true,
     autoBrake: true,
@@ -91,7 +94,7 @@ export const COURSE_RULES: Record<CourseId, CourseRules> = {
     redSignal: true,
     bridgeGreet: true,
     speedFlag: true,
-    journey: false,
+    journey: true,
   },
 };
 
@@ -211,8 +214,9 @@ export const SIGNAL_UNTIL = 0.04;
  */
 export const PLATFORM_TASK_LEAD = 0.13;
 
-function pointsFor(id: Station["id"], spec: WindowSpec, signs: readonly SpeedSign[]): PointTask[] {
-  const out: PointTask[] = [{ id: `${id}-signal`, kind: "signal", at: 0, until: SIGNAL_UNTIL }];
+/** depart：出站處（有風景段時是第一段風景段開頭，負的）；號誌題跟著出發號誌立在那裡。 */
+function pointsFor(id: Station["id"], spec: WindowSpec, signs: readonly SpeedSign[], depart = 0): PointTask[] {
+  const out: PointTask[] = [{ id: `${id}-signal`, kind: "signal", at: depart, until: depart + SIGNAL_UNTIL }];
   const first = signs[0];
   if (first) {
     const from = Math.max(SIGNAL_UNTIL + 0.001, first.at - 0.04);
@@ -253,7 +257,7 @@ function station(
     // 第一站不放：開局推動力不走最像壞掉。有對向列車的站才放，等待時有東西看。
     holdAtStart: rules.redSignal && index > 0 && scenery.passAt !== null,
     signs,
-    points: rules.pointing ? pointsFor(id, spec, scenery.signs) : [],
+    points: rules.pointing ? pointsFor(id, spec, scenery.signs, legStart({ scenic })) : [],
     scenic,
   };
 }

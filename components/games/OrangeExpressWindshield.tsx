@@ -133,7 +133,8 @@ export function OrangeExpressWindshield({
     return () => window.clearTimeout(timer);
   }, [mission]);
   const pending = pendingPoint(run);
-  const task = coach.on && pending?.kind === "platform" ? null : pending;
+  // 示範那站不出月台題；開局任務卡還在時不出號誌題（小站長 PR-I4：一次只做一件事。車要碰了桿子才走，卡片一收題目就出，不會錯過）。
+  const task = (coach.on && pending?.kind === "platform") || mission === "shown" ? null : pending;
   const signalHalo = run.signal === "red" && run.power > 0;
   const event = activeEvent(run);
   const eventKind = event?.kind ?? null;

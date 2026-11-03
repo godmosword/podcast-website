@@ -7,6 +7,7 @@ import {
   RACE_WIN,
   WAVE_AFTER,
   activeEvent,
+  eventCue,
   eventKey,
   eventPending,
   eventPlan,
@@ -16,7 +17,8 @@ import {
   sectionEvent,
 } from "@/lib/games/orange-express/events";
 import { sectionStart } from "@/lib/games/orange-express/journey";
-import { createRun, currentLimit, step, withHook } from "@/lib/games/orange-express/reducer";
+import { windowNotice } from "@/lib/games/orange-express/notice";
+import { createRun, currentLimit, pendingPoint, step, withHook } from "@/lib/games/orange-express/reducer";
 import { SCENIC_LENGTH, stationsFor } from "@/lib/games/orange-express/routes";
 import type { RunState, ScenicEventKind } from "@/lib/games/orange-express/types";
 
@@ -65,7 +67,7 @@ describe("沿途事件：排法", () => {
     expect(distinct.size).toBeGreaterThan(5);
   });
 
-  it("排進路線：大司機五段都有事件，其他規則組沒有；小鴨那段有看不到的降速區", () => {
+  it("排進路線：大司機、小站長五段都有事件，低齡沒有；小鴨那段有看不到的降速區", () => {
     const stations = stationsFor("drive", "big", 3);
     const events = routeEvents(stations);
     expect(events.map((event) => event.kind)).toEqual(eventPlan(3));
@@ -74,7 +76,8 @@ describe("沿途事件：排法", () => {
       expect(station.slowZones).toHaveLength(ducks);
     }
     expect(routeEvents(stationsFor("drive", "little"))).toEqual([]);
-    expect(routeEvents(stationsFor("captain"))).toEqual([]);
+    expect(routeEvents(stationsFor("look"))).toEqual([]);
+    expect(routeEvents(stationsFor("captain", "big", 3)).map((event) => event.kind)).toEqual(eventPlan(3));
   });
 
   it("提示比事件點早 4 秒（巡航）以上：聽完一句還有時間找桿子，也容得下作用延遲", () => {
@@ -278,5 +281,63 @@ describe("沿途事件：生命週期", () => {
       expect(event.at).toBeCloseTo(sectionStart(station, event.section) + spot.at * SCENIC_LENGTH, 9);
       expect(event.at).toBeLessThan(0);
     }
+  });
+});
+
+describe("小站長的旅程（PR-I4）", () => {
+  /** 小站長的賽跑：在紅燈站出站那一段（第 1 或 3 格，剛好都是要等對向列車的站）。 */
+  function captainRace(): { seed: number; stationIndex: number; section: number } {
+    for (let seed = 0; seed < 200; seed += 1) {
+      const found = routeEvents(stationsFor("captain", "big", seed)).find((event) => event.kind === "race");
+      if (found) return { seed, stationIndex: found.stationIndex, section: found.section };
+    }
+    throw new Error("找不到賽跑");
+  }
+
+  it("賽跑排在要等紅燈的那一段：紅燈時不出提示、不結算；轉綠後號誌題還掛著也先不出，題目過了才開始", () => {
+    const { seed, stationIndex, section } = captainRace();
+    expect(stationsFor("captain", "big", seed)[stationIndex]!.holdAtStart).toBe(true);
+    const red = withHook(createRun("captain", "big", seed), { stationIndex, section, signal: "red", speed: 0 });
+    const event = sectionEvent(red)!;
+    expect(event.kind).toBe("race");
+    expect(activeEvent(red)).toBeNull();
+    expect(eventPending(red)).toBeNull();
+    // 推到快也不算：車不走、題目也還沒開始。
+    const pushed = tick(step(red, { type: "set-power", notch: 4 }));
+    expect(pushed.events[event.key]).toBeUndefined();
+    // 轉綠，號誌題還掛著：一次只做一件事。
+    const green = { ...pushed, signal: "green" as const };
+    expect(pendingPoint(green)?.kind).toBe("signal");
+    expect(eventPending(green)).toBeNull();
+    // 按了號誌題：賽跑提示出來。
+    const pointed = { ...green, pointsDone: [...green.pointsDone, pendingPoint(green)!.id] };
+    expect(eventPending(pointed)?.kind).toBe("race");
+    // 一路推快到終點：照樣跑贏。
+    const done = driveTo(pointed, event.until + 0.001, 60);
+    expect(done.events[event.key]).toBe("done");
+  });
+
+  it("小鴨：小站長沒有慢的目標速度，靠煞車慢下來；做到了不算速限牌的提前慢下來", () => {
+    for (let seed = 0; seed < 200; seed += 1) {
+      const found = routeEvents(stationsFor("captain", "big", seed)).find((e) => e.kind === "ducks" && e.stationIndex > 0);
+      if (!found) continue;
+      let s = withHook(createRun("captain", "big", seed), {
+        stationIndex: found.stationIndex,
+        section: found.section,
+        speed: 0.82,
+        power: 4,
+      });
+      const event = sectionEvent(s)!;
+      s = driveTo(s, event.hintAt + 0.01);
+      expect(eventCue(s)).toBe("slow");
+      // 提示字不說「慢」（P1／P2 的狀態字也是慢，推了卻不會變慢），說「拉煞車」。
+      expect(windowNotice(s, false)?.text).toMatch(/拉煞車$/);
+      s = step(step(s, { type: "set-power", notch: 0 }), { type: "set-brake", notch: 2 });
+      s = driveTo(s, event.until + 0.001);
+      expect(s.events[event.key]).toBe("done");
+      expect(s.earlySlows).toBe(0);
+      return;
+    }
+    throw new Error("找不到小鴨");
   });
 });

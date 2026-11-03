@@ -175,8 +175,12 @@ export function racer(scene: SceneId): string {
 }
 
 /** 沿途事件的提示：一個動作、一句話（前窗上緣＋朗讀）。 */
-export function eventHint(kind: ScenicEventKind, scene: SceneId): string {
-  if (kind === "ducks") return `${crossingCritter(scene)}要過鐵軌，慢下來`;
+/**
+ * brake：小站長（完整桿面，P1／P2 的狀態字也是「慢」，但推了不會變慢）小鴨改說「拉煞車」，
+ * 不出現「慢」字，跟亮起的煞車格對得上（PR-I4 設計審）。
+ */
+export function eventHint(kind: ScenicEventKind, scene: SceneId, brake = false): string {
+  if (kind === "ducks") return `${crossingCritter(scene)}要過鐵軌，${brake ? "拉煞車" : "慢下來"}`;
   if (kind === "crossing") return "平交道，按喇叭";
   if (kind === "wave") return "有朋友在揮手，按喇叭";
   return `跟${racer(scene)}賽跑，推到快`;

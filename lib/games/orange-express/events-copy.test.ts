@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { chimeWithinLimits, CROSSING_BELL, AUTO_BRAKE_DING } from "@/lib/games/orange-express/chime";
+import { missionNames } from "@/components/games/OrangeExpressMissionCard";
 import { eventHint, missionLine, resultComment } from "@/lib/games/orange-express/copy";
 import { cheerFor, routeEvents, sectionEvent } from "@/lib/games/orange-express/events";
 import { eventSpeech, nextSpeech, windowNotice } from "@/lib/games/orange-express/notice";
@@ -34,6 +35,8 @@ describe("沿途事件：文案", () => {
 
   it("任務卡那句", () => {
     expect(missionLine(["Bonbon", "小南", "馬米"])).toBe("今天要去接Bonbon、小南、馬米回家");
+    // 小站長（PR-I4）一站接兩位，Bonbon、馬米在第一站與回家站各接一次：只念一次，不印名字的朋友不念。
+    expect(missionLine(missionNames(stationsFor("captain")))).toBe("今天要去接Bonbon、馬米、小南回家");
   });
 
   it("結算一句話優先說事件：小動物過鐵軌每次都做到時說它；都沒做到就照舊", () => {

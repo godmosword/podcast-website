@@ -429,8 +429,11 @@ export function OrangeExpressCab({
   const hornHint =
     (bridgeGreetPending(run) && run.phase === "running") || landmarkTaskPending(run) || cue === "horn";
   // 小鴨亮動力的「慢」、賽跑亮「快」（已經在那一格就不亮）。
+  // 小站長（完整桿面，沒有慢的目標速度）推 P1／P2 不會變慢：小鴨改亮煞車的 B2（PR-I4）。
   const powers = powerNotches(run.course);
-  const powerCue = cue === "slow" ? (powers[1] ?? null) : cue === "fast" ? (powers[powers.length - 1] ?? null) : null;
+  const powerCue =
+    cue === "slow" ? (simple ? (powers[1] ?? null) : null) : cue === "fast" ? (powers[powers.length - 1] ?? null) : null;
+  const brakeCue = cue === "slow" && !simple ? 2 : null;
   const flagLamp: LampState = run.autoBrake
     ? "orange"
     : run.speed <= 0.001
@@ -511,6 +514,7 @@ export function OrangeExpressCab({
         showEffort={showEffort}
         coach={coachBrake}
         release={releaseBrake}
+        cue={brakeCue}
         onChange={onBrake}
       />
       <div className={styles.cabBottom}>

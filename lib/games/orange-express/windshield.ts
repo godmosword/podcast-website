@@ -1,4 +1,4 @@
-import { sectionAt, sectionStart } from "@/lib/games/orange-express/journey";
+import { legStart, sectionAt, sectionStart } from "@/lib/games/orange-express/journey";
 import {
   EVENT_VIEW_BEFORE,
   drawCrossingRoad,
@@ -119,6 +119,9 @@ export function cameraTravel(
   if (progress < 0 && spans.eventAt != null) return spans.eventAt * STATION_WORLD - EVENT_VIEW_BEFORE;
   if (progress < 0) {
     const track = { scenic: spans.scenic ?? [] };
+    // 有風景段時從第一段出發：剛出發、號誌題還在（或紅燈等著）時停在出站處，前窗看得到出發號誌。
+    const start = legStart(track);
+    if (progress < start + SIGNAL_UNTIL) return start * STATION_WORLD;
     const k = sectionAt(track, progress);
     const length = track.scenic[k]?.length ?? 0;
     return (sectionStart(track, k) + length / 2) * STATION_WORLD;
@@ -132,6 +135,14 @@ export function cameraTravel(
     if (within(span, progress)) return ((span.from + span.to) / 2) * STATION_WORLD;
   }
   return 0.28 * STATION_WORLD;
+}
+
+/**
+ * 出發號誌的世界位置（公尺）：出站處往前 SIGNAL_WORLD。沒有風景段時出站處就是站段起點（原本的位置）；
+ * 有風景段時（大司機、小站長的旅程）在第一段風景段開頭，紅燈等對向列車時前窗看得到它（PR-I4）。
+ */
+export function signalWorld(scenic: readonly ScenicSection[]): number {
+  return legStart({ scenic }) * STATION_WORLD + SIGNAL_WORLD;
 }
 
 /** 對向列車車頭離鏡頭幾公尺（相對速度固定，跟我們開多快無關）。 */
@@ -588,6 +599,8 @@ export type TreeSpot = {
   compact?: boolean;
   /** 路旁速限牌（立在左邊）：牌子前後左邊不生樹。 */
   signs?: readonly SpeedSign[];
+  /** 出發號誌的世界位置（公尺）；沒給是站段起點後 SIGNAL_WORLD（有風景段時在出站處，見 signalWorld）。 */
+  signalAt?: number;
 };
 
 /**
@@ -599,7 +612,8 @@ export function treeVisible(spot: TreeSpot): boolean {
   const { side, world, z, targetWorld, scene, tunnel, bridge } = spot;
   if (z < TREE_NEAR || z > TREE_FAR) return false;
   // 出發號誌前後兩側淨空：綠燈落在綠樹冠前面最容易看不出來。
-  if (world >= SIGNAL_WORLD - SIGNAL_CLEAR_BEFORE && world <= SIGNAL_WORLD + SIGNAL_CLEAR_AFTER) return false;
+  const signal = spot.signalAt ?? SIGNAL_WORLD;
+  if (world >= signal - SIGNAL_CLEAR_BEFORE && world <= signal + SIGNAL_CLEAR_AFTER) return false;
   if (side < 0 && (spot.signs ?? []).some((sign) => Math.abs(world - sign.at * STATION_WORLD) <= SIGN_CLEAR)) return false;
   if (scene === "city") return false;
   if (scene === "sea" && side > 0) return false;
@@ -670,7 +684,7 @@ function drawTrees(
   ctx: CanvasRenderingContext2D,
   view: View,
   travel: number,
-  paint: Pick<WindshieldPaint, "scene" | "tunnel" | "bridge" | "target" | "compact" | "signs">,
+  paint: Pick<WindshieldPaint, "scene" | "tunnel" | "bridge" | "target" | "compact" | "signs" | "scenic">,
   nearerThan = TREE_FAR,
 ): void {
   const scene = paint.scene ?? "field";
@@ -690,6 +704,7 @@ function drawTrees(
         bridge: paint.bridge ?? null,
         compact: paint.compact,
         signs: paint.signs,
+        signalAt: signalWorld(paint.scenic ?? []),
       };
       if (!treeVisible(spot)) {
         continue;
@@ -1071,10 +1086,11 @@ function drawSignal(
   ctx: CanvasRenderingContext2D,
   view: View,
   travel: number,
+  at: number,
   aspect: SignalAspect = "green",
   halo = false,
 ): void {
-  const z = SIGNAL_WORLD - travel;
+  const z = at - travel;
   if (z <= Z_NEAR + 0.6 || z >= Z_FAR) return;
   const foot = project(view, SIGNAL_X, 0, z);
   const head = project(view, SIGNAL_X, SIGNAL_HEAD, z);
@@ -1326,6 +1342,7 @@ export function drawWindshield(
     : null;
   const passing =
     paint.passing == null ? null : paint.reduced ? REDUCED_PASS : paint.passing;
+  const signalAt = signalWorld(paint.scenic ?? []);
 
   const outside = () => {
     drawSky(ctx, view, palette, scene);
@@ -1348,7 +1365,7 @@ export function drawWindshield(
     if (bridgeZ) drawBridge(ctx, view, bridgeZ[0], bridgeZ[1]);
     drawPortals(ctx, view, travel, tunnelZ, stopPostWorld(paint.target));
     // 號誌最後畫：看得到它的時候，門形線柱、架空線、鐵橋都比它遠，不能從燈上劃過去。
-    drawSignal(ctx, view, travel, paint.signal, paint.signalHalo === true);
+    drawSignal(ctx, view, travel, signalAt, paint.signal, paint.signalHalo === true);
   };
 
   ctx.clearRect(0, 0, width, height);
@@ -1363,6 +1380,6 @@ export function drawWindshield(
     drawSigns(ctx, view, travel, nearSigns);
     // 隧道山體很寬，比山腳近的樹也會被它蓋掉只剩一條扁餅；比隧道口近的樹再畫一次。
     drawTrees(ctx, view, travel, paint, tunnelZ[0]);
-    if (SIGNAL_WORLD - travel < tunnelZ[0]) drawSignal(ctx, view, travel, paint.signal, paint.signalHalo === true);
+    if (signalAt - travel < tunnelZ[0]) drawSignal(ctx, view, travel, signalAt, paint.signal, paint.signalHalo === true);
   }
 }

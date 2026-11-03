@@ -15,6 +15,7 @@ import {
   step,
   withHook,
 } from "@/lib/games/orange-express/reducer";
+import { legStart } from "@/lib/games/orange-express/journey";
 import { stationsFor } from "@/lib/games/orange-express/routes";
 import type { RunState } from "@/lib/games/orange-express/types";
 
@@ -57,16 +58,19 @@ describe("G2 小站長紅燈等對向列車", () => {
     let s = step(captainLeavingPark(), { type: "close-doors" });
     s = step(step(s, { type: "set-brake", notch: 0 }), { type: "set-power", notch: 4 });
     expect(s.tractive).toBe(0);
+    // PR-I4 起小站長從出站處（第一段風景段開頭，負的）等紅燈。
+    const depart = s.progress;
+    expect(depart).toBeCloseTo(legStart(currentStation(s)), 9);
     s = tick(s, 1.5);
     expect(signalRed(s)).toBe(true);
     expect(s.speed).toBe(0);
-    expect(s.progress).toBe(0);
+    expect(s.progress).toBe(depart);
     expect(s.tractive).toBe(0);
     s = tick(s, 2);
     expect(signalRed(s)).toBe(false);
     expect(s.power).toBe(4);
     expect(s.speed).toBeGreaterThan(0);
-    expect(s.progress).toBeGreaterThan(0);
+    expect(s.progress).toBeGreaterThan(depart);
   });
 
   it("轉綠那一刻動力先跳一點（跟剛推下去一樣），不是從 0 慢慢爬", () => {
@@ -125,9 +129,9 @@ describe("G2 小站長紅燈等對向列車", () => {
     expect(nextStationAnnouncement(stationsFor("drive", "big")[1]!).text).toBe("下一站，橘子坡站");
   });
 
-  it("紅燈時停車預測就是原地", () => {
+  it("紅燈時停車預測就是原地（出站處）", () => {
     const s = step(captainLeavingPark(), { type: "close-doors" });
-    expect(predictStop(s)).toBe(0);
+    expect(predictStop(s)).toBe(s.progress);
   });
 
   it("withHook：跳站預設綠燈；寫 red 才從起點等，對向列車剛出現", () => {
@@ -136,11 +140,11 @@ describe("G2 小站長紅燈等對向列車", () => {
     expect(jumped.signal).toBe("green");
     const red = withHook(base, { stationIndex: 2, signal: "red", progress: 0.3, speed: 0.4 });
     expect(red.signal).toBe("red");
-    expect(red.progress).toBe(0);
+    expect(red.progress).toBeCloseTo(legStart(red.stations[2]!), 9);
     expect(red.speed).toBe(0);
     expect(red.passing).toBe(0);
     expect(withHook(red, { stationIndex: 1 }).signal).toBe("green");
-    expect(withHook(red, { progress: 0 }).signal).toBe("red");
+    expect(withHook(red, { progress: legStart(red.stations[2]!) }).signal).toBe("red");
   });
 });
 

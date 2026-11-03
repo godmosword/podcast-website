@@ -919,9 +919,9 @@ test.describe("小橘特快車：版面", () => {
         expect(horn.width).toBeGreaterThanOrEqual(48);
         expect(door.height).toBeLessThanOrEqual(56);
 
-        // 出發（號誌題＋速限牌提示）、速限牌、進站（月台題）、停好：提示、停車目標條、指差確認鈕、乘客卡彼此不重疊。
+        // 速限牌（提示＋速限牌題）、進站（月台題）、停好：提示、停車目標條、指差確認鈕、乘客卡彼此不重疊。
+        // PR-I4 起出發號誌與號誌題在出站處（風景段開頭），那裡只有號誌題一樣東西，不在這裡比。
         for (const patch of [
-          { progress: 0, speed: 0.2 },
           { progress: 0.05, speed: 0.4 },
           { progress: 0.55, speed: 0.3, brake: 2 },
           { progress: 0.65, speed: 0 },
@@ -1625,6 +1625,26 @@ test.describe("小橘特快車：沿途事件與任務卡（2026-11-02）", () =
     await expect(journal.locator('[data-got="true"]')).toHaveCount(3);
     // 整排是一顆按鈕，手指點得到。
     expect((await journal.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  });
+
+  test("小站長也有旅程（PR-I4）：路線條；紅燈等對向列車時不出賽跑提示，轉綠、按完號誌題才開始", async ({ page }) => {
+    await page.addInitScript(() => {
+      window.__orangeExpress = { driver: "big", eventSeed: 0, freeze: true };
+    });
+    await page.goto("/games/orange-express");
+    await startLevel(page, "小站長");
+    await expect(page.getByTestId("orange-express-route")).toBeVisible();
+    // 種子 0：橘子坡前第一段是賽跑，出站時紅燈。
+    await jump(page, { stationIndex: 1, section: 0, signal: "red", speed: 0 });
+    const notice = page.getByTestId("orange-express-notice");
+    await expect(notice).toHaveAttribute("data-kind", "red");
+    await expect(page.getByTestId("orange-express-windshield")).toHaveAttribute("data-event", "none");
+    await jump(page, { stationIndex: 1, section: 0, signal: "green", speed: 0 });
+    const point = page.getByTestId("orange-express-point");
+    await expect(point).toBeVisible();
+    await expect(page.getByTestId("orange-express-windshield")).toHaveAttribute("data-event", "none");
+    await point.click();
+    await expect(notice).toContainText("跟小狗賽跑，推到快");
   });
 
   test("任務卡帶上一趟留下的小目標，朗讀接在任務那句後面", async ({ page }) => {

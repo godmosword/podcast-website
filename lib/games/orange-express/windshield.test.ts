@@ -15,11 +15,13 @@ import {
   LANDMARK_AHEAD,
   landmarkBox,
   postScreenBox,
+  signalWorld,
   stopPostWorld,
   treeVisible,
   viewFor,
   windshieldFrame,
 } from "@/lib/games/orange-express/windshield";
+import { legStart } from "@/lib/games/orange-express/journey";
 import { PLATFORM_TASK_LEAD, SIGNAL_UNTIL, stationsFor } from "@/lib/games/orange-express/routes";
 import type { Phase } from "@/lib/games/orange-express/types";
 
@@ -193,14 +195,25 @@ describe("前窗：指差確認的東西要看得到（B19）", () => {
   it("號誌題整段，出發號誌都在前窗裡；減少動態時停在起點", () => {
     expect(pointingStations.length).toBeGreaterThan(0);
     for (const station of pointingStations) {
+      // PR-I4 起小站長有風景段：出發號誌與號誌題都在出站處（第一段風景段開頭）。
+      const start = legStart(station);
       const task = station.points.find((p) => p.kind === "signal")!;
-      expect(task.until).toBe(SIGNAL_UNTIL);
+      expect(task.at).toBeCloseTo(start, 9);
+      expect(task.until).toBeCloseTo(start + SIGNAL_UNTIL, 9);
       for (const progress of [task.at, task.until]) {
-        const z = SIGNAL_WORLD - cameraTravel(false, progress, "running", station.target);
+        const z = signalWorld(station.scenic) - cameraTravel(false, progress, "running", station.target);
         expect(z).toBeGreaterThan(10);
         expect(z).toBeLessThan(40);
       }
+      const spans = { scenic: station.scenic };
+      expect(cameraTravel(true, start, "running", station.target, spans)).toBeCloseTo(start * STATION_WORLD, 6);
+      expect(cameraTravel(true, start + SIGNAL_UNTIL - 0.001, "running", station.target, spans)).toBeCloseTo(
+        start * STATION_WORLD,
+        6,
+      );
     }
+    // 沒有風景段的站照舊：出發號誌在站段起點後 SIGNAL_WORLD。
+    expect(signalWorld([])).toBe(SIGNAL_WORLD);
     expect(cameraTravel(true, 0, "running", 0.65)).toBe(0);
     expect(cameraTravel(true, SIGNAL_UNTIL - 0.001, "running", 0.65)).toBe(0);
     expect(cameraTravel(true, SIGNAL_UNTIL + 0.01, "running", 0.65)).toBeCloseTo(0.28 * STATION_WORLD);

@@ -8,10 +8,10 @@ function at(state: RunState, patch: Partial<RunState>): RunState {
 }
 
 describe("路線條", () => {
-  it("只有大司機有；開局小橘在最左邊，每一站的朋友都站在章上", () => {
+  it("大司機、小站長有（小站長 PR-I4 起）；開局小橘在最左邊，每一站的朋友都站在章上", () => {
     expect(routeStripFor(createRun("drive", "little"))).toBeNull();
-    expect(routeStripFor(createRun("captain"))).toBeNull();
     expect(routeStripFor(createRun("look"))).toBeNull();
+    expect(routeStripFor(createRun("captain"))!.stops.map((stop) => stop.waiting.length)).toEqual([2, 2, 2]);
     const strip = routeStripFor(createRun("drive", "big"))!;
     expect(strip.train).toBe(0);
     expect(strip.stops.map((stop) => stop.name)).toEqual(["遊樂園", "橘子坡", "回家"]);

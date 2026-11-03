@@ -60,10 +60,12 @@ function autopilot(level: LevelId, driver: DriverId): { state: RunState; seconds
 }
 
 describe("旅程：風景段的形狀", () => {
-  it("只有大司機有旅程；風景段順序是〔風景、站、風景、風景、站、風景、風景、站〕", () => {
+  it("大司機、小站長有旅程（小站長 PR-I4 起）；風景段順序是〔風景、站、風景、風景、站、風景、風景、站〕", () => {
     expect(COURSE_RULES.big.journey).toBe(true);
-    for (const course of ["look", "little", "captain"] as const) expect(COURSE_RULES[course].journey).toBe(false);
+    expect(COURSE_RULES.captain.journey).toBe(true);
+    for (const course of ["look", "little"] as const) expect(COURSE_RULES[course].journey).toBe(false);
     expect(stationsFor("drive", "big").map((station) => station.scenic.length)).toEqual([1, 2, 2]);
+    expect(stationsFor("captain").map((station) => station.scenic.length)).toEqual([1, 2, 2]);
     for (const station of stationsFor("drive", "big")) {
       for (const section of station.scenic) expect(section.length).toBe(SCENIC_LENGTH);
     }
@@ -92,11 +94,11 @@ describe("旅程：風景段的形狀", () => {
 });
 
 describe("旅程：重設表", () => {
-  it("開局：大司機從第一段風景段出發，其他規則組照舊從 0", () => {
+  it("開局：大司機、小站長從第一段風景段出發，其他規則組照舊從 0", () => {
     expect(createRun("drive", "big").progress).toBeCloseTo(-L, 9);
+    expect(createRun("captain").progress).toBeCloseTo(-L, 9);
     expect(Object.is(createRun("drive", "little").progress, 0)).toBe(true);
     expect(Object.is(createRun("look").progress, 0)).toBe(true);
-    expect(Object.is(createRun("captain").progress, 0)).toBe(true);
   });
 
   it("風景→風景：段號加一，速度、作用、桿位都連續，不停車也不廣播", () => {
@@ -142,14 +144,15 @@ describe("旅程：重設表", () => {
     // 不能跳到這一站出站之前。
     expect(withHook(run, { stationIndex: 0, progress: -5 }).progress).toBeCloseTo(-L, 6);
     // 不開旅程的規則組照舊夾在 0。
-    expect(withHook(createRun("captain"), { progress: -1 }).progress).toBe(0);
+    expect(withHook(createRun("drive", "little"), { progress: -1 }).progress).toBe(0);
   });
 
   it("掛鉤寫紅燈：從這一站出站那一刻（第一段風景段起點）等，不跳過風景段", () => {
     const red = withHook(createRun("drive", "big"), { stationIndex: 1, signal: "red" });
     expect(red.signal).toBe("red");
     expect(red.progress).toBeCloseTo(-2 * L, 9);
-    expect(Object.is(withHook(createRun("captain"), { stationIndex: 1, signal: "red" }).progress, 0)).toBe(true);
+    // 小站長（PR-I4 起有旅程）一樣從出站處等。
+    expect(withHook(createRun("captain"), { stationIndex: 1, signal: "red" }).progress).toBeCloseTo(-2 * L, 9);
   });
 
   it("鐵軌接縫聲：段界剛好是一般的接縫，跨過段界只響一聲，跟站段裡一樣", () => {
@@ -230,7 +233,6 @@ describe("旅程：不開旅程的規則組不變", () => {
   for (const [level, driver] of [
     ["look", "big"],
     ["drive", "little"],
-    ["captain", "big"],
   ] as const) {
     it(`${level}/${driver}：沒有風景段，整趟照舊`, () => {
       const stations = stationsFor(level, driver);

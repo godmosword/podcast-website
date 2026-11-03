@@ -8,11 +8,12 @@ import type { RunGoal } from "@/lib/games/orange-express/journal";
 import type { Station } from "@/lib/games/orange-express/types";
 import styles from "./orange-express.module.css";
 
-/** 任務卡上要念的名字（不印名字的朋友不念）。 */
+/** 任務卡上要念的名字（不印名字的朋友不念；小站長同一位朋友接兩次也只念一次）。 */
 export function missionNames(stations: readonly Station[]): string[] {
-  return stations.flatMap((station) =>
+  const names = stations.flatMap((station) =>
     station.passengers.filter((rider) => rider.showName !== false).map((rider) => rider.name),
   );
+  return names.filter((name, index) => names.indexOf(name) === index);
 }
 
 /**
@@ -30,15 +31,30 @@ export function OrangeExpressMissionCard({
   goal?: RunGoal | null;
 }) {
   const line = missionLine(missionNames(stations));
+  // 同一位朋友只畫一次（小站長第一站與回家站都有 Bonbon、馬米）：臉跟念出來的名字對得上（PR-I4 設計審）。
+  const seen = new Set<string>();
+  const faces = stations.map((station) =>
+    station.passengers.filter((rider) => {
+      if (seen.has(rider.id)) return false;
+      seen.add(rider.id);
+      return true;
+    }),
+  );
   return (
-    <div className={styles.mission} data-state={state} data-testid="orange-express-mission" role="note">
+    <div
+      className={styles.mission}
+      data-state={state}
+      data-crowded={stations.some((station) => station.passengers.length > 1) ? "true" : "false"}
+      data-testid="orange-express-mission"
+      role="note"
+    >
       <ol className={styles.missionStops} aria-hidden>
-        {stations.map((station) => (
+        {stations.map((station, index) => (
           <li key={station.id} className={styles.missionStop}>
             <span className={styles.missionStamp}>
               <LandmarkGlyph id={station.landmark} />
             </span>
-            {station.passengers.map((rider) => (
+            {faces[index]!.map((rider) => (
               <span key={rider.id} className={styles.missionFace}>
                 <RiderFace id={rider.id} />
               </span>

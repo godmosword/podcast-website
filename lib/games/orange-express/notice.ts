@@ -11,6 +11,7 @@ import {
   pendingPoint,
   powerCap,
   signalRed,
+  simpleLevers,
 } from "@/lib/games/orange-express/reducer";
 import { stopBarFor } from "@/lib/games/orange-express/stop-target";
 import { signBars } from "@/lib/games/orange-express/windshield";
@@ -84,7 +85,9 @@ function eventNotice(state: RunState): WindowNotice | null {
     return { kind: "event", text: eventDoneText(event.kind, scene), event: { ...info, done: true } };
   }
   if (result || state.progress > event.until) return null;
-  const text = raceChasing(state, powerCap(state.course)) ? eventDoneText(event.kind, scene, false) : eventHint(event.kind, scene);
+  const text = raceChasing(state, powerCap(state.course))
+    ? eventDoneText(event.kind, scene, false)
+    : eventHint(event.kind, scene, !simpleLevers(state.course));
   return { kind: "event", text, event: { ...info, done: false } };
 }
 

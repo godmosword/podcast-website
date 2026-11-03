@@ -1264,6 +1264,64 @@
   box-shadow: 0 0 0 1.5px var(--ink);
 }
 
+/*
+ * 一站接兩位（小站長，PR-I4）：章與頭像縮一號、第二位疊在第一位後面一半、站間軌道短一點，
+ * 整張卡不撐出前窗（390 寬約 300px 內放得下三站六位）。
+ */
+.mission[data-crowded="true"] .missionStops {
+  gap: 4px;
+}
+
+.mission[data-crowded="true"] .missionStamp {
+  width: 34px;
+  height: 34px;
+}
+
+.mission[data-crowded="true"] .missionStamp svg {
+  width: 24px;
+  height: 24px;
+}
+
+.mission[data-crowded="true"] .missionFace svg {
+  width: 26px;
+  height: 26px;
+}
+
+.mission[data-crowded="true"] .missionFace + .missionFace {
+  margin-left: -12px;
+}
+
+.mission[data-crowded="true"] .missionStop + .missionStop::before {
+  width: 10px;
+  margin-right: 2px;
+}
+
+/* 最窄的手機：再縮一號，任務那句可以在頓號換行。 */
+@media (max-width: 359px) {
+  .mission[data-crowded="true"] .missionStamp {
+    width: 28px;
+    height: 28px;
+  }
+
+  .mission[data-crowded="true"] .missionStamp svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .mission[data-crowded="true"] .missionFace svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .mission[data-crowded="true"] .missionFace + .missionFace {
+    margin-left: -10px;
+  }
+
+  .mission[data-crowded="true"] .missionLine {
+    word-break: normal;
+  }
+}
+
 .missionLine {
   margin: 0;
   font-size: var(--fs-label);

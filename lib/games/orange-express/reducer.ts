@@ -686,9 +686,13 @@ export function step(state: RunState, action: RunAction): RunState {
   return unchanged(state, next) ? state : next;
 }
 
-/** 走完這一幀後結算沿途事件；小鴨做到也算一次提前慢下來（大司機的 earlySlows 從 H3 起由小鴨計）。 */
+/**
+ * 走完這一幀後結算沿途事件。大司機沒有速限牌，小鴨做到算一次提前慢下來（earlySlows 從 H3 起由小鴨計）；
+ * 小站長的 earlySlows 是「看到速限牌早早慢下來」，小鴨不算進去（PR-I4）。
+ */
 function withEventsJudged(state: RunState): RunState {
   const { events, duckDone } = judgeEvents(state, powerCap(state.course));
   if (events === state.events) return state;
-  return { ...state, events, earlySlows: state.earlySlows + (duckDone ? 1 : 0) };
+  const countsSlow = duckDone && !COURSE_RULES[state.course].signs;
+  return { ...state, events, earlySlows: state.earlySlows + (countsSlow ? 1 : 0) };
 }

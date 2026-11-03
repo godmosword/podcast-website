@@ -866,6 +866,18 @@ for (const size of [PHONE, [375, 553, "light"] as const]) {
   });
 }
 
+/** 小站長也有旅程（PR-I4）：開局任務卡三站六位朋友，章與頭像縮一號、一站兩位疊在一起，不撐出前窗。 */
+for (const size of [PHONE, [320, 568, "light"] as const]) {
+  const [width, height, theme] = size;
+  test(`visual：小橘特快車小站長任務卡 ${width}×${height} ${theme}`, async ({ page }) => {
+    await openOrangeExpress(page, size, { mission: true });
+    await startOrangeExpress(page, "小站長");
+    await expect(page.getByTestId("orange-express-mission")).toHaveAttribute("data-crowded", "true");
+    await settleOrangeExpress(page);
+    await expect(page).toHaveScreenshot(`orange-express-captain-mission-${width}x${height}-${theme}.png`, orangeShot(theme));
+  });
+}
+
 /** 推了動力、煞車沒放、車不走：煞車桿「鬆」那格亮實線框、桿頂的字跟著亮（大司機）。 */
 test("visual：小橘特快車先鬆煞車 390 light", async ({ page }) => {
   await openOrangeExpress(page, PHONE);

@@ -29,6 +29,18 @@ describe("新手腳本量一趟多久（PR-H4）", () => {
     expect(journey / plain).toBeGreaterThan(2.1);
   });
 
+  it("小站長（PR-I4 起有旅程）：每種排法都開得完；比大司機長一點（紅燈等對向列車、指差、窄綠區）", () => {
+    const times = SEEDS.slice(0, 6).map((seed) => {
+      const { seconds, state } = noviceRun("captain", "big", seed);
+      expect(state.phase).toBe("route-done");
+      return seconds;
+    });
+    const median = [...times].sort((a, b) => a - b)[3]!;
+    console.info(`新手腳本 小站長 約 ${median.toFixed(1)} 秒`);
+    expect(median).toBeGreaterThan(noviceStats(SEEDS.slice(0, 6)).median);
+    expect(median).toBeLessThan(240);
+  });
+
   it("小小司機沒有旅程：長度不變", () => {
     const { seconds, state } = noviceRun("drive", "little", 0);
     expect(state.phase).toBe("route-done");

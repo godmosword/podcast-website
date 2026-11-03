@@ -173,11 +173,33 @@ export function sectionEvent(state: Pick<RunState, "stations" | "stationIndex" |
   return section ? placed(station, state.stationIndex, k, section) : null;
 }
 
+type HoldState = Pick<RunState, "stations" | "stationIndex" | "progress"> &
+  Partial<Pick<RunState, "signal" | "pointsDone">>;
+
+/**
+ * 賽跑還不能開始（小站長，PR-I4）：出站時紅燈在等對向列車，或號誌指差題還掛著。
+ * 賽跑提示在出站那一刻；紅燈時推到快車也不走，號誌題時一次只做一件事，都等它們過了才出提示。
+ * 車停著等的時候 progress 不動，轉綠、按完（或題目過了）提示就接著出。
+ */
+export function raceHeld(state: HoldState): boolean {
+  if (state.signal === "red") return true;
+  const station = state.stations[state.stationIndex];
+  if (!station) return false;
+  return station.points.some(
+    (task) =>
+      task.kind === "signal" &&
+      !(state.pointsDone ?? []).includes(task.id) &&
+      state.progress >= task.at &&
+      state.progress <= task.until,
+  );
+}
+
 /** 事件在前窗與提示裡「進行中」：提示出現到回應結束。倒車、停好、開門時不會在風景段，不必另外擋。 */
-export function activeEvent(state: Pick<RunState, "stations" | "stationIndex" | "progress">): PlacedEvent | null {
+export function activeEvent(state: HoldState): PlacedEvent | null {
   const event = sectionEvent(state);
   if (!event) return null;
   if (state.progress < event.hintAt || state.progress > event.at + EVENT_SHOW_AFTER) return null;
+  if (event.kind === "race" && state.progress <= event.until && raceHeld(state)) return null;
   return event;
 }
 
@@ -214,6 +236,9 @@ export function judgeEvents(state: RunState, powerMax: number): { events: RunSta
   const event = sectionEvent(state);
   if (!event || state.events[event.key]) return { events: state.events, duckDone: false };
   if (state.progress < event.hintAt) return { events: state.events, duckDone: false };
+  if (event.kind === "race" && state.progress <= event.until && raceHeld(state)) {
+    return { events: state.events, duckDone: false };
+  }
   if (event.kind === "ducks" && state.progress <= event.until && slowedDown(state, powerMax)) {
     return { events: withResult(state, event.key, "done"), duckDone: true };
   }
