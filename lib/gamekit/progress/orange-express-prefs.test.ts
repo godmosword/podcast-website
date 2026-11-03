@@ -3,14 +3,17 @@ import {
   ORANGE_EXPRESS_DISPLAY_EVENT,
   loadOrangeExpressCoach,
   loadOrangeExpressDisplay,
+  loadOrangeExpressJournal,
   loadOrangeExpressLevel,
   resolveOrangeExpressDriver,
   resolveOrangeExpressLevel,
   saveOrangeExpressCoach,
   saveOrangeExpressDisplay,
+  saveOrangeExpressJournal,
   saveOrangeExpressLevel,
 } from "@/lib/gamekit/progress/orange-express-prefs";
 import { EMPTY_COACH } from "@/lib/games/orange-express/coach-record";
+import { EMPTY_JOURNAL, type OrangeExpressJournal } from "@/lib/games/orange-express/journal";
 import {
   PROGRESS_STORAGE_KEY,
   getGameKitSettingsFromStore,
@@ -114,6 +117,21 @@ describe("小橘特快車難度偏好", () => {
     saveOrangeExpressCoach(record);
     expect(loadOrangeExpressCoach()).toEqual(record);
     expect(getGameKitSettingsFromStore().orangeExpressLevel).toBe("drive");
+    expect(getGameKitSettingsFromStore().candyMatchMode).toBe("easy");
+  });
+
+  it("進步紀錄：舊存檔沒有＝空的；存了讀得回來，不動示範與其他設定", () => {
+    saveGameKitSettingsToStore({ candyMatchMode: "easy", orangeExpressLevel: "drive" });
+    expect(loadOrangeExpressJournal()).toEqual(EMPTY_JOURNAL);
+    const journal: OrangeExpressJournal = {
+      courses: { big: { runs: 1, lastGreens: 2, bestGreens: 2, lastSmooth: 1 } },
+      eventsDone: ["race"],
+      landmarks: ["ferris"],
+      goals: { big: "smooth" },
+    };
+    saveOrangeExpressJournal(journal);
+    expect(loadOrangeExpressJournal()).toEqual(journal);
+    expect(loadOrangeExpressCoach()).toEqual(EMPTY_COACH);
     expect(getGameKitSettingsFromStore().candyMatchMode).toBe("easy");
   });
 

@@ -41,3 +41,22 @@ export async function pinOrangeExpressDisplay(page: Page, gaugeNumbers = false) 
     localStorage.setItem(key, JSON.stringify(next));
   }, gaugeNumbers);
 }
+
+/** 預先放一份進步紀錄（PR-I3）：標題的沿途見聞、任務卡的小目標才有東西可畫。每次載入頁面都會蓋回這份。 */
+export async function seedOrangeExpressJournal(page: Page, journal: Record<string, unknown>) {
+  await page.addInitScript((value) => {
+    const key = "cheche:progress";
+    let raw: { preferences?: { gameKit?: Record<string, unknown> } } = {};
+    try {
+      raw = JSON.parse(localStorage.getItem(key) ?? "{}") as typeof raw;
+    } catch {
+      raw = {};
+    }
+    const preferences = raw.preferences ?? {};
+    const next = {
+      ...raw,
+      preferences: { ...preferences, gameKit: { ...preferences.gameKit, orangeExpressJournal: value } },
+    };
+    localStorage.setItem(key, JSON.stringify(next));
+  }, journal);
+}

@@ -15,6 +15,7 @@ import { noticeWithDoorHint } from "@/lib/games/orange-express/notice";
 import { currentStation, pendingPoint } from "@/lib/games/orange-express/reducer";
 import { routeStripFor } from "@/lib/games/orange-express/route-strip";
 import { drawWindshield, windshieldFrame } from "@/lib/games/orange-express/windshield";
+import type { RunGoal } from "@/lib/games/orange-express/journal";
 import type { RunState } from "@/lib/games/orange-express/types";
 import styles from "./orange-express.module.css";
 
@@ -84,6 +85,7 @@ export function OrangeExpressWindshield({
   coach,
   nod,
   nodBeforeHappy,
+  missionGoal = null,
   cheer = false,
   mission = null,
   onPoint,
@@ -100,6 +102,8 @@ export function OrangeExpressWindshield({
   nod: boolean;
   nodBeforeHappy: boolean;
   /** 剛在降速牌前提前慢下來（或沿途事件做到了）：小橘開心一秒。 */
+  /** 任務卡帶的這趟小目標（上一趟留下的，PR-I3）。 */
+  missionGoal?: RunGoal | null;
   cheer?: boolean;
   /** 開局任務卡（大司機）。 */
   mission?: MissionState;
@@ -263,7 +267,7 @@ export function OrangeExpressWindshield({
           </span>
         </button>
       ) : null}
-      {mission ? <OrangeExpressMissionCard stations={run.stations} state={mission} /> : null}
+      {mission ? <OrangeExpressMissionCard stations={run.stations} state={mission} goal={missionGoal} /> : null}
       {/* 做到事件、提前慢下來：小橘在前窗右下角探頭笑（PR-I2）。矮手機收起了儀表徽章，風景段也沒有停車目標條，這裡是孩子正在看的地方。 */}
       {cheer && !showRiders ? (
         <span className={styles.cheerFace} data-testid="orange-express-cheer" aria-hidden>

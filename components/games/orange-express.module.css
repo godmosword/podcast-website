@@ -97,6 +97,101 @@
   font-weight: 900;
 }
 
+/* 路線名與沿途見聞同一行（PR-I3）：見聞靠右，不多一列。 */
+.routeRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 8px;
+}
+
+/* 一顆按鈕（點了念「沿途見聞：…」），高度夠手指點；事件四枚與地標三枚中間多空一點，看得出是兩組。 */
+.journal {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+  margin: 4px 0 0;
+  padding: 0 4px;
+  font: inherit;
+  color: inherit;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.journal:focus-visible {
+  outline: 3px solid var(--accent-ink);
+  outline-offset: 3px;
+}
+
+.journalGap {
+  width: 6px;
+}
+
+.journalStamp {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--c-yellow) 45%, var(--card));
+}
+
+.journalStamp svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* 還沒找到：虛線空圈（不畫灰章）。 */
+.journalStamp[data-got="false"] {
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--ink) 70%, transparent);
+  background: transparent;
+}
+
+/* 下趟小目標（結算、任務卡，PR-I3）：圖示＋一句，膠囊樣子跟少星小籤一樣，但不畫 +★。 */
+.goal {
+  display: inline-flex;
+  align-self: center;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 3px 12px 3px 3px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--c-mint) 30%, var(--card));
+  color: var(--ink);
+  font-size: var(--fs-label);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.goalMark {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--card);
+  line-height: 0;
+}
+
+.goalMark svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* 「停在綠色區」：站卡的綠條紋色塊縮小一號（設計審：小火車看不出是綠色區）。 */
+.goalSwatch {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--ink);
+  border-radius: 5px;
+}
+
 .levels {
   display: grid;
   grid-template-columns: 1fr;
@@ -739,7 +834,8 @@
 }
 
 .stopGreen,
-.gradeSwatch[data-grade="green"] {
+.gradeSwatch[data-grade="green"],
+.goalSwatch[data-grade="green"] {
   background: var(--c-mint);
   background-image: repeating-linear-gradient(
     90deg,

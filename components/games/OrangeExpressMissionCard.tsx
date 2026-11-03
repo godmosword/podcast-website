@@ -1,8 +1,10 @@
 "use client";
 
+import { OrangeExpressGoal } from "@/components/games/OrangeExpressGoal";
 import { LandmarkGlyph, RiderFace } from "@/components/games/OrangeExpressGlyphs";
 import type { MissionState } from "@/components/games/useOrangeExpressMission";
-import { missionLine } from "@/lib/games/orange-express/copy";
+import { GOAL_NOW, missionLine } from "@/lib/games/orange-express/copy";
+import type { RunGoal } from "@/lib/games/orange-express/journal";
 import type { Station } from "@/lib/games/orange-express/types";
 import styles from "./orange-express.module.css";
 
@@ -20,9 +22,12 @@ export function missionNames(stations: readonly Station[]): string[] {
 export function OrangeExpressMissionCard({
   stations,
   state,
+  goal = null,
 }: {
   stations: readonly Station[];
   state: Exclude<MissionState, null>;
+  /** 上一趟留下的小目標（PR-I3）：卡片最下面一行「這次試試：…」，朗讀接在任務那句後面。 */
+  goal?: RunGoal | null;
 }) {
   const line = missionLine(missionNames(stations));
   return (
@@ -42,6 +47,7 @@ export function OrangeExpressMissionCard({
         ))}
       </ol>
       <p className={styles.missionLine}>{line}</p>
+      {goal ? <OrangeExpressGoal goal={goal} prefix={GOAL_NOW} testId="orange-express-mission-goal" /> : null}
     </div>
   );
 }

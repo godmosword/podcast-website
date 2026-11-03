@@ -12,6 +12,7 @@ import { pinClassicSushiDay } from "./helpers/dino-sushi";
 import {
   jumpOrangeExpress,
   pinOrangeExpressDisplay,
+  seedOrangeExpressJournal,
   startOrangeExpress,
 } from "./helpers/orange-express";
 import type { OrangeExpressHook } from "../lib/games/orange-express/types";
@@ -836,6 +837,34 @@ test("visual：小橘特快車做到事件的開心小橘 375×553 light（減�
   await settleOrangeExpress(page);
   await expect(page).toHaveScreenshot("orange-express-cheer-375x553-light.png", orangeShot("light"));
 });
+
+/** 進步紀錄（PR-I3）：玩過幾趟後，標題路線名旁的沿途見聞（找到的上色、沒找到的虛線空圈）。 */
+const JOURNAL_SEED = {
+  courses: { big: { runs: 2, lastGreens: 2, bestGreens: 3, lastSmooth: 1 } },
+  eventsDone: ["ducks", "race"],
+  landmarks: ["ferris", "house"],
+  goals: { big: "smooth" },
+};
+
+test("visual：小橘特快車標題沿途見聞 390 light", async ({ page }) => {
+  await seedOrangeExpressJournal(page, JOURNAL_SEED);
+  await openOrangeExpress(page, PHONE);
+  await expect(page.getByTestId("orange-express-journal")).toBeVisible();
+  await expect(page).toHaveScreenshot("orange-express-journal-title-390-light.png", orangeShot("light"));
+});
+
+/** 任務卡帶上一趟留下的小目標（PR-I3），矮手機也放得下。 */
+for (const size of [PHONE, [375, 553, "light"] as const]) {
+  const [width, height, theme] = size;
+  test(`visual：小橘特快車任務卡小目標 ${width}×${height} ${theme}`, async ({ page }) => {
+    await seedOrangeExpressJournal(page, JOURNAL_SEED);
+    await openOrangeExpress(page, size, { mission: true });
+    await startOrangeExpress(page, "自己開");
+    await expect(page.getByTestId("orange-express-mission-goal")).toBeVisible();
+    await settleOrangeExpress(page);
+    await expect(page).toHaveScreenshot(`orange-express-mission-goal-${width}x${height}-${theme}.png`, orangeShot(theme));
+  });
+}
 
 /** 推了動力、煞車沒放、車不走：煞車桿「鬆」那格亮實線框、桿頂的字跟著亮（大司機）。 */
 test("visual：小橘特快車先鬆煞車 390 light", async ({ page }) => {

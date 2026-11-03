@@ -1,7 +1,11 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { PROGRESS_STORAGE_KEY } from "../lib/progress-keys";
-import { jumpOrangeExpress as jump, startOrangeExpress as startLevel } from "./helpers/orange-express";
+import {
+  jumpOrangeExpress as jump,
+  seedOrangeExpressJournal,
+  startOrangeExpress as startLevel,
+} from "./helpers/orange-express";
 import { pinTheme } from "./visual-helpers";
 
 async function tap(page: Page, key: string) {
@@ -93,9 +97,14 @@ test.describe("小橘特快車", () => {
     await expect(result.getByTestId("orange-express-result-line")).toHaveText("輕輕停，朋友站得穩穩的");
     const spokenResultLines = await page.evaluate(() => {
       const spoken = (window as unknown as { __spoken: string[] }).__spoken;
-      return spoken.filter((text) => text === "輕輕停，朋友站得穩穩的").length;
+      return spoken.filter((text) => text.startsWith("輕輕停，朋友站得穩穩的")).length;
     });
     expect(spokenResultLines).toBe(1);
+    // 那句後面接下趟小目標（PR-I3）：三顆星、三站都輕輕停了，練這趟沒做到的沿途事件。
+    const spokenGoal = await page.evaluate(() =>
+      (window as unknown as { __spoken: string[] }).__spoken.some((text) => text.includes("下次試試：")),
+    );
+    expect(spokenGoal).toBe(true);
     // 大司機有沿途事件：事件章列取代計數列（版面不多一列）。四種事件各一個章。
     await expect(result.getByTestId("orange-express-extras")).toHaveCount(0);
     const stamps = result.getByTestId("orange-express-event-stamps");
@@ -1579,6 +1588,51 @@ test.describe("小橘特快車：沿途事件與任務卡（2026-11-02）", () =
     // 從停著起跑到終點（段長 1.4 的 75%）約 8 秒；終點時夠快才蓋章、說「跑贏了」。
     await expect(page.getByTestId("orange-express-notice")).toContainText("跑贏小狗了", { timeout: 15000 });
     await expect(drive).toHaveAttribute("data-events-done", "1");
+  });
+
+  test("進步紀錄：第二趟停得比較準，結算說進步、給下趟小目標；回標題看得到沿途見聞（PR-I3）", async ({ page }) => {
+    await startBig(page);
+    const result = page.getByTestId("orange-express-result");
+    async function serve(stationIndex: number, progress = 0.65) {
+      await jump(page, { stationIndex, progress, speed: 0, freeze: false });
+      await expect(page.getByTestId("orange-express-drive")).toHaveAttribute("data-phase", "stopped");
+      await page.getByRole("button", { name: "開門" }).click();
+      await page.getByTestId("orange-express-horn").click();
+      const close = page.getByRole("button", { name: "關門" });
+      await expect(close).not.toHaveAttribute("aria-disabled", "true");
+      await close.click();
+    }
+    // 第一趟：第一站停在黃區。沒有上一趟可比，結算照原本那句；少了星星由小籤說，不另放小目標。
+    await serve(0, 0.55);
+    await serve(1);
+    await serve(2);
+    await expect(result).toBeVisible();
+    await expect(page.getByTestId("orange-express-result-line")).not.toContainText("比上次");
+    await expect(page.getByTestId("orange-express-result-goal")).toHaveCount(0);
+    // 第二趟：每站都綠區 → 上一趟說好的「停在綠色區」做到了，最先說；三顆星了才放下趟小目標（這趟沒做到的小鴨）。
+    await page.getByRole("button", { name: "再開一次" }).click();
+    await serve(0);
+    await serve(1);
+    await serve(2);
+    await expect(page.getByTestId("orange-express-result-line")).toHaveText("說好的停在綠色區，做到了！");
+    const goal = page.getByTestId("orange-express-result-goal");
+    await expect(goal).toHaveAttribute("data-goal", "ducks");
+    await expect(goal).toContainText("下次試試：");
+    // 回標題：路線名旁的沿途見聞有三站地標章，事件還是虛線空圈。
+    await page.getByRole("button", { name: "回標題" }).click();
+    const journal = page.getByTestId("orange-express-journal");
+    await expect(journal).toHaveAttribute("aria-label", /找到 3 個，共 7 個/);
+    await expect(journal.locator('[data-got="true"]')).toHaveCount(3);
+    // 整排是一顆按鈕，手指點得到。
+    expect((await journal.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  });
+
+  test("任務卡帶上一趟留下的小目標，朗讀接在任務那句後面", async ({ page }) => {
+    await seedOrangeExpressJournal(page, { courses: {}, eventsDone: [], landmarks: [], goals: { big: "smooth" } });
+    await startBig(page, { mission: true });
+    const goal = page.getByTestId("orange-express-mission-goal");
+    await expect(goal).toHaveAttribute("data-goal", "smooth");
+    await expect(goal).toContainText("這次試試：輕輕停");
   });
 
   test("任務卡：開局先念「今天要去接…回家」再廣播下一站；第一次碰桿子就收，不擋桿子", async ({ page }) => {

@@ -1,6 +1,7 @@
 /** 孩子看得到的句子。禁詞測試掃這一包，也掃遊戲原始碼。 */
 
 import { EVENT_KINDS, routeEvents } from "@/lib/games/orange-express/events";
+import type { RunGoal, RunProgress } from "@/lib/games/orange-express/journal";
 import type {
   BrakeNotch,
   DriverId,
@@ -303,4 +304,55 @@ export function powerValueText(notch: PowerNotch, simple?: readonly PowerNotch[]
 export function brakeValueText(notch: BrakeNotch, simple = false): string {
   if (notch === 5 || simple) return `${COPY.brake}，${brakeWord(notch)}`;
   return `${COPY.brake} ${brakeLampLabel(notch)}，${brakeWord(notch)}`;
+}
+
+/** 跟上一趟比進步了：結算那句換成這句（PR-I3）。第一次做到的事件照場景換動物。 */
+export function progressText(progress: RunProgress, scene: SceneId): string {
+  if (progress.kind === "goal-done") return `說好的${GOAL_TEXT[progress.goal]}，做到了！`;
+  if (progress.kind === "all-green") return "第一次每站都停在綠色區！";
+  if (progress.kind === "more-green") return "停在綠色區的站比上次多了！";
+  if (progress.kind === "more-smooth") return "輕輕停的站比上次多了！";
+  if (progress.event === "ducks") return `第一次讓${crossingCritter(scene)}慢慢過鐵軌`;
+  if (progress.event === "crossing") return "第一次在平交道按喇叭";
+  if (progress.event === "wave") return "第一次跟揮手的朋友打招呼";
+  return `第一次跑贏${racer(scene)}`;
+}
+
+/**
+ * 下趟小目標（結算前面接「下次試試：」，任務卡前面接「這次試試：」）。
+ * 說要做的動作、正向（設計審：「不要…」只說不能做什麼，3–4 歲聽到動作才知道怎麼做）。
+ */
+export const GOAL_TEXT: Record<RunGoal, string> = {
+  green: "停在綠色區",
+  overrun: "早一點拉停",
+  "early-door": "等門亮了再按",
+  smooth: "輕輕停",
+  ducks: "慢下來讓小動物先過",
+  crossing: "平交道前按喇叭",
+  wave: "朋友揮手時按喇叭",
+  race: "賽跑時推到快",
+};
+
+export const GOAL_NEXT = "下次試試：";
+export const GOAL_NOW = "這次試試：";
+
+/** 沿途見聞（標題）：讀屏說收集到哪些。 */
+export const JOURNAL_LABEL = "沿途見聞";
+
+/** 地標的名字（沿途見聞的讀屏）。 */
+export const LANDMARK_NAME: Record<LandmarkId, string> = {
+  ferris: "摩天輪",
+  "orange-tree": "橘子樹",
+  house: "小房子",
+};
+
+/** 結算那句：跟上一趟比進步了就說進步，不然照 resultComment 挑。 */
+export function resultLineFor(
+  run: Parameters<typeof resultComment>[0],
+  progress: RunProgress | null,
+): string {
+  if (!progress) return resultComment(run);
+  const event = progress.kind === "first-event" ? routeEvents(run.stations).find((e) => e.kind === progress.event) : undefined;
+  const scene = run.stations[event?.stationIndex ?? 0]?.scene ?? "city";
+  return progressText(progress, scene);
 }

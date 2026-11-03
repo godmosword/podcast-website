@@ -7,12 +7,15 @@ import { useGameLoop } from "@/lib/gamekit/react/useGameLoop";
 import { keyAction } from "@/lib/gamekit/runtime/input";
 import {
   loadOrangeExpressCoach,
+  loadOrangeExpressJournal,
   loadOrangeExpressLevel,
   resolveOrangeExpressDriver,
   resolveOrangeExpressLevel,
   saveOrangeExpressCoach,
+  saveOrangeExpressJournal,
   saveOrangeExpressLevel,
 } from "@/lib/gamekit/progress/orange-express-prefs";
+import { OrangeExpressJournalRow } from "@/components/games/OrangeExpressJournalRow";
 import { OrangeExpressCab } from "@/components/games/OrangeExpressCab";
 import Image from "next/image";
 import { LevelGlyph, XiaojuFace } from "@/components/games/OrangeExpressGlyphs";
@@ -50,9 +53,21 @@ import {
   DRIVER_NAME,
   GRADE_TEXT,
   LEVEL_DOTS,
+  GOAL_NEXT,
+  GOAL_NOW,
+  GOAL_TEXT,
   missionLine,
-  resultComment,
+  resultLineFor,
 } from "@/lib/games/orange-express/copy";
+import {
+  EMPTY_JOURNAL,
+  nextGoal,
+  progressOf,
+  recordRun,
+  type OrangeExpressJournal,
+  type RunGoal,
+  type RunProgress,
+} from "@/lib/games/orange-express/journal";
 import { activeEvent, cheerFor, doneCount } from "@/lib/games/orange-express/events";
 import { isSmoothStop, medalsFor, starMissReason } from "@/lib/games/orange-express/medals";
 import { COURSE_RULES } from "@/lib/games/orange-express/routes";
@@ -171,6 +186,15 @@ export function OrangeExpressView({
   instance: OrangeExpressInstance;
 }) {
   const [screen, setScreen] = useState<Screen>("title");
+  /** 這一趟跟上一趟比的進步、下趟小目標（開完那一刻算好，存檔前先比）。 */
+  const [outcome, setOutcome] = useState<{ progress: RunProgress | null; goal: RunGoal | null }>({
+    progress: null,
+    goal: null,
+  });
+  /** 這一趟任務卡帶的小目標（上一趟留下的）。 */
+  const [missionGoal, setMissionGoal] = useState<RunGoal | null>(null);
+  /** 標題的沿途見聞：存檔只在瀏覽器讀得到，掛載後才讀（伺服器先畫空的，避免水合不一致）。 */
+  const [journal, setJournal] = useState<OrangeExpressJournal>(EMPTY_JOURNAL);
   const [level, setLevel] = useState<LevelId>("look");
   const [run, setRun] = useState<RunState | null>(null);
   const [shake, setShake] = useState(false);
@@ -225,6 +249,8 @@ export function OrangeExpressView({
   /** 這一趟示範過了沒（小小司機的趟數只加一次）。 */
   const coachCounted = useRef(false);
   const resultSpoken = useRef(false);
+  /** 這一趟記進進步紀錄了沒（每趟只記一次；begin() 重設）。 */
+  const journalRecorded = useRef(false);
   /** 示範在哪一站真的出現過；停好時要是這一站才算學會（直接跳到停好、示範沒出現過不算）。 */
   const coachShownAt = useRef<number | null>(null);
   const driver = resolveOrangeExpressDriver(display.driver, kidsMode);
@@ -317,6 +343,8 @@ export function OrangeExpressView({
     missionCut.current = false;
     missionSpeechUntil.current = 0;
     resultSpoken.current = false;
+    journalRecorded.current = false;
+    setOutcome({ progress: null, goal: null });
     doorSpeech.current = null;
     setDoorHint(false);
     // 掛鉤在（測試、視覺基準）時不示範，除非掛鉤寫 coach: true。
@@ -330,8 +358,11 @@ export function OrangeExpressView({
     // 大司機開局先出任務卡、念「今天要去接…回家」。掛鉤在時不出，除非寫 mission: true。
     // 朗讀順序：任務卡 → 沿途事件提示（有時效，孩子一開始就開快時會先到）→ 下一站。
     const missionOn = COURSE_RULES[next.course].journey && (!hook || hook.mission === true);
+    const goal = missionOn ? (loadOrangeExpressJournal().goals[next.course] ?? null) : null;
+    setMissionGoal(goal);
     if (missionOn) {
-      const line = missionLine(missionNames(next.stations));
+      const names = missionLine(missionNames(next.stations));
+      const line = goal ? `${names}。${GOAL_NOW}${GOAL_TEXT[goal]}` : names;
       const voice = voiceRef.current;
       const speechEnd = performance.now() + (voice ? speechMs(line) : 0);
       if (voice) speakText(line, { interrupt: true, volume: volumeRef.current });
@@ -705,6 +736,15 @@ export function OrangeExpressView({
     if (run.phase === "route-done") {
       stopSound();
       instance.notifyWon(run);
+      // 進步要跟「這一趟之前」比：先讀、比完、再把這一趟記進去。一趟只記一次。
+      if (!journalRecorded.current) {
+        journalRecorded.current = true;
+        const before = loadOrangeExpressJournal();
+        const earlyDoors = instance.earlyDoorCount();
+        const goal = nextGoal(run, starMissReason(run, earlyDoors));
+        setOutcome({ progress: progressOf(before, run, earlyDoors), goal });
+        saveOrangeExpressJournal(recordRun(before, run, goal));
+      }
       setScreen("result");
       syncHost();
     }
@@ -719,8 +759,17 @@ export function OrangeExpressView({
   useEffect(() => {
     if (!run || screen !== "result" || !voiceRef.current || resultSpoken.current) return;
     resultSpoken.current = true;
-    speakText(resultComment(run), { interrupt: false, volume: volumeRef.current });
-  }, [gameVolume, run, screen, soundOn, voiceEnabled]);
+    const line = resultLineFor(run, outcome.progress);
+    speakText(outcome.goal ? `${line}。${GOAL_NEXT}${GOAL_TEXT[outcome.goal]}` : line, {
+      interrupt: false,
+      volume: volumeRef.current,
+    });
+  }, [gameVolume, outcome, run, screen, soundOn, voiceEnabled]);
+
+  // 回到標題時重讀沿途見聞（剛開完一趟會多幾枚章）。
+  useEffect(() => {
+    if (screen === "title") setJournal(loadOrangeExpressJournal());
+  }, [screen]);
 
   // 每位朋友上車：等乘客卡滑完、愛心泡泡冒出來時叮一聲（現有的輕鈴，不念角色台詞）。
   // 上車時每一幀 run 都在變，timer 不能跟著 effect 清掉，不然 0.4 秒上一位、0.64 秒才響的鈴會被下一幀取消；
@@ -815,7 +864,15 @@ export function OrangeExpressView({
     return (
       <div className={styles.screen} data-screen="title" data-testid="orange-express-title">
         <TitleHero />
-        <p className={styles.route}>{COPY.routeName}</p>
+        <div className={styles.routeRow}>
+          <p className={styles.route}>{COPY.routeName}</p>
+          <OrangeExpressJournalRow
+            journal={journal}
+            onSpeak={(text) => {
+              if (voiceRef.current) speakText(text, { interrupt: true, volume: volumeRef.current });
+            }}
+          />
+        </div>
         <div className={styles.levels} role="radiogroup" aria-label={COPY.routeName}>
           {LEVELS.map((id) => (
             <button
@@ -872,7 +929,8 @@ export function OrangeExpressView({
       <div className={styles.screen} data-screen="result">
         <OrangeExpressResult
           stars={medals.stars}
-          resultLine={resultComment(run)}
+          resultLine={resultLineFor(run, outcome.progress)}
+          goal={outcome.goal}
           smoothStops={medals.smoothStops}
           missReason={starMissReason(run, earlyDoors)}
           reduced={reducedMotion}
@@ -929,6 +987,7 @@ export function OrangeExpressView({
         }
         cheer={cheer}
         mission={mission}
+        missionGoal={missionGoal}
         onPoint={pointCheck}
       />
       <p className={styles.live} aria-live="polite">

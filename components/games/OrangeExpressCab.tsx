@@ -332,8 +332,8 @@ export function StopIcon({ size }: GlyphProps) {
   );
 }
 
-/** 「輕」：矮一半、圓頭小一點的停車柱。 */
-function LightStopIcon() {
+/** 「輕」：矮一半、圓頭小一點的停車柱。結算的下趟小目標「輕輕停」也用它。 */
+export function LightStopIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden>
       <path d="M12 21v-4.5" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />

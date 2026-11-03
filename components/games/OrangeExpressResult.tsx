@@ -4,12 +4,20 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { ResultStars } from "@/components/games/ResultStars";
-import { IconTrain } from "@/components/games/ClayIcons";
 import { DoorIcon, StopIcon } from "@/components/games/OrangeExpressCab";
 import { OrangeExpressEventStamps } from "@/components/games/OrangeExpressEventStamps";
+import { OrangeExpressGoal } from "@/components/games/OrangeExpressGoal";
 import { LandmarkGlyph, RiderFace, XiaojuFace } from "@/components/games/OrangeExpressGlyphs";
 import { XIAOJU_STICKER_SRC } from "@/lib/games/orange-express/art";
-import { COPY, GRADE_WORD, bridgeResultText, landmarkResultText, pointsResultText } from "@/lib/games/orange-express/copy";
+import {
+  COPY,
+  GOAL_NEXT,
+  GRADE_WORD,
+  bridgeResultText,
+  landmarkResultText,
+  pointsResultText,
+} from "@/lib/games/orange-express/copy";
+import type { RunGoal } from "@/lib/games/orange-express/journal";
 import type { StarMissReason } from "@/lib/games/orange-express/medals";
 import type { RunState, Station, StopGrade } from "@/lib/games/orange-express/types";
 import { getNextGame } from "@/data/games";
@@ -17,10 +25,10 @@ import styles from "./orange-express.module.css";
 
 /**
  * 少的那顆星卡在哪：只放一張小籤，說真正的原因。
- * 圖示用駕駛台上同一個符號：開過頭配停車燈（不用往前的箭頭，孩子會讀成「繼續開」），門配車門。
+ * 圖示用駕駛台上同一個符號：綠色區配站卡的綠條紋色塊，開過頭配停車燈（不用往前的箭頭，孩子會讀成「繼續開」），門配車門。
  */
 const MISS_HINT: Record<StarMissReason, { text: string; mark: ReactNode }> = {
-  green: { text: COPY.starHint, mark: <IconTrain size={18} /> },
+  green: { text: COPY.starHint, mark: <span className={styles.goalSwatch} data-grade="green" /> },
   overrun: { text: COPY.overrunHint, mark: <StopIcon size={18} /> },
   "early-door": { text: COPY.earlyDoorHint, mark: <DoorIcon size={18} /> },
 };
@@ -28,6 +36,7 @@ const MISS_HINT: Record<StarMissReason, { text: string; mark: ReactNode }> = {
 export function OrangeExpressResult({
   stars,
   resultLine,
+  goal = null,
   smoothStops,
   missReason,
   reduced,
@@ -43,6 +52,8 @@ export function OrangeExpressResult({
 }: {
   stars: number;
   resultLine: string;
+  /** 下趟小目標（PR-I3）。少了星星時星星下面的小籤已經說了那件事，就不再放。 */
+  goal?: RunGoal | null;
   smoothStops: number;
   missReason: StarMissReason | null;
   reduced: boolean;
@@ -101,6 +112,10 @@ export function OrangeExpressResult({
         animate={!reduced}
         hints={missReason ? [{ key: missReason, ...MISS_HINT[missReason] }] : []}
       />
+      {/* 跟少星小籤同一個位置：少了星星時由小籤說，三顆星才放下趟小目標（不多一列）。 */}
+      {goal && !missReason ? (
+        <OrangeExpressGoal goal={goal} prefix={GOAL_NEXT} testId="orange-express-result-goal" />
+      ) : null}
       <ol className={styles.stationGrades}>
         {stations.map((station, index) => {
           const grade = grades[index] ?? "yellow";

@@ -6,6 +6,10 @@ import type { GameKitGameId } from "@/lib/gamekit/types";
 import type { PlayerProfile } from "@/lib/gamekit/types";
 import { emptyDayFlags, normalizeDayFlags } from "@/lib/games/dino-sushi/day-progress";
 import { EMPTY_COACH, normalizeOrangeExpressCoach, type CoachRecord } from "@/lib/games/orange-express/coach-record";
+import {
+  normalizeOrangeExpressJournal,
+  type OrangeExpressJournal,
+} from "@/lib/games/orange-express/journal-record";
 import { normalizeOrangeExpressDriver, normalizeOrangeExpressLevel } from "@/lib/games/orange-express/level";
 import type { DriverId, LevelId } from "@/lib/games/orange-express/types";
 import { isDinoSushiStickerId } from "@/lib/games/dino-sushi/stickers";
@@ -76,6 +80,8 @@ export type GameKitPreferenceStore = {
   orangeExpressDriver: DriverId | null;
   /** 第一次進站的停車示範看到哪裡。舊存檔沒有＝都還沒看過。 */
   orangeExpressCoach: CoachRecord;
+  /** 進步紀錄、沿途見聞、下趟小目標（PR-I3）。舊存檔沒有＝空的。 */
+  orangeExpressJournal: OrangeExpressJournal;
 };
 
 export type ContinueState = {
@@ -177,6 +183,7 @@ export const DEFAULT_PROGRESS: ProgressStore = {
       orangeExpressSway: true,
       orangeExpressDriver: null,
       orangeExpressCoach: { ...EMPTY_COACH },
+      orangeExpressJournal: normalizeOrangeExpressJournal(undefined),
     },
     theme: "system",
     nightPromptDismissed: false,
@@ -334,6 +341,7 @@ function normalizeGameKitPreferences(
     orangeExpressSway: value?.orangeExpressSway !== false,
     orangeExpressDriver: normalizeOrangeExpressDriver(value?.orangeExpressDriver),
     orangeExpressCoach: normalizeOrangeExpressCoach(value?.orangeExpressCoach),
+    orangeExpressJournal: normalizeOrangeExpressJournal(value?.orangeExpressJournal),
   };
 }
 

@@ -9,6 +9,11 @@ import {
   resolveOrangeExpressLevel,
 } from "@/lib/games/orange-express/level";
 import { EMPTY_COACH, normalizeOrangeExpressCoach, type CoachRecord } from "@/lib/games/orange-express/coach-record";
+import {
+  EMPTY_JOURNAL,
+  normalizeOrangeExpressJournal,
+  type OrangeExpressJournal,
+} from "@/lib/games/orange-express/journal-record";
 import type { DriverId, LevelId } from "@/lib/games/orange-express/types";
 
 export {
@@ -98,5 +103,24 @@ export function saveOrangeExpressCoach(record: CoachRecord): void {
     saveGameKitSettingsToStore({ orangeExpressCoach: normalizeOrangeExpressCoach(record) });
   } catch {
     // 存不進去時，下次開新頁會再示範一次。
+  }
+}
+
+/** 進步紀錄與沿途見聞：讀不到就當空的（結算照原本那句、標題不放見聞），不影響開車。 */
+export function loadOrangeExpressJournal(): OrangeExpressJournal {
+  if (typeof window === "undefined") return normalizeOrangeExpressJournal(EMPTY_JOURNAL);
+  try {
+    return normalizeOrangeExpressJournal(getGameKitSettingsFromStore().orangeExpressJournal);
+  } catch {
+    return normalizeOrangeExpressJournal(EMPTY_JOURNAL);
+  }
+}
+
+export function saveOrangeExpressJournal(journal: OrangeExpressJournal): void {
+  if (typeof window === "undefined") return;
+  try {
+    saveGameKitSettingsToStore({ orangeExpressJournal: normalizeOrangeExpressJournal(journal) });
+  } catch {
+    // 存不進去時，下一趟沒有比較的對象，結算照原本那句。
   }
 }
