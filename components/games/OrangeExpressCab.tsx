@@ -1,19 +1,17 @@
 "use client";
 
-import { useId, useRef, type CSSProperties, type ReactNode } from "react";
+import { useId, useRef, type CSSProperties } from "react";
 import { OrangeExpressGauge } from "@/components/games/OrangeExpressGauge";
-import { HornIcon, LandmarkGlyph, XiaojuFace } from "@/components/games/OrangeExpressGlyphs";
+import { HornIcon, XiaojuFace } from "@/components/games/OrangeExpressGlyphs";
 import { OrangeExpressNextHand } from "@/components/games/OrangeExpressNextHand";
+import { OrangeExpressSeats } from "@/components/games/OrangeExpressSeats";
 import {
   brakeLampLabel,
   brakeValueText,
-  brakeWord,
   COPY,
   powerLampLabel,
   powerValueText,
-  powerWord,
 } from "@/lib/games/orange-express/copy";
-import { gaugeZone } from "@/lib/games/orange-express/gauge";
 import { xiaojuMood } from "@/lib/games/orange-express/mood";
 import {
   dragIndex,
@@ -115,10 +113,6 @@ function Lever({
     kind === "power"
       ? powerValueText(notch as PowerNotch, simplePowers)
       : brakeValueText(notch as BrakeNotch, simple);
-  const word =
-    kind === "power"
-      ? powerWord(notch as PowerNotch, simplePowers)
-      : brakeWord(notch as BrakeNotch);
   const last = notches.length - 1;
   const found = notches.indexOf(notch);
   const index = found >= 0 ? found : 0;
@@ -140,12 +134,8 @@ function Lever({
 
   return (
     <div className={styles.leverColumn} data-kind={kind} data-testid={`orange-express-${kind}-lever`}>
-      <span className={styles.leverTitle}>
-        {label}
-        <b className={styles.leverWord} data-testid={`orange-express-${kind}-word`}>
-          {word}
-        </b>
-      </span>
+      {/* 桿頂只寫「動力／煞車」：現在在哪一格看桿子本身（PR-J2 拿掉重複的狀態小牌；讀屏的 aria-valuetext 照說）。 */}
+      <span className={styles.leverTitle}>{label}</span>
       <div
         ref={ref}
         className={styles.lever}
@@ -250,20 +240,6 @@ function Lever({
   );
 }
 
-function FlagIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden>
-      <path
-        d="M6 3v18"
-        stroke="currentColor"
-        strokeWidth="2.4"
-        strokeLinecap="round"
-      />
-      <path d="M7 4h11l-3 4 3 4H7z" fill="currentColor" />
-    </svg>
-  );
-}
-
 /** 不給 size 時由外層 CSS 決定大小（燈泡、車門鈕）；結算小籤沒有那層 CSS，要給 size。 */
 type GlyphProps = { size?: number };
 
@@ -331,45 +307,6 @@ export function LightStopIcon() {
   );
 }
 
-function LightIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden>
-      <path
-        d="M8 14a6 6 0 1 1 8 0c-1 1-1.5 2-1.5 3h-5c0-1-.5-2-1.5-3z"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.2"
-        strokeLinejoin="round"
-      />
-      <path d="M9.5 20.5h5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-type LampState = "off" | "green" | "yellow" | "orange";
-
-function Lamp({
-  label,
-  state,
-  icon,
-}: {
-  label: string;
-  state: LampState;
-  icon: ReactNode;
-}) {
-  return (
-    <li className={styles.lamp} data-lamp={state}>
-      <span className={styles.lampBulb} aria-hidden>
-        {icon}
-      </span>
-      <span className={styles.lampText}>{label}</span>
-      <span className={styles.srOnly}>
-        {state === "off" ? COPY.lampOff : COPY.lampOn}
-      </span>
-    </li>
-  );
-}
-
 export function OrangeExpressCab({
   run,
   shake,
@@ -398,7 +335,6 @@ export function OrangeExpressCab({
 }) {
   const station = run.stations[run.stationIndex];
   const limit = currentLimit(run);
-  const zone = gaugeZone(run.speed, limit);
   const waiting = station != null && run.boarded < station.passengers.length;
   const doorLabel =
     run.phase === "doors-open"
@@ -408,19 +344,11 @@ export function OrangeExpressCab({
       : COPY.openDoors;
   const doorReady =
     run.phase === "stopped" || (run.phase === "doors-open" && !waiting);
-  const atStation = run.phase === "stopped" || run.phase === "doors-open";
   const tunnel = inTunnel(run);
   const simple = simpleLevers(run.course);
   // 桿槽填色看實際出力：只有有重量感的大司機、小站長才畫（低齡幾乎即時，畫了只是多一樣東西）。
   const showEffort = run.course === "big" || run.course === "captain";
   const powers = powerNotches(run.course);
-  const flagLamp: LampState = run.autoBrake
-    ? "orange"
-    : run.speed <= 0.001
-      ? "off"
-      : zone === "green"
-        ? "green"
-        : "yellow";
 
   return (
     <div
@@ -431,48 +359,16 @@ export function OrangeExpressCab({
       data-simple={simple ? "true" : "false"}
       data-focus={next ? next.control : undefined}
     >
-      {/* 站名、速度表、指示燈收在兩根桿中間那一格；不另佔一列，高度留給前窗。DOM 放最前，讀屏先聽到站名。 */}
+      {/*
+        中間那一格（PR-J2 減法）：小橘、要接的朋友座位、速度表。燈、站名牌拿掉了：站名與「下一站」由座位的地標章
+        與讀屏那句帶，門、停車的狀態看車門鈕與停車目標條。不另佔一列，高度留給前窗。DOM 放最前，讀屏先聽到要接誰。
+      */}
       <div className={styles.dash}>
         <div className={styles.dashHead}>
           <XiaojuFace className={styles.badge} mood={xiaojuMood(run, cheer)} />
-          <p className={styles.stationName}>
-            <span className={styles.stationLead}>
-              {station ? <LandmarkGlyph id={station.landmark} className={styles.stationLandmark} /> : null}
-              {atStation ? COPY.atStation : COPY.nextStop}
-            </span>
-            {station ? (
-              <span className={styles.stationPlate}>{station.name}</span>
-            ) : null}
-          </p>
+          <OrangeExpressSeats run={run} />
         </div>
         <OrangeExpressGauge speed={run.speed} limit={limit} numbers={numbers} flag={COURSE_RULES[run.course].speedFlag} />
-        {/* 低齡只留「門」「停車」：桿子自己限速，速度旗燈不會亮橘；車內燈是裝飾。省下一列給前窗。 */}
-        <ul className={styles.lamps} aria-label={COPY.lampsLabel}>
-          {simple ? null : (
-            <Lamp
-              label={COPY.lampFlag}
-              state={flagLamp}
-              icon={<FlagIcon />}
-            />
-          )}
-          <Lamp
-            label={COPY.lampDoor}
-            state={run.phase === "doors-open" ? "orange" : "off"}
-            icon={<DoorIcon />}
-          />
-          <Lamp
-            label={COPY.lampStop}
-            state={atStation ? "green" : "off"}
-            icon={<StopIcon />}
-          />
-          {simple ? null : (
-            <Lamp
-              label={COPY.lampLight}
-              state={tunnel ? "yellow" : "off"}
-              icon={<LightIcon />}
-            />
-          )}
-        </ul>
       </div>
       <Lever
         kind="power"

@@ -1,14 +1,14 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import { LandmarkGlyph, RiderFace, XiaojuFace } from "@/components/games/OrangeExpressGlyphs";
+import { LandmarkGlyph, XiaojuFace } from "@/components/games/OrangeExpressGlyphs";
 import { COPY } from "@/lib/games/orange-express/copy";
 import type { RouteStrip } from "@/lib/games/orange-express/route-strip";
 import styles from "./orange-express.module.css";
 
 /**
  * 前窗上緣的路線條：一段地圖軌道，站點是插在軌道上方的地標章（像地圖釘），小橘走在軌道上，不會蓋住章。
- * 要接的朋友從開局就站在章上，上車後坐進小橘後面的小車廂。下一站的章亮黃圈，停過的章填黃底，走過的軌道塗實。
+ * 下一站的章亮黃圈，停過的章填黃底，走過的軌道塗實。要接的朋友只在駕駛台的座位上（PR-J2），這裡不重複畫。
  * 小橘的位置每一幀照算、不做滑動動畫（減少動態也一樣）。
  */
 /** arrive：任務卡剛收進來，站點章依序彈一下（減少動態不彈）。 */
@@ -35,28 +35,13 @@ export function OrangeExpressRouteStrip({ strip, arrive = false }: { strip: Rout
             style={{ left: `${stop.at}%`, "--i": index } as CSSProperties}
           >
             <LandmarkGlyph id={stop.landmark} className={styles.routeStamp} />
-            {stop.waiting.length > 0 ? (
-              <span className={styles.routeWaiting} data-testid="orange-express-route-waiting">
-                {stop.waiting.map((rider) => (
-                  <RiderFace key={rider.id} id={rider.id} />
-                ))}
-              </span>
-            ) : null}
           </span>
         ))}
         <span
           className={styles.routeTrain}
           data-testid="orange-express-route-train"
-          data-riding={strip.riding.length}
           style={{ left: `${strip.train}%` }}
         >
-          {strip.riding.length > 0 ? (
-            <span className={styles.routeRiding}>
-              {strip.riding.map((rider) => (
-                <RiderFace key={rider.id} id={rider.id} />
-              ))}
-            </span>
-          ) : null}
           <XiaojuFace />
         </span>
       </div>

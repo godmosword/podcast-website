@@ -209,7 +209,6 @@ test.describe("小橘特快車", () => {
     await expect(power).toHaveAttribute("aria-valuetext", "動力 P3，快");
     await expect(power.locator('[data-notch="3"]')).toHaveAttribute("data-on", "true");
     await expect(power.locator('[data-notch="2"]')).toHaveAttribute("data-on", "false");
-    await expect(page.getByTestId("orange-express-power-word")).toHaveText("快");
 
     const brake = page.getByRole("slider", { name: "煞車" });
     for (let i = 0; i < 6; i += 1) await tap(page, "ArrowLeft");
@@ -697,7 +696,6 @@ test.describe("小橘特快車：桌面從 P0 推動力，車真的會走", () =
     await page.keyboard.press("ArrowUp");
     await page.keyboard.press("ArrowUp");
     await expect(power).toHaveAttribute("aria-valuenow", "2");
-    await expect(page.getByTestId("orange-express-power-word")).not.toHaveText("停");
     await expect.poll(() => speed(page)).toBeGreaterThan(0);
     await expect.poll(async () => (await windshield(page)).equals(still)).toBe(false);
   });
@@ -814,7 +812,7 @@ test.describe("小橘特快車：版面", () => {
         const cab = page.getByTestId("orange-express-cab");
         const strip = [
           await box(page.getByTestId("orange-express-horn")),
-          await box(cab.getByText("遊樂園", { exact: true })),
+          await box(cab.getByTestId("orange-express-seats")),
           await box(page.getByTestId("orange-express-gauge")),
           await box(page.getByRole("button", { name: "開門" })),
         ];
@@ -995,8 +993,9 @@ test.describe("小橘特快車：低齡桿面與第一次進站示範", () => {
     await page.keyboard.press("ArrowUp");
     await expect(power).toHaveAttribute("aria-valuetext", "動力，慢");
     await expect(power.locator('[data-notch="2"]')).toHaveAttribute("data-on", "true");
-    // 低齡的中間格只留門與停車兩盞燈。
-    await expect(page.getByRole("list", { name: "駕駛台的燈" }).locator("li")).toHaveCount(2);
+    // 中間格沒有燈了（PR-J2）：小橘、接朋友座位、速度表。
+    await expect(page.getByRole("list", { name: "駕駛台的燈" })).toHaveCount(0);
+    await expect(page.getByTestId("orange-express-seats")).toHaveAttribute("data-total", "3");
     // 鍵盤只走得到看得見的格：再一下到「快」（P4），再按也停在「快」。
     await page.keyboard.press("ArrowUp");
     await expect(power).toHaveAttribute("aria-valuetext", "動力，快");
@@ -1183,19 +1182,58 @@ test.describe("小橘特快車：停好時的開心小橘", () => {
   });
 });
 
+test.describe("小橘特快車：矮手機與窄手機整頁不捲動（PR-J2 座位）", () => {
+  for (const [width, height] of [[320, 568], [375, 553], [667, 375], [844, 390]] as const) {
+    for (const level of ["自己開", "小站長"] as const) {
+      test(`${width}×${height} ${level}：座位放得下、整頁不捲動`, async ({ page }) => {
+        await page.setViewportSize({ width, height });
+        await page.addInitScript(() => {
+          window.__orangeExpress = { driver: "big", freeze: true };
+        });
+        await page.goto("/games/orange-express");
+        await startLevel(page, level);
+        const seats = page.getByTestId("orange-express-seats");
+        await expect(seats).toBeVisible();
+        const box = (await seats.boundingBox())!;
+        const dash = (await seats.locator("xpath=ancestor::*[contains(@class, 'dash')][1]").boundingBox())!;
+        expect(box.x).toBeGreaterThanOrEqual(dash.x - 1);
+        expect(box.x + box.width).toBeLessThanOrEqual(dash.x + dash.width + 1);
+        const scroll = await page.evaluate(() => document.scrollingElement!.scrollHeight - document.scrollingElement!.clientHeight);
+        expect(scroll).toBeLessThanOrEqual(0);
+      });
+    }
+  }
+});
+
 test.describe("小橘特快車：站點地標", () => {
-  test("下一站旁有地標小圖示，換站跟著換；結算站卡也有", async ({ page }) => {
+  test("駕駛台的座位每站一個地標章，下一站那組亮黃圈、換站跟著換；讀屏說下一站", async ({ page }) => {
     await page.addInitScript(() => {
       window.__orangeExpress = { driver: "big", freeze: true };
     });
     await page.goto("/games/orange-express");
     await startLevel(page, "自己開");
-    const cab = page.getByTestId("orange-express-cab");
-    await expect(cab.locator('[data-landmark="ferris"]')).toHaveCount(1);
+    const seats = page.getByTestId("orange-express-seats");
+    const next = seats.locator('[data-next-stop="true"]');
+    await expect(seats.locator("[data-landmark]")).toHaveCount(3);
+    await expect(next.locator('[data-landmark="ferris"]')).toHaveCount(1);
+    await expect(seats).toHaveAttribute("aria-label", "要接的朋友：已上車 0 位，共 3 位，下一站遊樂園");
     await jump(page, { stationIndex: 1 });
-    await expect(cab.locator('[data-landmark="orange-tree"]')).toHaveCount(1);
+    await expect(next.locator('[data-landmark="orange-tree"]')).toHaveCount(1);
     await jump(page, { stationIndex: 2 });
-    await expect(cab.locator('[data-landmark="house"]')).toHaveCount(1);
+    await expect(next.locator('[data-landmark="house"]')).toHaveCount(1);
+  });
+
+  test("朋友上車那一刻座位亮起來；到家時結算接到的朋友四組都有", async ({ page }) => {
+    await page.addInitScript(() => {
+      window.__orangeExpress = { driver: "little", progress: 0.65, speed: 0 };
+    });
+    await page.goto("/games/orange-express");
+    await startLevel(page, "自己開");
+    const seats = page.getByTestId("orange-express-seats");
+    await expect(seats.locator('[data-aboard="true"]')).toHaveCount(0);
+    await page.getByRole("button", { name: "開門" }).click();
+    await expect(seats.locator('[data-aboard="true"]')).toHaveCount(1);
+    await expect(seats).toHaveAttribute("aria-label", /已上車 1 位，共 3 位/);
   });
 });
 
@@ -1461,7 +1499,7 @@ test.describe("小橘特快車：大司機減法（2026-11-01）", () => {
     await expect(power).not.toContainText("P");
     await expect(brake).not.toContainText("B");
     await expect(brake.locator("[data-notch]")).toHaveText(["緊急", "停", "輕", "鬆"]);
-    await expect(page.getByRole("list", { name: "駕駛台的燈" }).getByRole("listitem")).toHaveCount(2);
+    await expect(page.getByRole("list", { name: "駕駛台的燈" })).toHaveCount(0);
     await expect(page.getByTestId("orange-express-gauge-flag")).toHaveCount(0);
 
     await tap(page, "ArrowUp");

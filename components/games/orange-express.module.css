@@ -1008,7 +1008,6 @@
 .routeStrip {
   --route-stop: 32px;
   --route-train: 26px;
-  --route-face: 22px;
   --route-rail-y: 40px;
   position: absolute;
   top: 8px;
@@ -1113,25 +1112,6 @@
   height: calc(var(--route-stop) - 10px);
 }
 
-/* 頭像墊一個圓底加細框：小南的臉是白色，直接放在地圖紙上會只剩一條藍帽沿。 */
-.routeWaiting svg,
-.routeRiding svg {
-  display: block;
-  width: var(--route-face);
-  height: var(--route-face);
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--ink) 10%, var(--card));
-  box-shadow: 0 0 0 1.5px var(--ink);
-}
-
-/* 等車的朋友站在章的右上角。 */
-.routeWaiting {
-  position: absolute;
-  top: -4px;
-  left: calc(100% - 6px);
-  display: flex;
-}
-
 .routeTrain {
   position: absolute;
   top: var(--route-rail-y);
@@ -1147,31 +1127,11 @@
   height: 100%;
 }
 
-/* 上了車的朋友坐在小橘後面的小車廂（膠囊），跟「站在章上」的形狀不同。 */
-.routeRiding {
-  position: absolute;
-  top: 50%;
-  right: calc(100% - 4px);
-  display: flex;
-  gap: 2px;
-  padding: 1px 3px;
-  transform: translateY(-50%);
-  border: 2px solid var(--ink);
-  border-radius: var(--radius-pill);
-  background: var(--card);
-}
-
-.routeRiding svg {
-  width: calc(var(--route-face) - 4px);
-  height: calc(var(--route-face) - 4px);
-}
-
 /* 桌機的前窗很寬：路線條收窄置中、東西放大，不讓一整條空軌道把章與小橘縮成雜點。 */
 @media (min-width: 900px) {
   .routeStrip {
     --route-stop: 42px;
     --route-train: 34px;
-    --route-face: 28px;
     --route-rail-y: 52px;
     left: 50%;
     right: auto;
@@ -1443,34 +1403,117 @@
   color: var(--ink);
 }
 
-.stationName {
+/*
+ * 接朋友座位（PR-J2）：每站一組，上面地標章、下面要接的朋友。沒上車是虛線空位（臉淡一點、看得出是誰），
+ * 上車那一刻彈進來、外面閃一圈朋友的代表色。下一站那組的章是白底墨框，其他站的章淡一半——
+ * 不用黃：台面上的黃只留給「現在按這個」（J1），兩樣都黃孩子會以為座位也要按（設計審）。
+ * 一站兩位時有名字那位在上面。窄的地方（檔尾與橫拿那段的 container query）只留臉，小站長五位再縮成小圓點。
+ */
+.seats {
+  --seat: 26px;
+  --stamp: 18px;
+  --overlap: -4px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* 小站長五位：臉小一號，390 寬約 115px 的中間格才放得下。 */
+.seats[data-total="5"] {
+  --seat: 20px;
+}
+
+.seatGroup {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  min-width: 0;
-  margin: 0;
-  font-weight: 900;
-  white-space: nowrap;
+  gap: 3px;
 }
 
-.stationLead {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: var(--fs-meta);
-  color: var(--ink-soft);
+.seatStamp {
+  box-sizing: content-box;
+  width: var(--stamp);
+  height: var(--stamp);
+  padding: 1px;
+  border-radius: 50%;
 }
 
-/*
- * 下一站的地標小圖示：跟前窗裡的地標同一個東西。矮手機收起徽章時不跟著收。
- * 上下負邊距讓它不把「下一站」那行撐高：矮手機的中間格多 1px 就會讓整頁捲動。
- */
-.stationLandmark {
-  width: 24px;
-  height: 24px;
-  flex: 0 0 auto;
-  margin-block: -6px;
+.seatGroup[data-next-stop="false"] .seatStamp {
+  opacity: 0.5;
+}
+
+.seatGroup[data-next-stop="true"] .seatStamp {
+  background: var(--card);
+  box-shadow: 0 0 0 2px var(--ink);
+}
+
+.seatRow {
+  display: flex;
+  border-radius: var(--radius-pill);
+}
+
+.seat {
+  display: block;
+  width: var(--seat);
+  height: var(--seat);
+  border-radius: 50%;
+}
+
+.seat:first-child {
+  position: relative;
+  z-index: 1;
+}
+
+.seat + .seat {
+  margin-left: var(--overlap);
+}
+
+.seat svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--ink) 10%, var(--card));
+  box-shadow: 0 0 0 1.5px var(--ink);
+}
+
+.seat[data-aboard="false"] {
+  outline: 2px dashed var(--ink);
+  outline-offset: -1px;
+}
+
+.seat[data-aboard="false"] svg {
+  opacity: 0.6;
+  filter: saturate(0.3);
+  box-shadow: none;
+}
+
+.seat[data-aboard="true"] {
+  animation: seatPop 420ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes seatPop {
+  from {
+    transform: scale(1.5);
+    box-shadow: 0 0 0 6px var(--seat-color);
+  }
+
+  to {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+.screen[data-reduced="true"] .seat {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seat {
+    animation: none;
+  }
 }
 
 .resultLandmark {
@@ -1478,85 +1521,6 @@
   height: 22px;
   flex: 0 0 auto;
   margin-inline-start: 2px;
-}
-
-.stationPlate {
-  align-self: center;
-  padding: 2px 10px;
-  border-radius: var(--radius-xs);
-  color: var(--cta-solid-fg);
-  background: var(--cta-solid-bg);
-  font-size: var(--fs-body);
-  box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--ink) 30%, transparent);
-}
-
-.lamps {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(36px, auto));
-  justify-content: center;
-  gap: 4px 6px;
-  margin: 0;
-  padding: 4px 6px;
-  border: 2px solid var(--ink);
-  border-radius: 14px;
-  background: var(--panel);
-  box-shadow: inset 0 2px 0 color-mix(in srgb, var(--ink) 12%, transparent);
-  list-style: none;
-}
-
-.lamp {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1px;
-  min-width: 36px;
-}
-
-.lampBulb {
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border: 2px solid var(--ink);
-  border-radius: 50%;
-  color: var(--ink-soft);
-  background: color-mix(in srgb, var(--ink) 14%, var(--card));
-  box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--ink) 14%, transparent);
-}
-
-.lampBulb svg {
-  width: 16px;
-  height: 16px;
-}
-
-.lamp[data-lamp="green"] .lampBulb {
-  color: var(--ink);
-  background: var(--c-mint);
-  box-shadow:
-    0 0 0 3px color-mix(in srgb, var(--c-mint) 45%, transparent),
-    inset 0 2px 0 color-mix(in srgb, var(--card) 70%, transparent);
-}
-
-.lamp[data-lamp="yellow"] .lampBulb {
-  color: var(--ink);
-  background: var(--c-yellow);
-  box-shadow:
-    0 0 0 3px color-mix(in srgb, var(--c-yellow) 45%, transparent),
-    inset 0 2px 0 color-mix(in srgb, var(--card) 70%, transparent);
-}
-
-.lamp[data-lamp="orange"] .lampBulb {
-  color: var(--ink);
-  background: color-mix(in srgb, var(--landing-brand) 70%, var(--card));
-  box-shadow:
-    0 0 0 3px color-mix(in srgb, var(--landing-brand) 35%, transparent),
-    inset 0 2px 0 color-mix(in srgb, var(--card) 70%, transparent);
-}
-
-.lampText {
-  font-size: 0.7rem;
-  font-weight: 800;
-  white-space: nowrap;
 }
 
 /* ── 桿 ─────────────────────────────────────────────── */
@@ -1584,16 +1548,6 @@
   gap: 4px;
   font-size: var(--fs-label);
   font-weight: 900;
-}
-
-.leverWord {
-  min-width: 2.6em;
-  padding: 1px 6px;
-  border: 2px solid var(--ink);
-  border-radius: var(--radius-pill);
-  background: var(--card);
-  font-size: var(--fs-meta);
-  text-align: center;
 }
 
 .lever {
@@ -2008,6 +1962,7 @@
 
 .dash {
   grid-area: dash;
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2470,12 +2425,12 @@
     height: auto;
   }
 
-  /* 中間那格用格線排：寬時站名｜速度表｜燈一橫排；不夠寬時見下一段。不用 flex-wrap：
+  /* 中間那格用格線排：小橘與座位｜速度表一橫排。不用 flex-wrap：
    * 換行會把那格撐高，兩根桿跟著被拉長，前窗就變矮。 */
   .dash {
     display: grid;
-    grid-template-columns: auto auto auto;
-    grid-template-areas: "head gauge lamps";
+    grid-template-columns: auto auto;
+    grid-template-areas: "head gauge";
     align-items: center;
     justify-content: center;
     gap: 8px 48px;
@@ -2485,29 +2440,21 @@
     grid-area: head;
   }
 
-  /* 速度表不跟著螢幕一直放大（PR-I2：桌機 230px 把駕駛台撐高、前窗變成扁扁一條），空間留給窗外。 */
+  /* 速度表不跟著螢幕一直放大（PR-I2：桌機 230px 把駕駛台撐高、前窗變成扁扁一條），空間留給窗外；PR-J2 再小一號。 */
   .gauge {
     grid-area: gauge;
-    width: clamp(140px, 14vw, 184px);
-  }
-
-  .lamps {
-    grid-area: lamps;
+    width: clamp(128px, 11vw, 160px);
   }
 }
 
-/* 平板直式（約 768 寬）：中間那格約 290px，站名疊在燈上面、速度表在右。 */
+/* 平板直式（約 768 寬）：中間那格約 290px，小橘與座位在左、速度表在右。 */
 @media (min-width: 720px) and (max-width: 999.98px) {
   .dash {
-    grid-template-columns: auto auto;
-    grid-template-areas:
-      "head gauge"
-      "lamps gauge";
     gap: 8px 20px;
   }
 
   .gauge {
-    width: 160px;
+    width: 140px;
   }
 }
 
@@ -2518,29 +2465,22 @@
   }
 }
 
-/* 桌機與平板：中間那格很寬，站名牌與燈放大，不要縮成兩座小島。橫拿手機（矮）不套。 */
+/* 桌機與平板：中間那格很寬，座位放大，不要縮成一排小點。橫拿手機（矮）不套。 */
 @media (min-width: 720px) and (min-height: 521px) {
   .badge {
     width: 52px;
     height: 52px;
   }
 
-  .stationPlate {
-    font-size: var(--fs-h4);
+  .seats {
+    --seat: 38px;
+    --stamp: 30px;
+    --overlap: -8px;
+    gap: 12px;
   }
 
-  .lampBulb {
-    width: 40px;
-    height: 40px;
-  }
-
-  .lampBulb svg {
-    width: 22px;
-    height: 22px;
-  }
-
-  .lampText {
-    font-size: var(--fs-meta);
+  .seats[data-total="5"] {
+    --seat: 34px;
   }
 }
 
@@ -2563,22 +2503,14 @@
     width: 32px;
     height: 32px;
   }
-
-  .lamps {
-    gap: 4px;
-  }
-
-  .lampText {
-    display: none;
-  }
 }
 
 /*
  * 橫拿手機（約 844×390、667×375）：兩根桿夾著前窗，前窗下面一條依序是喇叭（靠動力桿那隻手）、
- * 站名＋速度表＋燈、車門（靠煞車那隻手）。整個駕駛台在一屏內，不用捲。
+ * 小橘＋座位＋速度表、車門（靠煞車那隻手）。整個駕駛台在一屏內，不用捲。
  * .cab 與 .cabBottom 拆開（display: contents），子元素直接站上外層格線；黏土台面改畫在外層。
- * 車門寬度固定，標籤換成「等人上車」「關門」時中間那格不會被擠。中間那格太窄就收起燈：
- * 車門鈕變綠、速度表色帶都還在，燈的資訊有備援。桿子跟著視窗高，矮螢幕每格會略低於 48px。
+ * 車門寬度固定，標籤換成「等人上車」「關門」時中間那格不會被擠。座位只留臉，
+ * 中間那格太窄（667 寬約 170px）就縮成小圓點。桿子跟著視窗高，矮螢幕每格會略低於 48px。
  */
 @media (orientation: landscape) and (max-height: 520px) {
   .screen[data-screen="drive"] {
@@ -2629,7 +2561,6 @@
   }
 
   .dash {
-    container-type: inline-size;
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
@@ -2640,7 +2571,8 @@
   }
 
   .dashHead {
-    gap: 2px;
+    flex-direction: row;
+    gap: 8px;
   }
 
   .badge {
@@ -2648,15 +2580,28 @@
     height: 28px;
   }
 
+  /* 這一條只有一顆喇叭高：章放在臉左邊。小站長五位放不下章，只留臉，下一站那組臉外一圈墨框。 */
+  .seats {
+    --seat: 22px;
+  }
+
+  .seatGroup {
+    flex-direction: row;
+  }
+
+  .seats[data-total="5"] .seatStamp {
+    display: none;
+  }
+
+  .seats[data-total="5"] .seatGroup[data-next-stop="true"] .seatRow {
+    background: var(--card);
+    box-shadow: 0 0 0 2px var(--ink);
+  }
+
   .gauge {
     flex: 0 0 auto;
     width: 88px;
     min-width: 0;
-  }
-
-  .lamps {
-    grid-template-columns: repeat(2, minmax(32px, auto));
-    padding: 2px 4px;
   }
 
   .horn {
@@ -2673,9 +2618,37 @@
     white-space: nowrap;
   }
 
-  @container (max-width: 270px) {
-    .lamps {
+  /* 667 寬：跟速度表擠在同一條，只剩小圓點（站與站之間空 8px，看得出哪幾位同一站）。 */
+  @container (max-width: 240px) {
+    .seats,
+    .seats[data-total="5"] {
+      --seat: 12px;
+      gap: 8px;
+    }
+
+    .seatStamp,
+    .seat svg {
       display: none;
+    }
+
+    .seat,
+    .seat[data-aboard="false"] {
+      outline: 1.5px solid var(--ink);
+      outline-offset: -1.5px;
+    }
+
+    .seat + .seat {
+      margin-left: 2px;
+    }
+
+    .seat[data-aboard="true"] {
+      background: var(--seat-color);
+    }
+
+    .seatGroup[data-next-stop="true"] .seatRow {
+      padding: 2px;
+      background: var(--card);
+      box-shadow: 0 0 0 2px var(--ink);
     }
   }
 }
@@ -2818,7 +2791,6 @@
   .routeStrip {
     --route-stop: 28px;
     --route-train: 22px;
-    --route-face: 20px;
     --route-rail-y: 34px;
     padding-block: 3px 1px;
   }
@@ -2883,8 +2855,7 @@
 
   /*
    * 小站長（煞車六格、每格 40px，桿子不能再矮）：跟桌機一樣兩根桿拉長到兩列，喇叭與車門收進中間那格，
-   * 前窗不用再讓出整條下排（PR-I2：375×553 前窗約 122 → 175px）。中間那格收起燈：車門鈕會變綠、
-   * 停車目標條與速度表的旗都還在，燈的資訊有備援（跟橫拿手機同一套）。
+   * 前窗不用再讓出整條下排（PR-I2：375×553 前窗約 122 → 175px）。
    */
   .cab:not([data-simple="true"]) {
     grid-template-areas:
@@ -2893,17 +2864,17 @@
     grid-template-rows: minmax(0, 1fr) auto;
   }
 
-  /* 只是看不到：燈的狀態（門、停車、速度旗…）讀屏照樣讀得到。 */
-  .cab:not([data-simple="true"]) .lamps {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    border: 0;
-    clip-path: inset(50%);
-    white-space: nowrap;
+  /*
+   * 中間那格還要放喇叭與車門：座位不放地標章、只留臉（下一站那組臉外一圈墨框），
+   * 不然前窗比拿掉站名牌之前還矮（PR-J2 量過：375×553 172 → 170px）。
+   */
+  .cab:not([data-simple="true"]) .seatStamp {
+    display: none;
+  }
+
+  .cab:not([data-simple="true"]) .seatGroup[data-next-stop="true"] .seatRow {
+    background: var(--card);
+    box-shadow: 0 0 0 2px var(--ink);
   }
 
   /* 喇叭的發光圈不要碰到車門鈕（設計審）。 */
@@ -2938,5 +2909,51 @@
     overflow: hidden;
     clip-path: inset(50%);
     white-space: nowrap;
+  }
+}
+
+/*
+ * 中間那格太窄（寬不到 360px 的手機約 84px）：三位以下只留臉（小一號、不放地標章，下一站那組臉外一圈墨框）；
+ * 小站長五位擠不下臉，縮成一排小圓點，上車的填朋友的代表色。站與站之間空 8px，看得出哪幾位同一站。
+ */
+@container (max-width: 96px) {
+  .seats {
+    --seat: 22px;
+    gap: 8px;
+  }
+
+  .seatStamp {
+    display: none;
+  }
+
+  .seatGroup[data-next-stop="true"] .seatRow {
+    background: var(--card);
+    box-shadow: 0 0 0 2px var(--ink);
+  }
+
+  .seats[data-total="5"] {
+    --seat: 12px;
+  }
+
+  .seats[data-total="5"] .seat svg {
+    display: none;
+  }
+
+  .seats[data-total="5"] .seat,
+  .seats[data-total="5"] .seat[data-aboard="false"] {
+    outline: 1.5px solid var(--ink);
+    outline-offset: -1.5px;
+  }
+
+  .seats[data-total="5"] .seat + .seat {
+    margin-left: 2px;
+  }
+
+  .seats[data-total="5"] .seat[data-aboard="true"] {
+    background: var(--seat-color);
+  }
+
+  .seats[data-total="5"] .seatGroup[data-next-stop="true"] .seatRow {
+    padding: 2px;
   }
 }

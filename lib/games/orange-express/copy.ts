@@ -59,6 +59,8 @@ export const COPY = {
   predicted: "會停在這裡",
   /** 路線條的讀屏名稱；後面接站名與「下一站」。 */
   routeStrip: "這趟的路",
+  /** 駕駛台的「接朋友」座位（PR-J2），讀屏念的開頭。 */
+  seatsLabel: "要接的朋友",
   stopWord: "停",
   slowWord: "慢",
   fastWord: "快",
@@ -82,13 +84,6 @@ export const COPY = {
   /** 桿子得到焦點時讀屏說明鍵位：上下永遠是動力、左右永遠是煞車。 */
   leverKeys: "上下鍵是動力，左右鍵是煞車",
   nextGame: "接著玩",
-  lampFlag: "速度旗",
-  lampDoor: "門",
-  lampStop: "停車",
-  lampOn: "燈亮了",
-  lampOff: "燈沒亮",
-  lampsLabel: "駕駛台的燈",
-  lampLight: "車內燈",
   driverLabel: "司機",
   driverHow: "家長在遊戲設定切換",
   autoBrakeOn: "超過速度旗了，小橘幫你輕輕煞車",

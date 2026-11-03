@@ -96,14 +96,12 @@ export function OrangeExpressResult({
             <XiaojuFace />
           )}
         </span>
-        {/* 大司機：接到的朋友擠在小橘旁邊一起到家（計畫的「一列朋友頭像」，靠在小橘旁，不多一列）。 */}
-        {hasEvents ? (
-          <span className={styles.resultRiders} data-testid="orange-express-result-riders" aria-hidden>
-            {stations.flatMap((station) =>
-              station.passengers.map((rider) => <RiderFace key={rider.id} id={rider.id} />),
-            )}
-          </span>
-        ) : null}
+        {/* 接到的朋友擠在小橘旁邊一起到家（靠在小橘旁，不多一列）。PR-J2 起四組都有：駕駛台座位全亮了，這裡接著看到。 */}
+        <span className={styles.resultRiders} data-testid="orange-express-result-riders" aria-hidden>
+          {stations.flatMap((station) =>
+            station.passengers.map((rider) => <RiderFace key={rider.id} id={rider.id} />),
+          )}
+        </span>
       </span>
       <h2>{COPY.arrivedHome}</h2>
       <p className={styles.resultLine} data-testid="orange-express-result-line">{resultLine}</p>

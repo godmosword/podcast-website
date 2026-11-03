@@ -8,34 +8,17 @@ function at(state: RunState, patch: Partial<RunState>): RunState {
 }
 
 describe("路線條", () => {
-  it("大司機、小站長有（小站長 PR-I4 起）；開局小橘在最左邊，每一站的朋友都站在章上", () => {
+  it("大司機、小站長有（小站長 PR-I4 起）；開局小橘在最左邊（朋友在駕駛台座位上，不在這裡，PR-J2）", () => {
     expect(routeStripFor(createRun("drive", "little"))).toBeNull();
     expect(routeStripFor(createRun("look"))).toBeNull();
-    expect(routeStripFor(createRun("captain"))!.stops.map((stop) => stop.waiting.length)).toEqual([2, 2, 1]);
+    expect(routeStripFor(createRun("captain"))!.stops).toHaveLength(3);
     const strip = routeStripFor(createRun("drive", "big"))!;
     expect(strip.train).toBe(0);
     expect(strip.stops.map((stop) => stop.name)).toEqual(["遊樂園", "橘子坡", "回家"]);
-    expect(strip.stops.map((stop) => stop.waiting.map((rider) => rider.id))).toEqual([
-      ["bonbon"],
-      ["xiaonan"],
-      ["mami"],
-    ]);
     expect(strip.stops[2]!.at).toBe(100);
-    expect(strip.riding).toEqual([]);
     expect(strip.next).toBe("遊樂園");
     expect(strip.stops.map((stop) => stop.next)).toEqual([true, false, false]);
     expect(strip.stops.some((stop) => stop.reached)).toBe(false);
-  });
-
-  it("每位朋友只上車一次（小站長回家站原本又接一次 Bonbon、馬米），車上的人不重複", () => {
-    for (const run of [createRun("captain"), createRun("drive", "big"), createRun("drive", "little"), createRun("look")]) {
-      const ids = run.stations.flatMap((station) => station.passengers.map((rider) => rider.id));
-      expect(new Set(ids).size).toBe(ids.length);
-    }
-    const done = at(createRun("captain"), { stationIndex: 2, phase: "route-done" });
-    expect(routeStripFor(done)?.riding.map((rider) => rider.id) ?? []).toEqual([]);
-    const home = at(createRun("captain"), { stationIndex: 2, phase: "running" });
-    expect(routeStripFor(home)!.riding.map((rider) => rider.id)).toEqual(["bonbon", "dot", "xiaonan", "sprout"]);
   });
 
   it("進站後讓給停車目標條；到終點不出", () => {
@@ -45,14 +28,12 @@ describe("路線條", () => {
     expect(routeStripFor(at(run, { phase: "route-done" }))).toBeNull();
   });
 
-  it("朋友上車後跟著小橘走，那一站的章記成停過", () => {
+  it("關門出站後，那一站的章記成停過、小橘從那一站出發", () => {
     let s = at(createRun("drive", "big"), { phase: "doors-open", boarded: 1, grades: ["green"], progress: 0.65 });
     s = step(s, { type: "close-doors" });
     const strip = routeStripFor(s)!;
-    expect(strip.stops[0]!.waiting).toEqual([]);
     expect(strip.stops[0]!.reached).toBe(true);
     expect(strip.stops[1]!.reached).toBe(false);
-    expect(strip.riding.map((rider) => rider.id)).toEqual(["bonbon"]);
     expect(strip.train).toBe(strip.stops[0]!.at);
     expect(strip.next).toBe("橘子坡");
     expect(strip.stops.map((stop) => stop.next)).toEqual([false, true, false]);
