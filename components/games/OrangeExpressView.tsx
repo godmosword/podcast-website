@@ -139,6 +139,8 @@ const CHEER_MS = 1000;
 const EVENT_CHEER_MS = 1600;
 /** 任務卡收起前，前窗提示最多先等這麼久（收起時會改成真正的時間）。 */
 const MISSION_HOLD_MS = 60_000;
+/** 車停著（狀態沒變）時前窗多久重畫一次：雲、樹、月台朋友照樣在動，30fps 就夠，省電（PR-J3）。 */
+const IDLE_PAINT_MS = 33;
 /** 對向列車擦身時「咻」的時間點（秒）。 */
 const WHOOSH_AT = 1.45;
 const DRIVE_KEYS: ReadonlySet<GameAction> = new Set([
@@ -235,6 +237,9 @@ export function OrangeExpressView({
   const phaseRef = useRef<RunState["phase"] | null>(null);
   const picked = useRef(false);
   const frozen = useRef(false);
+  /** 前窗的重畫函式（前窗自己掛上來）；車停著時迴圈用它補畫。 */
+  const windshieldPaint = useRef<(() => void) | null>(null);
+  const idlePaintMs = useRef(0);
   const swayRef = useRef<HTMLDivElement | null>(null);
   const swayClock = useRef(0);
   const bump = useRef(0);
@@ -278,6 +283,18 @@ export function OrangeExpressView({
   volumeRef.current = gameVolume;
 
   const swayOn = display.sway && !reducedMotion;
+  const reducedRef = useRef(reducedMotion);
+  reducedRef.current = reducedMotion;
+  /** 掛鉤釘住的前窗時鐘（視覺基準）；沒釘是 null。 */
+  const pinnedClock = useRef<number | null>(null);
+  /**
+   * 前窗時鐘（PR-J3）：定格（測試、基準）與減少動態時是 0，前窗跟以前一樣定住；掛鉤釘了就用釘的那一秒。
+   * 每次畫時才讀，中途解除定格也跟得上。
+   */
+  const windshieldClock = useCallback(() => {
+    if (frozen.current || reducedRef.current) return 0;
+    return pinnedClock.current ?? performance.now() / 1000;
+  }, []);
   const driveOn = run !== null && status === "playing" && screen === "drive";
   /** 進站的拍子：駕駛台「停」格什麼時候亮（低齡與大司機每一趟都看它）；暫停、離開駕駛畫面時是 none。 */
   const stopBeat: CoachBeat = driveOn ? coachBeat(run) : "none";
@@ -358,6 +375,7 @@ export function OrangeExpressView({
     saveOrangeExpressLevel(nextLevel);
     const hook = typeof window === "undefined" ? undefined : window.__orangeExpress;
     frozen.current = hook?.freeze === true;
+    pinnedClock.current = typeof hook?.clock === "number" && Number.isFinite(hook.clock) ? hook.clock : null;
     const nextDriver = hook?.driver ?? driverRef.current;
     // 沿途事件每趟換排法；掛鉤在時固定（測試與基準要穩定），可用 eventSeed 指定。
     const seed = hook ? (hook.eventSeed ?? 0) : Math.floor(Math.random() * 1_000_000);
@@ -842,7 +860,17 @@ export function OrangeExpressView({
       if (!cur || instance.isInputPaused() || cur.phase === "route-done") return;
       const dt = dtMs / 1000;
       const next = frozen.current ? cur : step(cur, { type: "tick", dt });
-      if (next !== cur) apply(next);
+      if (next !== cur) {
+        apply(next);
+        idlePaintMs.current = 0;
+      } else if (!frozen.current && !reducedRef.current && pinnedClock.current === null) {
+        // 狀態沒變（停好、開門、紅燈前停著）：前窗不會跟著 render 重畫，這裡補畫，風景才不會停住。
+        idlePaintMs.current += dtMs;
+        if (idlePaintMs.current >= IDLE_PAINT_MS) {
+          idlePaintMs.current = 0;
+          windshieldPaint.current?.();
+        }
+      }
 
       if (!sound.current) {
         const now = performance.now();
@@ -1020,6 +1048,8 @@ export function OrangeExpressView({
         mission={mission}
         missionGoal={missionGoal}
         next={next}
+        clock={windshieldClock}
+        paintRef={windshieldPaint}
         onPoint={pointCheck}
       />
       <p className={styles.live} aria-live="polite">

@@ -594,7 +594,7 @@ async function openOrangeExpress(
   await pinOrangeExpressDisplay(page, gaugeNumbers);
   await page.addInitScript((h) => {
     window.__orangeExpress = h;
-  }, { freeze: true, driver: "big", ...hook } satisfies OrangeExpressHook);
+  }, { freeze: true, driver: "big", clock: 0, ...hook } satisfies OrangeExpressHook);
   await page.goto("/games/orange-express");
   await stabilizeVisualPage(page, { theme });
   await expect(page.getByRole("button", { name: "開始開車" })).toBeVisible();
@@ -837,6 +837,20 @@ test("visual：小橘特快車小站長出發號誌 375×553 light（定格）",
   await expect(page.getByTestId("orange-express-point")).toBeVisible();
   await settleOrangeExpress(page);
   await expect(page).toHaveScreenshot("orange-express-captain-signal-375x553-light.png", orangeShot("light"));
+});
+
+/**
+ * 場景自己會動（PR-J3）：時鐘釘在 1.2 秒，進站最後一段月台上 Bonbon 揮手、摩天輪轉了一點、樹冠搖、雲飄了一點。
+ */
+test("visual：小橘特快車月台上等車的朋友 390 light（時鐘釘住）", async ({ page }) => {
+  await openOrangeExpress(page, PHONE, { clock: 1.2 });
+  await startOrangeExpress(page, "自己開");
+  await jumpOrangeExpress(page, { stationIndex: 0, progress: 0.62, speed: 0.25 });
+  await settleOrangeExpress(page);
+  await expect(page.getByTestId("orange-express-windshield")).toHaveScreenshot(
+    "orange-express-waiting-390x844-light.png",
+    orangeShot("light"),
+  );
 });
 
 /** 沿途事件做到時，小橘在前窗右下角探頭笑（PR-I2）；矮手機收起了儀表徽章，這是看得到表情的地方。 */

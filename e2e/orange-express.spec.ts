@@ -1182,6 +1182,39 @@ test.describe("小橘特快車：停好時的開心小橘", () => {
   });
 });
 
+test.describe("小橘特快車：場景自己會動（PR-J3）", () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  async function glass(page: Page): Promise<Buffer> {
+    return page.getByTestId("orange-express-windshield").locator("canvas").screenshot();
+  }
+
+  test("車停好、狀態沒變時前窗照樣在動（雲飄、摩天輪轉）", async ({ page }) => {
+    await page.addInitScript(() => {
+      window.__orangeExpress = { driver: "little", progress: 0.65, speed: 0 };
+    });
+    await page.goto("/games/orange-express");
+    await startLevel(page, "自己開");
+    await expect(page.getByTestId("orange-express-drive")).toHaveAttribute("data-phase", "stopped");
+    const before = await glass(page);
+    await page.waitForTimeout(900);
+    expect((await glass(page)).equals(before)).toBe(false);
+  });
+
+  test("減少動態：停著時前窗定住不動", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.addInitScript(() => {
+      window.__orangeExpress = { driver: "little", progress: 0.65, speed: 0 };
+    });
+    await page.goto("/games/orange-express");
+    await startLevel(page, "自己開");
+    await expect(page.getByTestId("orange-express-drive")).toHaveAttribute("data-phase", "stopped");
+    const before = await glass(page);
+    await page.waitForTimeout(900);
+    expect((await glass(page)).equals(before)).toBe(true);
+  });
+});
+
 test.describe("小橘特快車：矮手機與窄手機整頁不捲動（PR-J2 座位）", () => {
   for (const [width, height] of [[320, 568], [375, 553], [667, 375], [844, 390]] as const) {
     for (const level of ["自己開", "小站長"] as const) {

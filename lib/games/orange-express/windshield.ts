@@ -24,9 +24,18 @@ import {
 
 export { viewFor, type View };
 import { PASS_DURATION } from "@/lib/games/orange-express/reducer";
+import {
+  boatBob,
+  cloudAt,
+  drawFlock,
+  drawWaiting,
+  ferrisSpin,
+  treeSway,
+} from "@/lib/games/orange-express/windshield-life";
 import { SIGNAL_UNTIL } from "@/lib/games/orange-express/routes";
 import type {
   LandmarkId,
+  PassengerId,
   Phase,
   ScenicSection,
   SceneId,
@@ -50,6 +59,8 @@ const PLATFORM_AFTER = 28;
  * 月台單獨畫到更近，頂面才會一路鋪到前窗下緣。
  */
 const PLATFORM_NEAR = 0.3;
+/** 月台頂面離地多高（公尺）；等車的朋友站在上面。 */
+const PLATFORM_HEIGHT = 1.1;
 const POST_AHEAD = 9;
 /** 停車柱前後這麼多公尺不畫門形線柱，兩根柱子才不會疊成「雙桿」。 */
 const POST_CLEAR = 12;
@@ -347,9 +358,18 @@ export type WindshieldPaint = {
   landmark?: LandmarkId | null;
   /** 直式矮手機（CSS 的 portrait 且高 ≤600）：地標改放停車目標條右邊那一欄。 */
   compact?: boolean;
+  /**
+   * 時鐘（秒，PR-J3）：雲飄、樹搖、摩天輪轉、鳥、帆船、月台朋友揮手跟著它動，不跟著車。
+   * 定格（測試、視覺基準）與減少動態時由畫面給 0，畫面跟以前一樣定住。
+   */
+  clock?: number;
+  /** 這一站月台上還在等車的朋友；進站時畫在月台上揮手（衣服、頭跟駕駛台座位對得上），停好後交給月台朋友卡。 */
+  waiting?: readonly PassengerId[];
+  /** 天上那群鳥要不要畫：進站、沿途事件時不畫，不跟要做的事搶眼（設計審）。沒給是要畫。 */
+  birds?: boolean;
 };
 
-function drawSky(ctx: CanvasRenderingContext2D, view: View, palette: Palette, scene: SceneId): void {
+function drawSky(ctx: CanvasRenderingContext2D, view: View, palette: Palette, scene: SceneId, clock: number): void {
   const { w, h, hy } = view;
   const sky = ctx.createLinearGradient(0, 0, 0, hy);
   sky.addColorStop(0, palette.skyTop);
@@ -364,9 +384,9 @@ function drawSky(ctx: CanvasRenderingContext2D, view: View, palette: Palette, sc
     ctx.fill();
   }
 
-  // 最多兩朵（設計文件第 9 節）。
-  drawCloud(ctx, w * 0.2, h * 0.13, Math.min(w * 0.05, h * 0.06));
-  drawCloud(ctx, w * 0.64, h * 0.08, Math.min(w * 0.04, h * 0.048));
+  // 最多兩朵（設計文件第 9 節）；慢慢往右飄（PR-J3）。
+  drawCloud(ctx, w * cloudAt(0.2, clock), h * 0.13, Math.min(w * 0.05, h * 0.06));
+  drawCloud(ctx, w * cloudAt(0.64, clock), h * 0.08, Math.min(w * 0.04, h * 0.048));
 }
 
 /** 黏土雲：三四顆圓疊成，下緣一道淡陰影，左上一抹高光。s 是一顆圓的半徑（像素）。 */
@@ -486,6 +506,7 @@ function drawGround(
   palette: Palette,
   scene: SceneId,
   travel: number,
+  clock: number,
 ): void {
   const { w, h, hy } = view;
   ctx.fillStyle = palette.ground;
@@ -507,8 +528,9 @@ function drawGround(
       const len = widthAt(view, z, 2.4, 3);
       segment(ctx, a, { x: a.x + len, y: a.y }, WAVE, widthAt(view, z, 0.12, 1));
     }
-    const boat = project(view, 160, 0, 900);
     const size = Math.max(6, h * 0.04);
+    const moored = project(view, 160, 0, 900);
+    const boat = { x: moored.x, y: moored.y + boatBob(clock, size) };
     poly(
       ctx,
       [
@@ -647,11 +669,13 @@ function inLandmarkBand(world: number, targetWorld: number): boolean {
 }
 
 /** 圓團樹：樹幹、深色底圓、兩顆側圓、左上亮圓；遠處只畫一顆圓。 */
-function drawTree(ctx: CanvasRenderingContext2D, view: View, x: number, z: number, seed: number): void {
+function drawTree(ctx: CanvasRenderingContext2D, view: View, x: number, z: number, seed: number, clock: number): void {
   const size = 1.6 + hashAt(seed + 3) * 0.9;
   const r = widthAt(view, z, size, 1.5);
   const foot = project(view, x, 0, z);
-  const c = project(view, x, size * 1.25, z);
+  const crown = project(view, x, size * 1.25, z);
+  // 樹冠輕輕搖（PR-J3），樹幹不動。
+  const c = { x: crown.x + treeSway(clock, seed, r), y: crown.y };
   if (z > 90) {
     ctx.fillStyle = TREE_DARK;
     ctx.beginPath();
@@ -696,7 +720,7 @@ function drawTrees(
   ctx: CanvasRenderingContext2D,
   view: View,
   travel: number,
-  paint: Pick<WindshieldPaint, "scene" | "tunnel" | "bridge" | "target" | "compact" | "signs" | "scenic">,
+  paint: Pick<WindshieldPaint, "scene" | "tunnel" | "bridge" | "target" | "compact" | "signs" | "scenic" | "clock">,
   nearerThan = TREE_FAR,
 ): void {
   const scene = paint.scene ?? "field";
@@ -724,7 +748,7 @@ function drawTrees(
       // 寬畫面（桌機）同樣的公尺離中間比較近，樹往外推，不擠在軌道兩旁的中距離。
       const spread = view.w / view.h > 1.8 ? 1.7 : 1;
       const x = side < 0 ? -(8 + hashAt(seed) * 6) * spread : (11 + hashAt(seed) * 6) * spread;
-      drawTree(ctx, view, x, z, seed);
+      drawTree(ctx, view, x, z, seed, paint.clock ?? 0);
     }
   }
 }
@@ -841,14 +865,14 @@ function mound(ctx: CanvasRenderingContext2D, x: number, y: number, rx: number, 
 }
 
 /** 摩天輪：照封面簡化——圓圈、六根輻條、六個彩色車廂、星星輪軸。 */
-function drawFerris(ctx: CanvasRenderingContext2D, x: number, ground: number, s: number): void {
+function drawFerris(ctx: CanvasRenderingContext2D, x: number, ground: number, s: number, spin: number): void {
   const R = 5.5 * s;
   const cy = ground - 7 * s;
   const leg = Math.max(1, 0.45 * s);
   segment(ctx, { x: x - 4 * s, y: ground }, { x, y: cy }, FERRIS_LEG, leg);
   segment(ctx, { x: x + 4 * s, y: ground }, { x, y: cy }, FERRIS_LEG, leg);
   for (let i = 0; i < 6; i += 1) {
-    const a = (i * Math.PI) / 3;
+    const a = (i * Math.PI) / 3 + spin;
     segment(ctx, { x, y: cy }, { x: x + Math.cos(a) * R, y: cy + Math.sin(a) * R }, FERRIS_SPOKE, Math.max(0.8, 0.25 * s));
   }
   ctx.strokeStyle = FERRIS_RIM;
@@ -857,7 +881,7 @@ function drawFerris(ctx: CanvasRenderingContext2D, x: number, ground: number, s:
   ctx.arc(x, cy, R, 0, Math.PI * 2);
   ctx.stroke();
   for (let i = 0; i < 6; i += 1) {
-    const a = (i * Math.PI) / 3 + Math.PI / 6;
+    const a = (i * Math.PI) / 3 + Math.PI / 6 + spin;
     ctx.fillStyle = GONDOLAS[i]!;
     ctx.beginPath();
     ctx.arc(x + Math.cos(a) * R, cy + Math.sin(a) * R, Math.max(1.5, 1.35 * s), 0, Math.PI * 2);
@@ -947,12 +971,13 @@ function drawLandmark(
   scene: SceneId,
   id: LandmarkId,
   compact: boolean,
+  clock: number,
 ): void {
   const z = targetWorld + LANDMARK_AHEAD - travel;
   if (z <= Z_NEAR + 2 || z > 900) return;
   const s = view.f / z;
   const foot = project(view, landmarkX(view, scene, compact), 0, z);
-  if (id === "ferris") drawFerris(ctx, foot.x, foot.y, s);
+  if (id === "ferris") drawFerris(ctx, foot.x, foot.y, s, ferrisSpin(clock));
   else if (id === "orange-tree") drawOrangeTree(ctx, foot.x, foot.y, s);
   // 矮手機的回家站在海那一側：小房子放大，草坡墊高，像遠方小島上的家。
   else drawHouse(ctx, foot.x, foot.y, s * landmarkScale(id, compact), compact ? 2.4 : 1.4);
@@ -1016,7 +1041,7 @@ function drawPlatform(ctx: CanvasRenderingContext2D, view: View, travel: number,
   const z1 = Math.min(Z_FAR, targetWorld + PLATFORM_AFTER - travel);
   if (z1 <= z0) return;
   const edge = -1.9;
-  const top = 1.1;
+  const top = PLATFORM_HEIGHT;
   // 月台下緣一道接地陰影落在道碴上，月台才像放在地上、不是貼紙。
   quad(ctx, view, edge, edge + 0.4, 0.004, z0, z1, BALLAST_SHADE);
   wall(ctx, view, edge, 0, top, z0, z1, PLATFORM_FACE);
@@ -1357,22 +1382,27 @@ export function drawWindshield(
   const passing =
     paint.passing == null ? null : paint.reduced ? REDUCED_PASS : paint.passing;
   const signalAt = signalWorld(paint.scenic ?? []);
+  const clock = paint.clock ?? 0;
 
   const outside = () => {
-    drawSky(ctx, view, palette, scene);
+    drawSky(ctx, view, palette, scene, clock);
     if (scene === "city") drawSkyline(ctx, view);
     drawHills(ctx, view, palette, scene);
-    drawGround(ctx, view, palette, scene, travel);
+    if (paint.birds !== false) drawFlock(ctx, view, scene, clock);
+    drawGround(ctx, view, palette, scene, travel, clock);
     if (bridgeZ) drawWater(ctx, view, bridgeZ[0], bridgeZ[1]);
     if (scene === "city") drawBuildings(ctx, view, travel);
     drawTrees(ctx, view, travel, paint);
     if (paint.landmark) {
-      drawLandmark(ctx, view, travel, paint.target * STATION_WORLD, scene, paint.landmark, paint.compact === true);
+      drawLandmark(ctx, view, travel, paint.target * STATION_WORLD, scene, paint.landmark, paint.compact === true, clock);
     }
     if (paint.event) drawCrossingRoad(ctx, view, travel, paint.event);
     drawTrack(ctx, view, OTHER_TRACK, travel);
     drawTrack(ctx, view, 0, travel);
     drawPlatform(ctx, view, travel, paint.target * STATION_WORLD);
+    if (paint.waiting?.length) {
+      drawWaiting(ctx, view, stopPostWorld(paint.target), travel, PLATFORM_HEIGHT, paint.waiting, clock);
+    }
     drawSigns(ctx, view, travel, paint.signs ?? []);
     if (paint.event) drawEvent(ctx, view, travel, paint.progress * STATION_WORLD, paint.event, paint.reduced);
     if (passing !== null) drawOncoming(ctx, view, passing);

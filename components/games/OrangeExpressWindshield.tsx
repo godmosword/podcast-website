@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore, type Ref } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type MutableRefObject, type Ref } from "react";
 import { DoorIcon } from "@/components/games/OrangeExpressCab";
 import { NoticeGlyph, RiderFace, XiaojuFace } from "@/components/games/OrangeExpressGlyphs";
 import { OrangeExpressMissionCard } from "@/components/games/OrangeExpressMissionCard";
@@ -91,6 +91,8 @@ export function OrangeExpressWindshield({
   cheer = false,
   mission = null,
   next = null,
+  clock,
+  paintRef,
   onPoint,
 }: {
   run: RunState;
@@ -112,6 +114,10 @@ export function OrangeExpressWindshield({
   mission?: MissionState;
   /** 現在只該亮的那一個控制（PR-J1）：是指差鈕時鈕上加手指與黃框。 */
   next?: NextAction | null;
+  /** 前窗的時鐘（秒，PR-J3）：雲、樹、鳥、月台朋友跟著它動；定格與減少動態時是 0。 */
+  clock: () => number;
+  /** 車停著狀態沒變時，遊戲迴圈用它重畫前窗（不另開一個 rAF）。 */
+  paintRef: MutableRefObject<(() => void) | null>;
   onPoint: () => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -145,6 +151,8 @@ export function OrangeExpressWindshield({
   const eventKind = event?.kind ?? null;
   const eventAt = event?.at ?? null;
   const eventResult = event ? (run.events[event.key] ?? null) : null;
+  // 進站時月台上等車的朋友（停好後交給月台朋友卡）：還沒到這一站，這一站的人都還在等。
+  const approaching = run.phase === "running" || run.phase === "in-window";
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -164,6 +172,7 @@ export function OrangeExpressWindshield({
         canvas.height = nextH;
       }
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const t = clock();
       drawWindshield(ctx, cssW, cssH, {
         progress: run.progress,
         phase: run.phase,
@@ -179,6 +188,9 @@ export function OrangeExpressWindshield({
         signalHalo,
         landmark: here.landmark,
         compact,
+        clock: t,
+        waiting: approaching ? here.passengers.map((rider) => rider.id) : [],
+        birds: eventKind === null && run.progress < here.approachAt,
         event:
           eventKind !== null && eventAt !== null
             ? {
@@ -186,17 +198,24 @@ export function OrangeExpressWindshield({
                 scene: here.scene,
                 at: eventAt,
                 result: eventResult,
-                time: performance.now() / 1000,
+                time: t,
                 speed: run.speed,
               }
             : null,
       });
     };
     draw();
+    paintRef.current = draw;
     const observer = new ResizeObserver(draw);
     observer.observe(canvas);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      if (paintRef.current === draw) paintRef.current = null;
+    };
   }, [
+    clock,
+    paintRef,
+    approaching,
     compact,
     reduced,
     run.phase,

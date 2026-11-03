@@ -202,6 +202,8 @@ export type OrangeExpressHook = {
   eventSeed?: number;
   /** 只在開局時讀：掛鉤在時預設不出開局任務卡（測試與基準要穩定），寫 true 才出。 */
   mission?: boolean;
+  /** 只在開局時讀：前窗時鐘釘在這一秒（雲、樹、摩天輪、月台朋友不動），視覺基準解除定格時也穩定（PR-J3）。 */
+  clock?: number;
 };
 
 export const LEVEL_INDEX: Record<LevelId, number> = {
