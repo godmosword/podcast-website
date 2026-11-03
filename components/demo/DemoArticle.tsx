@@ -10,8 +10,9 @@ import {
 import { formatParentArticleDate } from "@/lib/parent-articles";
 import stylesA from "./DemoArticleA.module.css";
 import stylesB from "./DemoArticleB.module.css";
+import stylesB2 from "./DemoArticleB2.module.css";
 
-type Variant = "a" | "b";
+type Variant = "a" | "b" | "b2";
 
 /** 最後一個字跟閉引號黏在一起，避免「」單獨掉到下一行。原文沒有改。 */
 function QuotedLine({
@@ -37,37 +38,64 @@ function QuotedLine({
 const COPY = {
   a: {
     kicker: "A Day 觀點文",
-    otherHref: "/demo/style-b",
-    otherLabel: "看 B 版親子雜誌",
+    links: [
+      { href: "/demo/style-b", label: "看 B 版親子雜誌" },
+      { href: "/demo/style-b2", label: "看 B2 閱讀版" },
+    ],
   },
   b: {
     kicker: "親子生活雜誌",
-    otherHref: "/demo/style-a",
-    otherLabel: "看 A 版觀點文",
+    links: [
+      { href: "/demo/style-a", label: "看 A 版觀點文" },
+      { href: "/demo/style-b2", label: "看 B2 閱讀版" },
+    ],
+  },
+  b2: {
+    kicker: "閱讀版",
+    links: [
+      { href: "/demo/style-b", label: "跟 B 版並排看" },
+      { href: "/demo/style-a", label: "看 A 版" },
+    ],
   },
 } as const;
+
+const STYLES = { a: stylesA, b: stylesB, b2: stylesB2 } as const;
 
 function Slots({
   slots,
   styles,
   imageSizes,
+  captioned,
+  quietClosing,
 }: {
   slots: readonly DemoSlot[];
-  styles: Record<string, string>;
+  styles: Record<string, string | undefined>;
   imageSizes: string;
+  captioned: boolean;
+  quietClosing: boolean;
 }) {
   const firstFigure = slots.findIndex((slot) => slot.kind === "figure");
   return slots.map((slot, index) => {
     if (slot.kind === "paragraphs") {
+      const closingFollows =
+        quietClosing && slots[index + 1]?.kind === "pull" && index + 1 === slots.length - 1;
       return (
         <div key={index} className={styles.stanza}>
           {slot.texts.map((text, textIndex) => (
-            <p key={`${index}-${textIndex}`}>{text}</p>
+            <p
+              key={`${index}-${textIndex}`}
+              className={
+                closingFollows && textIndex === slot.texts.length - 1 ? styles.closingLine : undefined
+              }
+            >
+              {text}
+            </p>
           ))}
         </div>
       );
     }
     if (slot.kind === "pull") {
+      if (quietClosing && index === slots.length - 1) return null;
       return (
         <blockquote key={index} className={styles.pull}>
           <p>
@@ -86,20 +114,27 @@ function Slots({
           sizes={imageSizes}
           priority={index === firstFigure}
         />
+        {captioned ? <figcaption className={styles.caption}>{slot.figure.caption}</figcaption> : null}
       </figure>
     );
   });
 }
 
 export function DemoArticle({ variant }: { variant: Variant }) {
-  const styles = variant === "a" ? stylesA : stylesB;
+  const styles = STYLES[variant];
   const copy = COPY[variant];
+  const imageSizes =
+    variant === "a" ? "100vw" : variant === "b" ? "(min-width: 1000px) 960px, 100vw" : "(min-width: 760px) 684px, 100vw";
 
   return (
     <article className={styles.page}>
       <p className={styles.banner}>
         排版示範，不是正式文章。文字是原文，沒有改寫。
-        <Link href={copy.otherHref}>{copy.otherLabel}</Link>
+        {copy.links.map((link) => (
+          <Link key={link.href} href={link.href}>
+            {link.label}
+          </Link>
+        ))}
       </p>
       <header className={styles.header}>
         <p className={styles.kicker}>{copy.kicker}</p>
@@ -117,7 +152,9 @@ export function DemoArticle({ variant }: { variant: Variant }) {
         <Slots
           slots={DEMO_SLOTS}
           styles={styles}
-          imageSizes={variant === "a" ? "100vw" : "(min-width: 1000px) 960px, 100vw"}
+          imageSizes={imageSizes}
+          captioned={variant === "b2"}
+          quietClosing={variant === "b2"}
         />
       </div>
       <footer className={styles.footer}>

@@ -24,6 +24,8 @@ export type DemoFigure = {
   readonly src: string;
   readonly alt: string;
   readonly credit: string;
+  /** 圖下小字，不是文章正文。 */
+  readonly caption: string;
   readonly width: number;
   readonly height: number;
 };
@@ -33,6 +35,7 @@ export const DEMO_FIGURES = [
     src: "/stories/ep-34/01.jpg",
     alt: "第34集故事封面，小紅賽車在遊樂園",
     credit: "圖 1　第 34 集〈小紅賽車好想生氣怎麼辦？〉故事封面（public/stories/ep-34/01.jpg）",
+    caption: "第 34 集〈小紅賽車好想生氣怎麼辦？〉故事封面",
     width: 1400,
     height: 1400,
   },
@@ -40,6 +43,7 @@ export const DEMO_FIGURES = [
     src: "/characters/小紅賽車.jpg",
     alt: "小紅賽車的角色定裝照",
     credit: "圖 2　小紅賽車定裝照（public/characters/小紅賽車.jpg）",
+    caption: "小紅賽車定裝照",
     width: 1400,
     height: 1400,
   },
@@ -47,6 +51,7 @@ export const DEMO_FIGURES = [
     src: "/stories/ep-3/01.webp",
     alt: "第3集故事封面，小紅賽車準備比賽",
     credit: "圖 3　第 3 集〈小紅賽車不是第一名也沒關係〉故事封面（public/stories/ep-3/01.webp）",
+    caption: "第 3 集〈小紅賽車不是第一名也沒關係〉故事封面",
     width: 1400,
     height: 1400,
   },
