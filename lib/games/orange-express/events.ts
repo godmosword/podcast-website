@@ -10,12 +10,12 @@ import type {
 } from "@/lib/games/orange-express/types";
 
 /**
- * 沿途事件（大司機的風景段）：每段一件，一件只有一個動作。
- * - 小鴨過鐵軌：提示出現後動力拉到「快」以下（慢或鬆）或拉任何煞車（慢下來）。
+ * 沿途事件（大司機的風景段）：每段一件，一件只有一個動作。成不成看車真的怎麼走，不只看桿子撥到哪（PR-I1）。
+ * - 小鴨過鐵軌：提示出現後慢下來（動力在「快」以下或拉煞車），而且在降速區之前速度真的掉到 DUCK_OK 以下。
  *   不管做到沒，看不到的降速區都讓小橘安靜地輕煞（不響叮叮，那是幫忙不是糾正），小鴨照樣過。
  * - 平交道：柵欄前按喇叭。
  * - 揮手的朋友：經過時按喇叭。
- * - 跟小動物賽跑：提示後推到「快」。
+ * - 跟小動物賽跑：提示後推到「快」只是開始追；到終點時速度有 RACE_WIN 才算追上。
  * 沒做到不扣星，遇到的都算「遇到了」，做到的多一個黃章。這個檔不引 reducer。
  */
 
@@ -24,11 +24,11 @@ export const EVENT_KINDS: readonly ScenicEventKind[] = ["ducks", "crossing", "wa
 /**
  * 每種事件在一段裡的提示點與事件點（段長的幾分之幾；段長 1.4 時提示到事件約 0.66，巡航約 4.5 秒）。
  * 孩子聽完一句提示（約 2 秒）還有時間找桿子、喇叭；也容得下 0.45 秒作用延遲。
- * 賽跑在出站後的第一段、提示在出站那一刻（車還停著）：孩子從停著推到「快」才像起跑。
- * 提示時已經在「快」也算贏（車已經跑最快，判輸反而矛盾）。
+ * 小鴨提示得早一點：要在降速區前就真的慢下來（巡航約 3.8 秒，撥到慢後約 1.3 秒速度表才掉到）。
+ * 賽跑在出站後的第一段、提示在出站那一刻（車還停著）：孩子從停著推到「快」才像起跑，終點看速度。
  */
 export const EVENT_SPOTS: Record<ScenicEventKind, { hint: number; at: number }> = {
-  ducks: { hint: 0.15, at: 0.62 },
+  ducks: { hint: 0.05, at: 0.62 },
   crossing: { hint: 0.15, at: 0.62 },
   wave: { hint: 0.15, at: 0.62 },
   race: { hint: 0, at: 0.75 },
@@ -39,6 +39,15 @@ export const EVENT_SPOTS: Record<ScenicEventKind, { hint: number; at: number }> 
  * 從巡航自動輕煞到 0.2 約 85 公尺，小鴨開始過鐵軌（事件點前 45 公尺）時已經慢下來，看得到小鴨慢慢走。
  */
 export const DUCK_ZONE = { before: 0.24, after: 0.04, limit: 0.2 } as const;
+
+/**
+ * 小鴨：降速區開始前速度要掉到這裡以下才算慢下來（圖示桿面「慢」的目標是 0.45，從巡航撥到慢約 1.3 秒到）。
+ * 降速區裡的輕煞是小橘幫忙的，那之後才慢下來不算。
+ */
+export const DUCK_OK = 0.5;
+
+/** 賽跑：到終點時速度有這麼快才算追上（慢的目標 0.45 追不上，快的巡航 0.82 追得上）。 */
+export const RACE_WIN = 0.65;
 
 /** 揮手的朋友：經過事件點之後這一小段按喇叭也算（「經過時」）。 */
 export const WAVE_AFTER = 0.08;
@@ -128,7 +137,7 @@ export type PlacedEvent = {
   section: number;
   hintAt: number;
   at: number;
-  /** 做動作算數到這裡（揮手的朋友多一小段）。 */
+  /** 做動作算數到這裡（揮手的朋友多一小段、小鴨到降速區起點、賽跑到終點）。 */
   until: number;
 };
 
@@ -144,8 +153,15 @@ function placed(station: Station, stationIndex: number, k: number, section: Scen
     section: k,
     hintAt: start + event.hint,
     at,
-    until: event.kind === "wave" ? at + WAVE_AFTER : at,
+    until: untilFor(event.kind, at),
   };
+}
+
+/** 可以做動作的最後一刻：揮手多一小段；小鴨要在降速區開始前；賽跑是終點。 */
+function untilFor(kind: ScenicEventKind, at: number): number {
+  if (kind === "wave") return at + WAVE_AFTER;
+  if (kind === "ducks") return at - DUCK_ZONE.before;
+  return at;
 }
 
 /** 現在這一段的事件（不管提示出現了沒）。站段與沒有事件的段是 null。 */
@@ -176,27 +192,34 @@ function withResult(state: RunState, key: string, result: EventResult): RunState
   return { ...state.events, [key]: result };
 }
 
-/** 這一刻的桿位算不算做到（喇叭另外在 honkEvent 算）。 */
-function leversDo(kind: ScenicEventKind, state: Pick<RunState, "power" | "brake" | "course">, powerMax: number): boolean {
-  // 「慢下來」：桿子上寫著「慢」，拉到慢也算（不只鬆）。
-  if (kind === "ducks") return state.power < powerMax || state.brake > 0;
-  if (kind === "race") return state.power === powerMax && state.brake === 0;
-  return false;
+/** 小鴨：正在慢下來（桿子上寫著「慢」，拉到慢也算，不只鬆），而且速度表真的掉下來了。 */
+function slowedDown(state: Pick<RunState, "power" | "brake" | "speed">, powerMax: number): boolean {
+  return (state.power < powerMax || state.brake > 0) && state.speed <= DUCK_OK;
+}
+
+/** 賽跑正在追：提示掛著時推著「快」、沒拉煞車（前窗說「快追上了」，還不算贏）。 */
+export function raceChasing(state: RunState, powerMax: number): boolean {
+  const event = eventPending(state);
+  return event?.kind === "race" && state.power === powerMax && state.brake === 0;
 }
 
 /**
- * 每一幀走完之後結算這一段的事件：提示出現後桿位做到了就記「做到」；開過可以做動作的最後一刻還沒做到就記「遇到」。
+ * 每一幀走完之後結算這一段的事件：
+ * - 小鴨：提示出現後、降速區前真的慢下來就記「做到」。
+ * - 賽跑：開過終點那一幀看速度，追得上記「做到」、追不上記「遇到」。
+ * - 開過可以做動作的最後一刻還沒做到就記「遇到」（平交道、揮手的朋友在 honkEvent 做到）。
  * 回傳新的 events（沒變就回傳同一個物件）與這一幀是不是剛做到小鴨（提前慢下來的計數）。
  */
 export function judgeEvents(state: RunState, powerMax: number): { events: RunState["events"]; duckDone: boolean } {
   const event = sectionEvent(state);
   if (!event || state.events[event.key]) return { events: state.events, duckDone: false };
   if (state.progress < event.hintAt) return { events: state.events, duckDone: false };
-  if (state.progress <= event.until && leversDo(event.kind, state, powerMax)) {
-    return { events: withResult(state, event.key, "done"), duckDone: event.kind === "ducks" };
+  if (event.kind === "ducks" && state.progress <= event.until && slowedDown(state, powerMax)) {
+    return { events: withResult(state, event.key, "done"), duckDone: true };
   }
-  if (state.progress > event.until) return { events: withResult(state, event.key, "met"), duckDone: false };
-  return { events: state.events, duckDone: false };
+  if (state.progress <= event.until) return { events: state.events, duckDone: false };
+  const won = event.kind === "race" && state.speed >= RACE_WIN;
+  return { events: withResult(state, event.key, won ? "done" : "met"), duckDone: false };
 }
 
 /** 平交道、揮手的朋友：提示出現後到可以做動作的最後一刻按喇叭，記「做到」。其他時候回傳 null。 */

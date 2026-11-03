@@ -1,3 +1,4 @@
+import { RACE_WIN } from "@/lib/games/orange-express/events";
 import type { EventResult, SceneId, ScenicEventKind } from "@/lib/games/orange-express/types";
 import {
   Z_FAR,
@@ -27,6 +28,8 @@ export type EventPaint = {
   result: EventResult | null;
   /** 秒；揮手、拍翅、平交道燈閃用。減少動態時不用。 */
   time: number;
+  /** 車速（0–1）：賽跑時小動物離多遠跟著它（開得比追上門檻快才看得到追近）。沒給當作追上門檻。 */
+  speed?: number;
 };
 
 /** 小鴨過鐵軌的地方在事件點前方這麼遠：車到事件點時小鴨已經走到對面，車還在幾公尺外。 */
@@ -40,8 +43,11 @@ const DUCK_START = -5;
 export const CROSSING_AHEAD = 12;
 /** 揮手的小朋友在事件點前方這麼遠。 */
 export const WAVE_AHEAD = 10;
-/** 賽跑時小動物一直跑在鏡頭前這麼遠。 */
+/** 賽跑時車速剛好是追上門檻（RACE_WIN）時，小動物跑在鏡頭前這麼遠。 */
 export const RACE_AHEAD = 13;
+/** 車速比追上門檻每快（慢）1，小動物就近（遠）這麼多公尺；夾在 RACE_CHASE 裡。 */
+const RACE_PULL = 20;
+const RACE_CHASE = { near: 8, far: 19 } as const;
 /** 減少動態、做到了：小動物停在這麼近（剛被超過）。 */
 const RACE_NEAR = 6;
 /** 賽跑的小動物跑在左邊這條線上（電桿在 -3.4 附近，避開才不會被桿子穿身）。 */
@@ -311,20 +317,35 @@ function drawWave(ctx: CanvasRenderingContext2D, view: View, travel: number, pai
   dot(ctx, head.x + s * 0.14, head.y + s * 0.04, s * 0.06, INK);
 }
 
+/** 終點前小動物離多遠：開得比追上門檻快就近一點、慢就遠一點（推到快看得到在追）。 */
+function chaseGap(speed: number): number {
+  return Math.min(RACE_CHASE.far, Math.max(RACE_CHASE.near, RACE_AHEAD + (RACE_WIN - speed) * RACE_PULL));
+}
+
 /**
- * 賽跑的小動物在鏡頭前多遠：比賽中一直跑在前面；過了終點，做到了（推到快）就被小橘超過、往後掉，
- * 沒做到就再往前跑一點、回頭揮手。
+ * 賽跑的小動物在鏡頭前多遠：終點前跑在前面，距離跟著車速；過了終點，追上了（終點時夠快）就被小橘超過、往後掉，
+ * 沒追上就再往前跑一點、回頭揮手。
  */
-export function raceGap(reduced: boolean, train: number, at: number, result: EventResult | null): number | null {
+export function raceGap(
+  reduced: boolean,
+  train: number,
+  at: number,
+  result: EventResult | null,
+  speed = RACE_WIN,
+): number | null {
   const past = train - at * WORLD;
-  if (past <= 0) return RACE_AHEAD;
-  // 減少動態：做到了就停在很近的旁邊（剛被超過），沒做到停在比較遠的前面。
-  if (reduced) return result === "done" ? RACE_NEAR : RACE_AHEAD + 10;
-  return result === "done" ? RACE_AHEAD - past * 0.8 : RACE_AHEAD + past * 0.6;
+  // 減少動態：終點前固定距離；做到了就停在很近的旁邊（剛被超過），沒做到停在比較遠的前面。
+  if (reduced) {
+    if (past <= 0) return RACE_AHEAD;
+    return result === "done" ? RACE_NEAR : RACE_AHEAD + 10;
+  }
+  const gap = chaseGap(speed);
+  if (past <= 0) return gap;
+  return result === "done" ? gap - past * 0.8 : gap + past * 0.6;
 }
 
 function drawRace(ctx: CanvasRenderingContext2D, view: View, train: number, paint: EventPaint, reduced: boolean) {
-  const z = raceGap(reduced, train, paint.at, paint.result);
+  const z = raceGap(reduced, train, paint.at, paint.result, paint.speed);
   if (z === null || !visible(z)) return;
   const s = widthAt(view, z, RACER_SCALE, 0.5);
   const edge = Math.max(1, s * 0.07);

@@ -1,14 +1,17 @@
 import { describe, expect, it } from "vitest";
 import { coachBeat } from "@/lib/games/orange-express/coach";
 import {
+  DUCK_OK,
   DUCK_ZONE,
   EVENT_SPOTS,
+  RACE_WIN,
   WAVE_AFTER,
   activeEvent,
   eventKey,
   eventPending,
   eventPlan,
   eventsBefore,
+  raceChasing,
   routeEvents,
   sectionEvent,
 } from "@/lib/games/orange-express/events";
@@ -81,17 +84,27 @@ describe("沿途事件：排法", () => {
       expect(((spot.at - spot.hint) * SCENIC_LENGTH) / cruise).toBeGreaterThan(4);
     }
   });
+
+  it("小鴨：提示到降速區起點（真的要慢下來的最後一刻）巡航也有 3.5 秒以上", () => {
+    const event = sectionEvent(cruiseInto("ducks"))!;
+    expect(event.until).toBeCloseTo(event.at - DUCK_ZONE.before, 9);
+    expect((event.until - event.hintAt) / (0.82 * 0.18)).toBeGreaterThan(3.5);
+  });
 });
 
 describe("沿途事件：做到與遇到", () => {
-  it("小鴨：提示後放開動力就做到，算一次提前慢下來；降速區裡照樣輕煞但不響叮叮", () => {
+  it("小鴨：提示後撥到慢，撥的當下不算；速度表真的掉下來才做到，算一次提前慢下來；降速區不響叮叮", () => {
     let s = cruiseInto("ducks");
     const event = sectionEvent(s)!;
     s = driveTo(s, event.hintAt + 0.01);
     expect(eventPending(s)?.kind).toBe("ducks");
-    s = step(s, { type: "set-power", notch: 0 });
-    s = tick(s);
+    s = tick(step(s, { type: "set-power", notch: 2 }));
+    // 高速中撥到慢：還在快的速度，不算（astra 2026-11-03：原本這一刻就算做到）。
+    expect(s.speed).toBeGreaterThan(DUCK_OK);
+    expect(s.events[event.key]).toBeUndefined();
+    while (s.speed > DUCK_OK) s = tick(s);
     expect(s.events[event.key]).toBe("done");
+    expect(s.progress).toBeLessThan(event.until);
     expect(s.earlySlows).toBe(1);
     const before = s.autoBrakeCount;
     s = driveTo(s, event.at);
@@ -99,37 +112,57 @@ describe("沿途事件：做到與遇到", () => {
     expect(s.autoBrakeCount).toBe(before);
   });
 
-  it("小鴨：一直推著快沒放，過了事件點記「遇到」；小橘照樣在小鴨前安靜地輕煞（不響叮叮、不算）", () => {
+  it("小鴨：聽完提示（約 2 秒）才撥到慢、或放到鬆，也來得及在降速區前慢下來", () => {
+    for (const notch of [2, 0] as const) {
+      let s = cruiseInto("ducks");
+      const event = sectionEvent(s)!;
+      s = driveTo(s, event.hintAt);
+      for (let t = 0; t < 2; t += 1 / 30) s = tick(s);
+      s = step(s, { type: "set-power", notch });
+      s = driveTo(s, event.until + 0.001);
+      expect(s.events[event.key], `動力 ${notch}`).toBe("done");
+    }
+  });
+
+  it("小鴨：一直推著快沒放，過了降速區起點記「遇到」；小橘照樣在小鴨前安靜地輕煞（不響叮叮、不算）", () => {
     let s = cruiseInto("ducks");
     const event = sectionEvent(s)!;
+    s = driveTo(s, event.until + 0.001);
+    expect(s.events[event.key]).toBe("met");
     s = driveTo(s, event.at - 0.01);
     expect(s.speed).toBeLessThanOrEqual(DUCK_ZONE.limit + 0.02);
     expect(s.autoBrakeCount).toBe(0);
     expect(currentLimit(s)).toBe(DUCK_ZONE.limit);
-    s = driveTo(s, event.at + 0.01);
-    expect(s.events[event.key]).toBe("met");
     expect(s.earlySlows).toBe(0);
   });
 
-  it("小鴨：從「快」拉到「慢」也算慢下來（桿子上寫著慢）", () => {
+  it("小鴨：開進降速區才放開動力來不及（那時是小橘在煞車），記「遇到」、不響叮叮", () => {
     let s = cruiseInto("ducks");
     const event = sectionEvent(s)!;
-    s = driveTo(s, event.hintAt + 0.01);
-    s = tick(step(s, { type: "set-power", notch: 2 }));
-    expect(s.events[event.key]).toBe("done");
+    for (let i = 0; i < 2000 && s.progress <= event.until; i += 1) s = tick(s);
+    expect(s.events[event.key]).toBe("met");
+    const before = s.autoBrakeCount;
+    s = tick(step(s, { type: "set-power", notch: 0 }));
+    expect(s.events[event.key]).toBe("met");
+    expect(s.autoBrakeCount).toBe(before);
   });
 
-  it("提示還沒出現前就放開動力不算：要在提示之後", () => {
+  it("提示還沒出現前就放開動力不記：要在提示之後；本來就慢慢開的，提示一出現就做到", () => {
     let s = cruiseInto("ducks", 0);
     const event = sectionEvent(s)!;
     expect(s.events[event.key]).toBeUndefined();
     s = tick(s);
     expect(s.progress).toBeLessThan(event.hintAt);
     expect(s.events[event.key]).toBeUndefined();
-    // 動力一直放著：提示一出現就算做到（孩子已經在慢慢開）。
+    // 動力一直放著（鬆也不會比慢快）：速度一路往慢的目標掉，提示出現後掉到 DUCK_OK 就做到。
     s = driveTo(s, event.hintAt + 0.001, 60);
-    s = tick(s);
+    expect(s.speed).toBeGreaterThan(DUCK_OK);
+    s = driveTo(s, event.until, 60);
     expect(s.events[event.key]).toBe("done");
+    // 本來就慢慢開（提示出現時已經比 DUCK_OK 慢）：提示一出現就做到。
+    let calm = withHook(s, { stationIndex: s.stationIndex, section: event.section, speed: 0.45, power: 2 });
+    calm = driveTo(calm, event.hintAt + 0.001, 60);
+    expect(calm.events[event.key]).toBe("done");
   });
 
   it("平交道：柵欄前按喇叭做到；事件點過了才按不算", () => {
@@ -156,41 +189,45 @@ describe("沿途事件：做到與遇到", () => {
     expect(s.events[event.key]).toBe("done");
   });
 
-  it("賽跑：提示後推到「快」做到；一直在「慢」就記遇到", () => {
+  it("賽跑：推到快只是開始追（不蓋章）；到終點夠快才記做到，一直在慢記遇到", () => {
     const { seed, stationIndex, section } = seedWith("race");
     const start = withHook(createRun("drive", "big", seed), { stationIndex, section, speed: 0, power: 0 });
     const event = sectionEvent(start)!;
     let slow = step(start, { type: "set-power", notch: 2 });
     slow = driveTo(slow, event.until + 0.01, 60);
     expect(slow.events[event.key]).toBe("met");
-    let fast = step(start, { type: "set-power", notch: 4 });
-    fast = driveTo(fast, event.hintAt + 0.01);
-    fast = tick(fast);
+    let fast = tick(step(start, { type: "set-power", notch: 4 }));
+    expect(raceChasing(fast, 4)).toBe(true);
+    expect(fast.events[event.key]).toBeUndefined();
+    fast = driveTo(fast, event.until - 0.01, 60);
+    expect(fast.events[event.key]).toBeUndefined();
+    fast = driveTo(fast, event.until + 0.001, 60);
+    expect(fast.speed).toBeGreaterThanOrEqual(RACE_WIN);
     expect(fast.events[event.key]).toBe("done");
   });
 
-  it("賽跑：提示在出站那一刻；那時已經在「快」也算贏（車已經跑最快）", () => {
+  it("賽跑：推到快之後又緊急煞停，到終點追不上，記遇到（astra 2026-11-03：原本第一幀就算贏）", () => {
+    const { seed, stationIndex, section } = seedWith("race");
+    const start = withHook(createRun("drive", "big", seed), { stationIndex, section, speed: 0, power: 0 });
+    const event = sectionEvent(start)!;
+    let s = tick(step(start, { type: "set-power", notch: 4 }));
+    s = driveTo(s, event.hintAt + 0.3, 60);
+    s = step(step(s, { type: "set-power", notch: 0 }), { type: "set-brake", notch: 5 });
+    for (let t = 0; t < 3; t += 1 / 30) s = tick(s);
+    expect(s.speed).toBe(0);
+    expect(raceChasing(s, 4)).toBe(false);
+    s = step(step(s, { type: "set-brake", notch: 0 }), { type: "set-power", notch: 2 });
+    s = driveTo(s, event.until + 0.001, 60);
+    expect(s.events[event.key]).toBe("met");
+  });
+
+  it("賽跑：提示在出站那一刻；那時已經在「快」，到終點一樣算贏", () => {
     const { seed, stationIndex, section } = seedWith("race");
     const start = withHook(createRun("drive", "big", seed), { stationIndex, section, speed: 0.5, power: 4 });
     const event = sectionEvent(start)!;
     expect(event.hintAt).toBe(start.progress);
-    expect(tick(start).events[event.key]).toBe("done");
-  });
-
-  it("小鴨：做到的那一幀剛好開進降速區，自動輕煞同一幀也不算、不響", () => {
-    let s = cruiseInto("ducks");
-    const event = sectionEvent(s)!;
-    const zoneFrom = event.at - DUCK_ZONE.before;
-    // 推著快開進降速區（這一幀還沒輕煞），下一幀才放開動力：同一幀做到、輕煞開始。
-    for (let i = 0; i < 2000 && s.progress < zoneFrom; i += 1) s = tick(s);
-    expect(s.progress).toBeGreaterThanOrEqual(zoneFrom);
-    expect(s.autoBrake).toBe(false);
-    expect(s.events[event.key]).toBeUndefined();
-    const before = s.autoBrakeCount;
-    s = tick(step(s, { type: "set-power", notch: 0 }));
-    expect(s.events[event.key]).toBe("done");
-    expect(s.autoBrake).toBe(true);
-    expect(s.autoBrakeCount).toBe(before);
+    expect(tick(start).events[event.key]).toBeUndefined();
+    expect(driveTo(start, event.until + 0.001).events[event.key]).toBe("done");
   });
 
   it("前窗的事件：提示出現到事件點後一小段；站段沒有", () => {

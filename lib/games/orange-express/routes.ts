@@ -32,7 +32,7 @@ export type CourseRules = {
   autoBrake: boolean;
   /** 指差確認小任務。 */
   pointing: boolean;
-  /** 門還沒亮就按開門會少一顆星。低齡只在當下提醒，不扣星。 */
+  /** 門還沒亮就按開門會少一顆星（只有小站長）。其他只在當下提醒，不扣星：孩子按按看是在探索，不是失誤。 */
   earlyDoorCosts: boolean;
   /** 停好後按喇叭跟這一站的地標打招呼（不影響星星，結算蓋地標章）。 */
   landmarkGreet: boolean;
@@ -70,11 +70,12 @@ export const COURSE_RULES: Record<CourseId, CourseRules> = {
     journey: false,
   },
   // 大司機（2026-11-01 減法）：拿掉速限牌、指差、鐵橋招呼；進站速度旗看不到，超過照樣自動輕煞。
+  // 提早按門 2026-11-03 起只提醒、不扣星（PR-I1）。
   big: {
     signs: false,
     autoBrake: true,
     pointing: false,
-    earlyDoorCosts: true,
+    earlyDoorCosts: false,
     landmarkGreet: true,
     redSignal: false,
     bridgeGreet: false,

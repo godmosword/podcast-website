@@ -27,6 +27,23 @@ export const PROGRESS_RATE = 0.18;
  * 必須大於慢慢看的「算停住」門檻（stopEpsilon("look")），不然一拉煞車就在區間最前面（黃區）停下。
  */
 export const LOOK_CREEP = 0.1;
+/**
+ * 圖示桿面三格（鬆／慢／快＝P0／P2／P4）的「慢」有自己的目標速度：一直推慢就穩穩地慢慢開，不會跟快一樣跑到巡航上限。
+ * 鬆也不會比慢快（桿上鬆在慢下面）：比目標快時照 SLOW_EASE 柔和地降下來，到了目標以下才是平常的滑行。
+ * 這是桿子的意思，不是自動輕煞：不響叮叮、不算次數。慢慢看（小橘幫忙開）與小站長（寫代碼的完整桿面）照原本的物理。
+ */
+export const SLOW_CRUISE: Partial<Record<CourseId, number>> = { little: 0.45, big: 0.45 };
+/** 圖示桿面「慢」那格的內部值。 */
+export const SLOW_NOTCH: PowerNotch = 2;
+/** 比慢的目標快時每秒至少減這麼多：速度表看得到在掉，又比「輕」煞車柔和。 */
+export const SLOW_EASE = 0.25;
+
+/** 這一組在這個動力格的速度上限；沒有（快、小站長、慢慢看）回傳 null。 */
+export function slowCap(course: CourseId, power: PowerNotch): number | null {
+  if (power > SLOW_NOTCH) return null;
+  return SLOW_CRUISE[course] ?? null;
+}
+
 /** 自動輕煞的減速度，約等於 B2。 */
 export const AUTO_BRAKE_DECEL = 0.4;
 /** 超過速度旗這麼多才算超速，避免在旗子上下抖。 */
@@ -220,6 +237,11 @@ export function motionStep(m: Motion, dt: number): MotionResult {
   } else if (speed > limit) {
     // 桿子推不過速度旗；沒有自動輕煞的規則組，旗子降下來時也安靜地收回。
     speed = m.speed <= limit + AUTO_BRAKE_MARGIN ? limit : Math.max(limit, speed - BLEED * dt);
+  }
+  const cap = slowCap(m.course, m.power);
+  if (cap !== null && speed > cap) {
+    // 慢（或鬆）推不過自己的目標；從快撥下來時至少照 SLOW_EASE 降，拉了煞車就照煞車（取比較慢的）。
+    speed = m.speed <= cap + AUTO_BRAKE_MARGIN ? cap : Math.max(cap, Math.min(speed, m.speed - SLOW_EASE * dt));
   }
   if (
     m.level === "look" &&

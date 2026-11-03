@@ -728,7 +728,8 @@ test("visual：小橘特快車沿途事件小鴨 375×553（減少動態）", as
   await page.emulateMedia({ reducedMotion: "reduce" });
   await openOrangeExpress(page, [375, 553, "light"], { eventSeed: 0 });
   await startOrangeExpress(page, "自己開");
-  await jumpOrangeExpress(page, { stationIndex: 0, progress: -0.582, speed: 0.2, power: 4 });
+  // 降速區起點（-0.772）之前：PR-I1 起過了降速區起點小鴨提示就收（來不及慢下來），要在那之前才拍得到提示。
+  await jumpOrangeExpress(page, { stationIndex: 0, progress: -0.8, speed: 0.2, power: 4 });
   await expect(page.getByTestId("orange-express-windshield")).toHaveAttribute("data-event", "ducks");
   await settleOrangeExpress(page);
   await expect(page).toHaveScreenshot("orange-express-event-ducks-reduced-375x553-light.png", orangeShot("light"));
@@ -769,13 +770,13 @@ for (const size of [PHONE, PHONE_NIGHT, [375, 553, "light"] as const]) {
   });
 }
 
-/** 第一次進站示範的第二拍：停車目標條外圈亮、字換成「右邊拉，停在綠區」、「停」那格亮外框（截圖停掉動畫）。 */
+/** 第一次進站示範的第二拍：停車目標條外圈亮、字換成「現在拉，停在綠區」、「停」那格亮外框（截圖停掉動畫）。PR-I1 起對準綠區中心，第二拍晚一點（0.58）。 */
 for (const size of [PHONE, [375, 553, "light"] as const]) {
   const [width, height, theme] = size;
   test(`visual：小橘特快車小小司機進站示範 ${width}×${height} ${theme}（定格）`, async ({ page }) => {
     await openOrangeExpress(page, size, { driver: "little", coach: true });
     await startOrangeExpress(page, "自己開");
-    await jumpOrangeExpress(page, { progress: 0.4, speed: 0.45 });
+    await jumpOrangeExpress(page, { progress: 0.58, speed: 0.45 });
     await expect(page.getByTestId("orange-express-stopbar")).toHaveAttribute("data-coach", "brake");
     await settleOrangeExpress(page);
     await expect(page).toHaveScreenshot(`orange-express-coach-${width}x${height}-${theme}.png`, orangeShot(theme));

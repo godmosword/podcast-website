@@ -1,5 +1,5 @@
 import { COPY, LANDMARK_GREET, POINT_CALL, eventDoneText, eventHint, signWord } from "@/lib/games/orange-express/copy";
-import { activeEvent } from "@/lib/games/orange-express/events";
+import { activeEvent, raceChasing } from "@/lib/games/orange-express/events";
 import { kmh } from "@/lib/games/orange-express/gauge";
 import { COURSE_RULES } from "@/lib/games/orange-express/routes";
 import {
@@ -9,6 +9,7 @@ import {
   nextSign,
   onBridge,
   pendingPoint,
+  powerCap,
   signalRed,
 } from "@/lib/games/orange-express/reducer";
 import { stopBarFor } from "@/lib/games/orange-express/stop-target";
@@ -70,6 +71,7 @@ export function windowNotice(state: RunState, numbers: boolean): WindowNotice | 
 
 /**
  * 沿途事件（風景段）：提示出現到可以做動作的最後一刻說「要做什麼」；做到了換成回應那句，留到事件的回應結束。
+ * 賽跑推著快時先說「快追上了」（還沒蓋章），到終點追上了才說「跑贏了」。
  * 沒做到時提示到時間就收，不說沒做到。
  */
 function eventNotice(state: RunState): WindowNotice | null {
@@ -79,11 +81,11 @@ function eventNotice(state: RunState): WindowNotice | null {
   const result = state.events[event.key];
   const info = { key: event.key, kind: event.kind, scene };
   if (result === "done") {
-    const text = eventDoneText(event.kind, scene, state.progress >= event.at);
-    return { kind: "event", text, event: { ...info, done: true } };
+    return { kind: "event", text: eventDoneText(event.kind, scene), event: { ...info, done: true } };
   }
   if (result || state.progress > event.until) return null;
-  return { kind: "event", text: eventHint(event.kind, scene), event: { ...info, done: false } };
+  const text = raceChasing(state, powerCap(state.course)) ? eventDoneText(event.kind, scene, false) : eventHint(event.kind, scene);
+  return { kind: "event", text, event: { ...info, done: false } };
 }
 
 /**

@@ -37,7 +37,7 @@ describe("路線：四組規則", () => {
     expect(createRun("drive", "little").course).toBe("little");
   });
 
-  it("只有小站長有速限牌與指差確認；提早按門只有大司機與小站長扣星", () => {
+  it("只有小站長有速限牌與指差確認；提早按門只有小站長扣星", () => {
     for (const course of ["look", "little"] as const) {
       expect(COURSE_RULES[course]).toEqual({
         signs: false,
@@ -52,7 +52,7 @@ describe("路線：四組規則", () => {
       });
     }
     for (const course of ["big", "captain"] as const) {
-      expect(COURSE_RULES[course].earlyDoorCosts).toBe(true);
+      expect(COURSE_RULES[course].earlyDoorCosts).toBe(course === "captain");
       expect(COURSE_RULES[course].landmarkGreet).toBe(true);
     }
     for (const station of stationsFor("drive", "little")) {

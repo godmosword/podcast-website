@@ -173,7 +173,14 @@ export function OrangeExpressWindshield({
         compact,
         event:
           eventKind !== null && eventAt !== null
-            ? { kind: eventKind, scene: here.scene, at: eventAt, result: eventResult, time: performance.now() / 1000 }
+            ? {
+                kind: eventKind,
+                scene: here.scene,
+                at: eventAt,
+                result: eventResult,
+                time: performance.now() / 1000,
+                speed: run.speed,
+              }
             : null,
       });
     };
@@ -186,6 +193,7 @@ export function OrangeExpressWindshield({
     reduced,
     run.phase,
     run.progress,
+    run.speed,
     run.passing,
     run.signal,
     signalHalo,

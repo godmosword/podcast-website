@@ -5,7 +5,7 @@ import {
 import type { GameKitGameId } from "@/lib/gamekit/types";
 import type { PlayerProfile } from "@/lib/gamekit/types";
 import { emptyDayFlags, normalizeDayFlags } from "@/lib/games/dino-sushi/day-progress";
-import { normalizeOrangeExpressCoach, type CoachRecord } from "@/lib/games/orange-express/coach-record";
+import { EMPTY_COACH, normalizeOrangeExpressCoach, type CoachRecord } from "@/lib/games/orange-express/coach-record";
 import { normalizeOrangeExpressDriver, normalizeOrangeExpressLevel } from "@/lib/games/orange-express/level";
 import type { DriverId, LevelId } from "@/lib/games/orange-express/types";
 import { isDinoSushiStickerId } from "@/lib/games/dino-sushi/stickers";
@@ -176,7 +176,7 @@ export const DEFAULT_PROGRESS: ProgressStore = {
       orangeExpressGaugeNumbers: false,
       orangeExpressSway: true,
       orangeExpressDriver: null,
-      orangeExpressCoach: { littleRuns: 0, littleLearned: false, bigLearned: false },
+      orangeExpressCoach: { ...EMPTY_COACH },
     },
     theme: "system",
     nightPromptDismissed: false,

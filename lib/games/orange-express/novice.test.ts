@@ -25,7 +25,8 @@ describe("新手腳本量一趟多久（PR-H4）", () => {
     const journey = noviceRun("drive", "big", 0).seconds;
     const plain = noviceRun("drive", "big", 0, undefined, 900, flat).seconds;
     console.info(`新手腳本 有旅程 ${journey.toFixed(1)} 秒、沒有旅程 ${plain.toFixed(1)} 秒`);
-    expect(journey / plain).toBeGreaterThan(2.2);
+    // PR-I1 後兩邊都變長（慢有目標速度、照示範拉得晚一點停在綠區正中間），比例從約 2.5 變約 2.2。
+    expect(journey / plain).toBeGreaterThan(2.1);
   });
 
   it("小小司機沒有旅程：長度不變", () => {

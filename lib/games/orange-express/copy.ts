@@ -68,8 +68,10 @@ export const COPY = {
   starHint: "停在綠色區",
   overrunHint: "不要開過頭",
   earlyDoorHint: "門亮了再按",
-  /** 第一次進站示範：前半同怎麼玩的「右邊拉，車會停」，後半同停車目標條的「停在綠區」。 */
-  coachBrake: "右邊拉，停在綠區",
+  /** 第一次進站示範的第一拍（進站點、車還在走）：先說要用哪一根，手放好，還不拉。 */
+  coachReady: "快到了，準備拉右邊",
+  /** 第二拍：現在拉就停在綠區正中間（PR-I1），「現在」放最前面；後半同停車目標條的「停在綠區」。 */
+  coachBrake: "現在拉，停在綠區",
   /** 推了動力、煞車沒放、車不走：先放開煞車（看桿位，不看實際作用）。 */
   releaseBrake: "先把煞車放開",
   /** 提示「先鬆煞車」時桿頂小牌改寫目標（往下拉到「鬆」），不再亮著現在的「輕」讓人以為要停在那。 */
@@ -181,7 +183,7 @@ export function eventHint(kind: ScenicEventKind, scene: SceneId): string {
 
 /**
  * 做到了：前窗上緣換成這句（不念，鈴聲和小橘的笑臉就是回饋）。
- * 賽跑在終點前做到時說「快追上了」，過了終點小動物真的被超過才說「跑贏了」，字跟畫面一致。
+ * 賽跑推著快、還沒到終點時說「快追上了」（passed = false，還不算做到），到終點追上了才說「跑贏了」，字跟畫面一致。
  */
 export function eventDoneText(kind: ScenicEventKind, scene: SceneId, passed = true): string {
   if (kind === "ducks") return `${crossingCritter(scene)}慢慢走過去了`;

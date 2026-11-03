@@ -215,8 +215,11 @@ export function OrangeExpressView({
   const pendingAnnounce = useRef<RunState | null>(null);
   /** 等著念的「門亮了再按」：一站只念一次，排在廣播後面。 */
   const doorSpeech = useRef<{ item: SpeechItem; at: number } | null>(null);
-  /** 等著念的「右邊拉，停在綠區」：一站一次，排在最前面，不套逾時（還在第二拍就念）。 */
-  const coachSpeech = useRef<SpeechItem | null>(null);
+  /**
+   * 等著念的示範句：第一拍「快到了，準備拉右邊」、第二拍「現在拉，停在綠區」，每拍一站一次，還在那一拍才念。
+   * 第二拍有時效，插隊念（打斷前一句）；第一拍排在最前面但等前一句念完。
+   */
+  const coachSpeech = useRef<(SpeechItem & { beat: CoachBeat }) | null>(null);
   /** 等著念的「先把煞車放開」：一趟只念一次。 */
   const releaseSpeech = useRef<SpeechItem | null>(null);
   /** 這一趟示範過了沒（小小司機的趟數只加一次）。 */
@@ -569,11 +572,21 @@ export function OrangeExpressView({
       speakText(hint.text, { interrupt: true, volume: volumeRef.current });
       return recheck(ms);
     }
+    // 「現在拉」有時效：照做才停得進綠區，不等前一句念完。
+    const urgent = coachSpeech.current;
+    if (urgent?.beat === "brake" && beat === "brake") {
+      coachSpeech.current = null;
+      spoken.current.add(urgent.key);
+      const ms = speechMs(urgent.text);
+      voiceBusyUntil.current = now + ms;
+      speakText(urgent.text, { interrupt: true, volume: volumeRef.current });
+      return recheck(ms);
+    }
     const wait = voiceBusyUntil.current - now;
     if (wait > 0) return recheck(wait);
     const coach = coachSpeech.current;
     coachSpeech.current = null;
-    const freshCoach = coach && beat === "brake" ? coach : null;
+    const freshCoach = coach && beat === coach.beat ? coach : null;
     const release = freshCoach ? null : releaseSpeech.current;
     if (!freshCoach) releaseSpeech.current = null;
     const freshRelease = release && releaseHint ? release : null;
@@ -621,7 +634,8 @@ export function OrangeExpressView({
     setVoiceTick((tick) => tick + 1);
   }, [releaseHint]);
 
-  // 示範真的出現了才算一趟（開局就離開的不算）；到第二拍排一句「右邊拉，停在綠區」，一站一次。
+  // 示範真的出現了才算一趟（開局就離開的不算）。每一拍排一句、一站一次：
+  // 第一拍「快到了，準備拉右邊」（車停在區間前就不說），第二拍「現在拉，停在綠區」。
   useEffect(() => {
     if (!run || beat === "none") return;
     coachShownAt.current = run.stationIndex;
@@ -629,10 +643,11 @@ export function OrangeExpressView({
       coachCounted.current = true;
       saveOrangeExpressCoach(startCoachRun(run.course, loadOrangeExpressCoach()));
     }
-    if (beat !== "brake") return;
-    const key = `${run.stationIndex}:coach`;
+    const text = beat === "brake" ? COPY.coachBrake : run.speed > 0 ? COPY.coachReady : null;
+    if (!text) return;
+    const key = `${run.stationIndex}:coach-${beat}`;
     if (spoken.current.has(key) || coachSpeech.current?.key === key) return;
-    coachSpeech.current = { key, text: COPY.coachBrake };
+    coachSpeech.current = { key, text, beat };
     setVoiceTick((tick) => tick + 1);
   }, [beat, run]);
 
@@ -679,8 +694,8 @@ export function OrangeExpressView({
       } else {
         audio?.voices?.(ARRIVAL_MELODY);
       }
-      // 示範中停在綠區或黃區才算學會；停太早、開過頭倒車都不算，下一站或下一趟再示範。
-      if (coachOn && coachShownAt.current === run.stationIndex && run.grades[run.stationIndex]) {
+      // 示範中停在綠區才算學會；黃區、停太早、開過頭倒車都不算，下一站或下一趟再示範（每組最多 3 趟）。
+      if (coachOn && coachShownAt.current === run.stationIndex && run.grades[run.stationIndex] === "green") {
         saveOrangeExpressCoach(learnCoach(run.course, loadOrangeExpressCoach()));
         setCoachOn(false);
       }

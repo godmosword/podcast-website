@@ -10,6 +10,7 @@ import {
   saveOrangeExpressDisplay,
   saveOrangeExpressLevel,
 } from "@/lib/gamekit/progress/orange-express-prefs";
+import { EMPTY_COACH } from "@/lib/games/orange-express/coach-record";
 import {
   PROGRESS_STORAGE_KEY,
   getGameKitSettingsFromStore,
@@ -108,9 +109,10 @@ describe("小橘特快車難度偏好", () => {
 
   it("進站示範：舊存檔沒有＝沒看過；存了讀得回來，不動其他設定", () => {
     saveGameKitSettingsToStore({ candyMatchMode: "easy", orangeExpressLevel: "drive" });
-    expect(loadOrangeExpressCoach()).toEqual({ littleRuns: 0, littleLearned: false, bigLearned: false });
-    saveOrangeExpressCoach({ littleRuns: 2, littleLearned: false, bigLearned: true });
-    expect(loadOrangeExpressCoach()).toEqual({ littleRuns: 2, littleLearned: false, bigLearned: true });
+    expect(loadOrangeExpressCoach()).toEqual(EMPTY_COACH);
+    const record = { ...EMPTY_COACH, littleRuns: 2, bigRuns: 1, bigLearned: true, captainRuns: 1 };
+    saveOrangeExpressCoach(record);
+    expect(loadOrangeExpressCoach()).toEqual(record);
     expect(getGameKitSettingsFromStore().orangeExpressLevel).toBe("drive");
     expect(getGameKitSettingsFromStore().candyMatchMode).toBe("easy");
   });

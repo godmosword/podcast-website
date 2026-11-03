@@ -91,12 +91,15 @@ describe("沿途事件：前窗畫法的狀態", () => {
     for (const x of duckXs(0)) expect(x + 2.6).toBeLessThan(-0.75);
   });
 
-  it("賽跑做到了：終點前說「快追上了」，過了終點才說「跑贏了」", () => {
+  it("賽跑：推著快、終點前說「快追上了」（還沒做到）；到終點追上了才說「跑贏了」", () => {
     const s = atHint("race");
     const event = sectionEvent(s)!;
-    const done = { ...s, events: { [event.key]: "done" as const } };
-    expect(windowNotice(done, false)?.text).toBe("快追上小狗了");
-    expect(windowNotice({ ...done, progress: event.at + 0.01 }, false)?.text).toBe("跑贏小狗了");
+    const chasing = windowNotice(s, false);
+    expect(chasing?.text).toBe("快追上小狗了");
+    expect(chasing?.event?.done).toBe(false);
+    expect(windowNotice({ ...s, power: 2 }, false)?.text).toBe("跟小狗賽跑，推到快");
+    const done = { ...s, progress: event.at + 0.01, events: { [event.key]: "done" as const } };
+    expect(windowNotice(done, false)?.text).toBe("跑贏小狗了");
   });
 
   it("平交道燈左右輪流、每秒最多換兩次；減少動態常亮", () => {
@@ -111,6 +114,18 @@ describe("沿途事件：前窗畫法的狀態", () => {
     expect(raceGap(false, at * 600 + 10, at, "done")!).toBeLessThan(RACE_AHEAD);
     expect(raceGap(false, at * 600 + 10, at, "met")!).toBeGreaterThan(RACE_AHEAD);
     expect(raceGap(true, at * 600 + 10, at, "done")!).toBeLessThan(RACE_AHEAD);
+  });
+
+  it("賽跑：終點前開快看得到追近、開慢被拉遠；過終點不跳；減少動態固定距離", () => {
+    const at = -1;
+    const before = at * 600 - 50;
+    const fast = raceGap(false, before, at, null, 0.82)!;
+    const slow = raceGap(false, before, at, null, 0.45)!;
+    expect(fast).toBeLessThan(RACE_AHEAD);
+    expect(slow).toBeGreaterThan(RACE_AHEAD);
+    expect(raceGap(false, at * 600 + 0.01, at, "done", 0.82)!).toBeCloseTo(raceGap(false, at * 600, at, null, 0.82)!, 1);
+    expect(raceGap(true, before, at, null, 0.82)).toBe(RACE_AHEAD);
+    expect(raceGap(true, before, at, null, 0.2)).toBe(RACE_AHEAD);
   });
 
   it("平交道的噹噹在音量限制內，跟自動輕煞的叮叮不同音", () => {
@@ -128,13 +143,26 @@ describe("沿途事件：回饋與朗讀的時效", () => {
       // 同一件不會再回饋一次。
       expect(cheerFor(honked, step(honked, { type: "honk" }))).toBeNull();
     }
-    const ducks = atHint("ducks");
-    const slowed = step(step(ducks, { type: "set-power", notch: 0 }), { type: "tick", dt: 1 / 30 });
-    expect(slowed.earlySlows).toBe(ducks.earlySlows + 1);
-    expect(cheerFor(ducks, slowed)).toBe("event");
+    // 小鴨在速度表真的掉下來那一幀回饋、賽跑在終點追上那一幀回饋（PR-I1），不是撥桿那一刻。
+    const ducks = step(atHint("ducks"), { type: "set-power", notch: 0 });
+    const cheers = (from: RunState, until: (s: RunState) => boolean) => {
+      let prev = from;
+      const out: string[] = [];
+      for (let i = 0; i < 2000 && !until(prev); i += 1) {
+        const next = step(prev, { type: "tick", dt: 1 / 30 });
+        const cheer = cheerFor(prev, next);
+        if (cheer) out.push(cheer);
+        prev = next;
+      }
+      return { out, last: prev };
+    };
+    const slowed = cheers(ducks, (s) => Object.keys(s.events).length > 0);
+    expect(slowed.out).toEqual(["event"]);
+    expect(slowed.last.earlySlows).toBe(ducks.earlySlows + 1);
     const race = atHint("race");
-    const raced = step(step(race, { type: "set-power", notch: 4 }), { type: "tick", dt: 1 / 30 });
-    expect(cheerFor(race, raced)).toBe("event");
+    const raceEvent = sectionEvent(race)!;
+    const raced = cheers(race, (s) => s.progress > raceEvent.until);
+    expect(raced.out).toEqual(["event"]);
   });
 
   it("提前慢下來（小站長）是 early-slow；開新一趟、跳段讓數字變少都不回饋", () => {

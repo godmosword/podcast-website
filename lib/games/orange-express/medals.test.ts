@@ -24,22 +24,17 @@ describe("結算：少一顆星的原因", () => {
     expect(starMissReason(run, 0)).toBe("overrun");
   });
 
-  it("每站都綠區但門還沒亮就按了，提示門亮了再按", () => {
-    const run = finished(["green", "green", "green"]);
-    expect(medalsFor(run, 2).stars).toBe(2);
-    expect(starMissReason(run, 2)).toBe("early-door");
-  });
-
-  it("小站長門還沒亮就按了，也少一顆星", () => {
+  it("小站長每站都綠區但門還沒亮就按了，少一顆星、提示門亮了再按", () => {
     const run = finished(["green", "green", "green"], 0, "captain");
     expect(medalsFor(run, 1).stars).toBe(2);
     expect(starMissReason(run, 1)).toBe("early-door");
   });
 
-  it("慢慢看、小小司機門還沒亮就按了，當下提醒就好，不扣星", () => {
+  it("慢慢看、小小司機、大司機門還沒亮就按了，當下提醒就好，不扣星（大司機 2026-11-03 起）", () => {
     for (const [level, driver] of [
       ["look", "big"],
       ["drive", "little"],
+      ["drive", "big"],
     ] as const) {
       const run = finished(["green", "green", "green"], 0, level, driver);
       expect(medalsFor(run, 3).stars, run.course).toBe(3);
@@ -48,8 +43,8 @@ describe("結算：少一顆星的原因", () => {
   });
 
   it("好幾個原因時先說停車位置，再說開過頭，最後才是門", () => {
-    expect(starMissReason(finished(["yellow", "green", "green"], 1), 3)).toBe("green");
-    expect(starMissReason(finished(["green", "green", "green"], 1), 3)).toBe("overrun");
+    expect(starMissReason(finished(["yellow", "green", "green"], 1, "captain"), 3)).toBe("green");
+    expect(starMissReason(finished(["green", "green", "green"], 1, "captain"), 3)).toBe("overrun");
   });
 });
 

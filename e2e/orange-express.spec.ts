@@ -1023,7 +1023,7 @@ test.describe("小橘特快車：低齡桿面與第一次進站示範", () => {
     }
   });
 
-  test("小小司機第一次進站：先亮目標條，該拉時強調「停」那格；停好才算學會", async ({ page }) => {
+  test("小小司機第一次進站：先亮目標條，該拉時強調「停」那格；停在綠區才算學會", async ({ page }) => {
     await page.addInitScript(() => {
       window.__orangeExpress = { freeze: true, driver: "little", coach: true };
     });
@@ -1035,10 +1035,13 @@ test.describe("小橘特快車：低齡桿面與第一次進站示範", () => {
     await jump(page, { progress: 0.32, speed: 0.45 });
     await expect(bar).toHaveAttribute("data-coach", "watch");
     await expect(stopNotch).toHaveAttribute("data-coach", "false");
+    // 現在拉會停在黃區（區間起點附近）時還不叫拉：照「現在拉」做要停得進綠區（PR-I1）。
+    await jump(page, { progress: 0.42, speed: 0.45 });
+    await expect(bar).toHaveAttribute("data-coach", "watch");
 
-    await jump(page, { progress: 0.4, speed: 0.45 });
+    await jump(page, { progress: 0.58, speed: 0.45 });
     await expect(bar).toHaveAttribute("data-coach", "brake");
-    await expect(page.getByTestId("orange-express-stop-words")).toContainText("右邊拉，停在綠區");
+    await expect(page.getByTestId("orange-express-stop-words")).toContainText("現在拉，停在綠區");
     await expect(stopNotch).toHaveAttribute("data-coach", "true");
     // 停太早不算：車停在區間前，回到只亮目標條。
     await jump(page, { progress: 0.36, speed: 0 });
@@ -1051,7 +1054,7 @@ test.describe("小橘特快車：低齡桿面與第一次進站示範", () => {
     // 學會了：重新開一趟不再示範。
     await page.goto("/games/orange-express");
     await startLevel(page, "自己開");
-    await jump(page, { progress: 0.4, speed: 0.45 });
+    await jump(page, { progress: 0.58, speed: 0.45 });
     await expect(bar).toHaveAttribute("data-coach", "none");
   });
 
@@ -1068,7 +1071,7 @@ test.describe("小橘特快車：低齡桿面與第一次進站示範", () => {
 
     await page.goto("/games/orange-express");
     await startLevel(page, "自己開");
-    await jump(page, { progress: 0.4, speed: 0.45 });
+    await jump(page, { progress: 0.58, speed: 0.45 });
     await expect(bar).toHaveAttribute("data-coach", "brake");
     await page.keyboard.press("Escape");
     await expect(page.getByText("暫停了")).toBeVisible();
@@ -1077,31 +1080,44 @@ test.describe("小橘特快車：低齡桿面與第一次進站示範", () => {
     await expect(bar).toHaveAttribute("data-coach", "brake");
   });
 
-  test("大司機第一次進站：強調「停」那一格；減少動態不脈動", async ({ page }) => {
+  test("大司機第一次進站：強調「停」那一格；減少動態不脈動；黃區不算學會，小站長自己再示範", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.addInitScript(() => {
       window.__orangeExpress = { freeze: true, driver: "big", coach: true };
     });
     await page.goto("/games/orange-express");
     await startLevel(page, "自己開");
-    await jump(page, { progress: 0.55, speed: 0.3 });
+    await jump(page, { progress: 0.61, speed: 0.3 });
     const brake = page.getByRole("slider", { name: "煞車" });
     // 大司機 2026-11-01 起是圖示桿面：跟小小司機一樣亮「停」（B3）那一格，不亮「輕」。
     await expect(brake).toHaveAttribute("data-coach", "false");
     const stopCell = brake.locator('[data-notch="3"]');
     await expect(stopCell).toHaveAttribute("data-coach", "true");
     await expect(brake.locator('[data-notch="2"]')).toHaveAttribute("data-coach", "false");
-    await expect(page.getByTestId("orange-express-stop-words")).toContainText("右邊拉，停在綠區");
+    await expect(page.getByTestId("orange-express-stop-words")).toContainText("現在拉，停在綠區");
     await expect(page.getByTestId("orange-express-point")).toHaveCount(0);
     expect(await stopCell.evaluate((el) => getComputedStyle(el).animationName)).toBe("none");
 
-    // 停在黃區也算學會（黃區也算停好）。
+    // 停在黃區還不算學會（PR-I1）：再開一趟大司機還會示範。
     await jump(page, { progress: 0.53, speed: 0, freeze: false });
     await expect(page.getByTestId("orange-express-drive")).toHaveAttribute("data-phase", "stopped");
     await page.goto("/games/orange-express");
+    await startLevel(page, "自己開");
+    await jump(page, { progress: 0.61, speed: 0.3 });
+    const bar = page.getByTestId("orange-express-stopbar");
+    await expect(bar).toHaveAttribute("data-coach", "brake");
+
+    // 停在綠區才學會；小站長是自己的一組（綠區窄一半），照樣示範。
+    await jump(page, { progress: 0.65, speed: 0, freeze: false });
+    await expect(page.getByTestId("orange-express-drive")).toHaveAttribute("data-phase", "stopped");
+    await page.goto("/games/orange-express");
+    await startLevel(page, "自己開");
+    await jump(page, { progress: 0.61, speed: 0.3 });
+    await expect(bar).toHaveAttribute("data-coach", "none");
+    await page.goto("/games/orange-express");
     await startLevel(page, "小站長");
-    await jump(page, { progress: 0.55, speed: 0.3 });
-    await expect(page.getByTestId("orange-express-stopbar")).toHaveAttribute("data-coach", "none");
+    await jump(page, { progress: 0.61, speed: 0.3 });
+    await expect(bar).toHaveAttribute("data-coach", "brake");
   });
 });
 
@@ -1414,8 +1430,8 @@ test.describe("小橘特快車：大司機減法（2026-11-01）", () => {
 
 /**
  * 沿途事件與任務卡（PR-H3）。種子 0 的排法：遊樂園前小鴨；橘子坡前賽跑（小狗）、小鴨；回家前平交道、揮手的朋友。
- * 位置都是站的 progress（風景段是負的，每段長 1.4）：提示在段的 15%（賽跑在段起點）、事件點在 62%（賽跑 75%）。
- * 遊樂園前：-1.4 起，小鴨提示 -1.19、事件點 -0.53。橘子坡前：賽跑 -2.8 起、終點 -1.75；小鴨同上。
+ * 位置都是站的 progress（風景段是負的，每段長 1.4）：提示在段的 15%（小鴨 5%、賽跑在段起點）、事件點在 62%（賽跑 75%）。
+ * 遊樂園前：-1.4 起，小鴨提示 -1.33、降速區起點 -0.77、事件點 -0.53。橘子坡前：賽跑 -2.8 起、終點 -1.75；小鴨同上。
  * 回家前：平交道提示 -2.59、事件點 -1.93；揮手提示 -1.19、事件點 -0.53。
  */
 test.describe("小橘特快車：沿途事件與任務卡（2026-11-02）", () => {
@@ -1429,7 +1445,7 @@ test.describe("小橘特快車：沿途事件與任務卡（2026-11-02）", () =
     await startLevel(page, "自己開");
   }
 
-  test("小鴨：提示出現後放開動力就做到，小橘開心、算一次提前慢下來，降速區不響叮叮；結算小鴨章墊黃", async ({ page }) => {
+  test("小鴨：提示出現後放開動力、速度掉下來就做到，小橘開心、算一次提前慢下來，降速區不響叮叮；結算小鴨章墊黃", async ({ page }) => {
     await startBig(page);
     const drive = page.getByTestId("orange-express-drive");
     const notice = page.getByTestId("orange-express-notice");
@@ -1506,16 +1522,17 @@ test.describe("小橘特快車：沿途事件與任務卡（2026-11-02）", () =
     await expect(page.getByTestId("orange-express-notice")).toHaveCount(0);
   });
 
-  test("賽跑：提示後推到「快」就做到", async ({ page }) => {
+  test("賽跑：推到「快」先說快追上了（還沒蓋章），到終點夠快才跑贏", async ({ page }) => {
     await startBig(page);
+    const drive = page.getByTestId("orange-express-drive");
     await jump(page, { stationIndex: 1, progress: -2.75, speed: 0, power: 0, freeze: false });
     await expect(page.getByTestId("orange-express-notice")).toContainText("跟小狗賽跑，推到快");
     await page.getByRole("slider", { name: "動力" }).locator('[data-notch="4"]').click();
-    await expect(page.getByTestId("orange-express-drive")).toHaveAttribute("data-events-done", "1");
-    // 終點前說「快追上了」，過了終點小狗被超過才說「跑贏了」。
     await expect(page.getByTestId("orange-express-notice")).toContainText("快追上小狗了");
-    // 從停著起跑到終點（段長 1.4 的 75%）約 8 秒。
+    await expect(drive).toHaveAttribute("data-events-done", "0");
+    // 從停著起跑到終點（段長 1.4 的 75%）約 8 秒；終點時夠快才蓋章、說「跑贏了」。
     await expect(page.getByTestId("orange-express-notice")).toContainText("跑贏小狗了", { timeout: 15000 });
+    await expect(drive).toHaveAttribute("data-events-done", "1");
   });
 
   test("任務卡：開局先念「今天要去接…回家」再廣播下一站；第一次碰桿子就收，不擋桿子", async ({ page }) => {
