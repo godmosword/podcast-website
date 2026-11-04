@@ -340,7 +340,7 @@ function drawWave(ctx: CanvasRenderingContext2D, view: View, travel: number, pai
   for (const side of arms) {
     const shoulder = { x: body.x + side * s * 0.35, y: body.y - s * 0.4 };
     const angle = done ? -Math.PI / 2 + side * 0.35 : -Math.PI / 2 + 0.4 + swing;
-    const hand = { x: shoulder.x + Math.cos(angle) * s * 0.9 * side, y: shoulder.y + Math.sin(angle) * s * 0.9 };
+    const hand = { x: shoulder.x + Math.cos(angle) * s * 0.9, y: shoulder.y + Math.sin(angle) * s * 0.9 };
     segment(ctx, shoulder, hand, INK, s * 0.26);
     segment(ctx, shoulder, hand, SKIN, s * 0.16);
   }

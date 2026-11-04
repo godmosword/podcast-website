@@ -1321,7 +1321,9 @@ test.describe("小橘特快車：停好後跟地標打招呼、朋友上車的�
 
 /** 駕駛台與前窗指差鈕上亮著「現在按這個」的控制（路線條的站點另有自己的 data-next，不算）。 */
 function litControls(page: Page) {
-  return page.locator('[data-testid="orange-express-cab"] [data-next="true"], [data-testid="orange-express-point"][data-next="true"]');
+  return page.locator(
+    '[data-testid="orange-express-cab"] [data-next="true"], [data-testid="orange-express-point"][data-next="true"], [data-testid="orange-express-wave-friend"][data-next="true"]',
+  );
 }
 
 test.describe("小橘特快車：一次只亮一個（PR-J1）", () => {
@@ -1688,27 +1690,94 @@ test.describe("小橘特快車：沿途事件與任務卡（2026-11-02）", () =
     await expect(cheer).toHaveCount(0, { timeout: 4000 });
   });
 
-  test("揮手的朋友：按喇叭做到，小橘一樣開心", async ({ page }) => {
+  test("揮手的朋友：按喇叭不算；點前窗的朋友卡才做到，小橘一樣開心（PR-K1）", async ({ page }) => {
     await startBig(page);
+    const drive = page.getByTestId("orange-express-drive");
+    const notice = page.getByTestId("orange-express-notice");
     await jump(page, { stationIndex: 2, progress: -1.1, speed: 0.4, power: 2, freeze: false });
-    await expect(page.getByTestId("orange-express-notice")).toHaveAttribute("data-event", "wave");
+    await expect(notice).toHaveAttribute("data-event", "wave");
+    await expect(notice).toContainText("有朋友在揮手，點朋友");
+    const friend = page.getByRole("button", { name: "跟朋友揮手" });
+    // 亮的是朋友卡，不是喇叭；只亮這一個，駕駛台淡下來。
+    await expect(friend).toHaveAttribute("data-next", "true");
+    await expect(friend.getByTestId("orange-express-next-hand")).toHaveCount(1);
+    await expect(litControls(page)).toHaveCount(1);
+    await expect(page.getByTestId("orange-express-cab")).toHaveAttribute("data-focus", "wave");
+    // 按喇叭只是喇叭聲。
     await page.getByTestId("orange-express-horn").click();
-    await expect(page.getByTestId("orange-express-drive")).toHaveAttribute("data-events-done", "1");
+    await expect(drive).toHaveAttribute("data-honked", "1");
+    await expect(drive).toHaveAttribute("data-events-done", "0");
+    await friend.click();
+    await expect(drive).toHaveAttribute("data-events-done", "1");
+    await expect(notice).toContainText("揮揮手！朋友好開心");
+    const happy = page.getByRole("button", { name: "朋友好開心" });
+    await expect(happy).toHaveAttribute("data-done", "true");
+    // 做到的回饋看得到：卡片跳一跳、冒愛心。
+    expect(await happy.evaluate((el) => getComputedStyle(el).animationName)).toContain("waveFriendHop");
+    await expect(happy.locator("svg").last()).toBeVisible();
     await expect(page.getByTestId("orange-express-cab").locator("svg[data-mood]").first()).toHaveAttribute(
       "data-mood",
       "happy",
     );
   });
 
-  test("揮手的朋友：沒按喇叭也照樣過去，記「遇到」、不說沒做到", async ({ page }) => {
+  test("揮手的朋友：鍵盤用空白鍵也能揮手（風景段沒有門可開，不會抖車門）", async ({ page }) => {
     await startBig(page);
     const drive = page.getByTestId("orange-express-drive");
+    await jump(page, { stationIndex: 2, progress: -1.1, speed: 0.4, power: 2, freeze: false });
+    await expect(page.getByRole("button", { name: "跟朋友揮手" })).toBeVisible();
+    await page.keyboard.press("Space");
+    await expect(drive).toHaveAttribute("data-events-done", "1");
+    await expect(page.getByTestId("orange-express-door")).toHaveAttribute("data-shake", "false");
+  });
+
+  test("揮手的朋友：沒點也照樣過去，記「遇到」、卡片收起、不說沒做到", async ({ page }) => {
+    await startBig(page);
+    const drive = page.getByTestId("orange-express-drive");
+    const friend = page.getByTestId("orange-express-wave-friend");
     await jump(page, { stationIndex: 2, progress: -0.6, speed: 0.82, power: 4, freeze: false });
     await expect(page.getByTestId("orange-express-notice")).toHaveAttribute("data-event", "wave");
+    await expect(friend).toBeVisible();
     await expect(drive).toHaveAttribute("data-events-met", "1", { timeout: 6000 });
     await expect(drive).toHaveAttribute("data-events-done", "0");
+    await expect(friend).toHaveCount(0);
     await expect(page.getByTestId("orange-express-notice")).toHaveCount(0);
   });
+
+  test("揮手的朋友：無障礙檢查通過；減少動態時卡片不滑、手不揮", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await startBig(page);
+    await jump(page, { stationIndex: 2, progress: -1.1, speed: 0.4, power: 2 });
+    const friend = page.getByRole("button", { name: "跟朋友揮手" });
+    await expect(friend).toBeVisible();
+    expect(await friend.evaluate((el) => getComputedStyle(el).animationName)).toBe("none");
+    const results = await new AxeBuilder({ page }).include('[data-testid="orange-express-windshield"]').analyze();
+    expect(results.violations).toEqual([]);
+    // 做到後也不跳，愛心留著。
+    await friend.click();
+    const happy = page.getByRole("button", { name: "朋友好開心" });
+    expect(await happy.evaluate((el) => getComputedStyle(el).animationName)).toBe("none");
+  });
+
+  for (const [width, height] of [[390, 844], [375, 553], [320, 568], [844, 390]] as const) {
+    test(`揮手的朋友卡 ${width}×${height}：夠大、在前窗裡、不蓋開心小橘、整頁不捲動`, async ({ page }) => {
+      await page.setViewportSize({ width, height });
+      await startBig(page);
+      await jump(page, { stationIndex: 2, progress: -1.1, speed: 0.4, power: 2 });
+      const friend = page.getByRole("button", { name: "跟朋友揮手" });
+      await friend.click();
+      const card = (await page.getByTestId("orange-express-wave-friend").boundingBox())!;
+      const glass = (await page.getByTestId("orange-express-windshield").boundingBox())!;
+      const cheer = (await page.getByTestId("orange-express-cheer").boundingBox())!;
+      expect(card.width).toBeGreaterThanOrEqual(48);
+      expect(card.height).toBeGreaterThanOrEqual(48);
+      expect(card.x).toBeGreaterThanOrEqual(glass.x);
+      expect(card.y + card.height).toBeLessThanOrEqual(glass.y + glass.height);
+      expect(card.x + card.width).toBeLessThanOrEqual(cheer.x);
+      const scroll = await page.evaluate(() => document.scrollingElement!.scrollHeight - document.scrollingElement!.clientHeight);
+      expect(scroll).toBeLessThanOrEqual(0);
+    });
+  }
 
   test("賽跑：推到「快」先說快追上了（還沒蓋章），到終點夠快才跑贏", async ({ page }) => {
     await startBig(page);

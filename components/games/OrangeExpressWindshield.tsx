@@ -2,12 +2,13 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore, type MutableRefObject, type Ref } from "react";
 import { DoorIcon } from "@/components/games/OrangeExpressCab";
-import { NoticeGlyph, RiderFace, XiaojuFace } from "@/components/games/OrangeExpressGlyphs";
+import { NoticeGlyph, RiderFace, RiderHeart, XiaojuFace } from "@/components/games/OrangeExpressGlyphs";
 import { OrangeExpressMissionCard } from "@/components/games/OrangeExpressMissionCard";
 import { OrangeExpressNextHand } from "@/components/games/OrangeExpressNextHand";
 import { OrangeExpressRouteStrip } from "@/components/games/OrangeExpressRouteStrip";
 import type { MissionState } from "@/components/games/useOrangeExpressMission";
 import { OrangeExpressStopBar } from "@/components/games/OrangeExpressStopBar";
+import { OrangeExpressWaveFriend } from "@/components/games/OrangeExpressWaveFriend";
 import { canvasDpr } from "@/lib/games/orange-express/canvas-dpr";
 import { COPY, POINT_CALL, POINT_WHAT } from "@/lib/games/orange-express/copy";
 import type { CoachBeat } from "@/lib/games/orange-express/coach";
@@ -51,18 +52,6 @@ function BoardedCheck() {
   );
 }
 
-/** 朋友上車：頭像旁冒一個愛心泡泡（沒有字，不識字也看得懂）。 */
-function RiderHeart() {
-  return (
-    <span className={styles.riderHeart} aria-hidden>
-      <svg viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="11" fill="rgb(255, 250, 240)" stroke="rgb(58, 46, 40)" strokeWidth="1.6" />
-        <path d="M12 18s-6-3.6-6-7.6A3.2 3.2 0 0 1 12 8.6a3.2 3.2 0 0 1 6 1.8C18 14.4 12 18 12 18z" fill="rgb(247, 120, 150)" />
-      </svg>
-    </span>
-  );
-}
-
 function PointIcon() {
   return (
     <svg viewBox="0 0 32 32" aria-hidden className={styles.pointIcon}>
@@ -94,6 +83,7 @@ export function OrangeExpressWindshield({
   clock,
   paintRef,
   onPoint,
+  onWave,
 }: {
   run: RunState;
   reduced: boolean;
@@ -119,6 +109,7 @@ export function OrangeExpressWindshield({
   /** 車停著狀態沒變時，遊戲迴圈用它重畫前窗（不另開一個 rAF）。 */
   paintRef: MutableRefObject<(() => void) | null>;
   onPoint: () => void;
+  onWave: () => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const compact = useCompactWindshield();
@@ -293,6 +284,10 @@ export function OrangeExpressWindshield({
           </span>
           {next?.control === "point" ? <OrangeExpressNextHand at="button" /> : null}
         </button>
+      ) : null}
+      {/* 揮手的朋友（PR-K1）：提示掛著到回應結束都在；沒做到（遇到）就收，不說沒做到。 */}
+      {eventKind === "wave" && eventResult !== "met" && mission !== "shown" ? (
+        <OrangeExpressWaveFriend done={eventResult === "done"} next={next?.control === "wave"} onWave={onWave} />
       ) : null}
       {mission ? <OrangeExpressMissionCard stations={run.stations} state={mission} goal={missionGoal} /> : null}
       {/* 做到事件、提前慢下來：小橘在前窗右下角探頭笑（PR-I2）。矮手機收起了儀表徽章，風景段也沒有停車目標條，這裡是孩子正在看的地方。 */}

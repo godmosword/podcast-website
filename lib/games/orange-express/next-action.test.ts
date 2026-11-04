@@ -160,12 +160,13 @@ describe("下一步：一次只亮一個（PR-J1）", () => {
     expect(next(stoppedAt("captain"), { coachOn: true })).toMatchObject({ control: "door" });
   });
 
-  it("沿途事件：小鴨亮「慢」（小站長亮煞車 B2）、賽跑亮最快、平交道與揮手亮喇叭；已經在那一格不亮", () => {
+  it("沿途事件：小鴨亮「慢」（小站長亮煞車 B2）、賽跑亮最快、平交道亮喇叭、揮手亮朋友卡；已經在那一格不亮", () => {
     expect(next(atEvent("big", "drive", "ducks", { power: 4 }))).toMatchObject({ control: "power", notch: 2, dir: "down" });
     expect(next(atEvent("big", "drive", "ducks", { power: 2 }))).toBeNull();
     expect(next(atEvent("big", "drive", "race", { power: 2 }))).toMatchObject({ control: "power", notch: 4, dir: "up" });
     expect(next(atEvent("big", "drive", "crossing", { power: 4 }))).toMatchObject({ control: "horn", reason: "event" });
-    expect(next(atEvent("big", "drive", "wave", { power: 4 }))).toMatchObject({ control: "horn" });
+    expect(next(atEvent("big", "drive", "wave", { power: 4 }))).toMatchObject({ control: "wave", reason: "event" });
+    expect(next(atEvent("big", "captain", "wave", { power: 3 }))).toMatchObject({ control: "wave" });
     expect(next(atEvent("big", "captain", "ducks", { power: 3 }))).toMatchObject({ control: "brake", notch: 2 });
   });
 

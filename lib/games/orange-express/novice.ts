@@ -48,6 +48,7 @@ const RELEASE_DELAY = 0.9;
 function actionsFor(state: RunState, next: NextAction): RunAction[] {
   if (next.control === "horn") return [{ type: "honk" }];
   if (next.control === "point") return [{ type: "point" }];
+  if (next.control === "wave") return [{ type: "wave" }];
   if (next.control === "door") return [{ type: next.reason === "close" ? "close-doors" : "open-doors" }];
   if (next.control === "power") return [{ type: "set-power", notch: next.notch ?? powerNotches(state.course)[1]! }];
   if (next.reason === "brake" || next.reason === "brake-ready") {

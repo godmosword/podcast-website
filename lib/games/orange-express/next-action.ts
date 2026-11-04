@@ -18,7 +18,7 @@ const STOP_NOTCH = 3;
 /** 小站長讓小鴨過時亮的煞車格（PR-I4）。 */
 const DUCK_BRAKE = 2;
 
-export type NextControl = "power" | "brake" | "horn" | "door" | "point";
+export type NextControl = "power" | "brake" | "horn" | "door" | "point" | "wave";
 
 export type NextReason =
   | "greet"
@@ -58,7 +58,7 @@ export type NextContext = {
 
 const STILL = 0.001;
 
-function button(control: "horn" | "door" | "point", reason: NextReason): NextAction {
+function button(control: "horn" | "door" | "point" | "wave", reason: NextReason): NextAction {
   return { control, notch: null, dir: null, reason };
 }
 
@@ -120,6 +120,7 @@ function forEvent(state: RunState): NextAction | null {
   const cue = eventCue(state);
   if (!cue) return null;
   if (cue === "horn") return button("horn", "event");
+  if (cue === "wave") return button("wave", "event");
   const powers = powerNotches(state.course);
   if (cue === "fast") {
     const top = powers[powers.length - 1]!;

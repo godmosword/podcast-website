@@ -715,6 +715,31 @@ for (const shot of ORANGE_EVENT_SHOTS) {
   });
 }
 
+/** 揮手的朋友卡（PR-K1）：矮手機提示中，以及點了之後兩手舉高、冒愛心。減少動態讓卡片定住。 */
+test("visual：小橘特快車揮手的朋友卡 375×553 light（減少動態）", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await openOrangeExpress(page, [375, 553, "light"], { eventSeed: 0 });
+  await startOrangeExpress(page, "自己開");
+  await jumpOrangeExpress(page, { stationIndex: 2, progress: -0.557, speed: 0.6, power: 4 });
+  await expect(page.getByTestId("orange-express-wave-friend")).toBeVisible();
+  await settleOrangeExpress(page);
+  await expect(page).toHaveScreenshot("orange-express-wave-friend-375x553-light.png", orangeShot("light"));
+});
+
+test("visual：小橘特快車揮手的朋友做到了 390 light（減少動態）", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await openOrangeExpress(page, PHONE, { eventSeed: 0 });
+  await startOrangeExpress(page, "自己開");
+  await jumpOrangeExpress(page, { stationIndex: 2, progress: -0.557, speed: 0.6, power: 4 });
+  await page.getByRole("button", { name: "跟朋友揮手" }).click();
+  await expect(page.getByTestId("orange-express-wave-friend")).toHaveAttribute("data-done", "true");
+  await settleOrangeExpress(page);
+  await expect(page.getByTestId("orange-express-windshield")).toHaveScreenshot(
+    "orange-express-wave-friend-done-390x844-light.png",
+    orangeShot("light"),
+  );
+});
+
 /** 夜間：提示膠囊、事件圖示的描邊在夜間主題下照樣看得清楚（前窗與卡片用固定美術色）。 */
 test("visual：小橘特快車沿途事件揮手的朋友 390 night（定格）", async ({ page }) => {
   await openOrangeExpress(page, PHONE_NIGHT, { eventSeed: 0 });

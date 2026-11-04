@@ -71,7 +71,7 @@ import {
   type RunGoal,
   type RunProgress,
 } from "@/lib/games/orange-express/journal";
-import { activeEvent, cheerFor, doneCount } from "@/lib/games/orange-express/events";
+import { activeEvent, cheerFor, doneCount, eventPending } from "@/lib/games/orange-express/events";
 import { isSmoothStop, medalsFor, starMissReason } from "@/lib/games/orange-express/medals";
 import { COURSE_RULES } from "@/lib/games/orange-express/routes";
 import { eventSpeech, nextSpeech, type SpeechItem } from "@/lib/games/orange-express/notice";
@@ -539,6 +539,16 @@ export function OrangeExpressView({
     apply(next);
   }, [apply, audio, instance]);
 
+  /** 跟揮手的朋友揮手（PR-K1）：點前窗的朋友卡，或揮手提示掛著時按空白鍵。鈴聲與小橘開心在 apply 比前後時給。 */
+  const waveBack = useCallback(() => {
+    const cur = runRef.current;
+    if (!cur || instance.isInputPaused()) return;
+    const next = step(cur, { type: "wave" });
+    if (next === cur) return;
+    audio?.ensureAudio();
+    apply(next);
+  }, [apply, audio, instance]);
+
   const onAction = useCallback(
     (action: GameAction) => {
       const cur = runRef.current;
@@ -555,9 +565,13 @@ export function OrangeExpressView({
         pressHorn();
         return;
       }
-      if (action === "action") tryDoors();
+      if (action === "action") {
+        // 風景段沒有門可開：揮手提示掛著時，空白鍵是跟朋友揮手（鍵盤的路）。
+        if (eventPending(cur)?.kind === "wave") waveBack();
+        else tryDoors();
+      }
     },
-    [instance, pressHorn, setBrake, setPower, tryDoors],
+    [instance, pressHorn, setBrake, setPower, tryDoors, waveBack],
   );
 
   const beginRef = useRef(begin);
@@ -1051,6 +1065,7 @@ export function OrangeExpressView({
         clock={windshieldClock}
         paintRef={windshieldPaint}
         onPoint={pointCheck}
+        onWave={waveBack}
       />
       <p className={styles.live} aria-live="polite">
         {liveText(run, doorHint, next)}

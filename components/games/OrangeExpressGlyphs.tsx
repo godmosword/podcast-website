@@ -362,3 +362,15 @@ export function RiderFace({ id }: { id: PassengerId }) {
     </svg>
   );
 }
+
+/** 朋友上車：頭像旁冒一個愛心泡泡（沒有字，不識字也看得懂）。 */
+export function RiderHeart() {
+  return (
+    <span className={styles.riderHeart} aria-hidden>
+      <svg viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="11" fill="rgb(255, 250, 240)" stroke="rgb(58, 46, 40)" strokeWidth="1.6" />
+        <path d="M12 18s-6-3.6-6-7.6A3.2 3.2 0 0 1 12 8.6a3.2 3.2 0 0 1 6 1.8C18 14.4 12 18 12 18z" fill="rgb(247, 120, 150)" />
+      </svg>
+    </span>
+  );
+}

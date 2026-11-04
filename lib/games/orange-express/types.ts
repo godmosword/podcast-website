@@ -176,7 +176,8 @@ export type RunAction =
   | { type: "open-doors" }
   | { type: "close-doors" }
   | { type: "honk" }
-  | { type: "point" };
+  | { type: "point" }
+  | { type: "wave" };
 
 /** 測試與 e2e 用。正式遊玩不會寫這個物件。 */
 export type OrangeExpressHook = {

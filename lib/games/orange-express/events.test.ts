@@ -182,14 +182,30 @@ describe("沿途事件：做到與遇到", () => {
     expect(late.events[event.key]).toBe("met");
   });
 
-  it("揮手的朋友：經過事件點後一小段按喇叭也算", () => {
+  it("揮手的朋友：點朋友才算（經過事件點後一小段也算）；按喇叭只是喇叭聲", () => {
     let s = cruiseInto("wave");
     const event = sectionEvent(s)!;
     expect(event.until).toBeCloseTo(event.at + WAVE_AFTER, 6);
+    // 提示前點了不算。
+    expect(step({ ...s, progress: event.hintAt - 0.01 }, { type: "wave" }).events[event.key]).toBeUndefined();
     s = driveTo(s, event.at + 0.02);
     expect(s.events[event.key]).toBeUndefined();
-    s = step(s, { type: "honk" });
-    expect(s.events[event.key]).toBe("done");
+    expect(step(s, { type: "honk" })).toBe(s);
+    const waved = step(s, { type: "wave" });
+    expect(waved.events[event.key]).toBe("done");
+    // 同一件不重複；過了可以做動作的最後一刻記「遇到」，再點也不改。
+    expect(step(waved, { type: "wave" })).toBe(waved);
+    const late = driveTo(s, event.until + 0.001);
+    expect(late.events[event.key]).toBe("met");
+    expect(step(late, { type: "wave" }).events[event.key]).toBe("met");
+  });
+
+  it("平交道只認喇叭：點朋友的動作對平交道沒有作用", () => {
+    const s = cruiseInto("crossing");
+    const event = sectionEvent(s)!;
+    const inHint = { ...s, progress: event.hintAt + 0.01 };
+    expect(step(inHint, { type: "wave" })).toBe(inHint);
+    expect(step(inHint, { type: "honk" }).events[event.key]).toBe("done");
   });
 
   it("賽跑：推到快只是開始追（不蓋章）；到終點夠快才記做到，一直在慢記遇到", () => {

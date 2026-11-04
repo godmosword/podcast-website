@@ -59,6 +59,9 @@ export const COPY = {
   predicted: "會停在這裡",
   /** 路線條的讀屏名稱；後面接站名與「下一站」。 */
   routeStrip: "這趟的路",
+  /** 前窗的揮手朋友卡（PR-K1），讀屏。 */
+  waveFriend: "跟朋友揮手",
+  waveFriendDone: "朋友好開心",
   /** 駕駛台的「接朋友」座位（PR-J2），讀屏念的開頭。 */
   seatsLabel: "要接的朋友",
   stopWord: "停",
@@ -179,7 +182,7 @@ export function racer(scene: SceneId): string {
 export function eventHint(kind: ScenicEventKind, scene: SceneId, brake = false): string {
   if (kind === "ducks") return `${crossingCritter(scene)}要過鐵軌，${brake ? "拉煞車" : "慢下來"}`;
   if (kind === "crossing") return "平交道，按喇叭";
-  if (kind === "wave") return "有朋友在揮手，按喇叭";
+  if (kind === "wave") return "有朋友在揮手，點朋友";
   return `跟${racer(scene)}賽跑，推到快`;
 }
 
@@ -190,7 +193,7 @@ export function eventHint(kind: ScenicEventKind, scene: SceneId, brake = false):
 export function eventDoneText(kind: ScenicEventKind, scene: SceneId, passed = true): string {
   if (kind === "ducks") return `${crossingCritter(scene)}慢慢走過去了`;
   if (kind === "crossing") return "叭叭！平交道";
-  if (kind === "wave") return "叭叭！朋友好開心";
+  if (kind === "wave") return "揮揮手！朋友好開心";
   return passed ? `跑贏${racer(scene)}了` : `快追上${racer(scene)}了`;
 }
 
@@ -330,7 +333,7 @@ export const GOAL_TEXT: Record<RunGoal, string> = {
   smooth: "輕輕停",
   ducks: "慢下來讓小動物先過",
   crossing: "平交道前按喇叭",
-  wave: "朋友揮手時按喇叭",
+  wave: "朋友揮手時點一下",
   race: "賽跑時推到快",
 };
 

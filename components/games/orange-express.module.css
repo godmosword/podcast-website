@@ -518,7 +518,8 @@
   animation: riderHeart 1.2s 640ms ease-out both;
 }
 
-.riders .riderHeart svg {
+.riders .riderHeart svg,
+.waveFriend .riderHeart svg {
   display: block;
   width: 100%;
   height: 100%;
@@ -799,6 +800,104 @@
   width: 32px;
   height: 32px;
   flex: 0 0 auto;
+}
+
+/*
+ * 揮手的朋友卡（PR-K1）：前窗左下角，跟停好時的月台朋友卡同一個位置，固定不動、夠大（路旁畫的朋友開快時點不到）。
+ * 右下是指差鈕與開心小橘，左右分開不打架。做到了換薄荷底（跟做到的提示同色）。
+ */
+.waveFriend {
+  position: absolute;
+  left: 9%;
+  bottom: 10px;
+  width: 76px;
+  height: 76px;
+  padding: 4px;
+  font: inherit;
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  border-radius: 18px;
+  background: var(--card);
+  box-shadow: 0 4px 0 var(--ink);
+  touch-action: manipulation;
+  animation: waveFriendIn 280ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.waveFriend:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 var(--ink);
+}
+
+.waveFriend:focus-visible {
+  outline: 3px solid var(--accent-ink);
+  outline-offset: 3px;
+}
+
+.waveFriend[data-done="true"] {
+  background: color-mix(in srgb, var(--c-mint) 70%, var(--card));
+  cursor: default;
+  animation: waveFriendHop 420ms ease-out 2;
+}
+
+/* 做到了：卡片跳兩下、愛心大一點（22px 只亮 1.2 秒孩子看不到，設計審）。 */
+.waveFriend .riderHeart {
+  width: 30px;
+  height: 30px;
+  animation-delay: 0ms;
+  animation-duration: 1.6s;
+}
+
+@keyframes waveFriendHop {
+  40% {
+    transform: translateY(-10px);
+  }
+}
+
+/* 減少動態：不跳，愛心一直留著。 */
+.screen[data-reduced="true"] .waveFriend .riderHeart {
+  opacity: 1;
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .waveFriend .riderHeart {
+    opacity: 1;
+    animation: none;
+  }
+}
+
+.waveFriendFace {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* 舉著的手左右揮（肩膀是支點），約 1.5 次／秒。 */
+.waveArm {
+  transform-origin: 43px 43px;
+  animation: waveArm 660ms ease-in-out infinite alternate;
+}
+
+@keyframes waveArm {
+  from {
+    transform: rotate(-16deg);
+  }
+
+  to {
+    transform: rotate(18deg);
+  }
+}
+
+@keyframes waveFriendIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.86);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* ── 停車目標條 ─────────────────────────────────────── */
@@ -1700,7 +1799,8 @@
 .lever[data-next="true"],
 .horn[data-next="true"],
 .door[data-next="true"],
-.pointTask[data-next="true"] {
+.pointTask[data-next="true"],
+.waveFriend[data-next="true"] {
   outline: 4px solid rgb(255, 216, 102);
   outline-offset: var(--pulse-from, 2px);
   animation: coachPulse 1s ease-in-out 3;
@@ -1735,6 +1835,13 @@
   animation:
     pointPop 320ms cubic-bezier(0.34, 1.56, 0.64, 1),
     coachPulse 1s ease-in-out 320ms 3;
+}
+
+/* 朋友卡滑進來之後再脈動。 */
+.waveFriend[data-next="true"] {
+  animation:
+    waveFriendIn 280ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    coachPulse 1s ease-in-out 280ms 3;
 }
 
 @keyframes coachPulse {
@@ -1798,6 +1905,12 @@
   transform: scaleX(-1);
   transform-origin: 47% 17%;
   animation-name: nextTapFlip;
+}
+
+/* 朋友卡：指尖放在朋友右邊，手身往右下，不蓋臉與藍衣（藍衣是跟路旁朋友相認的線索，設計審）。 */
+.waveFriend .nextHand {
+  --tip-x: 74%;
+  --tip-y: 62%;
 }
 
 /* 指差鈕下半有「月台」「號誌」字：指尖放在圖示右上，手身往右、不蓋字。 */
@@ -1877,6 +1990,8 @@
 .screen[data-reduced="true"] .horn[data-next="true"],
 .screen[data-reduced="true"] .door[data-next="true"],
 .screen[data-reduced="true"] .pointTask[data-next="true"],
+.screen[data-reduced="true"] .waveFriend,
+.screen[data-reduced="true"] .waveArm,
 .screen[data-reduced="true"] .nextHand svg {
   animation: none;
 }
@@ -1887,6 +2002,10 @@
   .horn[data-next="true"],
   .door[data-next="true"],
   .pointTask[data-next="true"],
+  .waveFriend,
+  .waveFriend[data-next="true"],
+  .waveFriend[data-done="true"],
+  .waveArm,
   .nextHand svg {
     animation: none;
   }
@@ -2580,6 +2699,14 @@
     height: 28px;
   }
 
+  .waveFriend {
+    bottom: 6px;
+    width: 62px;
+    height: 62px;
+    padding: 3px;
+    border-radius: 14px;
+  }
+
   /* 這一條只有一顆喇叭高：章放在臉左邊。小站長五位放不下章，只留臉，下一站那組臉外一圈墨框。 */
   .seats {
     --seat: 22px;
@@ -2797,6 +2924,14 @@
 
   .pointTask {
     bottom: 12px;
+  }
+
+  .waveFriend {
+    bottom: 6px;
+    width: 62px;
+    height: 62px;
+    padding: 3px;
+    border-radius: 14px;
   }
 
   .cheerFace {

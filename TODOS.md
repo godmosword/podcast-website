@@ -76,7 +76,8 @@
   - I4 設計審留的後續（等試玩再調）：小站長一趟負擔偏重（約 25 個要處理的提示；可考慮第一段不放事件、地標招呼改旁白、鐵橋喇叭與揮手合併）；紅燈站出站段事情多（紅燈→對向列車→號誌題→賽跑，可考慮把賽跑移到第二段）。`design · M`
   - ✅ 出發號誌最小 14px 寬（`SIGNAL_MIN_W`）；小站長不再重複接 Bonbon、馬米（有名字的朋友跟大司機同站，前兩站各多一位不具名朋友，新增綠色小芽）。第二次試玩觀察表補了 I 系列四項。見 PR-I5。
   - ✅ **PR-I4 小站長旅程**：`captain.journey`；出發號誌與號誌題移到出站處（大司機一起移）、紅燈與號誌題時賽跑先不開始、小鴨亮煞車 B2、任務卡六位朋友擠得下並去重名字、任務卡在時不出號誌題。見 PR-I4。
-  - 之後：整體美術統一另開計畫（先選一個代表場景的方向；生圖屬付費 L3）；平交道與揮手玩法區分。
+  - 之後：整體美術統一另開計畫（先選一個代表場景的方向；生圖屬付費 L3）。
+  - ✅ **PR-K1 平交道與揮手玩法區分**（計畫 `docs/plans/2026-11-04-orange-express-wave.md`）：揮手改成點前窗左下角的朋友卡（`OrangeExpressWaveFriend`，鍵盤空白鍵），平交道維持喇叭。見 PR-K1。
 - **小橘特快車車內廣播錄音**（2026-10-31 使用者決定先擺著）：結構已留好（`lib/games/orange-express/announce.ts` 的 `ANNOUNCE_CLIPS`）。家人或小橘錄「下一站，遊樂園站／橘子坡站／回家站」三句，以及小站長紅燈站的「紅燈，等一下，對向列車要先過去喔。下一站，橘子坡站／回家站」兩句（`next-<站 id>-wait`），放 `public/games/v2/orange-express/voice/next-<站 id>.m4a` 並登記；錄好前用瀏覽器朗讀暫代。也要在 iPhone／Android 實機各聽一次朗讀與「叮叮」輕煞聲。`content · S · 需真人`
 - **重錄 darwin 視覺基準（2026-10 稽核修正）**：Linux 不能改 `-chromium-darwin`。請在 Mac 跑 `npm run test:visual:trusted -- --update-snapshots`，只接受下面這些有意的差異後再更新。320 沒有基準。
   - 睡前 390 日間／夜間：`landing-bedtime-390-light-chromium-darwin.png`、`landing-bedtime-390-night-chromium-darwin.png`（只縮小「數綿羊123．睡前故事」。1280 與其他段不動）。

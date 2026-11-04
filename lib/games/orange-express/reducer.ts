@@ -11,7 +11,7 @@ import {
   type Motion,
 } from "@/lib/games/orange-express/physics";
 import { COURSE_RULES, courseFor, stationsFor, stopEpsilon } from "@/lib/games/orange-express/routes";
-import { eventsBefore, honkEvent, judgeEvents, quietSlow } from "@/lib/games/orange-express/events";
+import { eventsBefore, honkEvent, judgeEvents, quietSlow, waveEvent } from "@/lib/games/orange-express/events";
 import { legStart, onScenic, sectionAt, sectionStart } from "@/lib/games/orange-express/journey";
 import { isSmoothStop } from "@/lib/games/orange-express/medals";
 import {
@@ -454,7 +454,7 @@ export function honk(state: RunState): RunState {
   if (landmarkTaskPending(state)) {
     return { ...state, landmarkGreets: [...state.landmarkGreets, state.stationIndex] };
   }
-  // 平交道、揮手的朋友（風景段，跟站段的鐵橋不會同時）。
+  // 平交道（風景段，跟站段的鐵橋不會同時）。
   const evented = honkEvent(state);
   if (evented) return evented;
   if (!bridgeGreetPending(state)) return state;
@@ -610,6 +610,7 @@ export function step(state: RunState, action: RunAction): RunState {
   }
 
   if (action.type === "honk") return honk(state);
+  if (action.type === "wave") return waveEvent(state) ?? state;
 
   if (action.type === "point") {
     const task = pendingPoint(state);

@@ -14,7 +14,8 @@ import type {
  * - 小鴨過鐵軌：提示出現後慢下來（動力在「快」以下或拉煞車），而且在降速區之前速度真的掉到 DUCK_OK 以下。
  *   不管做到沒，看不到的降速區都讓小橘安靜地輕煞（不響叮叮，那是幫忙不是糾正），小鴨照樣過。
  * - 平交道：柵欄前按喇叭。
- * - 揮手的朋友：經過時按喇叭。
+ * - 揮手的朋友：點前窗的朋友卡跟他揮手（PR-K1，平交道才按喇叭）。路旁畫的朋友開快時只有最後約 0.3 秒看得清楚，
+ *   點的是固定不動的卡片。
  * - 跟小動物賽跑：提示後推到「快」只是開始追；到終點時速度有 RACE_WIN 才算追上。
  * 沒做到不扣星，遇到的都算「遇到了」，做到的多一個黃章。這個檔不引 reducer。
  */
@@ -49,7 +50,7 @@ export const DUCK_OK = 0.5;
 /** 賽跑：到終點時速度有這麼快才算追上（慢的目標 0.45 追不上，快的巡航 0.82 追得上）。 */
 export const RACE_WIN = 0.65;
 
-/** 揮手的朋友：經過事件點之後這一小段按喇叭也算（「經過時」）。 */
+/** 揮手的朋友：經過事件點之後這一小段點朋友也算（「經過時」）。 */
 export const WAVE_AFTER = 0.08;
 
 /** 事件點過後，前窗的回應（小鴨拍翅、朋友跳一下、小動物揮手）再留這麼遠。 */
@@ -229,7 +230,7 @@ export function raceChasing(state: RunState, powerMax: number): boolean {
  * 每一幀走完之後結算這一段的事件：
  * - 小鴨：提示出現後、降速區前真的慢下來就記「做到」。
  * - 賽跑：開過終點那一幀看速度，追得上記「做到」、追不上記「遇到」。
- * - 開過可以做動作的最後一刻還沒做到就記「遇到」（平交道、揮手的朋友在 honkEvent 做到）。
+ * - 開過可以做動作的最後一刻還沒做到就記「遇到」（平交道在 honkEvent、揮手的朋友在 waveEvent 做到）。
  * 回傳新的 events（沒變就回傳同一個物件）與這一幀是不是剛做到小鴨（提前慢下來的計數）。
  */
 export function judgeEvents(state: RunState, powerMax: number): { events: RunState["events"]; duckDone: boolean } {
@@ -247,10 +248,17 @@ export function judgeEvents(state: RunState, powerMax: number): { events: RunSta
   return { events: withResult(state, event.key, won ? "done" : "met"), duckDone: false };
 }
 
-/** 平交道、揮手的朋友：提示出現後到可以做動作的最後一刻按喇叭，記「做到」。其他時候回傳 null。 */
+/** 平交道：提示出現後到柵欄前按喇叭，記「做到」。其他時候回傳 null。 */
 export function honkEvent(state: RunState): RunState | null {
   const event = eventPending(state);
-  if (!event || (event.kind !== "crossing" && event.kind !== "wave")) return null;
+  if (event?.kind !== "crossing") return null;
+  return { ...state, events: withResult(state, event.key, "done") };
+}
+
+/** 揮手的朋友：提示出現後到可以做動作的最後一刻點朋友，記「做到」。其他時候回傳 null。 */
+export function waveEvent(state: RunState): RunState | null {
+  const event = eventPending(state);
+  if (event?.kind !== "wave") return null;
   return { ...state, events: withResult(state, event.key, "done") };
 }
 
@@ -262,13 +270,14 @@ export function quietSlow(state: RunState): boolean {
   return sectionEvent(state)?.kind === "ducks";
 }
 
-/** 提示掛著時要強調駕駛台上的哪一個東西：喇叭、動力的「慢」格或「快」格。 */
-export type EventCue = "horn" | "slow" | "fast";
+/** 提示掛著時要強調哪一個東西：喇叭、動力的「慢」格或「快」格、前窗的朋友卡。 */
+export type EventCue = "horn" | "slow" | "fast" | "wave";
 
 export function eventCue(state: RunState): EventCue | null {
   const event = eventPending(state);
   if (!event) return null;
-  if (event.kind === "crossing" || event.kind === "wave") return "horn";
+  if (event.kind === "crossing") return "horn";
+  if (event.kind === "wave") return "wave";
   return event.kind === "ducks" ? "slow" : "fast";
 }
 
@@ -294,7 +303,7 @@ export function eventsBefore(events: RunState["events"], stationIndex: number, s
 /**
  * 這一次狀態轉換要不要響鈴、讓小橘開心：沿途事件多做到一件是 event（小鴨同時加 earlySlows 也只算 event），
  * 否則提前慢下來多一次是 early-slow。開新一趟、跳段讓數字變少都不算。
- * 畫面在每一次 apply 比較前後（不只每幀的 tick）：喇叭做到的平交道、揮手是在按下去那一刻寫入的。
+ * 畫面在每一次 apply 比較前後（不只每幀的 tick）：平交道（喇叭）、揮手（點朋友）是在按下去那一刻寫入的。
  */
 export function cheerFor(
   prev: Pick<RunState, "events" | "earlySlows">,

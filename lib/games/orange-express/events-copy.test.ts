@@ -66,11 +66,15 @@ describe("沿途事件：前窗提示與朗讀", () => {
     expect(nextSpeech(s, false, new Set([item.key]))).toBeNull();
   });
 
+  it("揮手的朋友：提示叫孩子點朋友，不說按喇叭", () => {
+    expect(windowNotice(atHint("wave"), false)?.text).toBe("有朋友在揮手，點朋友");
+  });
+
   it("做到了換成回應那句、不念；沒做到到時間就收", () => {
     const s = atHint("wave");
     const event = sectionEvent(s)!;
     const done = { ...s, events: { [event.key]: "done" as const } };
-    expect(windowNotice(done, false)?.text).toBe("叭叭！朋友好開心");
+    expect(windowNotice(done, false)?.text).toBe("揮揮手！朋友好開心");
     expect(windowNotice(done, false)?.event?.done).toBe(true);
     expect(nextSpeech(done, false, new Set())).toBeNull();
     const met = { ...s, progress: event.until + 0.01, events: { [event.key]: "met" as const } };
@@ -138,13 +142,13 @@ describe("沿途事件：前窗畫法的狀態", () => {
 });
 
 describe("沿途事件：回饋與朗讀的時效", () => {
-  it("四種事件做到時都回饋一次：喇叭當下寫入的平交道、揮手也算；小鴨同時加提前慢下來只算事件", () => {
-    for (const kind of ["crossing", "wave"] as const) {
+  it("四種事件做到時都回饋一次：按下去當下寫入的平交道（喇叭）、揮手（點朋友）也算；小鴨同時加提前慢下來只算事件", () => {
+    for (const [kind, type] of [["crossing", "honk"], ["wave", "wave"]] as const) {
       const s = atHint(kind);
-      const honked = step(s, { type: "honk" });
-      expect(cheerFor(s, honked)).toBe("event");
+      const pressed = step(s, { type });
+      expect(cheerFor(s, pressed)).toBe("event");
       // 同一件不會再回饋一次。
-      expect(cheerFor(honked, step(honked, { type: "honk" }))).toBeNull();
+      expect(cheerFor(pressed, step(pressed, { type }))).toBeNull();
     }
     // 小鴨在速度表真的掉下來那一幀回饋、賽跑在終點追上那一幀回饋（PR-I1），不是撥桿那一刻。
     const ducks = step(atHint("ducks"), { type: "set-power", notch: 0 });
