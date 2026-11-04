@@ -7,7 +7,9 @@ Whisper 轉錄產出的是**草稿**，會在播放器即時顯示。在切場�
 ```
 SoundOn 上架
     ↓
-GHA sync:apple（音檔 + 封面 + Whisper 草稿字幕 + 簡轉繁 + 自動 --fix）
+GHA sync:apple（音檔 + 封面；上架 MVP，這一步不轉錄）
+    ↓
+GHA transcribe-backfill（Whisper 草稿字幕 + 簡轉繁 + 自動 --fix）
     ↓
 【本文件】最終校稿 + --mark          ← 更新到繪本／幕級字幕前的閘門
     ↓
@@ -16,19 +18,19 @@ illustrate（segment → 生圖 → approve）
 verify → commit push
 ```
 
-> **MVP 上線說明：** GHA 會先部署 `pageCount=1` + 草稿字幕，供抽查播放。同步腳本會對**本輪新集／新轉錄**字幕自動跑 `--fix`（Bonbon／馬米等品牌名），**不會**自動 `--mark`。正式生圖管線（illustrate）在 `--mark` 之前**會被 CLI 擋下**，避免未校對台詞流入 scenes／captions。
+> **MVP 上線說明：** GHA 會先部署 `pageCount=1`，草稿字幕隨後由 `transcribe-backfill` 補上，供抽查播放。轉錄時會自動跑 `--fix`（Bonbon／馬米等品牌名），**不會**自動 `--mark`。正式生圖管線（illustrate）在 `--mark` 之前**會被 CLI 擋下**，避免未校對台詞流入 scenes／captions。
 
 ## 指令
 
 ```bash
-# 0. 若 sync 未轉錄（本機補跑）
+# 0. 若 transcribe-backfill 還沒補到（本機補跑）
 npm run transcribe -- ep-N
 
 # 1. Lint 報告（列出待修項；GHA 已跑過 --fix 時通常剩同音誤字）
 npm run proofread:subtitles -- ep-N
 
 # 2. （本機補跑）自動修正高信心項（Bonbon／馬米品牌名、多餘空白）
-#    GHA sync 對新集已自動執行；本機 transcribe 補跑後可手動再 --fix
+#    GHA transcribe-backfill 已自動執行；本機 transcribe 補跑後可手動再 --fix
 npm run proofread:subtitles -- ep-N --fix
 
 # 3. 人工編輯側車檔

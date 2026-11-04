@@ -35,7 +35,7 @@ Skill／Agent 發現只掃描 repository 受版本控制的檔案；排除 `node
 
 | 任務類型 | 加讀 |
 |----------|------|
-| **單集插圖全流程** | [`EPISODE-WORKFLOW.md`](EPISODE-WORKFLOW.md)、[`SUBTITLE-PROOFREAD.md`](SUBTITLE-PROOFREAD.md) |
+| **新集上架／單集插圖全流程** | [`EPISODE-WORKFLOW.md`](EPISODE-WORKFLOW.md)（先看「新集上架總覽」）、[`SUBTITLE-PROOFREAD.md`](SUBTITLE-PROOFREAD.md) |
 | **YouTube 影片** | [`VIDEO-EXPORT.md`](VIDEO-EXPORT.md)（靜圖匯出）、[`VIDEO-GENERATE.md`](VIDEO-GENERATE.md)（無聲短片；尚未有 CLI） |
 | **字幕校對** | [`SUBTITLE-PROOFREAD.md`](SUBTITLE-PROOFREAD.md)、`data/subtitles/<slug>.json` |
 | **生圖 / 切場景** | README § illustrate、`scripts/lib/illustrate-core.ts`、`data/characters.json` |
@@ -52,6 +52,8 @@ Skill／Agent 發現只掃描 repository 受版本控制的檔案；排除 `node
 
 | 任務 | 必守 | 必驗 |
 |------|------|------|
+| 新集封面現代格式 | 同步不會做；缺檔播放頁破圖 | `npm run optimize:lcp-images -- --verify` |
+| 新集歸主題 | [`EPISODE-WORKFLOW.md`](EPISODE-WORKFLOW.md)「歸主題」；依字幕只選一個 | `npx vitest run data/episode-themes.test.ts` |
 | 字幕校對 | [`SUBTITLE-PROOFREAD.md`](SUBTITLE-PROOFREAD.md)；`--mark` 後才可 illustrate | 人工校對品質 |
 | 切場景／scenes | 對齊 ep-9／ep-10 全幕契約；中文 → Sonnet | `verify:episodes` |
 | illustrate 出圖（SOP 內） | 未 `--mark` 不得生圖；**一輪**生圖後停；重抽須先列幕號等文字確認；暫存 → 人工審 contact → 才 `--approve` | `verify:episodes`；strict 於 approve 前 |
