@@ -8,6 +8,7 @@ import {
   DEMO_SLOTS,
   DEMO_TITLE_QUOTE,
   demoB3ArticleText,
+  demoB3EndsWithPunctuation,
   demoBodyParagraphs,
 } from "./demo-article-layout";
 
@@ -43,6 +44,29 @@ describe("排版示範沿用原文", () => {
     for (const block of DEMO_B3_BLOCKS) {
       if (block.kind === "paragraph") expect(block.texts.length).toBeGreaterThan(0);
     }
+    const kept = ["隨口唸", "這一集", "停一停", "數一數", "一樣🌋"];
+    const joined = ["有感，", "聽不進去。", "方法，", "十字路口。", "練習，", "怎麼做。", "時候，"];
+    const seen = new Set<string>();
+    for (const block of DEMO_B3_BLOCKS) {
+      if (block.kind !== "paragraph") continue;
+      for (let index = 0; index < block.texts.length - 1; index += 1) {
+        const line = block.texts[index] ?? "";
+        const broken = !demoB3EndsWithPunctuation(line);
+        for (const sample of kept) {
+          if (line.endsWith(sample)) {
+            seen.add(sample);
+            expect(broken).toBe(true);
+          }
+        }
+        for (const sample of joined) {
+          if (line.endsWith(sample)) {
+            seen.add(sample);
+            expect(broken).toBe(false);
+          }
+        }
+      }
+    }
+    expect([...seen].sort()).toEqual([...kept, ...joined].sort());
   });
 
   it("示範路由不進 sitemap", () => {

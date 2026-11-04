@@ -1,5 +1,9 @@
 import Link from "next/link";
-import { DEMO_B3_BLOCKS, DEMO_SOURCE_ARTICLE } from "@/lib/demo-article-layout";
+import {
+  DEMO_B3_BLOCKS,
+  DEMO_SOURCE_ARTICLE,
+  demoB3EndsWithPunctuation,
+} from "@/lib/demo-article-layout";
 import { formatParentArticleDate } from "@/lib/parent-articles";
 import styles from "./DemoArticleB3.module.css";
 
@@ -39,7 +43,12 @@ export function DemoArticleB3() {
         return (
           <p key={index} className={styles.stanza}>
             {block.texts.map((text, textIndex) => (
-              <span key={`${index}-${textIndex}`}>{text}</span>
+              <span key={`${index}-${textIndex}`}>
+                {textIndex > 0 && !demoB3EndsWithPunctuation(block.texts[textIndex - 1] ?? "") ? (
+                  <br />
+                ) : null}
+                {text}
+              </span>
             ))}
           </p>
         );

@@ -107,8 +107,19 @@ export type DemoB3Block =
   | { readonly kind: "paragraph"; readonly texts: readonly string[] }
   | { readonly kind: "subhead"; readonly text: string };
 
+/** 前一行最後一個字是這些標點時，下一句才接上；否則保留換行。 */
+const DEMO_B3_ENDING_PUNCTUATION = new Set(
+  Array.from("。！？，、；：…．.!,?;:」』》〉）〕】"),
+);
+
+export function demoB3EndsWithPunctuation(text: string): boolean {
+  const last = [...text].at(-1);
+  return last != null && DEMO_B3_ENDING_PUNCTUATION.has(last);
+}
+
 /**
- * B3 只把原文句子接起來。空行沿用方格子的 spacer，中間接的字一個不加、不刪。
+ * B3 只把原文句子接起來。空行沿用方格子的 spacer。
+ * 上一句結尾有標點才接成同一段；沒有標點就保留換行。中間不添字。
  */
 export const DEMO_B3_BLOCKS: readonly DemoB3Block[] = (() => {
   const blocks: DemoB3Block[] = [];
