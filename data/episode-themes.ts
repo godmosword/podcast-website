@@ -62,6 +62,7 @@ export const EPISODE_THEMES: readonly EpisodeThemeRow[] = [
   { ep: 33, slug: "ep-33", title: "神奇的油漆車長出自己的樣子", theme: "成長勇氣" },
   { ep: 34, slug: "ep-34", title: "小紅賽車好想生氣怎麼辦？", theme: "情緒管理" },
   { ep: 35, slug: "ep-35", title: "恐龍車多多問為什麼不能一直吃糖果？", theme: "生活好習慣" },
+  { ep: 36, slug: "ep-36", title: "電動車與機器人的尋找任務", theme: "思考與創造" },
 ];
 
 const themeSet = new Set<string>(STORY_FINDER_THEMES);
