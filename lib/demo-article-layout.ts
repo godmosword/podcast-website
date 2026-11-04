@@ -99,3 +99,45 @@ export const DEMO_SLOTS: readonly DemoSlot[] = [
 export function demoBodyParagraphs(): string[] {
   return DEMO_SLOTS.flatMap((slot) => (slot.kind === "paragraphs" ? [...slot.texts] : []));
 }
+
+/** 這兩句在原文就是分段，B3 把它們當小標，不重複、不改字。 */
+const DEMO_B3_SUBHEADS = new Set(["直到有一天……", "突然想到！"]);
+
+export type DemoB3Block =
+  | { readonly kind: "paragraph"; readonly texts: readonly string[] }
+  | { readonly kind: "subhead"; readonly text: string };
+
+/**
+ * B3 只把原文句子接起來。空行沿用方格子的 spacer，中間接的字一個不加、不刪。
+ */
+export const DEMO_B3_BLOCKS: readonly DemoB3Block[] = (() => {
+  const blocks: DemoB3Block[] = [];
+  let buffer: string[] = [];
+  const flush = () => {
+    if (buffer.length === 0) return;
+    blocks.push({ kind: "paragraph", texts: buffer });
+    buffer = [];
+  };
+  for (const block of article.blocks) {
+    if (block.type === "spacer") {
+      flush();
+      continue;
+    }
+    if (block.type !== "paragraph") continue;
+    if (DEMO_B3_SUBHEADS.has(block.text)) {
+      flush();
+      blocks.push({ kind: "subhead", text: block.text });
+      continue;
+    }
+    buffer.push(block.text);
+  }
+  flush();
+  return blocks;
+})();
+
+/** 正文連起來必須等於原文全段直接相接，沒有多出來的字。 */
+export function demoB3ArticleText(): string {
+  return DEMO_B3_BLOCKS.map((block) => (block.kind === "paragraph" ? block.texts.join("") : block.text)).join(
+    "",
+  );
+}

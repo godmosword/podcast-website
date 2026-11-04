@@ -3,9 +3,11 @@ import sitemap from "@/app/sitemap";
 import { PARENT_ARTICLES } from "@/data/parent-articles";
 import {
   DEMO_ARTICLE_SLUG,
+  DEMO_B3_BLOCKS,
   DEMO_PARAGRAPHS,
   DEMO_SLOTS,
   DEMO_TITLE_QUOTE,
+  demoB3ArticleText,
   demoBodyParagraphs,
 } from "./demo-article-layout";
 
@@ -32,6 +34,15 @@ describe("排版示範沿用原文", () => {
       }
     }
     expect(sincePull).toBe(0);
+  });
+
+  it("B3 只把原文句子接起來，不增刪任何字", () => {
+    expect(demoB3ArticleText()).toBe(DEMO_PARAGRAPHS.join(""));
+    const subheads = DEMO_B3_BLOCKS.filter((block) => block.kind === "subhead");
+    expect(subheads).toHaveLength(2);
+    for (const block of DEMO_B3_BLOCKS) {
+      if (block.kind === "paragraph") expect(block.texts.length).toBeGreaterThan(0);
+    }
   });
 
   it("示範路由不進 sitemap", () => {
