@@ -387,6 +387,14 @@ describe("sync workflow contract", () => {
     expect(src).toMatch(/!isSubtitleProofreadMarked/);
   });
 
+  it("同步與 backfill 的字幕再處理只過濾、不再跑 OpenCC（人工改的字才不會被蓋掉，#296）", () => {
+    const backfill = readFileSync(join(ROOT, "scripts/transcribe-backfill.ts"), "utf8");
+    for (const src of [readSyncScript(), backfill]) {
+      expect(src).toContain("refilterSidecars");
+      expect(src).not.toContain("relocalizeSidecars");
+    }
+  });
+
   it("sync report 必須保留 FAQ MVP 待人工改寫清單", () => {
     const report = readFileSync(join(ROOT, "scripts/lib/sync-report.ts"), "utf8");
     const notify = readFileSync(join(ROOT, "scripts/post-sync-notify.ts"), "utf8");
@@ -485,6 +493,13 @@ describe("sync workflow contract", () => {
     expect(src).toContain("hasOpenSyncLandingPr");
     expect(yaml).toContain('STALE_HOURS: "3"');
     expect(yaml).toContain("pull-requests: read");
+  });
+
+  it("看門狗每輪先跑內容提醒，RSS 壞了也照樣提醒", () => {
+    const src = readFileSync(join(ROOT, "scripts/check-sync-fresh.ts"), "utf8");
+    const remindAt = src.indexOf("runContentReminder()");
+    expect(remindAt).toBeGreaterThan(-1);
+    expect(remindAt).toBeLessThan(src.indexOf("await lookupFeedUrlWithRetry()"));
   });
 
   it("notify-live 必須接受 report.gitHead 為 HEAD 祖先（GHA 先寫 report 再 commit）", () => {

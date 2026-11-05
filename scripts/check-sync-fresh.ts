@@ -11,6 +11,7 @@
  *      （WAIT_FOR_SYNC_HOURS，預設至少 8h）→ 靜默，避免與之後的「待生圖」Issue 連開兩張。
  *      超過等待窗且沒有在等合入的 sync PR，才開／補 sync-stale-rss。
  *   5. sync/apple PR 開超過 2 小時還沒合入 → 另記 sync-unmerged-pr，不跟 stale 混單。
+ *   另外每輪先跑內容提醒（上架滿 7 天還沒校對或沒歸主題），見 lib/content-reminder.ts。
  *
  * 環境變數：STALE_HOURS（yaml 仍可設 3，僅作下限）、WAIT_FOR_SYNC_HOURS、SYNC_ALERT_DRY_RUN=1。
  */
@@ -19,6 +20,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { fetchRssXml, lookupFeedUrlWithRetry } from "./lib/apple-feed";
+import { runContentReminder } from "./lib/content-reminder";
 import { parseRssEpisodes, type RssEpisode } from "./lib/apple-rss";
 import {
   isRssEpisodeOnSite,
@@ -121,6 +123,7 @@ function findMissingEpisode(
 }
 
 async function main(): Promise<void> {
+  runContentReminder();
   const feedUrl = await lookupFeedUrlWithRetry();
   const rss = parseRssEpisodes(await fetchRssXml(feedUrl));
 

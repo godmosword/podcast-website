@@ -111,7 +111,7 @@ function gh(args: string[]): string {
   return execFileSync("gh", args, { encoding: "utf8" }).trim();
 }
 
-function callGh(args: string[], deps: SyncAlertDeps = {}): string {
+export function callGh(args: string[], deps: SyncAlertDeps = {}): string {
   return (deps.gh ?? gh)(args);
 }
 
@@ -124,7 +124,7 @@ function warn(deps: SyncAlertDeps, message: string): void {
 }
 
 /** 確保 label 存在（已存在則忽略）。 */
-function ensureLabel(
+export function ensureLabel(
   name: string,
   color: string,
   description: string,
@@ -146,7 +146,7 @@ function ensureLabel(
   }
 }
 
-function assigneeArgs(env: NodeJS.ProcessEnv = process.env): string[] {
+export function assigneeArgs(env: NodeJS.ProcessEnv = process.env): string[] {
   const raw = env.SYNC_ISSUE_ASSIGNEES?.trim();
   if (!raw) return [];
   return raw
@@ -156,7 +156,7 @@ function assigneeArgs(env: NodeJS.ProcessEnv = process.env): string[] {
     .flatMap((user) => ["--assignee", user]);
 }
 
-function mentionPreamble(env: NodeJS.ProcessEnv = process.env): string {
+export function mentionPreamble(env: NodeJS.ProcessEnv = process.env): string {
   const mentions = env.SYNC_ISSUE_MENTIONS?.trim();
   return mentions ? `${mentions}\n\n` : "";
 }
