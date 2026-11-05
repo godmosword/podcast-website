@@ -24,7 +24,13 @@ import { writeSubtitlesIfChanged, type SubtitleSegment } from "./subtitle-file";
 type Subtitle = SubtitleSegment;
 
 // Whisper 中文常輸出簡體；本站為繁中（台灣），統一簡轉繁（含台灣用語）。
-const toTraditional = OpenCC.Converter({ from: "cn", to: "twp" });
+const openccToTwp = OpenCC.Converter({ from: "cn", to: "twp" });
+// OpenCC 字典把「是只」「有只」當量詞（是隻貓），「就是只有」「但是只要」都會錯。
+const ADVERB_ZHI = /(?<=[是有])隻(?=[有是要能會想剩在])/g;
+
+function toTraditional(text: string): string {
+  return openccToTwp(text).replace(ADVERB_ZHI, "只");
+}
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const SUBTITLES_DIR = join(ROOT, "data", "subtitles");
@@ -90,11 +96,11 @@ function fixNames(text: string): string {
   return NAME_FIXES.reduce((s, [re, to]) => s.replace(re, to), text);
 }
 
-/** 簡轉繁（台灣用語）+ 修正主持人名 + 清除幻覺、去空白、合併連續重複句。 */
-function cleanSegments(segments: Subtitle[]): Subtitle[] {
+/** 修正主持人名 + 清除幻覺、去空白、合併連續重複句。不動字形：人工改過的字才不會被蓋掉（#296）。 */
+export function refilterSegments(segments: readonly Subtitle[]): Subtitle[] {
   const out: Subtitle[] = [];
   for (const seg of segments) {
-    const text = fixNames(toTraditional(seg.text.trim()));
+    const text = fixNames(seg.text.trim());
     if (!text || isHallucination(text)) continue;
     if (out.length > 0 && out[out.length - 1].text === text) continue;
     out.push({ t: seg.t, text });
@@ -102,7 +108,12 @@ function cleanSegments(segments: Subtitle[]): Subtitle[] {
   return out;
 }
 
-/** 重新本地化既有側車檔（簡轉繁 + 重新過濾），不重跑 Whisper。 */
+/** Whisper 原始輸出：簡轉繁（台灣用語）後再過濾。一段文字只該轉這一次。 */
+export function cleanSegments(segments: readonly Subtitle[]): Subtitle[] {
+  return refilterSegments(segments.map((seg) => ({ t: seg.t, text: toTraditional(seg.text.trim()) })));
+}
+
+/** 把 Whisper 原始輸出的側車檔簡轉繁 + 過濾（transcribe --convert）。不重跑 Whisper；已轉過的字幕不要再跑。 */
 export function relocalizeSidecar(slug: string): { count: number; file: string } {
   const file = join(SUBTITLES_DIR, `${slug}.json`);
   const segments = JSON.parse(readFileSync(file, "utf-8")) as Subtitle[];
@@ -124,7 +135,8 @@ export function listSidecarSlugs(candidates?: string[]): string[] {
 }
 
 /** 批次重新本地化側車檔（簡轉繁 + 幻覺過濾 + 人名修正），不重跑 Whisper。 */
-export function relocalizeSidecars(
+/** 同步、backfill 的再處理：依最新規則重新過濾既有側車檔，不再簡轉繁。 */
+export function refilterSidecars(
   slugs: string[],
 ): { ok: number; failed: string[] } {
   let ok = 0;
@@ -132,7 +144,9 @@ export function relocalizeSidecars(
   for (const slug of slugs) {
     if (!hasSubtitleSidecar(slug)) continue;
     try {
-      relocalizeSidecar(slug);
+      const file = subtitleSidecarPath(slug);
+      const segments = JSON.parse(readFileSync(file, "utf-8")) as Subtitle[];
+      writeSubtitles(slug, refilterSegments(segments));
       ok += 1;
     } catch {
       failed.push(slug);

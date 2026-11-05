@@ -63,7 +63,7 @@ function runConvert(args: string[]): void {
 function main(): void {
   const args = process.argv.slice(2);
 
-  // --convert：對既有側車檔簡轉繁/重新過濾，不重跑 Whisper。
+  // --convert：Whisper 原始輸出的側車檔簡轉繁/重新過濾，不重跑 Whisper。已轉過的字幕不要再跑（會蓋掉人工改的字）。
   if (args.includes("--convert")) {
     runConvert(args);
     return;

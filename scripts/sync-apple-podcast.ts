@@ -56,7 +56,7 @@ import {
   hasSubtitleSidecar,
   listSidecarSlugs,
   listSlugsMissingSubtitles,
-  relocalizeSidecars,
+  refilterSidecars,
   transcribeToSidecar,
   whisperAvailable,
 } from "./lib/transcribe-core";
@@ -400,10 +400,10 @@ function backfillMissingSubtitles(catalog: Story[]): void {
 }
 
 /**
- * 轉錄後再跑一次字幕清理（簡轉繁 + 幻覺過濾 + 人名修正），
- * 確保 deploy 前側車檔與最新邏輯一致；不重跑 Whisper。
+ * 轉錄後再跑一次字幕清理（幻覺過濾 + 人名修正），確保 deploy 前側車檔與最新邏輯一致。
+ * 不重跑 Whisper，也不再簡轉繁：轉錄時轉過了，再轉會蓋掉人工改的字（#296）。
  */
-function relocalizeCatalogSubtitles(catalog: Story[]): void {
+function refilterCatalogSubtitles(catalog: Story[]): void {
   if (dryRun) return;
 
   const slugs = listSidecarSlugs(catalog.map((s) => s.slug)).filter(
@@ -411,8 +411,8 @@ function relocalizeCatalogSubtitles(catalog: Story[]): void {
   );
   if (slugs.length === 0) return;
 
-  console.log(`字幕再處理：簡轉繁 + 過濾（${slugs.length} 集，已 --mark 者略過）…`);
-  const { ok, failed } = relocalizeSidecars(slugs);
+  console.log(`字幕再處理：過濾（${slugs.length} 集，已 --mark 者略過）…`);
+  const { ok, failed } = refilterSidecars(slugs);
   console.log(`字幕再處理：完成 ${ok}/${slugs.length} 集`);
   if (failed.length > 0) {
     console.warn(`字幕再處理：略過 ${failed.join(", ")}`);
@@ -940,7 +940,7 @@ async function main(): Promise<void> {
     console.log("No new episodes or metadata changes.");
     const nextSeen = reconcileSeenGuids(rssItems, state, catalog, eps);
     backfillMissingSubtitles(finalCatalog);
-    relocalizeCatalogSubtitles(finalCatalog);
+    refilterCatalogSubtitles(finalCatalog);
     autoProofreadSyncedSubtitles();
     report.subtitlesMissing = listSlugsMissingSubtitles(
       finalCatalog.map((s) => s.slug),
@@ -981,7 +981,7 @@ async function main(): Promise<void> {
   }
 
   backfillMissingSubtitles(finalCatalog);
-  relocalizeCatalogSubtitles(finalCatalog);
+  refilterCatalogSubtitles(finalCatalog);
   autoProofreadSyncedSubtitles();
   report.subtitlesMissing = listSlugsMissingSubtitles(
     finalCatalog.map((s) => s.slug),

@@ -10,7 +10,7 @@ import { fileURLToPath } from "node:url";
 import { alertAfterConsecutiveFailures } from "./sync-alert";
 import { runTranscribeBackfill, type BackfillState } from "./lib/transcribe-backfill";
 import { autoProofreadFixSlug } from "./lib/subtitle-proofread";
-import { relocalizeSidecars, transcribeToSidecar } from "./lib/transcribe-core";
+import { refilterSidecars, transcribeToSidecar } from "./lib/transcribe-core";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const STATE_PATH = path.join(ROOT, "data/apple-sync-state.json");
@@ -34,7 +34,7 @@ function main(): void {
       const { count, file } = transcribeToSidecar(slug, audioPath);
       console.log(`字幕：${slug} ${count} 句 → ${path.relative(ROOT, file)}`);
       try {
-        relocalizeSidecars([slug]);
+        refilterSidecars([slug]);
         const proof = autoProofreadFixSlug(slug);
         console.log(`字幕校稿：${slug} 自動修正 ${proof.fixCount} 處`);
       } catch (err) {
