@@ -70,7 +70,7 @@ npm run proofread:subtitles -- ep-N --mark
 ### 格式
 
 - 逐字稿保留口語「呢、喔、啊」即可（兒童 podcast 風格）
-- 簡轉繁已由 transcribe 處理；少數漏網詞人工改
+- 簡轉繁已由 transcribe 處理；少數漏網詞人工改。同步只再過濾一次幻覺句，不再簡轉繁；還沒 `--mark` 時人工改的字不會被蓋掉
 
 ## 與 illustrate 的關係
 
