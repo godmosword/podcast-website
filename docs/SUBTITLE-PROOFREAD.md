@@ -36,7 +36,7 @@ npm run proofread:subtitles -- ep-N --fix
 # 3. 人工編輯側車檔
 #    編輯 data/subtitles/ep-N.json
 
-# 4. 再次 lint，通過後標記（illustrate 閘門）
+# 4. 再次 lint，通過後標記（illustrate 閘門）。標記前這集要先歸主題（EPISODE-WORKFLOW「歸主題」），不然測試會紅
 npm run proofread:subtitles -- ep-N --mark
 ```
 

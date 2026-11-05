@@ -214,8 +214,8 @@ Neon／`DATABASE_URL` 為選配。未設定時不需要執行 migration；許願
 
 - 資產：`public/stories/ep-N/audio.mp3` + Apple 封面 `01.jpg`
 - 資料：`pageCount: 1`（單圖 MVP）；摘要自動去 SoundOn 尾註
-- 同步本身不跑 whisper。新集缺字幕也可以先上線；`transcribe-backfill` workflow 之後補，同一集失敗 3 次才開 issue
-- 新集會連同 `story-zones`、`reflection-prompts`、`story-dates`、`episode-faqs` 四個 sidecar 一起補齊；封面 blur 與音檔長度在驗證前寫入。FAQ 先產生可驗證的 MVP stub，之後由人工依劇情改寫
+- 同步本身不跑 whisper。新集缺字幕也可以先上線；`transcribe-backfill` workflow 之後補，字幕沒蓋滿整集會自己重試（`-mc 0`、開頭分段補轉），同一集失敗 3 次才開 issue
+- 新集會連同 `story-zones`、`reflection-prompts`、`story-dates`、`episode-faqs` 四個 sidecar 一起補齊；封面 blur、WebP／AVIF 與音檔長度在驗證前寫入。FAQ 先產生可驗證的 MVP stub，之後由人工依劇情改寫
 - 同步拆成抓取、`npm run sync:validate`、再推上固定分支 `sync/apple`。驗證只查同步產物，不跑全站 `npm test` 或 `npm run build`。同一類失敗連續兩次才開一張 Issue。job 不等 CI；看門狗盯還沒合入的 PR，以及 RSS 有、站上還沒有的集數
 
 ```bash

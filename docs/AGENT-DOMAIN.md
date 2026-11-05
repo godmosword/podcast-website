@@ -52,8 +52,7 @@ Skill／Agent 發現只掃描 repository 受版本控制的檔案；排除 `node
 
 | 任務 | 必守 | 必驗 |
 |------|------|------|
-| 新集封面現代格式 | 同步不會做；缺檔播放頁破圖 | `npm run optimize:lcp-images -- --verify` |
-| 新集歸主題 | [`EPISODE-WORKFLOW.md`](EPISODE-WORKFLOW.md)「歸主題」；依字幕只選一個 | `npx vitest run data/episode-themes.test.ts` |
+| 新集歸主題 | [`EPISODE-WORKFLOW.md`](EPISODE-WORKFLOW.md)「歸主題」；依字幕只選一個 | `npx vitest run data/episode-themes.test.ts`；`npm run verify:episodes` 這集沒有 `theme-pending` |
 | 字幕校對 | [`SUBTITLE-PROOFREAD.md`](SUBTITLE-PROOFREAD.md)；`--mark` 後才可 illustrate | 人工校對品質 |
 | 切場景／scenes | 對齊 ep-9／ep-10 全幕契約；中文 → Sonnet | `verify:episodes` |
 | illustrate 出圖（SOP 內） | 未 `--mark` 不得生圖；**一輪**生圖後停；重抽須先列幕號等文字確認；暫存 → 人工審 contact → 才 `--approve` | `verify:episodes`；strict 於 approve 前 |

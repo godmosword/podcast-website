@@ -118,7 +118,7 @@ npm run audit:production
 npm run typecheck
 npm test
 npm run verify:episodes
-npm run verify:release-content   # 目前無未校對字幕；有新集未 --mark 時會列為內容 blocker
+npm run verify:release-content   # 目前無未校對字幕；有新集未 --mark 或未歸主題時會列為內容 blocker
 npm run build
 PW_REUSE_SERVER=1 npm run test:e2e:public
 PW_REUSE_SERVER=1 npm run test:e2e:ci   # 兒童主路徑；非 ruleset required check

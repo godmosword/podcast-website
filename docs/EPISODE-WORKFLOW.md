@@ -4,51 +4,42 @@
 
 ## 新集上架總覽（先看這裡）
 
-SoundOn 上架後，新集會自己出現在站上，但還有幾步要人或 agent 做。**第 3、4 步沒有自動化，也沒有開單提醒**，新集進 main 後當天就要做。
+SoundOn 上架後，新集會自己出現在站上，字幕、封面格式也會自動補。**第 4 步起要人或 agent 做**，「待生圖」Issue 有 checklist。
 
 | # | 誰 | 做什麼 | 產物 | 沒做會怎樣 |
 |---|---|---|---|---|
 | 1 | 自動：`Sync Apple Podcast`（每 15 分鐘） | 抓 RSS，推 `sync/apple` 開 PR 自動合併；開「待生圖」Issue | 音檔、封面 `01.jpg`、`pageCount=1`、四個 sidecar stub、blur、音檔長度 | — |
-| 2 | 自動：`Transcribe backfill`（每小時，一輪一集） | Whisper 草稿字幕＋自動 `--fix`，同一路徑開 PR 自動合併；同一集失敗 3 次才開 Issue。**人要看一眼**：PR 有沒有真的合併、字幕有沒有整集（見「這一集做完了沒」） | `data/subtitles/<slug>.json` | `verify:geo` 紅（缺完整逐字稿）。字幕進 main 前都是這樣，屬預期 |
-| 3 | **人／agent，第 1 步後當天** | `npm run optimize:lcp-images`，commit 新產生的圖 | `01.avif`、`01.webp` | **播放頁破圖**（「插圖載入失敗」）：`<picture>` 先要 AVIF，404 不會退回 JPG |
-| 4 | **人／agent，第 2 步後當天** | 讀字幕，歸一個主題（見下方「歸主題」） | `data/episode-themes.ts` 多一列 | **`npm test` 紅，main 的 CI `quality` 跟著紅**，之後每個人的 push 都紅 |
+| 2 | 自動：同一個 job | 封面缺 WebP／AVIF 就補；缺檔 `sync-validate` 擋下 | `01.avif`、`01.webp` | 播放器會退回 JPG，不再破圖 |
+| 3 | 自動：`Transcribe backfill`（每小時，一輪一集） | Whisper 草稿字幕＋自動 `--fix`，同一路徑開 PR 自動合併。字幕沒蓋滿整集會自己重試；還是不夠就算失敗，同一集失敗 3 次開 Issue | `data/subtitles/<slug>.json` | 字幕進 main 前 `verify:geo` 紅（缺完整逐字稿），屬預期 |
+| 4 | 人／agent，字幕進來後 | 讀字幕，歸一個主題（見下方「歸主題」） | `data/episode-themes.ts` 多一列 | 找故事的主題篩選找不到這集；`verify:episodes` 列 `theme-pending`；`--strict`、字幕 `--mark` 後的測試會擋 |
 | 5 | 人／agent | 字幕校對到 `--mark`（[SUBTITLE-PROOFREAD.md](./SUBTITLE-PROOFREAD.md)） | `data/subtitles/_proofread/<slug>.json` | 不能生圖；站上一直是草稿字幕 |
 | 6 | 人／agent | 改寫 stub：反思提問、FAQ，確認 zone | `data/reflection-prompts.ts`、`data/episode-faqs.ts`、`data/story-zones.ts` | 站上是模板句 |
 | 7 | 人（生圖付費，先取得同意） | 切場景 → 一輪生圖 → 審圖 → `--approve`（見下方「標準步驟」） | 全幕插圖、`captions`、`captionTimes` | 維持單張封面的 MVP；`verify:episodes` 每次列 warn |
 | 8 | 人／agent | 驗證、commit、push、`npm run sync:notify` | — | 「待生圖」Issue 不會更新 |
 | 9 | 營運（選用） | YouTube 影片、SoundOn show notes 回鏈 | — | — |
 
-第 1、2 步的 PR 只跑 `sync-validate`、不等 CI，而且 `GITHUB_TOKEN` 推的 commit 不會在 main 觸發 CI。第 4 步的紅燈因此不會在同步當下出現，要到下一個人 push 才看得到。
+第 1～3 步的 PR 只跑 `sync-validate`、不等 CI，全站單元測試要到下一個人 push 才會跑。
 
 ### 這一集做完了沒
 
 ```bash
-npm run optimize:lcp-images -- --verify   # 第 3 步：WebP／AVIF 齊備
-npx vitest run data/episode-themes.test.ts   # 第 4 步：每集都有主題
-npm run verify:geo                        # 第 2 步：完整逐字稿（要先 build）
-npm run verify:episodes                   # 第 5–7 步：error 擋、warn 列待辦
-gh pr list --head sync/apple              # 第 1、2 步：沒有卡住的 PR（mergeable 是 CONFLICTING 就是卡住了）
+npm run optimize:lcp-images -- --verify   # 第 2 步：WebP／AVIF 齊備
+npm run verify:geo                        # 第 3 步：完整逐字稿（要先 build）
+npm run verify:episodes                   # 第 4–7 步：error 擋、warn 列待辦（theme-pending、subtitle-unproofread…）
+gh pr view sync/apple --json state,mergeable   # 第 1、3 步：OPEN 又 CONFLICTING 就是卡住了
 ```
 
-字幕要抽查：第一句應該在開頭幾秒，句數約每分鐘 20 句以上（`ep-26`～`ep-35` 是 110–234 句）。只有幾十句、第一句在幾分鐘後，就是轉錄出事了，見下方「字幕轉錄失敗」。
+同步 PR 卡住時（常見原因：PR 開著的時候有人手動改了 `data/apple-sync-state.json`）：字幕沒問題就把 main 合進 `sync/apple`、解衝突；字幕有問題就在 main 補好、關 PR。下一次有新集時同步會把分支重設到 main。
 
 ### 字幕轉錄失敗
 
-片頭音樂會讓 Whisper 陷入重複幻覺（「请不吝点赞…」一路重複到後面），這些句子被幻覺過濾丟掉後，字幕就少一大段甚至全空，**腳本照樣回報成功**。`ep-36` 在 CI 只剩最後 42 句，本機重跑是 0 句。
+片頭音樂會讓 Whisper 陷入重複幻覺（「请不吝点赞…」一路重複到後面），這些句子被過濾後字幕少一大段甚至全空。`transcribeWithRetries` 會自救：照常轉 → 覆蓋不足就加 `-mc 0` 重跑 → 第一句在 15～90 秒之間就把前面切成每段 9 秒補轉 → 還是不足就失敗（第一句 ≤ 25 秒、最大空白 ≤ 60 秒、離結尾 ≤ 60 秒、每分鐘至少 5 句才算夠）。
 
-重轉（音檔留在本機，不外送）：
-
-```bash
-ffmpeg -i public/stories/<slug>/audio.mp3 -ar 16000 -ac 1 -c:a pcm_s16le /tmp/a.wav
-whisper-cli -m models/ggml-large-v3.bin -f /tmp/a.wav -l zh -mc 0 -oj -of /tmp/raw   # -mc 0 關掉上下文延續
-# 開頭還是幻覺時：把前 30 秒切成每段 9 秒分開轉
-```
-
-轉完寫成 `data/subtitles/<slug>.json`（`[{ "t": 秒, "text": 句 }]`），用 `relocalizeSidecar(slug)` 簡轉繁與過濾，再 `npm run proofread:subtitles -- <slug> --fix`，並把 `data/apple-sync-state.json` 該集的 `subtitles` 改成 `ok`。這仍是草稿，要走第 5 步校對。
+收到「字幕轉錄失敗」的 Issue 時，本機跑 `npm run transcribe -- <slug>`（音檔不外送）。照樣失敗就聽一下音檔：真的有長音樂或長靜音，加 `--allow-gaps` 寫出最好的一份；開頭幾分鐘都轉不出來，先用 `-mc 0` 轉整集、前段切成每段 9 秒分開轉（`whisper-cli -m models/ggml-large-v3.bin -f <wav> -l zh -mc 0 -oj -of <輸出>`），合併成 `data/subtitles/<slug>.json` 後跑 `npm run transcribe -- --convert <slug>` 與 `npm run proofread:subtitles -- <slug> --fix`。補好後把 `data/apple-sync-state.json` 該集的 `subtitles` 改成 `ok`。轉出來仍是草稿，要走第 5 步校對。
 
 ### 歸主題
 
-`data/episode-themes.ts` 是手寫檔，同步不能寫（同步 PR 不跑單元測試，見 `scripts/ci/sync-output-paths.txt`）。
+`data/episode-themes.ts` 是手寫檔，同步不能寫（同步 PR 不跑單元測試，見 `scripts/ci/sync-output-paths.txt`）。字幕還沒 `--mark` 的新集可以先不在表裡；`--mark` 後就一定要有，否則 `data/episode-themes.test.ts` 紅。
 
 - **判斷依據**：字幕裡故事真正在教的那一件事，不依標題關鍵字硬套。字幕是草稿也可以判斷，不必等 `--mark`。
 - **只能選一個**，而且只能是 `STORY_FINDER_THEMES` 這七個：成長勇氣、責任品格、生活好習慣、情緒管理、交友與合作助人、安全與自我保護、思考與創造。
@@ -61,13 +52,9 @@ whisper-cli -m models/ggml-large-v3.bin -f /tmp/a.wav -l zh -mc 0 -oj -of /tmp/r
 
 （上面只示範格式；`theme` 要讀過字幕才定。）
 
-### 已知缺口
+### 下一集上架時順便確認
 
-- 第 3、4 步靠人記得，漏了不會有人通知。`ep-33`～`ep-35` 就漏了第 3 步，播放頁破圖到 2026-11-04 才發現；`ep-36` 是第一集碰到第 4 步的測試。
-- 轉錄失敗不會報錯（見「字幕轉錄失敗」）。
-- `sync/apple` 分支合併後沒有刪。字幕 backfill 只看分支在不在，就接在已經 squash 進 main 的舊歷史後面，PR 跟 main 衝突、自動合併卡住（`ep-36` 的 #295）。卡住時：確認字幕沒問題就把分支更新到 main；字幕有問題就在 main 補好、關 PR。下一次同步會把 `sync/apple` 重設到 main。
-
-待辦見 [TODOS](../TODOS.md)「新集上架流程的自動化缺口」。
+這些自動化是 2026-11-04（PR-S1）補的，還沒有真的新集走過一輪。下一集上架時看：封面 `01.avif` 有跟著進 PR、字幕 PR 有合併且第一句在開頭、main 的 CI 仍是綠的、Issue 有「歸主題」那一項。
 
 ## 黃金範本
 
@@ -113,11 +100,11 @@ Metadata 寫入位置：
 ## 標準步驟
 
 ```bash
-# 0. GHA 同步後為 MVP（pageCount=1、01.jpg；自動補 story-zones／reflection-prompts／story-dates／episode-faqs）。
+# 0. GHA 同步後為 MVP（pageCount=1、01.jpg＋WebP／AVIF；自動補 story-zones／reflection-prompts／story-dates／episode-faqs）。
 #    Whisper **草稿**字幕由 transcribe-backfill 之後補；本機 sync:apple 有 whisper 時會順便轉錄
 
-# 0b. 封面現代格式（總覽第 3 步，同步不會做；播放頁 <picture> 先要 AVIF；缺檔會 404、不會退回 JPG）
-npm run optimize:lcp-images
+# 0b. 封面現代格式：GHA 同步會補；本機 sync 後自己跑（播放頁先要 AVIF，缺檔時退回 JPG 會慢一拍）
+npm run generate:story-covers
 
 # 0c. 歸主題（總覽第 4 步，見「歸主題」）：編輯 data/episode-themes.ts
 
@@ -191,7 +178,7 @@ npm run verify:browse-index          # 找車車／主題索引與目錄一致�
 npm run check                        # test + verify + build，與 CI 同一套
 ```
 
-新集的總覽第 2、4 步還沒做完時，`npm run check` 會在 `npm test`（缺主題）或 `verify:geo`（缺完整逐字稿）紅，而且停在第一個失敗、後面的 build 不會跑。這不是當下改動造成的，要先補完該集。
+新集的字幕還沒進 main 時，`npm run check` 會在 `verify:geo`（缺完整逐字稿）紅。這不是當下改動造成的，等字幕 PR 合併。
 
 - **全幕集**（`pageCount > 1`）：插圖數、scenes 幕數、subtitles、`captionTimes`、`captions` 必須與 `pageCount` 一致，否則 **error**。
 - **MVP**（`pageCount = 1`）：至少 `01.jpg` + 字幕側車；一律列 **warn**（`illustrate-pending`，或已切場景未 approve 的 `illustrate-incomplete`），不會靜默通過。
