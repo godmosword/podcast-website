@@ -3,9 +3,6 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { ROOT, subtitleCoverageProblem, transcribeWithRetries } from "./transcribe-core";
 
-/** 舊集開頭缺口（第一句在 30 秒以後，疑似同一種幻覺），等校對補；不要因為舊資料放寬門檻。 */
-const KNOWN_OPENING_GAPS = new Set(["ep-12", "ep-14", "ep-15", "ep-16", "ep-17"]);
-
 const cues = (...times: number[]) => times.map((t) => ({ t, text: `第${t}秒` }));
 
 describe("subtitleCoverageProblem", () => {
@@ -28,7 +25,7 @@ describe("subtitleCoverageProblem", () => {
     expect(subtitleCoverageProblem(sparse, 500)).toContain("句數");
   });
 
-  it("現有字幕掃一次不誤判（只有已知的舊集開頭缺口）", () => {
+  it("現有字幕掃一次都過得了門檻", () => {
     const lengths = JSON.parse(readFileSync(join(ROOT, "data/audio-lengths.json"), "utf8")) as Record<string, number>;
     const dir = join(ROOT, "data/subtitles");
     const flagged: string[] = [];
@@ -40,7 +37,7 @@ describe("subtitleCoverageProblem", () => {
       // 音檔都是 128 kbps：位元組 ÷ 16000 ≈ 秒。
       if (subtitleCoverageProblem(segments, bytes / 16000)) flagged.push(slug);
     }
-    expect(flagged.filter((slug) => !KNOWN_OPENING_GAPS.has(slug))).toEqual([]);
+    expect(flagged).toEqual([]);
   });
 });
 
