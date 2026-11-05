@@ -23,9 +23,20 @@ function mockProbes(overrides: Partial<WorkflowProbes>): WorkflowProbes {
     imageCount: () => 1,
     sceneCount: () => 0,
     hasProofreadMarker: () => true,
+    hasTheme: () => true,
     ...overrides,
   };
 }
+
+describe("主題（找故事篩選）", () => {
+  it("缺主題列 theme-pending warn；有主題不列", () => {
+    const story = mockStory({ slug: "ep-99", pageCount: 1 });
+    const pending = verifyStoryWorkflow(story, mockProbes({ hasTheme: () => false }));
+    expect(pending.find((issue) => issue.code === "theme-pending")?.level).toBe("warn");
+    const done = verifyStoryWorkflow(story, mockProbes({ hasTheme: () => true }));
+    expect(done.some((issue) => issue.code === "theme-pending")).toBe(false);
+  });
+});
 
 describe("REFERENCE_ILLUSTRATED_SLUGS", () => {
   it("範本為 ep-9 與 ep-10", () => {

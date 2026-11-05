@@ -7,6 +7,7 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Story } from "../../data/content";
+import { episodeFinderTheme } from "../../data/episode-themes";
 import { STORIES_DIR, subtitleSidecarPath } from "./transcribe-core";
 import { scenesSidecarPath } from "./illustrate-core";
 import {
@@ -42,6 +43,8 @@ export type WorkflowProbes = {
   imageCount: (slug: string) => number;
   sceneCount: (slug: string) => number;
   hasProofreadMarker: (slug: string) => boolean;
+  /** 這集有沒有歸主題（data/episode-themes.ts）。 */
+  hasTheme: (slug: string) => boolean;
 };
 
 function illustrationJpgCount(slug: string): number {
@@ -83,6 +86,7 @@ const defaultWorkflowProbes: WorkflowProbes = {
   imageCount: illustrationJpgCount,
   sceneCount: scenesSidecarCount,
   hasProofreadMarker: isSubtitleProofreadMarked,
+  hasTheme: (slug) => episodeFinderTheme(slug) !== "",
 };
 
 export type WorkflowJsonIssue = {
@@ -276,10 +280,27 @@ function verifyMvpEpisode(
 }
 
 /** 單一狀態路由：MVP → legacy allowlist → 全幕標準檢查。 */
+/** 同步不能寫手寫的主題表：新集先列 warn，人讀過字幕再歸（docs/EPISODE-WORKFLOW.md「歸主題」）。 */
+function themeIssues(story: Story, probes: WorkflowProbes): WorkflowIssue[] {
+  if (probes.hasTheme(story.slug)) return [];
+  return [
+    {
+      slug: story.slug,
+      level: "warn",
+      code: "theme-pending",
+      message: "還沒歸主題：讀字幕後在 data/episode-themes.ts 加一列（找故事的主題篩選暫時找不到這集）",
+    },
+  ];
+}
+
 export function verifyStoryWorkflow(
   story: Story,
   probes: WorkflowProbes = defaultWorkflowProbes,
 ): WorkflowIssue[] {
+  return [...verifyStoryAssets(story, probes), ...themeIssues(story, probes)];
+}
+
+function verifyStoryAssets(story: Story, probes: WorkflowProbes): WorkflowIssue[] {
   if (story.pageCount <= 1) {
     return verifyMvpEpisode(story, probes);
   }

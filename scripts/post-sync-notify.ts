@@ -224,6 +224,7 @@ ${hasFaqStub ? "- **FAQ**：已自動補 FAQ MVP stub，待依本集劇情人工
 
 - [ ] 抽查站上 [${slug}](${storyUrl}) 能播、封面正確
 - [${catalogOnly ? " " : "x"}] ${catalogOnly ? "確認字幕側車與校稿狀態（catalog-only，無自動 --fix 紀錄）" : proofreadFixNote(slug, report)}
+- [ ] 讀字幕歸主題：\`data/episode-themes.ts\` 加一列（見 [EPISODE-WORKFLOW.md](docs/EPISODE-WORKFLOW.md)「歸主題」）
 - [ ] 最終校稿 \`data/subtitles/${slug}.json\` → \`npm run proofread:subtitles -- ${slug} --mark\`（[SUBTITLE-PROOFREAD.md](docs/SUBTITLE-PROOFREAD.md)）${pendingLint !== undefined && pendingLint > 0 ? `\n- [ ] 修正 lint 待辦 ${pendingLint} 項（\`npm run proofread:subtitles -- ${slug}\` 查看）` : ""}
 - [ ] 確認車種／標籤（必要時 \`data/apple-sync.defaults.json\` overrides；sync 會自動更新 \`data/browse-index.json\`）
 ${hasFaqStub ? "- [ ] 改寫 `data/episode-faqs.ts` 的 FAQ MVP stub，確認問題／答案真的對應本集劇情" : ""}
