@@ -13,6 +13,7 @@ import {
   readdirSync,
   readFileSync,
   rmSync,
+  statSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
@@ -161,10 +162,88 @@ export function whisperAvailable(
 type WhisperSeg = { offsets?: { from: number }; text?: string };
 type WhisperJson = { transcription?: WhisperSeg[] };
 
+/**
+ * 覆蓋率門檻（秒）。現有字幕：第一句多在 0 秒、最大空白 30、離結尾最多 17、每分鐘至少 15 句。
+ * Whisper 遇到片頭音樂可能陷入重複幻覺，被過濾後字幕少一大段甚至全空，但指令照樣成功（ep-36 只剩 42 句）。
+ * 第一句 30 秒就算缺：那是 Whisper 整個第一視窗被吃掉（主持人開場不見）。
+ */
+const COVERAGE_FIRST_MAX = 25;
+const COVERAGE_GAP_MAX = 60;
+const COVERAGE_TAIL_MAX = 60;
+const COVERAGE_MIN_PER_MINUTE = 5;
+/** 第一句比這晚就試著補開頭。 */
+const OPENING_FILL_AFTER = 15;
+/** 第一句比這還晚就不切段了：每段都要重載模型，ep-36 那種 330 秒要 37 段，job 會超時、連失敗都記不到。 */
+const OPENING_FILL_MAX = 90;
+/** 開頭切成這麼長一段分開轉：段短，幻覺比較沒機會接下去。 */
+const OPENING_SLICE_SEC = 9;
+
+/** 字幕有沒有蓋滿整集；有問題回一句原因，沒問題回 null。 */
+export function subtitleCoverageProblem(
+  cues: readonly Subtitle[],
+  durationSec: number,
+): string | null {
+  if (cues.length === 0) return "沒有字幕";
+  const first = cues[0]!.t;
+  if (first > COVERAGE_FIRST_MAX) return `第一句在 ${first} 秒才出現`;
+  for (let i = 1; i < cues.length; i += 1) {
+    const gap = cues[i]!.t - cues[i - 1]!.t;
+    if (gap > COVERAGE_GAP_MAX) return `第 ${cues[i - 1]!.t} 秒後有 ${Math.round(gap)} 秒空白`;
+  }
+  const tail = durationSec - cues[cues.length - 1]!.t;
+  if (tail > COVERAGE_TAIL_MAX) return `離結尾還有 ${Math.round(tail)} 秒沒有字幕`;
+  const perMinute = cues.length / (durationSec / 60);
+  if (perMinute < COVERAGE_MIN_PER_MINUTE) return `句數太少（每分鐘 ${perMinute.toFixed(1)} 句）`;
+  return null;
+}
+
+/** 開頭補轉：把 [0, firstCue) 切段各轉一次，時間加回原位，只留第一句之前的。 */
+function fillOpening(
+  cues: readonly Subtitle[],
+  runSlice: (start: number, seconds: number) => Subtitle[],
+): Subtitle[] {
+  const first = cues[0]?.t ?? 0;
+  if (first <= OPENING_FILL_AFTER || first > OPENING_FILL_MAX) return [...cues];
+  const opening: Subtitle[] = [];
+  for (let start = 0; start < first; start += OPENING_SLICE_SEC) {
+    for (const cue of runSlice(start, OPENING_SLICE_SEC)) {
+      const t = Math.round((start + cue.t) * 10) / 10;
+      if (t < first) opening.push({ t, text: cue.text });
+    }
+  }
+  const merged: Subtitle[] = [];
+  for (const cue of [...opening, ...cues]) {
+    if (merged[merged.length - 1]?.text !== cue.text) merged.push(cue);
+  }
+  return merged;
+}
+
+/**
+ * 照常轉一次；覆蓋不足就關掉上下文延續（-mc 0，重複幻覺的來源）重跑，開頭還空就切段補。
+ * 全部試過還是不足就丟錯：不寫出殘缺字幕，失敗算進 backfill 的重試次數。
+ * allowGaps：人確認過音檔真的這樣（例如結尾長音樂），寫出最好的一份。
+ */
+export function transcribeWithRetries(input: {
+  durationSec: number;
+  run: (extraArgs: string[]) => Subtitle[];
+  runSlice: (start: number, seconds: number) => Subtitle[];
+  allowGaps?: boolean;
+}): Subtitle[] {
+  const { durationSec, run, runSlice, allowGaps = false } = input;
+  const first = run([]);
+  if (!subtitleCoverageProblem(first, durationSec)) return first;
+  const cues = fillOpening(run(["-mc", "0"]), runSlice);
+  const problem = subtitleCoverageProblem(cues, durationSec);
+  if (problem && !allowGaps) throw new Error(`字幕不完整：${problem}`);
+  return cues;
+}
+
+type TranscribeOptions = { bin?: string; model?: string; lang?: string; allowGaps?: boolean };
+
 /** 轉錄單一音檔，回傳清理後的字幕段。 */
 function transcribeAudio(
   audioPath: string,
-  opts: { bin?: string; model?: string; lang?: string } = {},
+  opts: TranscribeOptions = {},
 ): Subtitle[] {
   const bin = opts.bin ?? DEFAULT_BIN;
   const model = opts.model ?? DEFAULT_MODEL;
@@ -174,15 +253,10 @@ function transcribeAudio(
   const work = mkdtempSync(join(tmpdir(), "transcribe-"));
   const wav = join(work, "audio.wav");
   const outBase = join(work, "out");
-  try {
-    execFileSync(
-      "ffmpeg",
-      ["-i", audioPath, "-ar", "16000", "-ac", "1", "-c:a", "pcm_s16le", "-y", wav],
-      { stdio: "ignore" },
-    );
+  const whisper = (input: string, extraArgs: string[]): Subtitle[] => {
     execFileSync(
       bin,
-      ["-m", modelPath, "-f", wav, "-l", lang, "-oj", "-of", outBase],
+      ["-m", modelPath, "-f", input, "-l", lang, ...extraArgs, "-oj", "-of", outBase],
       { stdio: ["ignore", "ignore", "inherit"] },
     );
     const json = JSON.parse(readFileSync(`${outBase}.json`, "utf-8")) as WhisperJson;
@@ -191,6 +265,28 @@ function transcribeAudio(
       text: (s.text ?? "").trim(),
     }));
     return cleanSegments(segments);
+  };
+  try {
+    execFileSync(
+      "ffmpeg",
+      ["-i", audioPath, "-ar", "16000", "-ac", "1", "-c:a", "pcm_s16le", "-y", wav],
+      { stdio: "ignore" },
+    );
+    return transcribeWithRetries({
+      // 16 kHz、單聲道、16 bit：每秒 32000 位元組（減 WAV 檔頭）。
+      durationSec: (statSync(wav).size - 44) / 32000,
+      allowGaps: opts.allowGaps,
+      run: (extraArgs) => whisper(wav, extraArgs),
+      runSlice: (start, seconds) => {
+        const slice = join(work, "slice.wav");
+        execFileSync(
+          "ffmpeg",
+          ["-i", wav, "-ss", String(start), "-t", String(seconds), "-c", "copy", "-y", slice],
+          { stdio: "ignore" },
+        );
+        return whisper(slice, ["-mc", "0"]);
+      },
+    });
   } finally {
     rmSync(work, { recursive: true, force: true });
   }
@@ -208,7 +304,7 @@ function writeSubtitles(slug: string, segments: Subtitle[]): string {
 export function transcribeToSidecar(
   slug: string,
   audioPath: string,
-  opts: { bin?: string; model?: string; lang?: string } = {},
+  opts: TranscribeOptions = {},
 ): { count: number; file: string } {
   const segments = transcribeAudio(audioPath, opts);
   const file = writeSubtitles(slug, segments);

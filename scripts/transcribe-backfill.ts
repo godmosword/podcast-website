@@ -51,7 +51,7 @@ function main(): void {
         body: [
           `\`${stage.slug}\`（guid \`${guid}\`）字幕已失敗 ${stage.subtitleAttempts} 次，不再自動重試。`,
           "",
-          "集數可以先上線。字幕補上後，把 `apple-sync-state.json` 裡這筆的 `subtitles` 改回 `pending`、`subtitleAttempts` 歸零，workflow 才會再跑。",
+          "集數可以先上線。怎麼本機重轉見 `docs/EPISODE-WORKFLOW.md`「字幕轉錄失敗」。要讓 workflow 再跑，把 `apple-sync-state.json` 裡這筆的 `subtitles` 改回 `pending`、`subtitleAttempts` 歸零。",
           "",
           stage.lastSubtitleError ? `最後一次錯誤：${stage.lastSubtitleError}` : "",
         ].join("\n"),

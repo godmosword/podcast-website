@@ -16,6 +16,7 @@
 //   npm run transcribe -- ep-1 ep-2 ep-7     # 多集
 //   npm run transcribe -- --all               # 全部 public/stories/* 有 audio.mp3 的集
 //   WHISPER_MODEL=models/ggml-small.bin npm run transcribe -- ev
+//   npm run transcribe -- ep-N --allow-gaps   # 確認過音檔真的有長音樂：字幕沒蓋滿也寫出來
 //
 // 輸出為草稿（逐字、可能誤聽人名、偶有簡體），上架前請人工校對。
 // ============================================================
@@ -92,7 +93,9 @@ function main(): void {
     }
     console.error(`→ 轉錄 ${slug}…`);
     try {
-      const { count, file } = transcribeToSidecar(slug, audio);
+      const { count, file } = transcribeToSidecar(slug, audio, {
+        allowGaps: args.includes("--allow-gaps"),
+      });
       console.log(`✓ ${slug}：${count} 句 → ${file}`);
       ok += 1;
     } catch (err) {
@@ -103,6 +106,8 @@ function main(): void {
   console.error(
     `\n完成 ${ok}/${slugs.length} 集。字幕為草稿，請人工校對（刪誤聽、簡轉繁）。`,
   );
+  // 字幕不完整會丟錯（見 transcribeWithRetries）：有失敗就讓指令失敗，不要假裝成功。
+  if (ok < slugs.length) process.exitCode = 1;
 }
 
 main();
