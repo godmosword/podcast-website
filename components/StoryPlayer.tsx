@@ -33,6 +33,7 @@ import {
   type PlaybackClock,
 } from "@/lib/activity-log";
 import { takeLandingPlayback } from "@/lib/landing-playback";
+import { imageErrored, imageLoaded, NO_IMAGE_FALLBACK } from "@/lib/story-image-fallback";
 import { playSfx, isSfxEnabled } from "@/lib/sfx";
 import {
   isStoryPlayRaster,
@@ -151,7 +152,11 @@ export default function StoryPlayer({
 }: StoryPlayerProps) {
   const [page, setPage] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [mediaError, setMediaError] = useState<"audio" | "image" | null>(null);
+  const [mediaError, setMediaError] = useState<"audio" | null>(null);
+  /** 現代格式載入失敗的插圖，這些改用 JPG：<picture> 遇到 AVIF 404 不會自己退回（ep-33～36）。 */
+  const [imageFallback, setImageFallback] = useState(NO_IMAGE_FALLBACK);
+  const currentImage = images[page] ?? "";
+  const imageFailed = imageFallback.failed.has(currentImage);
   const [playBlocked, setPlayBlocked] = useState(false);
   const [subtitlesOn, setSubtitlesOn] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
@@ -860,7 +865,7 @@ export default function StoryPlayer({
         onError={() => setMediaError("audio")}
       />
       <div className={styles.stage}>
-        {isLoading && (
+        {((isLoading && !imageFailed) || imageFallback.waitingJpg.has(currentImage)) && (
           <div className={styles.skeleton} aria-hidden>
             <Wheel
               size={52}
@@ -875,7 +880,7 @@ export default function StoryPlayer({
           if (Math.abs(i - page) > 1) return null;
           const visible = i === page && !hasEnded;
           const sources = storyPlayImageSources(src);
-          const modern = isStoryPlayRaster(src);
+          const modern = isStoryPlayRaster(src) && !imageFallback.jpgOnly.has(src);
           return (
             <div
               key={i}
@@ -898,8 +903,15 @@ export default function StoryPlayer({
                   loading={i === page ? "eager" : "lazy"}
                   fetchPriority={i === page ? "high" : "low"}
                   decoding="async"
-                  onLoad={() => i === page && setIsLoading(false)}
-                  onError={() => setMediaError("image")}
+                  onLoad={() => {
+                    setImageFallback((prev) => imageLoaded(prev, src));
+                    if (i === page) setIsLoading(false);
+                  }}
+                  onError={() => {
+                    setImageFallback((prev) => imageErrored(prev, src, modern));
+                    // 這張不會再有 onLoad：不清的話翻到下一頁骨架會一直蓋著。
+                    if (!modern && i === page) setIsLoading(false);
+                  }}
                 />
               </picture>
             </div>
@@ -920,11 +932,11 @@ export default function StoryPlayer({
         />
       )}
 
-      {(mediaError || playBlocked) && !hasEnded && (
+      {(mediaError || imageFailed || playBlocked) && !hasEnded && (
         <div className={styles.errorBanner} role="alert">
-          {mediaError === "image" && "插圖載入失敗，請稍後再試或回上一頁。"}
           {mediaError === "audio" && "音檔載入失敗，請檢查網路後再試。"}
-          {!mediaError && playBlocked && "無法播放，請再按一次播放鈕。"}
+          {!mediaError && imageFailed && "插圖載入失敗，請稍後再試或回上一頁。"}
+          {!mediaError && !imageFailed && playBlocked && "無法播放，請再按一次播放鈕。"}
         </div>
       )}
 

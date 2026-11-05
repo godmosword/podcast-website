@@ -51,6 +51,29 @@ const browseIndex = {
 };
 
 describe("validateParsedSync", () => {
+  it("封面缺 AVIF／WebP 是 error：播放頁 <picture> 先要 AVIF，404 不退回 JPG（ep-33～36 破圖）", () => {
+    const report = validateParsedSync({
+      synced,
+      state,
+      browseIndex,
+      stories: [story()],
+      coverModernExists: () => false,
+      workflowIssues: [],
+      browseIssues: [],
+    });
+    expect(report.errors.map((issue) => issue.code)).toContain("missing-cover-modern");
+    const ok = validateParsedSync({
+      synced,
+      state,
+      browseIndex,
+      stories: [story()],
+      coverModernExists: () => true,
+      workflowIssues: [],
+      browseIssues: [],
+    });
+    expect(ok.errors.map((issue) => issue.code)).not.toContain("missing-cover-modern");
+  });
+
   it("封面、blur、slug、guid 都齊才沒有 error", () => {
     const report = validateParsedSync({
       synced,

@@ -122,6 +122,7 @@ export function validateParsedSync(input: {
   stories: readonly Story[];
   coverExists?: (slug: string) => boolean;
   blurExists?: (slug: string) => boolean;
+  coverModernExists?: (slug: string) => boolean;
   workflowIssues?: readonly WorkflowIssue[];
   browseIssues?: readonly BrowseIndexIssue[];
   /** 倉庫驗證才核對 ep-9／ep-10 範本；純 fixture 不碰磁碟。 */
@@ -210,6 +211,7 @@ export function validateParsedSync(input: {
 
   const coverExists = input.coverExists ?? (() => true);
   const blurExists = input.blurExists ?? (() => true);
+  const coverModernExists = input.coverModernExists ?? (() => true);
   for (const story of input.stories) {
     if (!coverExists(story.slug)) {
       errors.push({
@@ -225,6 +227,14 @@ export function validateParsedSync(input: {
         code: "missing-blur",
         slug: story.slug,
         message: `${story.slug} 缺封面 blur`,
+      });
+    }
+    if (!coverModernExists(story.slug)) {
+      errors.push({
+        level: "error",
+        code: "missing-cover-modern",
+        slug: story.slug,
+        message: `${story.slug} 缺封面 WebP／AVIF（npm run generate:story-covers）：播放頁會破圖`,
       });
     }
   }
@@ -349,6 +359,11 @@ export function validateSyncRepo(root = process.cwd()): SyncValidateReport {
       existsSync(path.join(root, "public", storyCoverPath(slug).replace(/^\//, ""))),
     blurExists: (slug) =>
       getStoryBlurDataUrl(storyCoverPath(slug))?.startsWith("data:image/") === true,
+    coverModernExists: (slug) => {
+      const cover = path.join(root, "public", storyCoverPath(slug).replace(/^\//, ""));
+      const base = cover.replace(/\.jpe?g$/i, "");
+      return existsSync(`${base}.avif`) && existsSync(`${base}.webp`);
+    },
     workflowIssues,
     browseIssues,
     includeReference: true,

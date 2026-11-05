@@ -70,6 +70,20 @@ function listStoryIllustrationJpgTargets(publicDir: string): string[] {
   return files.sort();
 }
 
+/** 缺 WebP／AVIF（或尺寸不符）的每集封面 01.jpg 補上，回傳補了哪幾集。同步用：只碰白名單內的 public/stories/。 */
+export async function ensureStoryCoverSiblings(publicDir: string): Promise<string[]> {
+  const storiesDir = join(publicDir, "stories");
+  if (!existsSync(storiesDir)) return [];
+  const written: string[] = [];
+  for (const slug of readdirSync(storiesDir).sort()) {
+    const jpg = join(storiesDir, slug, "01.jpg");
+    if (!existsSync(jpg) || (await verifyModernSiblings(jpg))) continue;
+    await writeModernSiblings(jpg);
+    written.push(slug);
+  }
+  return written;
+}
+
 export function listLcpJpgTargets(publicDir: string): string[] {
   const landingDir = join(publicDir, "landing");
   const landing = existsSync(landingDir)
