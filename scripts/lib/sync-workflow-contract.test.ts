@@ -346,6 +346,8 @@ describe("sync workflow contract", () => {
     const derivedAt = yaml.indexOf("name: Generate derived assets");
     const packAt = yaml.indexOf("name: Pack sync artifact");
     const validateAt = yaml.indexOf("npm run sync:validate");
+    // 封面 AVIF／WebP 也是衍生資產：同步不產生，播放頁就破圖（ep-33～36）。
+    expect(derived).toContain("npm run generate:story-covers");
     expect(syncAt).toBeGreaterThan(-1);
     expect(derivedAt).toBeGreaterThan(syncAt);
     expect(packAt).toBeGreaterThan(derivedAt);
@@ -511,6 +513,12 @@ describe("sync workflow contract", () => {
     expect(yaml).toContain("npx tsx scripts/transcribe-backfill.ts");
     expect(yaml).toContain("bash scripts/setup-whisper-ci.sh");
     expect(yaml).toContain("bash scripts/ci/checkout-sync-base.sh");
+    // 判斷有沒有開著的 sync PR 要用 gh（#295）。
+    expect(yaml).toMatch(/Checkout sync branch base\n\s+env:\n\s+GH_TOKEN:/);
+    // 轉錄要 20 分鐘，PR 可能中途合併：推之前要再看一次。
+    const rebaseAt = yaml.indexOf("bash scripts/ci/rebase-sync-if-merged.sh");
+    expect(rebaseAt).toBeGreaterThan(yaml.indexOf("scripts/transcribe-backfill.ts"));
+    expect(rebaseAt).toBeLessThan(yaml.indexOf("bash scripts/ci/commit-and-push-sync.sh"));
     expect(src).toContain("SUBTITLE_ATTEMPT_LIMIT");
     expect(src).toContain('category: "whisper"');
     expect(readWorkflow("sync-apple-podcast.yml")).not.toContain("setup-whisper-ci.sh");

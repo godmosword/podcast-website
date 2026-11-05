@@ -23,7 +23,8 @@ env:
 jobs:
   transcribe:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # 覆蓋不足時會重跑（-mc 0）再補開頭，CPU 上一輪約 20 分鐘。
+    timeout-minutes: 75
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
@@ -33,6 +34,8 @@ jobs:
         run: bash scripts/ci/sync-report-paths.sh
 
       - name: Checkout sync branch base
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: bash scripts/ci/checkout-sync-base.sh
 
       - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
@@ -63,6 +66,11 @@ jobs:
           SYNC_ISSUE_ASSIGNEES: ${{ secrets.SYNC_ISSUE_ASSIGNEES }}
           SYNC_ISSUE_MENTIONS: ${{ secrets.SYNC_ISSUE_MENTIONS }}
         run: npx tsx scripts/transcribe-backfill.ts
+
+      - name: Move onto main if the sync PR merged meanwhile
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash scripts/ci/rebase-sync-if-merged.sh
 
       - name: Commit and push
         env:
