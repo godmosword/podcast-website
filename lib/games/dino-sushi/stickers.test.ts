@@ -10,6 +10,7 @@ import {
   factsFromRound,
   isDinoSushiStickerId,
   rememberPlaced,
+  roundEndAnnouncement,
   stickerAnnouncement,
   stickerById,
   stickerTapSpeech,
@@ -87,7 +88,8 @@ describe("多多壽司屋貼紙目錄", () => {
     }
     expect(stickerById("surprise-perfect")?.rule).toBe("連續 5 盤都一次做對");
     expect(stickerById("surprise-round")?.rule).toBe("點餐，送完 5 盤");
-    expect(STICKER_ROUND_PROMISE).toContain("至少會拿到一張");
+    expect(STICKER_ROUND_PROMISE).toContain("送完為止");
+    expect(STICKER_ROUND_PROMISE).toContain("「驚喜」要自己做到");
   });
 });
 
@@ -204,6 +206,29 @@ describe("貼紙解鎖", () => {
       { finishedRound: true },
     );
     expect(next.gifted).toBe("customer-anan");
+  });
+
+  it("一輪結束念的句子：貼紙接新開的天，沒貼紙也念", () => {
+    expect(roundEndAnnouncement(["topping-tamago"], null, "第 2 天開了！")).toBe("新貼紙！玉子！第 2 天開了！");
+    expect(roundEndAnnouncement([], null, "第 2 天開了！")).toBe("第 2 天開了！");
+    expect(roundEndAnnouncement([], null, "")).toBe("");
+  });
+
+  it("成就貼紙不當保底送：只差這幾張時，沒達成就什麼都不送", () => {
+    const achievements = ["surprise-round", "surprise-perfect", "surprise-free", "surprise-daily"];
+    const owned = DINO_SUSHI_STICKERS.map((sticker) => sticker.id).filter((id) => id !== "surprise-perfect");
+    const none = collectStickers(
+      owned,
+      factsFromRound(round({ mode: "order", done: true, firstTries: [true, false, false, false, false] })),
+      { finishedRound: true },
+    );
+    expect(none).toEqual({ unlocked: [], gifted: null });
+    const notOwned = DINO_SUSHI_STICKERS.map((sticker) => sticker.id).filter((id) => !achievements.includes(id));
+    const stillNone = collectStickers(notOwned, factsFromRound(round({ mode: "free", done: false })), {
+      finishedRound: true,
+    });
+    expect(stillNone.gifted).toBeNull();
+    for (const id of achievements) expect(stillNone.unlocked).not.toContain(id);
   });
 
   it("客人的訂單做對才拿到；看一看、自由做、做第二次都不算", () => {

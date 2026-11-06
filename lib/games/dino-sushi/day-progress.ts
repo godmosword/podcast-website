@@ -1,7 +1,7 @@
 /**
  * 《多多壽司屋》八天開店的進度。純函數，不讀存檔。
  * 第 4 天的星星仍是舊的 medals["dino-sushi"][0]，不抄進 dinoSushiDays。
- * 第 5–8 天這一階段還不能玩，就算舊檔已經通關、資料上開到第 5 天，按鈕仍鎖著。
+ * 第 5–8 天這一階段還不能玩，標題也不顯示；就算舊檔已經通關、資料上開到第 5 天也一樣。
  */
 
 export const SUSHI_DAY_COUNT = 8;
@@ -61,6 +61,18 @@ export function isDayUnlocked(day: number, days: readonly number[], classicFlags
 
 export function isDayPlayable(day: number): boolean {
   return day >= 1 && day <= SUSHI_PLAYABLE_DAY;
+}
+
+/** 結算主鈕要不要前進：下一天玩得到、還沒通關才回傳。自由做（第 0 天）與最後一天都沒有。 */
+export function nextDayAfter(day: number, days: readonly number[], classicFlags: number): number | null {
+  const next = day + 1;
+  if (day < 1 || !isDayPlayable(next)) return null;
+  return isDayCleared(flagsForDay(next, days, classicFlags)) ? null : next;
+}
+
+/** 第一次通關時宣布新的一天：結算標題和念出來用同一句。 */
+export function dayOpenedLine(day: number): string {
+  return `第 ${day} 天開了！`;
 }
 
 /** 最早一個開著、玩得到、還沒通關的天。都通關了就再玩第 4 天。 */

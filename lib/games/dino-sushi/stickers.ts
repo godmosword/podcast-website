@@ -103,7 +103,7 @@ export const STICKER_GROUP_LABEL: Record<StickerGroup, string> = {
 };
 
 /** 貼紙書最下面那一句：沒拿到新的也還有一張。 */
-export const STICKER_ROUND_PROMISE = "每一輪結束，至少會拿到一張新貼紙。";
+export const STICKER_ROUND_PROMISE = "每一輪結束，多多會送一張新貼紙，送完為止；「驚喜」要自己做到。";
 
 export type DinoSushiStickerId = (typeof DINO_SUSHI_STICKERS)[number]["id"];
 
@@ -239,7 +239,8 @@ export function collectStickers(
   if (unlocked.length > 0 || !options?.finishedRound || earnedEarlier > 0) {
     return { unlocked, gifted: null };
   }
-  const gift = DINO_SUSHI_STICKERS.find((sticker) => !have.has(sticker.id));
+  // 成就類只能自己達成，不當保底送。
+  const gift = DINO_SUSHI_STICKERS.find((sticker) => sticker.group !== "surprise" && !have.has(sticker.id));
   if (!gift || !isDinoSushiStickerId(gift.id)) return { unlocked, gifted: null };
   return { unlocked: [gift.id], gifted: gift.id };
 }
@@ -289,6 +290,11 @@ export function applyRoundStickers(
     added: collected.unlocked,
     alreadySettled: false,
   };
+}
+
+/** 一輪結束念的那一句：貼紙接著新開的天。speakText 只留一句等待，要併成一句才不會互相蓋掉。 */
+export function roundEndAnnouncement(ids: readonly string[], giftedId: string | null, closing: string): string {
+  return `${stickerAnnouncement(ids, giftedId)}${closing}`;
 }
 
 /** 念出來的句子。多張只念前三個名字，免得排隊太長。 */

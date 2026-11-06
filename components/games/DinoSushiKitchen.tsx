@@ -224,7 +224,13 @@ export function DinoSushiKitchen({
         {/* 右上一欄由上往下排：自由做的「多多吃飽了」→ 點餐泡泡 → 多多的字卡，彼此不會疊在一起 */}
         <div className={styles.talk} data-role="talk">
           {round.mode === "free" ? (
-            <TapButton className={styles.fullButton} onTap={actions.finish} disabled={disabled}>
+            /* 第一盤送出前藏起來但留位子：字卡不會在按鈕出現時被擠下去 */
+            <TapButton
+              className={styles.fullButton}
+              data-waiting={round.plates.length === 0 ? "true" : undefined}
+              onTap={actions.finish}
+              disabled={disabled}
+            >
               <span className={styles.fullArt} aria-hidden>
                 <PlateArt />
                 <PlateArt />

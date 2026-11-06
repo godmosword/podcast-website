@@ -158,6 +158,11 @@ describe("自由做", () => {
     expect(s.done).toBe(true);
   });
 
+  it("自由做一盤都還沒送不能結束（空白回合不領獎）", () => {
+    const free = createRound("free", 3);
+    expect(roundReducer(free, { type: "finish" })).toBe(free);
+  });
+
   it("點餐模式不能用「吃飽了」提早結束", () => {
     const s = createRound("order", 3);
     expect(roundReducer(s, { type: "finish" })).toBe(s);

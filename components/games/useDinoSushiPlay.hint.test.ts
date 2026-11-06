@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { SynthVoice } from "@/lib/gamekit/runtime/audio";
 import { EVICT_POP_DELAY, SUSHI_SFX } from "@/lib/games/dino-sushi/sfx";
 import { toppingById, type ToppingId } from "@/lib/games/dino-sushi/toppings";
-import { IDLE_HINT_MS, useDinoSushiPlay } from "./useDinoSushiPlay";
+import { IDLE_HINT_MS, THANKS_LINGER_MS, useDinoSushiPlay } from "./useDinoSushiPlay";
 
 afterEach(() => {
   cleanup();
@@ -48,6 +48,22 @@ function offOrderSavory(result: Play): ToppingId {
   const order = round.orders[round.index]!;
   return round.tray.find((id) => toppingById(id).kind === "savory" && !order.toppings.includes(id))!;
 }
+
+describe("朋友的謝謝不要跨到下一單太久", () => {
+  it("下一單出來後 THANKS_LINGER_MS 就收掉", () => {
+    const { result } = setup();
+    finishFirstOrder(result);
+    expect(result.current.thanks).not.toBeNull();
+    act(() => {
+      vi.advanceTimersByTime(THANKS_LINGER_MS - 1);
+    });
+    expect(result.current.thanks).not.toBeNull();
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+    expect(result.current.thanks).toBeNull();
+  });
+});
 
 describe("點偏了立刻亮下一步", () => {
   it("教完第一單之後，點錯的料會亮正確的下一格，不出現錯誤字", () => {

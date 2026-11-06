@@ -6,6 +6,7 @@ import { IconChevronLeft } from "@/components/games/ClayIcons";
 import { ResultStars, type ResultStarHint } from "@/components/games/ResultStars";
 import { PlateArt } from "@/lib/games/dino-sushi/art";
 import { DuoDuoSticker } from "@/lib/games/dino-sushi/duoduo-sticker";
+import { dayOpenedLine } from "@/lib/games/dino-sushi/day-progress";
 import { freshLayout } from "@/lib/games/dino-sushi/fresh-layout";
 import { ORDERS_PER_ROUND } from "@/lib/games/dino-sushi/orders";
 import type { RoundMedals } from "@/lib/games/dino-sushi/medals";
@@ -32,6 +33,8 @@ type Props = {
   gift: string;
   reducedMotion: boolean;
   onReplay: () => void;
+  /** 有下一天時（outcome.nextDay）主鈕往前走。 */
+  onNextDay: () => void;
   onTitle: () => void;
   onBook: () => void;
 };
@@ -151,6 +154,7 @@ export function DinoSushiResult({
   gift,
   reducedMotion,
   onReplay,
+  onNextDay,
   onTitle,
   onBook,
 }: Props) {
@@ -170,6 +174,13 @@ export function DinoSushiResult({
     );
   const bookLabel = fresh.length > 0 ? "放進貼紙書" : "貼紙書";
   const mood = outcome.variety ?? roundVariety(outcome.seed);
+  const { nextDay } = outcome;
+  const title =
+    nextDay !== null && outcome.dayOpened
+      ? dayOpenedLine(nextDay)
+      : outcome.mode === "order"
+        ? "多多吃飽飽！"
+        : "多多吃飽了！";
   return (
     <div
       className={styles.resultOverlay}
@@ -183,15 +194,24 @@ export function DinoSushiResult({
         <span className={styles.resultDuo}>
           <DuoDuoSticker mouth="closed" face="love" />
         </span>
+        {outcome.dayOpened && outcome.nextDayFace ? (
+          <span className={styles.resultGuest}>
+            {/* eslint-disable-next-line @next/next/no-img-element -- 現成客人貼紙與多多表情，不另生圖 */}
+            <img src={outcome.nextDayFace} alt="" draggable={false} />
+          </span>
+        ) : null}
         <ShopBelt />
       </div>
       <GameEndStation
         className={styles.resultStation}
         mood="win"
-        title={outcome.mode === "order" ? "多多吃飽飽！" : "多多吃飽了！"}
+        title={title}
         gameSlug="dino-sushi"
         onReplay={onReplay}
         replayLabel={outcome.mode === "order" ? "再做一輪" : "再自由做"}
+        mainAction={
+          nextDay !== null ? { label: `開始第 ${nextDay} 天`, onClick: onNextDay, icon: "next" } : undefined
+        }
         details={details}
         leadingAction={titleAction}
         sideSize={64}

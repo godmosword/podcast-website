@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-/** 選天：八張臉、第 5–8 天先鎖著、每張至少 48px、間距至少 8px。 */
+/** 選天：只顯示玩得到的四天、每張至少 48px、間距至少 8px。 */
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
@@ -19,7 +19,7 @@ async function expectDayTargets(page: Page) {
       return { x: r.x, y: r.y, w: r.width, h: r.height };
     }),
   );
-  expect(boxes).toHaveLength(8);
+  expect(boxes).toHaveLength(4);
   for (const box of boxes) {
     expect(Math.min(box.w, box.h)).toBeGreaterThanOrEqual(48);
   }
@@ -49,7 +49,7 @@ for (const vp of [
   { width: 390, height: 844 },
   { width: 844, height: 390 },
 ]) {
-  test(`${vp.width}×${vp.height}：八張臉至少 48px，間距至少 8px`, async ({ page }) => {
+  test(`${vp.width}×${vp.height}：四張臉至少 48px，間距至少 8px`, async ({ page }) => {
     await page.setViewportSize(vp);
     await page.goto("/games/dino-sushi");
     await expect(page.getByRole("heading", { name: "多多肚子餓了！" })).toBeVisible();
@@ -63,7 +63,7 @@ test("沒解開的天有鎖、讀屏說未解鎖，點了不會開始", async ({
   const open = page.getByRole("button", { name: /^第 1 天/ });
   await expect(open).not.toHaveAttribute("aria-disabled", "true");
   await expect(open.locator("[data-lock]")).toHaveCount(0);
-  for (const day of [2, 3, 4, 5, 6, 7, 8]) {
+  for (const day of [2, 3, 4]) {
     const button = page.getByRole("button", { name: new RegExp(`^第 ${day} 天`) });
     await expect(button).toHaveAttribute("aria-disabled", "true");
     await expect(button).toHaveAccessibleName(/（未解鎖）/);
@@ -74,7 +74,7 @@ test("沒解開的天有鎖、讀屏說未解鎖，點了不會開始", async ({
   }
 });
 
-test("舊檔通關可以點第 4 天，第 5–8 天仍鎖著", async ({ page }) => {
+test("舊檔通關可以點第 4 天，第 5–8 天不顯示", async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem(
       "cheche:progress",
@@ -94,8 +94,8 @@ test("舊檔通關可以點第 4 天，第 5–8 天仍鎖著", async ({ page })
   });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/games/dino-sushi");
-  await expect(page.getByRole("button", { name: /^第 5 天/ })).toHaveAttribute("aria-disabled", "true");
-  await expect(page.getByRole("button", { name: /^第 8 天/ })).toHaveAttribute("aria-disabled", "true");
+  await expect(page.getByRole("button", { name: /^第 5 天/ })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /^第 8 天/ })).toHaveCount(0);
   await page.getByRole("button", { name: /^第 4 天，多多/ }).click();
   await expect(page.getByRole("img", { name: /^第 1 單/ })).toBeVisible();
   await expect(page.getByRole("button", { name: "選握壽司" })).toBeVisible();

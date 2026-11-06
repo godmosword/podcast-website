@@ -162,7 +162,8 @@ export function roundReducer(state: RoundState, action: RoundAction): RoundState
     case "serve":
       return serve(state);
     case "finish":
-      return state.mode === "free" ? { ...state, done: true } : state;
+      // 一盤都沒送不能結束：貼紙要有做壽司才拿得到。
+      return state.mode === "free" && state.plates.length > 0 ? { ...state, done: true } : state;
     default:
       return state;
   }

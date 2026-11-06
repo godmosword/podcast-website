@@ -33,7 +33,7 @@ function artSrc(art: StickerArt): string {
     case "medal":
       return duoduoStickerSrc(art.state);
     case "customer":
-      return customerById(art.id).avatar;
+      return customerById(art.id).sticker;
     default:
       return art.state === "toothbrush" ? DUODUO_TOOTHBRUSH_SRC : duoduoStickerSrc(art.state);
   }
@@ -67,8 +67,8 @@ export function DinoSushiStickerFace({
     );
   } else if (art.kind === "customer") {
     image = (
-      // eslint-disable-next-line @next/next/no-img-element -- 現有角色定裝照，圓裁現成的 jpg
-      <img src={customerById(art.id).avatar} alt="" draggable={false} decoding="async" />
+      // eslint-disable-next-line @next/next/no-img-element -- 跟排隊、點餐同一張去背貼紙
+      <img src={customerById(art.id).sticker} alt="" draggable={false} decoding="async" />
     );
   } else {
     const src = art.state === "toothbrush" ? DUODUO_TOOTHBRUSH_SRC : duoduoStickerSrc(art.state);

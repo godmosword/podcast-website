@@ -15,6 +15,8 @@ import {
   isDayCleared,
   isDayPlayable,
   isDayUnlocked,
+  nextDayAfter,
+  dayOpenedLine,
   suggestedDay,
 } from "@/lib/games/dino-sushi/day-progress";
 import { DAY_CARDS } from "@/lib/games/dino-sushi/days";
@@ -49,6 +51,12 @@ export type DinoSushiOutcome = {
   /** 點餐是第幾天；自由做是 0。再做一輪回到同一天。 */
   day: number;
   variety: RoundVariety;
+  /** 結算主鈕要前進到第幾天；沒有就是 null（留在再做一輪）。 */
+  nextDay: number | null;
+  /** 這一輪是第一次通關這一天：要宣布下一天開了。 */
+  dayOpened: boolean;
+  /** 下一天的朋友，第一次通關時站到多多旁邊。 */
+  nextDayFace: string | null;
 };
 
 function storedClassicFlags(): number {
@@ -58,6 +66,11 @@ function storedClassicFlags(): number {
 function dayFaceSrc(card: (typeof DAY_CARDS)[number]): string {
   if (card.duoduo) return duoduoStickerSrc(card.duoduo);
   return customerById(card.customerId!).sticker;
+}
+
+function faceForDay(day: number | null): string | null {
+  const card = DAY_CARDS.find((item) => item.day === day);
+  return card ? dayFaceSrc(card) : null;
 }
 
 export function DinoSushiView({
@@ -79,6 +92,7 @@ export function DinoSushiView({
   );
   const [classicFlags, setClassicFlags] = useState(() => (typeof window === "undefined" ? 0 : storedClassicFlags()));
   const [outcome, setOutcome] = useState<DinoSushiOutcome | null>(null);
+  const sessionRef = useRef({ mode: "order" as Mode, day: 0, firstClear: false });
   const inputPaused = instance.isInputPaused() || status === "paused";
 
   const refreshDays = useCallback(() => {
@@ -111,6 +125,7 @@ export function DinoSushiView({
         } else {
           instance.notifyWon(medals);
         }
+        const nextDay = nextDayAfter(round.day, loadDinoSushiDays(), storedClassicFlags());
         setOutcome({
           mode: "order",
           plates: round.plates,
@@ -118,6 +133,9 @@ export function DinoSushiView({
           seed: round.seed,
           day: round.day,
           variety: round.variety,
+          nextDay,
+          dayOpened: nextDay !== null && sessionRef.current.firstClear,
+          nextDayFace: faceForDay(nextDay),
         });
       } else {
         instance.notifyFinished();
@@ -128,6 +146,9 @@ export function DinoSushiView({
           seed: round.seed,
           day: 0,
           variety: round.variety,
+          nextDay: null,
+          dayOpened: false,
+          nextDayFace: null,
         });
       }
       setScreen("result");
@@ -139,7 +160,13 @@ export function DinoSushiView({
   const play = useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, onDone });
   const { actions } = play;
   const voiceOn = soundOn && voiceEnabled && gameVolume > 0;
-  const stickers = useDinoSushiStickers(play.round, { on: voiceOn, volume: gameVolume });
+  const openedDay =
+    play.round?.done && sessionRef.current.firstClear ? nextDayAfter(play.round.day, dayFlags, classicFlags) : null;
+  const stickers = useDinoSushiStickers(play.round, {
+    on: voiceOn,
+    volume: gameVolume,
+    closing: openedDay !== null ? dayOpenedLine(openedDay) : "",
+  });
   const [book, setBook] = useState(false);
   const [queuedSeed, setQueuedSeed] = useState<number | null>(null);
   useEffect(() => {
@@ -147,14 +174,13 @@ export function DinoSushiView({
   }, []);
   const unseen = stickers.state.unlocked.filter((id) => !stickers.state.seen.includes(id));
   const nextDay = suggestedDay(dayFlags, classicFlags);
-  const sessionRef = useRef({ mode: "order" as Mode, day: 0 });
-  const titleDays: SushiDayFace[] = DAY_CARDS.map((card) => ({
+  /* 第 5–8 天還沒做，先不顯示：鎖頭會讓孩子以為是自己沒達標。 */
+  const titleDays: SushiDayFace[] = DAY_CARDS.filter((card) => isDayPlayable(card.day)).map((card) => ({
     day: card.day,
     name: card.name,
     src: dayFaceSrc(card),
     stars: dayStarCount(flagsForDay(card.day, dayFlags, classicFlags)),
     unlocked: isDayUnlocked(card.day, dayFlags, classicFlags),
-    playable: isDayPlayable(card.day),
     current: card.day === nextDay,
   }));
 
@@ -168,14 +194,15 @@ export function DinoSushiView({
       setOutcome(null);
       const seed = queuedSeed ?? readRoundSeed();
       let day = 0;
+      let firstClear = false;
       if (next === "order") {
         day = explicitDay ?? suggestedDay(dayFlags, classicFlags);
-        const teach = !isDayCleared(flagsForDay(day, dayFlags, classicFlags));
-        actions.start(next, seed, { day, teach });
+        firstClear = !isDayCleared(flagsForDay(day, dayFlags, classicFlags));
+        actions.start(next, seed, { day, teach: firstClear });
       } else {
         actions.start(next, seed, "normal");
       }
-      sessionRef.current = { mode: next, day };
+      sessionRef.current = { mode: next, day, firstClear };
       setQueuedSeed(readRoundSeed());
       setScreen("kitchen");
       instance.notifyPlaying(next);
@@ -205,8 +232,9 @@ export function DinoSushiView({
   }, [screen]);
 
   /* controller 經 ref 轉呼叫、只在 mount 註冊一次（同消消樂 G-C1：避免 paused 連鎖重註冊把狀態打回 ready）。 */
-  const controllerRef = useRef({ begin, goToTitle, mode });
-  controllerRef.current = { begin, goToTitle, mode };
+  const resultNextDay = screen === "result" ? (outcome?.nextDay ?? null) : null;
+  const controllerRef = useRef({ begin, goToTitle, mode, resultNextDay });
+  controllerRef.current = { begin, goToTitle, mode, resultNextDay };
   const syncHostRef = useRef(syncHost);
   syncHostRef.current = syncHost;
 
@@ -215,11 +243,14 @@ export function DinoSushiView({
       startOrder: () => controllerRef.current.begin("order"),
       startFree: () => controllerRef.current.begin("free"),
       restart: () => {
+        /* 外框的 Enter 跟結算主鈕走同一天 */
+        const { begin: run, mode: current, resultNextDay: next } = controllerRef.current;
+        if (next !== null) {
+          run("order", next);
+          return;
+        }
         const playing = sessionRef.current;
-        controllerRef.current.begin(
-          controllerRef.current.mode,
-          playing.mode === "order" && playing.day >= 1 ? playing.day : undefined,
-        );
+        run(current, playing.mode === "order" && playing.day >= 1 ? playing.day : undefined);
       },
       goToTitle: () => controllerRef.current.goToTitle(),
     });
@@ -271,6 +302,7 @@ export function DinoSushiView({
             gift={stickers.state.gift}
             reducedMotion={reducedMotion}
             onReplay={() => begin(outcome.mode, outcome.day >= 1 ? outcome.day : undefined)}
+            onNextDay={() => begin("order", outcome.nextDay ?? undefined)}
             onTitle={goToTitle}
             onBook={() => setBook(true)}
           />

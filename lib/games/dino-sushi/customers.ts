@@ -19,7 +19,6 @@ export type Customer = {
   /** data/characters.json 的名字，用來對定裝照。 */
   fullName: string;
   /** 定裝照。標題頁、貼紙書、謝謝膠囊用。 */
-  avatar: string;
   /** 全身貼紙。排隊、座位、點餐泡泡用。 */
   sticker: string;
   /** 進店第一句，後面再接想吃的壽司。 */
@@ -34,7 +33,6 @@ export const CUSTOMERS: readonly Customer[] = [
     id: "xiaohong",
     name: "小紅",
     fullName: "小紅賽車",
-    avatar: "/characters/小紅賽車.jpg",
     sticker: dinoSushiSrc("customers/xiaohong.webp"),
     greeting: "嗨，我是小紅。",
     thanks: "咻～好快好好吃！",
@@ -44,7 +42,6 @@ export const CUSTOMERS: readonly Customer[] = [
     id: "anan",
     name: "安安",
     fullName: "安安救護車",
-    avatar: "/characters/安安救護車.jpg",
     sticker: dinoSushiSrc("customers/anan.webp"),
     greeting: "你好，我是安安。",
     thanks: "謝謝你，好健康喔！",
@@ -54,7 +51,6 @@ export const CUSTOMERS: readonly Customer[] = [
     id: "ale",
     name: "阿樂",
     fullName: "黃色計程車",
-    avatar: "/characters/黃色計程車.jpg",
     sticker: dinoSushiSrc("customers/ale.webp"),
     greeting: "嗶嗶，我是阿樂。",
     thanks: "嗶嗶！黃黃的最棒！",
@@ -64,7 +60,6 @@ export const CUSTOMERS: readonly Customer[] = [
     id: "lingling",
     name: "鈴鈴",
     fullName: "鈴鈴清潔車",
-    avatar: "/characters/鈴鈴清潔車.jpg",
     sticker: dinoSushiSrc("customers/lingling.webp"),
     greeting: "你好，我是鈴鈴。",
     thanks: "乾乾淨淨，真好吃！",
@@ -74,7 +69,6 @@ export const CUSTOMERS: readonly Customer[] = [
     id: "dongdong",
     name: "東東",
     fullName: "東東挖土機",
-    avatar: "/characters/東東挖土機.jpg",
     sticker: dinoSushiSrc("customers/dongdong.webp"),
     greeting: "挖，我是東東。",
     thanks: "挖～一大口！",
@@ -84,7 +78,6 @@ export const CUSTOMERS: readonly Customer[] = [
     id: "xiangxiang",
     name: "香香",
     fullName: "香香餐車",
-    avatar: "/characters/香香餐車.jpg",
     sticker: dinoSushiSrc("customers/xiangxiang.webp"),
     greeting: "你好，我是香香。",
     thanks: "你做得比我還香！",

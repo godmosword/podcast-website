@@ -17,8 +17,6 @@ export type SushiDayFace = {
   stars: number;
   /** 資料上開著（前一天通關，或舊檔已經通關）。 */
   unlocked: boolean;
-  /** 這一階段玩得到。第 5–8 天先鎖著。 */
-  playable: boolean;
   /** 大開始鈕會進的那一天。 */
   current: boolean;
 };
@@ -34,7 +32,10 @@ type Props = {
   onBook: () => void;
 };
 
-/** 標題：封面、八張臉、一顆大圓「開始」。第 5–8 天看得到但還不能玩。 */
+/** 12px 下金框會蓋過米色，沒拿到的星要整顆退色，不然 0 顆看起來像 3 顆。 */
+const EMPTY_STAR = { filter: "grayscale(1)", opacity: 0.45 } as const;
+
+/** 標題：封面、玩得到的那幾天、一顆大圓「開始」。第 5–8 天還沒做，不顯示。 */
 export function DinoSushiTitle({
   days,
   stickerCount,
@@ -67,7 +68,7 @@ export function DinoSushiTitle({
         <div className={styles.dayScroll}>
           <ul className={styles.dayRow}>
             {days.map((day) => {
-              const locked = !day.playable || !day.unlocked;
+              const locked = !day.unlocked;
               const status = locked ? "（未解鎖）" : day.current ? "，現在要玩" : "";
               const label = `第 ${day.day} 天，${day.name}，已經拿到 ${day.stars} 顆星，全部 3 顆${status}`;
               const shaking = locked && wiggle?.day === day.day;
@@ -97,8 +98,9 @@ export function DinoSushiTitle({
                         {[0, 1, 2].map((index) => (
                           <IconStar
                             key={index}
-                            size={12}
+                            size={14}
                             color={index < day.stars ? "#ffd34d" : "#e4d3b4"}
+                            style={index < day.stars ? undefined : EMPTY_STAR}
                           />
                         ))}
                       </span>

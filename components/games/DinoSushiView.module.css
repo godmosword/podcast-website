@@ -285,7 +285,8 @@
   gap: 8px;
   width: 100%;
   min-width: calc(48px * 4 + 8px * 3);
-  margin: 0;
+  max-width: 420px;
+  margin: 0 auto;
   padding: 0;
   list-style: none;
 }
@@ -391,8 +392,8 @@
 }
 
 .dayFace {
-  width: 28px;
-  height: 28px;
+  width: 44px;
+  height: 44px;
   object-fit: contain;
   pointer-events: none;
 }
@@ -406,14 +407,7 @@
 .dayStars {
   display: flex;
   gap: 1px;
-  height: 12px;
-}
-
-@container sushi-title (min-width: 560px) {
-  .dayRow {
-    grid-template-columns: repeat(8, minmax(48px, 1fr));
-    min-width: calc(48px * 8 + 8px * 7);
-  }
+  height: 14px;
 }
 
 /* 與消消樂、方塊轉轉同一顆大圓「開始」 */
@@ -646,10 +640,10 @@
     min-height: 0;
   }
 
-  /* 矮畫面改成一排八張，橫向滑，開始鈕才留得住。 */
-  .dayRow {
-    grid-template-columns: repeat(8, minmax(48px, 1fr));
-    min-width: calc(48px * 8 + 8px * 7);
+  /* 矮畫面頭像收小，開始鈕才留得住。 */
+  .dayFace {
+    width: 28px;
+    height: 28px;
   }
 
   .titlePanel {
@@ -730,6 +724,39 @@
     0 8px 18px rgba(110, 75, 35, 0.16);
   --awning-h: clamp(16px, 13cqh, 28px);
   --counter-h: clamp(24px, 20cqh, 44px);
+}
+
+/* 第一次通關：下一天的朋友站到多多旁邊，關聲音、不識字也看得出多了新的東西 */
+.resultGuest {
+  position: absolute;
+  z-index: 1;
+  right: 8%;
+  bottom: calc(var(--counter-h) - 2px);
+  height: calc((100% - var(--counter-h) - var(--awning-h) - 2px) * 0.72);
+  aspect-ratio: 1;
+  animation: resultGuestIn 420ms ease-out 500ms backwards;
+}
+
+.resultGuest img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.resultHero[data-reduced="true"] .resultGuest {
+  animation: none;
+}
+
+@keyframes resultGuestIn {
+  0% {
+    opacity: 0;
+    transform: translateX(24px) scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .resultDuo {

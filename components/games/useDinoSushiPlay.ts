@@ -49,6 +49,8 @@ export const IDLE_HINT_MS = BASE_IDLE_HINT_MS;
 export type GuestThanks = { order: Order; line: string; leaving: boolean };
 /** 膠囊收起前的淡出時間。 */
 const THANKS_FADE_MS = 200;
+/** 下一單出來後，上一位朋友的謝謝再留這麼久就收。 */
+export const THANKS_LINGER_MS = 600;
 
 type PlayAction =
   | { type: "init"; mode: Mode; seed: number; tier: OrderTier; day?: number }
@@ -394,10 +396,10 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
     });
     later(t.done + CAPTION_LINGER_MS, () => setCaption((c) => (c === reaction ? null : c)));
     if (served && thanks) {
-      later(t.done + CAPTION_LINGER_MS - THANKS_FADE_MS, () =>
+      later(t.done + THANKS_LINGER_MS - THANKS_FADE_MS, () =>
         setThanks((g) => (g && g.order === served ? { ...g, leaving: true } : g)),
       );
-      later(t.done + CAPTION_LINGER_MS, () => setThanks((g) => (g && g.order === served ? null : g)));
+      later(t.done + THANKS_LINGER_MS, () => setThanks((g) => (g && g.order === served ? null : g)));
     }
   }, [clearTimers, later, locked, reducedMotion, round, sfx, touch]);
 

@@ -56,8 +56,7 @@ test("自由做「多多吃飽了」是實心綠鈕，跟多多的字卡長得�
   await page.goto("/games/dino-sushi");
   await page.getByRole("button", { name: "自由做" }).click();
   const full = page.getByRole("button", { name: "多多吃飽了" });
-  await expect(full).toBeVisible();
-  expect(await full.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe("rgb(63, 127, 42)");
+  await expect(full).toHaveCount(0);
   await page.getByRole("button", { name: "選握壽司" }).click();
   await page.getByRole("group", { name: "壽司料" }).getByRole("button").first().click();
   await page.getByRole("button", { name: "給多多吃" }).click();
@@ -65,6 +64,8 @@ test("自由做「多多吃飽了」是實心綠鈕，跟多多的字卡長得�
   await expect(caption).toBeVisible();
   expect(await caption.evaluate((el) => getComputedStyle(el).backgroundColor)).not.toBe("rgb(63, 127, 42)");
   await expect(page.getByRole("img", { name: "吃完 1 盤" })).toBeVisible();
+  await expect(full).toBeVisible();
+  expect(await full.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe("rgb(63, 127, 42)");
   await expect(full).toBeEnabled();
   await full.focus();
   await expect(full).toBeFocused();
@@ -348,7 +349,7 @@ test("自由做沒有排隊，也沒有客人座位", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/games/dino-sushi");
   await page.getByRole("button", { name: "自由做" }).click();
-  await expect(page.getByRole("button", { name: "多多吃飽了" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "選握壽司" })).toBeVisible();
   await expect(page.locator("[data-customer-queue]")).toHaveCount(0);
   await expect(page.locator("[data-customer-seat]")).toHaveCount(0);
 });
@@ -454,3 +455,28 @@ test("375×553：選完飯馬上按暫停，托盤不往下捲", async ({ page }
   await page.waitForTimeout(1000);
   expect(await page.evaluate(() => window.scrollY)).toBe(0);
 });
+
+for (const vp of [
+  { width: 375, height: 553 },
+  { width: 393, height: 659 },
+  { width: 390, height: 664 },
+  { width: 414, height: 736 },
+  { width: 430, height: 739 },
+]) {
+  test(`${vp.width}×${vp.height}：瀏覽器裡的一般手機，點餐時多多至少 50px，排隊不蓋到它`, async ({ page }) => {
+    await page.setViewportSize(vp);
+    await page.goto("/games/dino-sushi");
+    await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+    await expect(page.getByRole("img", { name: /^第 1 單/ })).toBeVisible();
+    const measured = await page.evaluate(() => {
+      const duo = [...document.querySelectorAll<HTMLImageElement>('[data-testid="dino-sushi"] img')]
+        .filter((img) => img.src.includes("duoduo"))
+        .map((img) => img.getBoundingClientRect())
+        .sort((a, b) => b.width - a.width)[0]!;
+      const queue = document.querySelector("[data-customer-queue]")!.getBoundingClientRect();
+      return { width: duo.width, top: duo.top, queueBottom: queue.bottom };
+    });
+    expect(measured.width).toBeGreaterThanOrEqual(50);
+    expect(measured.top).toBeGreaterThanOrEqual(measured.queueBottom - 12);
+  });
+}

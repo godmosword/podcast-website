@@ -67,7 +67,6 @@ test("新的一天從第 1 天開始：只有握壽司，料數 1、1、1、1、
 test("自由做不受天數影響：沒有訂單，三種飯都在", async ({ page }) => {
   await page.goto("/games/dino-sushi");
   await page.getByRole("button", { name: "自由做" }).click();
-  await expect(page.getByRole("button", { name: "多多吃飽了" })).toBeVisible();
   await expect(page.getByRole("button", { name: "選手捲" })).toBeVisible();
   await expect(page.getByRole("img", { name: /^第 1 單/ })).toHaveCount(0);
 });

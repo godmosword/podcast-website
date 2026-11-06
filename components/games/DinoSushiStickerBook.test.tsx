@@ -21,11 +21,11 @@ describe("貼紙書", () => {
     );
     expect(screen.getByRole("region", { name: "來過的朋友" })).toBeTruthy();
     const friend = screen.getByRole("button", { name: "小紅" });
-    expect(friend.querySelector("img")?.getAttribute("src")).toBe("/characters/小紅賽車.jpg");
+    expect(friend.querySelector("img")?.getAttribute("src")).toBe("/games/v2/dino-sushi/customers/sm/xiaohong.webp");
     expect(friend.querySelector("[data-kind='customer']")).toBeTruthy();
     const lockedFriend = screen.getByRole("button", { name: "還沒有。幫安安做對一盤" });
     expect(lockedFriend.textContent).toContain("？");
-    expect(lockedFriend.querySelector("img")?.getAttribute("src")).toBe("/characters/安安救護車.jpg");
+    expect(lockedFriend.querySelector("img")?.getAttribute("src")).toBe("/games/v2/dino-sushi/customers/sm/anan.webp");
     expect(screen.getAllByRole("button").filter((button) => button.getAttribute("data-locked") === "true")).toHaveLength(
       DINO_SUSHI_STICKER_TOTAL - 2,
     );
@@ -50,7 +50,7 @@ describe("貼紙書", () => {
     expect(sil).toMatch(/^url\(".*shrimp\.webp"\)$/);
     const friend = screen.getByRole("button", { name: "還沒有。幫安安做對一盤" });
     expect((friend.querySelector("[data-kind]") as HTMLElement).style.getPropertyValue("--sil")).toBe(
-      'url("/characters/安安救護車.jpg")',
+      'url("/games/v2/dino-sushi/customers/sm/anan.webp")',
     );
     const got = screen.getByRole("button", { name: "玉子" });
     expect((got.querySelector("[data-kind]") as HTMLElement).style.getPropertyValue("--sil")).toBe("");

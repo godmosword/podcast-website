@@ -88,7 +88,8 @@
    多多收窄，櫃台旁才站得下約六成四寬的客人（看起來超過多多的一半高）。燈籠讓出這條寬度。 */
 .duoArea[data-mode="order"] {
   --queue-top: 8px;
-  --queue-now: clamp(52px, 23cqw, 104px);
+  /* 也看舞台高度：一般手機在瀏覽器裡舞台只有 152px，只看寬度時排隊佔掉太多，多多只剩 30px。 */
+  --queue-now: clamp(50px, min(23cqw, 33cqh), 104px);
   --queue-wait: clamp(36px, 15cqw, 70px);
   --queue-show: 0.88;
   --queue-row: calc(var(--queue-now) * var(--queue-show));
@@ -605,7 +606,7 @@
   }
 
   .bubbleItem {
-    --cell: 30px;
+    --cell: 34px;
   }
 
   .guestFaceWrap {
@@ -630,7 +631,7 @@
   }
 
   .bubbleItem {
-    --cell: 30px;
+    --cell: 34px;
   }
 
   /* 矮舞台收起第幾單的小點，省下一列才不會壓到疊盤。做到哪一單看旁邊疊了幾盤。 */
@@ -755,6 +756,13 @@
 }
 
 /* 320×568：舞台只有約 152px 高，排隊不能跟著 23cqw 長，不然泡泡會壓到疊盤。 */
+/* 320 寬放 34px 會壓到客人貼紙，這裡維持 30px */
+@media (max-width: 340px) and (orientation: portrait) {
+  .bubbleItem {
+    --cell: 30px;
+  }
+}
+
 @media (max-width: 360px) and (orientation: portrait) {
   .duoArea[data-mode="order"] {
     --queue-top: 6px;
@@ -948,11 +956,12 @@
 
 .thanksFace > img {
   display: block;
+  box-sizing: border-box;
   width: 100%;
   height: 100%;
+  padding: 2px;
   border-radius: 50%;
-  object-fit: cover;
-  object-position: center 40%;
+  object-fit: contain;
   background: #fffdf8;
   box-shadow: 0 0 0 2px #ff8fb1;
   pointer-events: none;
@@ -1258,6 +1267,29 @@
   transition:
     transform 120ms ease-out,
     box-shadow 120ms ease-out;
+}
+
+.fullButton[data-waiting="true"] {
+  visibility: hidden;
+}
+
+/* 送出第一盤才彈出來：孩子看得到多了一顆鈕 */
+.fullButton:not([data-waiting]) {
+  animation: fullButtonIn 300ms ease-out;
+}
+
+@keyframes fullButtonIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .fullButton:active:not(:disabled) {
@@ -2311,6 +2343,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .fullButton:not([data-waiting]),
   .servingPlate[data-phase="slide"],
   .boardMain[data-shake],
   .bubbleItem[data-flash="true"],

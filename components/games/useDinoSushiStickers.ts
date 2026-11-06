@@ -11,6 +11,7 @@ import {
 import { cancelSpeech, speakText } from "@/lib/games/shared/speech";
 import {
   applyRoundStickers,
+  roundEndAnnouncement,
   stickerAnnouncement,
   type ApplyState,
 } from "@/lib/games/dino-sushi/stickers";
@@ -34,7 +35,8 @@ export function dinoSushiStickerPlayId(): string {
   return playId;
 }
 
-export type StickerVoice = { on: boolean; volume: number };
+/** closing：一輪結束時接在貼紙後面念的一句（例如第 2 天開了）。 */
+export type StickerVoice = { on: boolean; volume: number; closing?: string };
 
 /**
  * 標題頁進來先領「第一次來」；廚房裡每一步把新貼紙寫進存檔；
@@ -95,9 +97,10 @@ export function useDinoSushiStickers(round: RoundState | null, voice: StickerVoi
     if (!saved.ok) return;
     playState = applied.state;
     setState(saved.state);
-    if (round.done && applied.state.earned.length > 0 && spokenPlay.current !== play) {
+    const line = roundEndAnnouncement(applied.state.earned, applied.state.gifted, voiceRef.current.closing ?? "");
+    if (round.done && line && spokenPlay.current !== play) {
       spokenPlay.current = play;
-      say(stickerAnnouncement(applied.state.earned, applied.state.gifted), false);
+      say(line, false);
     }
   }, [attempt, noteSave, round, say]);
 
