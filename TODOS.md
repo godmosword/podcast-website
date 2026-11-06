@@ -27,6 +27,40 @@
 - **聽一次補回的開頭**：上面五集的開頭由轉錄稿校對，沒有人聽過。特別聽這幾句：`ep-15` 20.7 秒「長病毒了」、約 30 秒有一句聽不出來先留空、40 秒「我有聽到」；`ep-16` 約 26 秒 Bonbon 的回答先留空；`ep-17` 34.6 秒「然後深呼吸吐氣」、36 秒「我想要找爸爸媽媽」、42.8 秒「可以請爸爸媽媽幫忙」、70.4 秒「貓貓在敲門」。改完重新 `--mark`。`content · S · 需聽音檔`
 
 - **「關於我們」頁內容待 Kaiyi 決定修改方向。**
+
+### SEO／GEO：等正式站網址上線後再調（2026-11-06）
+
+> 正式自訂網域上線前，不要開始改這些程式。上線後用新網址重查 canonical、sitemap、OG、robots、`llms.txt`、Search Console，以及各平台與 Linktree 的外連。覆核日 2026-11-06，對照 https://podcast-website-mu.vercel.app 與 main 原始碼。
+
+**必做**
+
+- **平台與 Linktree 補上本站：** 2026-11-06 覆核，Apple、Spotify 的單集文案與 https://linktr.ee/bonboncarstory 都還沒連到這個網站。正式網址上線後再補。屬營運。`ops · S · 依賴正式網址`
+- **PodcastSeries 的 YouTube sameAs 是壞網址：** 線上首頁 JSON-LD `sameAs` 的 YouTube 是 `https://www.youtube.com/playlist`（`list` 被拿掉）。`lib/platforms.ts` 的 `platformShowUrls()` 只留 origin + pathname，`lib/json-ld.ts` 的 `podcastSeriesJsonLd` 拿它當 `sameAs`；頁尾圖示仍是完整播放清單網址。播放清單要不要改連頻道，見 [品牌標誌合規後續](#品牌標誌合規後續2026-10-12) 的「YouTube 連結」。這一條另記這個壞網址，開工時修。`eng · S · 可先記，實作等正式網址也可順手修`
+- **多數子頁沒有 og:image：** `/stories`、家長文章、國外旅遊、電子報、關於、主題各自寫了 `openGraph` 卻沒有 `images`。Twitter 標題、說明與圖退回全站預設（`app/layout.tsx`；這些頁沒覆寫 `twitter`）。首頁與單集頁有圖（`app/page.tsx` 已註明子頁會整段蓋掉版面預設；`lib/story-metadata.ts`）。2026-11-06 線上 `/stories`、`/about`、`/topic`、`/newsletter`、`/for-parents/overseas-travel` 無 `og:image`，Twitter 仍是全站吉祥物與全站文案；`/story/ep-1` 有自己的圖與文案。`eng · M · 正式網址`
+- **家長文、旅遊文、電子報缺 Article／BlogPosting：** `app/for-parents/articles/[slug]/page.tsx`、`app/for-parents/overseas-travel/[slug]/page.tsx`、`app/newsletter/[slug]/page.tsx` 的 `generateMetadata` 已是 `type: "article"` 並帶 `publishedTime`，頁上 JSON-LD 只有麵包屑。內文不顯示作者：`PARENT_ARTICLE_AUTHOR` 是馬米（`lib/parent-articles.ts`，列表頁眉有用），`ParentArticleView` 只渲染 `<time>`；電子報 `NewsletterView` 也只有 `<time>`。`eng · S · 正式網址`
+
+**應該做 · SEO**
+
+- **有封面就拿來當 og:image：** 圖缺了見上一條。國外旅遊文已有 `coverImage`（`data/parent-travel-abroad-articles.ts`），OG 沒用。有封面用封面，否則退 `DEFAULT_OG_IMAGE`（`/mascot.png`，`lib/site-url.ts`）。該頁 Twitter 的標題與說明跟該頁一致。`eng · S · 正式網址`
+- **`<head>` 補 RSS alternate：** `/feed.xml` 已存在（`app/feed.xml/route.ts`）。首頁 `alternates` 只有 canonical（`app/page.tsx`），版面也沒宣告 `application/rss+xml`。2026-11-06 線上首頁沒有這條。指到 `/feed.xml`。`eng · S · 正式網址`
+- **國外旅遊列表說明太薄：** `TRAVEL_ABROAD_LEDE` 現在是「國外旅遊的準備與行程。」（`lib/parent-travel-abroad.ts`），列表 metadata 用這句。2026-11-06 線上 `/for-parents/overseas-travel` 的 description 就是這句。`content · S · 正式網址`
+- **主題數兩邊不一致：** `/stories` 說 7 個成長主題（`STORY_FINDER_THEMES`，`data/episode-themes.ts`，`lib/stories-geo.ts`），`/topic` 說 16 個（`allTags()`，`lib/topic-index-geo.ts`）。2026-11-06 線上導言分別是「7 個成長主題」與「16 個成長主題」。先對齊對外怎麼數。`content · S · 需對齊口徑`
+- **部分文章 slug 仍是 `vocus-<id>`：** 手寫篇用英文短名，同步篇是 `vocus-<方格子 contentId>`（`data/parent-articles.ts` 註解，`scripts/lib/vocus-articles.ts`）。可以之後再改；改的話保留舊網址轉址。`content · S · 可後做`
+- **自訂網域上線後重跑搜尋設定：** 網域選哪個見 [路線圖待決策 ①](#路線圖單一優先序總表)（`chechepark.tw`／`checheland.tw`／其他；`NEXT_PUBLIC_SITE_URL` 與 `CANONICAL_SITE_URL` 已就緒）與 [M0a](#修正版執行順序)。部署後用新網址重查 canonical、sitemap、OG、Search Console。`ops · S · 依賴正式網址`
+
+**應該做 · GEO**
+
+- **`public/llms.txt` 過期：** 仍列 `/for-parents/dashboard`（`app/for-parents/dashboard/` 已沒有頁面），沒有列出家長文章（`/for-parents/articles`）、電子報（`/newsletter`）、國外旅遊（`/for-parents/overseas-travel`）。`eng · S · 正式網址`
+- **Organization 補 sameAs：** `siteIdentityJsonLd` 的 Organization 沒有 `sameAs`（`lib/json-ld.ts`）；sameAs 主要在 PodcastSeries，而且是 `platformShowUrls()`。可加上 IG、Threads（`lib/social.ts`）、https://linktr.ee/bonboncarstory，以及各收聽平台。Facebook 的 id 在查詢參數，sameAs 要留完整網址（`platformShowUrls()` 會拿掉查詢，見上面 YouTube 那條）。創作者社群 sameAs 見 [待議：主持人／創作者實體強化](#待議主持人創作者實體強化)。`eng · S · 正式網址`
+- **正式網址上線後的 GEO 營運沿用原條：** `INDEXNOW_KEY`、Google Search Console／Bing Webmaster、每週量測已寫在 [GEO 營運基礎](#geo-營運基礎crawler-政策indexnow逐字稿verifygeo) 的「剩餘（使用者手動）」，手冊是 `docs/GEO.md` 與 `docs/GEO-BASELINE.md`。網域換了之後照那一段做。`ops · S · 依賴正式網址`
+
+**以後再確認**
+
+- **索引涵蓋還沒核實：** 2026-11-06 覆核時 `site:` 搜尋看不出收錄範圍。正式網址上線後用 Search Console 再查。`ops · S · 依賴正式網址`
+- **http 轉 https 在一個環境不確定：** 2026-11-06 覆核時，有一個環境得到 Pingora 500。正式網址上線後再測。`ops · S · 依賴正式網址`
+
+### pending
+
 - ✅ **補 darwin 視覺基準（小橘特快車第一版與第三輪）**：2026-10-27 在 Mac 以審查修正後的駕駛台補 23 張（`e2e/visual.spec.ts` 的「小橘特快車」）：標題選「自己開」390／1280 日間與夜間；開車中整個視窗：加速 P3（390 日間與夜間、1280 日間）、進站停車目標條（390 日間與夜間、1280 日間、844×390 橫式）、速限牌、隧道（390 日間與夜間，另一張減少動態）、鐵橋喇叭提示、對向列車、海邊（390 與 1280 日間）、停好開門乘客上完車；家長開「速度表數字」的儀表特寫；結算兩張（大司機三站綠區含指差確認與鐵橋打招呼，390 日間；慢慢看開過頭提示說原因，390 夜間）。前窗一律定格並關掉輕晃（晃動跟時間走，定格時也還在晃）。開車中的 19 張連錄兩次位元組相同，標題 4 張只有背景漸層 ≤37 像素、色差 ≤4 的雜訊。整套 112 passed／2 skipped。遊戲設定對話框沒錄，見下一條。見本 commit。
 - ✅ **遊戲設定對話框在手機上超出畫面**（2026-10-27）：根因是 `GameChrome` 的 `.wrap` 用 `isolation: isolate`，遮罩的 z-index 200 只在層內比，頁面 sticky 抬頭（z-index 20）疊在上面。打開時外框標 `data-settings-open` 把整層抬到 200；對話框限高、框內捲，遮罩避開瀏海與主畫面指示條。消消樂、壽司屋、小橘特快車在 390×844、375×667、320×568、844×390、1280×800 都量過，`e2e/games.spec.ts` 補三款 × 375×667／844×390 的回歸測試（未修前 4 條紅）。順手修好消消樂「念出來」說明誤用壽司屋的文案。補小橘特快車遊戲設定 390 日間基準。見本 commit。
 - **小橘特快車美術／UX 審查的後續**（2026-10-27 審查；第一批見上兩條，第二批 2026-10-28 PR #267，計畫 `docs/plans/2026-10-28-orange-express-art-batch2.md`）：
