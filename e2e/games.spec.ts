@@ -798,9 +798,6 @@ test.describe("多多壽司屋", () => {
       expect(free.height, "自由做高").toBeGreaterThanOrEqual(64);
 
       await page.getByRole("button", { name: "自由做" }).click();
-      const full = (await page.getByRole("button", { name: "多多吃飽了" }).boundingBox())!;
-      expect(Math.min(full.width, full.height), "多多吃飽了").toBeGreaterThanOrEqual(64);
-
       await page.getByRole("button", { name: "選握壽司" }).click();
       const tray = page.getByRole("group", { name: "壽司料" }).getByRole("button");
       for (const btn of await tray.all()) {
@@ -832,7 +829,17 @@ test.describe("多多壽司屋", () => {
       const brushBox = (await brush.boundingBox())!;
       expect(Math.min(brushBox.width, brushBox.height), "幫多多刷牙").toBeGreaterThanOrEqual(80);
 
-      await page.getByRole("button", { name: "多多吃飽了" }).click();
+      // 送出第一盤才彈出來，等彈完再量
+      const fullButton = page.getByRole("button", { name: "多多吃飽了" });
+      await expect(fullButton).toBeVisible();
+      await expect
+        .poll(async () => {
+          const full = (await fullButton.boundingBox())!;
+          return Math.min(full.width, full.height);
+        }, { message: "多多吃飽了" })
+        .toBeGreaterThanOrEqual(64);
+
+      await fullButton.click();
       const title = (await page.getByRole("button", { name: "回標題" }).boundingBox())!;
       expect(Math.min(title.width, title.height), "回標題").toBeGreaterThanOrEqual(64);
       const again = (await page.getByRole("button", { name: "再自由做" }).boundingBox())!;
