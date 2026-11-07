@@ -77,7 +77,7 @@ export function createRound(mode: Mode, seed: number, tier: OrderTier = "normal"
     attempts: 0,
     plates: [],
     firstTries: [],
-    favorite: favoriteFor(seed),
+    favorite: favoriteFor(seed, tray),
     pending: null,
     pendingFirstTry: false,
     brushReady: false,

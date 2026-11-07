@@ -179,4 +179,72 @@ describe("dinoSushiAdapter", () => {
     inst.notifyServed();
     expect(onSession).not.toHaveBeenCalled();
   });
+
+  describe("存檔寫不進去", () => {
+    function brokenStore() {
+      const store = { broken: true };
+      const onSession = vi.fn(() => {
+        if (store.broken) throw new Error("QuotaExceededError");
+      });
+      return { store, onSession, inst: new DinoSushiInstance({ kidsMode: true, reducedMotion: false, onSession }) };
+    }
+
+    it("第 1–3 天：不丟例外、回報 false，畫面仍進結算", () => {
+      const { inst } = brokenStore();
+      inst.notifyPlaying("order");
+      expect(inst.notifyDayCleared({ cleared: true })).toBe(false);
+      expect(inst.getStatus()).toBe("won");
+    });
+
+    it("第 4 天：再存一次補寫同一筆；寫好之後不再重送", () => {
+      const { inst, onSession, store } = brokenStore();
+      inst.notifyPlaying("order");
+      expect(inst.notifyWon({ cleared: true, flawless: true, collectedAll: false })).toBe(false);
+      expect(inst.flushSessions()).toBe(false);
+      store.broken = false;
+      expect(inst.flushSessions()).toBe(true);
+      const sent = { gameId: "dino-sushi", score: 0, levelIndex: 0, cleared: true, flawless: true, collectedAll: false };
+      expect(onSession).toHaveBeenLastCalledWith(sent);
+      const calls = onSession.mock.calls.length;
+      expect(inst.flushSessions()).toBe(true);
+      expect(onSession).toHaveBeenCalledTimes(calls);
+    });
+
+    it("同一輪重複通報不會多排一筆", () => {
+      const { inst, onSession, store } = brokenStore();
+      inst.notifyPlaying("order");
+      inst.notifyDayCleared({ cleared: true });
+      inst.notifyDayCleared({ cleared: true });
+      store.broken = false;
+      onSession.mockClear();
+      expect(inst.flushSessions()).toBe(true);
+      expect(onSession).toHaveBeenCalledTimes(1);
+    });
+
+    it("自由做：第一盤沒寫進去，吃飽時再補一次，並回報結果", () => {
+      const { inst, onSession, store } = brokenStore();
+      inst.notifyPlaying("free");
+      inst.notifyServed();
+      expect(inst.notifyFinished()).toBe(false);
+      store.broken = false;
+      onSession.mockClear();
+      expect(inst.flushSessions()).toBe(true);
+      expect(onSession).toHaveBeenCalledTimes(1);
+      expect(onSession).toHaveBeenCalledWith({ gameId: "dino-sushi", score: 0 });
+    });
+
+    it("沒補上的回報留到下一輪，跟下一輪的一起寫，順序不變", () => {
+      const { inst, onSession, store } = brokenStore();
+      inst.notifyPlaying("order");
+      inst.notifyWon({ cleared: true, flawless: false, collectedAll: false });
+      inst.notifyPlaying("order");
+      store.broken = false;
+      onSession.mockClear();
+      expect(inst.notifyDayCleared({ cleared: true })).toBe(true);
+      expect(onSession.mock.calls.map(([result]: unknown[]) => (result as { grantMedals?: boolean }).grantMedals)).toEqual([
+        undefined,
+        false,
+      ]);
+    });
+  });
 });

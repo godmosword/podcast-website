@@ -28,6 +28,21 @@ export function normalizeDayFlags(value: unknown): number[] {
   return out;
 }
 
+/** 把這一輪的獎牌 bit 加進那一天，回傳新陣列。第 4 天走舊獎牌、範圍外的天都不寫。 */
+export function withDayFlags(days: readonly number[], day: number, flags: number): number[] {
+  const next = normalizeDayFlags(days);
+  if (day < 1 || day > SUSHI_DAY_COUNT || day === 4) return next;
+  next[day - 1] = next[day - 1]! | (flags & MEDAL_MASK);
+  return next;
+}
+
+/** 存檔和還沒寫進去的合起來：逐天 OR，星星只加不減。 */
+export function mergeDayFlags(left: readonly number[], right: readonly number[]): number[] {
+  const a = normalizeDayFlags(left);
+  const b = normalizeDayFlags(right);
+  return a.map((flags, i) => flags | b[i]!);
+}
+
 /** 第 4 天讀舊獎牌；其他天讀 dinoSushiDays。 */
 export function flagsForDay(day: number, days: readonly number[], classicFlags: number): number {
   if (day === 4) return classicFlags & MEDAL_MASK;

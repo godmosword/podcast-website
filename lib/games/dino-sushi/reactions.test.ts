@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { addTopping, changeBase, EMPTY_SUSHI, type Sushi } from "./sushi";
+import { buildTray } from "./orders";
 import { favoriteFor, MOOD_RANK, reactionFor, servingLine } from "./reactions";
 import type { Order } from "./orders";
 
@@ -59,9 +60,11 @@ describe("點餐反應", () => {
 });
 
 describe("自由做反應", () => {
-  it("最愛只挑家常料，吃到最愛是最高級", () => {
+  it("最愛只挑這一輪托盤上的家常料，吃到最愛是最高級", () => {
     for (let seed = 1; seed <= 30; seed++) {
-      const fav = favoriteFor(seed);
+      const tray = buildTray(seed);
+      const fav = favoriteFor(seed, tray);
+      expect(tray).toContain(fav);
       expect(["strawberry", "pudding", "wasabi"]).not.toContain(fav);
       const r = reactionFor(make("gunkan", [fav]), { favorite: fav });
       expect(r.mood).toBe("love");

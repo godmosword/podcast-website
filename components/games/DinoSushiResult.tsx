@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, type CSSProperties } from "react";
+import { useLayoutEffect, useRef, type CSSProperties, type ReactNode, type RefObject } from "react";
 import { GameEndStation } from "@/components/games/GameEndStation";
 import { IconChevronLeft } from "@/components/games/ClayIcons";
 import { ResultStars, type ResultStarHint } from "@/components/games/ResultStars";
@@ -31,6 +31,8 @@ type Props = {
   fresh: readonly string[];
   /** 這一輪若是保底送的，就是那張的 id。 */
   gift: string;
+  /** 存檔失敗的提示。放在結算對話框裡面，才看得到、按得到。 */
+  notice: ReactNode;
   reducedMotion: boolean;
   onReplay: () => void;
   /** 有下一天時（outcome.nextDay）主鈕往前走。 */
@@ -90,6 +92,22 @@ function PlateRow({ outcome, reducedMotion }: { outcome: DinoSushiOutcome; reduc
       ))}
     </p>
   );
+}
+
+/**
+ * 按「再存一次」成功後那顆鈕就消失，焦點會掉到 body，對話框外面什麼都按不到。
+ * 掉了就接回主鈕。貼紙這時可能也存好了，新貼紙的「+N」排在主鈕前面，所以不能拿第一顆鈕。
+ */
+function useKeepFocusAfterNotice(root: RefObject<HTMLElement | null>, hasNotice: boolean, mainLabel: string) {
+  const hadNotice = useRef(hasNotice);
+  useLayoutEffect(() => {
+    const removed = hadNotice.current && !hasNotice;
+    hadNotice.current = hasNotice;
+    if (!removed) return;
+    const active = document.activeElement;
+    if (active && active !== document.body) return;
+    root.current?.querySelector<HTMLElement>(`[role="dialog"] button[aria-label="${mainLabel}"]`)?.focus();
+  }, [hasNotice, mainLabel, root]);
 }
 
 function staggerStyle(i: number): CSSProperties {
@@ -152,6 +170,7 @@ export function DinoSushiResult({
   stars,
   fresh,
   gift,
+  notice,
   reducedMotion,
   onReplay,
   onNextDay,
@@ -175,6 +194,10 @@ export function DinoSushiResult({
   const bookLabel = fresh.length > 0 ? "放進貼紙書" : "貼紙書";
   const mood = outcome.variety ?? roundVariety(outcome.seed);
   const { nextDay } = outcome;
+  const replayLabel = outcome.mode === "order" ? "再做一輪" : "再自由做";
+  const nextDayLabel = nextDay !== null ? `開始第 ${nextDay} 天` : null;
+  const overlayRef = useRef<HTMLDivElement>(null);
+  useKeepFocusAfterNotice(overlayRef, Boolean(notice), nextDayLabel ?? replayLabel);
   const title =
     nextDay !== null && outcome.dayOpened
       ? dayOpenedLine(nextDay)
@@ -183,10 +206,11 @@ export function DinoSushiResult({
         : "多多吃飽了！";
   return (
     <div
+      ref={overlayRef}
       className={styles.resultOverlay}
       data-testid="dino-sushi-result"
-      /* 有新貼紙時店面收矮、彩紙收起，「放進貼紙書」才留在同一屏 */
-      data-fresh={fresh.length > 0 ? "true" : undefined}
+      /* 有新貼紙或存檔提示時店面收矮、彩紙收起，主鈕和「放進貼紙書」才留在同一屏 */
+      data-fresh={fresh.length > 0 || notice ? "true" : undefined}
     >
       {/* 店裡吃飽飽的多多（裝飾）：同一間迴轉壽司店，結算不像跳到另一個畫面 */}
       <div className={styles.resultHero} data-reduced={reducedMotion ? "true" : undefined} aria-hidden>
@@ -208,18 +232,20 @@ export function DinoSushiResult({
         title={title}
         gameSlug="dino-sushi"
         onReplay={onReplay}
-        replayLabel={outcome.mode === "order" ? "再做一輪" : "再自由做"}
-        mainAction={
-          nextDay !== null ? { label: `開始第 ${nextDay} 天`, onClick: onNextDay, icon: "next" } : undefined
-        }
+        replayLabel={replayLabel}
+        mainAction={nextDayLabel !== null ? { label: nextDayLabel, onClick: onNextDay, icon: "next" } : undefined}
         details={details}
         leadingAction={titleAction}
         sideSize={64}
         mainSize={88}
         extraActions={
-          <TapButton className={styles.resultBook} onTap={onBook}>
-            {bookLabel}
-          </TapButton>
+          <>
+            <TapButton className={styles.resultBook} onTap={onBook}>
+              {bookLabel}
+            </TapButton>
+            {/* 排在主鈕後面：對話框一開焦點仍在主鈕，Enter 不會按到「再存一次」 */}
+            {notice}
+          </>
         }
       />
     </div>

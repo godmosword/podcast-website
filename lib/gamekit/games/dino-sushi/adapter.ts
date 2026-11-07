@@ -9,6 +9,7 @@ import type {
   OverlayProps,
 } from "@/lib/gamekit/adapter";
 import { DinoSushiView } from "@/components/games/DinoSushiView";
+import type { GameSessionResult } from "@/lib/gamekit/progress/session";
 import { DINO_SUSHI_LEVEL_INDEX, type RoundMedals } from "@/lib/games/dino-sushi/medals";
 import type { Mode } from "@/lib/games/dino-sushi/round";
 
@@ -56,6 +57,8 @@ class DinoSushiInstance implements GameInstance {
   private mode: Mode = "order";
   private paused = false;
   private sessionReported = false;
+  /** 寫不進存檔的回報。留到「再存一次」或下一次回報一起補，順序不變。 */
+  private unreported: readonly GameSessionResult[] = [];
   /** 剛回到標題的時間：結算畫面用 Enter 按「回標題」時，Host 會在下一幀補呼叫 start()，要忽略。 */
   private readyAt = 0;
   /** 剛進結算的時間：用 Enter 按「多多吃飽了」會立刻結算，Host 下一幀又把同一次 Enter 當 start()，要忽略。 */
@@ -141,24 +144,43 @@ class DinoSushiInstance implements GameInstance {
     this.status = "playing";
   }
 
-  /** 自由做：第一盤送出就記「玩過」與活動紀錄，不給星。 */
+  /** 把還沒寫進去的回報再寫一次。全部寫好回傳 true；localStorage 滿了也不丟例外。 */
+  flushSessions(): boolean {
+    while (this.unreported.length > 0) {
+      try {
+        this.options.onSession?.(this.unreported[0]!);
+      } catch {
+        return false;
+      }
+      this.unreported = this.unreported.slice(1);
+    }
+    return true;
+  }
+
+  /** 一輪只報一次。回傳 false＝有東西沒寫進去，由 View 提示再存一次。 */
+  private reportOnce(result: GameSessionResult): boolean {
+    if (!this.sessionReported) {
+      this.sessionReported = true;
+      this.unreported = [...this.unreported, result];
+    }
+    return this.flushSessions();
+  }
+
+  /** 自由做：第一盤送出就記「玩過」與活動紀錄，不給星。寫不進去就排著，吃飽時再補、再提示。 */
   notifyServed(): void {
     if (this.mode !== "free" || this.sessionReported) return;
-    this.sessionReported = true;
-    this.options.onSession?.({ gameId: this.id, score: 0 });
+    this.reportOnce({ gameId: this.id, score: 0 });
   }
 
   /**
    * 第 1–3 天送完 5 單。星星只記在壽司屋，不走全站獎牌。
    * 不帶 levelIndex，Host 就不會把 bit OR 進 medals["dino-sushi"]。
    */
-  notifyDayCleared(medals: Pick<RoundMedals, "cleared">): void {
+  notifyDayCleared(medals: Pick<RoundMedals, "cleared">): boolean {
     this.screen = "result";
     this.status = "won";
     this.resultAt = Date.now();
-    if (this.sessionReported) return;
-    this.sessionReported = true;
-    this.options.onSession?.({
+    return this.reportOnce({
       gameId: this.id,
       score: 0,
       cleared: medals.cleared,
@@ -167,13 +189,11 @@ class DinoSushiInstance implements GameInstance {
   }
 
   /** 第 4 天（舊的那一關）送完 5 單。仍回報 levelIndex 0，舊星只會 OR、不會再發一次。 */
-  notifyWon(medals: Pick<RoundMedals, "cleared" | "flawless" | "collectedAll">): void {
+  notifyWon(medals: Pick<RoundMedals, "cleared" | "flawless" | "collectedAll">): boolean {
     this.screen = "result";
     this.status = "won";
     this.resultAt = Date.now();
-    if (this.sessionReported) return;
-    this.sessionReported = true;
-    this.options.onSession?.({
+    return this.reportOnce({
       gameId: this.id,
       score: 0,
       levelIndex: DINO_SUSHI_LEVEL_INDEX,
@@ -183,11 +203,12 @@ class DinoSushiInstance implements GameInstance {
     });
   }
 
-  /** 自由做按「多多吃飽了」。 */
-  notifyFinished(): void {
+  /** 自由做按「多多吃飽了」。順便補第一盤沒寫進去的回報。 */
+  notifyFinished(): boolean {
     this.screen = "result";
     this.status = "won";
     this.resultAt = Date.now();
+    return this.flushSessions();
   }
 
   isInputPaused(): boolean {

@@ -3,14 +3,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { GameAudioBus, OverlayProps } from "@/lib/gamekit/adapter";
 import type { DinoSushiInstance } from "@/lib/gamekit/games/dino-sushi/adapter";
-import { loadDinoSushiDays, saveDinoSushiDayFlags } from "@/lib/gamekit/progress/dino-sushi-days";
 import { medalCount, medalFlags } from "@/lib/gamekit/progress/meta";
-import { loadPlayerProfile } from "@/lib/gamekit/progress/save";
-import { GAMEKIT_PROGRESS_EVENT } from "@/lib/gamekit/progress/session";
 import { useDinoSushiClayPreload } from "@/lib/games/dino-sushi/art";
 import {
   dayStarCount,
-  emptyDayFlags,
   flagsForDay,
   isDayCleared,
   isDayPlayable,
@@ -21,14 +17,14 @@ import {
 } from "@/lib/games/dino-sushi/day-progress";
 import { DAY_CARDS } from "@/lib/games/dino-sushi/days";
 import { duoduoStickerSrc, useDuoDuoStickerPreload } from "@/lib/games/dino-sushi/duoduo-sticker";
-import { DINO_SUSHI_LEVEL_INDEX, roundMedals, type RoundMedals } from "@/lib/games/dino-sushi/medals";
+import { roundMedals, type RoundMedals } from "@/lib/games/dino-sushi/medals";
 import { SUSHI_SFX } from "@/lib/games/dino-sushi/sfx";
 import type { Mode, RoundState } from "@/lib/games/dino-sushi/round";
-import { PROGRESS_CHANGE_EVENT } from "@/lib/progress-keys";
 import { DinoSushiKitchen } from "./DinoSushiKitchen";
 import { DinoSushiResult } from "./DinoSushiResult";
 import { DinoSushiStickerBook } from "./DinoSushiStickerBook";
 import { DinoSushiTitle, type SushiDayFace } from "./DinoSushiTitle";
+import { ROUND_SAVE_ERROR, storedClassicFlags, useDinoSushiDayProgress } from "./useDinoSushiDayProgress";
 import { playVoices, useDinoSushiPlay } from "./useDinoSushiPlay";
 import { useDinoSushiStickers } from "./useDinoSushiStickers";
 import { DINO_SUSHI_STICKER_TOTAL } from "@/lib/games/dino-sushi/stickers";
@@ -59,10 +55,6 @@ export type DinoSushiOutcome = {
   nextDayFace: string | null;
 };
 
-function storedClassicFlags(): number {
-  return loadPlayerProfile().medals["dino-sushi"]?.[DINO_SUSHI_LEVEL_INDEX] ?? 0;
-}
-
 function dayFaceSrc(card: (typeof DAY_CARDS)[number]): string {
   if (card.duoduo) return duoduoStickerSrc(card.duoduo);
   return customerById(card.customerId!).sticker;
@@ -87,27 +79,11 @@ export function DinoSushiView({
   useDinoSushiClayPreload();
   const [screen, setScreen] = useState<Screen>("title");
   const [mode, setMode] = useState<Mode>("order");
-  const [dayFlags, setDayFlags] = useState<number[]>(() =>
-    typeof window === "undefined" ? emptyDayFlags() : loadDinoSushiDays(),
-  );
-  const [classicFlags, setClassicFlags] = useState(() => (typeof window === "undefined" ? 0 : storedClassicFlags()));
+  const { dayFlags, classicFlags, saveFailed, recordDay, noteReport, retry: retryProgress } =
+    useDinoSushiDayProgress(instance);
   const [outcome, setOutcome] = useState<DinoSushiOutcome | null>(null);
   const sessionRef = useRef({ mode: "order" as Mode, day: 0, firstClear: false });
   const inputPaused = instance.isInputPaused() || status === "paused";
-
-  const refreshDays = useCallback(() => {
-    setDayFlags(loadDinoSushiDays());
-    setClassicFlags(storedClassicFlags());
-  }, []);
-  useEffect(() => {
-    refreshDays();
-    window.addEventListener(GAMEKIT_PROGRESS_EVENT, refreshDays);
-    window.addEventListener(PROGRESS_CHANGE_EVENT, refreshDays);
-    return () => {
-      window.removeEventListener(GAMEKIT_PROGRESS_EVENT, refreshDays);
-      window.removeEventListener(PROGRESS_CHANGE_EVENT, refreshDays);
-    };
-  }, [refreshDays]);
 
   const onServed = useCallback(() => {
     instance.notifyServed();
@@ -119,13 +95,9 @@ export function DinoSushiView({
         const medals = roundMedals(round.firstTries);
         const flags = medalFlags(medals.cleared, medals.flawless, medals.collectedAll);
         /* 第 1–3 天只記在壽司屋。第 4 天仍走舊獎牌，已經有的星不會再發。 */
-        if (round.day >= 1 && round.day <= 3) {
-          setDayFlags(saveDinoSushiDayFlags(round.day, flags));
-          instance.notifyDayCleared(medals);
-        } else {
-          instance.notifyWon(medals);
-        }
-        const nextDay = nextDayAfter(round.day, loadDinoSushiDays(), storedClassicFlags());
+        const days = recordDay(round.day, flags);
+        noteReport(round.day >= 1 && round.day <= 3 ? instance.notifyDayCleared(medals) : instance.notifyWon(medals));
+        const nextDay = nextDayAfter(round.day, days, storedClassicFlags());
         setOutcome({
           mode: "order",
           plates: round.plates,
@@ -138,7 +110,7 @@ export function DinoSushiView({
           nextDayFace: faceForDay(nextDay),
         });
       } else {
-        instance.notifyFinished();
+        noteReport(instance.notifyFinished());
         setOutcome({
           mode: "free",
           plates: round.plates,
@@ -154,7 +126,7 @@ export function DinoSushiView({
       setScreen("result");
       syncHost();
     },
-    [instance, syncHost],
+    [instance, noteReport, recordDay, syncHost],
   );
 
   const play = useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, onDone });
@@ -258,6 +230,24 @@ export function DinoSushiView({
     syncHostRef.current();
   }, [instance]);
 
+  const resultShown = screen === "result" && outcome !== null && !book;
+  const saveError = saveFailed ? ROUND_SAVE_ERROR : stickers.saveError;
+  const saveNotice = saveError ? (
+    <p className={styles.saveError} role="alert">
+      <span>{saveError}</span>
+      <button
+        type="button"
+        className={styles.saveRetry}
+        onClick={() => {
+          retryProgress();
+          if (stickers.saveError) stickers.retrySave();
+        }}
+      >
+        再存一次
+      </button>
+    </p>
+  ) : null;
+
   return (
     <div
       className={styles.surface}
@@ -294,9 +284,10 @@ export function DinoSushiView({
           />
         ) : null}
 
-        {screen === "result" && outcome && !book ? (
+        {resultShown ? (
           <DinoSushiResult
             outcome={outcome}
+            notice={saveNotice}
             stars={outcome.medals ? medalCount(medalFlags(outcome.medals.cleared, outcome.medals.flawless, outcome.medals.collectedAll)) : null}
             fresh={stickers.state.fresh}
             gift={stickers.state.gift}
@@ -319,14 +310,8 @@ export function DinoSushiView({
         />
       ) : null}
 
-      {stickers.saveError ? (
-        <p className={styles.saveError} role="alert">
-          <span>{stickers.saveError}</span>
-          <button type="button" className={styles.saveRetry} onClick={stickers.retrySave}>
-            再存一次
-          </button>
-        </p>
-      ) : null}
+      {/* 結算蓋住整個卡面，而且是圈住焦點的對話框，提示要放進去才看得到、按得到 */}
+      {resultShown ? null : saveNotice}
 
       {/* 單一常駐 live 區：新訂單、多多的字卡 */}
       <p className={styles.visuallyHidden} aria-live="polite">

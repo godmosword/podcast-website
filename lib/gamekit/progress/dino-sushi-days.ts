@@ -5,7 +5,13 @@
  */
 
 import { getGameKitSettingsFromStore, saveGameKitSettingsToStore } from "@/lib/progress-store";
-import { normalizeDayFlags, SUSHI_DAY_COUNT } from "@/lib/games/dino-sushi/day-progress";
+import { mergeDayFlags, normalizeDayFlags } from "@/lib/games/dino-sushi/day-progress";
+
+export type DinoSushiDaysWrite = {
+  ok: boolean;
+  /** 算進這次之後的八天。ok 為 false 時只活在記憶體，呼叫端要留著下次再寫。 */
+  days: number[];
+};
 
 export function loadDinoSushiDays(): number[] {
   if (typeof window === "undefined") return normalizeDayFlags(undefined);
@@ -16,13 +22,18 @@ export function loadDinoSushiDays(): number[] {
   }
 }
 
-/** 把這一輪的獎牌 bit OR 進指定那天。第 4 天略過。回傳寫完的八天。 */
-export function saveDinoSushiDayFlags(day: number, flags: number): number[] {
+/**
+ * 把幾天的獎牌 bit OR 進存檔。沒有新東西就不寫。
+ * localStorage 滿了也不丟例外：結算不能因為存不進去就變成錯誤頁。
+ */
+export function saveDinoSushiDays(pending: readonly number[]): DinoSushiDaysWrite {
   const current = loadDinoSushiDays();
-  if (day < 1 || day > SUSHI_DAY_COUNT || day === 4) return current;
-  const next = current.slice();
-  next[day - 1] = (next[day - 1]! | (flags & 7)) & 7;
-  if (next[day - 1] === current[day - 1]) return current;
-  saveGameKitSettingsToStore({ dinoSushiDays: next });
-  return next;
+  const next = mergeDayFlags(current, pending);
+  if (next.every((flags, i) => flags === current[i])) return { ok: true, days: current };
+  try {
+    saveGameKitSettingsToStore({ dinoSushiDays: next });
+  } catch {
+    return { ok: false, days: next };
+  }
+  return { ok: true, days: next };
 }

@@ -168,3 +168,18 @@ describe("自由做", () => {
     expect(roundReducer(s, { type: "finish" })).toBe(s);
   });
 });
+
+describe("自由做的最愛", () => {
+  it("種子 1–1000：最愛都在托盤上，放上去就吃得到「最愛」", () => {
+    for (let seed = 1; seed <= 1000; seed++) {
+      const start = createRound("free", seed);
+      expect(start.tray, `種子 ${seed}`).toContain(start.favorite);
+      const served = run(start, [
+        { type: "pick-base", base: "nigiri" },
+        { type: "add", id: start.favorite },
+        { type: "serve" },
+      ]);
+      expect(served.pending?.mood, `種子 ${seed}`).toBe("love");
+    }
+  });
+});

@@ -59,10 +59,12 @@ function missingLine(order: Order, match: OrderMatch): string {
   return `還想要${missing}！`;
 }
 
-/** 自由做的「最愛」：只從家常料挑，不挑甜點。 */
-export function favoriteFor(seed: number): ToppingId {
+/** 自由做的「最愛」：只從這一輪托盤上的家常料挑，孩子一定做得出來。不挑甜點。 */
+export function favoriteFor(seed: number, tray: readonly ToppingId[]): ToppingId {
   const rng = seededRng((seed ^ FAVORITE_SEED_SALT) >>> 0);
-  return SAVORY_TOPPINGS[pickIndex(SAVORY_TOPPINGS.length, rng)]!.id;
+  const onTray = tray.filter((id) => toppingById(id).kind === "savory");
+  const pool = onTray.length > 0 ? onTray : SAVORY_TOPPINGS.map((topping) => topping.id);
+  return pool[pickIndex(pool.length, rng)]!;
 }
 
 function react(mood: Mood, line: string, brush: boolean, match?: OrderMatch): Reaction {

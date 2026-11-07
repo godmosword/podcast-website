@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { emptyDayFlags, nextDayAfter } from "./day-progress";
+import { emptyDayFlags, mergeDayFlags, nextDayAfter, withDayFlags } from "./day-progress";
 
 const cleared = (...days: number[]) => {
   const flags = emptyDayFlags();
@@ -29,5 +29,31 @@ describe("nextDayAfter：結算的主鈕要不要前進", () => {
 
   it("自由做沒有天數：不前進", () => {
     expect(nextDayAfter(0, emptyDayFlags(), 0)).toBeNull();
+  });
+});
+
+describe("withDayFlags：把這一輪的星星加進那一天", () => {
+  it("只加不減，回傳新陣列、不動原本的", () => {
+    const days = withDayFlags(emptyDayFlags(), 1, 1);
+    const more = withDayFlags(days, 1, 6);
+    expect(days[0]).toBe(1);
+    expect(more[0]).toBe(7);
+    expect(withDayFlags(more, 1, 1)[0]).toBe(7);
+  });
+
+  it("第 4 天走舊獎牌、範圍外的天都不寫", () => {
+    const empty = emptyDayFlags();
+    expect(withDayFlags(empty, 4, 7)).toEqual(empty);
+    expect(withDayFlags(empty, 0, 7)).toEqual(empty);
+    expect(withDayFlags(empty, 9, 7)).toEqual(empty);
+  });
+});
+
+describe("mergeDayFlags：存檔和還沒寫進去的合起來", () => {
+  it("逐天 OR；舊存檔長度不對也不會丟掉另一邊", () => {
+    const left = withDayFlags(emptyDayFlags(), 1, 1);
+    const right = withDayFlags(withDayFlags(emptyDayFlags(), 1, 2), 2, 1);
+    expect(mergeDayFlags(left, right).slice(0, 2)).toEqual([3, 1]);
+    expect(mergeDayFlags([], right).slice(0, 2)).toEqual([2, 1]);
   });
 });
