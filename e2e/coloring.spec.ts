@@ -205,7 +205,7 @@ test.describe("coloring book", () => {
     expect(await countRedInDoneSnapshot(page)).toBeGreaterThan(0);
 
     const changePage = page.getByRole("button", { name: "換一張塗" });
-    const replay = page.getByRole("button", { name: "再塗這一張" });
+    const replay = page.getByRole("button", { name: "繼續塗這一張" });
     for (const btn of [changePage, replay]) {
       const box = await btn.boundingBox();
       expect(box).toBeTruthy();
@@ -254,12 +254,12 @@ test.describe("coloring book", () => {
     await expect(page.getByTestId("coloring-done-snapshot")).toBeHidden();
   });
 
-  test("我塗好了打開完成站，可再塗這一張", async ({ page }) => {
+  test("我塗好了打開完成站，可繼續塗這一張", async ({ page }) => {
     await openFirstColoringPage(page);
     await paintCrayonStroke(page);
     await page.getByRole("button", { name: "我塗好了" }).click();
     await expect(page.getByRole("dialog", { name: "塗好了！" })).toBeVisible();
-    await page.getByRole("button", { name: "再塗這一張" }).click();
+    await page.getByRole("button", { name: "繼續塗這一張" }).click();
     await expect(page.getByRole("dialog", { name: "塗好了！" })).toHaveCount(0);
     await expect(page.locator("canvas")).toBeVisible();
   });

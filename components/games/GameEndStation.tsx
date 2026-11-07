@@ -29,6 +29,8 @@ export type GameEndStationProps = {
   onReplay: () => void;
   /** 再玩的無障礙名稱（K-12 後按鈕只有 icon，文字進 aria-label／title）。 */
   replayLabel?: string;
+  /** 有 mainAction 時次鈕的圖示；預設循環箭頭（重來）。著色「繼續塗」不是重來，換蠟筆。 */
+  replayIcon?: ReactNode;
   /** 目前遊戲 slug；用來解析下一站。 */
   gameSlug?: string;
   /** 手動指定下一站（優先於 gameSlug）。thumbnail 有給時，「去下一站」鈕顯示縮圖＋小箭頭。 */
@@ -93,6 +95,7 @@ export function GameEndStation({
   stars,
   onReplay,
   replayLabel = "再玩一次",
+  replayIcon,
   gameSlug,
   nextGame: nextGameProp,
   hubHref = "/games",
@@ -213,7 +216,7 @@ export function GameEndStation({
               aria-label={replayLabel}
               title={replayLabel}
             >
-              <IconReplay size={22} />
+              {replayIcon ?? <IconReplay size={22} />}
             </button>
           </>
         ) : (

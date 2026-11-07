@@ -51,7 +51,7 @@ test("消消樂：舊存檔與模式分流、主線與三星規則", async ({ pa
   await expect(page.getByRole("button", { name: /^開始：第 1 站/ })).toBeVisible();
   await expect(page.locator('[data-locked="true"]')).toHaveCount(9);
   await expect(page.locator('[data-challenge]')).toHaveCount(0);
-  await page.getByText("★ 怎麼拿三星？", { exact: true }).click();
+  await page.getByText("怎麼拿三星？", { exact: true }).click();
   await expect(page.getByText("過關時剩 6 步以上")).toBeVisible();
   await expect(page.getByText(/提示不影響星星/)).toBeVisible();
   await page.screenshot({ path: info.outputPath("challenge-rules-phone.png"), fullPage: true });
@@ -79,7 +79,8 @@ test("消消樂：收集飛向任務、減少動態略過飛行", async ({ page 
   expect(hints).toHaveLength(2);
   const frozen = new Date("2026-10-16T12:00:00Z");
   await page.clock.install({ time: frozen });
-  await page.clock.pauseAt(frozen);
+  // 停在 install 之後一秒：install 後時鐘仍會走，停在同一刻偶爾會變成「倒回過去」而報錯
+  await page.clock.pauseAt(new Date(frozen.getTime() + 1000));
   await page.locator(`[data-cell="${hints[0]}"]`).click({ force: true });
   await page.locator(`[data-cell="${hints[1]}"]`).click({ force: true });
   await page.clock.runFor(200);
@@ -122,7 +123,8 @@ test("消消樂：完整過關結算與累積獎章一致", async ({ page }, inf
   await page.getByRole("button", { name: "開始！", exact: true }).click();
   const frozen = new Date("2026-10-16T12:00:00Z");
   await page.clock.install({ time: frozen });
-  await page.clock.pauseAt(frozen);
+  // 停在 install 之後一秒：install 後時鐘仍會走，停在同一刻偶爾會變成「倒回過去」而報錯
+  await page.clock.pauseAt(new Date(frozen.getTime() + 1000));
   const result = page.getByTestId("candy-match-result");
   for (let move = 0; move < 25 && await result.count() === 0; move++) {
     await page.getByRole("button", { name: "提示", exact: true }).click({ force: true });

@@ -57,7 +57,8 @@ test.describe("存檔滿了", () => {
     await page.getByRole("button", { name: "開始！", exact: true }).click();
     const frozen = new Date("2026-10-16T12:00:00Z");
     await page.clock.install({ time: frozen });
-    await page.clock.pauseAt(frozen);
+    // 停在 install 之後一秒：install 後時鐘仍會走，停在同一刻偶爾會變成「倒回過去」而報錯
+    await page.clock.pauseAt(new Date(frozen.getTime() + 1000));
     await setStorageFull(page, true);
 
     const result = page.getByTestId("candy-match-result");
