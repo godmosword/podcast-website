@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import { PieceArt } from "@/components/games/CandyMatchPieceArt";
+import { XiaojuFace } from "@/components/games/OrangeExpressGlyphs";
 import type { GameMeta } from "@/data/games";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { dinoSushiSrc } from "@/lib/games/dino-sushi/asset-src";
@@ -165,7 +166,7 @@ export function GameCardDemo({ gameType }: { gameType: GameMeta["gameType"] }) {
   );
 }
 
-/** 「做對了」的星光：三段示範同一個樣子、同一個時間點，出現在成功的那個位置旁邊。 */
+/** 「做對了」的星光：四段示範同一個樣子、同一個時間點，出現在成功的那個位置旁邊。 */
 function Sparkle({ className }: { className: string }) {
   return (
     <span className={`${styles.sparkle} ${className}`}>
@@ -246,8 +247,29 @@ function CookingDemo() {
   );
 }
 
+/**
+ * 小橘特快車：封面上方出現遊戲裡同一條停車目標條（黃｜綠｜黃），小橘從左邊滑進來、
+ * 越來越慢（像拉煞車），剛好停在綠區、點一下頭，綠區亮星。前窗遊戲最核心的那一下：開車→停站。
+ */
+function DrivingDemo() {
+  return (
+    <span className={styles.driving}>
+      <span className={styles.stopTrack}>
+        <span className={styles.stopYellow} />
+        <span className={styles.stopGreen} />
+      </span>
+      <span className={styles.stopTrain}>
+        <XiaojuFace mood="happy" />
+        {/* 星光跟著小橘的臉定位：桌機、手機都落在臉的右上，不壓到五官 */}
+        <Sparkle className={styles.drivingSparkle} />
+      </span>
+    </span>
+  );
+}
+
 const DEMOS: Partial<Record<GameMeta["gameType"], () => React.JSX.Element>> = {
   coloring: ColoringDemo,
   match: MatchDemo,
   cooking: CookingDemo,
+  driving: DrivingDemo,
 };
