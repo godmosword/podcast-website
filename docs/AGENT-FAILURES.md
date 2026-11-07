@@ -41,6 +41,7 @@
 | 日期 | 命令／模型 | 症狀 | 處置與是否解除 |
 |------|------------|------|----------------|
 | 2026-09-16 | `codex exec -m gpt-5.6-luna` readonly 工程審（美術審 Batch B diff，560 行） | 兩次皆超時（600s／480s）未回答：第一次跑去 `rg` 全 repo 撞 `docs/qa/mobile-performance/latest.json`；第二次已限定檔案與 8 次工具呼叫仍在 cat 檔案時逾時 | 模型可探活（同日 Batch A 前已正常審過）、屬單次任務失敗。處置：Leader 自審四項風險點（play-size／controls-block 對齊、_blank rel、multiply 在 preserve-3d 容器、about scale 圖）後入庫；下次工程審先縮 diff 或拆檔提交 |
+| 2026-11-07 | `scripts/agent-review.sh engineering`（`gpt-6-luna`） | `You've hit your usage limit`，當天 14:49 才恢復；輸出是空的，結束碼 1 | 額度用完，不是模型壞掉。處置：這次工程審改走 `adversarial`（`grok-4.7-high-fast`），恢復後再評估；輸出空的要先看 `.err` |
 
 新增案例時沿用上方欄位；解除後移至年度 archive 並標記解除日期。
 
