@@ -29,6 +29,16 @@
 - [ ] **iPhone Safari — result modal**：完成或 game over 後確認 focus 落在 modal，Tab/VoiceOver 可到 replay、下一站與離開 CTA。
 - [ ] **iPad Safari — portrait / landscape / Split View**：分別檢查 Candy、Block Drop、多多壽司屋、Coloring 的主要操作；在 Split View 窄 viewport 確認沒有水平溢出與遮擋。
 
+## 多多壽司屋兒童試玩（PR-D1，2026-11-06）
+
+用 iPhone Safari，工具列開著、不捲動畫面。大人先不提示。
+
+- [ ] **角色與訂單辨識**：孩子看得清多多的表情、認得出訂單上的食材嗎？多多現在約 58px，夠不夠要實際看。
+- [ ] **進展引導**：第一天做完，孩子知道開了新的一天、自己按箭頭繼續嗎？
+- [ ] **自由做退出**：第一盤之前想離開時，孩子找得到「回遊樂園」嗎？結束鈕藏起來有沒有造成新的困惑？
+
+每次記下：在哪一步停住、誤點了什麼、哪裡需要大人幫忙、什麼時候主動重玩或離開。不要只問「好不好玩」；這份記錄用來決定下一階段先加挑戰，還是先改操作。
+
 ## Notes
 
 - 這份 checklist 不等同於自動化 Chromium/WebKit viewport 測試；真實 iPhone/iPad Safari、Safari browser chrome、Home Indicator、硬體音效與真實 App background lifecycle 仍需人工確認。
