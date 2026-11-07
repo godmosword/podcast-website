@@ -268,6 +268,10 @@ async function layout(page: Page) {
 for (const vp of [
   { width: 390, height: 844, now: 72, wait: 46, face: 48 },
   { width: 320, height: 568, now: 46, wait: 34, face: 36 },
+  { width: 393, height: 659, now: 50, wait: 36, face: 36 },
+  { width: 375, height: 553, now: 50, wait: 36, face: 36 },
+  { width: 393, height: 720, now: 50, wait: 36, face: 36 },
+  { width: 430, height: 739, now: 50, wait: 36, face: 36 },
   { width: 844, height: 390, now: 88, wait: 56, face: 40 },
   { width: 667, height: 375, now: 54, wait: 34, face: 40 },
   { width: 568, height: 320, now: 50, wait: 36, face: 36 },
@@ -457,13 +461,15 @@ test("375×553：選完飯馬上按暫停，托盤不往下捲", async ({ page }
 });
 
 for (const vp of [
-  { width: 375, height: 553 },
-  { width: 393, height: 659 },
-  { width: 390, height: 664 },
-  { width: 414, height: 736 },
-  { width: 430, height: 739 },
+  { width: 320, height: 568, duo: 90 },
+  { width: 375, height: 553, duo: 100 },
+  { width: 393, height: 659, duo: 110 },
+  { width: 390, height: 664, duo: 110 },
+  { width: 393, height: 720, duo: 110 },
+  { width: 414, height: 736, duo: 110 },
+  { width: 430, height: 739, duo: 110 },
 ]) {
-  test(`${vp.width}×${vp.height}：瀏覽器裡的一般手機，點餐時多多至少 50px，排隊不蓋到它`, async ({ page }) => {
+  test(`${vp.width}×${vp.height}：瀏覽器裡的一般手機，點餐時多多至少 ${vp.duo}px，排隊站在它右邊`, async ({ page }) => {
     await page.setViewportSize(vp);
     await page.goto("/games/dino-sushi");
     await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
@@ -474,9 +480,177 @@ for (const vp of [
         .map((img) => img.getBoundingClientRect())
         .sort((a, b) => b.width - a.width)[0]!;
       const queue = document.querySelector("[data-customer-queue]")!.getBoundingClientRect();
-      return { width: duo.width, top: duo.top, queueBottom: queue.bottom };
+      const frame = document.querySelector("[data-face]")!.getBoundingClientRect();
+      return { width: duo.width, frameRight: frame.right, queueLeft: queue.left };
     });
-    expect(measured.width).toBeGreaterThanOrEqual(50);
-    expect(measured.top).toBeGreaterThanOrEqual(measured.queueBottom - 12);
+    expect(measured.width).toBeGreaterThanOrEqual(vp.duo);
+    expect(measured.queueLeft, "排隊在多多右邊").toBeGreaterThanOrEqual(measured.frameRight);
   });
 }
+
+/* 舞台 >240px 或左欄太窄（568×320、667×375）的版面不走矮舞台規則，多多大小不變。 */
+for (const vp of [
+  { width: 390, height: 844, duo: 137.6 },
+  { width: 414, height: 896, duo: 154.8 },
+  { width: 844, height: 390, duo: 157.2 },
+  { width: 667, height: 375, duo: 99.8 },
+  { width: 568, height: 320, duo: 64 },
+  { width: 1280, height: 800, duo: 160.8 },
+]) {
+  test(`${vp.width}×${vp.height}：高舞台與窄左欄的多多大小不變`, async ({ page }) => {
+    await page.setViewportSize(vp);
+    await page.goto("/games/dino-sushi");
+    await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+    await expect(page.getByRole("img", { name: /^第 1 單/ })).toBeVisible();
+    const width = await page.locator("[data-face]").first().evaluate((el) => el.getBoundingClientRect().width);
+    expect(Math.abs(width - vp.duo), `多多圖框 ${width}`).toBeLessThanOrEqual(1);
+  });
+}
+
+function overlapArea(a: DOMRect | null, b: DOMRect | null) {
+  if (!a || !b) return 0;
+  const w = Math.min(a.right, b.right) - Math.max(a.left, b.left);
+  const h = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
+  return w > 0 && h > 0 ? w * h : 0;
+}
+
+for (const vp of [
+  { width: 393, height: 659 },
+  { width: 375, height: 553 },
+  { width: 320, height: 568 },
+]) {
+  test(`${vp.width}×${vp.height}：多多吃的時候，字卡和謝謝都不蓋住客人（每一單）`, async ({ page }) => {
+    await page.setViewportSize(vp);
+    await page.goto("/games/dino-sushi");
+    await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+    for (let n = 1; n <= 4; n++) {
+      await serve(page, n);
+      const caption = page.getByTestId("dino-sushi").locator("p[data-mood]");
+      await expect(caption).toBeVisible();
+      await page.waitForTimeout(350);
+      const boxes = await page.evaluate(() => {
+        const box = (selector: string) => {
+          const el = document.querySelector(selector);
+          if (!el) return null;
+          const r = el.getBoundingClientRect();
+          return { left: r.left, right: r.right, top: r.top, bottom: r.bottom };
+        };
+        return { seat: box("[data-customer-seat]"), caption: box("p[data-mood]"), thanks: box("p[data-customer]") };
+      });
+      expect(boxes.seat, `第 ${n} 單客人還坐著`).not.toBeNull();
+      expect(overlapArea(boxes.caption as DOMRect, boxes.seat as DOMRect), `第 ${n} 單字卡`).toBe(0);
+      expect(overlapArea(boxes.thanks as DOMRect, boxes.seat as DOMRect), `第 ${n} 單謝謝`).toBe(0);
+      await waitServed(page, n);
+    }
+  });
+}
+
+test("430×739：舞台 192 缺料時字卡還在，不蓋多多也不蓋疊盤", async ({ page }) => {
+  await page.setViewportSize({ width: 430, height: 739 });
+  await page.goto("/games/dino-sushi");
+  await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+  await serve(page, 1, { skipLast: true });
+  const caption = page.getByTestId("dino-sushi").locator("p[data-mood='look']");
+  await expect(caption).toBeVisible();
+  await page.waitForTimeout(350);
+  const boxes = await page.evaluate(() => {
+    const box = (selector: string) => {
+      const r = document.querySelector(selector)!.getBoundingClientRect();
+      return { left: r.left, right: r.right, top: r.top, bottom: r.bottom };
+    };
+    return { caption: box("p[data-mood]"), duo: box("[data-face]") };
+  });
+  expect(overlapArea(boxes.caption as DOMRect, boxes.duo as DOMRect)).toBe(0);
+});
+
+test("393×659：舞台放不下謝謝的頭像就不出，不會被切掉、蓋住金盤；座位上還是那位朋友", async ({ page }) => {
+  await page.setViewportSize({ width: 393, height: 659 });
+  await page.goto("/games/dino-sushi");
+  await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+  await serve(page, 1);
+  await expect(page.getByTestId("dino-sushi").locator("p[data-mood]")).toBeVisible();
+  await expect(page.locator("[data-customer-seat]")).toBeVisible();
+  await expect(page.locator("p[data-customer]")).toBeHidden();
+});
+
+test.describe("短手機的捲動（真的用手指點，不靠 Playwright 自動捲動）", () => {
+  test.use({ hasTouch: true });
+
+  async function fingerTap(page: Page, name: string) {
+    const box = (await page.getByRole("button", { name }).boundingBox())!;
+    await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+  }
+
+  async function settledScroll(page: Page) {
+    await expect
+      .poll(() =>
+        page.evaluate(async () => {
+          const ys: number[] = [];
+          for (let i = 0; i < 4; i++) {
+            ys.push(window.scrollY);
+            await new Promise((r) => setTimeout(r, 100));
+          }
+          return ys.every((y) => y === ys[0]);
+        }),
+      )
+      .toBe(true);
+    return page.evaluate(() => window.scrollY);
+  }
+
+  function duoHeadVsHeader(page: Page) {
+    return page.evaluate(() => {
+      const frame = document.querySelector("[data-face]")!.getBoundingClientRect();
+      const header = document.querySelector("header:has(#game-play-title)")!.getBoundingClientRect();
+      return { head: frame.top + frame.height * 0.1, header: header.bottom };
+    });
+  }
+
+  for (const vp of [
+    { width: 375, height: 553 },
+    { width: 320, height: 568 },
+    { width: 393, height: 659 },
+  ]) {
+    test(`${vp.width}×${vp.height}：張嘴時多多的臉不被抬頭蓋住`, async ({ page }) => {
+      await page.setViewportSize(vp);
+      await page.goto("/games/dino-sushi");
+      await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+      const { base, toppings } = await order(page, 1);
+      await fingerTap(page, `選${base}`);
+      await page.waitForTimeout(500);
+      await settledScroll(page);
+      for (const t of toppings) await fingerTap(page, `加${t}`);
+      await fingerTap(page, "給多多吃");
+      await page.waitForFunction(() => document.querySelector("[class*='servingPlate'][data-phase='open']") !== null);
+      const open = await duoHeadVsHeader(page);
+      expect(open.head, `張嘴那一刻頭頂 ${open.head}、抬頭底 ${open.header}`).toBeGreaterThanOrEqual(open.header - 8);
+    });
+
+    test(`${vp.width}×${vp.height}：缺料多多不吃，畫面不捲走，托盤還在`, async ({ page }) => {
+      await page.setViewportSize(vp);
+      await page.goto("/games/dino-sushi");
+      await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+      const { base, toppings } = await order(page, 1);
+      await fingerTap(page, `選${base}`);
+      await page.waitForTimeout(500);
+      const before = await settledScroll(page);
+      await fingerTap(page, "給多多吃");
+      await expect(page.getByTestId("dino-sushi").locator("p[data-mood='look']")).toBeAttached();
+      expect(await settledScroll(page)).toBe(before);
+      await expect(page.getByRole("button", { name: `加${toppings[0]}` })).toBeInViewport();
+    });
+  }
+
+  test("375×553：選完飯馬上送出，托盤下捲取消，不會在吃的時候把多多捲走", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 553 });
+    await page.goto("/games/dino-sushi");
+    await page.getByRole("button", { name: "自由做" }).click();
+    await fingerTap(page, "選握壽司");
+    await fingerTap(page, "給多多吃");
+    await page.waitForFunction(() => document.querySelector("[class*='servingPlate'][data-phase='open']") !== null);
+    const open = await duoHeadVsHeader(page);
+    expect(open.head, "張嘴那一刻").toBeGreaterThanOrEqual(open.header - 8);
+    const scrollAtOpen = await page.evaluate(() => window.scrollY);
+    await page.waitForTimeout(600);
+    expect(await page.evaluate(() => window.scrollY), "吃的時候沒有往下捲").toBeLessThanOrEqual(scrollAtOpen);
+  });
+});

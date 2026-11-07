@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { trayRevealScroll } from "./useRevealTray";
+import { resultFitScroll, stageRevealScroll, trayRevealScroll } from "./useRevealTray";
 
 describe("選完飯往下捲多少才看得到托盤", () => {
   it("托盤本來就在畫面內：不捲", () => {
@@ -23,5 +23,48 @@ describe("選完飯往下捲多少才看得到托盤", () => {
 
   it("沒有泡泡（自由做、吃的時候）：只看托盤", () => {
     expect(trayRevealScroll({ trayBottom: 652, viewportHeight: 553, talkTop: null, headerBottom: 80 })).toBe(107);
+  });
+});
+
+describe("送出時多多的臉有沒有被抬頭蓋住", () => {
+  it("頭頂在抬頭下面：不捲", () => {
+    expect(stageRevealScroll({ duoTop: 120, duoHeight: 100, headerBottom: 80 })).toBe(0);
+  });
+
+  it("只被蓋一點（透明留邊、8px 內）：不捲，每單少晃一次", () => {
+    expect(stageRevealScroll({ duoTop: 62, duoHeight: 100, headerBottom: 80 })).toBe(0);
+  });
+
+  it("被蓋住：往上捲到頭頂在抬頭下 4px", () => {
+    // 頭頂 15 + 11.7 = 26.7，抬頭底 72，要往下移 45.3 + 4
+    expect(stageRevealScroll({ duoTop: 15, duoHeight: 117, headerBottom: 72 })).toBe(-50);
+  });
+});
+
+describe("結算出現時怎麼捲，一屏才放得下", () => {
+  const base = { viewportBottom: 568, headerBottom: 52 };
+
+  it("書鈕和標題都看得到：不捲", () => {
+    expect(resultFitScroll({ ...base, bookBottom: 500, titleTop: 80 })).toBe(0);
+  });
+
+  it("書鈕超出：往下捲到書鈕底離螢幕底 8px", () => {
+    expect(resultFitScroll({ ...base, bookBottom: 572, titleTop: 120 })).toBe(12);
+  });
+
+  it("往下捲不能把標題捲進抬頭底下", () => {
+    expect(resultFitScroll({ ...base, bookBottom: 640, titleTop: 80 })).toBe(24);
+  });
+
+  it("標題被抬頭蓋住、書鈕還有空間：往上捲", () => {
+    expect(resultFitScroll({ ...base, bookBottom: 500, titleTop: 30 })).toBe(-26);
+  });
+
+  it("標題被蓋住但書鈕沒空間：只捲到書鈕還留得住", () => {
+    expect(resultFitScroll({ ...base, bookBottom: 550, titleTop: 30 })).toBe(-10);
+  });
+
+  it("標題被蓋住、書鈕也超出：不動", () => {
+    expect(resultFitScroll({ ...base, bookBottom: 600, titleTop: 30 })).toBe(0);
   });
 });

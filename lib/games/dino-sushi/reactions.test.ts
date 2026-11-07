@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { addTopping, changeBase, EMPTY_SUSHI, type Sushi } from "./sushi";
 import { buildTray } from "./orders";
-import { favoriteFor, MOOD_RANK, reactionFor, servingLine } from "./reactions";
+import { favoriteFor, MOOD_RANK, reactionFor, servingLine, shortCaption } from "./reactions";
 import type { Order } from "./orders";
 
 function make(base: NonNullable<Sushi["base"]>, toppings: Sushi["toppings"]): Sushi {
@@ -92,5 +92,30 @@ describe("自由做反應", () => {
       ].map((r) => r.sfx),
     );
     expect(sfx.size).toBe(5);
+  });
+});
+
+describe("shortCaption：矮舞台的短字卡", () => {
+  const reaction = (mood: Parameters<typeof shortCaption>[0]["mood"], line: string) => ({
+    mood,
+    line,
+    sfx: mood,
+    eats: mood !== "look",
+    brush: false,
+  });
+
+  it("吃下去的句子只留最後一段", () => {
+    expect(shortCaption(reaction("love", "小黃瓜、鮪魚沙拉加蝦，好好吃！"))).toBe("好好吃！");
+    expect(shortCaption(reaction("puff", "噗～辣辣的，哈哈！"))).toBe("哈哈！");
+  });
+
+  it("本來就短的句子不變", () => {
+    expect(shortCaption(reaction("sweet", "甜甜的！"))).toBe("甜甜的！");
+    expect(shortCaption(reaction("yum", "白飯香香的！"))).toBe("白飯香香的！");
+    expect(shortCaption(reaction("love", "最愛蝦了！"))).toBe("最愛蝦了！");
+  });
+
+  it("缺料句不裁：孩子要看缺什麼", () => {
+    expect(shortCaption(reaction("look", "想要軍艦，還有蝦！"))).toBe("想要軍艦，還有蝦！");
   });
 });

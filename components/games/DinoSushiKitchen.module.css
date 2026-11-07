@@ -94,6 +94,7 @@
   --queue-show: 0.88;
   --queue-row: calc(var(--queue-now) * var(--queue-show));
   --queue-clear: calc(var(--queue-top) + var(--queue-row) + 18px);
+  --duo-cap: 116px;
   --duo-max-w: calc((100cqw - var(--duo-left) - clamp(54px, 18cqw, 88px) - 36px) / 1.68);
   --duo-w: min(var(--duo-max-w), calc(100cqh - var(--counter-h) - var(--queue-clear)));
   --lantern-display: none;
@@ -310,6 +311,68 @@
 .duoArea[data-mode="order"] .queue {
   left: 8px;
   right: 8px;
+}
+
+/* 矮螢幕（iPhone SE 的 Safari）：頭頂要留給抬頭，選飯後才不用捲太多。 */
+@media (max-height: 600px) and (orientation: portrait) {
+  .duoArea[data-mode="order"] {
+    --duo-cap: 100px;
+  }
+}
+
+/*
+ * 矮舞台（一般手機在瀏覽器裡）：表情是這裡最重要的回饋，多多吃滿舞台高度，排隊站到它右邊。
+ * @container 改不了容器自己身上的變數，所以對舞台的直接子層重新宣告，子孫會繼承（送餐盤、壽司飛進嘴的距離都跟著算）。
+ * 隊伍靠多多排：下一位固定貼著它，不會每單離多多更遠。左欄太窄（568×320）維持兩列排隊。
+ */
+@container duo-stage (max-height: 240px) and (min-width: 280px) {
+  .duoArea[data-mode="order"] > * {
+    --duo-w: min(34cqw, var(--duo-cap), calc(100cqh - var(--counter-h) - 8px));
+    --serve-left: calc(var(--duo-left) + var(--duo-w) * 0.22);
+    --queue-now: 50px;
+    --queue-wait: 36px;
+  }
+
+  .duoArea[data-mode="order"] .queue {
+    left: calc(var(--duo-left) + var(--duo-w) + 4px);
+    right: 6px;
+    justify-content: flex-start;
+    gap: 4px;
+  }
+
+  /* 客人跟著多多變大。字卡在客人上層，改短句才不會蓋住它；謝謝只留頭像。 */
+  .duoArea[data-mode="order"] .seat {
+    max-width: max(48px, calc(var(--duo-w) * 0.64));
+  }
+
+  .duoArea[data-mode="order"] .lineFull {
+    display: none;
+  }
+
+  .duoArea[data-mode="order"] .lineShort {
+    display: inline;
+  }
+
+  .duoArea[data-mode="order"] .thanks {
+    padding: 2px;
+  }
+
+  .duoArea[data-mode="order"] .thanksFace {
+    width: 28px;
+    height: 28px;
+  }
+
+  .duoArea[data-mode="order"] .thanksFood,
+  .duoArea[data-mode="order"] .thanksLine {
+    display: none;
+  }
+}
+
+/* 泡泡底到舞台底放不下謝謝的頭像，它會被切掉、還蓋住金盤。吃的時候座位上已經有同一位朋友和愛心，這裡不重複。 */
+@container duo-stage (max-height: 180px) {
+  .duoArea[data-mode="order"] .thanks {
+    display: none;
+  }
 }
 
 /*
@@ -623,7 +686,8 @@
  * 名字列若再佔一列，第 5 單會壓到盤子。頭像改浮在右上，不增加泡泡高度；
  * 名字仍在讀屏與朗讀裡。
  */
-@container duo-stage (max-height: 190px) {
+/* 200 而不是 190：430×739 舞台 192，泡泡兩列會壓到疊盤。店名和燈籠的門檻仍是 190（DinoSushiShop）。 */
+@container duo-stage (max-height: 200px) {
   .bubble {
     box-sizing: border-box;
     min-height: 0;
@@ -774,7 +838,7 @@
 }
 
 /* 直向舞台還放得下排隊，但第 5 單的小點若再佔一列會壓到疊盤。小點改疊在泡泡底緣。 */
-@container duo-stage (max-height: 300px) and (min-height: 191px) {
+@container duo-stage (max-height: 300px) and (min-height: 201px) {
   .bubble {
     padding-bottom: 12px;
   }
@@ -871,10 +935,14 @@
 }
 
 /* 寫在 .orderDots 後面，矮舞台才蓋得過 display:flex。 */
-@container duo-stage (max-height: 190px) {
+@container duo-stage (max-height: 200px) {
   .orderDots {
     display: none;
   }
+}
+
+.lineShort {
+  display: none;
 }
 
 /* 多多的字卡：吃的時候在雨棚下（泡泡收起）；缺料時泡泡還在，字卡排在泡泡下面 */
@@ -1114,8 +1182,8 @@
 }
 
 /* 中等高度（390、844、667、568）：四盤若每層露出一半，會頂到變大的泡泡或站著的客人。盤緣收到 8px。
-   320 直向更矮，下面的 max-height 190 會再收到 4px，所以這條要寫在那條前面。 */
-@container duo-stage (max-height: 360px) and (min-height: 191px) {
+   320 直向更矮，下面的 max-height 200 會再收到 4px，所以這條要寫在那條前面。 */
+@container duo-stage (max-height: 360px) and (min-height: 201px) {
   .plate {
     margin-top: calc(8px - var(--pw) * 403 / 695);
   }
@@ -1167,7 +1235,7 @@
  * 9px 的盤緣會頂到第 5 單。點餐最多看得到 3 盤、自由做 4 盤，數字照實。
  * 最後一個子元素是數字，所以第 n 盤從後數是 nth-last-child(n + 1)。
  */
-@container duo-stage (max-height: 190px) {
+@container duo-stage (max-height: 200px) {
   .plates {
     --pw: 48px;
   }
@@ -2069,7 +2137,7 @@
  * 矮的大手機（430 寬、高 ≤840）：
  * - 托盤圖跟著較寬的格子長高，鈕會變 69px；圖高收到 40px，鈕回到 64px，兩列省 10px。
  * - 舞台下限跟著螢幕高度走（152–192px），廚房底永遠離螢幕底約 5px：430×739 舞台約 192px，
- *   超過 190px 才留得住燈籠、櫃台店名與泡泡裡的客人名字（DinoSushiShop、泡泡的矮舞台規則）。
+ *   超過 190px 才留得住燈籠與櫃台店名（DinoSushiShop）。泡泡在 200px 以下收成一列，客人名字只留給讀屏。
  * 420.01：小數寬度的 Android 不會掉進 420–421 之間的縫。
  */
 @media (min-width: 420.01px) and (max-width: 559px) and (max-height: 840px) and (orientation: portrait) {

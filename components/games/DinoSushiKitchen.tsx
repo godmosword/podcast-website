@@ -3,6 +3,7 @@
 import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { BaseArt, PlateArt, SHOP_SRC, SushiArt, ToppingArt } from "@/lib/games/dino-sushi/art";
 import { matchOrder, orderSpeechLine, orderThanksLine } from "@/lib/games/dino-sushi/orders";
+import { shortCaption } from "@/lib/games/dino-sushi/reactions";
 import { currentOrder } from "@/lib/games/dino-sushi/round";
 import { layerKey, MAX_TOPPINGS } from "@/lib/games/dino-sushi/sushi";
 import { BASES, baseById, toppingById, type BaseId, type ToppingId } from "@/lib/games/dino-sushi/toppings";
@@ -108,7 +109,7 @@ export function DinoSushiKitchen({
   /** 等選飯時點了托盤：該點的皿跳兩下＋光圈。seq 單雙切 a／b 才會重播；最後一張播完就收掉。 */
   const [nudge, setNudge] = useState<{ seq: number; ids: readonly BaseId[] } | null>(null);
   const baseFly = useBaseFly({ rootRef, base: round?.sushi.base ?? null, reducedMotion, inputPaused });
-  useRevealTray({ rootRef, choosingBase, reducedMotion, inputPaused });
+  useRevealTray({ rootRef, choosingBase, eating: round?.pending?.eats === true, reducedMotion, inputPaused });
   /** 用鍵盤拿掉第幾格：料位以料當 key，那顆鈕會消失，焦點接到同一格（或最後一格），料位空了就回托盤。 */
   const refocusSlot = useRef<number | null>(null);
   const toppings = round?.sushi.toppings;
@@ -251,7 +252,8 @@ export function DinoSushiKitchen({
           ) : null}
           {caption ? (
             <p className={styles.caption} data-mood={caption.mood} aria-hidden>
-              {caption.line}
+              <span className={styles.lineFull}>{caption.line}</span>
+              <span className={styles.lineShort}>{shortCaption(caption)}</span>
             </p>
           ) : null}
           {/* 先多多、再朋友（朗讀也是這個順序）；下一單泡泡出來後再留一下才淡出 */}

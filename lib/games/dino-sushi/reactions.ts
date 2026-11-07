@@ -59,6 +59,15 @@ function missingLine(order: Order, match: OrderMatch): string {
   return `還想要${missing}！`;
 }
 
+/**
+ * 矮舞台的字卡：吃下去的句子只留最後一段（「好好吃！」），才不會蓋住坐在旁邊的客人。
+ * 完整句留給朗讀。缺料句不裁，孩子要看缺什麼。
+ */
+export function shortCaption(reaction: Pick<Reaction, "mood" | "line">): string {
+  if (reaction.mood === "look") return reaction.line;
+  return reaction.line.split("，").at(-1) ?? reaction.line;
+}
+
 /** 自由做的「最愛」：只從這一輪托盤上的家常料挑，孩子一定做得出來。不挑甜點。 */
 export function favoriteFor(seed: number, tray: readonly ToppingId[]): ToppingId {
   const rng = seededRng((seed ^ FAVORITE_SEED_SALT) >>> 0);

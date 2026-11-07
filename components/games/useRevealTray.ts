@@ -28,6 +28,52 @@ export function trayRevealScroll({ trayBottom, viewportHeight, talkTop, headerBo
   return Math.max(0, Math.min(Math.ceil(need), Math.floor(room)));
 }
 
+/** 貼紙上方的透明留邊：多多的頭頂大約在圖框 10% 的地方。 */
+const DUO_HEAD_INSET = 0.1;
+/** 頭頂只被蓋這麼一點就不捲：每單少晃一次。 */
+const HEAD_COVER_TOLERANCE_PX = 8;
+const HEAD_GAP_PX = 4;
+
+/**
+ * 送出時多多的臉被黏住的抬頭蓋住多少，要往上捲多少（負值）。看不到就不算有回饋。
+ * 回傳 0＝不捲。
+ */
+export function stageRevealScroll({
+  duoTop,
+  duoHeight,
+  headerBottom,
+}: {
+  duoTop: number;
+  duoHeight: number;
+  headerBottom: number;
+}): number {
+  const covered = headerBottom - (duoTop + duoHeight * DUO_HEAD_INSET);
+  if (covered <= HEAD_COVER_TOLERANCE_PX) return 0;
+  return -Math.ceil(covered + HEAD_GAP_PX);
+}
+
+/**
+ * 結算出現時怎麼捲，標題到「放進貼紙書」才在同一屏。結算蓋在廚房上，位置取決於當下捲到哪。
+ * 書鈕超出就往下，但不把標題捲進抬頭底下；標題被蓋住就往上，但不把書鈕推出去。回傳 0＝不捲。
+ */
+export function resultFitScroll({
+  bookBottom,
+  titleTop,
+  viewportBottom,
+  headerBottom,
+}: {
+  bookBottom: number;
+  titleTop: number;
+  viewportBottom: number;
+  headerBottom: number;
+}): number {
+  const over = bookBottom + TRAY_MARGIN_PX - viewportBottom;
+  const room = titleTop - headerBottom - TALK_GAP_PX;
+  if (over > 0) return room > 0 ? Math.min(Math.ceil(over), Math.floor(room)) : 0;
+  if (room >= 0) return 0;
+  return -Math.min(Math.ceil(-room), Math.floor(-over));
+}
+
 /** 平滑捲動大約多久；暫停落在這段時間內就把捲動停在原地。 */
 const SMOOTH_SCROLL_MS = 600;
 
@@ -35,13 +81,13 @@ const SMOOTH_SCROLL_MS = 600;
  * 真正看得到的畫面底邊（版面座標）。iOS Safari 的工具列收合、縮放都會讓可見範圍跟
  * innerHeight 不同，有 visualViewport 就用它。
  */
-function visibleBottom(): number {
+export function visibleBottom(): number {
   const vv = window.visualViewport;
   return vv ? vv.offsetTop + vv.height : window.innerHeight;
 }
 
 /** 遊戲頁 sticky 抬頭黏住時的底邊（抬頭 top 是負的，黏住時會往上收一截）。 */
-function stickyHeaderBottom(): number {
+export function stickyHeaderBottom(): number {
   const header = document.getElementById("game-play-title")?.closest("header");
   if (!header) return 0;
   const top = parseFloat(getComputedStyle(header).top);
@@ -51,6 +97,8 @@ function stickyHeaderBottom(): number {
 type Options = {
   rootRef: RefObject<HTMLElement | null>;
   choosingBase: boolean;
+  /** 多多正在吃（缺料不吃不算，孩子還要補料）。 */
+  eating: boolean;
   reducedMotion: boolean;
   inputPaused: boolean;
 };
@@ -59,8 +107,10 @@ type Options = {
  * 很矮的直向（iPhone SE 的 Safari：320×568、375×553）放不下整個廚房，托盤第二列在螢幕外。
  * 選完飯、輪到放料時，把托盤捲進來；飯飛到砧板、落地壓完才捲，不跟選飯過場搶。
  * 放得下的螢幕算出來是 0，不會動。暫停時不捲，平滑捲動途中按暫停就停在原地。
+ * 送出時反過來：多多的臉被抬頭蓋住就立刻往上捲（盤子滑 450ms 就張嘴，晚了會錯過），
+ * 還沒執行的托盤下捲一併取消，不會在吃的時候把多多捲走。暫停後繼續時若臉仍被蓋，再捲一次。
  */
-export function useRevealTray({ rootRef, choosingBase, reducedMotion, inputPaused }: Options) {
+export function useRevealTray({ rootRef, choosingBase, eating, reducedMotion, inputPaused }: Options) {
   const wasChoosing = useRef(choosingBase);
   /** 平滑捲動開始的時間；沒在捲時為 null。 */
   const smoothSince = useRef<number | null>(null);
@@ -68,7 +118,7 @@ export function useRevealTray({ rootRef, choosingBase, reducedMotion, inputPause
   useEffect(() => {
     const justPicked = wasChoosing.current && !choosingBase;
     wasChoosing.current = choosingBase;
-    if (!justPicked || inputPaused) return;
+    if (!justPicked || inputPaused || eating) return;
     let frame = 0;
     const reveal = () => {
       const root = rootRef.current;
@@ -93,7 +143,17 @@ export function useRevealTray({ rootRef, choosingBase, reducedMotion, inputPause
       window.clearTimeout(timer);
       window.cancelAnimationFrame(frame);
     };
-  }, [choosingBase, inputPaused, reducedMotion, rootRef]);
+  }, [choosingBase, eating, inputPaused, reducedMotion, rootRef]);
+
+  useEffect(() => {
+    if (!eating || inputPaused) return;
+    const duo = rootRef.current?.querySelector("[data-face]")?.getBoundingClientRect();
+    if (!duo) return;
+    const by = stageRevealScroll({ duoTop: duo.top, duoHeight: duo.height, headerBottom: stickyHeaderBottom() });
+    if (by >= 0) return;
+    smoothSince.current = reducedMotion ? null : performance.now();
+    window.scrollBy({ top: by, behavior: reducedMotion ? "instant" : "smooth" });
+  }, [eating, inputPaused, reducedMotion, rootRef]);
 
   useEffect(() => {
     const since = smoothSince.current;
