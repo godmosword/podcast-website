@@ -47,9 +47,7 @@ for (const vp of [
     const result = page.getByTestId("dino-sushi-result");
     await expect(result.getByRole("heading", { name: "第 2 天開了！" })).toBeVisible();
     for (const name of ["開始第 2 天", "再做一輪"]) {
-      const button = result.getByRole("button", { name });
-      await button.scrollIntoViewIfNeeded();
-      await expect(button).toBeInViewport({ ratio: 1 });
+      await expect(result.getByRole("button", { name }), "不捲動就看得到").toBeInViewport({ ratio: 1 });
     }
     await result.getByRole("button", { name: "開始第 2 天" }).click();
     await expect(page.getByRole("img", { name: /^第 1 單/ })).toBeVisible();
@@ -136,3 +134,86 @@ for (const { width, height, overlap } of [
     expect(measured.overlap).toBeLessThanOrEqual(overlap);
   });
 }
+
+test.describe("短手機結算不用捲（真的用手指點）", () => {
+  test.use({ hasTouch: true });
+
+  async function fingerTap(page: Page, name: string) {
+    const box = (await page.getByRole("button", { name }).boundingBox())!;
+    await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+  }
+
+  /** missFirst：每單先只放飯送一次（多多不吃、看泡泡），補料再送，結算只有一顆星、多兩行提示。 */
+  async function serveByFinger(page: Page, n: number, missFirst: boolean) {
+    const label = await page.getByRole("img", { name: new RegExp(`^第 ${n} 單`) }).getAttribute("aria-label");
+    const [base, ...toppings] = label!.split("想吃：")[1]!.split("、");
+    await fingerTap(page, `選${base}`);
+    await page.waitForTimeout(650);
+    if (missFirst) {
+      await fingerTap(page, "給多多吃");
+      await expect(page.getByTestId("dino-sushi").locator("p[data-mood='look']")).toBeAttached();
+      await page.waitForTimeout(1200);
+    }
+    for (const topping of toppings) await fingerTap(page, `加${topping}`);
+    await fingerTap(page, "給多多吃");
+    await expect(
+      page.getByRole("img", { name: `吃完 ${n} 盤` }).or(page.getByTestId("dino-sushi-result")).first(),
+    ).toBeVisible();
+    if (n < 5) await expect(page.getByRole("img", { name: new RegExp(`^第 ${n + 1} 單`) }).or(page.getByTestId("dino-sushi-result")).first()).toBeVisible();
+    await page.waitForTimeout(250);
+  }
+
+  for (const vp of [
+    { width: 320, height: 568 },
+    { width: 375, height: 553 },
+    { width: 393, height: 659 },
+  ]) {
+    for (const missFirst of [false, true]) {
+      test(`${vp.width}×${vp.height}${missFirst ? "（一顆星）" : "（三顆星）"}：第一次通關，主鈕帶著下一位朋友，書鈕也在同一屏`, async ({ page }) => {
+        test.setTimeout(60_000);
+        await page.setViewportSize(vp);
+        await page.goto("/games/dino-sushi");
+        await page.getByRole("button", { name: /^第 1 天/ }).click();
+        for (let n = 1; n <= 5; n++) await serveByFinger(page, n, missFirst);
+        const result = page.getByTestId("dino-sushi-result");
+        await expect(result.getByRole("heading", { name: "第 2 天開了！" })).toBeVisible();
+        await page.waitForTimeout(300);
+        const main = result.getByRole("button", { name: "開始第 2 天" });
+        await expect(main).toBeInViewport({ ratio: 1 });
+        await expect(result.getByRole("button", { name: "再做一輪" })).toBeInViewport({ ratio: 1 });
+        await expect(result.locator("[data-role=\"result-book\"]")).toBeInViewport({ ratio: 1 });
+        const friend = main.locator("img");
+        await expect(friend).toBeVisible();
+        await expect(friend).toHaveAttribute("src", /anan/);
+        const headerBottom = await page.locator("header:has(#game-play-title)").evaluate((el) => el.getBoundingClientRect().bottom);
+        const titleTop = (await result.getByRole("heading", { name: "第 2 天開了！" }).boundingBox())!.y;
+        expect(titleTop, "標題沒有被抬頭蓋住").toBeGreaterThanOrEqual(headerBottom - 1);
+      });
+    }
+  }
+});
+
+test("主鈕的朋友朝著箭頭：安安翻面、圖不佔無障礙名稱", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await pinDays(page, [1, 0, 0, 0, 0, 0, 0, 0]);
+  await page.goto("/games/dino-sushi");
+  await page.getByRole("button", { name: /^第 1 天/ }).click();
+  await playDay(page);
+  const friend = page.getByTestId("dino-sushi-result").getByRole("button", { name: "開始第 2 天" }).locator("img");
+  await expect(friend).toHaveAttribute("data-flip", "true");
+  await expect(friend).toHaveAttribute("alt", "");
+});
+
+test("第 3 天第一次通關：下一天是多多，主鈕不翻面、店面不多畫一隻", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await pinDays(page, [1, 1, 0, 0, 0, 0, 0, 0]);
+  await page.goto("/games/dino-sushi");
+  await page.getByRole("button", { name: /^第 3 天/ }).click();
+  await playDay(page);
+  const result = page.getByTestId("dino-sushi-result");
+  await expect(result.getByRole("heading", { name: "第 4 天開了！" })).toBeVisible();
+  const friend = result.getByRole("button", { name: "開始第 4 天" }).locator("img");
+  await expect(friend).toHaveAttribute("src", /duoduo/);
+  await expect(friend).not.toHaveAttribute("data-flip", "true");
+  await expect(result.locator("[class*='resultGuest']")).toHaveCount(0);
+});

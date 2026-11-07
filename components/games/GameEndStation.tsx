@@ -46,6 +46,8 @@ export type GameEndStationProps = {
     onClick: () => void;
     /** 圖示要能讓孩子看出「這顆帶我往哪」：next＝往前（下一關），page＝翻頁（換一張）。 */
     icon?: "next" | "page";
+    /** 主鈕放「按了會見到誰」：圖＋箭頭徽章（壽司屋的下一位朋友）。flip：圖要翻面才朝著箭頭。 */
+    thumbnail?: { src: string; flip?: boolean };
   };
   /** 星星下方的補充資訊（例如消消樂的星數條件）；在對話框內，讀屏可讀。 */
   details?: ReactNode;
@@ -176,7 +178,22 @@ export function GameEndStation({
               aria-label={mainAction.label}
               title={mainAction.label}
             >
-              {mainAction.icon === "page" ? (
+              {mainAction.thumbnail ? (
+                <>
+                  <span className={styles.mainThumb} aria-hidden>
+                    {/* eslint-disable-next-line @next/next/no-img-element -- 結算站小圖，尺寸固定 */}
+                    <img
+                      src={mainAction.thumbnail.src}
+                      alt=""
+                      draggable={false}
+                      data-flip={mainAction.thumbnail.flip ? "true" : undefined}
+                    />
+                  </span>
+                  <span className={styles.mainThumbArrow} aria-hidden>
+                    <IconArrowRight size={22} />
+                  </span>
+                </>
+              ) : mainAction.icon === "page" ? (
                 <IconPageTurn size={34} />
               ) : (
                 <IconArrowRight size={34} />

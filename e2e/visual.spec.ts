@@ -568,6 +568,29 @@ for (const [width, height, theme] of [
   });
 }
 
+/** 一般手機在瀏覽器裡：矮舞台的排隊站在多多右邊，抬頭單列。 */
+test("visual：多多壽司屋廚房 393×659 light（矮舞台）", async ({ page }) => {
+  await openDinoSushi(page, 393, 659, "light", true);
+  await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+  await makeDinoOrder(page, 1, false);
+  await expect(page.getByTestId("dino-sushi")).toHaveScreenshot("dino-sushi-kitchen-393x659-light.png", {
+    maxDiffPixelRatio: 0.02,
+    animations: "disabled",
+  });
+});
+
+test("visual：多多壽司屋第一次通關 393×659 light（主鈕帶著下一位朋友）", async ({ page }) => {
+  await openDinoSushi(page, 393, 659, "light");
+  await page.getByRole("button", { name: /^第 1 天/ }).click();
+  for (let n = 1; n <= 5; n++) await makeDinoOrder(page, n, true);
+  const result = page.getByTestId("dino-sushi-result");
+  await expect(result.getByRole("button", { name: "開始第 2 天" }).locator("img")).toBeVisible();
+  await expect(result).toHaveScreenshot("dino-sushi-result-next-day-393x659-light.png", {
+    maxDiffPixelRatio: 0.02,
+    animations: "disabled",
+  });
+});
+
 test("visual：多多壽司屋結算 390 light（5 單一次做對、三星）", async ({ page }) => {
   await openDinoSushi(page, 390, 844, "light", true);
   await page.getByRole("button", { name: "開始幫多多做壽司" }).click();

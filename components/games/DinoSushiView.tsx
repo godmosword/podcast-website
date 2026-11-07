@@ -51,8 +51,16 @@ export type DinoSushiOutcome = {
   nextDay: number | null;
   /** 這一輪是第一次通關這一天：要宣布下一天開了。 */
   dayOpened: boolean;
-  /** 下一天的朋友，第一次通關時站到多多旁邊。 */
-  nextDayFace: string | null;
+  /** 下一天的朋友，在結算主鈕上；第一次通關時也站到多多旁邊。 */
+  nextDayFace: NextDayFace | null;
+};
+
+export type NextDayFace = {
+  src: string;
+  /** 車頭朝左，主鈕上要翻面。 */
+  flip: boolean;
+  /** 下一天的臉是多多自己：店面裡已經有一隻，不再多畫。 */
+  duoduo: boolean;
 };
 
 function dayFaceSrc(card: (typeof DAY_CARDS)[number]): string {
@@ -60,9 +68,9 @@ function dayFaceSrc(card: (typeof DAY_CARDS)[number]): string {
   return customerById(card.customerId!).sticker;
 }
 
-function faceForDay(day: number | null): string | null {
+function faceForDay(day: number | null): NextDayFace | null {
   const card = DAY_CARDS.find((item) => item.day === day);
-  return card ? dayFaceSrc(card) : null;
+  return card ? { src: dayFaceSrc(card), flip: card.faceLeft === true, duoduo: Boolean(card.duoduo) } : null;
 }
 
 export function DinoSushiView({

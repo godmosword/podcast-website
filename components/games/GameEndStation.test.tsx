@@ -93,4 +93,30 @@ describe("GameEndStation", () => {
     const order = [...html.matchAll(/aria-label="(下一站|再玩一次|回地圖)"/g)].map((m) => m[1]);
     expect(order).toEqual(["下一站", "再玩一次", "回地圖"]);
   });
+
+  it("mainAction 帶 thumbnail：主鈕放朋友＋箭頭徽章，名稱不變；翻面標在圖上", async () => {
+    const { GameEndStation } = await import("./GameEndStation");
+    const html = renderToStaticMarkup(
+      <GameEndStation
+        mood="win"
+        onReplay={() => undefined}
+        mainAction={{ label: "開始第 2 天", icon: "next", onClick: () => undefined, thumbnail: { src: "/x/anan.webp", flip: true } }}
+        hideHubLink
+      />,
+    );
+    const main = html.match(/<button[^>]*aria-label="開始第 2 天"[^>]*>([\s\S]*?)<\/button>/)?.[1] ?? "";
+    expect(main).toContain('src="/x/anan.webp"');
+    expect(main).toContain('alt=""');
+    expect(main).toContain('data-flip="true"');
+    expect(main).toContain("<svg");
+  });
+
+  it("mainAction 沒帶 thumbnail：主鈕沒有圖，其他遊戲不受影響", async () => {
+    const { GameEndStation } = await import("./GameEndStation");
+    const html = renderToStaticMarkup(
+      <GameEndStation mood="win" onReplay={() => undefined} mainAction={{ label: "下一關", icon: "next", onClick: () => undefined }} hideHubLink />,
+    );
+    const main = html.match(/<button[^>]*aria-label="下一關"[^>]*>([\s\S]*?)<\/button>/)?.[1] ?? "";
+    expect(main).not.toContain("<img");
+  });
 });

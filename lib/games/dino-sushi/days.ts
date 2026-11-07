@@ -17,12 +17,14 @@ export type DayCard = {
   /** 客人臉。多多那天改用表情貼紙。 */
   customerId?: CustomerId;
   duoduo?: "laugh" | "love";
+  /** 貼紙車頭朝左。放在往前走的結算主鈕上要翻面，才是朝著箭頭走。 */
+  faceLeft?: boolean;
 };
 
 export const DAY_CARDS: readonly DayCard[] = [
   { day: 1, name: "小紅", customerId: "xiaohong" },
-  { day: 2, name: "安安", customerId: "anan" },
-  { day: 3, name: "鈴鈴", customerId: "lingling" },
+  { day: 2, name: "安安", customerId: "anan", faceLeft: true },
+  { day: 3, name: "鈴鈴", customerId: "lingling", faceLeft: true },
   { day: 4, name: "多多", duoduo: "laugh" },
   { day: 5, name: "香香", customerId: "xiangxiang" },
   { day: 6, name: "東東", customerId: "dongdong" },

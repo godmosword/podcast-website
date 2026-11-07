@@ -17,6 +17,7 @@ import { TapButton } from "./DinoSushiPiece";
 import { ShopBelt, ShopWall } from "./DinoSushiShop";
 import type { DinoSushiOutcome } from "./DinoSushiView";
 import { useFreshGrid } from "./useFreshGrid";
+import { resultFitScroll, stickyHeaderBottom, visibleBottom } from "./useRevealTray";
 import styles from "./DinoSushiView.module.css";
 
 /** 新貼紙等盤子和星星出來才彈；第 10 張以後不再往後延，整段不超過約 1.1 秒。 */
@@ -110,6 +111,30 @@ function useKeepFocusAfterNotice(root: RefObject<HTMLElement | null>, hasNotice:
   }, [hasNotice, mainLabel, root]);
 }
 
+/**
+ * 結算蓋在廚房上，位置取決於當下捲到哪。出現時瞬間捲一次，標題到書鈕才在同一屏；
+ * 有存檔提示時它排在書鈕下面，底邊要算到它。
+ * 新貼紙、存檔提示會改變高度（貼紙格要量過才畫），下一幀才量得準。
+ */
+function useFitResultOnScreen(root: RefObject<HTMLElement | null>, layoutKey: string) {
+  useLayoutEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      const dialog = root.current?.querySelector('[role="dialog"]');
+      const last = dialog?.querySelector('[role="alert"]') ?? dialog?.querySelector('[data-role="result-book"]');
+      const title = dialog?.querySelector("h2")?.getBoundingClientRect();
+      if (!last || !title) return;
+      const by = resultFitScroll({
+        bookBottom: last.getBoundingClientRect().bottom,
+        titleTop: title.top,
+        viewportBottom: visibleBottom(),
+        headerBottom: stickyHeaderBottom(),
+      });
+      if (by !== 0) window.scrollBy({ top: by, behavior: "instant" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [layoutKey, root]);
+}
+
 function staggerStyle(i: number): CSSProperties {
   return { ["--i" as string]: i };
 }
@@ -198,6 +223,8 @@ export function DinoSushiResult({
   const nextDayLabel = nextDay !== null ? `開始第 ${nextDay} 天` : null;
   const overlayRef = useRef<HTMLDivElement>(null);
   useKeepFocusAfterNotice(overlayRef, Boolean(notice), nextDayLabel ?? replayLabel);
+  useFitResultOnScreen(overlayRef, `${fresh.length}:${notice ? 1 : 0}`);
+  const { nextDayFace } = outcome;
   const title =
     nextDay !== null && outcome.dayOpened
       ? dayOpenedLine(nextDay)
@@ -218,10 +245,10 @@ export function DinoSushiResult({
         <span className={styles.resultDuo}>
           <DuoDuoSticker mouth="closed" face="love" />
         </span>
-        {outcome.dayOpened && outcome.nextDayFace ? (
+        {outcome.dayOpened && nextDayFace && !nextDayFace.duoduo ? (
           <span className={styles.resultGuest}>
             {/* eslint-disable-next-line @next/next/no-img-element -- 現成客人貼紙與多多表情，不另生圖 */}
-            <img src={outcome.nextDayFace} alt="" draggable={false} />
+            <img src={nextDayFace.src} alt="" draggable={false} />
           </span>
         ) : null}
         <ShopBelt />
@@ -233,14 +260,23 @@ export function DinoSushiResult({
         gameSlug="dino-sushi"
         onReplay={onReplay}
         replayLabel={replayLabel}
-        mainAction={nextDayLabel !== null ? { label: nextDayLabel, onClick: onNextDay, icon: "next" } : undefined}
+        mainAction={
+          nextDayLabel !== null
+            ? {
+                label: nextDayLabel,
+                onClick: onNextDay,
+                icon: "next",
+                thumbnail: nextDayFace ? { src: nextDayFace.src, flip: nextDayFace.flip } : undefined,
+              }
+            : undefined
+        }
         details={details}
         leadingAction={titleAction}
         sideSize={64}
         mainSize={88}
         extraActions={
           <>
-            <TapButton className={styles.resultBook} onTap={onBook}>
+            <TapButton className={styles.resultBook} data-role="result-book" onTap={onBook}>
               {bookLabel}
             </TapButton>
             {/* 排在主鈕後面：對話框一開焦點仍在主鈕，Enter 不會按到「再存一次」 */}

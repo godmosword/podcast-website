@@ -974,6 +974,16 @@
     padding: 8px;
   }
 
+  /* 彩紙也收起：一顆星多兩行提示時，書鈕才放得進同一屏 */
+  .resultOverlay .resultStation > p:first-of-type {
+    display: none;
+  }
+
+  /* 兩條星星提示只留最接近的那條，標題和書鈕才都在同一屏 */
+  .resultOverlay [data-rule="flawless"] ~ [data-rule="all"] {
+    display: none;
+  }
+
   .freshStickers {
     gap: 4px;
   }

@@ -109,6 +109,61 @@
   height: 88px;
 }
 
+/*
+ * 主鈕帶圖：深墨外圈、硬底邊不變，還是這顆按鈕。內圈用暖黃：
+ * 白車身在奶油底、黑輪胎在深墨底都會融掉，這個底色上輪廓都分得開。不沿用下一站的 cover 與 overflow，車頭車尾不能被切。
+ */
+.mainBtn:has(.mainThumb) {
+  position: relative;
+  padding: 0;
+}
+
+.mainThumb {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 62px;
+  height: 62px;
+  border-radius: var(--radius-circle);
+  background: #ffe58a;
+}
+
+.station[data-main="88"] .mainThumb {
+  width: 72px;
+  height: 72px;
+}
+
+.mainThumb > img {
+  display: block;
+  width: 92%;
+  height: 92%;
+  object-fit: contain;
+  transform: translateY(-5%);
+}
+
+.mainThumb > img[data-flip="true"] {
+  transform: translateY(-5%) scaleX(-1);
+}
+
+/* 箭頭要比旁邊的「回標題」大，這排最清楚的方向才是往前。白框才不會融進深墨外圈。 */
+.mainThumbArrow {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 38px;
+  height: 38px;
+  border: 3px solid #fff;
+  border-radius: var(--radius-circle);
+  color: var(--cta-solid-fg);
+  background: var(--cta-solid-bg);
+  line-height: 0;
+}
+
 .leadingBtn {
   order: -1;
 }
