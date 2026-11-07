@@ -1,0 +1,128 @@
+/* A 版：觀點文。窄欄、金句當標題、段落之間穿插滿版圖。
+   標題用系統襯線，不另載網路字型。內文沿用站上粉圓。 */
+
+.page {
+  background: var(--bg);
+  color: var(--ink);
+  padding: var(--space-6) 0 var(--space-8);
+}
+
+.banner,
+.header,
+.stanza,
+.pull,
+.footer {
+  width: min(640px, calc(100% - 2 * var(--space-page)));
+  margin-inline: auto;
+}
+
+.banner {
+  margin-bottom: var(--space-6);
+  color: var(--ink-soft);
+  font-size: var(--fs-label);
+  line-height: 1.6;
+}
+
+.banner a,
+.footer a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-left: var(--space-2);
+  color: var(--accent-ink);
+  font-weight: 700;
+}
+
+.banner a:focus-visible,
+.footer a:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.kicker {
+  margin: 0 0 var(--space-3);
+  color: var(--warm-highlight);
+  font-size: var(--fs-label);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.title {
+  margin: 0;
+  color: var(--ink);
+  font-family: "Iowan Old Style", Palatino, "Palatino Linotype", "Songti TC", PMingLiU,
+    "Noto Serif CJK TC", serif;
+  font-size: var(--fs-h1);
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin: var(--space-4) 0 0;
+  color: var(--ink-soft);
+  font-size: var(--fs-label);
+}
+
+.stanza p {
+  margin: 0 0 var(--space-3);
+  font-size: var(--fs-body);
+  line-height: 1.75;
+}
+
+.pull {
+  margin-block: var(--space-6);
+  padding: var(--space-4) 0 var(--space-4) var(--space-4);
+  border-left: 4px solid var(--c-pink);
+  background: color-mix(in srgb, var(--c-yellow) 28%, var(--card));
+}
+
+.pull p {
+  margin: 0;
+  color: var(--ink);
+  font-family: "Iowan Old Style", Palatino, "Palatino Linotype", "Songti TC", PMingLiU,
+    "Noto Serif CJK TC", serif;
+  font-size: var(--fs-h2);
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.figure {
+  margin: var(--space-6) 0;
+}
+
+.keep {
+  white-space: nowrap;
+}
+
+.figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.footer {
+  margin-top: var(--space-8);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--hairline);
+  color: var(--ink-soft);
+  font-size: var(--fs-label);
+  line-height: 1.6;
+}
+
+.footer h2 {
+  margin: 0 0 var(--space-3);
+  color: var(--ink);
+  font-size: var(--fs-h3);
+}
+
+.footer ol {
+  margin: 0 0 var(--space-4);
+  padding-left: 1.2em;
+}
+
+.footer li + li {
+  margin-top: var(--space-2);
+}

@@ -1,0 +1,161 @@
+/* B 版：親子生活雜誌。沿用 A 的段落節奏，留白更大、襯線標題更大、
+   內文改細的系統無襯線（不載新字型）。米白底與粉彩用既有 token，夜間跟著暖炭黑。 */
+
+.page {
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--c-pink) 18%, var(--pm-page)) 0%,
+      var(--pm-page) 28%,
+      color-mix(in srgb, var(--c-sky) 12%, var(--pm-page)) 100%
+    );
+  color: var(--ink);
+  padding: var(--space-section) 0 calc(var(--space-8) + var(--space-8));
+}
+
+.banner,
+.header,
+.stanza,
+.pull,
+.footer {
+  width: min(560px, calc(100% - 2 * var(--space-page)));
+  margin-inline: auto;
+}
+
+.banner {
+  margin-bottom: var(--space-8);
+  color: var(--ink-soft);
+  font-family: "PingFang TC", "Hiragino Sans CNS", "Noto Sans TC", "Noto Sans CJK TC", "Microsoft JhengHei", sans-serif;
+  font-size: var(--fs-label);
+  font-weight: 400;
+  line-height: 1.7;
+}
+
+.banner a,
+.footer a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-left: var(--space-2);
+  color: var(--accent-ink);
+  font-weight: 700;
+}
+
+.banner a:focus-visible,
+.footer a:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.header {
+  margin-bottom: var(--space-8);
+  text-align: center;
+}
+
+.kicker {
+  display: inline-block;
+  margin: 0 0 var(--space-6);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--c-pink) 45%, var(--card));
+  color: var(--ink);
+  font-family: "PingFang TC", "Hiragino Sans CNS", "Noto Sans TC", "Noto Sans CJK TC", "Microsoft JhengHei", sans-serif;
+  font-size: var(--fs-label);
+  font-weight: 400;
+  letter-spacing: 0.14em;
+}
+
+.title {
+  margin: 0;
+  color: var(--ink);
+  font-family: "Iowan Old Style", Palatino, "Palatino Linotype", "Songti TC", PMingLiU,
+    "Noto Serif CJK TC", serif;
+  font-size: calc(var(--fs-h1) * 1.45);
+  font-weight: 700;
+  line-height: 1.28;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2) var(--space-4);
+  margin: var(--space-6) 0 0;
+  color: var(--ink-soft);
+  font-family: "PingFang TC", "Hiragino Sans CNS", "Noto Sans TC", "Noto Sans CJK TC", "Microsoft JhengHei", sans-serif;
+  font-size: var(--fs-label);
+  font-weight: 400;
+}
+
+.stanza {
+  margin-bottom: var(--space-8);
+}
+
+.stanza p {
+  margin: 0 0 var(--space-4);
+  font-family: "PingFang TC", "Hiragino Sans CNS", "Noto Sans TC", "Noto Sans CJK TC", "Microsoft JhengHei", sans-serif;
+  font-size: var(--fs-body);
+  font-weight: 400;
+  line-height: 1.95;
+}
+
+.pull {
+  margin-block: var(--space-8);
+  padding: var(--space-8) var(--space-4);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--c-lilac) 28%, var(--card));
+  text-align: center;
+}
+
+.pull p {
+  margin: 0;
+  color: var(--ink);
+  font-family: "Iowan Old Style", Palatino, "Palatino Linotype", "Songti TC", PMingLiU,
+    "Noto Serif CJK TC", serif;
+  font-size: var(--fs-h1);
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.figure {
+  margin: var(--space-8) auto;
+  width: min(960px, calc(100% - 2 * var(--space-page)));
+}
+
+.keep {
+  white-space: nowrap;
+}
+
+.figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+}
+
+.footer {
+  margin-top: var(--space-8);
+  padding-top: var(--space-8);
+  color: var(--ink-soft);
+  font-family: "PingFang TC", "Hiragino Sans CNS", "Noto Sans TC", "Noto Sans CJK TC", "Microsoft JhengHei", sans-serif;
+  font-size: var(--fs-label);
+  font-weight: 400;
+  line-height: 1.8;
+}
+
+.footer h2 {
+  margin: 0 0 var(--space-4);
+  color: var(--ink);
+  font-family: "Iowan Old Style", Palatino, "Palatino Linotype", "Songti TC", PMingLiU,
+    "Noto Serif CJK TC", serif;
+  font-size: var(--fs-h2);
+}
+
+.footer ol {
+  margin: 0 0 var(--space-6);
+  padding-left: 1.2em;
+}
+
+.footer li + li {
+  margin-top: var(--space-3);
+}
