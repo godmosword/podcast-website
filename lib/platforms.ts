@@ -52,11 +52,16 @@ export function visiblePlatforms(): Platform[] {
 
 /**
  * 各平台「節目頁」canonical 網址（供 PodcastSeries JSON-LD 的 sameAs 使用）。
- * 去除追蹤查詢參數，只留 origin + pathname；不含空連結。
+ * 去除追蹤查詢參數，保留辨識節目頁所需的語意參數（如 YouTube playlist list）；不含空連結。
  */
 export function platformShowUrls(): string[] {
   return visiblePlatforms().map((p) => {
     const url = new URL(p.url);
-    return `${url.origin}${url.pathname}`;
+    for (const key of [...url.searchParams.keys()]) {
+      if (/^utm_/i.test(key) || key === "si" || key === "fbclid") {
+        url.searchParams.delete(key);
+      }
+    }
+    return url.toString();
   });
 }

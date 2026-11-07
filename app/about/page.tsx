@@ -7,6 +7,7 @@ import AboutParentFaq from "@/components/about/AboutParentFaq";
 import { parentLandingFaqs } from "@/lib/for-parents";
 import { breadcrumbListJsonLd, faqPageJsonLd } from "@/lib/json-ld";
 import { STATIC_PAGE_MODIFIED_DATES } from "@/lib/page-freshness";
+import { pageSocialMetadata } from "@/lib/page-social-metadata";
 import Icon from "@/components/ui/Icon";
 import styles from "./page.module.css";
 
@@ -16,13 +17,13 @@ export const metadata: Metadata = {
     "車車遊樂園是 Bonbon & 馬米的親子 Podcast 看圖聽故事網站，適合約 3–7 歲親子共聽；整理適合年齡、怎麼陪孩子聽、多久更新與可以先聽哪幾集。",
   alternates: { canonical: "/about" },
   other: { dateModified: STATIC_PAGE_MODIFIED_DATES["/about"] },
-  openGraph: {
+  ...pageSocialMetadata({
     title: "關於車車遊樂園 · 給家長的中文車車 Podcast",
     description:
       "Bonbon & 馬米的親子 Podcast：適合年齡、怎麼陪孩子聽、多久更新與可以先聽哪幾集。",
     url: "/about",
     type: "website",
-  },
+  }),
 };
 
 export default function AboutPage() {

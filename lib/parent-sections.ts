@@ -24,7 +24,8 @@ export const PARENT_SECTION_ITEMS = [
     label: "國外旅遊",
     href: "/for-parents/overseas-travel",
     icon: "plane",
-    description: "國外旅遊的準備與行程。內容整理中。",
+    description:
+      "親子國外旅遊筆記：從名古屋、北陸行程，到小松之杜近看大型工程車、帶孩子操作小型挖土機的經驗。",
   },
   {
     id: "parent-travel-taiwan",

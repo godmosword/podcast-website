@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import SiteFooter from "@/components/SiteFooter";
 import { ParentArticleView } from "@/components/for-parents/ParentArticleView";
 import JsonLd from "@/components/JsonLd";
-import { breadcrumbListJsonLd } from "@/lib/json-ld";
+import { blogPostingJsonLd, breadcrumbListJsonLd } from "@/lib/json-ld";
+import { pageSocialMetadata } from "@/lib/page-social-metadata";
 import {
   getParentArticle,
   listParentArticles,
@@ -36,13 +37,15 @@ export async function generateMetadata({
     title: article.title,
     description,
     alternates: { canonical: path },
-    openGraph: {
+    ...pageSocialMetadata({
       title: `${article.title} · 車車遊樂園`,
       description,
       url: path,
       type: "article",
       publishedTime: article.publishedAt,
-    },
+      image: article.coverImage,
+      imageAlt: article.coverAlt ?? article.title,
+    }),
   };
 }
 
@@ -55,6 +58,15 @@ export default async function ParentArticlePage({ params }: ArticlePageProps) {
 
   return (
     <main className={styles.main}>
+      <JsonLd
+        data={blogPostingJsonLd({
+          headline: article.title,
+          description: article.excerpt.replaceAll("\n", ""),
+          path: parentArticlePath(article.slug),
+          datePublished: article.publishedAt,
+          image: article.coverImage,
+        })}
+      />
       <JsonLd
         data={breadcrumbListJsonLd([
           { name: "車車遊樂園", url: "/" },

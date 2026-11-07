@@ -6,8 +6,9 @@ import { PARENT_TRAVEL_ABROAD_ARTICLES } from "../data/parent-travel-abroad-arti
 const SECTION_HREF = "/for-parents/overseas-travel";
 const LEGACY_HREF = "/for-parents/travel-abroad";
 
-/** 列表導言。沿用這一區原本的說明，拿掉「內容整理中」。 */
-export const TRAVEL_ABROAD_LEDE = "國外旅遊的準備與行程。";
+/** 列表導言，具體說明目前收錄的名古屋、北陸與小松之杜親子旅遊紀錄。 */
+export const TRAVEL_ABROAD_LEDE =
+  "親子國外旅遊筆記：從名古屋、北陸行程，到小松之杜近看大型工程車、帶孩子操作小型挖土機的經驗。";
 
 function assertDistinctFromParentArticles(): void {
   const slugs = new Set(PARENT_ARTICLES.map((article) => article.slug));

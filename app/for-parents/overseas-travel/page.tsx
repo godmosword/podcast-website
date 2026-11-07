@@ -3,6 +3,7 @@ import { ParentSectionArticleList } from "@/components/for-parents/ParentSection
 import { ParentSectionPage } from "@/components/for-parents/ParentSectionPage";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbListJsonLd } from "@/lib/json-ld";
+import { pageSocialMetadata } from "@/lib/page-social-metadata";
 import {
   TRAVEL_ABROAD_LEDE,
   listTravelAbroadArticles,
@@ -15,6 +16,7 @@ import { parentSection } from "@/lib/parent-sections";
 const section = parentSection("parent-travel-abroad");
 const articles = listTravelAbroadArticles();
 const description = articles.length > 0 ? TRAVEL_ABROAD_LEDE : section.description;
+const latestArticle = listTravelAbroadArticlesByRecency()[0];
 
 export const metadata: Metadata = {
   title: section.label,
@@ -23,12 +25,14 @@ export const metadata: Metadata = {
   ...(articles.length === 0
     ? { robots: { index: false, follow: false } }
     : {
-        openGraph: {
+        ...pageSocialMetadata({
           title: `${section.label} · 車車遊樂園`,
           description,
           url: section.href,
-          type: "website" as const,
-        },
+          type: "website",
+          image: latestArticle?.coverImage,
+          imageAlt: latestArticle?.coverAlt,
+        }),
       }),
 };
 

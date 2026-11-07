@@ -7,6 +7,8 @@ import { CHANNEL_DESCRIPTION, CHANNEL_TITLE } from "@/lib/feed-constants";
 import { siteRssUrl } from "@/lib/feed";
 import { STATIC_PAGE_MODIFIED_DATES } from "@/lib/page-freshness";
 import { platformShowUrls } from "@/lib/platforms";
+import { visibleSocials, LINKTREE_URL } from "@/lib/social";
+import { PARENT_ARTICLE_AUTHOR } from "@/lib/parent-articles";
 import {
   collectionDescription,
   collectionPath,
@@ -16,7 +18,7 @@ import {
   playgroundDetailDescription,
   playgroundDetailUrl,
 } from "@/lib/playground-detail";
-import { getSiteUrl } from "@/lib/site-url";
+import { DEFAULT_OG_IMAGE, getSiteUrl } from "@/lib/site-url";
 import { storyDescription } from "@/lib/story-metadata";
 import { storyAudioUrl, storyCoverPath } from "@/lib/story-utils";
 import { hasVtt } from "@/lib/transcript";
@@ -87,6 +89,15 @@ export function siteIdentityJsonLd(): Record<string, unknown> {
         name: CHANNEL_TITLE,
         url: siteUrl,
         logo: absoluteUrl("/icon-512.png"),
+        sameAs: [
+          ...new Set([
+            ...visibleSocials()
+              .map((social) => social.url)
+              .filter((url) => url.startsWith("https://")),
+            LINKTREE_URL,
+            ...platformShowUrls(),
+          ]),
+        ],
       },
       {
         "@type": "WebSite",
@@ -98,6 +109,39 @@ export function siteIdentityJsonLd(): Record<string, unknown> {
         publisher: { "@id": organizationId },
       },
     ],
+  };
+}
+
+export type BlogPostingInput = {
+  headline: string;
+  description: string;
+  path: string;
+  datePublished: string;
+  image?: string;
+};
+
+/** 育兒文章、旅遊文章與電子報共用的文章結構化資料。 */
+export function blogPostingJsonLd(
+  input: BlogPostingInput,
+): Record<string, unknown> {
+  const pageUrl = absoluteUrl(input.path);
+  return {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "@id": `${pageUrl}#article`,
+    headline: input.headline,
+    description: input.description,
+    url: pageUrl,
+    mainEntityOfPage: { "@type": "WebPage", "@id": pageUrl },
+    datePublished: input.datePublished,
+    image: absoluteUrl(input.image ?? DEFAULT_OG_IMAGE),
+    inLanguage: LANGUAGE,
+    author: {
+      "@type": "Person",
+      name: PARENT_ARTICLE_AUTHOR.name,
+      url: PARENT_ARTICLE_AUTHOR.profileUrl,
+    },
+    publisher: { "@id": `${getSiteUrl()}/#organization` },
   };
 }
 

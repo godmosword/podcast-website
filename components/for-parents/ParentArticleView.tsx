@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { ParentArticle, ParentArticleBlock } from "@/data/parent-articles";
 import {
   formatParentArticleDate,
+  PARENT_ARTICLE_AUTHOR,
   parentArticlePath,
   parentArticlesIndexPath,
 } from "@/lib/parent-articles";
@@ -74,6 +75,16 @@ export function ParentArticleView({
         <time className={styles.date} dateTime={article.publishedAt}>
           {formatParentArticleDate(article.publishedAt)}
         </time>
+        <p className={styles.author}>
+          作者：
+          <a
+            href={PARENT_ARTICLE_AUTHOR.profileUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {PARENT_ARTICLE_AUTHOR.name}
+          </a>
+        </p>
       </header>
       {article.coverImage ? (
         article.coverWidth && article.coverHeight ? (

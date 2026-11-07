@@ -57,7 +57,15 @@ describe("siteIdentityJsonLd", () => {
     const organization = (data["@graph"] as Record<string, unknown>[]).find(
       (node) => node["@type"] === "Organization",
     );
-    expect(organization).not.toHaveProperty("sameAs");
+    expect(organization?.sameAs).toEqual(
+      expect.arrayContaining([
+        "https://www.instagram.com/s32183218",
+        "https://www.threads.com/@bonboncarstory",
+        "https://www.facebook.com/profile.php?id=61590533437349",
+        "https://linktr.ee/bonboncarstory",
+        "https://www.youtube.com/playlist?list=PLVbyl20K8lOeuJ2ky6dEsmpew7xAxZDhF",
+      ]),
+    );
 
     vi.unstubAllEnvs();
   });
@@ -89,6 +97,9 @@ describe("podcastSeriesJsonLd", () => {
     for (const url of sameAs) {
       expect(url).toMatch(/^https?:\/\//);
     }
+    expect(sameAs).toContain(
+      "https://www.youtube.com/playlist?list=PLVbyl20K8lOeuJ2ky6dEsmpew7xAxZDhF",
+    );
 
     vi.unstubAllEnvs();
   });

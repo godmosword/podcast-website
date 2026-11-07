@@ -50,6 +50,18 @@
   font-weight: 800;
 }
 
+.author {
+  margin: 4px 0 0;
+  color: var(--ink-soft);
+  font-size: var(--fs-meta);
+}
+
+.author a {
+  color: var(--warm-highlight);
+  font-weight: 700;
+  text-underline-offset: 0.18em;
+}
+
 .hero {
   position: relative;
   overflow: hidden;

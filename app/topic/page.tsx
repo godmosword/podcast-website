@@ -5,6 +5,7 @@ import { storyCoverPath } from "@/lib/story-utils";
 import { topicVisualFor } from "@/lib/topic-visuals";
 import { GeoSrOnlyLede } from "@/lib/geo-sr-only-lede";
 import { topicIndexDefinitionSummary } from "@/lib/topic-index-geo";
+import { pageSocialMetadata } from "@/lib/page-social-metadata";
 import StoryImage from "@/components/StoryImage";
 import TopicIcon from "@/components/TopicIcon";
 import SiteFooter from "@/components/SiteFooter";
@@ -21,12 +22,12 @@ export function generateMetadata(): Metadata {
     title: "主題分類",
     description,
     alternates: { canonical: "/topic" },
-    openGraph: {
+    ...pageSocialMetadata({
       title: "主題分類 · 車車遊樂園",
       description,
       url: "/topic",
       type: "website",
-    },
+    }),
   };
 }
 

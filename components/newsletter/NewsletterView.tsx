@@ -4,6 +4,7 @@ import { NewsletterBody } from "@/components/newsletter/NewsletterBody";
 import Icon from "@/components/ui/Icon";
 import {
   formatParentArticleDate,
+  PARENT_ARTICLE_AUTHOR,
 } from "@/lib/parent-articles";
 import {
   newsletterNeighbors,
@@ -25,6 +26,16 @@ export function NewsletterView({ issue }: { issue: Newsletter }) {
         <time className={articleStyles.date} dateTime={issue.publishedAt}>
           {formatParentArticleDate(issue.publishedAt)}
         </time>
+        <p className={articleStyles.author}>
+          作者：
+          <a
+            href={PARENT_ARTICLE_AUTHOR.profileUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {PARENT_ARTICLE_AUTHOR.name}
+          </a>
+        </p>
       </header>
       <div className={articleStyles.body}>
         <NewsletterBody body={issue.body} />

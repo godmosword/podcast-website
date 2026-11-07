@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import SiteFooter from "@/components/SiteFooter";
 import { NewsletterView } from "@/components/newsletter/NewsletterView";
 import JsonLd from "@/components/JsonLd";
-import { breadcrumbListJsonLd } from "@/lib/json-ld";
+import { blogPostingJsonLd, breadcrumbListJsonLd } from "@/lib/json-ld";
+import { pageSocialMetadata } from "@/lib/page-social-metadata";
 import {
   getNewsletter,
   listNewsletters,
@@ -34,13 +35,14 @@ export async function generateMetadata({
     title: issue.title,
     description: issue.description,
     alternates: { canonical: path },
-    openGraph: {
+    ...pageSocialMetadata({
       title: `${issue.title} · 車車遊樂園`,
       description: issue.description,
       url: path,
       type: "article",
       publishedTime: issue.publishedAt,
-    },
+      imageAlt: issue.title,
+    }),
   };
 }
 
@@ -52,6 +54,14 @@ export default async function NewsletterPage({ params }: NewsletterPageProps) {
 
   return (
     <main className={styles.main}>
+      <JsonLd
+        data={blogPostingJsonLd({
+          headline: issue.title,
+          description: issue.description,
+          path: newsletterPath(issue.slug),
+          datePublished: issue.publishedAt,
+        })}
+      />
       <JsonLd
         data={breadcrumbListJsonLd([
           { name: "車車遊樂園", url: "/" },

@@ -595,7 +595,7 @@ async function checkRobots(): Promise<void> {
   }
 }
 
-/** podcastSeriesJsonLd() 的 sameAs：非空、全絕對 https URL、無 query string。 */
+/** podcastSeriesJsonLd() 的 sameAs：非空、全絕對 https URL；只允許辨識平台頁的語意 query。 */
 function checkSameAs(): void {
   const series = podcastSeriesJsonLd();
   const sameAs = series.sameAs;
@@ -606,13 +606,31 @@ function checkSameAs(): void {
   const bad = (sameAs as unknown[]).filter((u) => {
     if (typeof u !== "string") return true;
     if (!u.startsWith("https://")) return true;
-    if (u.includes("?")) return true;
+    let url: URL;
+    try {
+      url = new URL(u);
+    } catch {
+      return true;
+    }
+    for (const [key, value] of url.searchParams) {
+      const isFacebookProfileId =
+        key === "id" &&
+        url.hostname === "www.facebook.com" &&
+        url.pathname === "/profile.php" &&
+        /^\d+$/.test(value);
+      const isYouTubePlaylistId =
+        key === "list" &&
+        url.hostname === "www.youtube.com" &&
+        url.pathname === "/playlist" &&
+        value.length > 0;
+      if (!isFacebookProfileId && !isYouTubePlaylistId) return true;
+    }
     return false;
   });
   if (bad.length > 0) {
-    fail("PodcastSeries sameAs 皆為絕對 https URL 且無 query string", JSON.stringify(bad));
+    fail("PodcastSeries sameAs 皆為絕對 https URL 且只含必要的平台識別參數", JSON.stringify(bad));
   } else {
-    pass("PodcastSeries sameAs 皆為絕對 https URL 且無 query string", `${sameAs.length} 筆`);
+    pass("PodcastSeries sameAs 皆為絕對 https URL 且只含必要的平台識別參數", `${sameAs.length} 筆`);
   }
 }
 

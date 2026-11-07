@@ -5,6 +5,7 @@ import { ParentArticlesMasthead } from "@/components/for-parents/ParentArticlesM
 import { NewsletterSubscribeForm } from "@/components/newsletter/NewsletterSubscribeForm";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbListJsonLd } from "@/lib/json-ld";
+import { pageSocialMetadata } from "@/lib/page-social-metadata";
 import {
   listNewsletters,
   newsletterPath,
@@ -20,12 +21,12 @@ export const metadata: Metadata = {
   title: section.label,
   description: section.description,
   alternates: { canonical: section.href },
-  openGraph: {
+  ...pageSocialMetadata({
     title: `${section.label} · 車車遊樂園`,
     description: section.description,
     url: section.href,
     type: "website",
-  },
+  }),
 };
 
 export default function NewsletterIndexPage() {

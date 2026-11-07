@@ -17,6 +17,9 @@ export type Social = {
   icon: SocialIcon;
 };
 
+/** 官方 Linktree；亦供 Organization 結構化資料識別品牌官方頁面。 */
+export const LINKTREE_URL = "https://linktr.ee/bonboncarstory";
+
 /** 社群清單（顯示順序即陣列順序）。 */
 const SOCIALS: Social[] = [
   {

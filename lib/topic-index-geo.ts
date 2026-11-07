@@ -10,8 +10,8 @@ export function topicIndexDefinitionSummary(themes: TopicIndexTheme[]): string {
     .join("、");
 
   const lead = busiest
-    ? `目前整理 ${themeCount} 個成長主題；「${busiest.tag}」收錄 ${busiest.count} 集最多。`
-    : `目前整理 ${themeCount} 個成長主題。`;
+    ? `目前整理 ${themeCount} 個主題標籤；「${busiest.tag}」收錄 ${busiest.count} 集最多。`
+    : `目前整理 ${themeCount} 個主題標籤。`;
 
   return `${lead}涵蓋${sampleTags}等標籤，點選主題看相關集數與代表故事，再進單集看圖聽故事。`;
 }

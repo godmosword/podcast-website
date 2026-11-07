@@ -21,7 +21,12 @@
 - /topic/{tag}：特定主題故事列表，例如睡前、安全、合作、勇氣。
 - /vehicles/{vehicle}：特定車種故事列表，例如救護車、消防車、恐龍車、警車。
 - /about：車車遊樂園介紹與使用方式，含給家長的常見問題（適合年齡、如何共聽、多久更新、從哪幾集開始）。每集故事頁下方的「給爸媽：一起聊聊」有該集的共讀提問與親子小活動。
-- /for-parents/dashboard：家庭儀表板，查看這台裝置上的收聽與小遊戲探索摘要（localStorage，不上傳）。
+- /for-parents/articles：育兒文章索引，收錄馬米寫給家長的親子與育兒文章。
+- /for-parents/articles/{slug}：育兒文章全文，附來源與上一篇／下一篇導覽。
+- /for-parents/overseas-travel：親子國外旅遊索引，含名古屋、北陸與小松之杜大型工程車參觀紀錄。
+- /for-parents/overseas-travel/{slug}：親子國外旅遊文章全文。
+- /newsletter：馬米寫給家長的電子報索引，附每期今晚就能試的小練習與訂閱表單。
+- /newsletter/{slug}：電子報單期全文。
 - /characters：車車遊樂園原創角色介紹，包含每位 Q 版黏土車車角色的個性與登場故事。
 - /adventures：車車宇宙樂園地圖，含故事與遊戲入口；互動地圖另有純文字 fallback。
 - /games：親子小遊戲入口。

@@ -42,30 +42,29 @@
 
 - **「關於我們」頁內容待 Kaiyi 決定修改方向。**
 
-### SEO／GEO：等正式站網址上線後再調（2026-11-06）
+### SEO／GEO：程式項目完成，正式網域與營運檢查待辦保留（2026-11-07）
 
-> 正式自訂網域上線前，不要開始改這些程式。上線後用新網址重查 canonical、sitemap、OG、robots、`llms.txt`、Search Console，以及各平台與 Linktree 的外連。覆核日 2026-11-06，對照 https://podcast-website-mu.vercel.app 與 main 原始碼。
+> 2026-11-06 曾以 https://podcast-website-mu.vercel.app 和 main 原始碼覆核。網域仍未決，因此本次只完成不依賴網域選擇的程式項目；正式網域上線後仍須用新網址重查 canonical、sitemap、OG、robots、`llms.txt`、Search Console，以及各平台與 Linktree 的外連。
 
 **必做**
 
 - **平台與 Linktree 補上本站：** 2026-11-06 覆核，Apple、Spotify 的單集文案與 https://linktr.ee/bonboncarstory 都還沒連到這個網站。正式網址上線後再補。屬營運。`ops · S · 依賴正式網址`
-- **PodcastSeries 的 YouTube sameAs 是壞網址：** 線上首頁 JSON-LD `sameAs` 的 YouTube 是 `https://www.youtube.com/playlist`（`list` 被拿掉）。`lib/platforms.ts` 的 `platformShowUrls()` 只留 origin + pathname，`lib/json-ld.ts` 的 `podcastSeriesJsonLd` 拿它當 `sameAs`；頁尾圖示仍是完整播放清單網址。播放清單要不要改連頻道，見 [品牌標誌合規後續](#品牌標誌合規後續2026-10-12) 的「YouTube 連結」。這一條另記這個壞網址，開工時修。`eng · S · 可先記，實作等正式網址也可順手修`
-- **多數子頁沒有 og:image：** `/stories`、家長文章、國外旅遊、電子報、關於、主題各自寫了 `openGraph` 卻沒有 `images`。Twitter 標題、說明與圖退回全站預設（`app/layout.tsx`；這些頁沒覆寫 `twitter`）。首頁與單集頁有圖（`app/page.tsx` 已註明子頁會整段蓋掉版面預設；`lib/story-metadata.ts`）。2026-11-06 線上 `/stories`、`/about`、`/topic`、`/newsletter`、`/for-parents/overseas-travel` 無 `og:image`，Twitter 仍是全站吉祥物與全站文案；`/story/ep-1` 有自己的圖與文案。`eng · M · 正式網址`
-- **家長文、旅遊文、電子報缺 Article／BlogPosting：** `app/for-parents/articles/[slug]/page.tsx`、`app/for-parents/overseas-travel/[slug]/page.tsx`、`app/newsletter/[slug]/page.tsx` 的 `generateMetadata` 已是 `type: "article"` 並帶 `publishedTime`，頁上 JSON-LD 只有麵包屑。內文不顯示作者：`PARENT_ARTICLE_AUTHOR` 是馬米（`lib/parent-articles.ts`，列表頁眉有用），`ParentArticleView` 只渲染 `<time>`；電子報 `NewsletterView` 也只有 `<time>`。`eng · S · 正式網址`
+- ✅ **PodcastSeries 的 YouTube sameAs 修正：** `platformShowUrls()` 保留 YouTube 播放清單的 `list`，只剔除追蹤參數；`verify:geo` 允許並驗證 YouTube playlist ID 與 Facebook profile ID 這兩種必要參數。播放清單要不要改連頻道仍見 [品牌標誌合規後續](#品牌標誌合規後續2026-10-12) 的「YouTube 連結」；目前保留原播放清單連結。
+- ✅ **子頁 OG 與 Twitter metadata：** `/stories`、育兒文章、國外旅遊、電子報、關於與主題都明確輸出 og:image 和各頁標題、說明、分享圖；國外旅遊列表與有封面的文章使用封面，其他頁使用預設吉祥物圖。
+- ✅ **家長文、旅遊文、電子報的 BlogPosting：** 三類文章頁輸出 BlogPosting JSON-LD，並在內文標出作者馬米；作者名稱與個人頁連結來自共用作者資料。
 
 **應該做 · SEO**
 
-- **有封面就拿來當 og:image：** 圖缺了見上一條。國外旅遊文已有 `coverImage`（`data/parent-travel-abroad-articles.ts`），OG 沒用。有封面用封面，否則退 `DEFAULT_OG_IMAGE`（`/mascot.png`，`lib/site-url.ts`）。該頁 Twitter 的標題與說明跟該頁一致。`eng · S · 正式網址`
-- **`<head>` 補 RSS alternate：** `/feed.xml` 已存在（`app/feed.xml/route.ts`）。首頁 `alternates` 只有 canonical（`app/page.tsx`），版面也沒宣告 `application/rss+xml`。2026-11-06 線上首頁沒有這條。指到 `/feed.xml`。`eng · S · 正式網址`
-- **國外旅遊列表說明太薄：** `TRAVEL_ABROAD_LEDE` 現在是「國外旅遊的準備與行程。」（`lib/parent-travel-abroad.ts`），列表 metadata 用這句。2026-11-06 線上 `/for-parents/overseas-travel` 的 description 就是這句。`content · S · 正式網址`
-- **主題數兩邊不一致：** `/stories` 說 7 個成長主題（`STORY_FINDER_THEMES`，`data/episode-themes.ts`，`lib/stories-geo.ts`），`/topic` 說 16 個（`allTags()`，`lib/topic-index-geo.ts`）。2026-11-06 線上導言分別是「7 個成長主題」與「16 個成長主題」。先對齊對外怎麼數。`content · S · 需對齊口徑`
+- ✅ **RSS alternate：** 首頁 head 宣告 `application/rss+xml` 並指向 `/feed.xml`。
+- ✅ **國外旅遊列表說明：** 導言改為目前實際收錄的名古屋、北陸與小松之杜親子旅遊內容。
+- ✅ **主題數口徑：** `/stories` 明確稱 7 個「精選成長主題」；`/topic` 稱 16 個「主題標籤」，不再把兩種篩選分類說成同一組成長主題。
 - **部分文章 slug 仍是 `vocus-<id>`：** 手寫篇用英文短名，同步篇是 `vocus-<方格子 contentId>`（`data/parent-articles.ts` 註解，`scripts/lib/vocus-articles.ts`）。可以之後再改；改的話保留舊網址轉址。`content · S · 可後做`
 - **自訂網域上線後重跑搜尋設定：** 網域選哪個見 [路線圖待決策 ①](#路線圖單一優先序總表)（`chechepark.tw`／`checheland.tw`／其他；`NEXT_PUBLIC_SITE_URL` 與 `CANONICAL_SITE_URL` 已就緒）與 [M0a](#修正版執行順序)。部署後用新網址重查 canonical、sitemap、OG、Search Console。`ops · S · 依賴正式網址`
 
 **應該做 · GEO**
 
-- **`public/llms.txt` 過期：** 仍列 `/for-parents/dashboard`（`app/for-parents/dashboard/` 已沒有頁面），沒有列出家長文章（`/for-parents/articles`）、電子報（`/newsletter`）、國外旅遊（`/for-parents/overseas-travel`）。`eng · S · 正式網址`
-- **Organization 補 sameAs：** `siteIdentityJsonLd` 的 Organization 沒有 `sameAs`（`lib/json-ld.ts`）；sameAs 主要在 PodcastSeries，而且是 `platformShowUrls()`。可加上 IG、Threads（`lib/social.ts`）、https://linktr.ee/bonboncarstory，以及各收聽平台。Facebook 的 id 在查詢參數，sameAs 要留完整網址（`platformShowUrls()` 會拿掉查詢，見上面 YouTube 那條）。創作者社群 sameAs 見 [待議：主持人／創作者實體強化](#待議主持人創作者實體強化)。`eng · S · 正式網址`
+- ✅ **`public/llms.txt` 路由地圖：** 移除不存在的 dashboard，加入育兒文章、國外旅遊與電子報索引及單篇路由。
+- ✅ **Organization sameAs：** 加入 Instagram、Threads、Facebook、Linktree 與各收聽平台；Facebook 的 profile ID 和 YouTube playlist ID 均保留。創作者個人實體的 sameAs 仍依 [待議：主持人／創作者實體強化](#待議主持人創作者實體強化) 決策。
 - **正式網址上線後的 GEO 營運沿用原條：** `INDEXNOW_KEY`、Google Search Console／Bing Webmaster、每週量測已寫在 [GEO 營運基礎](#geo-營運基礎crawler-政策indexnow逐字稿verifygeo) 的「剩餘（使用者手動）」，手冊是 `docs/GEO.md` 與 `docs/GEO-BASELINE.md`。網域換了之後照那一段做。`ops · S · 依賴正式網址`
 
 **以後再確認**

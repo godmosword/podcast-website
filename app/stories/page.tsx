@@ -9,6 +9,7 @@ import SiteFooter from "@/components/SiteFooter";
 import { podcastSeriesJsonLd } from "@/lib/json-ld";
 import { StoriesIndexHeader } from "@/components/stories/StoriesIndexHeader";
 import { storiesCatalogSummary } from "@/lib/stories-geo";
+import { pageSocialMetadata } from "@/lib/page-social-metadata";
 import styles from "./page.module.css";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -22,12 +23,12 @@ export async function generateMetadata(): Promise<Metadata> {
     title: "全部故事",
     description,
     alternates: { canonical: "/stories" },
-    openGraph: {
+    ...pageSocialMetadata({
       title: "全部故事 · 車車遊樂園",
       description,
       url: "/stories",
       type: "website",
-    },
+    }),
   };
 }
 
