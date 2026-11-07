@@ -5,6 +5,7 @@ import { IconBubble, IconSwap } from "@/components/games/ClayIcons";
 import { IconFootprints, IconMapFold } from "@/components/games/CandyMatchIcons";
 import { CandyGoalCard } from "@/components/games/CandyMatchTaskBar";
 import { ResultStars, type ResultStarHint } from "@/components/games/ResultStars";
+import { SaveRetryNotice } from "@/components/games/SaveRetryNotice";
 import type { CandyMatchRound } from "@/lib/games/candy-match/stages";
 import { medalCount, medalFlags } from "@/lib/gamekit/progress/meta";
 import { goalStatus, type CandyGoal, type CandyProgress } from "@/lib/games/candy-match/tasks";
@@ -21,6 +22,9 @@ type CandyMatchResultProps = {
   onNext: () => void;
   onReplay: () => void;
   onMap: () => void;
+  /** 這一關的結算沒寫進存檔（localStorage 滿了）：顯示「再存一次」。 */
+  saveFailed?: boolean;
+  onRetrySave?: () => void;
 };
 
 const CONFETTI = [
@@ -98,8 +102,12 @@ export function CandyMatchResult({
   onNext,
   onReplay,
   onMap,
+  saveFailed = false,
+  onRetrySave,
 }: CandyMatchResultProps) {
   const mapAction = { label: "回地圖", icon: <IconMapFold size={22} />, onClick: onMap };
+  const saveNotice =
+    saveFailed && onRetrySave ? <SaveRetryNotice message="這一關沒存好。" onRetry={onRetrySave} /> : null;
   const goals = round.stage.goals;
   return (
     <div
@@ -144,6 +152,7 @@ export function CandyMatchResult({
             </>
           }
           leadingAction={mapAction}
+          extraActions={saveNotice}
           hideHubLink
           sideSize={56}
         />
@@ -156,6 +165,7 @@ export function CandyMatchResult({
           replayLabel="再來一次"
           details={<GoalRecap goals={goals} progress={progress} emphasis="short" />}
           leadingAction={mapAction}
+          extraActions={saveNotice}
           hideHubLink
           sideSize={56}
         />

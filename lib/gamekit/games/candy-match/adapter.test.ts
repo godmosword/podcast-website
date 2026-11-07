@@ -144,4 +144,57 @@ describe("candyMatchAdapter", () => {
     expect(CANDY_MATCH_STATUS_MAP.retry).toBe("over");
     expect(CANDY_MATCH_STATUS_MAP.paused).toBe("paused");
   });
+
+  describe("存檔寫不進去", () => {
+    function brokenStore() {
+      const store = { broken: true };
+      const onSession = vi.fn<(result: GameSessionResult) => void>(() => {
+        if (store.broken) throw new Error("QuotaExceededError");
+      });
+      return { store, onSession, inst: new CandyMatchInstance({ kidsMode: true, reducedMotion: false, onSession }) };
+    }
+
+    it("過關：不丟例外、回報 false，狀態仍進 won", () => {
+      const { inst } = brokenStore();
+      inst.notifyPlaying(0, 0);
+      expect(() => inst.notifyWon({ score: 10, levelIndex: 0, cleared: true })).not.toThrow();
+      expect(inst.notifyWon({ score: 10, levelIndex: 0, cleared: true })).toBe(false);
+      expect(inst.getStatus()).toBe("won");
+      expect(inst.hasUnsavedSessions()).toBe(true);
+    });
+
+    it("沒過關：不丟例外、回報 false，狀態仍進 over", () => {
+      const { inst } = brokenStore();
+      inst.notifyPlaying(0, 0);
+      expect(inst.notifyRetry({ score: 3, levelIndex: 0 })).toBe(false);
+      expect(inst.getStatus()).toBe("over");
+    });
+
+    it("再存一次補寫同一筆，寫好之後不再重送（不會重複發獎）", () => {
+      const { inst, onSession, store } = brokenStore();
+      inst.notifyPlaying(0, 0);
+      inst.notifyWon({ score: 10, levelIndex: 0, cleared: true });
+      inst.notifyWon({ score: 10, levelIndex: 0, cleared: true });
+      expect(inst.flushSessions()).toBe(false);
+      store.broken = false;
+      onSession.mockClear();
+      expect(inst.flushSessions()).toBe(true);
+      expect(onSession).toHaveBeenCalledTimes(1);
+      expect(onSession).toHaveBeenCalledWith({ gameId: "candy-match", score: 10, levelIndex: 0, cleared: true });
+      expect(inst.hasUnsavedSessions()).toBe(false);
+      expect(inst.flushSessions()).toBe(true);
+      expect(onSession).toHaveBeenCalledTimes(1);
+    });
+
+    it("沒按再存一次就玩下一關：下一關存得進去時，上一關照順序一起補", () => {
+      const { inst, onSession, store } = brokenStore();
+      inst.notifyPlaying(0, 0);
+      inst.notifyWon({ score: 10, levelIndex: 0, cleared: true });
+      inst.notifyPlaying(1, 0);
+      store.broken = false;
+      onSession.mockClear();
+      expect(inst.notifyWon({ score: 20, levelIndex: 1, cleared: true })).toBe(true);
+      expect(onSession.mock.calls.map(([r]) => r.levelIndex)).toEqual([0, 1]);
+    });
+  });
 });

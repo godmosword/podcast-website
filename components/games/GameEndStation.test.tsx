@@ -120,3 +120,38 @@ describe("GameEndStation", () => {
     expect(main).not.toContain("<img");
   });
 });
+
+describe("GameEndStation 開啟時的焦點", () => {
+  it("details 裡有可按的東西（例如貼紙 +N），焦點仍落在主鈕", async () => {
+    const { cleanup, render } = await import("@testing-library/react");
+    const { GameEndStation } = await import("./GameEndStation");
+    render(
+      <GameEndStation
+        mood="win"
+        onReplay={() => undefined}
+        mainAction={{ label: "開始第 2 天", icon: "next", onClick: () => undefined }}
+        details={<button type="button">+3</button>}
+        leadingAction={{ label: "回標題", icon: <span />, onClick: () => undefined }}
+        hideHubLink
+      />,
+    );
+    expect(document.activeElement?.getAttribute("aria-label")).toBe("開始第 2 天");
+    cleanup();
+  });
+
+  it("沒有 mainAction：焦點落在再玩主鈕，不是 details 裡的按鈕", async () => {
+    const { cleanup, render } = await import("@testing-library/react");
+    const { GameEndStation } = await import("./GameEndStation");
+    render(
+      <GameEndStation
+        mood="retry"
+        onReplay={() => undefined}
+        replayLabel="再來一次"
+        details={<button type="button">看提示</button>}
+        hideHubLink
+      />,
+    );
+    expect(document.activeElement?.getAttribute("aria-label")).toBe("再來一次");
+    cleanup();
+  });
+});

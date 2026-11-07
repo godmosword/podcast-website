@@ -90,6 +90,12 @@ export function CandyMatchView({
   const [prefs, setPrefs] = useState<CandyMatchPrefs>(EMPTY_PREFS);
   const [brandFontsEnabled, setBrandFontsEnabled] = useState(false);
   const [cellPx, setCellPx] = useState(56);
+  /** 按「再存一次」後重畫：存檔狀態放在 instance 裡，React 看不到它變。 */
+  const [, setSaveTick] = useState(0);
+  const retrySave = useCallback(() => {
+    instance.flushSessions();
+    setSaveTick((tick) => tick + 1);
+  }, [instance]);
   const mode = resolveCandyMode(prefs.mode, prefs.challengeUnlocked);
   const inputPaused = instance.isInputPaused() || status === "paused";
 
@@ -464,6 +470,8 @@ export function CandyMatchView({
               onNext={() => startLevel(play.round.index + 1)}
               onReplay={restartCurrentLevel}
               onMap={goToMap}
+              saveFailed={instance.hasUnsavedSessions()}
+              onRetrySave={retrySave}
             />
           ) : null}
         </div>

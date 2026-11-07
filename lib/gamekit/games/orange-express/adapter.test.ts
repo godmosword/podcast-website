@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getLifetimeStars } from "@/lib/gamekit/progress/economy";
-import { reportGameSession } from "@/lib/gamekit/progress/session";
+import { reportGameSession, type GameSessionResult } from "@/lib/gamekit/progress/session";
 import {
   OrangeExpressInstance,
   orangeExpressAdapter,
@@ -131,6 +131,39 @@ describe("orangeExpressAdapter", () => {
       flawless: false,
       collectedAll: true,
     });
+  });
+});
+
+describe("小橘特快車存檔寫不進去", () => {
+  function brokenStore() {
+    const store = { broken: true };
+    const onSession = vi.fn<(result: GameSessionResult) => void>(() => {
+      if (store.broken) throw new Error("QuotaExceededError");
+    });
+    return { store, onSession, inst: new OrangeExpressInstance({ kidsMode: true, reducedMotion: false, onSession }) };
+  }
+
+  it("到站結算不丟例外、回報 false，仍進結算", () => {
+    const { inst } = brokenStore();
+    inst.notifyPlaying("look");
+    const run = finishLook();
+    expect(() => inst.notifyWon(run)).not.toThrow();
+    expect(inst.notifyWon(run)).toBe(false);
+    expect(inst.getStatus()).toBe("won");
+    expect(inst.hasUnsavedSessions()).toBe(true);
+  });
+
+  it("再存一次補寫同一筆，寫好之後不再重送", () => {
+    const { inst, onSession, store } = brokenStore();
+    inst.notifyPlaying("look");
+    inst.notifyWon(finishLook());
+    store.broken = false;
+    onSession.mockClear();
+    expect(inst.flushSessions()).toBe(true);
+    expect(onSession).toHaveBeenCalledTimes(1);
+    expect(onSession.mock.calls[0]?.[0]).toMatchObject({ gameId: "orange-express", orangeExpressLevel: "look" });
+    expect(inst.flushSessions()).toBe(true);
+    expect(onSession).toHaveBeenCalledTimes(1);
   });
 });
 

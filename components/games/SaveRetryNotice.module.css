@@ -1,0 +1,27 @@
+.notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 8px auto 0;
+  max-width: 320px;
+  padding: 4px 8px 4px 12px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--ink) 14%, transparent);
+  background: var(--card);
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.retry {
+  flex: none;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 12px;
+  background: var(--cta-solid-bg);
+  color: var(--cta-solid-fg);
+  font-weight: 800;
+  cursor: pointer;
+}

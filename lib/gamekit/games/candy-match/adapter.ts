@@ -10,6 +10,7 @@ import type {
 } from "@/lib/gamekit/adapter";
 import type { GameAction } from "@/lib/gamekit/types";
 import type { GameSessionResult } from "@/lib/gamekit/progress/session";
+import { SessionOutbox } from "@/lib/gamekit/progress/session-outbox";
 import { CandyMatchView } from "@/components/games/CandyMatchView";
 import type { CandyMatchController } from "@/components/games/CandyMatchView";
 
@@ -35,8 +36,12 @@ class CandyMatchInstance implements GameInstance {
   private paused = false;
   private sessionReported = false;
   private controller: CandyMatchController | null = null;
+  /** 寫不進存檔的回報留著，等「再存一次」或下一關一起補。 */
+  private readonly outbox: SessionOutbox;
 
-  constructor(private readonly options: GameCreateOptions) {}
+  constructor(private readonly options: GameCreateOptions) {
+    this.outbox = new SessionOutbox((result) => options.onSession?.(result));
+  }
 
   getStatus(): GameStatus {
     return this.status;
@@ -129,13 +134,27 @@ class CandyMatchInstance implements GameInstance {
     this.score = score;
   }
 
-  notifyWon(payload: Omit<GameSessionResult, "gameId">): void {
+  /** 把還沒寫進去的回報再寫一次。全部寫好回傳 true；localStorage 滿了也不丟例外。 */
+  flushSessions(): boolean {
+    return this.outbox.flush();
+  }
+
+  /** 還有結算沒寫進存檔：結算畫面要提示「再存一次」。 */
+  hasUnsavedSessions(): boolean {
+    return this.outbox.hasPending();
+  }
+
+  /** 一局只排一次。回傳 false＝有東西沒寫進去，由 View 提示再存一次。 */
+  private reportOnce(result: GameSessionResult): boolean {
+    if (this.sessionReported) return this.outbox.flush();
+    this.sessionReported = true;
+    return this.outbox.push(result);
+  }
+
+  notifyWon(payload: Omit<GameSessionResult, "gameId">): boolean {
     this.status = "won";
     this.score = payload.score;
-    if (!this.sessionReported) {
-      this.sessionReported = true;
-      this.options.onSession?.({ gameId: "candy-match", ...payload });
-    }
+    return this.reportOnce({ gameId: "candy-match", ...payload });
   }
 
   /**
@@ -146,12 +165,10 @@ class CandyMatchInstance implements GameInstance {
     score: number;
     levelIndex: number;
     candyMode?: "easy" | "challenge";
-  }): void {
+  }): boolean {
     this.status = "over";
     this.score = payload.score;
-    if (this.sessionReported) return;
-    this.sessionReported = true;
-    this.options.onSession?.({
+    return this.reportOnce({
       gameId: "candy-match",
       score: payload.score,
       levelIndex: payload.levelIndex,
