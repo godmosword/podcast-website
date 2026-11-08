@@ -59,8 +59,11 @@ describe("電子報列表", () => {
       "/newsletter/2026-10-09",
     ]);
     expect(older[0]?.textContent).toContain("你猜哪台車會滑比較遠");
+    expect(older[0]?.textContent).not.toContain("科學思考打底");
+    expect(older[0]?.textContent).not.toContain("斜坡賽車");
     expect(older[0]?.textContent).toMatch(/3日 · 約 \d+ 分鐘/);
     expect(older[0]?.querySelector("time")?.textContent).toBe("3日");
+    expect(feature.querySelector("h2")?.textContent).toBe("🧩 「他看影片明明很專心」");
     expect(older[7]?.textContent).toContain("睡前螢幕下班");
   });
 });

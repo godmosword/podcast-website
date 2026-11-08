@@ -51,13 +51,22 @@ function cardMinutes(article: ArticleCard): number {
   return parentArticleReadingMinutes(article as ParentArticle);
 }
 
+/** 電子報列表只顯示冒號前的短句；完整標題留給連結名稱與內文。 */
+function issueHook(title: string): string {
+  const colon = title.indexOf("：");
+  return colon > 0 ? title.slice(0, colon) : title;
+}
+
 function FeaturedArticle({
   article,
   hrefFor,
+  variant,
 }: {
   article: ArticleCard;
   hrefFor: (slug: string) => string;
+  variant: "articles" | "newsletter";
 }) {
+  const newsletter = variant === "newsletter";
   return (
     <Link className={styles.feature} href={hrefFor(article.slug)}>
       {article.coverImage ? (
@@ -79,7 +88,12 @@ function FeaturedArticle({
           {` · 約 ${cardMinutes(article)} 分鐘`}
         </span>
       </p>
-      <h2 className={styles.featureTitle}>{article.title}</h2>
+      <h2
+        className={styles.featureTitle}
+        aria-label={newsletter ? article.title : undefined}
+      >
+        {newsletter ? issueHook(article.title) : article.title}
+      </h2>
       <p className={styles.verse}>
         {excerptLines(article.excerpt).map((line, index) => (
           <span key={index}>{line}</span>
@@ -176,7 +190,9 @@ function MoreArticles({
                     </time>
                   )}
                   <span className={styles.rowBody}>
-                    <span className={styles.rowTitle}>{article.title}</span>
+                    <span className={styles.rowTitle}>
+                      {newsletter ? issueHook(article.title) : article.title}
+                    </span>
                     {newsletter ? (
                       <span className={styles.issueMeta}>
                         <time dateTime={article.publishedAt}>{issueDay(article.publishedAt)}</time>
@@ -184,10 +200,11 @@ function MoreArticles({
                           ? ` · 約 ${article.minutes} 分鐘`
                           : null}
                       </span>
-                    ) : null}
-                    <span className={newsletter ? styles.issueExcerpt : styles.rowExcerpt}>
-                      {article.excerpt.replace(/\s*\n\s*/g, " ")}
-                    </span>
+                    ) : (
+                      <span className={styles.rowExcerpt}>
+                        {article.excerpt.replace(/\s*\n\s*/g, " ")}
+                      </span>
+                    )}
                   </span>
                   <Icon name="chevron-right" size={18} className={styles.rowArrow} />
                 </Link>
@@ -216,7 +233,9 @@ export function ParentArticleList({
 
   return (
     <div className={styles.stack}>
-      {latest ? <FeaturedArticle article={latest} hrefFor={hrefFor} /> : null}
+      {latest ? (
+        <FeaturedArticle article={latest} hrefFor={hrefFor} variant={variant} />
+      ) : null}
       {series.map((entry) => (
         <ArticleSeries key={entry.id} series={entry} hrefFor={hrefFor} />
       ))}
