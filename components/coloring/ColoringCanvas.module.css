@@ -304,6 +304,55 @@
   justify-content: center;
 }
 
+.doneGrownUp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+/* 給大人的入口：小字、不搶主鈕；觸控高度仍 44px */
+.doneGrownUpToggle {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.doneGrownUpChevron {
+  vertical-align: -3px;
+  transition: transform var(--motion-press);
+}
+
+.doneGrownUpToggle[aria-expanded="true"] .doneGrownUpChevron {
+  transform: rotate(90deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .doneGrownUpChevron {
+    transition: none;
+  }
+}
+
+/* 「繼續塗」次鈕：跟工具列同一支蠟筆，不用循環箭頭（那代表重來） */
+.doneCrayon {
+  width: 26px;
+  height: 26px;
+}
+
+.doneGrownUpToggle:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* 夜間遊戲頁鎖奶油底：--card、--ink 在 .main 已指回日間色，但 --surface-elevated、--hairline
+ * 是在 :root 算好的夜間值（深底、白線），用了會變深底深字。這裡只用會跟著 .main 走的 token。 */
 .doneActions button,
 .doneActions a,
 .loading button,
@@ -311,10 +360,17 @@
   min-height: 44px;
   padding: 8px 12px;
   border-radius: var(--radius-sm);
-  border: 1px solid var(--hairline);
-  background: var(--surface-elevated);
+  border: 1px solid color-mix(in srgb, var(--ink) 14%, transparent);
+  background: var(--card);
   color: var(--ink);
+  font: inherit;
   cursor: pointer;
+}
+
+.doneActions a {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
 }
 
 @media (max-height: 700px) {

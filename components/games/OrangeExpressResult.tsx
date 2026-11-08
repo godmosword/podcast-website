@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { ResultStars } from "@/components/games/ResultStars";
+import { SaveRetryNotice } from "@/components/games/SaveRetryNotice";
 import { DoorIcon, StopIcon } from "@/components/games/OrangeExpressCab";
 import { OrangeExpressEventStamps } from "@/components/games/OrangeExpressEventStamps";
 import { OrangeExpressGoal } from "@/components/games/OrangeExpressGoal";
@@ -49,6 +50,8 @@ export function OrangeExpressResult({
   events,
   onReplay,
   onTitle,
+  saveFailed = false,
+  onRetrySave,
 }: {
   stars: number;
   resultLine: string;
@@ -69,6 +72,9 @@ export function OrangeExpressResult({
   events: RunState["events"];
   onReplay: () => void;
   onTitle: () => void;
+  /** 這一趟的結算沒寫進存檔（localStorage 滿了）：顯示「再存一次」。 */
+  saveFailed?: boolean;
+  onRetrySave?: () => void;
 }) {
   const next = getNextGame("orange-express");
   // 大司機有沿途事件：結算版面上限不變，事件章列換掉計數列（不累加一列）。
@@ -146,6 +152,8 @@ export function OrangeExpressResult({
           {COPY.backTitle}
         </button>
       </div>
+      {/* 排在主鈕後面：Enter 仍是「再開一趟」 */}
+      {saveFailed && onRetrySave ? <SaveRetryNotice message="這一趟沒存好。" onRetry={onRetrySave} /> : null}
       {next ? (
         <Link href={next.href} className={styles.nextLink}>
           {COPY.nextGame}

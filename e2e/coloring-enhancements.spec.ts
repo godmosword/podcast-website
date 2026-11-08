@@ -1,6 +1,13 @@
 import { test, expect, type Page } from "@playwright/test";
 const DUO = "char-恐龍車多多",
   RED = "char-小紅賽車";
+
+/** 完成面的存圖、分享、列印、開新稿、看故事收在「給大人」裡，預設收起。 */
+async function openGrownUp(page: Page) {
+  const toggle = page.getByRole("button", { name: "給大人：存圖・分享・列印" });
+  if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
+}
+
 async function open(page: Page, id = DUO) {
   await page.goto(`/games/coloring-book?page=${encodeURIComponent(id)}`);
   await expect(
@@ -157,6 +164,7 @@ test("same-page completed artworks coexist after a fresh start and open independ
   await expect(
     page.getByText("作品已收藏在這台裝置", { exact: true }),
   ).toBeVisible();
+  await openGrownUp(page);
   await page.getByRole("button", { name: "開新稿", exact: true }).click();
   expect(await redPixels(page)).toBe(0);
   await page.getByRole("option", { name: "藍色", exact: true }).click();
@@ -165,6 +173,7 @@ test("same-page completed artworks coexist after a fresh start and open independ
   await expect(
     page.getByText("作品已收藏在這台裝置", { exact: true }),
   ).toBeVisible();
+  await openGrownUp(page);
   await expect(
     page.getByRole("link", { name: "看這個故事", exact: true }),
   ).toHaveAttribute("href", "/story/ep-3");
@@ -381,6 +390,7 @@ test("share falls back to PNG download and print contains the full artwork on A4
     page.getByText("作品已收藏在這台裝置", { exact: true }),
   ).toBeVisible();
   const download = page.waitForEvent("download");
+  await openGrownUp(page);
   await page.getByRole("button", { name: "分享作品", exact: true }).click();
   expect((await download).suggestedFilename()).toMatch(/\.png$/);
   await page.getByRole("button", { name: "列印作品", exact: true }).click();
@@ -520,6 +530,7 @@ test("native sharing passes the created PNG and cancelled sharing does not downl
   page.on("download", () => {
     downloaded = true;
   });
+  await openGrownUp(page);
   await page.getByRole("button", { name: "分享作品", exact: true }).click();
   await expect
     .poll(() =>

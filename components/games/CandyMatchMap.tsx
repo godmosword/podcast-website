@@ -8,6 +8,7 @@ import { IconLock, IconPlay, IconStar } from "@/components/games/ClayIcons";
 import { CandyGoalIcon } from "@/components/games/CandyMatchTaskBar";
 import { IconFootprints, IconLeaf } from "@/components/games/CandyMatchIcons";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { AdultHoldGate } from "@/components/games/AdultHoldGate";
 import Icon from "@/components/ui/Icon";
 import type { CandyGoal } from "@/lib/games/candy-match/tasks";
 import styles from "./CandyMatchMap.module.css";
@@ -40,9 +41,6 @@ type CandyMatchMapProps = {
   previewFor: (index: number) => CandyStationPreview;
   onStart: (index: number) => void;
 };
-
-/** 與繪本塗塗鴉的家長工具相同：小孩短按不會打開，按住約 0.7 秒或鍵盤才開。 */
-const ADULT_HOLD_MS = 700;
 
 /** 畫面上只留兩個字＋圖示；完整說明（不限步數…）放在 aria-label。 */
 const MODE_SHORT: Record<CandyMode, string> = { easy: "輕鬆", challenge: "挑戰" };
@@ -106,30 +104,11 @@ function ParentChallengeGate({
   onUnlockedChange: (unlocked: boolean) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const [holding, setHolding] = useState(false);
-  const hintId = useId();
   const titleId = useId();
   const noteId = useId();
   const trigger = useRef<HTMLButtonElement>(null);
   const panel = useRef<HTMLDivElement>(null);
-  const holdTimer = useRef<number | null>(null);
-  const suppressClick = useRef(false);
   useFocusTrap(open, panel, { initialFocus: "container" });
-
-  const clearHold = () => {
-    setHolding(false);
-    if (holdTimer.current !== null) {
-      window.clearTimeout(holdTimer.current);
-      holdTimer.current = null;
-    }
-  };
-
-  useEffect(
-    () => () => {
-      if (holdTimer.current !== null) window.clearTimeout(holdTimer.current);
-    },
-    [],
-  );
 
   const close = () => {
     setOpen(false);
@@ -138,46 +117,7 @@ function ParentChallengeGate({
 
   return (
     <>
-      <button
-        ref={trigger}
-        type="button"
-        className={`${styles.adultGate} ${holding ? styles.holding : ""}`}
-        aria-label="家長工具"
-        aria-expanded={open}
-        aria-haspopup="dialog"
-        aria-describedby={hintId}
-        onPointerDown={() => {
-          clearHold();
-          setHolding(true);
-          holdTimer.current = window.setTimeout(() => {
-            holdTimer.current = null;
-            suppressClick.current = true;
-            setOpen(true);
-          }, ADULT_HOLD_MS);
-        }}
-        onPointerUp={clearHold}
-        onPointerCancel={clearHold}
-        onPointerLeave={clearHold}
-        onContextMenu={(event) => event.preventDefault()}
-        onClick={(event) => {
-          if (!suppressClick.current) return;
-          suppressClick.current = false;
-          event.preventDefault();
-        }}
-        onKeyDown={(event) => {
-          if (event.key !== "Enter" && event.key !== " ") return;
-          event.preventDefault();
-          setOpen(true);
-        }}
-      >
-        <Icon name="settings" size={24} />
-        <svg className={styles.holdRing} viewBox="0 0 48 48" aria-hidden focusable="false">
-          <circle cx="24" cy="24" r="20" />
-        </svg>
-        <span id={hintId} className={styles.srOnly}>
-          按住才會打開
-        </span>
-      </button>
+      <AdultHoldGate className={styles.adultGate} open={open} onOpen={() => setOpen(true)} triggerRef={trigger} />
       {open
         ? createPortal(
             <div

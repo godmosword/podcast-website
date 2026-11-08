@@ -385,7 +385,7 @@ test.describe("遊戲完整 lifecycle", () => {
 
     await page.getByRole("button", { name: "我塗好了" }).click();
     await expect(page.getByRole("dialog", { name: "塗好了！" })).toBeVisible();
-    await page.getByRole("button", { name: "再塗這一張" }).click();
+    await page.getByRole("button", { name: "繼續塗這一張" }).click();
     await expect(page.getByRole("dialog", { name: "塗好了！" })).toHaveCount(0);
 
     await page.getByRole("button", { name: "我塗好了" }).click();

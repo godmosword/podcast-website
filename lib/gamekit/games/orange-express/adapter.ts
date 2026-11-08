@@ -12,6 +12,7 @@ import { OrangeExpressView } from "@/components/games/OrangeExpressView";
 import { medalsFor } from "@/lib/games/orange-express/medals";
 import { LEVEL_INDEX, type LevelId, type RunState } from "@/lib/games/orange-express/types";
 import type { GameAction } from "@/lib/gamekit/types";
+import { SessionOutbox } from "@/lib/gamekit/progress/session-outbox";
 
 type Screen = "title" | "drive" | "result";
 
@@ -54,8 +55,12 @@ class OrangeExpressInstance implements GameInstance {
   private earlyDoorTaps = 0;
   private held = new Set<GameAction>();
   private controller: OrangeExpressController = NOOP;
+  /** 寫不進存檔的回報留著，等「再存一次」或下一趟一起補。 */
+  private readonly outbox: SessionOutbox;
 
-  constructor(private readonly options: GameCreateOptions) {}
+  constructor(private readonly options: GameCreateOptions) {
+    this.outbox = new SessionOutbox((result) => options.onSession?.(result));
+  }
 
   getStatus(): GameStatus {
     return this.status;
@@ -163,14 +168,25 @@ class OrangeExpressInstance implements GameInstance {
     return this.earlyDoorTaps;
   }
 
-  notifyWon(run: RunState): void {
+  /** 把還沒寫進去的回報再寫一次。全部寫好回傳 true；localStorage 滿了也不丟例外。 */
+  flushSessions(): boolean {
+    return this.outbox.flush();
+  }
+
+  /** 還有結算沒寫進存檔：結算畫面要提示「再存一次」。 */
+  hasUnsavedSessions(): boolean {
+    return this.outbox.hasPending();
+  }
+
+  /** 一趟只排一次。回傳 false＝有東西沒寫進去，由 View 提示再存一次。 */
+  notifyWon(run: RunState): boolean {
     this.screen = "result";
     this.status = "won";
     this.resultAt = Date.now();
-    if (this.sessionReported) return;
+    if (this.sessionReported) return this.outbox.flush();
     this.sessionReported = true;
     const medals = medalsFor(run, this.earlyDoorTaps);
-    this.options.onSession?.({
+    return this.outbox.push({
       gameId: this.id,
       score: 0,
       levelIndex: LEVEL_INDEX[run.level],

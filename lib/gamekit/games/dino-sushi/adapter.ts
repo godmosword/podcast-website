@@ -10,6 +10,7 @@ import type {
 } from "@/lib/gamekit/adapter";
 import { DinoSushiView } from "@/components/games/DinoSushiView";
 import type { GameSessionResult } from "@/lib/gamekit/progress/session";
+import { SessionOutbox } from "@/lib/gamekit/progress/session-outbox";
 import { DINO_SUSHI_LEVEL_INDEX, type RoundMedals } from "@/lib/games/dino-sushi/medals";
 import type { Mode } from "@/lib/games/dino-sushi/round";
 
@@ -58,14 +59,16 @@ class DinoSushiInstance implements GameInstance {
   private paused = false;
   private sessionReported = false;
   /** 寫不進存檔的回報。留到「再存一次」或下一次回報一起補，順序不變。 */
-  private unreported: readonly GameSessionResult[] = [];
+  private readonly outbox: SessionOutbox;
   /** 剛回到標題的時間：結算畫面用 Enter 按「回標題」時，Host 會在下一幀補呼叫 start()，要忽略。 */
   private readyAt = 0;
   /** 剛進結算的時間：用 Enter 按「多多吃飽了」會立刻結算，Host 下一幀又把同一次 Enter 當 start()，要忽略。 */
   private resultAt = 0;
   private controller: DinoSushiController = NOOP_CONTROLLER;
 
-  constructor(private readonly options: GameCreateOptions) {}
+  constructor(private readonly options: GameCreateOptions) {
+    this.outbox = new SessionOutbox((result) => options.onSession?.(result));
+  }
 
   getStatus(): GameStatus {
     return this.status;
@@ -146,24 +149,14 @@ class DinoSushiInstance implements GameInstance {
 
   /** 把還沒寫進去的回報再寫一次。全部寫好回傳 true；localStorage 滿了也不丟例外。 */
   flushSessions(): boolean {
-    while (this.unreported.length > 0) {
-      try {
-        this.options.onSession?.(this.unreported[0]!);
-      } catch {
-        return false;
-      }
-      this.unreported = this.unreported.slice(1);
-    }
-    return true;
+    return this.outbox.flush();
   }
 
   /** 一輪只報一次。回傳 false＝有東西沒寫進去，由 View 提示再存一次。 */
   private reportOnce(result: GameSessionResult): boolean {
-    if (!this.sessionReported) {
-      this.sessionReported = true;
-      this.unreported = [...this.unreported, result];
-    }
-    return this.flushSessions();
+    if (this.sessionReported) return this.outbox.flush();
+    this.sessionReported = true;
+    return this.outbox.push(result);
   }
 
   /** 自由做：第一盤送出就記「玩過」與活動紀錄，不給星。寫不進去就排著，吃飽時再補、再提示。 */

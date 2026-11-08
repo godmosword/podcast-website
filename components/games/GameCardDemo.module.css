@@ -1,7 +1,7 @@
 /*
  * 遊樂園卡片的玩法示範層（GameCardDemo）。蓋在封面上、不攔點擊（整張卡是連結）。
  *
- * 三段共用一條時間軸（--demo-ms 由元件寫入，只有一個來源）：
+ * 四段共用一條時間軸（--demo-ms 由元件寫入，只有一個來源）：
  *   0–8% 淡入 → 10–55% 動作 → 55–65% 亮星（做對了）→ 65–82% 停住 → 82–100% 整層淡掉。
  * 最後一格是乾淨的原封面。只用 transform／opacity（著色的蠟筆位置除外）；減少動態由元件端直接不掛。
  * 封面是固定美術、日夜不變，示範裡的蠟筆紅與星光黃也是固定色，不吃會隨夜間變暗的 --c-* token。
@@ -455,4 +455,161 @@
 .cookingSparkle {
   top: 22%;
   left: 92%;
+}
+
+/* ---- 小橘特快車：小橘滑進停車目標條、停在綠區 ----
+ * 放在封面上方的天空（小橘、月台、摩天輪都在下半），手機卡右下的玩法鈕也碰不到。
+ * 色條用遊戲裡停車目標條同一組黃、綠＋白直紋（分不清綠黃也認得出綠區），固定色不吃夜間 token。 */
+.driving {
+  position: absolute;
+  top: 10%;
+  left: 14%;
+  width: 54%;
+  height: 22%;
+}
+
+/* 手機卡：小橘的頭要離卡片上緣一點，點頭時才不會被切 */
+@container demo (max-width: 220px) {
+  .driving {
+    top: 13%;
+    left: 8%;
+    width: 74%;
+    height: 24%;
+  }
+}
+
+.stopTrack {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  left: 0;
+  height: max(8px, 4.4cqw);
+  translate: 0 -50%;
+  overflow: hidden;
+  border: 2px solid rgb(58, 36, 16);
+  border-radius: 999px;
+  background: rgb(255, 249, 238);
+  box-shadow: 0 2px 4px rgba(60, 35, 10, 0.25);
+  animation: stopTrackIn var(--demo-ms, 2100ms) ease-out both;
+}
+
+/* 綠區在 60–82%，兩側各一段黃區（遊戲裡也是黃包著綠） */
+.stopYellow,
+.stopGreen {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+
+.stopYellow {
+  left: 50%;
+  width: 42%;
+  background: rgb(255, 211, 77);
+}
+
+.stopGreen {
+  left: 60%;
+  width: 22%;
+  background: rgb(111, 207, 151);
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent 0 4px,
+    rgba(255, 255, 255, 0.55) 4px 6px
+  );
+}
+
+@keyframes stopTrackIn {
+  0%,
+  4% {
+    opacity: 0;
+    transform: scaleX(0.6);
+  }
+
+  12%,
+  100% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+/* 停好那一下綠區亮一次：「停在這裡就對了」。 */
+.stopGreen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgb(255, 255, 255);
+  opacity: 0;
+  animation: greenFlash var(--demo-ms, 2100ms) ease-out both;
+}
+
+@keyframes greenFlash {
+  0%,
+  50% {
+    opacity: 0;
+  }
+
+  55% {
+    opacity: 0.75;
+  }
+
+  66%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* 小橘坐在色條上面（不蓋住綠區），中心最後停在 71%（綠區正中）；
+ * 從畫面外滑進來，ease-out 表示一路在煞車 */
+.stopTrain {
+  position: absolute;
+  bottom: calc(50% + max(4px, 2.2cqw));
+  left: 71%;
+  width: max(25px, 12cqw);
+  aspect-ratio: 1;
+  translate: -50% 12%;
+  /* 點頭以底部為軸：像煞車停下時往前傾 */
+  transform-origin: 50% 100%;
+  animation: stopTrainSlide var(--demo-ms, 2100ms) linear both;
+}
+
+.stopTrain > svg:first-child {
+  display: block;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 1px 1px rgba(60, 35, 10, 0.35));
+}
+
+/* 10–50% 滑進來並減速，50–55% 停住點頭（往前傾一下再回來），之後停著 */
+@keyframes stopTrainSlide {
+  0%,
+  10% {
+    opacity: 0;
+    transform: translateX(-420%);
+    animation-timing-function: cubic-bezier(0.15, 0.6, 0.3, 1);
+  }
+
+  14% {
+    opacity: 1;
+  }
+
+  50% {
+    transform: translateX(0) rotate(0deg);
+    animation-timing-function: ease-out;
+  }
+
+  53% {
+    transform: translateX(4%) rotate(7deg);
+    animation-timing-function: ease-in-out;
+  }
+
+  58%,
+  100% {
+    opacity: 1;
+    transform: translateX(0) rotate(0deg);
+  }
+}
+
+.drivingSparkle {
+  top: 4%;
+  left: 100%;
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { getNextGame } from "@/data/games";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import {
@@ -29,6 +29,8 @@ export type GameEndStationProps = {
   onReplay: () => void;
   /** 再玩的無障礙名稱（K-12 後按鈕只有 icon，文字進 aria-label／title）。 */
   replayLabel?: string;
+  /** 有 mainAction 時次鈕的圖示；預設循環箭頭（重來）。著色「繼續塗」不是重來，換蠟筆。 */
+  replayIcon?: ReactNode;
   /** 目前遊戲 slug；用來解析下一站。 */
   gameSlug?: string;
   /** 手動指定下一站（優先於 gameSlug）。thumbnail 有給時，「去下一站」鈕顯示縮圖＋小箭頭。 */
@@ -93,6 +95,7 @@ export function GameEndStation({
   stars,
   onReplay,
   replayLabel = "再玩一次",
+  replayIcon,
   gameSlug,
   nextGame: nextGameProp,
   hubHref = "/games",
@@ -122,11 +125,17 @@ export function GameEndStation({
   const starCount =
     stars == null ? null : Math.max(0, Math.min(3, Math.floor(stars)));
   const stationRef = useRef<HTMLDivElement>(null);
+  const mainRef = useRef<HTMLButtonElement>(null);
 
   // 原本是手寫 trap，但守衛寫成「焦點不在站內就早退」——焦點一旦逸出
   // （切到網址列再切回來、或落到 body）就再也圈不回來。共用 hook 對這個
   // 情況會主動把焦點拉回容器，且 focusables 會濾掉隱藏元素。
-  useFocusTrap(true, stationRef);
+  // 初始焦點不交給 hook 的「第一個」：details 裡可能有貼紙「+N」等按鈕排在主鈕前面，
+  // 按 Enter 要是主鈕（下一關／下一天／換一張／再玩）。
+  useFocusTrap(true, stationRef, { initialFocus: "none" });
+  useEffect(() => {
+    mainRef.current?.focus();
+  }, []);
 
   return (
     <div
@@ -172,6 +181,7 @@ export function GameEndStation({
         {mainAction ? (
           <>
             <button
+              ref={mainRef}
               type="button"
               className={styles.mainBtn}
               onClick={mainAction.onClick}
@@ -206,12 +216,13 @@ export function GameEndStation({
               aria-label={replayLabel}
               title={replayLabel}
             >
-              <IconReplay size={22} />
+              {replayIcon ?? <IconReplay size={22} />}
             </button>
           </>
         ) : (
           <>
             <button
+              ref={mainRef}
               type="button"
               className={styles.mainBtn}
               onClick={onReplay}

@@ -13,7 +13,12 @@ function doneProgress(roundGoals: number): CandyProgress {
   return { ...freshCandyProgress(4), collected: [roundGoals, 0, 0, 0] };
 }
 
-function renderWin(flawless: boolean, efficient: boolean, previousMedals = 0) {
+function renderWin(
+  flawless: boolean,
+  efficient: boolean,
+  previousMedals = 0,
+  save: { saveFailed?: boolean; onRetrySave?: () => void } = {},
+) {
   const round = buildRound(0, "easy", { replay: false, rng: () => 0.5 });
   return render(
     <CandyMatchResult
@@ -26,6 +31,7 @@ function renderWin(flawless: boolean, efficient: boolean, previousMedals = 0) {
       onNext={vi.fn()}
       onReplay={vi.fn()}
       onMap={vi.fn()}
+      {...save}
     />,
   );
 }
@@ -128,5 +134,20 @@ describe("CandyMatchResult", () => {
     expect(screen.getByText("再差 2 台！")).toBeTruthy();
     expect(screen.queryByText("完成！")).toBeNull();
     expect(screen.getByRole("progressbar", { name: "收集計程車，還差 2 台" }).querySelector("svg")).toBeTruthy();
+  });
+
+  it("存檔寫不進去：提示再存一次，按了就補寫；焦點仍在主鈕", () => {
+    const onRetrySave = vi.fn();
+    renderWin(true, true, 0, { saveFailed: true, onRetrySave });
+    const notice = screen.getByRole("alert");
+    expect(notice.textContent).toContain("這一關沒存好");
+    within(notice).getByRole("button", { name: "再存一次" }).click();
+    expect(onRetrySave).toHaveBeenCalledTimes(1);
+    expect(document.activeElement?.getAttribute("aria-label")).toBe("下一站");
+  });
+
+  it("存得進去：不出提示", () => {
+    renderWin(true, true);
+    expect(screen.queryByRole("alert")).toBeNull();
   });
 });

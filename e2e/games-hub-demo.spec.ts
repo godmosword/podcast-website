@@ -1,12 +1,12 @@
 import { expect, test } from "@playwright/test";
 
 /**
- * 遊樂園卡片的玩法示範（10 月待辦 4，K-18）：進畫面播一次、三張依序（同一時間最多一段在動）、
- * 播完收掉回到封面、播放中首張的玩法鈕呼吸暫停、滑鼠停留才重播、減少動態完全不播。
+ * 遊樂園卡片的玩法示範（10 月待辦 4，K-18）：進畫面播一次、四張依序（同一時間最多一段在動）、
+ * 播完收掉回到封面、播放中首張的玩法鈕呼吸暫停（小橘 11-07 補上，四張都有）、滑鼠停留才重播、減少動態完全不播。
  */
-const SLUGS = ["coloring-book", "candy-match", "dino-sushi"] as const;
+const SLUGS = ["coloring-book", "candy-match", "dino-sushi", "orange-express"] as const;
 
-test("1280（四張同時在畫面內）：有示範的三張依序各播一次，同一時間最多一段，播完都收掉；播放中首張呼吸暫停", async ({ page }) => {
+test("1280（四張同時在畫面內）：四張依序各播一次，同一時間最多一段，播完都收掉；播放中首張呼吸暫停", async ({ page }) => {
   // 桌機兩欄（#264）：視窗要夠高，四張卡同時在畫面內，才測得到「同時進畫面時依序播」
   await page.setViewportSize({ width: 1280, height: 2200 });
   await page.goto("/games");

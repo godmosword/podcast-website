@@ -211,6 +211,12 @@ export function OrangeExpressView({
   const [journal, setJournal] = useState<OrangeExpressJournal>(EMPTY_JOURNAL);
   /** 剛開完的那一趟新拿到的章：回標題時彈一下；開下一趟就清掉。 */
   const [fresh, setFresh] = useState<JournalStamps | null>(null);
+  /** 按「再存一次」後重畫：存檔狀態放在 instance 裡，React 看不到它變。 */
+  const [, setSaveTick] = useState(0);
+  const retrySave = useCallback(() => {
+    instance.flushSessions();
+    setSaveTick((tick) => tick + 1);
+  }, [instance]);
   const [level, setLevel] = useState<LevelId>("look");
   const [run, setRun] = useState<RunState | null>(null);
   const [shake, setShake] = useState(false);
@@ -1016,6 +1022,8 @@ export function OrangeExpressView({
           events={run.events}
           onReplay={begin}
           onTitle={goTitle}
+          saveFailed={instance.hasUnsavedSessions()}
+          onRetrySave={retrySave}
         />
       </div>
     );
