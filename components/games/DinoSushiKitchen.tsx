@@ -8,6 +8,7 @@ import { currentOrder } from "@/lib/games/dino-sushi/round";
 import { layerKey, MAX_TOPPINGS } from "@/lib/games/dino-sushi/sushi";
 import { BASES, baseById, toppingById, type BaseId, type ToppingId } from "@/lib/games/dino-sushi/toppings";
 import { DOME_AFTER_PLATES, domeStickerId, orderLead } from "@/lib/games/dino-sushi/variety";
+import { RemoveBadge, SwapBadge } from "./DinoSushiBadges";
 import { DinoSushiCustomerQueue } from "./DinoSushiCustomerQueue";
 import { DinoSushiCustomerSeat } from "./DinoSushiCustomerSeat";
 import { DinoSushiDuoDuo } from "./DinoSushiDuoDuo";
@@ -298,6 +299,7 @@ export function DinoSushiKitchen({
                     layerClassName={reducedMotion ? undefined : styles.layerPop}
                   />
                 )}
+                {layerHint?.kind === "base" && sushi.base && !eating ? <SwapBadge /> : null}
                 {teaching && layerHint?.kind === "base" ? <Finger /> : null}
               </TapButton>
             </div>
@@ -325,6 +327,7 @@ export function DinoSushiKitchen({
                     }}
                   >
                     <ToppingArt id={id} />
+                    {removeHint ? <RemoveBadge /> : null}
                     {teaching && removeHint ? <Finger /> : null}
                   </TapButton>
                 ) : (
