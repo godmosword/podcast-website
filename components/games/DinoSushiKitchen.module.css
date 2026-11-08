@@ -267,25 +267,35 @@
   height: calc(var(--queue-now, 52px) * var(--queue-show, 0.88));
 }
 
-/* 下一位腳下一條暖橘，其他人是淡的接地影。不是圓框。 */
+/*
+ * 排隊的人站在一段小木台上（2026-11-08）：以前只有淡淡的接地影，貼紙看起來懸在牆上。
+ * 舞台是側面看的牆，所以用側視的木板（上緣亮、下緣深＋一道投影），不用地墊的橢圓。
+ * 輪子壓在木板上緣；下一位的木板是暖橘，其他人是木頭色。
+ */
 .queueItem::after {
   content: "";
   position: absolute;
-  z-index: 1;
-  left: 14%;
-  right: 16%;
-  bottom: 1%;
-  height: 16%;
-  background: radial-gradient(closest-side, rgba(74, 60, 46, 0.22), transparent 74%);
+  z-index: 0;
+  left: 2%;
+  right: 2%;
+  /* 貼紙在輪子下面還有一點透明邊，木板上緣要墊到輪底（約高的 10%） */
+  bottom: 0;
+  height: max(6px, 13%);
+  border-radius: 3px;
+  background: linear-gradient(#e9c590 0 40%, #c99a62 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 248, 232, 0.8),
+    0 3px 4px rgba(110, 75, 35, 0.22);
   pointer-events: none;
 }
 
 .queueItem[data-state="next"]::after {
-  background: radial-gradient(closest-side, rgba(255, 140, 43, 0.5), transparent 74%);
+  background: linear-gradient(#ffc489 0 40%, #f0934a 100%);
 }
 
 .queueSticker {
   position: absolute;
+  z-index: 1;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
@@ -1977,6 +1987,64 @@
   white-space: nowrap;
 }
 
+/*
+ * 提示角標（DinoSushiBadges）：只在提示指到那一格時出現，說明光暈要孩子做什麼
+ * （成品＝換一種飯、料位＝放回去）。黃底、跳一下；減少動態只顯示不跳。
+ * 角標收點擊、冒泡到按鈕：料位是正圓，右上角在圓外，點在角標上也要算點到。
+ */
+.badge {
+  position: absolute;
+  z-index: 2;
+  top: -4px;
+  right: -4px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #ffd34d;
+  box-shadow:
+    0 0 0 2px #fffaf0,
+    0 0 0 3.5px #b07f43,
+    0 2px 4px rgba(110, 75, 35, 0.28);
+  animation: badgeNudge 1.4s ease-in-out infinite;
+}
+
+.badge > svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: #6b4420;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+/* 成品的點擊範圍是整塊備料盤：角標放在盤子右上，不壓到壽司；桌面盤子大，角標跟著放大 */
+.sushiButton > .badge {
+  top: 6%;
+  right: 8%;
+  width: clamp(28px, 11cqw, 36px);
+  height: clamp(28px, 11cqw, 36px);
+}
+
+.sushiButton > .badge > svg {
+  width: 60%;
+  height: 60%;
+}
+
+@keyframes badgeNudge {
+  0%,
+  60%,
+  100% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1.18);
+  }
+}
+
 /* 下一步該點的那一格：柔和光暈。減少動態時停在亮框、不脈衝。首單再加手指。 */
 .kitchen [data-hint="true"] {
   box-shadow: 0 0 0 4px #ffd34d, 0 0 14px 4px rgba(255, 211, 77, 0.6);
@@ -2433,6 +2501,10 @@
     animation: none;
   }
 
+  .kitchen .badge {
+    animation: none;
+  }
+
   .thanks,
   .thanks[data-leaving="true"],
   .thanksHeart,
@@ -2493,6 +2565,7 @@
 .kitchen[data-reduced="true"] .boardMain,
 .kitchen[data-reduced="true"] .bubbleItem,
 .kitchen[data-reduced="true"] [data-hint="true"],
+.kitchen[data-reduced="true"] .badge,
 .kitchen[data-reduced="true"] .finger,
 .kitchen[data-reduced="true"] .brushButton,
 .kitchen[data-reduced="true"] .bubbleWrap,
@@ -2513,7 +2586,8 @@
 }
 
 /* 暫停時新的表情與疊盤動畫停在原地（時間軸由 useDinoSushiPlay 一起暫停） */
-.kitchen[data-paused="true"] [data-hint="true"] {
+.kitchen[data-paused="true"] [data-hint="true"],
+.kitchen[data-paused="true"] .badge {
   animation-play-state: paused;
 }
 

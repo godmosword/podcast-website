@@ -51,3 +51,45 @@ describe("GamePageShell.module.css 抬頭", () => {
     }
   });
 });
+
+describe("GamePageShell.module.css 夜間鎖奶油", () => {
+  const css = strip(readFileSync(join(import.meta.dirname, "GamePageShell.module.css"), "utf8"));
+  const nightMain = css.match(/:global\(\[data-theme="night"\] body:has\(main\[data-game-id="orange-express"\]\)\),?\s*\{([^}]*)\}/)?.[1] ?? "";
+
+  it("同一組 token 也套在 body（portal 到 body 的對話框才拿得到日間的紙）", () => {
+    const block = css.slice(0, css.indexOf("{", css.indexOf('.main[data-game-id="candy-match"],')));
+    expect(block).toContain('body:has(main[data-game-id="coloring-book"])');
+    expect(nightMain).toMatch(/--card:\s*var\(--game-day-paper\)/);
+  });
+
+  // :root 用夜間值算好的衍生 token，只改來源不會跟著變；遊戲頁要照式子重宣告一次（2026-11-08）
+  it.each([
+    ["--surface-elevated", /--surface-elevated:\s*var\(--card\)/],
+    ["--hairline", /--hairline:\s*var\(--game-day-hairline\)/],
+    ["--line", /--line:\s*var\(--hairline\)/],
+    ["--accent-ink", /--accent-ink:\s*var\(--game-day-accent-ink\)/],
+    ["--cta-quiet-fg（「回遊樂園」連結）", /--cta-quiet-fg:\s*var\(--accent-ink\)/],
+    ["--cta-soft-bg", /--cta-soft-bg:\s*var\(--card\)/],
+    ["--focus-ring", /--focus-ring:\s*var\(--ink\)/],
+    ["--c-yellow（小橘選中卡、星星）", /--c-yellow:\s*var\(--game-day-c-yellow\)/],
+    ["--c-lilac", /--c-lilac:\s*var\(--game-day-c-lilac\)/],
+    ["--elev-1", /--elev-1:\s*var\(--game-day-elev-1\)/],
+    ["--shadow-md", /--shadow-md:\s*var\(--game-day-shadow-md\)/],
+  ])("夜間遊戲頁重算 %s", (_name, pattern) => {
+    expect(nightMain).toMatch(pattern);
+  });
+
+  it("--game-day-* 跟 :root 日間值一樣（改了日間色要一起改）", () => {
+    const globals = strip(readFileSync(join(import.meta.dirname, "../../app/globals.css"), "utf8"));
+    const root = globals.slice(globals.indexOf(":root {"), globals.indexOf('[data-theme="night"] {'));
+    const value = (name: string) =>
+      root.match(new RegExp(`\\s${name}:\\s*([^;]+);`))?.[1]?.replace(/\s+/g, " ").trim();
+    for (const name of ["c-pink", "c-yellow", "c-mint", "c-sky", "c-teal", "c-lilac", "elev-1", "elev-2", "elev-3", "shadow-sm", "shadow-md", "mix-base", "landing-brand", "accent-ink", "hairline"]) {
+      expect(value(`--game-day-${name}`), name).toBe(value(`--${name}`));
+    }
+  });
+
+  it("夜間灰紫外框不套在鎖奶油的四款", () => {
+    expect(css).toMatch(/\.main:not\(\[data-game-id="candy-match"\], \[data-game-id="dino-sushi"\], \[data-game-id="coloring-book"\], \[data-game-id="orange-express"\]\) \.playArea/);
+  });
+});

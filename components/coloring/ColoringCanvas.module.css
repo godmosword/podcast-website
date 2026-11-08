@@ -179,7 +179,8 @@
   display: flex;
   overflow-y: auto;
   padding: 1.25rem;
-  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  /* 94%：88% 時畫布、色票、完成鈕的殘影太明顯，「給大人」那行壓在殘影上 */
+  background: color-mix(in srgb, var(--bg) 94%, transparent);
 }
 
 .doneSheet {
@@ -351,8 +352,7 @@
   outline-offset: 2px;
 }
 
-/* 夜間遊戲頁鎖奶油底：--card、--ink 在 .main 已指回日間色，但 --surface-elevated、--hairline
- * 是在 :root 算好的夜間值（深底、白線），用了會變深底深字。這裡只用會跟著 .main 走的 token。 */
+/* 夜間遊戲頁鎖奶油底：GamePageShell 已把 --card、--ink 指回日間色；邊線用墨色混出來，日夜都看得到。 */
 .doneActions button,
 .doneActions a,
 .loading button,

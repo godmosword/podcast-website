@@ -73,6 +73,49 @@ test("自由做「多多吃飽了」是實心綠鈕，跟多多的字卡長得�
   await expect(page.getByTestId("dino-sushi-result")).toBeVisible();
 });
 
+test("砧板角標只在提示時出現：選錯飯有換飯、料位滿了還缺料有放回去；點在角標上就是點那顆", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/games/dino-sushi");
+  await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+  const board = page.getByRole("region", { name: "砧板" });
+  const prep = board.locator('[data-role="prep-sushi"]');
+  const swap = prep.locator('[data-badge="swap"]');
+  const back = board.locator('[data-badge="remove"]');
+
+  // 找一單要兩樣以上的料（前面的照單送掉）
+  let n = 1;
+  let wanted = await order(page, n);
+  while (wanted.toppings.length < 2 && n < 5) {
+    await serve(page, n);
+    await waitServed(page, n);
+    n += 1;
+    wanted = await order(page, n);
+  }
+  expect(wanted.toppings.length, "固定 seed 裡要有兩樣料的單").toBeGreaterThanOrEqual(2);
+
+  // 選錯飯：成品亮、換飯角標出現；點角標（在盤子右上）就打開選飯
+  const wrong = ["握壽司", "軍艦", "手捲"].find((b) => b !== wanted.base)!;
+  await page.getByRole("button", { name: `選${wrong}` }).click();
+  await expect(prep).toHaveAttribute("data-hint", "true");
+  await expect(swap).toBeVisible();
+  await swap.click();
+  await page.getByRole("button", { name: `選${wanted.base}` }).click();
+  await expect(swap, "飯對了：角標收起").toHaveCount(0);
+  await expect(back, "平常料位沒有角標").toHaveCount(0);
+
+  // 先放一樣要的，再放兩樣不要的：料位滿了還缺料，提示「先拿掉多的那層」
+  const extras = ["蝦", "蟹肉棒", "玉米", "小黃瓜", "鮪魚沙拉", "酪梨"].filter((t) => !wanted.toppings.includes(t));
+  await page.getByRole("button", { name: `加${wanted.toppings[0]}` }).click();
+  await page.getByRole("button", { name: `加${extras[0]}` }).click();
+  await page.getByRole("button", { name: `加${extras[1]}` }).click();
+  await expect(back).toHaveCount(1);
+  const hinted = board.locator('[data-hint="true"]:has([data-badge="remove"])');
+  await expect(hinted).toHaveAttribute("aria-label", `拿掉${extras[0]}`);
+  // 料位是正圓、角標在右上圓外：點角標也要拿掉那一層
+  await back.click();
+  await expect(board.getByRole("button", { name: `拿掉${extras[0]}` })).toHaveCount(0);
+});
+
 test("做對一單：字卡下面出現點餐朋友的謝謝；只送飯不出現", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/games/dino-sushi");
