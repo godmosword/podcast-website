@@ -18,6 +18,9 @@ const SLUGS = [
   "2026-10-20",
   "2026-10-23",
   "2026-10-28",
+  "2026-10-30",
+  "2026-11-03",
+  "2026-11-06",
 ] as const;
 
 const SOURCE_LINKS = [
@@ -42,7 +45,7 @@ function manuscriptChars(markdown: string): string {
 }
 
 describe("newsletters", () => {
-  it("六期依日期由舊到新排，路徑用期別日期", () => {
+  it("九期依日期由舊到新排，路徑用期別日期", () => {
     expect(NEWSLETTERS.map((issue) => issue.slug)).toEqual([...SLUGS]);
     for (const issue of NEWSLETTERS) {
       expect(issue.publishedAt).toBe(issue.slug);
@@ -55,6 +58,12 @@ describe("newsletters", () => {
     );
     expect(getNewsletter("2026-10-28")?.description).toBe(
       "孩子卡關就喊「我不會」？今晚 5 分鐘「計時小幫手」遊戲，陪他多撐一下",
+    );
+    expect(getNewsletter("2026-11-06")?.title).toBe(
+      "🧩 「他看影片明明很專心」：孩子跟你一起拼、一起讀的時候，大腦更投入",
+    );
+    expect(getNewsletter("2026-11-06")?.description).toBe(
+      "孩子看影片很安靜，一起玩真的比較好嗎？今晚 8 分鐘「拼圖小司機」，陪他拼一拼",
     );
   });
 
@@ -83,17 +92,31 @@ describe("newsletters", () => {
     );
     expect(body).not.toContain("五歲的小宇");
     expect(body).not.toContain("今年七月");
+    expect(getNewsletter("2026-10-30")?.body).toContain(
+      "不硬推、也不一直幫他躲，一小步就好。",
+    );
+    expect(getNewsletter("2026-11-03")?.body).toContain(
+      "先別急著給答案，陪他猜一猜、試一試。",
+    );
+    expect(getNewsletter("2026-11-06")?.body).toContain(
+      "他看影片很專心，但跟你玩時，大腦更投入。",
+    );
   });
 
-  it("列表封面是 10/28，其餘同一個月由新到舊", () => {
+  it("列表封面是 11/06，其餘依月份由新到舊", () => {
     const layout = newslettersLayout();
-    const latest = getNewsletter("2026-10-28");
-    expect(layout.latest?.slug).toBe("2026-10-28");
+    const latest = getNewsletter("2026-11-06");
+    expect(layout.latest?.slug).toBe("2026-11-06");
     expect(layout.latest?.excerpt).toBe(latest?.description);
     expect(layout.latest?.minutes).toBeGreaterThanOrEqual(1);
     expect(layout.series).toEqual([]);
-    expect(layout.months.map((month) => month.key)).toEqual(["2026-10"]);
+    expect(layout.months.map((month) => month.key)).toEqual(["2026-11", "2026-10"]);
     expect(layout.months[0]?.articles.map((article) => article.slug)).toEqual([
+      "2026-11-03",
+    ]);
+    expect(layout.months[1]?.articles.map((article) => article.slug)).toEqual([
+      "2026-10-30",
+      "2026-10-28",
       "2026-10-23",
       "2026-10-20",
       "2026-10-16",
@@ -114,6 +137,10 @@ describe("newsletters", () => {
     });
     expect(newsletterNeighbors("2026-10-28")).toMatchObject({
       previous: { slug: "2026-10-23" },
+      next: { slug: "2026-10-30" },
+    });
+    expect(newsletterNeighbors("2026-11-06")).toMatchObject({
+      previous: { slug: "2026-11-03" },
       next: null,
     });
   });

@@ -1,10 +1,15 @@
 import { expect, test } from "@playwright/test";
 import { NEWSLETTERS } from "../data/newsletters";
 
-const issue = NEWSLETTERS.find((entry) => entry.slug === "2026-10-28");
-if (!issue) throw new Error("缺少 2026-10-28 電子報");
+const issue = NEWSLETTERS.find((entry) => entry.slug === "2026-11-06");
+if (!issue) throw new Error("缺少 2026-11-06 電子報");
+const persisted = NEWSLETTERS.find((entry) => entry.slug === "2026-10-28");
+if (!persisted) throw new Error("缺少 2026-10-28 電子報");
 
 const OLDER_HREFS = [
+  "/newsletter/2026-11-03",
+  "/newsletter/2026-10-30",
+  "/newsletter/2026-10-28",
   "/newsletter/2026-10-23",
   "/newsletter/2026-10-20",
   "/newsletter/2026-10-16",
@@ -45,8 +50,8 @@ test("選單有電子報入口，連到列表並看到這一期", async ({ page 
 
 test("單篇標題與來源連結正確", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
-  await page.goto(`/newsletter/${issue.slug}`);
-  await expect(page.getByRole("heading", { level: 1, name: issue.title })).toBeVisible();
+  await page.goto(`/newsletter/${persisted.slug}`);
+  await expect(page.getByRole("heading", { level: 1, name: persisted.title })).toBeVisible();
   await expect(page.getByRole("heading", { level: 2, name: "來源" })).toBeVisible();
   for (const [name, href] of SOURCE_LINKS) {
     const link = page.getByRole("link", { name, exact: true });

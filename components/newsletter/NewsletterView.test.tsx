@@ -30,7 +30,7 @@ describe("電子報列表", () => {
         <ParentArticlesMasthead
           title="電子報"
           count={NEWSLETTERS.length}
-          latestPublishedAt="2026-10-28"
+          latestPublishedAt="2026-11-06"
           longestMinutes={longestMinutes}
           variant="newsletter"
         />
@@ -39,24 +39,27 @@ describe("電子報列表", () => {
     );
 
     expect(screen.getByRole("heading", { level: 1, name: "電子報" })).toBeTruthy();
-    expect(screen.getByText(/6 期 · 最近更新 2026年10月28日/)).toBeTruthy();
+    expect(screen.getByText(/9 期 · 最近更新 2026年11月6日/)).toBeTruthy();
     expect(screen.queryByRole("link", { name: "在方格子追蹤（另開視窗）" })).toBeNull();
 
-    const feature = screen.getByRole("link", { name: /你已經試了 20 秒囉/ });
-    expect(feature.getAttribute("href")).toBe("/newsletter/2026-10-28");
-    expect(feature.textContent).toContain("孩子卡關就喊「我不會」？今晚 5 分鐘「計時小幫手」遊戲，陪他多撐一下");
+    const feature = screen.getByRole("link", { name: /他看影片明明很專心/ });
+    expect(feature.getAttribute("href")).toBe("/newsletter/2026-11-06");
+    expect(feature.textContent).toContain("孩子看影片很安靜，一起玩真的比較好嗎？今晚 8 分鐘「拼圖小司機」，陪他拼一拼");
     expect(feature.textContent).toContain("讀這篇");
 
-    const older = screen.getAllByRole("link", { name: /，2026年10月/ });
+    const older = screen.getAllByRole("link", { name: /，2026年1[01]月/ });
     expect(older.map((link) => link.getAttribute("href"))).toEqual([
+      "/newsletter/2026-11-03",
+      "/newsletter/2026-10-30",
+      "/newsletter/2026-10-28",
       "/newsletter/2026-10-23",
       "/newsletter/2026-10-20",
       "/newsletter/2026-10-16",
       "/newsletter/2026-10-13",
       "/newsletter/2026-10-09",
     ]);
-    expect(older[0]?.textContent).toContain("車車要轉彎囉");
-    expect(older[4]?.textContent).toContain("睡前螢幕下班");
+    expect(older[0]?.textContent).toContain("你猜哪台車會滑比較遠");
+    expect(older[7]?.textContent).toContain("睡前螢幕下班");
   });
 });
 
