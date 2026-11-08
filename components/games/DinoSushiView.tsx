@@ -73,6 +73,19 @@ function faceForDay(day: number | null): NextDayFace | null {
   return card ? { src: dayFaceSrc(card), flip: card.faceLeft === true, duoduo: Boolean(card.duoduo) } : null;
 }
 
+/**
+ * 結算主鈕帶著下一天的朋友：第一次見到的朋友，貼紙還沒載過，主鈕的圖會晚一點才出來。
+ * 開始第 N 天時先載第 N+1 天的臉（一張小貼紙）。回傳的 Image 要留著，載完前不被回收。
+ */
+function preloadNextDayFace(day: number): HTMLImageElement | null {
+  const face = faceForDay(day + 1);
+  if (!face || typeof Image === "undefined") return null;
+  const img = new Image();
+  img.decoding = "async";
+  img.src = face.src;
+  return img;
+}
+
 export function DinoSushiView({
   reducedMotion,
   status,
@@ -91,6 +104,7 @@ export function DinoSushiView({
     useDinoSushiDayProgress(instance);
   const [outcome, setOutcome] = useState<DinoSushiOutcome | null>(null);
   const sessionRef = useRef({ mode: "order" as Mode, day: 0, firstClear: false });
+  const nextFaceRef = useRef<HTMLImageElement | null>(null);
   const inputPaused = instance.isInputPaused() || status === "paused";
 
   const onServed = useCallback(() => {
@@ -179,6 +193,7 @@ export function DinoSushiView({
         day = explicitDay ?? suggestedDay(dayFlags, classicFlags);
         firstClear = !isDayCleared(flagsForDay(day, dayFlags, classicFlags));
         actions.start(next, seed, { day, teach: firstClear });
+        if (day >= 1) nextFaceRef.current = preloadNextDayFace(day);
       } else {
         actions.start(next, seed, "normal");
       }
