@@ -69,10 +69,18 @@
  * 夜間：消消樂、壽司屋、著色本、小橘特快車的頁底鎖奶油，字色釘回日間墨色。
  * 棋盤、店面、著色紙本身不改。方塊轉轉不在這三條路由裡。
  */
+/*
+ * body 也要一份：家長工具、離開提醒等對話框 portal 到 body，不在 .main 裡面，
+ * 以前只拿到日間墨色、卻是夜間深底，字幾乎看不見（對比 1.17）。
+ */
 :global([data-theme="night"]) .main[data-game-id="candy-match"],
 :global([data-theme="night"]) .main[data-game-id="dino-sushi"],
 :global([data-theme="night"]) .main[data-game-id="coloring-book"],
-:global([data-theme="night"]) .main[data-game-id="orange-express"] {
+:global([data-theme="night"]) .main[data-game-id="orange-express"],
+:global([data-theme="night"] body:has(main[data-game-id="candy-match"])),
+:global([data-theme="night"] body:has(main[data-game-id="dino-sushi"])),
+:global([data-theme="night"] body:has(main[data-game-id="coloring-book"])),
+:global([data-theme="night"] body:has(main[data-game-id="orange-express"])) {
   --bg: var(--surface-game);
   --ink: var(--game-day-ink);
   --ink-soft: var(--game-day-ink-soft);
@@ -85,6 +93,36 @@
   --support-from: var(--game-day-support);
   --support-to: var(--game-day-support-to);
   --support-fg: var(--on-dark);
+  /*
+   * 由上面幾個算出來的 token 在 :root 已用夜間值算好，只改來源不會跟著變（夜間會是深底、白線、淡青字）。
+   * 這裡照 :root 的式子重宣告一次，讓它們用日間的紙、墨重算。
+   */
+  --accent-ink: var(--game-day-accent-ink);
+  --hairline: var(--game-day-hairline);
+  --line: var(--hairline);
+  --surface-elevated: var(--card);
+  --surface-glass: color-mix(in srgb, var(--card) 78%, transparent);
+  --cta-soft-bg: var(--card);
+  --cta-soft-fg: var(--ink);
+  --cta-soft-line: color-mix(in srgb, var(--ink) 22%, transparent);
+  --cta-quiet-fg: var(--accent-ink);
+  --focus-ring: var(--ink);
+  /* 粉彩、陰影、品牌橘夜間會壓暗（土黃、灰紫、重黑影），在奶油底上變髒；一起指回日間 */
+  --c-pink: var(--game-day-c-pink);
+  --c-yellow: var(--game-day-c-yellow);
+  --c-mint: var(--game-day-c-mint);
+  --c-sky: var(--game-day-c-sky);
+  --c-teal: var(--game-day-c-teal);
+  --c-lilac: var(--game-day-c-lilac);
+  --elev-1: var(--game-day-elev-1);
+  --elev-2: var(--game-day-elev-2);
+  --elev-3: var(--game-day-elev-3);
+  --shadow-sm: var(--game-day-shadow-sm);
+  --shadow-md: var(--game-day-shadow-md);
+  --shadow-card: var(--elev-1);
+  --mix-base: var(--game-day-mix-base);
+  --landing-brand: var(--game-day-landing-brand);
+  --warm-card-glow: none;
   color: var(--ink);
 }
 
@@ -92,11 +130,7 @@
 :global([data-theme="night"] body:has(main[data-game-id="dino-sushi"])),
 :global([data-theme="night"] body:has(main[data-game-id="coloring-book"])),
 :global([data-theme="night"] body:has(main[data-game-id="orange-express"])) {
-  --bg: var(--surface-game);
-  --ink: var(--game-day-ink);
-  --ink-soft: var(--game-day-ink-soft);
   background-color: var(--bg);
-  color: var(--ink);
 }
 
 .skip {
@@ -311,7 +345,8 @@
   min-height: min(684px, calc((100vw - 24px) * 16 / 9 + 44px));
 }
 
-:global([data-theme="night"]) .playArea {
+/* 夜間外框只給沒鎖奶油底的遊戲（方塊轉轉）；四款鎖奶油的維持日間的無框樣子，不出灰紫底 */
+:global([data-theme="night"]) .main:not([data-game-id="candy-match"], [data-game-id="dino-sushi"], [data-game-id="coloring-book"], [data-game-id="orange-express"]) .playArea {
   padding: var(--space-3);
   border: 1px solid var(--hairline);
   background: color-mix(in srgb, var(--card) 82%, var(--c-lilac));
@@ -320,11 +355,6 @@
 /* 夜間就寢時段（自動 night）方塊局內把框內距收到 4px：12px 內距會讓 390×664 的格子掉到 24.6px（<25 驗收線） */
 :global([data-theme="night"]) .main[data-game-id="block-drop"]:has([data-status="playing"], [data-status="paused"]) .playArea {
   padding: 4px;
-}
-
-/* 消消樂沒有 data-status；局內才掛棋盤。夜間外框內距歸零，格寬才到得了 56px。卡片自己有邊。 */
-:global([data-theme="night"]) .main[data-game-id="candy-match"]:has([data-testid="candy-match-board"]) .playArea {
-  padding: 0;
 }
 
 /* 壽司屋矮橫向（iPhone 橫拿約 340px 高）：抬頭與卡片的間距收小，托盤第四列才放得下 */
