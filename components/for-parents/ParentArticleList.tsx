@@ -139,13 +139,21 @@ function ArticleSeries({
   );
 }
 
+function issueDay(publishedAt: string): string {
+  const day = Number(publishedAt.slice(8, 10));
+  return Number.isFinite(day) ? `${day}日` : publishedAt;
+}
+
 function MoreArticles({
   months,
   hrefFor,
+  variant,
 }: {
   months: ArticleListLayout["months"];
   hrefFor: (slug: string) => string;
+  variant: "articles" | "newsletter";
 }) {
+  const newsletter = variant === "newsletter";
   return (
     <section className={styles.more} aria-labelledby={MORE_HEADING_ID}>
       <h2 id={MORE_HEADING_ID} className={styles.sectionTitle}>
@@ -158,16 +166,26 @@ function MoreArticles({
             {month.articles.map((article) => (
               <li key={article.slug}>
                 <Link
-                  className={styles.row}
+                  className={newsletter ? styles.issue : styles.row}
                   href={hrefFor(article.slug)}
                   aria-label={`${article.title}，${formatParentArticleDate(article.publishedAt)}`}
                 >
-                  <time className={styles.day} dateTime={article.publishedAt}>
-                    {Number(article.publishedAt.slice(8, 10))}
-                  </time>
+                  {newsletter ? null : (
+                    <time className={styles.day} dateTime={article.publishedAt}>
+                      {Number(article.publishedAt.slice(8, 10))}
+                    </time>
+                  )}
                   <span className={styles.rowBody}>
                     <span className={styles.rowTitle}>{article.title}</span>
-                    <span className={styles.rowExcerpt}>
+                    {newsletter ? (
+                      <span className={styles.issueMeta}>
+                        <time dateTime={article.publishedAt}>{issueDay(article.publishedAt)}</time>
+                        {typeof article.minutes === "number"
+                          ? ` · 約 ${article.minutes} 分鐘`
+                          : null}
+                      </span>
+                    ) : null}
+                    <span className={newsletter ? styles.issueExcerpt : styles.rowExcerpt}>
                       {article.excerpt.replace(/\s*\n\s*/g, " ")}
                     </span>
                   </span>
@@ -182,13 +200,16 @@ function MoreArticles({
   );
 }
 
-/** 育兒文章列表：最新一篇當封面故事、系列照閱讀順序、其他文章依月份。電子報沿用同一套。 */
+/** 育兒文章列表：最新一篇當封面故事、系列照閱讀順序、其他文章依月份。電子報封面沿用同一套，過去各期改成標題為主的細線列。 */
 export function ParentArticleList({
   layout,
   hrefFor = parentArticlePath,
+  variant = "articles",
 }: {
   layout: ArticleListLayout;
   hrefFor?: (slug: string) => string;
+  /** 電子報過去各期不放左欄大日期。 */
+  variant?: "articles" | "newsletter";
 }) {
   const { latest, series, months } = layout;
   if (!latest && series.length === 0 && months.length === 0) return null;
@@ -199,7 +220,9 @@ export function ParentArticleList({
       {series.map((entry) => (
         <ArticleSeries key={entry.id} series={entry} hrefFor={hrefFor} />
       ))}
-      {months.length > 0 ? <MoreArticles months={months} hrefFor={hrefFor} /> : null}
+      {months.length > 0 ? (
+        <MoreArticles months={months} hrefFor={hrefFor} variant={variant} />
+      ) : null}
     </div>
   );
 }

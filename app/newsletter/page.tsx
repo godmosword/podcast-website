@@ -50,7 +50,7 @@ export default function NewsletterIndexPage() {
         variant="newsletter"
       />
       <NewsletterSubscribeForm />
-      <ParentArticleList layout={layout} hrefFor={newsletterPath} />
+      <ParentArticleList layout={layout} hrefFor={newsletterPath} variant="newsletter" />
       <SiteFooter compact showPlatformSubscribe={false} />
     </main>
   );
