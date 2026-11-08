@@ -51,10 +51,11 @@ function cardMinutes(article: ArticleCard): number {
   return parentArticleReadingMinutes(article as ParentArticle);
 }
 
-/** 電子報列表只顯示冒號前的短句；完整標題留給連結名稱與內文。 */
-function issueHook(title: string): string {
+/** 電子報標題是「金句：重點」。列表分成兩行，不改原稿。 */
+function issueParts(title: string): { hook: string; point: string } {
   const colon = title.indexOf("：");
-  return colon > 0 ? title.slice(0, colon) : title;
+  if (colon <= 0) return { hook: title, point: "" };
+  return { hook: title.slice(0, colon), point: title.slice(colon + 1) };
 }
 
 function FeaturedArticle({
@@ -67,6 +68,7 @@ function FeaturedArticle({
   variant: "articles" | "newsletter";
 }) {
   const newsletter = variant === "newsletter";
+  const parts = issueParts(article.title);
   return (
     <Link className={styles.feature} href={hrefFor(article.slug)}>
       {article.coverImage ? (
@@ -92,7 +94,14 @@ function FeaturedArticle({
         className={styles.featureTitle}
         aria-label={newsletter ? article.title : undefined}
       >
-        {newsletter ? issueHook(article.title) : article.title}
+        {newsletter ? (
+          <>
+            <span className={styles.featureHook}>{parts.hook}</span>
+            {parts.point ? <span className={styles.featurePoint}>{parts.point}</span> : null}
+          </>
+        ) : (
+          article.title
+        )}
       </h2>
       <p className={styles.verse}>
         {excerptLines(article.excerpt).map((line, index) => (
@@ -177,7 +186,9 @@ function MoreArticles({
         <div key={month.key} className={styles.month}>
           <h3 className={styles.monthTitle}>{parentArticleMonthLabel(month.key)}</h3>
           <ol className={styles.rows}>
-            {month.articles.map((article) => (
+            {month.articles.map((article) => {
+              const parts = issueParts(article.title);
+              return (
               <li key={article.slug}>
                 <Link
                   className={newsletter ? styles.issue : styles.row}
@@ -191,8 +202,11 @@ function MoreArticles({
                   )}
                   <span className={styles.rowBody}>
                     <span className={styles.rowTitle}>
-                      {newsletter ? issueHook(article.title) : article.title}
+                      {newsletter ? parts.hook : article.title}
                     </span>
+                    {newsletter && parts.point ? (
+                      <span className={styles.issuePoint}>{parts.point}</span>
+                    ) : null}
                     {newsletter ? (
                       <span className={styles.issueMeta}>
                         <time dateTime={article.publishedAt}>{issueDay(article.publishedAt)}</time>
@@ -209,7 +223,8 @@ function MoreArticles({
                   <Icon name="chevron-right" size={18} className={styles.rowArrow} />
                 </Link>
               </li>
-            ))}
+              );
+            })}
           </ol>
         </div>
       ))}
