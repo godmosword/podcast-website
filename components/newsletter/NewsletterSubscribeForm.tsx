@@ -59,20 +59,27 @@ export function NewsletterSubscribeForm() {
 
   return (
     <form className={styles.form} onSubmit={onSubmit} aria-label="訂閱電子報">
-      <p className={styles.lead}>想收到新的一期，留下信箱就好。下面仍可讀過去的每一期。</p>
-      <label className={styles.label} htmlFor="newsletter-email">
-        電子信箱
-      </label>
-      <input
-        id="newsletter-email"
-        className={styles.input}
-        name="email"
-        type="email"
-        autoComplete="email"
-        inputMode="email"
-        required
-        maxLength={254}
-      />
+      <p className={styles.lead}>想收到新的一期，留下信箱。</p>
+      <div className={styles.fields}>
+        <div className={styles.email}>
+          <label className={styles.label} htmlFor="newsletter-email">
+            電子信箱
+          </label>
+          <input
+            id="newsletter-email"
+            className={styles.input}
+            name="email"
+            type="email"
+            autoComplete="email"
+            inputMode="email"
+            required
+            maxLength={254}
+          />
+        </div>
+        <button className={styles.submit} type="submit" disabled={pending}>
+          {pending ? "送出中" : "訂閱"}
+        </button>
+      </div>
       <div className={styles.honeypot} aria-hidden="true">
         <label htmlFor="newsletter-website">網站</label>
         <input
@@ -82,9 +89,6 @@ export function NewsletterSubscribeForm() {
           autoComplete="off"
         />
       </div>
-      <button className={styles.submit} type="submit" disabled={pending}>
-        {pending ? "送出中" : "訂閱"}
-      </button>
       {message ? (
         <p className={styles.status} role="status">
           {message}
