@@ -11,7 +11,6 @@ import {
   BASES,
   baseById,
   SAVORY_TOPPINGS,
-  SWEET_TOPPINGS,
   TOPPINGS,
   toppingById,
   type BaseId,
@@ -39,7 +38,10 @@ export type OrderChecks = {
 };
 
 export const TRAY_SIZE = 8;
-const TRAY_SAVORY = 6;
+/** 2026-11-08 起托盤不放甜點（草莓、布丁）：7 種家常料＋芥末。 */
+const TRAY_SAVORY = 7;
+/** 飯型抽籤沿用以前 6 格的家常料池，同一個 seed 的飯型順序不變（視覺測試的 seed 7 仍有手捲）。 */
+const LEGACY_DRAFT_SAVORY = 6;
 export const ORDERS_PER_ROUND = 5;
 /** 每單要幾種料：由飯＋1 料漸增到飯＋3 料。 */
 export const ORDER_SIZES: readonly number[] = TIER_SIZES.normal;
@@ -64,17 +66,21 @@ function sortTray(ids: readonly ToppingId[]): ToppingId[] {
   return [...ids].sort((a, b) => TOPPING_ORDER.get(a)! - TOPPING_ORDER.get(b)!);
 }
 
-/** 主題日之前的托盤。飯型亂數仍吃這盤，seed 7 的手捲才不會被主題日改掉。 */
+/** 同一個 seed 洗一次家常料；取前 n 個（取多取少，前面的順序都一樣）。 */
+function classicSavory(seed: number, n: number): ToppingId[] {
+  return shuffled(SAVORY_TOPPINGS, seededRng(seed))
+    .slice(0, n)
+    .map((t) => t.id);
+}
+
+/** 主題日之前的托盤：7 種家常料＋芥末。 */
 function classicTray(seed: number): ToppingId[] {
-  const rng = seededRng(seed);
-  const savory = shuffled(SAVORY_TOPPINGS, rng).slice(0, TRAY_SAVORY);
-  const sweet = SWEET_TOPPINGS[pickIndex(SWEET_TOPPINGS.length, rng)]!;
-  return sortTray([...savory.map((t) => t.id), sweet.id, "wasabi"]);
+  return sortTray([...classicSavory(seed, TRAY_SAVORY), "wasabi"]);
 }
 
 /**
- * 主題日把該色的家常料換上托盤（不夠 6 格再用其他家常料補）。
- * 甜點與芥末仍各留 1 格，但不進訂單。
+ * 主題日把該色的家常料換上托盤（不夠 7 格再用其他家常料補）。
+ * 芥末留 1 格，不進訂單。甜點不再上托盤（舊托盤若有也丟掉）。
  */
 function withTheme(tray: readonly ToppingId[], theme: readonly ToppingId[]): ToppingId[] {
   const savory = tray.filter((id) => toppingById(id).kind === "savory");
@@ -83,8 +89,7 @@ function withTheme(tray: readonly ToppingId[], theme: readonly ToppingId[]): Top
   const missing = must.filter((id) => !have.includes(id));
   const fillers = savory.filter((id) => !must.includes(id));
   const nextSavory = [...have, ...missing, ...fillers].slice(0, TRAY_SAVORY);
-  const sweet = tray.find((id) => toppingById(id).kind === "sweet") ?? SWEET_TOPPINGS[0]!.id;
-  return sortTray([...nextSavory, sweet, "wasabi"]);
+  return sortTray([...nextSavory, "wasabi"]);
 }
 
 /** 不套主題日的 8 格托盤。第 1 天用這個，才不會被隨機主題日換料。 */
@@ -92,7 +97,7 @@ export function buildTrayWithTheme(seed: number, themeToppings: readonly Topping
   return withTheme(classicTray(seed), themeToppings);
 }
 
-/** 每輪托盤 8 格：6 種家常料＋1 種甜點＋芥末，依食材表順序排（甜點、芥末固定在最後）。 */
+/** 每輪托盤 8 格：7 種家常料＋芥末，依食材表順序排（芥末固定在最後）。 */
 export function buildTray(seed: number): ToppingId[] {
   return buildTrayWithTheme(seed, roundVariety(seed).theme.toppings);
 }
@@ -210,7 +215,7 @@ function sameFood(
 
 /** 飯型沿用主題日之前的托盤亂數，視覺測試的 seed 7 才仍有手捲。 */
 function draftBases(seed: number, sizes: readonly number[]): BaseId[] {
-  const pool = classicTray(seed).filter((id) => toppingById(id).kind === "savory");
+  const pool = classicSavory(seed, LEGACY_DRAFT_SAVORY);
   const rng = seededRng((seed ^ ORDER_SEED_SALT) >>> 0);
   const drafted: { base: BaseId; toppings: ToppingId[] }[] = [];
   for (const size of sizes) {
@@ -312,7 +317,7 @@ export function orderChecks(sushi: Sushi, order: Order): OrderChecks {
   };
 }
 
-/** 讀屏宣告：「小紅想吃：手捲、玉子、小黃瓜」。吃的仍是多多，這句只說誰點了什麼。 */
+/** 讀屏宣告：「小紅想吃：手捲、玉子、小黃瓜」。2026-11-08 起點餐是朋友自己吃（輸送帶送過去）。 */
 export function orderAnnouncement(order: Order): string {
   const parts = [baseById(order.base).label, ...order.toppings.map((t) => toppingById(t).label)];
   return `${customerById(order.customerId).name}想吃：${parts.join("、")}`;

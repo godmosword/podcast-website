@@ -2,6 +2,7 @@
 
 import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { BaseArt, PlateArt, SHOP_SRC, SushiArt, ToppingArt } from "@/lib/games/dino-sushi/art";
+import { customerById } from "@/lib/games/dino-sushi/customers";
 import { matchOrder, orderSpeechLine, orderThanksLine } from "@/lib/games/dino-sushi/orders";
 import { shortCaption } from "@/lib/games/dino-sushi/reactions";
 import { currentOrder } from "@/lib/games/dino-sushi/round";
@@ -10,7 +11,7 @@ import { BASES, baseById, toppingById, type BaseId, type ToppingId } from "@/lib
 import { DOME_AFTER_PLATES, domeStickerId, orderLead } from "@/lib/games/dino-sushi/variety";
 import { RemoveBadge, SwapBadge } from "./DinoSushiBadges";
 import { DinoSushiCustomerQueue } from "./DinoSushiCustomerQueue";
-import { DinoSushiCustomerSeat } from "./DinoSushiCustomerSeat";
+import { DinoSushiCustomerSeat, DinoSushiServeLane } from "./DinoSushiCustomerSeat";
 import { DinoSushiDuoDuo } from "./DinoSushiDuoDuo";
 import { DinoSushiEvictFly, type EvictFly } from "./DinoSushiEvictFly";
 import { DinoSushiGuestThanks } from "./DinoSushiGuestThanks";
@@ -80,7 +81,11 @@ function useFocusAcrossPhases(choosingBase: boolean) {
   return { rootRef, focusProps };
 }
 
-/** 廚房：迴轉壽司店（多多＋泡泡＋疊盤）｜砧板（3 料位）＋「給多多吃」｜托盤。 */
+/**
+ * 廚房：迴轉壽司店（店長多多＋櫃台的客人＋泡泡＋疊盤）｜砧板（3 料位）＋送出｜托盤。
+ * 點餐（2026-11-08 起）：做好的壽司經輸送帶送到客人座位，客人吃；多多在旁邊陪著開心。
+ * 自由做：沒有客人，盤子送到多多面前，多多吃。
+ */
 export function DinoSushiKitchen({
   play,
   reducedMotion,
@@ -144,6 +149,9 @@ export function DinoSushiKitchen({
   const order = currentOrder(round);
   const bases = round.allowedBases.length > 0 ? BASES.filter((b) => round.allowedBases.includes(b.id)) : [...BASES];
   const eating = round.pending?.eats === true;
+  /** 點餐送出後：盤子在帶子上（交接、送過去、客人吃、反應），裝飾盤這時停住淡出。 */
+  const delivering = round.mode === "order" && eating && phase !== "idle";
+  const guest = order ? customerById(order.customerId) : null;
   const sushi = round.sushi;
   const flash = caption?.mood === "look" ? (caption.match ?? null) : null;
   const disabled = locked || inputPaused;
@@ -208,6 +216,7 @@ export function DinoSushiKitchen({
           <DinoSushiCustomerQueue seats={variety.seats} index={round.index} />
         ) : null}
         <DinoSushiDuoDuo
+          mode={round.mode}
           phase={phase}
           caption={caption}
           serving={eating ? sushi : null}
@@ -219,9 +228,19 @@ export function DinoSushiKitchen({
         <ShopBelt
           domeOpen={domeOpen}
           stickerId={domeOpen && round ? domeStickerId(round.seed, ownedStickers) : null}
+          delivering={delivering}
         />
-        {/* 吃的時候泡泡收起，客人改站在櫃台旁，這一單不會從畫面上消失。 */}
-        {round.mode === "order" && eating && order ? <DinoSushiCustomerSeat order={order} /> : null}
+        {/* 點餐的這位客人整單坐在櫃台；換人時 key 換掉，新客人滑進座位 */}
+        {round.mode === "order" && order ? (
+          <DinoSushiCustomerSeat
+            key={round.index}
+            order={order}
+            phase={phase}
+            mood={eating && phase === "react" ? (caption?.mood ?? null) : null}
+            reducedMotion={reducedMotion}
+          />
+        ) : null}
+        {delivering ? <DinoSushiServeLane sushi={sushi} phase={phase} /> : null}
         <DinoSushiPlateStack plates={round.plates} />
         {/* 右上一欄由上往下排：自由做的「多多吃飽了」→ 點餐泡泡 → 多多的字卡，彼此不會疊在一起 */}
         <div className={styles.talk} data-role="talk">
@@ -251,13 +270,14 @@ export function DinoSushiKitchen({
               onReplay={speech.voiceOn ? speech.replay : undefined}
             />
           ) : null}
-          {caption ? (
+          {/* 客人吃的時候多多不說話（表情就是回饋），文字交給客人的謝謝 */}
+          {caption && !(round.mode === "order" && caption.eats) ? (
             <p className={styles.caption} data-mood={caption.mood} aria-hidden>
               <span className={styles.lineFull}>{caption.line}</span>
               <span className={styles.lineShort}>{shortCaption(caption)}</span>
             </p>
           ) : null}
-          {/* 先多多、再朋友（朗讀也是這個順序）；下一單泡泡出來後再留一下才淡出 */}
+          {/* 客人頭上同一時間只放一樣：吃的時候是謝謝，下一位入座就收（hook 在 done 清掉，不疊在下一位的臉上） */}
           {play.thanks ? (
             <DinoSushiGuestThanks order={play.thanks.order} line={play.thanks.line} leaving={play.thanks.leaving} />
           ) : null}
@@ -345,8 +365,14 @@ export function DinoSushiKitchen({
           >
             <span className={styles.serveArt} aria-hidden>
               <PlateArt />
+              {guest ? (
+                <span className={styles.serveTo}>
+                  {/* eslint-disable-next-line @next/next/no-img-element -- 核准的黏土貼紙，送給誰就放誰 */}
+                  <img src={guest.sticker} alt="" draggable={false} decoding="sync" />
+                </span>
+              ) : null}
             </span>
-            給多多吃
+            {guest ? `送給${guest.name}` : "給多多吃"}
             {teaching && serveHint ? <Finger /> : null}
           </TapButton>
         </div>

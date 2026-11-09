@@ -531,7 +531,7 @@ async function makeDinoOrder(page: Page, n: number, serve: boolean) {
   await page.getByRole("button", { name: `選${base}` }).click();
   for (const t of toppings) await page.getByRole("button", { name: `加${t}` }).click();
   if (!serve) return;
-  await page.getByRole("button", { name: "給多多吃" }).click();
+  await page.getByRole("button", { name: /^(送給.+|給多多吃)$/ }).click();
   await expect(
     page.getByRole("img", { name: `吃完 ${n} 盤` }).or(page.getByTestId("dino-sushi-result")).first(),
   ).toBeVisible();

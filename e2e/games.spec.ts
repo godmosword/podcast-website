@@ -244,7 +244,7 @@ test.describe("多多壽司屋", () => {
     expect(width).toBeLessThanOrEqual(320);
   });
 
-  test("兒童觸控鈕夠大：托盤與料位 ≥64px，給多多吃高 ≥80px", async ({ page }) => {
+  test("兒童觸控鈕夠大：托盤與料位 ≥64px，送出鈕全寬、高 ≥56px", async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 568 });
     await page.goto("/games/dino-sushi");
     await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
@@ -258,8 +258,10 @@ test.describe("多多壽司屋", () => {
       expect(box!.width).toBeGreaterThanOrEqual(64);
       expect(box!.height).toBeGreaterThanOrEqual(64);
     }
-    const serve = await page.getByRole("button", { name: "給多多吃" }).boundingBox();
-    expect(serve!.height).toBeGreaterThanOrEqual(80);
+    // 2026-11-08 起 320×568 砧板收兩列，送出鈕從 80 高收到 56 高、但拉成全寬
+    const serve = await page.getByRole("button", { name: /^(送給.+|給多多吃)$/ }).boundingBox();
+    expect(serve!.height).toBeGreaterThanOrEqual(56);
+    expect(serve!.width).toBeGreaterThanOrEqual(240);
     await page.getByRole("group", { name: "壽司料" }).getByRole("button").first().click();
     const slot = await page.getByRole("button", { name: /^拿掉/ }).boundingBox();
     expect(Math.min(slot!.width, slot!.height)).toBeGreaterThanOrEqual(64);
@@ -309,7 +311,7 @@ test.describe("多多壽司屋", () => {
       };
       const choosing = await measure();
       await page.getByRole("button", { name: "選握壽司" }).click();
-      await expect(page.getByRole("button", { name: "給多多吃" })).toBeVisible();
+      await expect(page.getByRole("button", { name: /^(送給.+|給多多吃)$/ })).toBeVisible();
       const topping = await measure();
       expect(Math.abs(topping.stage.y - choosing.stage.y)).toBeLessThanOrEqual(1);
       expect(Math.abs(topping.stage.height - choosing.stage.height)).toBeLessThanOrEqual(1);
@@ -320,7 +322,7 @@ test.describe("多多壽司屋", () => {
   test("選飯時看不到加料層：讀屏與 Tab 都到不了「給多多吃」", async ({ page }) => {
     await page.goto("/games/dino-sushi");
     await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
-    await expect(page.getByRole("button", { name: "給多多吃" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /^(送給.+|給多多吃)$/ })).toHaveCount(0);
     await expect(page.getByRole("button", { name: /^換飯|^選飯$/ })).toHaveCount(0);
     await expect(page.getByRole("group", { name: "選飯" }).getByRole("button")).toHaveCount(3);
   });
@@ -343,7 +345,7 @@ test.describe("多多壽司屋", () => {
     await page.mouse.click(x, y);
     await page.waitForTimeout(600);
     await expect(page.getByTestId("dino-sushi").locator("p[data-mood]")).toHaveCount(0);
-    await expect(page.getByRole("button", { name: "給多多吃" })).toBeVisible();
+    await expect(page.getByRole("button", { name: /^(送給.+|給多多吃)$/ })).toBeVisible();
   });
 
   /** 美術審 M1：疊盤放大後不能壓到點餐泡泡或「多多吃飽了」（矮直向與橫向手機最擠）。 */
@@ -375,7 +377,7 @@ test.describe("多多壽司屋", () => {
         const [base, ...toppings] = label!.split("想吃：")[1]!.split("、");
         await page.getByRole("button", { name: `選${base}` }).click();
         for (const t of toppings) await page.getByRole("button", { name: `加${t}` }).click();
-        await page.getByRole("button", { name: "給多多吃" }).click();
+        await page.getByRole("button", { name: /^(送給.+|給多多吃)$/ }).click();
         await expect(page.getByRole("img", { name: `吃完 ${n} 盤` })).toBeVisible();
       }
       const bubble = (await page.getByRole("img", { name: /^第 5 單/ }).boundingBox())!;
@@ -389,7 +391,7 @@ test.describe("多多壽司屋", () => {
       await page.getByRole("button", { name: "自由做" }).click();
       for (let n = 1; n <= 8; n++) {
         await page.getByRole("button", { name: "選軍艦" }).click();
-        await page.getByRole("button", { name: "給多多吃" }).click();
+        await page.getByRole("button", { name: /^(送給.+|給多多吃)$/ }).click();
         await expect(page.getByRole("img", { name: `吃完 ${n} 盤` })).toBeVisible();
         await expect(page.getByRole("button", { name: "選軍艦" })).toBeVisible();
       }
@@ -433,8 +435,9 @@ test.describe("多多壽司屋", () => {
       });
     const label = await page.getByRole("img", { name: /^第 1 單/ }).getAttribute("aria-label");
     const [base, ...toppings] = label!.split("想吃：")[1]!.split("、");
-    const expectHand = async (name: string) => {
-      await expect.poll(async () => (await probe())?.label).toBe(name);
+    const expectHand = async (name: string | RegExp) => {
+      if (typeof name === "string") await expect.poll(async () => (await probe())?.label).toBe(name);
+      else await expect.poll(async () => (await probe())?.label ?? "").toMatch(name);
       expect(await probe()).toMatchObject({ tipOnHost: true, bodyClear: true, inside: true });
     };
     await expectHand(`選${base}`);
@@ -443,7 +446,7 @@ test.describe("多多壽司屋", () => {
       await expectHand(`加${t}`);
       await page.getByRole("button", { name: `加${t}` }).click();
     }
-    await expectHand("給多多吃");
+    await expectHand(/^(送給.+|給多多吃)$/);
   });
   }
 
@@ -453,36 +456,9 @@ test.describe("多多壽司屋", () => {
     const [base, ...toppings] = label!.split("想吃：")[1]!.split("、");
     await page.getByRole("button", { name: `選${base}` }).click();
     for (const t of toppings) await page.getByRole("button", { name: `加${t}` }).click();
-    await page.getByRole("button", { name: "給多多吃" }).click();
+    await page.getByRole("button", { name: /^(送給.+|給多多吃)$/ }).click();
     await expect(page.getByRole("img", { name: `吃完 ${n} 盤` })).toBeVisible();
   };
-
-  /** 點牙刷正中央要點到牙刷，不能點到別的鈕（#215 的朗讀開關曾蓋在上面）。 */
-  for (const vp of [
-    { width: 320, height: 568 },
-    { width: 390, height: 844 },
-    { width: 844, height: 390 },
-    { width: 1280, height: 800 },
-  ]) {
-    test(`${vp.width}×${vp.height}：牙刷正中央點得到牙刷`, async ({ page }) => {
-      await page.emulateMedia({ reducedMotion: "reduce" });
-      await page.setViewportSize(vp);
-      await page.goto("/games/dino-sushi");
-      await page.getByRole("button", { name: "自由做" }).click();
-      await page.getByRole("button", { name: "選軍艦" }).click();
-      await page.getByRole("button", { name: "加布丁" }).click();
-      await page.getByRole("button", { name: "給多多吃" }).click();
-      const brush = page.getByRole("button", { name: "幫多多刷牙" });
-      await expect(brush).toBeVisible();
-      /* 320 廚房比一屏高，點送出後舞台會捲到抬頭底下；先把牙刷捲到畫面中間再量 */
-      await brush.evaluate((el) => el.scrollIntoView({ block: "center", inline: "nearest" }));
-      const hit = await brush.evaluate((el) => {
-        const r = el.getBoundingClientRect();
-        return document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)?.closest("button") === el;
-      });
-      expect(hit).toBe(true);
-    });
-  }
 
   /** 第 5 單有飯＋三樣料：四格都要在店面舞台裡，不被裁掉；點泡泡的「再聽一次」也在舞台裡。 */
   for (const vp of [
@@ -519,6 +495,8 @@ test.describe("多多壽司屋", () => {
   }
 
   test("320×568：料位和「給多多吃」各點各的，相鄰至少 8px", async ({ page }) => {
+    // 量版面：選飯的那顆飯會飛到備料盤（約 0.4 秒），負載大時還在半空就量到它蓋住料位 1
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await page.setViewportSize({ width: 320, height: 568 });
     await page.goto("/games/dino-sushi");
     await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
@@ -527,14 +505,15 @@ test.describe("多多壽司屋", () => {
     for (let i = 0; i < 3; i++) await tray.nth(i).click();
     const slots = page.getByRole("button", { name: /^拿掉/ });
     await expect(slots).toHaveCount(3);
-    const serve = (await page.getByRole("button", { name: "給多多吃" }).boundingBox())!;
+    const serve = (await page.getByRole("button", { name: /^(送給.+|給多多吃)$/ }).boundingBox())!;
     const boxes = await Promise.all((await slots.all()).map(async (s) => (await s.boundingBox())!));
     for (const [i, box] of boxes.entries()) {
       const hit = await slots.nth(i).evaluate((el) => {
         const r = el.getBoundingClientRect();
-        return document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)?.closest("button") === el;
+        const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+        return top?.closest("button") === el ? "ok" : `${top?.tagName} in ${top?.closest("button")?.getAttribute("aria-label") ?? "-"}`;
       });
-      expect(hit, `料位 ${i + 1}`).toBe(true);
+      expect(hit, `料位 ${i + 1}`).toBe("ok");
       expect(Math.min(box.width, box.height), `料位 ${i + 1}`).toBeGreaterThanOrEqual(64);
       /* 給多多吃在料位下面，全寬，上下至少隔 8px */
       expect(serve.y - (box.y + box.height), `料位 ${i + 1} 到給多多吃`).toBeGreaterThanOrEqual(8);
@@ -578,7 +557,7 @@ test.describe("多多壽司屋", () => {
         expect(Math.abs(box.height - box.width)).toBeLessThanOrEqual(1);
       }
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(vp.width);
-      const serve = (await page.getByRole("button", { name: "給多多吃" }).boundingBox())!;
+      const serve = (await page.getByRole("button", { name: /^(送給.+|給多多吃)$/ }).boundingBox())!;
       const last = slots[2]!;
       const apart = serve.x >= last.x + last.width + 8 || serve.y >= last.y + last.height + 8;
       expect(apart, "料位和「給多多吃」相隔至少 8px").toBe(true);
@@ -808,8 +787,8 @@ test.describe("多多壽司屋", () => {
       await tray.first().click();
       const slot = (await page.getByRole("button", { name: /^拿掉/ }).boundingBox())!;
       expect(Math.min(slot.width, slot.height), "料位").toBeGreaterThanOrEqual(64);
-      const serve = (await page.getByRole("button", { name: "給多多吃" }).boundingBox())!;
-      expect(serve.height, "給多多吃").toBeGreaterThanOrEqual(80);
+      const serve = (await page.getByRole("button", { name: /^(送給.+|給多多吃)$/ }).boundingBox())!;
+      expect(serve.height, "送出鈕").toBeGreaterThanOrEqual(56);
 
       const chrome = await page.evaluate(() =>
         [...document.querySelectorAll("header a, header button")]
@@ -822,12 +801,8 @@ test.describe("多多壽司屋", () => {
 
       await tray.nth(1).click();
       await tray.nth(2).click();
-      await page.getByRole("button", { name: /加(草莓|布丁)/ }).click();
-      await page.getByRole("button", { name: "給多多吃" }).click();
-      const brush = page.getByRole("button", { name: "幫多多刷牙" });
-      await expect(brush).toBeVisible();
-      const brushBox = (await brush.boundingBox())!;
-      expect(Math.min(brushBox.width, brushBox.height), "幫多多刷牙").toBeGreaterThanOrEqual(80);
+      // 2026-11-08 起托盤沒有甜點，也就沒有刷牙那一步
+      await page.getByRole("button", { name: /^(送給.+|給多多吃)$/ }).click();
 
       // 送出第一盤才彈出來，等彈完再量
       const fullButton = page.getByRole("button", { name: "多多吃飽了" });
@@ -867,7 +842,7 @@ test.describe("多多壽司屋", () => {
 
   /**
    * 手捲三樣料時中間那樣抬高到兩側上方：扁的鮭魚夾在蝦、蟹肉棒中間也要露出上緣；
-   * 最高的布丁放中間也不能冒出砧板、壓到上面的店面。
+   * 最高的蝦放中間也不能冒出砧板、壓到上面的店面（布丁 2026-11-08 下架）。
    */
   for (const vp of [
     { width: 320, height: 568 },
@@ -896,8 +871,9 @@ test.describe("多多壽司屋", () => {
           return {
             boardTop: el.getBoundingClientRect().top,
             top: Math.min(...layers.map((l) => l.r.top)),
-            // 中間那樣的上緣要比兩側的料都高一截，才看得到
-            above: layers.filter((l) => !l.middle).every((l) => center.top < l.r.top - 3),
+            // 中間那樣的上緣要比兩側的料都高一截，才看得到。320 矮直向的備料盤較小（2026-11-08 砧板收兩列），
+            // 料跟著等比縮小，「一截」用中間那樣高度的四分之一、最多 3px。
+            above: layers.filter((l) => !l.middle).every((l) => center.top < l.r.top - Math.min(3, center.height / 4)),
           };
         }, middle);
       const clear = async () => {
@@ -907,7 +883,7 @@ test.describe("多多壽司屋", () => {
       };
       for (const [middle, names] of [
         ["salmon", ["加鮭魚", "加蝦", "加蟹肉棒"]],
-        ["pudding", ["加布丁", "加蝦", "加蟹肉棒"]],
+        ["shrimp", ["加蝦", "加鮭魚", "加蟹肉棒"]],
       ] as const) {
         await clear();
         for (const name of names) await page.getByRole("button", { name }).click();

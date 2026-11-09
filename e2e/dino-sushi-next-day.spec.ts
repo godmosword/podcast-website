@@ -13,7 +13,7 @@ async function serveOrder(page: Page, n: number) {
   const [base, ...toppings] = label!.split("想吃：")[1]!.split("、");
   await page.getByRole("button", { name: `選${base}` }).click();
   for (const topping of toppings) await page.getByRole("button", { name: `加${topping}` }).click();
-  await page.getByRole("button", { name: "給多多吃" }).click();
+  await page.getByRole("button", { name: /^(送給.+|給多多吃)$/ }).click();
   await expect(
     page.getByRole("img", { name: `吃完 ${n} 盤` }).or(page.getByTestId("dino-sushi-result")).first(),
   ).toBeVisible();
@@ -67,7 +67,7 @@ test("次鈕重玩第 1 天，再通關不再宣布；主鈕仍往第 2 天走",
   await page.getByRole("button", { name: /^第 1 天/ }).click();
   await playDay(page);
   const result = page.getByTestId("dino-sushi-result");
-  await expect(result.getByRole("heading", { name: "多多吃飽飽！" })).toBeVisible();
+  await expect(result.getByRole("heading", { name: "朋友都吃飽飽！" })).toBeVisible();
   await expect(result.getByRole("button", { name: "開始第 2 天" })).toBeVisible();
 });
 
@@ -92,7 +92,7 @@ test("重玩舊的一天、下一天也通關了：主鈕維持再做一輪", as
   await page.getByRole("button", { name: /^第 1 天/ }).click();
   await playDay(page);
   const result = page.getByTestId("dino-sushi-result");
-  await expect(result.getByRole("heading", { name: "多多吃飽飽！" })).toBeVisible();
+  await expect(result.getByRole("heading", { name: "朋友都吃飽飽！" })).toBeVisible();
   await expect(result.getByRole("button", { name: /^開始第/ })).toHaveCount(0);
   await expect(result.getByRole("button", { name: "再做一輪" })).toBeVisible();
 });
@@ -105,7 +105,7 @@ test("自由做：第一盤送出前沒有「多多吃飽了」，送一盤才�
   const full = page.getByRole("button", { name: "多多吃飽了" });
   await expect(full).toHaveCount(0);
   await page.getByRole("button", { name: "選軍艦" }).click();
-  await page.getByRole("button", { name: "給多多吃" }).click();
+  await page.getByRole("button", { name: /^(送給.+|給多多吃)$/ }).click();
   await expect(page.getByRole("img", { name: "吃完 1 盤" })).toBeVisible();
   await expect(full).toBeVisible();
   await full.click();
@@ -114,11 +114,12 @@ test("自由做：第一盤送出前沒有「多多吃飽了」，送一盤才�
   await expect(result.getByRole("img", { name: "吃了 1 盤" })).toBeVisible();
 });
 
-for (const { width, height, overlap } of [
-  { width: 320, height: 568, overlap: 4 },
-  { width: 375, height: 553, overlap: 0 },
+for (const { width, height } of [
+  { width: 320, height: 568 },
+  { width: 375, height: 553 },
 ]) {
-  test(`${width}×${height}：四格訂單放大後不壓到客人貼紙`, async ({ page }) => {
+  /* 2026-11-08 起泡泡裡沒有客人頭像（客人坐在櫃台），改量四格整排都在泡泡裡 */
+  test(`${width}×${height}：四格訂單整排在泡泡裡`, async ({ page }) => {
     await pinDays(page, [1, 1, 1, 0, 0, 0, 0, 0]);
     await page.setViewportSize({ width, height });
     await page.goto("/games/dino-sushi");
@@ -127,18 +128,21 @@ for (const { width, height, overlap } of [
     await expect(page.getByRole("img", { name: /^第 5 單/ })).toBeVisible();
     const measured = await page.evaluate(() => {
       const items = [...document.querySelectorAll("[data-order-items] > span")];
-      const guest = document.querySelector('[class*="guestSticker"]')!.getBoundingClientRect();
-      return { count: items.length, overlap: items.at(-1)!.getBoundingClientRect().right - guest.left };
+      const bubble = document.querySelector('[role="img"][aria-label^="第 5 單"]')!.getBoundingClientRect();
+      const first = items[0]!.getBoundingClientRect();
+      const last = items.at(-1)!.getBoundingClientRect();
+      return { count: items.length, left: first.left - bubble.left, right: bubble.right - last.right };
     });
     expect(measured.count).toBe(4);
-    expect(measured.overlap).toBeLessThanOrEqual(overlap);
+    expect(measured.left, "第一格在泡泡裡").toBeGreaterThanOrEqual(-0.5);
+    expect(measured.right, "最後一格在泡泡裡").toBeGreaterThanOrEqual(-0.5);
   });
 }
 
 test.describe("短手機結算不用捲（真的用手指點）", () => {
   test.use({ hasTouch: true });
 
-  async function fingerTap(page: Page, name: string) {
+  async function fingerTap(page: Page, name: string | RegExp) {
     const box = (await page.getByRole("button", { name }).boundingBox())!;
     await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
   }
@@ -150,12 +154,12 @@ test.describe("短手機結算不用捲（真的用手指點）", () => {
     await fingerTap(page, `選${base}`);
     await page.waitForTimeout(650);
     if (missFirst) {
-      await fingerTap(page, "給多多吃");
+      await fingerTap(page, /^(送給.+|給多多吃)$/);
       await expect(page.getByTestId("dino-sushi").locator("p[data-mood='look']")).toBeAttached();
       await page.waitForTimeout(1200);
     }
     for (const topping of toppings) await fingerTap(page, `加${topping}`);
-    await fingerTap(page, "給多多吃");
+    await fingerTap(page, /^(送給.+|給多多吃)$/);
     await expect(
       page.getByRole("img", { name: `吃完 ${n} 盤` }).or(page.getByTestId("dino-sushi-result")).first(),
     ).toBeVisible();

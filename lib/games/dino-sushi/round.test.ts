@@ -103,10 +103,16 @@ describe("點餐一輪", () => {
   });
 });
 
+/** 托盤 11-08 起不放甜點；刷牙的狀態機要到 PR-C 才拿掉，這裡手動放一樣甜點測舊邏輯。 */
+function withSweet(seed: number) {
+  const round = createRound("free", seed);
+  return { ...round, tray: [...round.tray, "strawberry" as const] };
+}
+
 describe("刷牙彩蛋", () => {
   it("反應播完還能刷；送下一盤就收起", () => {
-    const start = createRound("free", 6);
-    const sweet = start.tray.find((id) => id === "strawberry" || id === "pudding")!;
+    const start = withSweet(6);
+    const sweet = "strawberry" as const;
     let s = run(start, [
       { type: "pick-base", base: "gunkan" },
       { type: "add", id: sweet },
@@ -121,8 +127,8 @@ describe("刷牙彩蛋", () => {
   });
 
   it("吃到甜點才能刷，一輪最多一次", () => {
-    const start = createRound("free", 6);
-    const sweet = start.tray.find((id) => id === "strawberry" || id === "pudding")!;
+    const start = withSweet(6);
+    const sweet = "strawberry" as const;
     expect(roundReducer(start, { type: "brush" })).toBe(start);
     let s = run(start, [
       { type: "pick-base", base: "gunkan" },

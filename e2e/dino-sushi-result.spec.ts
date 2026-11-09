@@ -20,7 +20,7 @@ async function serveOrder(page: Page, n: number, opts: { skipLast?: boolean } = 
   await page.getByRole("button", { name: `選${base}` }).click();
   const put = opts.skipLast ? toppings.slice(0, -1) : toppings;
   for (const t of put) await page.getByRole("button", { name: `加${t}` }).click();
-  await page.getByRole("button", { name: "給多多吃" }).click();
+  await page.getByRole("button", { name: /^(送給.+|給多多吃)$/ }).click();
   return toppings;
 }
 
@@ -37,7 +37,7 @@ async function finishRound(page: Page, opts: { retrySecond?: boolean } = {}) {
     if (n === 2 && opts.retrySecond) {
       const toppings = await serveOrder(page, n, { skipLast: true });
       await page.getByRole("button", { name: `加${toppings.at(-1)}` }).click();
-      await page.getByRole("button", { name: "給多多吃" }).click();
+      await page.getByRole("button", { name: /^(送給.+|給多多吃)$/ }).click();
     } else {
       await serveOrder(page, n);
     }
@@ -103,7 +103,7 @@ test("844×390：按鈕列、「放進貼紙書」、回遊樂園在右欄，書
   const result = page.getByTestId("dino-sushi-result");
   await settledResult(result);
   const box = async (l: Locator) => (await l.boundingBox())!;
-  const title = await box(result.getByRole("heading", { name: "多多吃飽飽！" }));
+  const title = await box(result.getByRole("heading", { name: "朋友都吃飽飽！" }));
   const replay = await box(result.getByRole("button", { name: "再做一輪" }));
   const bookBtn = result.getByRole("button", { name: "放進貼紙書" });
   const book = await box(bookBtn);
@@ -215,7 +215,7 @@ test.describe("貼紙書", () => {
     await page.getByRole("button", { name: "自由做" }).click();
     await page.getByRole("button", { name: "選手捲" }).click();
     await page.getByRole("button", { name: "加小黃瓜" }).click();
-    await page.getByRole("button", { name: "給多多吃" }).click();
+    await page.getByRole("button", { name: /^(送給.+|給多多吃)$/ }).click();
     await expect(page.getByRole("img", { name: "吃完 1 盤" })).toBeVisible();
     await page.getByRole("button", { name: "多多吃飽了" }).click();
     await page.getByTestId("dino-sushi-result").getByRole("button", { name: "放進貼紙書" }).click();

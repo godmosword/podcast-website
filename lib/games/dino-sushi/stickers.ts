@@ -42,7 +42,7 @@ const BASE_STICKERS: DinoSushiSticker[] = BASES.map((base) => ({
   id: `base-${base.id}`,
   name: base.label,
   group: "base",
-  rule: `做好${base.label}，給多多吃`,
+  rule: `做好${base.label}，送出去`,
   art: { kind: "base", id: base.id },
 }));
 
@@ -118,7 +118,7 @@ export function stickerById(id: string): DinoSushiSticker | undefined {
 export type PlateFact = {
   sushi: { base: BaseId | null; toppings: readonly ToppingId[] };
   mood: Mood;
-  /** 點餐做對、多多吃下去時才有。看一看或自由做不會記客人。 */
+  /** 點餐做對、朋友吃下去時才有。看一看或自由做不會記客人。 */
   customerId?: CustomerId;
 };
 
@@ -141,7 +141,7 @@ export type StickerFacts = {
   perfectRound: boolean;
   freeDone: boolean;
   firstVisitToday: boolean;
-  /** 這一輪做對、多多吃下去的客人。同一位只算一次。 */
+  /** 這一輪做對、吃下去的客人。同一位只算一次。 */
   servedCustomers: readonly CustomerId[];
 };
 
@@ -196,6 +196,30 @@ export function factsFromRound(
   };
 }
 
+/**
+ * 2026-11-08 起托盤不放甜點，這幾張暫時拿不到：保底不送，免得送出孩子玩不到的東西。
+ * 已經拿到的照留在貼紙書；沒拿過的不放進貼紙書、不計入總數與全收集（bookStickers、isStickerBookComplete）。
+ * PR-C 換新貼紙時正式退役。
+ */
+export const UNAVAILABLE_STICKER_IDS: ReadonlySet<string> = new Set([
+  "topping-strawberry",
+  "topping-pudding",
+  "mood-sweet",
+  "mood-brush",
+]);
+
+/** 這位玩家的貼紙書：拿得到的全部，加上舊存檔已經拿到的下架貼紙（不收回），依原本的順序。 */
+export function bookStickers(owned: Iterable<string>): DinoSushiSticker[] {
+  const have = new Set(owned);
+  return DINO_SUSHI_STICKERS.filter((sticker) => !UNAVAILABLE_STICKER_IDS.has(sticker.id) || have.has(sticker.id));
+}
+
+/** 拿得到的都收齊就算全收集；下架的那幾張不擋。 */
+export function isStickerBookComplete(owned: Iterable<string>): boolean {
+  const have = new Set(owned);
+  return DINO_SUSHI_STICKERS.every((sticker) => UNAVAILABLE_STICKER_IDS.has(sticker.id) || have.has(sticker.id));
+}
+
 export type CollectResult = {
   /** 這次新拿到的，依貼紙書順序。 */
   unlocked: DinoSushiStickerId[];
@@ -239,8 +263,10 @@ export function collectStickers(
   if (unlocked.length > 0 || !options?.finishedRound || earnedEarlier > 0) {
     return { unlocked, gifted: null };
   }
-  // 成就類只能自己達成，不當保底送。
-  const gift = DINO_SUSHI_STICKERS.find((sticker) => sticker.group !== "surprise" && !have.has(sticker.id));
+  // 成就類只能自己達成，不當保底送；暫時拿不到的（甜點、刷牙）也不送。
+  const gift = DINO_SUSHI_STICKERS.find(
+    (sticker) => sticker.group !== "surprise" && !have.has(sticker.id) && !UNAVAILABLE_STICKER_IDS.has(sticker.id),
+  );
   if (!gift || !isDinoSushiStickerId(gift.id)) return { unlocked, gifted: null };
   return { unlocked: [gift.id], gifted: gift.id };
 }

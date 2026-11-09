@@ -1,5 +1,5 @@
 /**
- * 《多多壽司屋》來店的朋友。只點餐，不吃；壽司仍是多多吃、多多做反應。
+ * 《多多壽司屋》來店的朋友。點餐後坐在櫃台，壽司由輸送帶送過去、朋友自己吃（2026-11-08 起）；自由做才是多多吃。
  * 局內排隊、座位、點餐泡泡用全身黏土貼紙（customers/<id>.webp）：
  * 核准草稿只去背、縮放、必要時鏡像，不重畫。見 scripts/build-dino-sushi-customer-stickers.ts。
  * 標題頁、貼紙書、謝謝膠囊仍用定裝照圓頭像，不改那些舊圖。
@@ -23,7 +23,7 @@ export type Customer = {
   sticker: string;
   /** 進店第一句，後面再接想吃的壽司。 */
   greeting: string;
-  /** 這單做對、多多吃下去時，朋友在旁邊說的一句。朋友自己不吃。 */
+  /** 這單做對、朋友咬下去那一拍說的一句。 */
   thanks: string;
   favorites: readonly ToppingId[];
 };

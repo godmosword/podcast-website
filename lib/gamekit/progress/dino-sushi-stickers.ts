@@ -14,8 +14,8 @@ import {
   saveGameProfileToStore,
 } from "@/lib/progress-store";
 import {
-  DINO_SUSHI_STICKER_TOTAL,
   isDinoSushiStickerId,
+  isStickerBookComplete,
   type DinoSushiStickerId,
 } from "@/lib/games/dino-sushi/stickers";
 
@@ -68,7 +68,7 @@ export function loadDinoSushiStickers(): DinoSushiStickerState {
 }
 
 function awardBookIfComplete(unlocked: readonly string[]): void {
-  if (unlocked.length < DINO_SUSHI_STICKER_TOTAL) return;
+  if (!isStickerBookComplete(unlocked)) return;
   const profile = loadGameProfileFromStore();
   if (profile.stickers.includes(DINO_SUSHI_BOOK_STICKER)) return;
   saveGameProfileToStore({

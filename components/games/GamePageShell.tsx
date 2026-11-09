@@ -36,7 +36,7 @@ const CONTROL_ICONS: Record<string, ReactNode> = {
     </>
   ),
   點飯和料做壽司: <IconTap size={22} />,
-  "按「給多多吃」送出": <IconSushi size={22} />,
+  做好了送給朋友: <IconSushi size={22} />,
   "左邊推，車會走": (
     <>
       <IconChevronUp size={22} />

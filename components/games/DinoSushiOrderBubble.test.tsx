@@ -10,12 +10,13 @@ const order = { base: "nigiri" as const, toppings: ["shrimp" as const], customer
 afterEach(cleanup);
 
 describe("點餐泡泡上的客人", () => {
-  it("顯示名字、全身貼紙，並標出最愛的料", () => {
+  it("顯示名字，不放頭像（客人坐在櫃台），並標出最愛的料", () => {
     render(<DinoSushiOrderBubble order={order} sushi={EMPTY_SUSHI} flash={null} index={0} total={5} />);
     const bubble = screen.getByRole("img", { name: /第 1 單/ });
     expect(bubble.getAttribute("data-customer")).toBe("xiaohong");
     expect(bubble.getAttribute("aria-label")).toContain("小紅想吃：握壽司、蝦");
-    expect(bubble.querySelector("img")?.getAttribute("src")).toBe(customerById("xiaohong").sticker);
+    const sticker = customerById("xiaohong").sticker;
+    expect([...bubble.querySelectorAll("img")].some((img) => img.getAttribute("src") === sticker)).toBe(false);
     expect(bubble.textContent).toContain("小紅想吃");
     expect(bubble.querySelector("[data-favorite='true']")).not.toBeNull();
     expect(bubble.querySelector("[data-ready='true']")).toBeNull();

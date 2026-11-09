@@ -35,6 +35,9 @@ describe("門口排隊", () => {
           <DinoSushiCustomerQueue seats={seats} index={index} />
           <DinoSushiCustomerSeat
             order={{ base: "nigiri", toppings: ["shrimp", "cucumber"], customerId: seats[index]! }}
+            phase="idle"
+            mood={null}
+            reducedMotion={false}
           />
         </>,
       );
@@ -57,20 +60,44 @@ describe("門口排隊", () => {
 });
 
 describe("客人座位", () => {
-  it("吃的時候留著全身貼紙和愛心，有最愛的料再加星星，不能點", () => {
-    render(
-      <DinoSushiCustomerSeat order={{ base: "nigiri", toppings: ["shrimp", "cucumber"], customerId: "xiaohong" }} />,
-    );
+  const favoriteOrder = { base: "nigiri", toppings: ["shrimp", "cucumber"], customerId: "xiaohong" } as const;
+
+  it("整單坐在櫃台：全身貼紙、不能點；還沒吃到時沒有愛心", () => {
+    render(<DinoSushiCustomerSeat order={favoriteOrder} phase="idle" mood={null} reducedMotion={false} />);
     const seat = document.querySelector("[data-customer-seat]");
     expect(seat?.getAttribute("aria-hidden")).toBe("true");
     expect(seat?.getAttribute("data-customer")).toBe("xiaohong");
     expect(seat?.querySelector("img")?.getAttribute("src")).toBe(customerById("xiaohong").sticker);
-    expect(seat?.querySelectorAll("svg")).toHaveLength(2);
+    expect(seat?.querySelectorAll("svg")).toHaveLength(0);
     expect(seat?.querySelector("button")).toBeNull();
   });
 
+  it("吃到的那一拍冒愛心，有最愛的料再加星星", () => {
+    render(<DinoSushiCustomerSeat order={favoriteOrder} phase="react" mood="love" reducedMotion={false} />);
+    expect(document.querySelector("[data-customer-seat]")?.querySelectorAll("svg")).toHaveLength(3);
+  });
+
   it("這單沒有最愛的料時只有愛心", () => {
-    render(<DinoSushiCustomerSeat order={{ base: "nigiri", toppings: ["tuna"], customerId: "xiaohong" }} />);
-    expect(document.querySelector("[data-customer-seat]")?.querySelectorAll("svg")).toHaveLength(1);
+    render(
+      <DinoSushiCustomerSeat
+        order={{ base: "nigiri", toppings: ["tuna"], customerId: "xiaohong" }}
+        phase="react"
+        mood="yum"
+        reducedMotion={false}
+      />,
+    );
+    expect(document.querySelector("[data-customer-seat]")?.querySelectorAll("svg")).toHaveLength(2);
+  });
+
+  it("芥末：搖一搖、冒小火，愛心照樣冒", () => {
+    render(<DinoSushiCustomerSeat order={favoriteOrder} phase="react" mood="puff" reducedMotion={false} />);
+    const seat = document.querySelector("[data-customer-seat]");
+    expect(seat?.getAttribute("data-mood")).toBe("puff");
+    expect(seat?.querySelectorAll("svg").length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("沒吃（缺料只看泡泡）不冒愛心", () => {
+    render(<DinoSushiCustomerSeat order={favoriteOrder} phase="react" mood="look" reducedMotion={false} />);
+    expect(document.querySelector("[data-customer-seat]")?.querySelectorAll("svg")).toHaveLength(0);
   });
 });

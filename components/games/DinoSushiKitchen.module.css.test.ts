@@ -10,8 +10,13 @@ function readCss(name: string): string {
 const css = readCss("DinoSushiKitchen.module.css");
 
 const ANIMATED = [
-  '.servingSushi[data-phase="open"]',
+  '.servingSushi[data-phase="eat"]',
   ".plates[data-land]",
+  ".lanePlate",
+  ".laneSushi",
+  ".seat",
+  ".seatHeart",
+  '.duoArt[data-cheer="true"]',
 ];
 
 function block(start: string): string {
@@ -44,6 +49,13 @@ describe("DinoSushiKitchen.module.css 動畫", () => {
     expect(reducedBlock).toMatch(/\.evictFly\s*\{[^}]*animation-name:\s*evictFade/);
     expect(block('.kitchen[data-reduced="true"] .evictFly {')).toMatch(/animation-name:\s*evictFade/);
     expect(css).toContain('.kitchen[data-paused="true"] .evictFly');
+  });
+
+  it("減少動態時客人那一口的淡出，暫停也停得住（簡寫不會把 play-state 蓋回 running）", () => {
+    expect(block('.kitchen[data-reduced="true"] .laneSushi[data-phase="eat"] {')).toMatch(/animation:\s*laneFade/);
+    expect(block('.kitchen[data-reduced="true"][data-paused="true"] .laneSushi[data-phase="eat"] {')).toMatch(
+      /animation-play-state:\s*paused/,
+    );
   });
 
   it("料換位置時滑過去；減少動態與 data-reduced 不滑", () => {

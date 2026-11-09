@@ -6,8 +6,7 @@ import { ToppingArt, BaseArt, baseSrc, toppingSrc } from "@/lib/games/dino-sushi
 import { customerById } from "@/lib/games/dino-sushi/customers";
 import { DUODUO_TOOTHBRUSH_SRC, duoduoStickerSrc } from "@/lib/games/dino-sushi/duoduo-sticker";
 import {
-  DINO_SUSHI_STICKER_TOTAL,
-  DINO_SUSHI_STICKERS,
+  bookStickers,
   STICKER_GROUP_LABEL,
   STICKER_ROUND_PROMISE,
   stickerTapSpeech,
@@ -146,6 +145,8 @@ export function DinoSushiStickerBook({ unlocked, seen, reducedMotion, onClose, o
   const bookRef = useRef<HTMLDivElement>(null);
   const owned = new Set(unlocked);
   const known = new Set(seen);
+  /* 下架的甜點貼紙：拿過的照留，沒拿過的不出現（拿不到就不放剪影） */
+  const book = bookStickers(owned);
   useFocusTrap(true, bookRef);
   const flash = useNewStickerFlash(bookRef, reducedMotion);
 
@@ -176,12 +177,12 @@ export function DinoSushiStickerBook({ unlocked, seen, reducedMotion, onClose, o
             貼紙書
           </h2>
           <p className={styles.count}>
-            {owned.size}/{DINO_SUSHI_STICKER_TOTAL}
+            {owned.size}/{book.length}
           </p>
         </div>
       </div>
       {GROUPS.map((group) => {
-        const stickers = DINO_SUSHI_STICKERS.filter((sticker) => sticker.group === group);
+        const stickers = book.filter((sticker) => sticker.group === group);
         const newCount = stickers.filter((sticker) => owned.has(sticker.id) && !known.has(sticker.id)).length;
         return (
           <section key={group} className={styles.section} aria-label={STICKER_GROUP_LABEL[group]}>

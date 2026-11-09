@@ -39,7 +39,7 @@ async function serveOrder(page: Page, n: number) {
   const [base, ...toppings] = label!.split("想吃：")[1]!.split("、");
   await page.getByRole("button", { name: `選${base}` }).click();
   for (const topping of toppings) await page.getByRole("button", { name: `加${topping}` }).click();
-  await page.getByRole("button", { name: "給多多吃" }).click();
+  await page.getByRole("button", { name: /^(送給.+|給多多吃)$/ }).click();
   await expect(
     page.getByRole("img", { name: `吃完 ${n} 盤` }).or(page.getByTestId("dino-sushi-result")).first(),
   ).toBeVisible();
@@ -113,7 +113,7 @@ test("自由做第一盤就存不進去：吃飽時結算照常，好了之後�
   await setStorageFull(page, true);
   await page.getByRole("button", { name: "選握壽司" }).click();
   await page.getByRole("button", { name: /^加/ }).first().click();
-  await page.getByRole("button", { name: "給多多吃" }).click();
+  await page.getByRole("button", { name: /^(送給.+|給多多吃)$/ }).click();
   await expect(page.getByRole("img", { name: "吃完 1 盤" })).toBeVisible();
   await page.getByRole("button", { name: "多多吃飽了" }).click();
   const result = page.getByTestId("dino-sushi-result");

@@ -95,7 +95,10 @@
   --queue-row: calc(var(--queue-now) * var(--queue-show));
   --queue-clear: calc(var(--queue-top) + var(--queue-row) + 18px);
   --duo-cap: 116px;
-  --duo-max-w: calc((100cqw - var(--duo-left) - clamp(54px, 18cqw, 88px) - 36px) / 1.68);
+  /* 客人坐櫃台、跟多多同一條輪底線，寬約多多的八成（2026-11-08：以前只有六成四，看起來像小一號） */
+  --seat-ratio: 0.8;
+  --seat-w: calc(var(--duo-w) * var(--seat-ratio));
+  --duo-max-w: calc((100cqw - var(--duo-left) - clamp(54px, 18cqw, 88px) - 36px) / (1.04 + var(--seat-ratio)));
   --duo-w: min(var(--duo-max-w), calc(100cqh - var(--counter-h) - var(--queue-clear)));
   --lantern-display: none;
   --serve-left: calc(var(--duo-left) + var(--duo-w) * 0.22);
@@ -172,7 +175,7 @@
   width: 42%;
 }
 
-.servingSushi[data-phase="open"] {
+.servingSushi[data-phase="eat"] {
   animation: sushiBite 220ms cubic-bezier(0.5, 0, 0.75, 0) both;
 }
 
@@ -194,7 +197,7 @@
   }
 }
 
-.servingPlate[data-phase="slide"] {
+.servingPlate[data-phase="ride"] {
   animation: sushiSlide 450ms cubic-bezier(0.3, 0.7, 0.4, 1) both;
 }
 
@@ -338,6 +341,7 @@
 @container duo-stage (max-height: 240px) and (min-width: 280px) {
   .duoArea[data-mode="order"] > * {
     --duo-w: min(34cqw, var(--duo-cap), calc(100cqh - var(--counter-h) - 8px));
+    --seat-w: calc(var(--duo-w) * var(--seat-ratio));
     --serve-left: calc(var(--duo-left) + var(--duo-w) * 0.22);
     --queue-now: 50px;
     --queue-wait: 36px;
@@ -352,7 +356,7 @@
 
   /* 客人跟著多多變大。字卡在客人上層，改短句才不會蓋住它；謝謝只留頭像。 */
   .duoArea[data-mode="order"] .seat {
-    max-width: max(48px, calc(var(--duo-w) * 0.64));
+    max-width: max(48px, var(--seat-w));
   }
 
   .duoArea[data-mode="order"] .lineFull {
@@ -397,10 +401,160 @@
   right: calc(14px + clamp(54px, 18cqw, 88px) + 8px);
   bottom: calc(var(--counter-h) - 2px);
   width: auto;
-  max-width: calc(var(--duo-w) * 0.64);
+  max-width: var(--seat-w, calc(var(--duo-w) * 0.64));
   margin-left: 0;
   margin-right: auto;
   pointer-events: none;
+  /* 下一位從右邊滑進座位 */
+  animation: seatIn 300ms cubic-bezier(0.3, 0.8, 0.4, 1) both;
+}
+
+@keyframes seatIn {
+  from {
+    opacity: 0;
+    transform: translateX(40%);
+  }
+}
+
+/* 客人咬一口：壓扁一下再彈回 */
+.seat[data-phase="eat"] .seatFace {
+  transform-origin: 50% 100%;
+  animation: seatBite 300ms ease-in-out;
+}
+
+@keyframes seatBite {
+  45% {
+    transform: scale(1.06, 0.9);
+  }
+}
+
+/* 芥末：先搖一搖、頭上冒一小團火，接著愛心照樣冒（客人覺得過癮） */
+.seat[data-mood="puff"] .seatFace {
+  animation: seatShake 320ms ease-in-out;
+}
+
+@keyframes seatShake {
+  25% {
+    transform: translateX(-4%) rotate(-3deg);
+  }
+  75% {
+    transform: translateX(4%) rotate(3deg);
+  }
+}
+
+.seatPuff {
+  position: absolute;
+  top: -14%;
+  left: 38%;
+  width: 26%;
+  aspect-ratio: 1;
+  border-radius: 50% 50% 46% 46%;
+  background: radial-gradient(circle at 50% 70%, #ffd34d 0 28%, #ff8a3d 30% 62%, transparent 64%);
+  pointer-events: none;
+  animation: seatPuff 520ms ease-out both;
+}
+
+@keyframes seatPuff {
+  from {
+    opacity: 0;
+    transform: translateY(20%) scale(0.5);
+  }
+  40% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-40%) scale(1.1);
+  }
+}
+
+/*
+ * 送給客人的那一盤（DinoSushiServeLane）：在多多面前的帶子起點冒出來，沿帶子送到客人座位正下方。
+ * --lane-dx 用座位與多多的同一組變數算。交接 120ms、送過去 600ms；減少動態直接在座位、不送。
+ */
+.lanePlate {
+  --lane-from: calc(var(--duo-left) + var(--duo-w) * 0.62 - var(--serve-w) / 2);
+  --lane-dx: calc(var(--duo-left) + var(--duo-w) + 6px + var(--seat-w, 48px) / 2 - var(--serve-w) / 2 - var(--lane-from));
+  position: absolute;
+  z-index: 4;
+  left: var(--lane-from);
+  bottom: calc(var(--counter-h) * 0.26);
+  display: grid;
+  width: var(--serve-w);
+  transform: translateX(var(--lane-dx));
+  pointer-events: none;
+}
+
+.lanePlate > img,
+.laneSushi {
+  grid-area: 1 / 1;
+  width: 100%;
+  height: auto;
+}
+
+.laneSushi {
+  z-index: 1;
+  display: block;
+  transform: translateY(-36%);
+}
+
+.laneSushi > [data-sushi] {
+  display: block;
+  width: 78%;
+  height: auto;
+  margin-inline: auto;
+}
+
+.laneSushi > [data-sushi][data-base="temaki"] {
+  width: 42%;
+}
+
+.lanePlate[data-phase="handoff"] {
+  transform: translateX(0);
+  animation: lanePop 120ms ease-out both;
+}
+
+.lanePlate[data-phase="ride"] {
+  animation: laneRide 600ms cubic-bezier(0.45, 0, 0.35, 1) both;
+}
+
+@keyframes lanePop {
+  from {
+    opacity: 0;
+    transform: translateX(0) scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes laneRide {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(var(--lane-dx));
+  }
+}
+
+/* 客人咬下去：這一口往上飛向客人、變小淡掉（座位寬的約四成五高處是嘴） */
+.laneSushi[data-phase="eat"] {
+  animation: laneBite 300ms cubic-bezier(0.5, 0, 0.75, 0) both;
+}
+
+@keyframes laneBite {
+  from {
+    transform: translateY(-36%);
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  to {
+    transform: translateY(calc(-36% - var(--seat-w, 48px) * 0.45)) scale(0.3);
+    opacity: 0;
+  }
 }
 
 .seatFace {
@@ -440,34 +594,69 @@
   pointer-events: none;
 }
 
+/*
+ * 朋友吃到那一拍：車頂兩側冒兩顆愛心往上飄，最愛再加星星。比多多的反應大——最開心的要是朋友（設計審 MUST-1）。
+ * 謝謝膠囊就在客人正上方，愛心放兩側、座位疊到膠囊上面，才不會被蓋住。用 margin 置中，transform 留給動畫。
+ */
+.seat[data-mood] {
+  z-index: 5;
+}
+
 .seatHeart {
   position: absolute;
-  top: -8px;
-  right: -8px;
+  top: -4%;
+  left: 12%;
+  width: 30px;
+  height: 30px;
+  margin-left: -15px;
+  transform-origin: 50% 80%;
+  animation: seatHeart 520ms ease-out both;
+  pointer-events: none;
+}
+
+.seatHeart[data-n="2"] {
+  top: 10%;
+  left: 92%;
   width: 20px;
   height: 20px;
-  transform-origin: 50% 80%;
-  animation: seatHeart 360ms ease-out 200ms both;
-  pointer-events: none;
+  margin-left: -10px;
+  animation-delay: 120ms;
 }
 
 .seatStar {
   position: absolute;
-  top: -6px;
-  left: -8px;
-  width: 16px;
-  height: 16px;
-  animation: seatStar 360ms ease-out 280ms both;
+  top: 16%;
+  left: 2%;
+  width: 22px;
+  height: 22px;
+  margin-left: -11px;
+  animation: seatStar 360ms ease-out 200ms both;
   pointer-events: none;
 }
 
 @keyframes seatHeart {
-  0%,
-  100% {
-    transform: scale(1);
+  0% {
+    transform: translateY(10px) scale(0.5);
+    opacity: 0;
   }
-  50% {
-    transform: scale(1.28);
+  45% {
+    transform: translateY(-4px) scale(1.18);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-8px) scale(1);
+    opacity: 1;
+  }
+}
+
+/* 點餐時朋友吃到那一拍，多多（店長）笑一下、小跳一次 */
+.duoArt[data-cheer="true"] {
+  animation: duoCheer 260ms ease-out;
+}
+
+@keyframes duoCheer {
+  45% {
+    transform: translateY(-6px);
   }
 }
 
@@ -574,7 +763,7 @@
   stroke-linejoin: round;
 }
 
-/* 客人全身貼紙靠右，避開左上角的小喇叭。貼紙不是另一個按鈕，整顆泡泡仍是再聽一次。 */
+/* 「誰想吃」靠右，避開左上角的小喇叭。整顆泡泡仍是再聽一次。 */
 .guest {
   display: flex;
   align-items: center;
@@ -593,36 +782,9 @@
   white-space: nowrap;
 }
 
-.guestFaceWrap {
-  position: relative;
-  flex: none;
-  /* 跟排隊同一種裁法：寬 56，只露出畫布底下 88%，車身才看得清 */
-  width: 56px;
-  aspect-ratio: 1 / 0.88;
-}
-
-.guestSticker {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.guestFace {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  display: block;
-  width: 100%;
-  height: auto;
-  background: transparent;
-  pointer-events: none;
-}
-
+/* 料都放齊了：名字旁冒一顆愛心（頭像拿掉後改放這裡） */
 .guestHeart {
-  position: absolute;
-  right: -4px;
-  bottom: -3px;
+  flex: none;
   width: 18px;
   height: 18px;
   pointer-events: none;
@@ -682,9 +844,6 @@
     --cell: 34px;
   }
 
-  .guestFaceWrap {
-    width: 40px;
-  }
 
   .guestName {
     font-size: var(--fs-meta);
@@ -734,9 +893,6 @@
     border: 0;
   }
 
-  .guestFaceWrap {
-    width: 40px;
-  }
 
   .guestHeart,
   .favStar {
@@ -766,14 +922,22 @@
   }
 
   .seat {
+    --seat-w: 48px;
     max-width: 48px;
     bottom: calc(var(--counter-h) - 2px);
   }
 
-  .seatHeart,
+  .seatHeart {
+    width: 22px;
+    height: 22px;
+    margin-left: -11px;
+  }
+
+  .seatHeart[data-n="2"],
   .seatStar {
-    width: 14px;
-    height: 14px;
+    width: 16px;
+    height: 16px;
+    margin-left: -8px;
   }
 }
 
@@ -805,6 +969,7 @@
   /* 164px 寬：多多、客人、小疊盤並排。客人約 46px，大約是縮小後多多的六成高。
      盤寬寫在 .plates 定義後面，才不會被預設的 54px 蓋掉。 */
   .seat {
+    --seat-w: 46px;
     left: calc(var(--duo-left) + var(--duo-w) + 2px);
     right: auto;
     width: 46px;
@@ -1879,9 +2044,36 @@
     0 4px 0 #2a180c;
 }
 
+/* 送給誰就放誰：盤子後面接客人的小頭像（看不懂字的孩子靠圖） */
+.serveTo {
+  position: absolute;
+  right: -16px;
+  bottom: -6px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #fffdf8;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.7);
+  overflow: hidden;
+}
+
+.serveTo > img {
+  width: 92%;
+  height: 92%;
+  object-fit: contain;
+}
+
 .serveArt {
+  position: relative;
   width: min(78%, 86px);
   aspect-ratio: 695 / 403;
+}
+
+/* 有客人頭像時，盤子右邊多留一點，頭像不壓到「送給…」 */
+.serveArt:has(.serveTo) {
+  margin-right: 14px;
 }
 
 .serveArt > img {
@@ -2202,6 +2394,79 @@
 }
 
 /*
+ * 矮的直向手機（Safari 一般高度 ≤780，含 320×568、393×659、430×739）：
+ * 砧板收成兩列（2026-11-08）：上列「備料盤｜三個料位」並排，下列「送給…」。
+ * 砧板從約 250px 收到約 150px，省下的高度由店面舞台的 1fr 接手。高的手機（390×844）不收，舞台已經夠高。
+ */
+@media (orientation: portrait) and (max-width: 559px) and (max-height: 780px) {
+  .boardMain {
+    grid-template-columns: auto auto;
+    grid-template-rows: auto;
+    justify-content: center;
+    align-items: center;
+    column-gap: 8px;
+  }
+
+  .prep {
+    width: 96px;
+  }
+
+  .slots {
+    width: auto;
+  }
+
+  .serveButton {
+    min-height: 56px;
+    padding-block: 4px;
+  }
+
+  .serveArt {
+    width: 56px;
+  }
+
+  /*
+   * 選飯的皿長到「送給…」上緣前 8px（下面保留 56px＝鈕高，再加 picker 的 8px 間距）。
+   * contain: size：皿不撐高砧板，砧板高度只由加料層決定，選飯前後一樣高、托盤不跳。
+   */
+  .basePicker {
+    contain: size;
+    grid-template-rows: minmax(0, 1fr) 56px;
+  }
+
+  .baseButton {
+    grid-template-rows: minmax(0, 1fr) auto;
+    min-height: 0;
+    padding-block: 4px;
+  }
+
+  .baseArt {
+    width: auto;
+    max-width: 100%;
+    height: 100%;
+    min-height: 0;
+  }
+
+  /* 一兩張皿時皿很寬：飯圖和字並排，圖可以用滿皿高 */
+  .basePicker:is([data-bases="1"], [data-bases="2"]) .baseButton {
+    grid-template-columns: auto auto;
+    grid-template-rows: minmax(0, 1fr);
+    justify-content: center;
+    column-gap: 6px;
+  }
+}
+
+/* 320 寬：備料盤再收一點，三個料位才排得下 */
+@media (max-width: 340px) and (orientation: portrait) {
+  .prep {
+    width: 68px;
+  }
+
+  .boardMain {
+    column-gap: 6px;
+  }
+}
+
+/*
  * 矮的大手機（430 寬、高 ≤840）：
  * - 托盤圖跟著較寬的格子長高，鈕會變 69px；圖高收到 40px，鈕回到 64px，兩列省 10px。
  * - 舞台下限跟著螢幕高度走（152–192px），廚房底永遠離螢幕底約 5px：430×739 舞台約 192px，
@@ -2336,9 +2601,6 @@
     --cell: clamp(40px, 11cqw, 48px);
   }
 
-  .guestFaceWrap {
-    width: 40px;
-  }
 
   .guestName {
     font-size: 0.72rem;
@@ -2394,7 +2656,7 @@
   /* 點餐時的多多寬度在 .duoArea[data-mode="order"]，這裡不蓋掉，櫃台旁才留得下客人。
      七成寬會碰到疊盤左下的數字，桌機收到約六成二，高度仍超過多多的一半。 */
   .duoArea[data-mode="order"] .seat {
-    max-width: calc(var(--duo-w) * 0.62);
+    max-width: var(--seat-w);
   }
 
   .trayButton {
@@ -2435,9 +2697,6 @@
     --cell: clamp(44px, 13cqw, 52px);
   }
 
-  .guestFaceWrap {
-    width: 56px;
-  }
 
   .guestName {
     font-size: var(--fs-h4);
@@ -2478,9 +2737,106 @@
   }
 }
 
+/*
+ * 寬舞台（桌面上下版面，約 1000×340）：吧台橫切面。
+ * 多多與客人在左、排隊的朋友站到右邊門口的同一條地面線（遠一點、小一號），多多不用再讓出頭上那條排隊帶；
+ * 泡泡與謝謝放在客人正上方、尾巴朝下指著客人：不能浮在排隊第一位頭上（設計審 MUST-2，孩子會以為是那一位想吃）。
+ */
+@container duo-stage (min-width: 640px) {
+  .duoArea[data-mode="order"] > * {
+    --duo-w: min(var(--duo-max-w), calc(100cqh - var(--counter-h) - var(--awning-h) - 24px));
+    /* 子層重算：舞台本身的 --seat-w 是用舊的 --duo-w 算的 */
+    --seat-w: calc(var(--duo-w) * var(--seat-ratio));
+    --queue-now: calc(var(--duo-w) * 0.5);
+    --queue-wait: calc(var(--duo-w) * 0.42);
+  }
+
+  .duoArea[data-mode="order"] .queue {
+    top: auto;
+    bottom: calc(var(--counter-h) - 2px);
+    left: auto;
+    right: calc(14px + clamp(54px, 18cqw, 88px) + 24px);
+    gap: 10px;
+  }
+
+  .duoArea[data-mode="order"] .talk {
+    top: calc(var(--awning-h) + 6px);
+    left: calc(var(--duo-left) + var(--duo-w) + 6px + var(--seat-w) / 2);
+    right: auto;
+    align-items: center;
+    max-width: min(34cqw, 380px);
+    transform: translateX(-50%);
+  }
+
+  /* 尾巴尖（路徑 x=3）落在泡泡正中，也就是座位正上方 */
+  .duoArea[data-mode="order"] .bubbleTail {
+    left: calc(50% - 3px);
+  }
+}
+
+/*
+ * 桌面（2026-11-08）：店面場景佔整個上排，砧板（左下）＋托盤 4×2（右下）。
+ * 吧台是橫的：寬舞台才放得下長帶子，多多、客人、排隊同一個比例。筆電短視窗（高 < 720）仍走三欄。
+ */
+@media (min-width: 900px) and (min-height: 720px) {
+  .kitchen {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    grid-template-rows: clamp(300px, 42svh, 420px) auto;
+    grid-template-areas:
+      "duo duo"
+      "board tray";
+    min-height: 0;
+  }
+
+  .board {
+    padding: 10px 14px;
+  }
+
+  /* 砧板一列：備料盤｜三個料位，下面是送出 */
+  .boardMain {
+    grid-template-columns: auto auto;
+    grid-template-rows: auto;
+    align-items: center;
+    column-gap: 16px;
+  }
+
+  .prep {
+    width: 180px;
+  }
+
+  .slots {
+    width: auto;
+  }
+
+  .serveButton {
+    min-height: 64px;
+  }
+
+  /* 皿停在「送給…」上緣前 8px（下面保留 64px＝鈕高）：選完飯立刻點送出，不會被連點防呆擋掉 */
+  .basePicker {
+    align-self: stretch;
+    contain: size;
+    grid-template-rows: minmax(0, 1fr) 64px;
+  }
+
+  .baseButton {
+    grid-row: 1;
+    min-height: 0;
+  }
+
+  .tray {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-content: center;
+  }
+
+  .trayButton {
+    min-height: 72px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .fullButton:not([data-waiting]),
-  .servingPlate[data-phase="slide"],
+  .servingPlate[data-phase="ride"],
   .boardMain[data-shake],
   .bubbleItem[data-flash="true"],
   .finger,
@@ -2492,9 +2848,21 @@
   .slot > img,
   .sushiButton > [data-sushi],
   .layerPop,
-  .servingSushi[data-phase="open"],
+  .servingSushi[data-phase="eat"],
   .plates[data-land] {
     animation: none;
+  }
+
+  /* 送餐與客人吃：不滑、不搖，一口只淡掉 */
+  .lanePlate,
+  .seat,
+  .seatFace,
+  .seatPuff {
+    animation: none;
+  }
+
+  .laneSushi[data-phase="eat"] {
+    animation: laneFade 300ms ease-out both;
   }
 
   .kitchen [data-hint="true"] {
@@ -2510,7 +2878,8 @@
   .thanksHeart,
   .thanksStar,
   .seatHeart,
-  .seatStar {
+  .seatStar,
+  .duoArt[data-cheer="true"] {
     animation: none;
   }
 
@@ -2575,7 +2944,7 @@
 .kitchen[data-reduced="true"] .slot > img,
 .kitchen[data-reduced="true"] .sushiButton > [data-sushi],
 .kitchen[data-reduced="true"] .layerPop,
-.kitchen[data-reduced="true"] .servingSushi[data-phase="open"],
+.kitchen[data-reduced="true"] .servingSushi[data-phase="eat"],
 .kitchen[data-reduced="true"] .plates[data-land] {
   animation: none;
 }
@@ -2591,15 +2960,47 @@
   animation-play-state: paused;
 }
 
-.kitchen[data-paused="true"] .servingSushi[data-phase="open"],
+.kitchen[data-paused="true"] .servingSushi[data-phase="eat"],
 .kitchen[data-paused="true"] .plates[data-land],
 .kitchen[data-paused="true"] .evictFly,
 .kitchen[data-paused="true"] .thanks,
 .kitchen[data-paused="true"] .thanksHeart,
 .kitchen[data-paused="true"] .thanksStar,
 .kitchen[data-paused="true"] .seatHeart,
-.kitchen[data-paused="true"] .seatStar {
+.kitchen[data-paused="true"] .seatStar,
+.kitchen[data-paused="true"] .duoArt[data-cheer="true"] {
   animation-play-state: paused;
+}
+
+/* 送餐與客人吃：暫停時停在原地；減少動態時不滑、不搖，一口只淡掉 */
+.kitchen[data-paused="true"] .lanePlate,
+.kitchen[data-paused="true"] .laneSushi,
+.kitchen[data-paused="true"] .seat,
+.kitchen[data-paused="true"] .seatFace,
+.kitchen[data-paused="true"] .seatPuff {
+  animation-play-state: paused;
+}
+
+.kitchen[data-reduced="true"] .lanePlate,
+.kitchen[data-reduced="true"] .seat,
+.kitchen[data-reduced="true"] .seatFace,
+.kitchen[data-reduced="true"] .seatPuff {
+  animation: none;
+}
+
+.kitchen[data-reduced="true"] .laneSushi[data-phase="eat"] {
+  animation: laneFade 300ms ease-out both;
+}
+
+/* 上面的簡寫會把 play-state 設回 running，暫停時要再壓一次（特異度要高過它） */
+.kitchen[data-reduced="true"][data-paused="true"] .laneSushi[data-phase="eat"] {
+  animation-play-state: paused;
+}
+
+@keyframes laneFade {
+  to {
+    opacity: 0;
+  }
 }
 
 .kitchen[data-reduced="true"] .thanks,
@@ -2607,7 +3008,8 @@
 .kitchen[data-reduced="true"] .thanksHeart,
 .kitchen[data-reduced="true"] .thanksStar,
 .kitchen[data-reduced="true"] .seatHeart,
-.kitchen[data-reduced="true"] .seatStar {
+.kitchen[data-reduced="true"] .seatStar,
+.kitchen[data-reduced="true"] .duoArt[data-cheer="true"] {
   animation: none;
 }
 
