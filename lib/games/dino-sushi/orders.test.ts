@@ -25,14 +25,14 @@ function make(base: Sushi["base"], toppings: Sushi["toppings"]): Sushi {
 }
 
 describe("托盤", () => {
-  it("每輪 8 格：6 種家常料＋1 種甜點＋芥末，不重複", () => {
+  it("每輪 8 格：7 種家常料＋芥末，不重複；不放甜點（2026-11-08）", () => {
     for (let seed = 1; seed <= 40; seed++) {
       const tray = buildTray(seed);
       expect(tray).toHaveLength(TRAY_SIZE);
       expect(new Set(tray).size).toBe(TRAY_SIZE);
       const kinds = tray.map((id) => toppingById(id).kind);
-      expect(kinds.filter((k) => k === "savory")).toHaveLength(6);
-      expect(kinds.filter((k) => k === "sweet")).toHaveLength(1);
+      expect(kinds.filter((k) => k === "savory")).toHaveLength(7);
+      expect(kinds.filter((k) => k === "sweet")).toHaveLength(0);
       expect(kinds.filter((k) => k === "wasabi")).toHaveLength(1);
     }
   });
@@ -214,9 +214,10 @@ describe("難度檔位的訂單", () => {
     return h.toString(16);
   }
 
-  it("一般檔（預設）跟加檔位之前一模一樣", () => {
-    expect(fingerprint()).toBe("9662f9d8");
-    expect(fingerprint("normal")).toBe("9662f9d8");
+  /* 指紋 2026-11-08 重錄：托盤拿掉甜點、家常料改 7 格，訂單取料池跟著變（飯型抽籤仍用舊的 6 格池，不變） */
+  it("一般檔（預設）跟指定 normal 一模一樣", () => {
+    expect(fingerprint()).toBe("71e800a1");
+    expect(fingerprint("normal")).toBe("71e800a1");
   });
 
   /* 三檔各 1000 個 seed（2026-10-17 另外掃過各 5000 個，相鄰重複 0 次） */

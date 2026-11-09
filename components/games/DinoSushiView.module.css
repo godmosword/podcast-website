@@ -997,6 +997,24 @@
   }
 }
 
+/*
+ * 375×553（Safari 扣掉工具列）：結算疊在廚房上、跟廚房一樣高。2026-11-08 矮手機砧板收兩列後廚房剛好一屏，
+ * 不再留下捲動，結算框跟著矮了約 20px；間距收緊，「放進貼紙書」才留在同一屏。
+ */
+@media (max-height: 600px) and (orientation: portrait) {
+  .resultOverlay .resultStation {
+    gap: 6px;
+  }
+
+  .resultOverlay .resultPlates {
+    margin-bottom: 4px;
+  }
+
+  .resultOverlay .resultBook {
+    margin-top: 0;
+  }
+}
+
 /* 有新貼紙時，直向依高度收：高 ≥800 店面收矮、新貼紙兩列；728–799 店面更矮、一列；641–727 店面收起。
    三段都收起彩紙（橫向已有先例），盤子列下緣間距 12→4。≤640 沿用上面的收法。 */
 @media (orientation: portrait) and (min-height: 641px) {

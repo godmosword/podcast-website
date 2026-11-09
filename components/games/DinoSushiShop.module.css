@@ -182,6 +182,13 @@
 }
 
 /* 盤列在右邊疊盤前淡出，像是繞到疊盤後面去 */
+/* 送給客人的那盤在帶上時，裝飾盤停住、淡下去，孩子只看自己做的那盤 */
+.counter[data-delivering="true"] .beltTrack {
+  animation-play-state: paused;
+  opacity: 0.3;
+  transition: opacity 200ms ease-out;
+}
+
 .beltLane {
   position: absolute;
   left: 0;

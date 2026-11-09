@@ -23,7 +23,7 @@ async function perfectRound(page: Page) {
     lengths.push(toppings.length);
     await page.getByRole("button", { name: `選${base}` }).click();
     for (const t of toppings) await page.getByRole("button", { name: `加${t}` }).click();
-    await page.getByRole("button", { name: "給多多吃" }).click();
+    await page.getByRole("button", { name: /^(送給.+|給多多吃)$/ }).click();
     await expect(
       page.getByRole("img", { name: `吃完 ${n} 盤` }).or(page.getByTestId("dino-sushi-result")).first(),
     ).toBeVisible();
@@ -133,7 +133,7 @@ for (const vp of [
       if (n < 5) {
         await page.getByRole("button", { name: `選${base}` }).click();
         for (const t of toppings) await page.getByRole("button", { name: `加${t}` }).click();
-        await page.getByRole("button", { name: "給多多吃" }).click();
+        await page.getByRole("button", { name: /^(送給.+|給多多吃)$/ }).click();
         await expect(page.getByRole("img", { name: `吃完 ${n} 盤` })).toBeVisible();
       }
     }

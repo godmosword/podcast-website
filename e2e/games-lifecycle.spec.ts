@@ -89,7 +89,7 @@ async function serveSushiOrder(page: Page, n: number, opts: { skipLast?: boolean
   await page.getByRole("button", { name: `選${base}` }).click();
   const put = opts.skipLast ? toppings.slice(0, -1) : toppings;
   for (const t of put) await page.getByRole("button", { name: `加${t}` }).click();
-  await page.getByRole("button", { name: "給多多吃" }).click();
+  await page.getByRole("button", { name: /^(送給.+|給多多吃)$/ }).click();
   return toppings;
 }
 
@@ -131,7 +131,7 @@ test.describe("遊戲完整 lifecycle", () => {
     await expect(page.getByRole("img", { name: /^第 1 單/ })).toBeVisible();
     await expect(page.getByRole("button", { name: /^換飯：/ })).toBeVisible();
     await page.getByRole("button", { name: `加${missing}` }).click();
-    await page.getByRole("button", { name: "給多多吃" }).click();
+    await page.getByRole("button", { name: /^(送給.+|給多多吃)$/ }).click();
     await expect(page.getByRole("img", { name: /^第 2 單/ })).toBeVisible();
   });
 
@@ -154,7 +154,7 @@ test.describe("遊戲完整 lifecycle", () => {
     await page.goto("/games/dino-sushi");
     await page.getByRole("button", { name: "自由做" }).click();
     await page.getByRole("button", { name: "選軍艦" }).click();
-    await page.getByRole("button", { name: "給多多吃" }).click();
+    await page.getByRole("button", { name: /^(送給.+|給多多吃)$/ }).click();
     await expect(page.getByRole("img", { name: "吃完 1 盤" })).toBeVisible();
     await page.getByRole("button", { name: "多多吃飽了" }).click();
     const result = page.getByTestId("dino-sushi-result");

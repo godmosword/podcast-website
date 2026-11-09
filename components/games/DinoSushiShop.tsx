@@ -52,11 +52,14 @@ export function ShopWall({ sky = "sunny", lantern = "red" }: Mood = {}) {
 export function ShopBelt({
   domeOpen = false,
   stickerId = null,
+  delivering = false,
 }: {
   /** 送完第 3 盤後，帶上第一個圓蓋掀開。 */
   domeOpen?: boolean;
   /** 已經拿到的貼紙；沒有就畫一顆星。不發新貼紙。 */
   stickerId?: string | null;
+  /** 正在把孩子做的那盤送給客人：裝飾盤停住淡出，孩子只看那一盤。 */
+  delivering?: boolean;
 } = {}) {
   const plates = [...BELT_PLATES, ...BELT_PLATES];
   const sticker = stickerId ? stickerById(stickerId) : undefined;
@@ -70,7 +73,7 @@ export function ShopBelt({
     wasOpen.current = domeOpen;
   }, [domeOpen]);
   return (
-    <div className={styles.counter} aria-hidden>
+    <div className={styles.counter} data-delivering={delivering ? "true" : undefined} aria-hidden>
       <span className={styles.belt} style={{ ["--belt-image" as string]: `url("${SHOP_SRC.belt}")` }} />
       <span className={styles.beltLane}>
         <span className={styles.beltTrack}>

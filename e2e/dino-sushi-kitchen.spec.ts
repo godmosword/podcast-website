@@ -20,7 +20,7 @@ async function serve(page: Page, n: number, opts: { skipLast?: boolean } = {}) {
   const { base, toppings } = await order(page, n);
   await page.getByRole("button", { name: `選${base}` }).click();
   for (const t of opts.skipLast ? toppings.slice(0, -1) : toppings) await page.getByRole("button", { name: `加${t}` }).click();
-  await page.getByRole("button", { name: "給多多吃" }).click();
+  await page.getByRole("button", { name: /^(送給.+|給多多吃)$/ }).click();
 }
 
 async function waitServed(page: Page, n: number) {
@@ -42,9 +42,11 @@ for (const vp of [
       ["選握壽司", "選軍艦", "選手捲"].map(async (name) => (await page.getByRole("button", { name }).boundingBox())!),
     );
     await page.getByRole("button", { name: "選握壽司" }).click();
-    const serveBtn = (await page.getByRole("button", { name: "給多多吃" }).boundingBox())!;
+    const serveBtn = (await page.getByRole("button", { name: /^(送給.+|給多多吃)$/ }).boundingBox())!;
+    // 2026-11-08 起矮手機（≤780 高）的砧板收成兩列、皿變矮，讓舞台變大
+    const minPlate = vp.height <= 780 ? 64 : 96;
     for (const p of plates) {
-      expect(p.height).toBeGreaterThanOrEqual(96);
+      expect(p.height).toBeGreaterThanOrEqual(minPlate);
       expect(p.height).toBeLessThanOrEqual(168.5);
       expect(serveBtn.y - (p.y + p.height), "皿下緣到給多多吃至少 8px").toBeGreaterThanOrEqual(7.5);
     }
@@ -59,7 +61,7 @@ test("自由做「多多吃飽了」是實心綠鈕，跟多多的字卡長得�
   await expect(full).toHaveCount(0);
   await page.getByRole("button", { name: "選握壽司" }).click();
   await page.getByRole("group", { name: "壽司料" }).getByRole("button").first().click();
-  await page.getByRole("button", { name: "給多多吃" }).click();
+  await page.getByRole("button", { name: /^(送給.+|給多多吃)$/ }).click();
   const caption = page.getByTestId("dino-sushi").locator("p[data-mood]");
   await expect(caption).toBeVisible();
   expect(await caption.evaluate((el) => getComputedStyle(el).backgroundColor)).not.toBe("rgb(63, 127, 42)");
@@ -116,7 +118,31 @@ test("砧板角標只在提示時出現：選錯飯有換飯、料位滿了還�
   await expect(board.getByRole("button", { name: `拿掉${extras[0]}` })).toHaveCount(0);
 });
 
-test("做對一單：字卡下面出現點餐朋友的謝謝；只送飯不出現", async ({ page }) => {
+test("送出鈕寫的是現在這一位客人；自由做寫給多多吃；托盤沒有草莓、布丁", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/games/dino-sushi");
+  await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
+  for (let n = 1; n <= 2; n++) {
+    const label = (await page.getByRole("img", { name: new RegExp(`^第 ${n} 單`) }).getAttribute("aria-label"))!;
+    const guest = label.match(/([^，、：。\s]+)想吃：/)![1]!;
+    const [base, ...toppings] = label.split("想吃：")[1]!.split("、");
+    await page.getByRole("button", { name: `選${base}` }).click();
+    for (const t of toppings) await page.getByRole("button", { name: `加${t}` }).click();
+    await expect(page.getByRole("button", { name: `送給${guest}` })).toBeVisible();
+    await expect(page.getByRole("button", { name: "給多多吃" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /^加(草莓|布丁)$/ })).toHaveCount(0);
+    await page.getByRole("button", { name: `送給${guest}` }).click();
+    await waitServed(page, n);
+  }
+  await page.goto("/games/dino-sushi");
+  await page.getByRole("button", { name: "自由做" }).click();
+  await page.getByRole("button", { name: "選握壽司" }).click();
+  await expect(page.getByRole("button", { name: "給多多吃" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /^送給/ })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /^加(草莓|布丁)$/ })).toHaveCount(0);
+});
+
+test("做對一單：客人咬下去那一拍出現謝謝、多多不出字卡；只送飯不出現", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/games/dino-sushi");
   await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
@@ -124,15 +150,11 @@ test("做對一單：字卡下面出現點餐朋友的謝謝；只送飯不出�
   const thanks = game.locator("p[data-customer]");
   await serve(page, 1);
   await expect(thanks).toBeVisible();
-  const [captionBox, thanksBox] = await Promise.all([
-    game.locator("p[data-mood]").boundingBox(),
-    thanks.boundingBox(),
-  ]);
-  expect(thanksBox!.y, "謝謝在多多字卡下面").toBeGreaterThan(captionBox!.y + captionBox!.height - 1);
+  await expect(game.locator("[data-customer-seat][data-mood]")).toBeVisible();
+  await expect(game.locator("p[data-mood]"), "客人吃的時候多多不出字卡").toHaveCount(0);
   await waitServed(page, 1);
-  // 下一單出來後再留一下（朗讀念完多多才念朋友），然後收起
-  await expect(thanks).toBeVisible();
-  await expect(thanks).toHaveCount(0, { timeout: 4000 });
+  // 下一位入座就收起，不蓋住下一位朋友（2026-11-08 起多多不念字卡，朋友的謝謝在咬下去那一拍就念）
+  await expect(thanks).toHaveCount(0);
   // 第 2 單只放飯：多多不吃，沒有謝謝
   await serve(page, 2, { skipLast: true });
   await expect(game.locator('p[data-mood="look"]')).toBeVisible();
@@ -244,7 +266,8 @@ async function layout(page: Page) {
     const now = document.querySelector("[data-customer-queue] li[data-state='next']");
     const bubble = document.querySelector("[role='img'][data-customer]");
     const badge = document.querySelector("[class*='replayBadge']");
-    const face = document.querySelector("[class*='guestFaceWrap']");
+    /* 2026-11-08 起泡泡裡沒有頭像，客人整單坐在櫃台：faceW 量座位上的客人 */
+    const face = document.querySelector("[data-customer-seat]");
     const seat = document.querySelector("[data-customer-seat]");
     const duo = document.querySelector("[data-face]");
     const plates = document.querySelector("[class*='plates']");
@@ -264,7 +287,7 @@ async function layout(page: Page) {
       const top = document.elementFromPoint(r.x + r.width / 2, r.y + Math.min(r.height / 2, 24));
       return top?.getAttribute("aria-label") || top?.tagName || "";
     };
-    const serve = [...document.querySelectorAll("button")].find((b) => (b.textContent || "").includes("給多多吃")) ?? null;
+    const serve = [...document.querySelectorAll("button")].find((b) => /送給|給多多吃/.test(b.textContent || "")) ?? null;
     const replay = document.querySelector("button[aria-label='再聽一次']");
     return {
       queueHidden: queue?.getAttribute("aria-hidden") ?? "",
@@ -327,7 +350,7 @@ for (const vp of [
     await expect(queue).toBeVisible();
     await expect(queue.locator("li")).toHaveCount(4);
     await page.evaluate(() => window.scrollTo(0, 0));
-    // 泡泡進場是 340ms 的 scale。量太早會把頭像量小，小喇叭也還在往上落到排隊旁邊。
+    // 泡泡進場是 340ms 的 scale、客人 300ms 滑進座位。量太早會量小，小喇叭也還在往上落到排隊旁邊。
     await expect.poll(async () => (await layout(page)).faceW, { timeout: 2000 }).toBeGreaterThanOrEqual(vp.face);
     await page.waitForFunction(() => {
       const el = document.querySelector("[class*='bubbleWrap']");
@@ -371,13 +394,13 @@ for (const vp of [
     expect(eating.items.map((item) => item.id)).not.toContain(eating.seatId);
     expect(eating.serveHit).not.toBe("");
     expect(eating.serveHit).not.toContain("排隊");
-    const serveBtn = page.getByRole("button", { name: "給多多吃" });
+    const serveBtn = page.getByRole("button", { name: /^(送給.+|給多多吃)$/ });
     const serveBox = (await serveBtn.boundingBox())!;
     const top = await page.evaluate(
       ({ x, y }) => document.elementFromPoint(x, y)?.closest("button")?.textContent ?? "",
       { x: serveBox.x + serveBox.width / 2, y: serveBox.y + 24 },
     );
-    expect(top).toContain("給多多吃");
+    expect(top).toMatch(/送給|給多多吃/);
 
     await page.getByRole("button", { name: "繼續遊戲" }).click();
     await waitServed(page, 1);
@@ -407,9 +430,12 @@ test("減少動態時，座位上的愛心不跳", async ({ page }) => {
   await page.goto("/games/dino-sushi");
   await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
   await serve(page, 1);
-  const heart = page.locator("[data-customer-seat] svg").first();
-  await expect(heart).toBeVisible();
-  await expect(heart).toHaveCSS("animation-name", "none");
+  // 減少動態時愛心只在 0.3–0.8 秒出現，分兩次查會撲空：出現的那一刻就一起讀動畫名稱
+  const name = await page.waitForFunction(() => {
+    const heart = document.querySelector("[data-customer-seat] svg");
+    return heart ? getComputedStyle(heart).animationName : null;
+  });
+  expect(await name.jsonValue()).toBe("none");
 });
 
 for (const vp of [
@@ -466,7 +492,7 @@ for (const { vp, reduced, scrolls } of [
       expect(await page.evaluate(() => window.scrollY)).toBe(0);
       return;
     }
-    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(40);
+    // 2026-11-08 起矮手機的砧板收成兩列，托盤可能本來就在畫面裡；捲不捲都行，停下來後要看得到。
     // 平滑捲動停下來再量：連續 300ms 位置不變
     await expect
       .poll(() =>
@@ -512,7 +538,8 @@ for (const vp of [
   { width: 414, height: 736, duo: 110 },
   { width: 430, height: 739, duo: 110 },
 ]) {
-  test(`${vp.width}×${vp.height}：瀏覽器裡的一般手機，點餐時多多至少 ${vp.duo}px，排隊站在它右邊`, async ({ page }) => {
+  /* 2026-11-08 起矮手機砧板收兩列、舞台變高：舞台 ≤240 時排隊站在多多右邊，更高時排隊回到上排。兩種都不能壓到多多。 */
+  test(`${vp.width}×${vp.height}：瀏覽器裡的一般手機，點餐時多多至少 ${vp.duo}px，排隊不壓多多`, async ({ page }) => {
     await page.setViewportSize(vp);
     await page.goto("/games/dino-sushi");
     await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
@@ -524,21 +551,26 @@ for (const vp of [
         .sort((a, b) => b.width - a.width)[0]!;
       const queue = document.querySelector("[data-customer-queue]")!.getBoundingClientRect();
       const frame = document.querySelector("[data-face]")!.getBoundingClientRect();
-      return { width: duo.width, frameRight: frame.right, queueLeft: queue.left };
+      return { width: duo.width, frameRight: frame.right, frameTop: frame.top, queueLeft: queue.left, queueBottom: queue.bottom };
     });
     expect(measured.width).toBeGreaterThanOrEqual(vp.duo);
-    expect(measured.queueLeft, "排隊在多多右邊").toBeGreaterThanOrEqual(measured.frameRight);
+    const clear = measured.queueLeft >= measured.frameRight - 0.5 || measured.queueBottom <= measured.frameTop + 0.5;
+    expect(clear, `排隊在多多右邊或上面：${JSON.stringify(measured)}`).toBe(true);
   });
 }
 
-/* 舞台 >240px 或左欄太窄（568×320、667×375）的版面不走矮舞台規則，多多大小不變。 */
+/*
+ * 舞台 >240px 或左欄太窄（568×320、667×375）的版面不走矮舞台規則，多多大小固定。
+ * 2026-11-08 重量：客人改成多多的八成寬（以前六成四），直向多多讓出一點（844×390 不變）；
+ * 桌面改上下版面、排隊站到門口，多多不用讓排隊帶，變大到 228。
+ */
 for (const vp of [
-  { width: 390, height: 844, duo: 137.6 },
-  { width: 414, height: 896, duo: 154.8 },
+  { width: 390, height: 844, duo: 130.9 },
+  { width: 414, height: 896, duo: 141.3 },
   { width: 844, height: 390, duo: 157.2 },
-  { width: 667, height: 375, duo: 99.8 },
+  { width: 667, height: 375, duo: 91.1 },
   { width: 568, height: 320, duo: 64 },
-  { width: 1280, height: 800, duo: 160.8 },
+  { width: 1280, height: 800, duo: 228 },
 ]) {
   test(`${vp.width}×${vp.height}：高舞台與窄左欄的多多大小不變`, async ({ page }) => {
     await page.setViewportSize(vp);
@@ -562,14 +594,15 @@ for (const vp of [
   { width: 375, height: 553 },
   { width: 320, height: 568 },
 ]) {
-  test(`${vp.width}×${vp.height}：多多吃的時候，字卡和謝謝都不蓋住客人（每一單）`, async ({ page }) => {
+  test(`${vp.width}×${vp.height}：客人吃的時候，謝謝不蓋住客人、多多不出字卡（每一單）`, async ({ page }) => {
     await page.setViewportSize(vp);
     await page.goto("/games/dino-sushi");
     await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
     for (let n = 1; n <= 4; n++) {
       await serve(page, n);
-      const caption = page.getByTestId("dino-sushi").locator("p[data-mood]");
-      await expect(caption).toBeVisible();
+      // 吃到的那一拍：客人座位標上表情
+      await expect(page.locator("[data-customer-seat][data-mood]")).toBeVisible();
+      await expect(page.getByTestId("dino-sushi").locator("p[data-mood]"), "客人吃的時候多多不出字卡").toHaveCount(0);
       await page.waitForTimeout(350);
       const boxes = await page.evaluate(() => {
         const box = (selector: string) => {
@@ -606,20 +639,26 @@ test("430×739：舞台 192 缺料時字卡還在，不蓋多多也不蓋疊盤"
   expect(overlapArea(boxes.caption as DOMRect, boxes.duo as DOMRect)).toBe(0);
 });
 
-test("393×659：舞台放不下謝謝的頭像就不出，不會被切掉、蓋住金盤；座位上還是那位朋友", async ({ page }) => {
+test("393×659：砧板收成兩列後舞台夠高，謝謝出得來、在舞台裡，座位上還是那位朋友", async ({ page }) => {
   await page.setViewportSize({ width: 393, height: 659 });
   await page.goto("/games/dino-sushi");
   await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
   await serve(page, 1);
-  await expect(page.getByTestId("dino-sushi").locator("p[data-mood]")).toBeVisible();
-  await expect(page.locator("[data-customer-seat]")).toBeVisible();
-  await expect(page.locator("p[data-customer]")).toBeHidden();
+  await expect(page.locator("[data-customer-seat][data-mood]")).toBeVisible();
+  const thanks = page.locator("p[data-customer]");
+  await expect(thanks).toBeVisible();
+  const inStage = await thanks.evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    const stage = el.closest("section")!.getBoundingClientRect();
+    return r.top >= stage.top - 1 && r.bottom <= stage.bottom + 1 && r.left >= stage.left - 1 && r.right <= stage.right + 1;
+  });
+  expect(inStage).toBe(true);
 });
 
 test.describe("短手機的捲動（真的用手指點，不靠 Playwright 自動捲動）", () => {
   test.use({ hasTouch: true });
 
-  async function fingerTap(page: Page, name: string) {
+  async function fingerTap(page: Page, name: string | RegExp) {
     const box = (await page.getByRole("button", { name }).boundingBox())!;
     await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
   }
@@ -640,12 +679,12 @@ test.describe("短手機的捲動（真的用手指點，不靠 Playwright 自�
     return page.evaluate(() => window.scrollY);
   }
 
-  function duoHeadVsHeader(page: Page) {
-    return page.evaluate(() => {
-      const frame = document.querySelector("[data-face]")!.getBoundingClientRect();
+  function headVsHeader(page: Page, selector = "[data-face]") {
+    return page.evaluate((sel) => {
+      const frame = document.querySelector(sel)!.getBoundingClientRect();
       const header = document.querySelector("header:has(#game-play-title)")!.getBoundingClientRect();
       return { head: frame.top + frame.height * 0.1, header: header.bottom };
-    });
+    }, selector);
   }
 
   for (const vp of [
@@ -653,7 +692,7 @@ test.describe("短手機的捲動（真的用手指點，不靠 Playwright 自�
     { width: 320, height: 568 },
     { width: 393, height: 659 },
   ]) {
-    test(`${vp.width}×${vp.height}：張嘴時多多的臉不被抬頭蓋住`, async ({ page }) => {
+    test(`${vp.width}×${vp.height}：客人咬下去時，客人的臉不被抬頭蓋住`, async ({ page }) => {
       await page.setViewportSize(vp);
       await page.goto("/games/dino-sushi");
       await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
@@ -662,10 +701,10 @@ test.describe("短手機的捲動（真的用手指點，不靠 Playwright 自�
       await page.waitForTimeout(500);
       await settledScroll(page);
       for (const t of toppings) await fingerTap(page, `加${t}`);
-      await fingerTap(page, "給多多吃");
-      await page.waitForFunction(() => document.querySelector("[class*='servingPlate'][data-phase='open']") !== null);
-      const open = await duoHeadVsHeader(page);
-      expect(open.head, `張嘴那一刻頭頂 ${open.head}、抬頭底 ${open.header}`).toBeGreaterThanOrEqual(open.header - 8);
+      await fingerTap(page, /^(送給.+|給多多吃)$/);
+      await page.waitForFunction(() => document.querySelector("[class*='lanePlate'][data-phase='eat']") !== null);
+      const open = await headVsHeader(page, "[data-customer-seat]");
+      expect(open.head, `咬下去那一刻客人頭頂 ${open.head}、抬頭底 ${open.header}`).toBeGreaterThanOrEqual(open.header - 8);
     });
 
     test(`${vp.width}×${vp.height}：缺料多多不吃，畫面不捲走，托盤還在`, async ({ page }) => {
@@ -676,7 +715,7 @@ test.describe("短手機的捲動（真的用手指點，不靠 Playwright 自�
       await fingerTap(page, `選${base}`);
       await page.waitForTimeout(500);
       const before = await settledScroll(page);
-      await fingerTap(page, "給多多吃");
+      await fingerTap(page, /^(送給.+|給多多吃)$/);
       await expect(page.getByTestId("dino-sushi").locator("p[data-mood='look']")).toBeAttached();
       expect(await settledScroll(page)).toBe(before);
       await expect(page.getByRole("button", { name: `加${toppings[0]}` })).toBeInViewport();
@@ -688,9 +727,10 @@ test.describe("短手機的捲動（真的用手指點，不靠 Playwright 自�
     await page.goto("/games/dino-sushi");
     await page.getByRole("button", { name: "自由做" }).click();
     await fingerTap(page, "選握壽司");
-    await fingerTap(page, "給多多吃");
-    await page.waitForFunction(() => document.querySelector("[class*='servingPlate'][data-phase='open']") !== null);
-    const open = await duoHeadVsHeader(page);
+    await fingerTap(page, /^(送給.+|給多多吃)$/);
+    // 自由做仍是多多吃：張嘴那一段的 phase 是 eat
+    await page.waitForFunction(() => document.querySelector("[class*='servingPlate'][data-phase='eat']") !== null);
+    const open = await headVsHeader(page);
     expect(open.head, "張嘴那一刻").toBeGreaterThanOrEqual(open.header - 8);
     const scrollAtOpen = await page.evaluate(() => window.scrollY);
     await page.waitForTimeout(600);

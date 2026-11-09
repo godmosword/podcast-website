@@ -84,7 +84,7 @@ export const GAMES: GameMeta[] = [
     hasScore: false,
     hasTimer: false,
     gameType: "cooking",
-    controls: ["點飯和料做壽司", "按「給多多吃」送出"],
+    controls: ["點飯和料做壽司", "做好了送給朋友"],
     art: {
       cover: "/games/v2/dino-sushi/cover.webp",
       thumbnail: "/games/v2/dino-sushi/cover.webp",

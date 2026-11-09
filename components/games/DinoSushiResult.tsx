@@ -229,7 +229,7 @@ export function DinoSushiResult({
     nextDay !== null && outcome.dayOpened
       ? dayOpenedLine(nextDay)
       : outcome.mode === "order"
-        ? "多多吃飽飽！"
+        ? "朋友都吃飽飽！"
         : "多多吃飽了！";
   return (
     <div

@@ -4,7 +4,10 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { SynthVoice } from "@/lib/gamekit/runtime/audio";
 import { EVICT_POP_DELAY, SUSHI_SFX } from "@/lib/games/dino-sushi/sfx";
 import { toppingById, type ToppingId } from "@/lib/games/dino-sushi/toppings";
-import { IDLE_HINT_MS, THANKS_LINGER_MS, useDinoSushiPlay } from "./useDinoSushiPlay";
+import { IDLE_HINT_MS, ORDER_TIMELINE_REDUCED, THANKS_FADE_MS, useDinoSushiPlay } from "./useDinoSushiPlay";
+
+/** 減少動態時點餐從送出到下一單（0.8 秒）。 */
+const DONE = ORDER_TIMELINE_REDUCED.done;
 
 afterEach(() => {
   cleanup();
@@ -29,7 +32,7 @@ function setup() {
 
 type Play = ReturnType<typeof setup>["result"];
 
-/** 照單做完第一單送出，等反應播完（減少動態：1.1 秒），停在第二單剛出現。 */
+/** 照單做完第一單送出，等反應播完（減少動態：0.8 秒），停在第二單剛出現。 */
 function finishFirstOrder(result: Play) {
   act(() => result.current.actions.start("order"));
   const first = result.current.round!.orders[0]!;
@@ -37,7 +40,7 @@ function finishFirstOrder(result: Play) {
   for (const id of first.toppings) act(() => result.current.actions.add(id));
   act(() => result.current.actions.serve());
   act(() => {
-    vi.advanceTimersByTime(1100);
+    vi.advanceTimersByTime(DONE);
   });
   expect(result.current.round!.index).toBe(1);
 }
@@ -49,18 +52,26 @@ function offOrderSavory(result: Play): ToppingId {
   return round.tray.find((id) => toppingById(id).kind === "savory" && !order.toppings.includes(id))!;
 }
 
-describe("朋友的謝謝不要跨到下一單太久", () => {
-  it("下一單出來後 THANKS_LINGER_MS 就收掉", () => {
+describe("朋友的謝謝不跨到下一位", () => {
+  it("咬下去那一拍出現，下一位入座前淡出，入座那一刻收掉（不疊在下一位頭上）", () => {
     const { result } = setup();
-    finishFirstOrder(result);
-    expect(result.current.thanks).not.toBeNull();
+    act(() => result.current.actions.start("order"));
+    const first = result.current.round!.orders[0]!;
+    act(() => result.current.actions.pickBase(first.base));
+    for (const id of first.toppings) act(() => result.current.actions.add(id));
+    act(() => result.current.actions.serve());
     act(() => {
-      vi.advanceTimersByTime(THANKS_LINGER_MS - 1);
+      vi.advanceTimersByTime(ORDER_TIMELINE_REDUCED.react);
     });
-    expect(result.current.thanks).not.toBeNull();
+    expect(result.current.thanks?.leaving).toBe(false);
     act(() => {
-      vi.advanceTimersByTime(1);
+      vi.advanceTimersByTime(DONE - THANKS_FADE_MS - ORDER_TIMELINE_REDUCED.react);
     });
+    expect(result.current.thanks?.leaving).toBe(true);
+    act(() => {
+      vi.advanceTimersByTime(THANKS_FADE_MS);
+    });
+    expect(result.current.round!.index).toBe(1);
     expect(result.current.thanks).toBeNull();
   });
 });
@@ -113,25 +124,25 @@ describe("點偏了立刻亮下一步", () => {
     finishFirstOrder(result);
     const second = result.current.round!.orders[1]!;
     const want = second.toppings[0]!;
-    const sweet = result.current.round!.tray.find((id) => toppingById(id).kind === "sweet")!;
+    // 托盤 11-08 起只剩芥末一種彩蛋
     act(() => result.current.actions.pickBase(second.base));
-    for (const id of ["wasabi", "wasabi", sweet] as const) act(() => result.current.actions.add(id));
+    for (const id of ["wasabi", "wasabi", "wasabi"] as const) act(() => result.current.actions.add(id));
     act(() => {
       vi.advanceTimersByTime(IDLE_HINT_MS);
     });
     expect(result.current.hint).toEqual({ kind: "topping", id: want });
     act(() => result.current.actions.add(want));
-    expect(result.current.round!.sushi.toppings).toEqual(["wasabi", sweet, want]);
+    expect(result.current.round!.sushi.toppings).toEqual(["wasabi", "wasabi", want]);
     expect(result.current.shake).toBe(0);
     expect(result.current.hint).toBeNull();
     // 再放兩樣彩蛋：擠掉的都是彩蛋，單上要的還在，不亮
     act(() => result.current.actions.add("wasabi"));
-    act(() => result.current.actions.add(sweet));
-    expect(result.current.round!.sushi.toppings).toEqual([want, "wasabi", sweet]);
+    act(() => result.current.actions.add("wasabi"));
+    expect(result.current.round!.sushi.toppings).toEqual([want, "wasabi", "wasabi"]);
     expect(result.current.hint).toBeNull();
     // 這次擠掉的是單上要的：馬上亮缺的那樣
     act(() => result.current.actions.add("wasabi"));
-    expect(result.current.round!.sushi.toppings).toEqual(["wasabi", sweet, "wasabi"]);
+    expect(result.current.round!.sushi.toppings).toEqual(["wasabi", "wasabi", "wasabi"]);
     expect(result.current.hint).toEqual({ kind: "topping", id: want });
   });
 
@@ -154,17 +165,17 @@ describe("點偏了立刻亮下一步", () => {
     expect(result.current.hint).toEqual({ kind: "topping", id: second.toppings[0] });
   });
 
-  it("閒置 4.5 秒後亮出下一步，從新訂單出現才起算（不是從按「給多多吃」）", () => {
+  it("閒置 4.5 秒後亮出下一步，從新訂單出現才起算（不是從按送出那一刻）", () => {
     const { result } = setup();
     finishFirstOrder(result);
     expect(result.current.hint).toBeNull();
-    // 按「給多多吃」後 4.5 秒：新訂單才出現 3.4 秒，還不亮
+    // 送出後 4.5 秒：新訂單才出現 3.7 秒，還不亮
     act(() => {
-      vi.advanceTimersByTime(IDLE_HINT_MS - 1100);
+      vi.advanceTimersByTime(IDLE_HINT_MS - DONE);
     });
     expect(result.current.hint).toBeNull();
     act(() => {
-      vi.advanceTimersByTime(1100);
+      vi.advanceTimersByTime(DONE);
     });
     const second = result.current.round!.orders[1]!;
     expect(result.current.hint).toEqual({ kind: "base", id: second.base });

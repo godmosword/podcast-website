@@ -57,8 +57,9 @@ function Star() {
 }
 
 /**
- * 多多頭上的點餐泡泡：朋友的全身貼紙說是誰點的，圖案說想吃什麼，放對一樣就打勾。
- * 客人只點餐；壽司仍是多多吃。整顆泡泡可以點，再聽一次；左上角的小喇叭是提示。
+ * 坐在櫃台的客人頭上的點餐泡泡：名字說是誰點的，圖案說想吃什麼，放對一樣就打勾。
+ * 客人整單坐在泡泡下面（2026-11-08 起客人自己吃），泡泡裡不再放頭像；尾巴指向客人。
+ * 整顆泡泡可以點，再聽一次；左上角的小喇叭是提示。
  */
 export function DinoSushiOrderBubble({ order, sushi, flash, index, total, onReplay }: Props) {
   const checks = orderChecks(sushi, order);
@@ -74,13 +75,7 @@ export function DinoSushiOrderBubble({ order, sushi, flash, index, total, onRepl
       >
         <span className={styles.guest} data-ready={ready ? "true" : undefined}>
           <span className={styles.guestName}>{customer.name}想吃</span>
-          <span className={styles.guestFaceWrap}>
-            <span className={styles.guestSticker}>
-              {/* eslint-disable-next-line @next/next/no-img-element -- 核准的黏土貼紙，只去背不重畫 */}
-              <img className={styles.guestFace} src={customer.sticker} alt="" draggable={false} decoding="sync" />
-            </span>
-            {ready ? <Heart /> : null}
-          </span>
+          {ready ? <Heart /> : null}
         </span>
         <span className={styles.bubbleItems} data-order-items>
           <span
@@ -106,7 +101,7 @@ export function DinoSushiOrderBubble({ order, sushi, flash, index, total, onRepl
             </span>
           ))}
         </span>
-        {/* 尾巴往左下指向多多 */}
+        {/* 尾巴往左下指向坐在櫃台的客人 */}
         <svg className={styles.bubbleTail} viewBox="0 0 28 20" aria-hidden focusable="false">
           <path d="M6 0H26L3 18Z" className={styles.bubbleTailFill} />
           <path d="M26 0L3 18L6 0" className={styles.bubbleTailLine} />

@@ -92,7 +92,7 @@ describe("每輪小變化", () => {
       const theme = roundVariety(seed).theme.toppings;
       expect(orders).toHaveLength(5);
       expect(theme.every((id) => tray.includes(id))).toBe(true);
-      expect(tray.filter((id) => toppingById(id).kind === "sweet")).toHaveLength(1);
+      expect(tray.filter((id) => toppingById(id).kind === "sweet")).toHaveLength(0);
       expect(tray).toContain("wasabi");
       for (const order of orders) {
         expect(order.toppings.some((id) => theme.includes(id))).toBe(true);

@@ -27,7 +27,7 @@ import { DinoSushiTitle, type SushiDayFace } from "./DinoSushiTitle";
 import { ROUND_SAVE_ERROR, storedClassicFlags, useDinoSushiDayProgress } from "./useDinoSushiDayProgress";
 import { playVoices, useDinoSushiPlay } from "./useDinoSushiPlay";
 import { useDinoSushiStickers } from "./useDinoSushiStickers";
-import { DINO_SUSHI_STICKER_TOTAL } from "@/lib/games/dino-sushi/stickers";
+import { bookStickers } from "@/lib/games/dino-sushi/stickers";
 import { readRoundSeed, type RoundVariety } from "@/lib/games/dino-sushi/variety";
 import { customerById } from "@/lib/games/dino-sushi/customers";
 import styles from "./DinoSushiView.module.css";
@@ -286,7 +286,7 @@ export function DinoSushiView({
           <DinoSushiTitle
             days={titleDays}
             stickerCount={stickers.state.unlocked.length}
-            stickerTotal={DINO_SUSHI_STICKER_TOTAL}
+            stickerTotal={bookStickers(stickers.state.unlocked).length}
             stickerNew={unseen.length > 0}
             onStart={() => begin("order")}
             onPickDay={(day) => begin("order", day)}

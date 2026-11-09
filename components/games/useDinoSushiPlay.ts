@@ -19,8 +19,12 @@ import { MAX_TOPPINGS } from "@/lib/games/dino-sushi/sushi";
 import { toppingById, type BaseId, type ToppingId } from "@/lib/games/dino-sushi/toppings";
 import { DOME_AFTER_PLATES, DOME_SPEECH, orderLead, readRoundSeed } from "@/lib/games/dino-sushi/variety";
 
-/** 送出後的動畫段：盤子滑過去 → 張嘴 → 咀嚼 → 表情＋字卡。 */
-export type ServePhase = "idle" | "slide" | "open" | "chew" | "react";
+/**
+ * 送出後的動畫段。
+ * 點餐（客人吃，2026-11-08）：交接到帶子起點 → 帶子送到客人座位 → 客人咬一口 → 同一拍的反應。
+ * 自由做（多多吃）：帶子送到多多面前 → 張嘴 → 咀嚼 → 反應。
+ */
+export type ServePhase = "idle" | "handoff" | "ride" | "eat" | "chew" | "react";
 
 export type HintTarget =
   | { kind: "base"; id: BaseId }
@@ -29,14 +33,25 @@ export type HintTarget =
   | { kind: "remove"; slot: number }
   | { kind: "serve" };
 
-type Timeline = { slide: number; open: number; chew: number; react: number; done: number };
+/** 各段從按下送出起算的時點（毫秒）。沒有的段寫 null。 */
+type Timeline = {
+  handoff: number | null;
+  ride: number | null;
+  eat: number;
+  chew: number | null;
+  react: number;
+  done: number;
+};
 
 /**
- * 送出到反應 ≤1.6 秒（react），減少動態時 ≤0.6 秒；反應後再讓字卡留約 1 秒才出下一單，期間鎖輸入。
- * 點餐模式下一單泡泡出現時就收掉字卡，免得上一句像在評論新的一單。
+ * 點餐：按下到能做下一盤 ≤ 1.6 秒（done＝解鎖、下一位入座）。高潮（愛心、謝謝、多多表情）同一拍在 react。
+ * 減少動態：不送，盤子直接在座位，一口淡入淡出，總長 0.8 秒。
  */
-const EAT_TIMELINE: Timeline = { slide: 0, open: 450, chew: 700, react: 1150, done: 2150 };
-const EAT_TIMELINE_REDUCED: Timeline = { slide: 0, open: 0, chew: 150, react: 300, done: 1100 };
+export const ORDER_TIMELINE: Timeline = { handoff: 0, ride: 120, eat: 720, chew: null, react: 1020, done: 1600 };
+export const ORDER_TIMELINE_REDUCED: Timeline = { handoff: null, ride: null, eat: 0, chew: null, react: 300, done: 800 };
+/** 自由做：多多吃，沿用原本的節奏（滑過來 → 張嘴 → 咀嚼 → 反應後字卡留約 1 秒）。 */
+export const FREE_TIMELINE: Timeline = { handoff: null, ride: 0, eat: 450, chew: 700, react: 1150, done: 2150 };
+export const FREE_TIMELINE_REDUCED: Timeline = { handoff: null, ride: 0, eat: 0, chew: 150, react: 300, done: 1100 };
 const LOOK_DONE_MS = 1200;
 const LOOK_DONE_MS_REDUCED = 600;
 /** 字卡在反應結束後再留一下，孩子才看得到。 */
@@ -47,10 +62,11 @@ export const IDLE_HINT_MS = BASE_IDLE_HINT_MS;
 
 /** 做對一單時點餐朋友的謝謝：記住剛送出的那張訂單（下一單出來後 currentOrder 會換人）。 */
 export type GuestThanks = { order: Order; line: string; leaving: boolean };
-/** 膠囊收起前的淡出時間。 */
-const THANKS_FADE_MS = 200;
-/** 下一單出來後，上一位朋友的謝謝再留這麼久就收。 */
-export const THANKS_LINGER_MS = 600;
+/**
+ * 膠囊收起前的淡出時間。謝謝畫在客人頭上，下一位入座（done）那一刻就收，不疊在下一位頭上；
+ * 朗讀不受影響：下一單的宣告排在謝謝念完之後（useDinoSushiSpeech 不插隊）。
+ */
+export const THANKS_FADE_MS = 200;
 
 type PlayAction =
   | { type: "init"; mode: Mode; seed: number; tier: OrderTier; day?: number }
@@ -369,15 +385,29 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
       });
       return;
     }
-    const t = reducedMotion ? EAT_TIMELINE_REDUCED : EAT_TIMELINE;
+    const isOrder = round.mode === "order";
+    const t = isOrder
+      ? reducedMotion
+        ? ORDER_TIMELINE_REDUCED
+        : ORDER_TIMELINE
+      : reducedMotion
+        ? FREE_TIMELINE_REDUCED
+        : FREE_TIMELINE;
     sfx(SUSHI_SFX.serve);
-    setPhase("slide");
-    later(t.open, () => setPhase("open"));
-    later(t.chew, () => {
-      setPhase("chew");
-      // 減少動態時咀嚼只有 150ms，嚼嚼聲會跟反應音疊在一起，直接跳過
-      if (!reducedMotion) sfx(varied(SUSHI_SFX.chomp));
-    });
+    const first = t.handoff !== null ? "handoff" : t.ride !== null ? "ride" : "eat";
+    setPhase(first);
+    if (t.ride !== null && t.ride > 0) later(t.ride, () => setPhase("ride"));
+    if (t.eat > 0) later(t.eat, () => setPhase("eat"));
+    if (isOrder) {
+      // 客人咬下去那一下就有咀嚼聲（減少動態時一口很短，跟反應音太近，跳過）
+      if (!reducedMotion) later(t.eat, () => sfx(varied(SUSHI_SFX.chomp)));
+    } else if (t.chew !== null) {
+      later(t.chew, () => {
+        setPhase("chew");
+        // 減少動態時咀嚼只有 150ms，嚼嚼聲會跟反應音疊在一起，直接跳過
+        if (!reducedMotion) sfx(varied(SUSHI_SFX.chomp));
+      });
+    }
     /* 點餐做對時，讀屏接著念朋友的謝謝（畫面上的膠囊是 aria-hidden） */
     const served = round.mode === "order" ? currentOrder(round) : null;
     const thanks = served && reaction.match?.ok ? orderThanksLine(served) : "";
@@ -396,10 +426,8 @@ export function useDinoSushiPlay({ audio, reducedMotion, inputPaused, onServed, 
     });
     later(t.done + CAPTION_LINGER_MS, () => setCaption((c) => (c === reaction ? null : c)));
     if (served && thanks) {
-      later(t.done + THANKS_LINGER_MS - THANKS_FADE_MS, () =>
-        setThanks((g) => (g && g.order === served ? { ...g, leaving: true } : g)),
-      );
-      later(t.done + THANKS_LINGER_MS, () => setThanks((g) => (g && g.order === served ? null : g)));
+      later(t.done - THANKS_FADE_MS, () => setThanks((g) => (g && g.order === served ? { ...g, leaving: true } : g)));
+      later(t.done, () => setThanks((g) => (g && g.order === served ? null : g)));
     }
   }, [clearTimers, later, locked, reducedMotion, round, sfx, touch]);
 

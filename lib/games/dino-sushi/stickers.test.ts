@@ -2,9 +2,12 @@ import { describe, expect, it } from "vitest";
 import { CUSTOMERS, type CustomerId } from "./customers";
 import { BASES, TOPPINGS, type BaseId, type ToppingId } from "./toppings";
 import {
+  bookStickers,
+  isStickerBookComplete,
   DINO_SUSHI_STICKER_TOTAL,
   DINO_SUSHI_STICKERS,
   STICKER_ROUND_PROMISE,
+  UNAVAILABLE_STICKER_IDS,
   applyRoundStickers,
   collectStickers,
   factsFromRound,
@@ -84,7 +87,7 @@ describe("多多壽司屋貼紙目錄", () => {
       expect(sticker?.rule).toBe(`把${topping.label}放上壽司`);
     }
     for (const base of BASES) {
-      expect(stickerById(`base-${base.id}`)?.rule).toBe(`做好${base.label}，給多多吃`);
+      expect(stickerById(`base-${base.id}`)?.rule).toBe(`做好${base.label}，送出去`);
     }
     expect(stickerById("surprise-perfect")?.rule).toBe("連續 5 盤都一次做對");
     expect(stickerById("surprise-round")?.rule).toBe("點餐，送完 5 盤");
@@ -208,6 +211,29 @@ describe("貼紙解鎖", () => {
     expect(next.gifted).toBe("customer-anan");
   });
 
+  it("暫時拿不到的甜點、刷牙貼紙不當保底送（2026-11-08 托盤拿掉甜點）", () => {
+    const unavailable = ["topping-strawberry", "topping-pudding", "mood-sweet", "mood-brush"];
+    // 前面的食材都有了，下一張照目錄本來是草莓：要跳過，往後送
+    // 自由做做完本身會拿到「自由做」成就；先擁有它，這一輪才是「沒新的、要保底」
+    const owned = [
+      "surprise-free",
+      ...DINO_SUSHI_STICKERS.filter((sticker) => sticker.group === "food" && !unavailable.includes(sticker.id)).map(
+        (sticker) => sticker.id,
+      ),
+    ];
+    const gift = collectStickers(owned, factsFromRound(round({ mode: "free", done: true })), { finishedRound: true });
+    expect(gift.gifted).not.toBeNull();
+    expect(unavailable).not.toContain(gift.gifted);
+    // 只差這 4 張與成就：什麼都不送
+    const allButUnavailable = DINO_SUSHI_STICKERS.map((sticker) => sticker.id).filter(
+      (id) => !unavailable.includes(id) && !id.startsWith("surprise-"),
+    );
+    const none = collectStickers(allButUnavailable, factsFromRound(round({ mode: "free", done: false })), {
+      finishedRound: true,
+    });
+    expect(none.gifted).toBeNull();
+  });
+
   it("一輪結束念的句子：貼紙接新開的天，沒貼紙也念", () => {
     expect(roundEndAnnouncement(["topping-tamago"], null, "第 2 天開了！")).toBe("新貼紙！玉子！第 2 天開了！");
     expect(roundEndAnnouncement([], null, "第 2 天開了！")).toBe("第 2 天開了！");
@@ -312,5 +338,30 @@ describe("貼紙怎麼念", () => {
     ).toBe("新貼紙！玉子、蝦、蟹肉棒，還有更多！");
     expect(stickerTapSpeech("mood-brush", true)).toBe("刷牙");
     expect(stickerTapSpeech("mood-brush", false)).toBe("還沒有。幫多多刷牙");
+  });
+});
+
+describe("下架的甜點貼紙（2026-11-08）", () => {
+  const available = DINO_SUSHI_STICKERS.filter((s) => !UNAVAILABLE_STICKER_IDS.has(s.id)).map((s) => s.id);
+
+  it("沒拿過的不放進貼紙書，總數只算拿得到的", () => {
+    const book = bookStickers([]);
+    expect(book.map((s) => s.id)).toEqual(available);
+    expect(book.some((s) => UNAVAILABLE_STICKER_IDS.has(s.id))).toBe(false);
+  });
+
+  it("舊存檔已經拿到的照留在原本的位置", () => {
+    const book = bookStickers(["topping-strawberry", "topping-tamago"]).map((s) => s.id);
+    expect(book).toContain("topping-strawberry");
+    expect(book).not.toContain("topping-pudding");
+    expect(book.length).toBe(available.length + 1);
+    const order = DINO_SUSHI_STICKERS.map((s) => s.id);
+    expect([...book].sort((a, b) => order.indexOf(a) - order.indexOf(b))).toEqual(book);
+  });
+
+  it("拿得到的都收齊就算全收集，不用等永遠拿不到的", () => {
+    expect(isStickerBookComplete(available)).toBe(true);
+    expect(isStickerBookComplete(available.slice(1))).toBe(false);
+    expect(isStickerBookComplete(DINO_SUSHI_STICKERS.map((s) => s.id))).toBe(true);
   });
 });

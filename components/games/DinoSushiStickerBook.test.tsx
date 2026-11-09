@@ -1,13 +1,13 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { DINO_SUSHI_STICKER_TOTAL } from "@/lib/games/dino-sushi/stickers";
+import { DINO_SUSHI_STICKERS, UNAVAILABLE_STICKER_IDS } from "@/lib/games/dino-sushi/stickers";
 import { DinoSushiStickerBook } from "./DinoSushiStickerBook";
 
 afterEach(cleanup);
 
 describe("貼紙書", () => {
-  it("30 格；拿到的寫名字，沒拿到的是問號，點了會念", () => {
+  it("拿得到的每一格都在（下架甜點沒拿過不放）；拿到的寫名字，沒拿到的是問號，點了會念", () => {
     const onSpeak = vi.fn();
     const onClose = vi.fn();
     render(
@@ -27,8 +27,9 @@ describe("貼紙書", () => {
     expect(lockedFriend.textContent).toContain("？");
     expect(lockedFriend.querySelector("img")?.getAttribute("src")).toBe("/games/v2/dino-sushi/customers/sm/anan.webp");
     expect(screen.getAllByRole("button").filter((button) => button.getAttribute("data-locked") === "true")).toHaveLength(
-      DINO_SUSHI_STICKER_TOTAL - 2,
+      DINO_SUSHI_STICKERS.length - UNAVAILABLE_STICKER_IDS.size - 2,
     );
+    expect(screen.queryByRole("button", { name: /草莓|布丁/ })).toBeNull();
     const got = screen.getByRole("button", { name: "玉子" });
     expect(got.getAttribute("data-new")).toBe("true");
     fireEvent.click(got, { detail: 0 });
