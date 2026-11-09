@@ -2,7 +2,7 @@
 
 恐龍車多多的小遊戲「多多壽司屋」（路徑仍是 `dino-sushi`）。本表只登記這個目錄裡已經進儲存庫的圖，一檔一列。提示詞和沒選上的候選圖在儲存庫外面。
 
-核對方式：git 歷史、`#212`、`#214`，以及 `scripts/generate-dino-sushi-cover.ts`、`scripts/optimize-dino-sushi-assets.ts`。透明度用畫面檔實測（有沒有 alpha 通道）。模型沒有逐檔的 API 紀錄，是依實測結果套上已知規則：不透明圖用 OpenAI `gpt-image-2`，透明圖用 `gpt-image-1.5`。`gpt-image-2` 不支援透明底，見 `scripts/generate-zone-night-art.ts`。
+核對方式：git 歷史、`#212`、`#214`，以及 `scripts/generate-dino-sushi-cover.ts`、`scripts/generate-dino-sushi-food.ts`、`scripts/cut-dino-sushi-front.ts`、`scripts/optimize-dino-sushi-assets.ts`。透明度用畫面檔實測（有沒有 alpha 通道）。模型沒有逐檔的 API 紀錄，是依實測結果套上已知規則：不透明圖用 OpenAI `gpt-image-2`，透明圖用 `gpt-image-1.5`。`gpt-image-2` 不支援透明底，見 `scripts/generate-zone-night-art.ts`。
 
 `sm/` 是 2026-10-14 由原檔做出的畫面用副本，不是另外生的一套圖。
 
@@ -33,15 +33,15 @@
 | `duoduo/sm/sticker-toothbrush.webp` | 吃完甜點後的刷牙按鈕（畫面讀的縮小副本） | 由原檔以 `scripts/optimize-dino-sushi-assets.ts` 縮小。不是另一次生圖。 | 同原檔（這張不是另一次生圖） | 2026-10-14 做成副本（原圖：2026-10-13） | sharp 縮小後轉 webp（quality 86、alphaQuality 100）。 | 不確定（commit `f50202eb` 在 main，GitHub 未關聯 PR） |
 | `duoduo/sm/sticker-fire.webp` | 吃到芥末的噴火表情（心情代碼仍是 puff）（畫面讀的縮小副本） | 由原檔以 `scripts/optimize-dino-sushi-assets.ts` 縮小。不是另一次生圖。 | 同原檔（這張不是另一次生圖） | 2026-10-14 做成副本（原圖：2026-10-14） | sharp 縮小後轉 webp（quality 86、alphaQuality 100）。 | 不確定（commit `f50202eb` 在 main，GitHub 未關聯 PR） |
 | `food/nigiri.webp` | 握壽司飯底 | AI 生圖。儲存庫內沒有這張圖的生圖腳本。 | gpt-image-1.5 | 不確定（2026-10-13 或 2026-10-14） | 去白邊、轉 webp。無分層。 | #214 |
-| `food/gunkan.webp` | 軍艦飯底 | AI 生圖。儲存庫內沒有這張圖的生圖腳本。 | gpt-image-1.5 | 不確定（2026-10-13 或 2026-10-14） | 去白邊、轉 webp。無分層。 | #214 |
-| `food/temaki.webp` | 手捲飯底（海苔後層） | AI 生圖。儲存庫內沒有這張圖的生圖腳本。 | gpt-image-1.5 | 2026-10-14 | 去白邊、手捲拆成前後層、轉 webp。 | #214 |
-| `food/temaki-front.webp` | 手捲海苔前片，蓋在配料上 | AI 生圖。儲存庫內沒有這張圖的生圖腳本。 | gpt-image-1.5 | 2026-10-14 | 去白邊、手捲拆成前後層、轉 webp。 | #214 |
+| `food/gunkan.webp` | 軍艦飯底（一圈薄海苔、矮橢圓） | AI 生圖：`scripts/generate-dino-sushi-food.ts`（images.edit，參考圖 nigiri、salmon，run `2026-11-09T13-58-20-136Z`）。2026-11-08 實玩回饋說原圖不像真的，重畫。 | gpt-image-1.5 | 2026-11-09 | 透明底直出；去透明邊、轉 webp（quality 90、alphaQuality 100）。無分層：飯面跟海苔邊一樣高，料直接坐在飯上，不需要前緣層。 | PR-B（2026-11-09，計畫 `docs/plans/2026-11-08-dino-sushi-real-shop.md`） |
+| `food/temaki.webp` | 手捲飯底（斜捲海苔，整張） | AI 生圖：`scripts/generate-dino-sushi-food.ts`（images.edit，參考圖 nigiri、cucumber，run `2026-11-09T13-58-20-136Z`）。2026-11-08 實玩回饋說原圖不像真的，重畫。 | gpt-image-1.5 | 2026-11-09 | 透明底直出；去透明邊、轉 webp（quality 90、alphaQuality 100）。 | PR-B（2026-11-09，計畫 `docs/plans/2026-11-08-dino-sushi-real-shop.md`） |
+| `food/temaki-front.webp` | 手捲海苔前片，蓋在配料上 | 由 `food/temaki.webp` 以 `scripts/cut-dino-sushi-front.ts temaki 0.37` 切出。不是另一次生圖。 | 同原檔（這張不是另一次生圖） | 2026-11-09 | 畫布高 37% 以上設成全透明，以下照原圖。 | PR-B（2026-11-09，計畫 `docs/plans/2026-11-08-dino-sushi-real-shop.md`） |
 | `food/tamago.webp` | 配料：玉子 | AI 生圖。儲存庫內沒有這張圖的生圖腳本。 | gpt-image-1.5 | 不確定（2026-10-13 或 2026-10-14） | 去白邊、轉 webp。無分層。 | #214 |
 | `food/shrimp.webp` | 配料：蝦 | AI 生圖。儲存庫內沒有這張圖的生圖腳本。 | gpt-image-1.5 | 不確定（2026-10-13 或 2026-10-14） | 去白邊、轉 webp。無分層。 | #214 |
 | `food/crab.webp` | 配料：蟹肉棒 | AI 生圖。儲存庫內沒有這張圖的生圖腳本。 | gpt-image-1.5 | 不確定（2026-10-13 或 2026-10-14） | 去白邊、轉 webp。無分層。 | #214 |
 | `food/corn.webp` | 配料：玉米 | AI 生圖。儲存庫內沒有這張圖的生圖腳本。 | gpt-image-1.5 | 不確定（2026-10-13 或 2026-10-14） | 去白邊、轉 webp。無分層。 | #214 |
 | `food/cucumber.webp` | 配料：小黃瓜 | AI 生圖。儲存庫內沒有這張圖的生圖腳本。 | gpt-image-1.5 | 不確定（2026-10-13 或 2026-10-14） | 去白邊、轉 webp。無分層。 | #214 |
-| `food/tuna.webp` | 配料：鮪魚沙拉 | AI 生圖。儲存庫內沒有這張圖的生圖腳本。 | gpt-image-1.5 | 不確定（2026-10-13 或 2026-10-14） | 去白邊、轉 webp。無分層。 | #214 |
+| `food/tuna.webp` | 配料：鮪魚沙拉（鮪魚碎拌美乃滋，不擠花） | AI 生圖：`scripts/generate-dino-sushi-food.ts`（images.edit，參考圖 corn、nigiri，run `2026-11-09T13-58-20-136Z`）。2026-11-08 實玩回饋說原圖不像真的，重畫。 | gpt-image-1.5 | 2026-11-09 | 透明底直出；去透明邊、轉 webp（quality 90、alphaQuality 100）。 | PR-B（2026-11-09，計畫 `docs/plans/2026-11-08-dino-sushi-real-shop.md`） |
 | `food/floss.webp` | 配料：肉鬆 | AI 生圖。儲存庫內沒有這張圖的生圖腳本。 | gpt-image-1.5 | 不確定（2026-10-13 或 2026-10-14） | 去白邊、轉 webp。無分層。 | #214 |
 | `food/salmon.webp` | 配料：鮭魚 | AI 生圖。儲存庫內沒有這張圖的生圖腳本。 | gpt-image-1.5 | 不確定（2026-10-13 或 2026-10-14） | 去白邊、轉 webp。無分層。 | #214 |
 | `food/avocado.webp` | 配料：酪梨 | AI 生圖。儲存庫內沒有這張圖的生圖腳本。 | gpt-image-1.5 | 不確定（2026-10-13 或 2026-10-14） | 去白邊、轉 webp。無分層。 | #214 |
@@ -49,15 +49,15 @@
 | `food/pudding.webp` | 配料：布丁（甜點） | AI 生圖。儲存庫內沒有這張圖的生圖腳本。 | gpt-image-1.5 | 不確定（2026-10-13 或 2026-10-14） | 去白邊、轉 webp。無分層。 | #214 |
 | `food/wasabi.webp` | 配料：芥末（wasabi-2 小丘；檔名未另存） | AI 生圖。儲存庫內沒有這張圖的生圖腳本。 | gpt-image-1.5 | 2026-10-14 | 去白邊、轉 webp。無分層。 | #214 |
 | `food/sm/nigiri.webp` | 握壽司飯底（畫面讀的縮小副本） | 由原檔以 `scripts/optimize-dino-sushi-assets.ts` 縮小。不是另一次生圖。 | 同原檔（這張不是另一次生圖） | 2026-10-14 做成副本（原圖日期不確定） | sharp 縮小後轉 webp（quality 86、alphaQuality 100）。 | 不確定（commit `f50202eb` 在 main，GitHub 未關聯 PR） |
-| `food/sm/gunkan.webp` | 軍艦飯底（畫面讀的縮小副本） | 由原檔以 `scripts/optimize-dino-sushi-assets.ts` 縮小。不是另一次生圖。 | 同原檔（這張不是另一次生圖） | 2026-10-14 做成副本（原圖日期不確定） | sharp 縮小後轉 webp（quality 86、alphaQuality 100）。 | 不確定（commit `f50202eb` 在 main，GitHub 未關聯 PR） |
-| `food/sm/temaki.webp` | 手捲飯底（海苔後層）（畫面讀的縮小副本） | 由原檔以 `scripts/optimize-dino-sushi-assets.ts` 縮小。不是另一次生圖。 | 同原檔（這張不是另一次生圖） | 2026-10-14 做成副本（原圖：2026-10-14） | sharp 縮小後轉 webp（quality 86、alphaQuality 100）。 | 不確定（commit `f50202eb` 在 main，GitHub 未關聯 PR） |
-| `food/sm/temaki-front.webp` | 手捲海苔前片，蓋在配料上（畫面讀的縮小副本） | 由原檔以 `scripts/optimize-dino-sushi-assets.ts` 縮小。不是另一次生圖。 | 同原檔（這張不是另一次生圖） | 2026-10-14 做成副本（原圖：2026-10-14） | sharp 縮小後轉 webp（quality 86、alphaQuality 100）。 | 不確定（commit `f50202eb` 在 main，GitHub 未關聯 PR） |
+| `food/sm/gunkan.webp` | 軍艦飯底（畫面讀的縮小副本） | 由原檔以 `scripts/optimize-dino-sushi-assets.ts` 縮小。不是另一次生圖。 | 同原檔（這張不是另一次生圖） | 2026-11-09 做成副本（原圖：2026-11-09） | sharp 縮小後轉 webp（quality 86、alphaQuality 100）。 | PR-B（2026-11-09，計畫 `docs/plans/2026-11-08-dino-sushi-real-shop.md`） |
+| `food/sm/temaki.webp` | 手捲飯底（海苔後層）（畫面讀的縮小副本） | 由原檔以 `scripts/optimize-dino-sushi-assets.ts` 縮小。不是另一次生圖。 | 同原檔（這張不是另一次生圖） | 2026-11-09 做成副本（原圖：2026-11-09） | sharp 縮小後轉 webp（quality 86、alphaQuality 100）。 | PR-B（2026-11-09，計畫 `docs/plans/2026-11-08-dino-sushi-real-shop.md`） |
+| `food/sm/temaki-front.webp` | 手捲海苔前片，蓋在配料上（畫面讀的縮小副本） | 由原檔以 `scripts/optimize-dino-sushi-assets.ts` 縮小。不是另一次生圖。 | 同原檔（這張不是另一次生圖） | 2026-11-09 做成副本（原圖：2026-11-09） | sharp 縮小後轉 webp（quality 86、alphaQuality 100）。 | PR-B（2026-11-09，計畫 `docs/plans/2026-11-08-dino-sushi-real-shop.md`） |
 | `food/sm/tamago.webp` | 配料：玉子（畫面讀的縮小副本） | 由原檔以 `scripts/optimize-dino-sushi-assets.ts` 縮小。不是另一次生圖。 | 同原檔（這張不是另一次生圖） | 2026-10-14 做成副本（原圖日期不確定） | sharp 縮小後轉 webp（quality 86、alphaQuality 100）。 | 不確定（commit `f50202eb` 在 main，GitHub 未關聯 PR） |
 | `food/sm/shrimp.webp` | 配料：蝦（畫面讀的縮小副本） | 由原檔以 `scripts/optimize-dino-sushi-assets.ts` 縮小。不是另一次生圖。 | 同原檔（這張不是另一次生圖） | 2026-10-14 做成副本（原圖日期不確定） | sharp 縮小後轉 webp（quality 86、alphaQuality 100）。 | 不確定（commit `f50202eb` 在 main，GitHub 未關聯 PR） |
 | `food/sm/crab.webp` | 配料：蟹肉棒（畫面讀的縮小副本） | 由原檔以 `scripts/optimize-dino-sushi-assets.ts` 縮小。不是另一次生圖。 | 同原檔（這張不是另一次生圖） | 2026-10-14 做成副本（原圖日期不確定） | sharp 縮小後轉 webp（quality 86、alphaQuality 100）。 | 不確定（commit `f50202eb` 在 main，GitHub 未關聯 PR） |
 | `food/sm/corn.webp` | 配料：玉米（畫面讀的縮小副本） | 由原檔以 `scripts/optimize-dino-sushi-assets.ts` 縮小。不是另一次生圖。 | 同原檔（這張不是另一次生圖） | 2026-10-14 做成副本（原圖日期不確定） | sharp 縮小後轉 webp（quality 86、alphaQuality 100）。 | 不確定（commit `f50202eb` 在 main，GitHub 未關聯 PR） |
 | `food/sm/cucumber.webp` | 配料：小黃瓜（畫面讀的縮小副本） | 由原檔以 `scripts/optimize-dino-sushi-assets.ts` 縮小。不是另一次生圖。 | 同原檔（這張不是另一次生圖） | 2026-10-14 做成副本（原圖日期不確定） | sharp 縮小後轉 webp（quality 86、alphaQuality 100）。 | 不確定（commit `f50202eb` 在 main，GitHub 未關聯 PR） |
-| `food/sm/tuna.webp` | 配料：鮪魚沙拉（畫面讀的縮小副本） | 由原檔以 `scripts/optimize-dino-sushi-assets.ts` 縮小。不是另一次生圖。 | 同原檔（這張不是另一次生圖） | 2026-10-14 做成副本（原圖日期不確定） | sharp 縮小後轉 webp（quality 86、alphaQuality 100）。 | 不確定（commit `f50202eb` 在 main，GitHub 未關聯 PR） |
+| `food/sm/tuna.webp` | 配料：鮪魚沙拉（畫面讀的縮小副本） | 由原檔以 `scripts/optimize-dino-sushi-assets.ts` 縮小。不是另一次生圖。 | 同原檔（這張不是另一次生圖） | 2026-11-09 做成副本（原圖：2026-11-09） | sharp 縮小後轉 webp（quality 86、alphaQuality 100）。 | PR-B（2026-11-09，計畫 `docs/plans/2026-11-08-dino-sushi-real-shop.md`） |
 | `food/sm/floss.webp` | 配料：肉鬆（畫面讀的縮小副本） | 由原檔以 `scripts/optimize-dino-sushi-assets.ts` 縮小。不是另一次生圖。 | 同原檔（這張不是另一次生圖） | 2026-10-14 做成副本（原圖日期不確定） | sharp 縮小後轉 webp（quality 86、alphaQuality 100）。 | 不確定（commit `f50202eb` 在 main，GitHub 未關聯 PR） |
 | `food/sm/salmon.webp` | 配料：鮭魚（畫面讀的縮小副本） | 由原檔以 `scripts/optimize-dino-sushi-assets.ts` 縮小。不是另一次生圖。 | 同原檔（這張不是另一次生圖） | 2026-10-14 做成副本（原圖日期不確定） | sharp 縮小後轉 webp（quality 86、alphaQuality 100）。 | 不確定（commit `f50202eb` 在 main，GitHub 未關聯 PR） |
 | `food/sm/avocado.webp` | 配料：酪梨（畫面讀的縮小副本） | 由原檔以 `scripts/optimize-dino-sushi-assets.ts` 縮小。不是另一次生圖。 | 同原檔（這張不是另一次生圖） | 2026-10-14 做成副本（原圖日期不確定） | sharp 縮小後轉 webp（quality 86、alphaQuality 100）。 | 不確定（commit `f50202eb` 在 main，GitHub 未關聯 PR） |

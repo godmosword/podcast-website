@@ -112,7 +112,8 @@ describe("砧板上的料重掛規則", () => {
     };
     expect(spot(["pudding", "shrimp", "crab"], "pudding")).toEqual({ top: 20, transform: "translate(-50%, -50%) rotate(-10deg)" });
     // 中間是別的料：照舊抬高到兩側上方
-    expect(spot(["salmon", "shrimp", "crab"], "salmon")).toEqual({ top: 15, transform: "translate(-50%, -50%) rotate(-18deg)" });
+    // 鮭魚 2026-11-09 改成 y 25（新手捲上放大、冒出筒口），中間再抬 12 → 13
+    expect(spot(["salmon", "shrimp", "crab"], "salmon")).toEqual({ top: 13, transform: "translate(-50%, -50%) rotate(-18deg)" });
     // 布丁在兩側：照舊
     expect(spot(["shrimp", "pudding", "crab"], "pudding")).toEqual({ top: 28, transform: "translate(-50%, -50%) rotate(-26deg)" });
   });
