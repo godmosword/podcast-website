@@ -18,7 +18,7 @@ describe("壽司黏土圖", () => {
     expect(html.match(/<img /g)).toHaveLength(4);
   });
 
-  it("手捲的料坐在飯口上：每一樣中心都在海苔前層（34.5%）以上、夠寬，一眼看得到包了什麼", () => {
+  it("手捲的料坐在飯口上：每一樣中心都在海苔前層（37%）以上、夠寬，一眼看得到包了什麼", () => {
     const ids = ["tamago", "shrimp", "crab", "corn", "cucumber", "tuna", "floss", "salmon", "avocado", "strawberry", "pudding", "wasabi"] as const;
     for (const id of ids) {
       const html = renderToStaticMarkup(<SushiArt sushi={{ base: "temaki", toppings: [id] }} />);

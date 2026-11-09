@@ -35,7 +35,7 @@ const BASE_SRC: Record<BaseId, string> = {
   temaki: dinoSushiSrc("food/temaki.webp"),
 };
 
-/** 手捲海苔前片，跟飯底同尺寸；畫布高 34.5% 以上是透明的。 */
+/** 手捲海苔前片，跟飯底同尺寸；畫布高 37% 以上是透明的（scripts/cut-dino-sushi-front.ts）。 */
 const TEMAKI_FRONT_SRC = dinoSushiSrc("food/temaki-front.webp");
 
 const TOPPING_SRC: Record<ToppingId, string> = {
@@ -65,18 +65,18 @@ export function toppingSrc(id: ToppingId): string {
 /** 飯圖原生寬高比，組裝舞台跟這張圖同比例，料的百分比才對得準。 */
 const BASE_ASPECT: Record<BaseId, string> = {
   nigiri: "581 / 416",
-  gunkan: "745 / 684",
-  temaki: "511 / 986",
+  gunkan: "982 / 768",
+  temaki: "709 / 1327",
 };
 
 /** 單層料落在飯上的中心（舞台百分比）與寬度。手捲另見 TEMAKI_PLACE。 */
 const ANCHOR: Record<Exclude<BaseId, "temaki">, { x: number; y: number; w: number }> = {
   nigiri: { x: 50, y: 44, w: 86 },
-  gunkan: { x: 50, y: 32, w: 68 },
+  gunkan: { x: 49, y: 22, w: 80 },
 };
 
 /**
- * 手捲：寬、高都是舞台百分比。料坐在飯口上、往上冒出筒口，下緣塞進海苔前層（從高度 34.5% 蓋下來），
+ * 手捲：寬、高都是舞台百分比。料坐在飯口上、往上冒出筒口，下緣塞進海苔前層（從高度 37% 蓋下來），
  * 像真的手捲一樣一眼看得到包了什麼；兩三樣時往左右散開，可以略超出筒身。
  * 芥末是一小坨，不跟其他料一樣大；玉子、肉鬆不能太寬，三樣時才不會擋住中間那樣。
  */
@@ -88,7 +88,7 @@ const TEMAKI_PLACE: Record<ToppingId, { w: number; y: number }> = {
   cucumber: { w: 84, y: 25 },
   tuna: { w: 84, y: 23 },
   floss: { w: 88, y: 24 },
-  salmon: { w: 68, y: 27 },
+  salmon: { w: 78, y: 25 },
   avocado: { w: 72, y: 26 },
   strawberry: { w: 68, y: 27 },
   pudding: { w: 90, y: 25 },
@@ -111,7 +111,7 @@ const TOPPING_FIT: Record<ToppingId, { scale: number; dy: number }> = {
   crab: { scale: 0.96, dy: 5 },
   corn: { scale: 0.66, dy: 2 },
   cucumber: { scale: 0.72, dy: 0 },
-  tuna: { scale: 0.52, dy: 2 },
+  tuna: { scale: 0.64, dy: 2 },
   floss: { scale: 0.76, dy: 1 },
   salmon: { scale: 0.94, dy: 3 },
   avocado: { scale: 0.8, dy: 2 },
@@ -161,7 +161,8 @@ function layerSpots(base: BaseId, toppings: readonly ToppingId[]): Spot[] {
     ];
   }
   return [
-    { x: a.x, y: a.y - 8, w: a.w * 0.58 },
+    /* 中間那格疊在最後面：抬高到兩側料的上方。扁的料（鮪魚沙拉、玉子）排中間時才露得出來 */
+    { x: a.x, y: a.y - 14, w: a.w * 0.62 },
     { x: a.x - 16, y: a.y + 6, w: a.w * 0.62 },
     { x: a.x + 16, y: a.y + 5, w: a.w * 0.62 },
   ];
