@@ -37,8 +37,8 @@ function storedDayOne(page: Page) {
 async function serveOrder(page: Page, n: number) {
   const label = await page.getByRole("img", { name: new RegExp(`^第 ${n} 單`) }).getAttribute("aria-label");
   const [base, ...toppings] = label!.split("想吃：")[1]!.split("、");
-  await page.getByRole("button", { name: `選${base}` }).click();
-  for (const topping of toppings) await page.getByRole("button", { name: `加${topping}` }).click();
+  await page.getByRole("button", { name: `選${base}`, exact: true }).click();
+  for (const topping of toppings) await page.getByRole("button", { name: `加${topping}`, exact: true }).click();
   await page.getByRole("button", { name: /^(送給.+|給多多吃)$/ }).click();
   await expect(
     page.getByRole("img", { name: `吃完 ${n} 盤` }).or(page.getByTestId("dino-sushi-result")).first(),

@@ -1,5 +1,7 @@
 /**
- * 《多多壽司屋》貼紙書：30 張。前 24 張是料、飯、表情、驚喜；第 25–30 張是來店的朋友。
+ * 《多多壽司屋》貼紙書：現役 29 張（料 13、飯 3、表情 3、驚喜 4、朋友 6）。
+ * 2026-11-08 起甜點下架：草莓、布丁、甜甜、刷牙 4 張退役（RETIRED_STICKER_IDS）——仍是合法 id、舊存檔已收集的照留在貼紙書，
+ * 但不再送出、不算總數與全收集；新增鮭魚卵、鰻魚、干貝 3 張。
  * 圖只用現有的飯、料、多多縮小副本、角色定裝照，再加上程式畫的獎章框。不另生圖。
  * 貼紙只會增加、不會收回。一輪結束若一張新的都沒有，依目錄順序送出下一張
  * （先補原本 24 張，那些都有了才送客人），直到收滿。
@@ -7,15 +9,17 @@
 
 import { CUSTOMERS, type CustomerId } from "./customers";
 import { roundMedals } from "./medals";
+import type { RetiredToppingId } from "./art";
 import type { Mood } from "./reactions";
 import { BASES, TOPPINGS, type BaseId, type ToppingId } from "./toppings";
 
-export const DINO_SUSHI_STICKER_TOTAL = 30;
 
 export type StickerGroup = "food" | "base" | "mood" | "surprise" | "customer";
 
 export type StickerArt =
   | { kind: "topping"; id: ToppingId }
+  /** 下架的甜點：只畫舊存檔已收集的。 */
+  | { kind: "retired-topping"; id: RetiredToppingId }
   | { kind: "base"; id: BaseId }
   | { kind: "duoduo"; state: "love" | "yum" | "sweet" | "fire" | "toothbrush" | "laugh" | "chew" | "closed" }
   | { kind: "medal"; state: "chew" | "laugh"; frame: "gold" | "sun" }
@@ -38,6 +42,12 @@ const FOOD_STICKERS: DinoSushiSticker[] = TOPPINGS.map((topping) => ({
   art: { kind: "topping", id: topping.id },
 }));
 
+/** 這家店現在不賣甜點：已收集的照留，說明改字。 */
+const RETIRED_FOOD_STICKERS: DinoSushiSticker[] = [
+  { id: "topping-strawberry", name: "草莓", group: "food", rule: "這家店現在不賣甜點", art: { kind: "retired-topping", id: "strawberry" } },
+  { id: "topping-pudding", name: "布丁", group: "food", rule: "這家店現在不賣甜點", art: { kind: "retired-topping", id: "pudding" } },
+];
+
 const BASE_STICKERS: DinoSushiSticker[] = BASES.map((base) => ({
   id: `base-${base.id}`,
   name: base.label,
@@ -49,9 +59,9 @@ const BASE_STICKERS: DinoSushiSticker[] = BASES.map((base) => ({
 const MOOD_STICKERS: DinoSushiSticker[] = [
   { id: "mood-love", name: "最愛", group: "mood", rule: "讓多多說「最愛」", art: { kind: "duoduo", state: "love" } },
   { id: "mood-yum", name: "好吃", group: "mood", rule: "讓多多說「好好吃」", art: { kind: "duoduo", state: "yum" } },
-  { id: "mood-sweet", name: "甜甜", group: "mood", rule: "給多多吃草莓或布丁", art: { kind: "duoduo", state: "sweet" } },
+  { id: "mood-sweet", name: "甜甜", group: "mood", rule: "這家店現在不賣甜點", art: { kind: "duoduo", state: "sweet" } },
   { id: "mood-puff", name: "噴火", group: "mood", rule: "給多多吃芥末", art: { kind: "duoduo", state: "fire" } },
-  { id: "mood-brush", name: "刷牙", group: "mood", rule: "幫多多刷牙", art: { kind: "duoduo", state: "toothbrush" } },
+  { id: "mood-brush", name: "刷牙", group: "mood", rule: "這家店現在不賣甜點", art: { kind: "duoduo", state: "toothbrush" } },
 ];
 
 const CUSTOMER_STICKERS: DinoSushiSticker[] = CUSTOMERS.map((customer) => ({
@@ -83,6 +93,7 @@ const SURPRISE_STICKERS: DinoSushiSticker[] = [
 
 export const DINO_SUSHI_STICKERS: readonly DinoSushiSticker[] = [
   ...FOOD_STICKERS,
+  ...RETIRED_FOOD_STICKERS,
   ...BASE_STICKERS,
   ...MOOD_STICKERS,
   ...SURPRISE_STICKERS,
@@ -197,27 +208,29 @@ export function factsFromRound(
 }
 
 /**
- * 2026-11-08 起托盤不放甜點，這幾張暫時拿不到：保底不送，免得送出孩子玩不到的東西。
- * 已經拿到的照留在貼紙書；沒拿過的不放進貼紙書、不計入總數與全收集（bookStickers、isStickerBookComplete）。
- * PR-C 換新貼紙時正式退役。
+ * 退役的貼紙（2026-11-08 甜點下架）：仍是合法 id（讀寫存檔不過濾）、已收集的照留在貼紙書；
+ * 保底不送、沒拿過的不放進貼紙書、不算總數與全收集（bookStickers、isStickerBookComplete）。
  */
-export const UNAVAILABLE_STICKER_IDS: ReadonlySet<string> = new Set([
+export const RETIRED_STICKER_IDS: ReadonlySet<string> = new Set([
   "topping-strawberry",
   "topping-pudding",
   "mood-sweet",
   "mood-brush",
 ]);
 
+/** 現役貼紙數（貼紙書的分母）。 */
+export const DINO_SUSHI_STICKER_TOTAL = DINO_SUSHI_STICKERS.filter((sticker) => !RETIRED_STICKER_IDS.has(sticker.id)).length;
+
 /** 這位玩家的貼紙書：拿得到的全部，加上舊存檔已經拿到的下架貼紙（不收回），依原本的順序。 */
 export function bookStickers(owned: Iterable<string>): DinoSushiSticker[] {
   const have = new Set(owned);
-  return DINO_SUSHI_STICKERS.filter((sticker) => !UNAVAILABLE_STICKER_IDS.has(sticker.id) || have.has(sticker.id));
+  return DINO_SUSHI_STICKERS.filter((sticker) => !RETIRED_STICKER_IDS.has(sticker.id) || have.has(sticker.id));
 }
 
 /** 拿得到的都收齊就算全收集；下架的那幾張不擋。 */
 export function isStickerBookComplete(owned: Iterable<string>): boolean {
   const have = new Set(owned);
-  return DINO_SUSHI_STICKERS.every((sticker) => UNAVAILABLE_STICKER_IDS.has(sticker.id) || have.has(sticker.id));
+  return DINO_SUSHI_STICKERS.every((sticker) => RETIRED_STICKER_IDS.has(sticker.id) || have.has(sticker.id));
 }
 
 export type CollectResult = {
@@ -239,7 +252,8 @@ export function collectStickers(
   const have = new Set(owned);
   const unlocked: DinoSushiStickerId[] = [];
   const grant = (id: string, when: boolean) => {
-    if (!when || have.has(id) || !isDinoSushiStickerId(id)) return;
+    // 退役的貼紙不再發（甜點下架後本來就做不到，這裡再擋一次）
+    if (!when || have.has(id) || !isDinoSushiStickerId(id) || RETIRED_STICKER_IDS.has(id)) return;
     have.add(id);
     unlocked.push(id);
   };
@@ -265,7 +279,7 @@ export function collectStickers(
   }
   // 成就類只能自己達成，不當保底送；暫時拿不到的（甜點、刷牙）也不送。
   const gift = DINO_SUSHI_STICKERS.find(
-    (sticker) => sticker.group !== "surprise" && !have.has(sticker.id) && !UNAVAILABLE_STICKER_IDS.has(sticker.id),
+    (sticker) => sticker.group !== "surprise" && !have.has(sticker.id) && !RETIRED_STICKER_IDS.has(sticker.id),
   );
   if (!gift || !isDinoSushiStickerId(gift.id)) return { unlocked, gifted: null };
   return { unlocked: [gift.id], gifted: gift.id };

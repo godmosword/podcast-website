@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { DINO_SUSHI_STICKERS } from "@/lib/games/dino-sushi/stickers";
+import { DINO_SUSHI_STICKERS, RETIRED_STICKER_IDS } from "@/lib/games/dino-sushi/stickers";
 import { PROGRESS_STORAGE_KEY } from "@/lib/progress-store";
 import { loadGameKitSettings, saveGameKitSettings } from "@/lib/gamekit/progress/settings";
 import { stickerLabel } from "@/lib/gamekit/progress/stickers";
@@ -165,8 +165,22 @@ describe("多多壽司屋貼紙存檔", () => {
     expect(seen.seen).toEqual(["topping-salmon", "base-temaki"]);
   });
 
-  it("舊的 24 張 id 還讀得回來，客人 id 也留著，不認識的會拿掉", () => {
-    const original = DINO_SUSHI_STICKERS.filter((sticker) => sticker.group !== "customer").map((sticker) => sticker.id);
+  it("舊的 24 張 id（含 4 張退役的甜點）還讀得回來，客人 id 也留著，不認識的會拿掉", () => {
+    const original = [
+      ...["tamago", "shrimp", "crab", "corn", "cucumber", "tuna", "floss", "salmon", "avocado", "strawberry", "pudding", "wasabi"].map((id) => `topping-${id}`),
+      "base-nigiri",
+      "base-gunkan",
+      "base-temaki",
+      "mood-love",
+      "mood-yum",
+      "mood-sweet",
+      "mood-puff",
+      "mood-brush",
+      "surprise-round",
+      "surprise-perfect",
+      "surprise-free",
+      "surprise-daily",
+    ];
     expect(original).toHaveLength(24);
     store.set(
       PROGRESS_STORAGE_KEY,
@@ -182,17 +196,14 @@ describe("多多壽司屋貼紙存檔", () => {
     expect(loadDinoSushiStickers().unlocked).toEqual([...original, "customer-xiaohong"]);
   });
 
-  it("收滿 30 張才加全站貼紙；只有舊的 24 張不會加，加過不重複", () => {
-    const ids = DINO_SUSHI_STICKERS.map((s) => s.id);
-    addDinoSushiStickers(ids.slice(0, 24));
+  it("現役 29 張收齊才加全站貼紙（退役的 4 張不用收）；少一張不會加，加過不重複", () => {
+    const active = DINO_SUSHI_STICKERS.filter((s) => !RETIRED_STICKER_IDS.has(s.id)).map((s) => s.id);
+    expect(active).toHaveLength(29);
+    addDinoSushiStickers(active.slice(0, 28));
     expect(JSON.parse(store.get(PROGRESS_STORAGE_KEY) ?? "{}").gameProfile?.stickers ?? []).not.toContain(
       DINO_SUSHI_BOOK_STICKER,
     );
-    addDinoSushiStickers(ids.slice(24, 29));
-    expect(JSON.parse(store.get(PROGRESS_STORAGE_KEY) ?? "{}").gameProfile?.stickers ?? []).not.toContain(
-      DINO_SUSHI_BOOK_STICKER,
-    );
-    addDinoSushiStickers([ids[29]!]);
+    addDinoSushiStickers([active[28]!]);
     const profile = JSON.parse(store.get(PROGRESS_STORAGE_KEY) ?? "{}").gameProfile;
     expect(profile.stickers.filter((id: string) => id === DINO_SUSHI_BOOK_STICKER)).toEqual([
       DINO_SUSHI_BOOK_STICKER,

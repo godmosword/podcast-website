@@ -1,12 +1,15 @@
 /**
- * 《多多壽司屋》八天開店。這一階段只做第 1–4 天的訂單。
- * 第 4 天就是現在的壽司屋：同一個 seed，托盤、訂單、客人、天空都跟以前一樣。
- * 第 5–8 天只有臉上的名字，玩法還在後面。
+ * 《多多壽司屋》八天開店。這一階段只做第 1–4 天的訂單。每一單都是真實配方（recipes.ts，2026-11-08 PR-C）：
+ * - 第 1 天：握壽司、每單一樣料。
+ * - 第 2 天：握壽司＋軍艦，最後一單是兩樣料的軍艦。
+ * - 第 3 天：手捲登場（第 2、4 單一定是手捲），最多兩樣料。
+ * - 第 4 天：三種飯都有，料數 1、1、2、2、3，手捲可以三樣。
+ * 主題只是偏好（有主題料的配方優先），不是硬篩。第 5–8 天只有臉上的名字，玩法還在後面。
  */
 
 import { pickIndex, seededRng } from "@/lib/games/candy-match/rng";
 import { CUSTOMERS, type CustomerId } from "./customers";
-import { buildOrders, buildScriptedOrders, buildTray, buildTrayWithTheme, ORDERS_PER_ROUND, type Order } from "./orders";
+import { buildOrders, buildRecipeRound, ORDERS_PER_ROUND, type Order, type OrderSlot } from "./orders";
 import { BASES, type BaseId, type ToppingId } from "./toppings";
 import { roundVariety, THEME_DAYS, type RoundVariety, type ThemeDay } from "./variety";
 
@@ -41,9 +44,20 @@ export type DayRound = {
 };
 
 const ALL_BASES: readonly BaseId[] = BASES.map((base) => base.id);
-const DAY1_SIZES = [1, 1, 1, 1, 2] as const;
-const DAY2_SIZES = [1, 1, 1, 2, 2] as const;
-const DAY3_SIZES = [1, 1, 2, 2, 2] as const;
+const NIGIRI: readonly BaseId[] = ["nigiri"];
+const NIGIRI_GUNKAN: readonly BaseId[] = ["nigiri", "gunkan"];
+const GUNKAN: readonly BaseId[] = ["gunkan"];
+const TEMAKI: readonly BaseId[] = ["temaki"];
+
+const slot = (size: number, bases: readonly BaseId[]): OrderSlot => ({ size, bases });
+
+/** 第 1–3 天每一單的料數與飯型（第 4 天見 buildOrders）。recipes.test.ts 守每一格至少 3 道配方可挑。 */
+export const DAY_SCRIPTS: Readonly<Record<1 | 2 | 3 | 4, readonly OrderSlot[]>> = {
+  1: [slot(1, NIGIRI), slot(1, NIGIRI), slot(1, NIGIRI), slot(1, NIGIRI), slot(1, NIGIRI)],
+  2: [slot(1, NIGIRI_GUNKAN), slot(1, NIGIRI_GUNKAN), slot(1, NIGIRI_GUNKAN), slot(1, NIGIRI_GUNKAN), slot(2, GUNKAN)],
+  3: [slot(1, ALL_BASES), slot(1, TEMAKI), slot(2, ALL_BASES), slot(2, TEMAKI), slot(2, ALL_BASES)],
+  4: [slot(1, ALL_BASES), slot(1, ALL_BASES), slot(2, ALL_BASES), slot(2, ALL_BASES), slot(3, ALL_BASES)],
+};
 
 /** 跟訂單、托盤的亂數錯開，換位子不會改掉第 4 天的指紋。 */
 const DAY1_ORDER_SALT = 0x0d1a0001;
@@ -101,18 +115,9 @@ function assignSeats(pins: readonly (CustomerId | undefined)[], visitors: readon
   return seats;
 }
 
-function scripted(
-  day: number,
-  seed: number,
-  tray: ToppingId[],
-  variety: RoundVariety,
-  allowedBases: readonly BaseId[],
-  sizes: readonly number[],
-  salt: number,
-): DayRound {
-  const orders = buildScriptedOrders(seed, tray, {
-    sizes,
-    bases: allowedBases,
+function scripted(day: 1 | 2 | 3, seed: number, variety: RoundVariety, allowedBases: readonly BaseId[], salt: number): DayRound {
+  const { orders, tray } = buildRecipeRound(seed, {
+    slots: DAY_SCRIPTS[day],
     seats: variety.seats,
     theme: variety.theme.toppings,
     salt,
@@ -120,80 +125,57 @@ function scripted(
   return { day, tray, orders, variety, allowedBases };
 }
 
-/** 第 1–4 天的一輪。第 4 天不走腳本，訂單跟 buildOrders(..., "normal") 同一份。 */
+function day1(seed: number): DayRound {
+  const others = pickIds(seed, DAY1_SEAT_SALT, ["anan", "ale", "lingling", "xiangxiang"], 2);
+  const visitors: CustomerId[] = ["xiaohong", ...others];
+  const variety: RoundVariety = {
+    visitors,
+    seats: assignSeats(["xiaohong"], visitors),
+    theme: QUIET_THEME,
+    sky: "sunny",
+    lantern: "red",
+    showTheme: false,
+  };
+  return scripted(1, seed, variety, NIGIRI, DAY1_ORDER_SALT);
+}
+
+function day2(seed: number): DayRound {
+  const other = pickIds(seed, DAY2_SEAT_SALT, ["xiaohong", "ale", "xiangxiang"], 1)[0]!;
+  const visitors: CustomerId[] = ["anan", "lingling", other];
+  const variety: RoundVariety = {
+    visitors,
+    seats: assignSeats(["anan", "lingling"], visitors),
+    theme: themeById("green"),
+    sky: "sunny",
+    lantern: "red",
+    showTheme: true,
+  };
+  return scripted(2, seed, variety, NIGIRI_GUNKAN, DAY2_ORDER_SALT);
+}
+
+function day3(seed: number): DayRound {
+  const extra = 2 + (Math.abs(seed) % 2);
+  const pool = CUSTOMERS.map((customer) => customer.id).filter((id) => id !== "lingling");
+  const visitors: CustomerId[] = ["lingling", ...pickIds(seed, DAY3_SEAT_SALT, pool, extra)];
+  const variety: RoundVariety = {
+    visitors,
+    seats: assignSeats(["lingling"], visitors),
+    theme: roundVariety(seed).theme,
+    sky: "evening",
+    lantern: "pink",
+    showTheme: true,
+  };
+  return scripted(3, seed, variety, ALL_BASES, DAY3_ORDER_SALT);
+}
+
+/** 第 1–4 天的一輪。第 4 天的訂單跟 buildOrders(seed, "normal") 同一份。 */
 export function buildDayRound(day: number, seed: number): DayRound {
+  if (day === 1) return day1(seed);
+  if (day === 2) return day2(seed);
+  if (day === 3) return day3(seed);
   if (day === 4) {
-    const tray = buildTray(seed);
-    const variety = roundVariety(seed);
-    return {
-      day: 4,
-      tray,
-      orders: buildOrders(seed, tray, "normal"),
-      variety,
-      allowedBases: ALL_BASES,
-    };
+    const { orders, tray } = buildOrders(seed, "normal");
+    return { day: 4, tray, orders, variety: roundVariety(seed), allowedBases: ALL_BASES };
   }
-
-  if (day === 1) {
-    const others = pickIds(seed, DAY1_SEAT_SALT, ["anan", "ale", "lingling", "xiangxiang"], 2);
-    const visitors: CustomerId[] = ["xiaohong", ...others];
-    const seats = assignSeats(["xiaohong"], visitors);
-    const variety: RoundVariety = {
-      visitors,
-      seats,
-      theme: QUIET_THEME,
-      sky: "sunny",
-      lantern: "red",
-      showTheme: false,
-    };
-    return scripted(1, seed, buildTrayWithTheme(seed, []), variety, ["nigiri"], DAY1_SIZES, DAY1_ORDER_SALT);
-  }
-
-  if (day === 2) {
-    const theme = themeById("green");
-    const other = pickIds(seed, DAY2_SEAT_SALT, ["xiaohong", "ale", "xiangxiang"], 1)[0]!;
-    const visitors: CustomerId[] = ["anan", "lingling", other];
-    const seats = assignSeats(["anan", "lingling"], visitors);
-    const variety: RoundVariety = {
-      visitors,
-      seats,
-      theme,
-      sky: "sunny",
-      lantern: "red",
-      showTheme: true,
-    };
-    return scripted(
-      2,
-      seed,
-      buildTrayWithTheme(seed, theme.toppings),
-      variety,
-      ["nigiri", "gunkan"],
-      DAY2_SIZES,
-      DAY2_ORDER_SALT,
-    );
-  }
-
-  if (day === 3) {
-    const base = roundVariety(seed);
-    const extra = 2 + (Math.abs(seed) % 2);
-    const others = pickIds(
-      seed,
-      DAY3_SEAT_SALT,
-      CUSTOMERS.map((customer) => customer.id).filter((id) => id !== "lingling"),
-      extra,
-    );
-    const visitors: CustomerId[] = ["lingling", ...others];
-    const seats = assignSeats(["lingling"], visitors);
-    const variety: RoundVariety = {
-      visitors,
-      seats,
-      theme: base.theme,
-      sky: "evening",
-      lantern: "pink",
-      showTheme: true,
-    };
-    return scripted(3, seed, buildTray(seed), variety, ALL_BASES, DAY3_SIZES, DAY3_ORDER_SALT);
-  }
-
   throw new Error(`day ${day} is not playable yet`);
 }

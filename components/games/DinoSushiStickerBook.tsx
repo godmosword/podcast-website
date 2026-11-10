@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
-import { ToppingArt, BaseArt, baseSrc, toppingSrc } from "@/lib/games/dino-sushi/art";
+import { ToppingArt, BaseArt, baseSrc, retiredToppingSrc, toppingSrc } from "@/lib/games/dino-sushi/art";
 import { customerById } from "@/lib/games/dino-sushi/customers";
 import { DUODUO_TOOTHBRUSH_SRC, duoduoStickerSrc } from "@/lib/games/dino-sushi/duoduo-sticker";
 import {
@@ -27,6 +27,8 @@ function artSrc(art: StickerArt): string {
   switch (art.kind) {
     case "topping":
       return toppingSrc(art.id);
+    case "retired-topping":
+      return retiredToppingSrc(art.id);
     case "base":
       return baseSrc(art.id);
     case "medal":
@@ -58,6 +60,12 @@ export function DinoSushiStickerFace({
         : "";
   let image = null;
   if (art.kind === "topping") image = <ToppingArt id={art.id} />;
+  else if (art.kind === "retired-topping") {
+    image = (
+      // eslint-disable-next-line @next/next/no-img-element -- 下架的甜點，只畫已收集的
+      <img src={retiredToppingSrc(art.id)} alt="" draggable={false} decoding="async" style={{ display: "block", objectFit: "contain", width: "100%", height: "100%" }} />
+    );
+  }
   else if (art.kind === "base") image = <BaseArt id={art.id} />;
   else if (art.kind === "medal") {
     image = (
@@ -77,7 +85,7 @@ export function DinoSushiStickerFace({
     );
   }
   return (
-    <span className={`${styles.pic} ${frame}`} data-kind={art.kind} style={silhouette}>
+    <span className={`${styles.pic} ${frame}`} data-kind={art.kind === "retired-topping" ? "topping" : art.kind} style={silhouette}>
       {/* 鎖住只畫剪影；問號只留在格子名稱，不再蓋住剪影的外形 */}
       {image}
     </span>

@@ -83,18 +83,18 @@
 
 ### PR-C 真實配方、貼紙換新（L2；依賴 PR-B 的新配料）
 
-- [ ] C1（L2，Leader）配方表 `recipes.ts`：每筆含飯型、料、幾樣料。不變量：每一天 × 每個 size × 當天允許飯型，至少 3 道不同配方（第 2 天兩樣料的軍艦至少 2 道，例：鮪魚玉米、鮭魚卵＋小黃瓜…依新料定）；混淆組不同單（醬類沙拉兩兩、蟹肉棒與蟹肉沙拉、玉子與蛋沙拉）。— 依賴：B2 核可
-- [ ] C2（L2，Leader）`days.ts` 腳本改寫（決定「第 1–4 天題池」），主題改由腳本指定、作偏好加權。— 依賴：C1
-- [ ] C3（L2，Leader）`orders.ts`：五單依序決定，不重抽：
+- [x] C1（L2，Leader，2026-11-10）配方表 `recipes.ts`：每筆含飯型、料、幾樣料。不變量：每一天 × 每個 size × 當天允許飯型，至少 3 道不同配方（第 2 天兩樣料的軍艦至少 2 道，例：鮪魚玉米、鮭魚卵＋小黃瓜…依新料定）；混淆組不同單（醬類沙拉兩兩、蟹肉棒與蟹肉沙拉、玉子與蛋沙拉）。— 依賴：B2 核可
+- [x] C2（L2，Leader，2026-11-10）`days.ts` 腳本改寫（決定「第 1–4 天題池」），主題改由腳本指定、作偏好加權。— 依賴：C1
+- [x] C3（L2，Leader，2026-11-10）`orders.ts`：五單依序決定，不重抽：
   1. 每單的候選＝符合當天飯型與 size 的配方，再依序套用：「料的聯集加進去後 ≤ 7 格」（托盤 8 格扣掉芥末）、與上一單不同、主題偏好、客人最愛；某一層過濾後沒有候選就跳過那一層（容量那一層除外）。
   2. 容量那一層若沒有候選，改從「只用已在托盤上的料」的配方裡挑；仍沒有就沿用前面任一單的配方（聯集不變，必定可行）。第一單一定放得下：每個配方最多 3 樣料。
   3. 每單只做一次有限的挑選，五單後結束，保證終止且托盤 ≤ 7 鹹料。
   4. 托盤剩下的格子從「放得上當天飯型」的料隨機補滿，加芥末。
   
   測試覆蓋「容量那一層無候選」與「只能沿用」兩條退路。— 依賴：C1、C2
-- [ ] C4（L2，Leader）新配料接進遊戲：`toppings.ts` 新增、`ToppingId` 收窄移除 strawberry／pudding（同步 `art.tsx` 的 `TEMAKI_PLACE`、`TOPPING_FIT` 這類完整 `Record`、`stickers.ts` 的 art／state、mood facts、`collectStickers`）。— 依賴：C1、B3
-- [ ] C5（L2，Leader）貼紙換新（決定「貼紙」）：`RETIRED_STICKER_IDS` 仍通過 `isDinoSushiStickerId`；`DINO_SUSHI_STICKER_TOTAL` 改成現役數；`awardBookIfComplete` 改成「現役集合都擁有」；保底只抽現役；貼紙書退役貼紙留原分組、說明改字。— 依賴：C4
-- [ ] C6（L2，Leader）測試：seed 1–1000 × 第 1–4 天 × 自由做：每單是配方、飯型與 size 合法、相鄰不同、托盤 8 格不重複且做得出每單、第 1 天全握壽司單一料；配方不變量；舊存檔 fixture：(a) 30 張全有、(b) 只缺 4 張退役、(c) 已領全收集 → 退役貼紙仍顯示、不重發、不收回、總數正確、不會自動變成全收集。e2e 依新訂單調整；QA 文件「第 1 天第 5 單」改寫。— 依賴：C2–C5
+- [x] C4（L2，Leader，2026-11-10）新配料接進遊戲：`toppings.ts` 新增、`ToppingId` 收窄移除 strawberry／pudding（同步 `art.tsx` 的 `TEMAKI_PLACE`、`TOPPING_FIT` 這類完整 `Record`、`stickers.ts` 的 art／state、mood facts、`collectStickers`）。— 依賴：C1、B3
+- [x] C5（L2，Leader，2026-11-10）貼紙換新（決定「貼紙」）：`RETIRED_STICKER_IDS` 仍通過 `isDinoSushiStickerId`；`DINO_SUSHI_STICKER_TOTAL` 改成現役數；`awardBookIfComplete` 改成「現役集合都擁有」；保底只抽現役；貼紙書退役貼紙留原分組、說明改字。— 依賴：C4
+- [x] C6（L2，Leader，2026-11-10）測試：seed 1–1000 × 第 1–4 天 × 自由做：每單是配方、飯型與 size 合法、相鄰不同、托盤 8 格不重複且做得出每單、第 1 天全握壽司單一料；配方不變量；舊存檔 fixture：(a) 30 張全有、(b) 只缺 4 張退役、(c) 已領全收集 → 退役貼紙仍顯示、不重發、不收回、總數正確、不會自動變成全收集。e2e 依新訂單調整；QA 文件「第 1 天第 5 單」改寫。— 依賴：C2–C5
 
 ## Files likely touched
 

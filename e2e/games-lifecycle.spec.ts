@@ -86,9 +86,9 @@ async function finishCandyLevel(page: Page) {
 async function serveSushiOrder(page: Page, n: number, opts: { skipLast?: boolean } = {}) {
   const label = await page.getByRole("img", { name: new RegExp(`^第 ${n} 單`) }).getAttribute("aria-label");
   const [base, ...toppings] = label!.split("想吃：")[1]!.split("、");
-  await page.getByRole("button", { name: `選${base}` }).click();
+  await page.getByRole("button", { name: `選${base}`, exact: true }).click();
   const put = opts.skipLast ? toppings.slice(0, -1) : toppings;
-  for (const t of put) await page.getByRole("button", { name: `加${t}` }).click();
+  for (const t of put) await page.getByRole("button", { name: `加${t}`, exact: true }).click();
   await page.getByRole("button", { name: /^(送給.+|給多多吃)$/ }).click();
   return toppings;
 }
@@ -130,7 +130,7 @@ test.describe("遊戲完整 lifecycle", () => {
     await expect(page.getByText(`還想要${missing}！`).first()).toBeVisible();
     await expect(page.getByRole("img", { name: /^第 1 單/ })).toBeVisible();
     await expect(page.getByRole("button", { name: /^換飯：/ })).toBeVisible();
-    await page.getByRole("button", { name: `加${missing}` }).click();
+    await page.getByRole("button", { name: `加${missing}`, exact: true }).click();
     await page.getByRole("button", { name: /^(送給.+|給多多吃)$/ }).click();
     await expect(page.getByRole("img", { name: /^第 2 單/ })).toBeVisible();
   });

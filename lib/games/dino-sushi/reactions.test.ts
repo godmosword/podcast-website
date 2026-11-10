@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { addTopping, changeBase, EMPTY_SUSHI, type Sushi } from "./sushi";
 import { buildTray } from "./orders";
-import { favoriteFor, MOOD_RANK, reactionFor, servingLine, shortCaption } from "./reactions";
+import { favoriteFor, reactionFor, servingLine, shortCaption } from "./reactions";
 import type { Order } from "./orders";
 
 function make(base: NonNullable<Sushi["base"]>, toppings: Sushi["toppings"]): Sushi {
@@ -47,12 +47,6 @@ describe("點餐反應", () => {
     );
   });
 
-  it("甜點：甜甜的、可以刷牙，但不能是最高級", () => {
-    const r = reactionFor(make("nigiri", ["tamago", "shrimp", "pudding"]), { order, firstTry: true });
-    expect(r).toMatchObject({ mood: "sweet", eats: true, line: "甜甜的！", brush: true });
-    expect(MOOD_RANK.sweet).toBeLessThan(MOOD_RANK.love);
-  });
-
   it("芥末：排氣管噗一朵白雲，多多自己笑", () => {
     const r = reactionFor(make("nigiri", ["tamago", "shrimp", "wasabi"]), { order, firstTry: true });
     expect(r).toMatchObject({ mood: "puff", eats: true, line: "噗～辣辣的，哈哈！" });
@@ -86,12 +80,11 @@ describe("自由做反應", () => {
       [
         reactionFor(make("gunkan", ["corn"]), { favorite: "salmon" }),
         reactionFor(make("gunkan", ["salmon"]), { favorite: "salmon" }),
-        reactionFor(make("gunkan", ["pudding"]), { favorite: "salmon" }),
         reactionFor(make("gunkan", ["wasabi"]), { favorite: "salmon" }),
         reactionFor(make("gunkan", []), { order: { base: "nigiri", toppings: ["corn"], customerId: "ale" }, firstTry: true }),
       ].map((r) => r.sfx),
     );
-    expect(sfx.size).toBe(5);
+    expect(sfx.size).toBe(4);
   });
 });
 

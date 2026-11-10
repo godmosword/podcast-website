@@ -1,12 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { seededRng } from "@/lib/games/candy-match/rng";
 import { customerById } from "./customers";
 import { TIER_SIZES, type OrderTier } from "./difficulty";
 import { roundVariety } from "./variety";
+import { RECIPES } from "./recipes";
 import {
   buildOrders,
   buildTray,
-  chooseToppings,
   matchOrder,
   orderAnnouncement,
   orderChecks,
@@ -18,111 +17,101 @@ import {
   type Order,
 } from "./orders";
 import { changeBase, addTopping, EMPTY_SUSHI, type Sushi } from "./sushi";
-import { toppingById, type ToppingId } from "./toppings";
+import { toppingById } from "./toppings";
 
 function make(base: Sushi["base"], toppings: Sushi["toppings"]): Sushi {
   return toppings.reduce((s, t) => addTopping(s, t), changeBase(EMPTY_SUSHI, base!));
 }
 
-describe("托盤", () => {
-  it("每輪 8 格：7 種家常料＋芥末，不重複；不放甜點（2026-11-08）", () => {
+const sameFood = (a: Order, b: Order) =>
+  a.base === b.base && a.toppings.length === b.toppings.length && a.toppings.every((id) => b.toppings.includes(id));
+const isRecipe = (o: Order) => RECIPES.some((r) => r.base === o.base && r.toppings.join() === o.toppings.join());
+
+describe("自由做的托盤", () => {
+  it("每輪 8 格：7 種家常料＋芥末，不重複；沒有甜點", () => {
     for (let seed = 1; seed <= 40; seed++) {
       const tray = buildTray(seed);
       expect(tray).toHaveLength(TRAY_SIZE);
       expect(new Set(tray).size).toBe(TRAY_SIZE);
       const kinds = tray.map((id) => toppingById(id).kind);
       expect(kinds.filter((k) => k === "savory")).toHaveLength(7);
-      expect(kinds.filter((k) => k === "sweet")).toHaveLength(0);
       expect(kinds.filter((k) => k === "wasabi")).toHaveLength(1);
+      expect(tray.at(-1)).toBe("wasabi");
     }
   });
 
   it("同 seed 結果相同；不同 seed 會輪替", () => {
     expect(buildTray(7)).toEqual(buildTray(7));
     const variants = new Set(Array.from({ length: 20 }, (_, i) => buildTray(i + 1).join(",")));
-    expect(variants.size).toBeGreaterThan(5);
+    expect(variants.size).toBeGreaterThan(10);
   });
 });
 
-describe("點餐", () => {
-  it("一輪 5 單，由飯＋1 料漸增到飯＋3 料", () => {
+describe("點餐：每一單都是真實配方（PR-C）", () => {
+  it("一輪 5 單，料數 1、1、2、2、3；每單都在配方表裡", () => {
     expect(ORDERS_PER_ROUND).toBe(5);
     expect(ORDER_SIZES).toEqual([1, 1, 2, 2, 3]);
-    const tray = buildTray(3);
-    const orders = buildOrders(3, tray);
-    expect(orders.map((o) => o.toppings.length)).toEqual([...ORDER_SIZES]);
-  });
-
-  it("訂單只點托盤上的家常料，同一單料不重複；相鄰兩單的飯和料不一樣", () => {
-    for (let seed = 1; seed <= 60; seed++) {
-      const tray = buildTray(seed);
-      const orders = buildOrders(seed, tray);
-      const variety = roundVariety(seed);
-      expect(orders.map((o) => o.customerId)).toEqual(variety.seats);
-      expect(variety.theme.toppings.every((id) => tray.includes(id))).toBe(true);
-      for (const o of orders) {
-        expect(o.toppings.some((id) => variety.theme.toppings.includes(id))).toBe(true);
-        expect(new Set(o.toppings).size).toBe(o.toppings.length);
-        for (const t of o.toppings) {
-          expect(tray).toContain(t);
-          expect(toppingById(t).kind).toBe("savory");
-          expect(t).not.toBe("strawberry");
-          expect(t).not.toBe("pudding");
-          expect(t).not.toBe("wasabi");
-        }
-      }
-      for (let i = 1; i < orders.length; i++) {
-        const prev = orders[i - 1]!;
-        const curr = orders[i]!;
-        const same =
-          prev.base === curr.base &&
-          prev.toppings.length === curr.toppings.length &&
-          prev.toppings.every((id) => curr.toppings.includes(id));
-        expect(same).toBe(false);
-      }
+    for (let seed = 1; seed <= 200; seed++) {
+      const { orders } = buildOrders(seed);
+      expect(orders.map((o) => o.toppings.length), `seed ${seed}`).toEqual([...ORDER_SIZES]);
+      for (const o of orders) expect(isRecipe(o), `seed ${seed} ${o.base} ${o.toppings.join("+")}`).toBe(true);
     }
   });
 
-  it("兩樣以上的單，托盤上有最愛就會點到", () => {
+  it("托盤做得出每一單：8 格不重複、7 種家常料＋芥末，訂單的料都在托盤上；相鄰兩單不一樣；客人照座位", () => {
+    for (let seed = 1; seed <= 300; seed++) {
+      const { orders, tray } = buildOrders(seed);
+      expect(tray).toHaveLength(TRAY_SIZE);
+      expect(new Set(tray).size).toBe(TRAY_SIZE);
+      expect(tray.filter((id) => toppingById(id).kind === "savory")).toHaveLength(7);
+      expect(orders.map((o) => o.customerId)).toEqual(roundVariety(seed).seats);
+      for (const o of orders) for (const id of o.toppings) expect(tray, `seed ${seed}`).toContain(id);
+      for (let i = 1; i < orders.length; i++) expect(sameFood(orders[i - 1]!, orders[i]!), `seed ${seed} 第 ${i} 單`).toBe(false);
+    }
+  });
+
+  it("鮪魚沙拉和肉鬆同時在托盤上時一頭一尾，不會相鄰（顏色接近）", () => {
+    let both = 0;
+    for (let seed = 1; seed <= 300; seed++) {
+      for (const tray of [buildOrders(seed).tray, buildTray(seed)]) {
+        if (!tray.includes("tuna") || !tray.includes("floss")) continue;
+        both += 1;
+        expect(tray.indexOf("tuna")).toBe(0);
+        expect(tray.indexOf("floss")).toBe(6);
+      }
+    }
+    expect(both).toBeGreaterThan(0);
+  });
+
+  it("每一輪更多變：300 個 seed 的托盤與搭配都很分散", () => {
+    const trays = new Set<string>();
+    const dishes = new Set<string>();
+    for (let seed = 1; seed <= 300; seed++) {
+      const { orders, tray } = buildOrders(seed);
+      trays.add(tray.join());
+      for (const o of orders) dishes.add(`${o.base}:${o.toppings.join("+")}`);
+    }
+    expect(trays.size).toBeGreaterThan(100);
+    expect(dishes.size).toBeGreaterThan(30);
+  });
+
+  it("有客人的最愛可以點時，多半會點到", () => {
     let hits = 0;
     let chances = 0;
-    for (let seed = 1; seed <= 40; seed++) {
-      const tray = buildTray(seed);
-      for (const order of buildOrders(seed, tray)) {
-        if (order.toppings.length < 2) continue;
-        const fav = customerById(order.customerId).favorites.filter((id) => tray.includes(id));
-        if (fav.length === 0) continue;
+    for (let seed = 1; seed <= 200; seed++) {
+      for (const order of buildOrders(seed).orders) {
+        const fav = customerById(order.customerId).favorites;
+        if (!RECIPES.some((r) => r.toppings.length === order.toppings.length && r.toppings.some((id) => fav.includes(id)))) continue;
         chances += 1;
         if (order.toppings.some((id) => fav.includes(id))) hits += 1;
       }
     }
     expect(chances).toBeGreaterThan(0);
-    expect(hits / chances).toBeGreaterThan(0.9);
+    expect(hits / chances).toBeGreaterThan(0.4);
   });
 
   it("同 seed 訂單決定性", () => {
-    expect(buildOrders(11, buildTray(11))).toEqual(buildOrders(11, buildTray(11)));
-  });
-
-  it("seed 7 仍有手捲（泡泡溢出測試用這個種子）", () => {
-    expect(buildOrders(7, buildTray(7)).some((order) => order.base === "temaki")).toBe(true);
-  });
-});
-
-describe("客人想吃的料", () => {
-  it("先拿托盤上的最愛，不夠再補別的家常料", () => {
-    const pool: ToppingId[] = ["shrimp", "corn", "salmon", "cucumber"];
-    const picked = chooseToppings(["corn", "tamago"], pool, 2, seededRng(3));
-    expect(picked).toHaveLength(2);
-    expect(picked).toContain("corn");
-    expect(picked.every((id) => pool.includes(id))).toBe(true);
-    expect(new Set(picked).size).toBe(2);
-  });
-
-  it("最愛不在托盤上就改點別的家常料", () => {
-    const picked = chooseToppings(["corn"], ["shrimp", "salmon"], 1, seededRng(1));
-    expect(picked).toHaveLength(1);
-    expect(["shrimp", "salmon"]).toContain(picked[0]);
+    expect(buildOrders(11)).toEqual(buildOrders(11));
   });
 });
 
@@ -139,9 +128,9 @@ describe("比對訂單", () => {
   });
 
   it("多放的料不算錯，但列在 extra", () => {
-    const r = matchOrder(make("temaki", ["tamago", "cucumber", "strawberry"]), order);
+    const r = matchOrder(make("temaki", ["tamago", "cucumber", "wasabi"]), order);
     expect(r.ok).toBe(true);
-    expect(r.extra).toEqual(["strawberry"]);
+    expect(r.extra).toEqual(["wasabi"]);
   });
 
   it("重複放同一種料不算多放", () => {
@@ -201,12 +190,10 @@ describe("比對訂單", () => {
 });
 
 describe("難度檔位的訂單", () => {
-  /** FNV-1a：一般檔 seed 1–100 的訂單在加檔位之前的指紋。變了＝視覺基準與 e2e 的訂單會跟著變。 */
+  /** FNV-1a：一般檔 seed 1–100 的訂單與托盤指紋。變了＝視覺基準與 e2e 的訂單會跟著變。 */
   function fingerprint(tier?: OrderTier): string {
     let h = 0x811c9dc5;
-    const text = Array.from({ length: 100 }, (_, i) =>
-      JSON.stringify(tier ? buildOrders(i + 1, buildTray(i + 1), tier) : buildOrders(i + 1, buildTray(i + 1))),
-    ).join("|");
+    const text = Array.from({ length: 100 }, (_, i) => JSON.stringify(tier ? buildOrders(i + 1, tier) : buildOrders(i + 1))).join("|");
     for (let k = 0; k < text.length; k++) {
       h ^= text.charCodeAt(k);
       h = Math.imul(h, 0x01000193) >>> 0;
@@ -214,31 +201,22 @@ describe("難度檔位的訂單", () => {
     return h.toString(16);
   }
 
-  /* 指紋 2026-11-08 重錄：托盤拿掉甜點、家常料改 7 格，訂單取料池跟著變（飯型抽籤仍用舊的 6 格池，不變） */
+  /* 指紋 2026-11-10 重錄：PR-C 改成真實配方、托盤由訂單決定 */
   it("一般檔（預設）跟指定 normal 一模一樣", () => {
-    expect(fingerprint()).toBe("71e800a1");
-    expect(fingerprint("normal")).toBe("71e800a1");
+    expect(fingerprint("normal")).toBe(fingerprint());
+    expect(fingerprint()).toBe("a5570c59");
   });
 
-  /* 三檔各 1000 個 seed（2026-10-17 另外掃過各 5000 個，相鄰重複 0 次） */
-  it.each(["easy", "normal", "advanced"] as const)("%s：料數照檔位、同 seed 決定性、相鄰兩單不同、只點托盤上的家常料", (tier) => {
+  it.each(["easy", "normal", "advanced"] as const)("%s：料數照檔位、同 seed 決定性、相鄰兩單不同、托盤做得出每一單", (tier) => {
     for (let seed = 1; seed <= 1000; seed++) {
-      const tray = buildTray(seed);
-      const orders = buildOrders(seed, tray, tier);
+      const { orders, tray } = buildOrders(seed, tier);
       expect(orders.map((o) => o.toppings.length)).toEqual(TIER_SIZES[tier]);
-      expect(buildOrders(seed, tray, tier)).toEqual(orders);
+      expect(buildOrders(seed, tier).orders).toEqual(orders);
       for (const o of orders) {
-        expect(new Set(o.toppings).size).toBe(o.toppings.length);
-        for (const id of o.toppings) {
-          expect(tray).toContain(id);
-          expect(toppingById(id).kind).toBe("savory");
-        }
+        expect(isRecipe(o), `seed ${seed}`).toBe(true);
+        for (const id of o.toppings) expect(tray).toContain(id);
       }
-      for (let i = 1; i < orders.length; i++) {
-        const [a, b] = [orders[i - 1]!, orders[i]!];
-        const same = a.base === b.base && a.toppings.length === b.toppings.length && a.toppings.every((t) => b.toppings.includes(t));
-        expect(same, `seed ${seed} 第 ${i} 單`).toBe(false);
-      }
+      for (let i = 1; i < orders.length; i++) expect(sameFood(orders[i - 1]!, orders[i]!), `seed ${seed} 第 ${i} 單`).toBe(false);
     }
   });
 });

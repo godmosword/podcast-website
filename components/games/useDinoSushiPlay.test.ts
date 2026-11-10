@@ -53,8 +53,6 @@ describe("點餐提示指向下一步", () => {
     const s0 = { ...start, index: 2 };
     const order = start.orders[2]!;
     const [first, second] = order.toppings;
-    // 托盤 11-08 起不放甜點；isOffStep 只看料的種類，甜點仍算彩蛋（PR-C 才拿掉這個種類）
-    const sweet = "strawberry" as const;
     const full = run(s0, [
       { type: "pick-base", base: order.base },
       { type: "add", id: first! },
@@ -64,7 +62,7 @@ describe("點餐提示指向下一步", () => {
     expect(hintTarget(full)).toEqual({ kind: "remove", slot: 1 });
     // 不管放的是缺的料還是彩蛋，都會把單上要的那層擠掉
     expect(isOffStep(full, { type: "add", id: second! })).toBe(true);
-    expect(isOffStep(full, { type: "add", id: sweet })).toBe(true);
+    expect(isOffStep(full, { type: "add", id: "wasabi" })).toBe(true);
     const removed = roundReducer(full, { type: "remove", slot: 1 });
     expect(hintTarget(removed)).toEqual({ kind: "topping", id: second });
   });
@@ -83,7 +81,7 @@ describe("無錯誤提示", () => {
     expect(IDLE_HINT_MS).toBe(4500);
   });
 
-  it("點錯飯型、點到訂單沒有的家常料，算偏離；訂單裡還沒放的另一樣、芥末與甜點都不算", () => {
+  it("點錯飯型、點到訂單沒有的家常料，算偏離；訂單裡還沒放的另一樣、芥末都不算", () => {
     const start = createRound("order", 7);
     const order = start.orders[0]!;
     const wrongBase = order.base === "nigiri" ? "temaki" : "nigiri";
@@ -92,11 +90,8 @@ describe("無錯誤提示", () => {
 
     const based = roundReducer(start, { type: "pick-base", base: order.base });
     const offOrder = start.tray.find((id) => toppingById(id).kind === "savory" && !order.toppings.includes(id))!;
-    // 托盤 11-08 起不放甜點；isOffStep 只看料的種類，甜點仍算彩蛋（PR-C 才拿掉這個種類）
-    const sweet = "strawberry" as const;
     expect(isOffStep(based, { type: "add", id: offOrder })).toBe(true);
     expect(isOffStep(based, { type: "add", id: "wasabi" })).toBe(false);
-    expect(isOffStep(based, { type: "add", id: sweet })).toBe(false);
     expect(isOffStep(based, { type: "add", id: order.toppings[0]! })).toBe(false);
     if (order.toppings.length > 1) {
       expect(isOffStep(based, { type: "add", id: order.toppings[1]! })).toBe(false);

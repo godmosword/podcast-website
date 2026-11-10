@@ -17,9 +17,9 @@ test.beforeEach(async ({ page }) => {
 async function serveOrder(page: Page, n: number, opts: { skipLast?: boolean } = {}) {
   const label = await page.getByRole("img", { name: new RegExp(`^第 ${n} 單`) }).getAttribute("aria-label");
   const [base, ...toppings] = label!.split("想吃：")[1]!.split("、");
-  await page.getByRole("button", { name: `選${base}` }).click();
+  await page.getByRole("button", { name: `選${base}`, exact: true }).click();
   const put = opts.skipLast ? toppings.slice(0, -1) : toppings;
-  for (const t of put) await page.getByRole("button", { name: `加${t}` }).click();
+  for (const t of put) await page.getByRole("button", { name: `加${t}`, exact: true }).click();
   await page.getByRole("button", { name: /^(送給.+|給多多吃)$/ }).click();
   return toppings;
 }
@@ -36,7 +36,7 @@ async function finishRound(page: Page, opts: { retrySecond?: boolean } = {}) {
   for (let n = 1; n <= 5; n++) {
     if (n === 2 && opts.retrySecond) {
       const toppings = await serveOrder(page, n, { skipLast: true });
-      await page.getByRole("button", { name: `加${toppings.at(-1)}` }).click();
+      await page.getByRole("button", { name: `加${toppings.at(-1)}`, exact: true }).click();
       await page.getByRole("button", { name: /^(送給.+|給多多吃)$/ }).click();
     } else {
       await serveOrder(page, n);

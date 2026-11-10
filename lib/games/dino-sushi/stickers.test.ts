@@ -7,7 +7,7 @@ import {
   DINO_SUSHI_STICKER_TOTAL,
   DINO_SUSHI_STICKERS,
   STICKER_ROUND_PROMISE,
-  UNAVAILABLE_STICKER_IDS,
+  RETIRED_STICKER_IDS,
   applyRoundStickers,
   collectStickers,
   factsFromRound,
@@ -44,30 +44,23 @@ function round(partial: Partial<RoundFactSource> = {}): RoundFactSource {
 }
 
 describe("多多壽司屋貼紙目錄", () => {
-  it("正好 30 張：前 24 張不變，後面是 6 位客人", () => {
-    expect(DINO_SUSHI_STICKERS).toHaveLength(DINO_SUSHI_STICKER_TOTAL);
-    expect(DINO_SUSHI_STICKER_TOTAL).toBe(30);
-    expect(DINO_SUSHI_STICKERS.filter((s) => s.group === "food")).toHaveLength(12);
-    expect(DINO_SUSHI_STICKERS.filter((s) => s.group === "base")).toHaveLength(3);
-    expect(DINO_SUSHI_STICKERS.filter((s) => s.group === "mood")).toHaveLength(5);
-    expect(DINO_SUSHI_STICKERS.filter((s) => s.group === "surprise")).toHaveLength(4);
-    expect(DINO_SUSHI_STICKERS.filter((s) => s.group === "customer")).toHaveLength(6);
-    const ids = DINO_SUSHI_STICKERS.map((s) => s.id);
-    expect(new Set(ids).size).toBe(30);
-    expect(ids.slice(0, 24)).toEqual([
-      ...TOPPINGS.map((topping) => `topping-${topping.id}`),
-      ...BASES.map((base) => `base-${base.id}`),
-      "mood-love",
-      "mood-yum",
-      "mood-sweet",
-      "mood-puff",
-      "mood-brush",
-      "surprise-round",
-      "surprise-perfect",
-      "surprise-free",
-      "surprise-daily",
-    ]);
-    expect(ids.slice(24)).toEqual(CUSTOMERS.map((customer) => `customer-${customer.id}`));
+  it("現役 29 張（料 13、飯 3、表情 3、驚喜 4、朋友 6）；草莓、布丁、甜甜、刷牙 4 張退役但 id 還在", () => {
+    expect(DINO_SUSHI_STICKER_TOTAL).toBe(29);
+    expect(DINO_SUSHI_STICKERS).toHaveLength(33);
+    expect([...RETIRED_STICKER_IDS].sort()).toEqual(["mood-brush", "mood-sweet", "topping-pudding", "topping-strawberry"]);
+    const active = DINO_SUSHI_STICKERS.filter((s) => !RETIRED_STICKER_IDS.has(s.id));
+    expect(active).toHaveLength(29);
+    expect(active.filter((s) => s.group === "food").map((s) => s.id)).toEqual(TOPPINGS.map((t) => `topping-${t.id}`));
+    expect(active.filter((s) => s.group === "base")).toHaveLength(3);
+    expect(active.filter((s) => s.group === "mood").map((s) => s.id)).toEqual(["mood-love", "mood-yum", "mood-puff"]);
+    expect(active.filter((s) => s.group === "surprise")).toHaveLength(4);
+    expect(active.filter((s) => s.group === "customer").map((s) => s.id)).toEqual(CUSTOMERS.map((c) => `customer-${c.id}`));
+    expect(new Set(DINO_SUSHI_STICKERS.map((s) => s.id)).size).toBe(33);
+    for (const id of RETIRED_STICKER_IDS) {
+      expect(isDinoSushiStickerId(id), id).toBe(true);
+      expect(stickerById(id)?.rule, id).toBe("這家店現在不賣甜點");
+    }
+    expect(stickerById("topping-ikura")).toMatchObject({ name: "鮭魚卵", rule: "把鮭魚卵放上壽司" });
     expect(stickerById("surprise-daily")).toMatchObject({
       name: "第一次來",
       rule: "第一次來玩",
@@ -128,30 +121,17 @@ describe("貼紙解鎖", () => {
     expect(eaten.unlocked).toEqual(["topping-corn", "base-gunkan", "mood-love"]);
   });
 
-  it("好吃、甜甜、噴火、刷牙各一張", () => {
+  it("好吃、噴火各一張；甜甜、刷牙已退役，就算條件成立也不再發", () => {
     const earned = collectStickers(
       [],
       factsFromRound(
         round({
           brushUsed: true,
-          plates: [
-            plate("nigiri", "yum"),
-            plate("nigiri", "sweet", ["strawberry"]),
-            plate("temaki", "puff", ["wasabi"]),
-          ],
+          plates: [plate("nigiri", "yum"), plate("nigiri", "sweet", ["shrimp"]), plate("temaki", "puff", ["wasabi"])],
         }),
       ),
     );
-    expect(earned.unlocked).toEqual([
-      "topping-strawberry",
-      "topping-wasabi",
-      "base-nigiri",
-      "base-temaki",
-      "mood-yum",
-      "mood-sweet",
-      "mood-puff",
-      "mood-brush",
-    ]);
+    expect(earned.unlocked).toEqual(["topping-shrimp", "topping-wasabi", "base-nigiri", "base-temaki", "mood-yum", "mood-puff"]);
   });
 
   it("點餐送完一輪、連續 5 盤一次做對、自由做吃飽、第一次來", () => {
@@ -337,17 +317,17 @@ describe("貼紙怎麼念", () => {
       stickerAnnouncement(["topping-tamago", "topping-shrimp", "topping-crab", "mood-yum"], null),
     ).toBe("新貼紙！玉子、蝦、蟹肉棒，還有更多！");
     expect(stickerTapSpeech("mood-brush", true)).toBe("刷牙");
-    expect(stickerTapSpeech("mood-brush", false)).toBe("還沒有。幫多多刷牙");
+    expect(stickerTapSpeech("mood-brush", false)).toBe("還沒有。這家店現在不賣甜點");
   });
 });
 
 describe("下架的甜點貼紙（2026-11-08）", () => {
-  const available = DINO_SUSHI_STICKERS.filter((s) => !UNAVAILABLE_STICKER_IDS.has(s.id)).map((s) => s.id);
+  const available = DINO_SUSHI_STICKERS.filter((s) => !RETIRED_STICKER_IDS.has(s.id)).map((s) => s.id);
 
   it("沒拿過的不放進貼紙書，總數只算拿得到的", () => {
     const book = bookStickers([]);
     expect(book.map((s) => s.id)).toEqual(available);
-    expect(book.some((s) => UNAVAILABLE_STICKER_IDS.has(s.id))).toBe(false);
+    expect(book.some((s) => RETIRED_STICKER_IDS.has(s.id))).toBe(false);
   });
 
   it("舊存檔已經拿到的照留在原本的位置", () => {

@@ -21,8 +21,8 @@ async function perfectRound(page: Page) {
     const label = await page.getByRole("img", { name: new RegExp(`^第 ${n} 單`) }).getAttribute("aria-label");
     const [base, ...toppings] = label!.split("想吃：")[1]!.split("、");
     lengths.push(toppings.length);
-    await page.getByRole("button", { name: `選${base}` }).click();
-    for (const t of toppings) await page.getByRole("button", { name: `加${t}` }).click();
+    await page.getByRole("button", { name: `選${base}`, exact: true }).click();
+    for (const t of toppings) await page.getByRole("button", { name: `加${t}`, exact: true }).click();
     await page.getByRole("button", { name: /^(送給.+|給多多吃)$/ }).click();
     await expect(
       page.getByRole("img", { name: `吃完 ${n} 盤` }).or(page.getByTestId("dino-sushi-result")).first(),
@@ -32,13 +32,13 @@ async function perfectRound(page: Page) {
   return lengths;
 }
 
-test("新的一天從第 1 天開始：只有握壽司，料數 1、1、1、1、2，不發全站星星", async ({ page }) => {
+test("新的一天從第 1 天開始：只有握壽司、每單一樣料，不發全站星星", async ({ page }) => {
   await page.goto("/games/dino-sushi");
   await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
   await expect(page.getByRole("button", { name: "選握壽司" })).toBeVisible();
   await expect(page.getByRole("button", { name: "選軍艦" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "選手捲" })).toHaveCount(0);
-  expect(await perfectRound(page)).toEqual([1, 1, 1, 1, 2]);
+  expect(await perfectRound(page)).toEqual([1, 1, 1, 1, 1]);
 
   const saved = await page.evaluate(() => {
     const raw = JSON.parse(localStorage.getItem("cheche:progress") ?? "{}");
@@ -131,8 +131,8 @@ for (const vp of [
       expect(toppings.length).toBe([1, 1, 2, 2, 3][n - 1]);
       if (n === 5) await bubble.screenshot({ path: info.outputPath(`day4-${vp.width}x${vp.height}.png`) });
       if (n < 5) {
-        await page.getByRole("button", { name: `選${base}` }).click();
-        for (const t of toppings) await page.getByRole("button", { name: `加${t}` }).click();
+        await page.getByRole("button", { name: `選${base}`, exact: true }).click();
+        for (const t of toppings) await page.getByRole("button", { name: `加${t}`, exact: true }).click();
         await page.getByRole("button", { name: /^(送給.+|給多多吃)$/ }).click();
         await expect(page.getByRole("img", { name: `吃完 ${n} 盤` })).toBeVisible();
       }

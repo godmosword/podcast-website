@@ -1,7 +1,7 @@
 /**
  * 《多多壽司屋》每一輪的小變化。同一個 seed 永遠得到同一組，測試與截圖才重現得了。
  * 難度不變：仍是 5 單、料數 1、1、2、2、3。不計時、不扣分。
- * 訂單仍只點熟食家常料；草莓、布丁、芥末不進訂單，也不另加新料。
+ * 訂單是真實配方（recipes.ts）；主題只是偏好，有主題料的配方先挑。芥末不進訂單。
  * 圓蓋只展示已經拿到的貼紙，不新增拿貼紙的規則、不改存檔。
  */
 
@@ -26,7 +26,7 @@ export type ThemeDay = {
 export const THEME_DAYS: readonly ThemeDay[] = [
   { id: "yellow", label: "今天是黃色日", name: "黃色日", toppings: ["tamago", "corn"] },
   { id: "green", label: "今天是綠色日", name: "綠色日", toppings: ["cucumber", "avocado"] },
-  { id: "seafood", label: "今天是海鮮日", name: "海鮮日", toppings: ["shrimp", "crab", "tuna", "salmon"] },
+  { id: "seafood", label: "今天是海鮮日", name: "海鮮日", toppings: ["shrimp", "crab", "tuna", "salmon", "ikura", "unagi", "scallop"] },
 ];
 
 export const SKY_MOODS: readonly SkyMood[] = ["sunny", "evening", "snow"];
