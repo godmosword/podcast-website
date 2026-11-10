@@ -528,8 +528,8 @@ async function openDinoSushi(
 async function makeDinoOrder(page: Page, n: number, serve: boolean) {
   const label = await page.getByRole("img", { name: new RegExp(`^第 ${n} 單`) }).getAttribute("aria-label");
   const [base, ...toppings] = label!.split("想吃：")[1]!.split("、");
-  await page.getByRole("button", { name: `選${base}` }).click();
-  for (const t of toppings) await page.getByRole("button", { name: `加${t}` }).click();
+  await page.getByRole("button", { name: `選${base}`, exact: true }).click();
+  for (const t of toppings) await page.getByRole("button", { name: `加${t}`, exact: true }).click();
   if (!serve) return;
   await page.getByRole("button", { name: /^(送給.+|給多多吃)$/ }).click();
   await expect(
