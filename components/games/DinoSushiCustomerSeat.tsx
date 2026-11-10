@@ -55,6 +55,8 @@ export function DinoSushiCustomerSeat({
   const customer = customerById(order.customerId);
   const favorite = order.toppings.some((id) => customer.favorites.includes(id));
   const happy = phase === "react" && mood !== null && mood !== "look";
+  /* 咬下去到開心那一拍換成「好吃」臉；缺料（look）不吃，不換。兩張一起放、只切顯示，換臉不會閃 */
+  const yum = Boolean(customer.yumSticker) && mood !== "look" && (phase === "eat" || happy);
   return (
     <div
       className={styles.seat}
@@ -68,7 +70,11 @@ export function DinoSushiCustomerSeat({
       <span className={styles.seatFace}>
         <span className={styles.seatSticker}>
           {/* eslint-disable-next-line @next/next/no-img-element -- 核准的黏土貼紙，只去背不重畫 */}
-          <img src={customer.sticker} alt="" draggable={false} decoding="sync" />
+          <img src={customer.sticker} alt="" draggable={false} decoding="sync" data-shown={yum ? "false" : "true"} />
+          {customer.yumSticker ? (
+            /* eslint-disable-next-line @next/next/no-img-element -- 核准的黏土貼紙（好吃臉），同畫布疊在上面 */
+            <img src={customer.yumSticker} alt="" draggable={false} decoding="sync" data-yum data-shown={yum ? "true" : "false"} />
+          ) : null}
         </span>
         {happy ? <Heart n={1} /> : null}
         {happy ? <Heart n={2} /> : null}
