@@ -21,6 +21,8 @@ export type Customer = {
   /** 定裝照。標題頁、貼紙書、謝謝膠囊用。 */
   /** 全身貼紙。排隊、座位、點餐泡泡用。 */
   sticker: string;
+  /** 「好吃」臉（瞇眼開口笑），座位上咬下去和開心那一拍換上。只有核可過的朋友才有（PR-B 第二輪，阿樂沒有）。 */
+  yumSticker?: string;
   /** 進店第一句，後面再接想吃的壽司。 */
   greeting: string;
   /** 這單做對、朋友咬下去那一拍說的一句。 */
@@ -34,6 +36,7 @@ export const CUSTOMERS: readonly Customer[] = [
     name: "小紅",
     fullName: "小紅賽車",
     sticker: dinoSushiSrc("customers/xiaohong.webp"),
+    yumSticker: dinoSushiSrc("customers/xiaohong-yum.webp"),
     greeting: "嗨，我是小紅。",
     thanks: "咻～好快好好吃！",
     favorites: ["shrimp"],
@@ -43,6 +46,7 @@ export const CUSTOMERS: readonly Customer[] = [
     name: "安安",
     fullName: "安安救護車",
     sticker: dinoSushiSrc("customers/anan.webp"),
+    yumSticker: dinoSushiSrc("customers/anan-yum.webp"),
     greeting: "你好，我是安安。",
     thanks: "謝謝你，好健康喔！",
     favorites: ["cucumber", "tamago"],
@@ -61,6 +65,7 @@ export const CUSTOMERS: readonly Customer[] = [
     name: "鈴鈴",
     fullName: "鈴鈴清潔車",
     sticker: dinoSushiSrc("customers/lingling.webp"),
+    yumSticker: dinoSushiSrc("customers/lingling-yum.webp"),
     greeting: "你好，我是鈴鈴。",
     thanks: "乾乾淨淨，真好吃！",
     favorites: ["cucumber"],
@@ -70,6 +75,7 @@ export const CUSTOMERS: readonly Customer[] = [
     name: "東東",
     fullName: "東東挖土機",
     sticker: dinoSushiSrc("customers/dongdong.webp"),
+    yumSticker: dinoSushiSrc("customers/dongdong-yum.webp"),
     greeting: "挖，我是東東。",
     thanks: "挖～一大口！",
     favorites: ["floss", "tuna", "crab"],
@@ -79,6 +85,7 @@ export const CUSTOMERS: readonly Customer[] = [
     name: "香香",
     fullName: "香香餐車",
     sticker: dinoSushiSrc("customers/xiangxiang.webp"),
+    yumSticker: dinoSushiSrc("customers/xiangxiang-yum.webp"),
     greeting: "你好，我是香香。",
     thanks: "你做得比我還香！",
     favorites: ["salmon", "tamago"],

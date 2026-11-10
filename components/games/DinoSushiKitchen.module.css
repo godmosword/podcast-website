@@ -582,6 +582,11 @@
   pointer-events: none;
 }
 
+/* 平常的臉和「好吃」臉疊在同一格，只切顯示（好吃臉一坐下就載好，換臉不閃） */
+.seatSticker > img[data-shown="false"] {
+  visibility: hidden;
+}
+
 .seatFace::after {
   content: "";
   position: absolute;
@@ -596,7 +601,7 @@
 
 /*
  * 朋友吃到那一拍：車頂兩側冒兩顆愛心往上飄，最愛再加星星。比多多的反應大——最開心的要是朋友（設計審 MUST-1）。
- * 謝謝膠囊就在客人正上方，愛心放兩側、座位疊到膠囊上面，才不會被蓋住。用 margin 置中，transform 留給動畫。
+ * 謝謝膠囊就在客人正上方，愛心放在車身兩側、不碰到膠囊；星星貼著車尾，不飄到多多那邊。用 margin 置中，transform 留給動畫。
  */
 .seat[data-mood] {
   z-index: 5;
@@ -604,8 +609,8 @@
 
 .seatHeart {
   position: absolute;
-  top: -4%;
-  left: 12%;
+  top: 12%;
+  left: 8%;
   width: 30px;
   height: 30px;
   margin-left: -15px;
@@ -625,8 +630,8 @@
 
 .seatStar {
   position: absolute;
-  top: 16%;
-  left: 2%;
+  top: 34%;
+  left: 98%;
   width: 22px;
   height: 22px;
   margin-left: -11px;

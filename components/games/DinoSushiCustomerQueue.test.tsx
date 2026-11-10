@@ -101,3 +101,38 @@ describe("客人座位", () => {
     expect(document.querySelector("[data-customer-seat]")?.querySelectorAll("svg")).toHaveLength(0);
   });
 });
+
+describe("客人座位的「好吃」臉（PR-B 第二輪）", () => {
+  const orderOf = (customerId: CustomerId) => ({ base: "nigiri" as const, toppings: ["shrimp" as const, "cucumber" as const], customerId });
+  const shownFace = () => {
+    const imgs = [...document.querySelectorAll<HTMLImageElement>("[data-customer-seat] img")];
+    return imgs.find((img) => img.getAttribute("data-shown") === "true")?.getAttribute("src");
+  };
+
+  it("有好吃臉的朋友：一坐下就先載好，咬下去和開心那一拍換上，其他時候是平常的臉", () => {
+    const xiaohong = customerById("xiaohong");
+    expect(xiaohong.yumSticker).toMatch(/xiaohong-yum\.webp$/);
+    for (const [phase, mood, yum] of [
+      ["idle", null, false],
+      ["ride", null, false],
+      ["eat", null, true],
+      ["react", "love", true],
+      ["react", "look", false],
+    ] as const) {
+      const { unmount } = render(
+        <DinoSushiCustomerSeat order={orderOf("xiaohong")} phase={phase} mood={mood} reducedMotion={false} />,
+      );
+      expect(document.querySelectorAll("[data-customer-seat] img"), "兩張都在（預先載好）").toHaveLength(2);
+      expect(shownFace(), `${phase}/${mood}`).toBe(yum ? xiaohong.yumSticker : xiaohong.sticker);
+      unmount();
+    }
+  });
+
+  it("阿樂沒有核可的好吃臉：一直是平常的臉，也不多載一張", () => {
+    const ale = customerById("ale");
+    expect(ale.yumSticker).toBeUndefined();
+    render(<DinoSushiCustomerSeat order={orderOf("ale")} phase="eat" mood={null} reducedMotion={false} />);
+    expect(document.querySelectorAll("[data-customer-seat] img")).toHaveLength(1);
+    expect(shownFace()).toBe(ale.sticker);
+  });
+});

@@ -7,10 +7,14 @@
  * 成品對齊多多：public/games/v2/dino-sushi/duoduo/sticker-*.webp
  * （1024×1024、透明、輪底約在畫布高度 92%）。
  *
- *   npm run build:dino-sushi-customers
+ *   npm run build:dino-sushi-customers           # 全身貼紙 <id>.webp
+ *   npm run build:dino-sushi-customers -- --yum  # 「好吃」臉 <id>-yum.webp（草稿 <id>-yum.jpg，有核可的才做）
  *   npm run optimize:dino-sushi-assets
+ *
+ * 好吃臉是 PR-B 第二輪生的（scripts/generate-dino-sushi-food.ts），走同一套去背、翻轉、輪底對齊，
+ * 座位換臉時位置才不會跳。
  */
-import { mkdirSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import sharp from "sharp";
 import { removeBorderBackground } from "./lib/roamer-alpha";
@@ -99,8 +103,8 @@ function opaqueBounds(data: Buffer, w: number, h: number): Bounds {
   return { minX, minY, maxX, maxY };
 }
 
-async function buildOne(id: string): Promise<void> {
-  const src = readFileSync(join(DRAFTS, `${id}.jpg`));
+async function buildOne(id: string, variant: "" | "-yum" = ""): Promise<void> {
+  const src = readFileSync(join(DRAFTS, `${id}${variant}.jpg`));
   const { png, bgPct } = await removeBorderBackground(src);
   let working = png;
   if (MIRROR.has(id)) working = await sharp(working).flop().png().toBuffer();
@@ -135,15 +139,19 @@ async function buildOne(id: string): Promise<void> {
   if (Math.abs(bottom - BASELINE) > 2) {
     throw new Error(`${id} 輪底在 y=${bottom}，應為 ${BASELINE}`);
   }
-  await sharp(canvas).webp(WEBP).toFile(join(OUT_DIR, `${id}.webp`));
+  await sharp(canvas).webp(WEBP).toFile(join(OUT_DIR, `${id}${variant}.webp`));
   console.log(
-    `${id} 去背 ${bgPct.toFixed(1)}% 淡影 ${shadowPx}px ${MIRROR.has(id) ? "翻轉 " : ""}` +
+    `${id}${variant} 去背 ${bgPct.toFixed(1)}% 淡影 ${shadowPx}px ${MIRROR.has(id) ? "翻轉 " : ""}` +
       `車身 ${box.maxX - box.minX + 1}×${box.maxY - box.minY + 1} 底 ${bottom}`,
   );
 }
 
 async function main(): Promise<void> {
   mkdirSync(OUT_DIR, { recursive: true });
+  if (process.argv.includes("--yum")) {
+    for (const id of IDS) if (existsSync(join(DRAFTS, `${id}-yum.jpg`))) await buildOne(id, "-yum");
+    return;
+  }
   for (const id of IDS) await buildOne(id);
 }
 

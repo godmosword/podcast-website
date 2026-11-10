@@ -31,6 +31,12 @@ export const DINO_SUSHI_SM_WIDTH = {
   "customers/lingling.webp": 384,
   "customers/dongdong.webp": 384,
   "customers/xiangxiang.webp": 384,
+  // 「好吃」臉：跟全身貼紙同畫布、同大小（阿樂沒有）
+  "customers/xiaohong-yum.webp": 384,
+  "customers/anan-yum.webp": 384,
+  "customers/lingling-yum.webp": 384,
+  "customers/dongdong-yum.webp": 384,
+  "customers/xiangxiang-yum.webp": 384,
   // 飯：橫放手機（932×430）備料盤上最大 190px；手捲是瘦長的，寬只有 85px
   "food/nigiri.webp": 576,
   "food/gunkan.webp": 576,
