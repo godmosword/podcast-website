@@ -35,9 +35,10 @@
     "9e2f8d23-a42f-48ac-81ce-240359e22989",
     "4e073130-63fd-43e2-bf3d-d0a655bec671",
     "590071f9-75fe-4abb-b394-f9073b449777",
-    "5dd55d90-f529-45ae-8236-b65a4da786dd"
+    "5dd55d90-f529-45ae-8236-b65a4da786dd",
+    "0714cf56-fbc4-45bc-ba31-2ca7ff2d026b"
   ],
-  "lastRun": "2026-11-04T08:13:47.404Z",
+  "lastRun": "2026-11-11T09:40:02.622Z",
   "guidBySlug": {
     "ep-10": "3ccfc2c9-c8e3-4a44-b0b5-e20644b8fbbe",
     "ep-11": "42c09026-1f99-4fe9-aa4d-a97ce5161d2a",
@@ -66,11 +67,20 @@
     "ep-34": "4e073130-63fd-43e2-bf3d-d0a655bec671",
     "ep-35": "590071f9-75fe-4abb-b394-f9073b449777",
     "ep-36": "5dd55d90-f529-45ae-8236-b65a4da786dd",
+    "ep-37": "0714cf56-fbc4-45bc-ba31-2ca7ff2d026b",
     "ep-7": "1cdd1d5b-f42e-4e6d-a68c-4fa059785576",
     "ep-8": "a26a07c2-a311-4237-be8e-931cb4a043e0",
     "ep-9": "c0213111-6d31-48a5-a584-9ca72156382f"
   },
   "episodes": {
+    "0714cf56-fbc4-45bc-ba31-2ca7ff2d026b": {
+      "slug": "ep-37",
+      "metadata": "ok",
+      "cover": "ok",
+      "blur": "ok",
+      "subtitles": "pending",
+      "subtitleAttempts": 0
+    },
     "137ceb85-d0c7-45e8-97b9-1d09ce046cb9": {
       "slug": "ep-19",
       "metadata": "ok",
