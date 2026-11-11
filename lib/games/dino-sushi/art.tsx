@@ -48,10 +48,22 @@ const TOPPING_SRC: Record<ToppingId, string> = {
   floss: dinoSushiSrc("food/floss.webp"),
   salmon: dinoSushiSrc("food/salmon.webp"),
   avocado: dinoSushiSrc("food/avocado.webp"),
-  strawberry: dinoSushiSrc("food/strawberry.webp"),
-  pudding: dinoSushiSrc("food/pudding.webp"),
+  ikura: dinoSushiSrc("food/ikura.webp"),
+  unagi: dinoSushiSrc("food/unagi.webp"),
+  scallop: dinoSushiSrc("food/scallop.webp"),
   wasabi: dinoSushiSrc("food/wasabi.webp"),
 };
+
+/** 下架的甜點（2026-11-08）：托盤上已經沒有，只有貼紙書裡已收集的那幾張還要畫。 */
+export type RetiredToppingId = "strawberry" | "pudding";
+const RETIRED_TOPPING_SRC: Record<RetiredToppingId, string> = {
+  strawberry: dinoSushiSrc("food/strawberry.webp"),
+  pudding: dinoSushiSrc("food/pudding.webp"),
+};
+
+export function retiredToppingSrc(id: RetiredToppingId): string {
+  return RETIRED_TOPPING_SRC[id];
+}
 
 /** 貼紙書的剪影要拿原圖當遮罩，所以讓外面拿得到圖檔路徑。 */
 export function baseSrc(id: BaseId): string {
@@ -90,19 +102,17 @@ const TEMAKI_PLACE: Record<ToppingId, { w: number; y: number }> = {
   floss: { w: 88, y: 24 },
   salmon: { w: 78, y: 25 },
   avocado: { w: 72, y: 26 },
-  strawberry: { w: 68, y: 27 },
-  pudding: { w: 90, y: 25 },
+  ikura: { w: 84, y: 23 },
+  unagi: { w: 80, y: 25 },
+  scallop: { w: 64, y: 26 },
   wasabi: { w: 60, y: 25 },
 };
 
 /**
  * 手捲三樣料時，中間那格（疊在最後面、抬到兩側上方）的個別調整。
- * 布丁（彩蛋）：照一般抬高會整顆連綠盤冒出來；沉到 y 20%、少斜一點，只露焦糖頂和一截黃色布丁身，
- * 盤子藏在兩側的料後面。只露焦糖在手機上會被看成巧克力，所以留一截布丁身。
+ * 以前給布丁用（沉一點才不會整顆冒出來）；2026-11-08 甜點下架後目前沒有要調的料，機制留著。
  */
-const TEMAKI_MIDDLE: Partial<Record<ToppingId, { dy: number; rot: number }>> = {
-  pudding: { dy: -5, rot: -10 },
-};
+const TEMAKI_MIDDLE: Partial<Record<ToppingId, { dy: number; rot: number }>> = {};
 
 /** 每種料的圖形差很多：條狀蓋滿、方塊與高的甜點要縮小，才不會蓋過飯。 */
 const TOPPING_FIT: Record<ToppingId, { scale: number; dy: number }> = {
@@ -115,8 +125,9 @@ const TOPPING_FIT: Record<ToppingId, { scale: number; dy: number }> = {
   floss: { scale: 0.76, dy: 1 },
   salmon: { scale: 0.94, dy: 3 },
   avocado: { scale: 0.8, dy: 2 },
-  strawberry: { scale: 0.46, dy: -2 },
-  pudding: { scale: 0.42, dy: -4 },
+  ikura: { scale: 0.7, dy: 2 },
+  unagi: { scale: 0.94, dy: 3 },
+  scallop: { scale: 0.66, dy: 3 },
   wasabi: { scale: 0.36, dy: 8 },
 };
 

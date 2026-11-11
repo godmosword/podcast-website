@@ -102,7 +102,7 @@ describe("砧板上的料重掛規則", () => {
     expect(z(front)).toBeGreaterThan(Math.max(...zs));
   });
 
-  it("手捲三樣料、布丁在中間：沉一點、少斜一點，露出焦糖頂和一截布丁身（彩蛋）；其他料與其他位置不變", () => {
+  it("手捲三樣料：中間那樣抬高到兩側上方、斜一點；兩側不抬", () => {
     const spot = (toppings: ToppingId[], name: string) => {
       const { container } = render(<SushiArt sushi={{ base: "temaki", toppings }} />);
       const span = layers(container).get(name)!;
@@ -110,11 +110,9 @@ describe("砧板上的料重掛規則", () => {
       cleanup();
       return out;
     };
-    expect(spot(["pudding", "shrimp", "crab"], "pudding")).toEqual({ top: 20, transform: "translate(-50%, -50%) rotate(-10deg)" });
-    // 中間是別的料：照舊抬高到兩側上方
     // 鮭魚 2026-11-09 改成 y 25（新手捲上放大、冒出筒口），中間再抬 12 → 13
     expect(spot(["salmon", "shrimp", "crab"], "salmon")).toEqual({ top: 13, transform: "translate(-50%, -50%) rotate(-18deg)" });
-    // 布丁在兩側：照舊
-    expect(spot(["shrimp", "pudding", "crab"], "pudding")).toEqual({ top: 28, transform: "translate(-50%, -50%) rotate(-26deg)" });
+    // 鮭魚在左側：不抬高（y 25 ＋ 3）
+    expect(spot(["shrimp", "salmon", "crab"], "salmon")).toEqual({ top: 28, transform: "translate(-50%, -50%) rotate(-26deg)" });
   });
 });

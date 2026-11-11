@@ -10,19 +10,16 @@ import {
 } from "./sushi";
 
 describe("食材表", () => {
-  it("三種飯型、12 種料，id 不重複", () => {
+  it("三種飯型、13 種料（12 家常料＋芥末），id 不重複", () => {
     expect(BASES.map((b) => b.id)).toEqual(["nigiri", "gunkan", "temaki"]);
-    expect(TOPPINGS).toHaveLength(12);
-    expect(new Set(TOPPINGS.map((t) => t.id)).size).toBe(12);
+    expect(TOPPINGS).toHaveLength(13);
+    expect(new Set(TOPPINGS.map((t) => t.id)).size).toBe(13);
   });
 
-  it("點餐只用熟食家常料：甜點與芥末不在 SAVORY_TOPPINGS", () => {
-    expect(SAVORY_TOPPINGS.length).toBeGreaterThanOrEqual(6);
+  it("點餐只用家常料：芥末不在 SAVORY_TOPPINGS；甜點已下架（2026-11-08）", () => {
+    expect(SAVORY_TOPPINGS).toHaveLength(12);
     for (const t of SAVORY_TOPPINGS) expect(t.kind).toBe("savory");
-    expect(TOPPINGS.filter((t) => t.kind === "sweet").map((t) => t.id)).toEqual([
-      "strawberry",
-      "pudding",
-    ]);
+    expect(TOPPINGS.filter((t) => t.kind === "sweet")).toEqual([]);
     expect(TOPPINGS.filter((t) => t.kind === "wasabi").map((t) => t.id)).toEqual(["wasabi"]);
   });
 

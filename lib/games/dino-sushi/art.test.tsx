@@ -2,6 +2,7 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { BaseArt, DINO_SUSHI_CLAY_SRCS, PlateArt, SushiArt, ToppingArt, traySrc } from "./art";
+import { TOPPINGS } from "./toppings";
 
 vi.stubGlobal("React", React);
 
@@ -19,7 +20,7 @@ describe("壽司黏土圖", () => {
   });
 
   it("手捲的料坐在飯口上：每一樣中心都在海苔前層（37%）以上、夠寬，一眼看得到包了什麼", () => {
-    const ids = ["tamago", "shrimp", "crab", "corn", "cucumber", "tuna", "floss", "salmon", "avocado", "strawberry", "pudding", "wasabi"] as const;
+    const ids = TOPPINGS.map((t) => t.id);
     for (const id of ids) {
       const html = renderToStaticMarkup(<SushiArt sushi={{ base: "temaki", toppings: [id] }} />);
       const top = Number(html.match(/top:(\d+(?:\.\d+)?)%/)?.[1]);
@@ -89,12 +90,13 @@ describe("壽司黏土圖", () => {
         "/games/v2/dino-sushi/shop/sm/prepplate.webp",
         "/games/v2/dino-sushi/food/sm/gunkan.webp",
         "/games/v2/dino-sushi/food/sm/temaki-front.webp",
-        "/games/v2/dino-sushi/food/sm/pudding.webp",
+        "/games/v2/dino-sushi/food/sm/ikura.webp",
+        "/games/v2/dino-sushi/food/sm/scallop.webp",
       ]),
     );
     expect(new Set(DINO_SUSHI_CLAY_SRCS).size).toBe(DINO_SUSHI_CLAY_SRCS.length);
     expect(DINO_SUSHI_CLAY_SRCS).toContain("/games/v2/dino-sushi/shop/sm/plate-gold.webp");
-    expect(DINO_SUSHI_CLAY_SRCS).toHaveLength(13 + 3 + 1 + 12);
+    expect(DINO_SUSHI_CLAY_SRCS).toHaveLength(13 + 3 + 1 + 13);
     // 直式招牌已改成刻在櫃台前板的文字，不再預載
     expect(DINO_SUSHI_CLAY_SRCS.some((src) => src.includes("sign.webp"))).toBe(false);
     // 一律載縮小副本，不載原檔

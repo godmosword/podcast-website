@@ -52,6 +52,10 @@ export const DINO_SUSHI_SM_WIDTH = {
   "food/floss.webp": 448, // 130px
   "food/salmon.webp": 512, // 161px
   "food/avocado.webp": 448, // 137px
+  "food/ikura.webp": 384, // 同玉米
+  "food/unagi.webp": 512, // 同鮭魚
+  "food/scallop.webp": 384,
+  // 下架的甜點：只剩貼紙書裡已收集的那幾張會用到
   "food/strawberry.webp": 256, // 79px
   "food/pudding.webp": 256, // 79px
   "food/wasabi.webp": 256, // 97px（桌機）

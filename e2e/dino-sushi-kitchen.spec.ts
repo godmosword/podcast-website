@@ -18,8 +18,8 @@ async function order(page: Page, n: number) {
 
 async function serve(page: Page, n: number, opts: { skipLast?: boolean } = {}) {
   const { base, toppings } = await order(page, n);
-  await page.getByRole("button", { name: `選${base}` }).click();
-  for (const t of opts.skipLast ? toppings.slice(0, -1) : toppings) await page.getByRole("button", { name: `加${t}` }).click();
+  await page.getByRole("button", { name: `選${base}`, exact: true }).click();
+  for (const t of opts.skipLast ? toppings.slice(0, -1) : toppings) await page.getByRole("button", { name: `加${t}`, exact: true }).click();
   await page.getByRole("button", { name: /^(送給.+|給多多吃)$/ }).click();
 }
 
@@ -97,19 +97,23 @@ test("砧板角標只在提示時出現：選錯飯有換飯、料位滿了還�
 
   // 選錯飯：成品亮、換飯角標出現；點角標（在盤子右上）就打開選飯
   const wrong = ["握壽司", "軍艦", "手捲"].find((b) => b !== wanted.base)!;
-  await page.getByRole("button", { name: `選${wrong}` }).click();
+  await page.getByRole("button", { name: `選${wrong}`, exact: true }).click();
   await expect(prep).toHaveAttribute("data-hint", "true");
   await expect(swap).toBeVisible();
   await swap.click();
-  await page.getByRole("button", { name: `選${wanted.base}` }).click();
+  await page.getByRole("button", { name: `選${wanted.base}`, exact: true }).click();
   await expect(swap, "飯對了：角標收起").toHaveCount(0);
   await expect(back, "平常料位沒有角標").toHaveCount(0);
 
   // 先放一樣要的，再放兩樣不要的：料位滿了還缺料，提示「先拿掉多的那層」
-  const extras = ["蝦", "蟹肉棒", "玉米", "小黃瓜", "鮪魚沙拉", "酪梨"].filter((t) => !wanted.toppings.includes(t));
-  await page.getByRole("button", { name: `加${wanted.toppings[0]}` }).click();
-  await page.getByRole("button", { name: `加${extras[0]}` }).click();
-  await page.getByRole("button", { name: `加${extras[1]}` }).click();
+  // 托盤由訂單決定（PR-C），多的料從這一輪托盤上實際有的挑
+  const trayLabels = (await page.getByRole("group", { name: "壽司料" }).getByRole("button").evaluateAll((els) =>
+    els.map((el) => (el.getAttribute("aria-label") ?? "").replace(/^加/, "")),
+  )) as string[];
+  const extras = trayLabels.filter((t) => t !== "芥末" && !wanted.toppings.includes(t));
+  await page.getByRole("button", { name: `加${wanted.toppings[0]}`, exact: true }).click();
+  await page.getByRole("button", { name: `加${extras[0]}`, exact: true }).click();
+  await page.getByRole("button", { name: `加${extras[1]}`, exact: true }).click();
   await expect(back).toHaveCount(1);
   const hinted = board.locator('[data-hint="true"]:has([data-badge="remove"])');
   await expect(hinted).toHaveAttribute("aria-label", `拿掉${extras[0]}`);
@@ -126,8 +130,8 @@ test("送出鈕寫的是現在這一位客人；自由做寫給多多吃；托�
     const label = (await page.getByRole("img", { name: new RegExp(`^第 ${n} 單`) }).getAttribute("aria-label"))!;
     const guest = label.match(/([^，、：。\s]+)想吃：/)![1]!;
     const [base, ...toppings] = label.split("想吃：")[1]!.split("、");
-    await page.getByRole("button", { name: `選${base}` }).click();
-    for (const t of toppings) await page.getByRole("button", { name: `加${t}` }).click();
+    await page.getByRole("button", { name: `選${base}`, exact: true }).click();
+    for (const t of toppings) await page.getByRole("button", { name: `加${t}`, exact: true }).click();
     await expect(page.getByRole("button", { name: `送給${guest}` })).toBeVisible();
     await expect(page.getByRole("button", { name: "給多多吃" })).toHaveCount(0);
     await expect(page.getByRole("button", { name: /^加(草莓|布丁)$/ })).toHaveCount(0);
@@ -577,6 +581,11 @@ for (const vp of [
     await page.goto("/games/dino-sushi");
     await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
     await expect(page.getByRole("img", { name: /^第 1 單/ })).toBeVisible();
+    // 字型載完前抬頭高度不同，舞台跟著差幾 px：等字型、等兩個畫格再量（以前 149.6／157.2 來回跳就是這個）
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    });
     const width = await page.locator("[data-face]").first().evaluate((el) => el.getBoundingClientRect().width);
     expect(Math.abs(width - vp.duo), `多多圖框 ${width}`).toBeLessThanOrEqual(1);
   });
@@ -718,7 +727,7 @@ test.describe("短手機的捲動（真的用手指點，不靠 Playwright 自�
       await fingerTap(page, /^(送給.+|給多多吃)$/);
       await expect(page.getByTestId("dino-sushi").locator("p[data-mood='look']")).toBeAttached();
       expect(await settledScroll(page)).toBe(before);
-      await expect(page.getByRole("button", { name: `加${toppings[0]}` })).toBeInViewport();
+      await expect(page.getByRole("button", { name: `加${toppings[0]}`, exact: true })).toBeInViewport();
     });
   }
 

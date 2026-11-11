@@ -62,7 +62,8 @@ const ALL_BASES: readonly BaseId[] = BASES.map((base) => base.id);
 export function createRound(mode: Mode, seed: number, tier: OrderTier = "normal", day?: number): RoundState {
   const scripted = mode === "order" && day !== undefined && day >= 1 && day <= 4;
   const built = scripted ? buildDayRound(day, seed) : null;
-  const tray = built?.tray ?? buildTray(seed);
+  const unscripted = !built && mode === "order" ? buildOrders(seed, tier) : null;
+  const tray = built?.tray ?? unscripted?.tray ?? buildTray(seed);
   return {
     mode,
     seed,
@@ -71,7 +72,7 @@ export function createRound(mode: Mode, seed: number, tier: OrderTier = "normal"
     variety: built?.variety ?? roundVariety(seed),
     allowedBases: built?.allowedBases ?? ALL_BASES,
     tray,
-    orders: built ? built.orders : mode === "order" ? buildOrders(seed, tray, tier) : [],
+    orders: built?.orders ?? unscripted?.orders ?? [],
     index: 0,
     sushi: EMPTY_SUSHI,
     attempts: 0,

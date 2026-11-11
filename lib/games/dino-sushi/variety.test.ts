@@ -84,21 +84,24 @@ describe("每輪小變化", () => {
     expect(orderLead(0, variety)).not.toMatch(/草莓|布丁|芥末/);
   });
 
-  it("托盤帶齊主題料，訂單仍是 5 單熟食、沒有第 6 單", () => {
+  it("主題料優先：自由做的托盤帶齊主題料；點餐 5 單熟食、沒有第 6 單，多數單有主題料", () => {
     expect(DOME_AFTER_PLATES).toBe(3);
+    let themed = 0;
+    let total = 0;
     for (let seed = 1; seed <= 40; seed++) {
       const tray = buildTray(seed);
-      const orders = buildOrders(seed, tray);
+      const { orders, tray: orderTray } = buildOrders(seed);
       const theme = roundVariety(seed).theme.toppings;
       expect(orders).toHaveLength(5);
-      expect(theme.every((id) => tray.includes(id))).toBe(true);
-      expect(tray.filter((id) => toppingById(id).kind === "sweet")).toHaveLength(0);
-      expect(tray).toContain("wasabi");
+      expect(tray.filter((id) => theme.includes(id)).length).toBeGreaterThanOrEqual(Math.min(3, theme.length));
+      expect(orderTray).toContain("wasabi");
       for (const order of orders) {
-        expect(order.toppings.some((id) => theme.includes(id))).toBe(true);
+        total += 1;
+        if (order.toppings.some((id) => theme.includes(id))) themed += 1;
         expect(order.toppings.some((id) => toppingById(id).kind !== "savory")).toBe(false);
       }
     }
+    expect(themed / total).toBeGreaterThan(0.5);
   });
 
   it("圓蓋只從已經拿到的貼紙裡挑，沒有就不給新的", () => {

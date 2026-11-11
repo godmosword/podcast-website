@@ -375,8 +375,8 @@ test.describe("多多壽司屋", () => {
       for (let n = 1; n <= 4; n++) {
         const label = await page.getByRole("img", { name: new RegExp(`^第 ${n} 單`) }).getAttribute("aria-label");
         const [base, ...toppings] = label!.split("想吃：")[1]!.split("、");
-        await page.getByRole("button", { name: `選${base}` }).click();
-        for (const t of toppings) await page.getByRole("button", { name: `加${t}` }).click();
+        await page.getByRole("button", { name: `選${base}`, exact: true }).click();
+        for (const t of toppings) await page.getByRole("button", { name: `加${t}`, exact: true }).click();
         await page.getByRole("button", { name: /^(送給.+|給多多吃)$/ }).click();
         await expect(page.getByRole("img", { name: `吃完 ${n} 盤` })).toBeVisible();
       }
@@ -441,10 +441,10 @@ test.describe("多多壽司屋", () => {
       expect(await probe()).toMatchObject({ tipOnHost: true, bodyClear: true, inside: true });
     };
     await expectHand(`選${base}`);
-    await page.getByRole("button", { name: `選${base}` }).click();
+    await page.getByRole("button", { name: `選${base}`, exact: true }).click();
     for (const t of toppings) {
       await expectHand(`加${t}`);
-      await page.getByRole("button", { name: `加${t}` }).click();
+      await page.getByRole("button", { name: `加${t}`, exact: true }).click();
     }
     await expectHand(/^(送給.+|給多多吃)$/);
   });
@@ -454,8 +454,8 @@ test.describe("多多壽司屋", () => {
   const serveOrder = async (page: import("@playwright/test").Page, n: number) => {
     const label = await page.getByRole("img", { name: new RegExp(`^第 ${n} 單`) }).getAttribute("aria-label");
     const [base, ...toppings] = label!.split("想吃：")[1]!.split("、");
-    await page.getByRole("button", { name: `選${base}` }).click();
-    for (const t of toppings) await page.getByRole("button", { name: `加${t}` }).click();
+    await page.getByRole("button", { name: `選${base}`, exact: true }).click();
+    for (const t of toppings) await page.getByRole("button", { name: `加${t}`, exact: true }).click();
     await page.getByRole("button", { name: /^(送給.+|給多多吃)$/ }).click();
     await expect(page.getByRole("img", { name: `吃完 ${n} 盤` })).toBeVisible();
   };
@@ -607,7 +607,7 @@ test.describe("多多壽司屋", () => {
     await expect(page.getByRole("button", { name: /^拿掉/ })).toHaveCount(0);
     const picker = page.getByRole("group", { name: "選飯" });
     await expect(picker.locator("[data-nudge]")).toHaveCount(1);
-    await expect(picker.getByRole("button", { name: `選${base}` })).toHaveAttribute("data-nudge", /^[ab]$/);
+    await expect(picker.getByRole("button", { name: `選${base}`, exact: true })).toHaveAttribute("data-nudge", /^[ab]$/);
     await expect(page.locator('[aria-live="polite"]').filter({ hasText: "先選飯，再放料" })).toHaveCount(1);
     // 播完就收掉
     await expect(picker.locator("[data-nudge]")).toHaveCount(0);
@@ -886,7 +886,7 @@ test.describe("多多壽司屋", () => {
         ["shrimp", ["加蝦", "加鮭魚", "加蟹肉棒"]],
       ] as const) {
         await clear();
-        for (const name of names) await page.getByRole("button", { name }).click();
+        for (const name of names) await page.getByRole("button", { name, exact: true }).click();
         await settled(page);
         const m = await measure(middle);
         expect(m.above, `${middle} 在中間`).toBe(true);

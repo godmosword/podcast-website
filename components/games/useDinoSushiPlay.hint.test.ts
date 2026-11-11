@@ -332,12 +332,12 @@ describe("難度檔位", () => {
     expect(result.current.teaching).toBe(true);
   });
 
-  it("第 1 天固定料數 1、1、1、1、2，提示仍是 4.5 秒，要教", () => {
+  it("第 1 天固定每單一樣料、全是握壽司，提示仍是 4.5 秒，要教", () => {
     const { result } = setup();
     act(() => result.current.actions.start("order", 7, { day: 1, teach: true }));
     expect(result.current.round!.day).toBe(1);
     expect(result.current.round!.tier).toBe("normal");
-    expect(result.current.round!.orders.map((order) => order.toppings.length)).toEqual([1, 1, 1, 1, 2]);
+    expect(result.current.round!.orders.map((order) => order.toppings.length)).toEqual([1, 1, 1, 1, 1]);
     expect(result.current.round!.orders.every((order) => order.base === "nigiri")).toBe(true);
     expect(result.current.teaching).toBe(true);
     expect(result.current.hint).not.toBeNull();

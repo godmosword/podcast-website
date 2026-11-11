@@ -1,6 +1,7 @@
 /**
  * 《多多壽司屋》食材表。純資料。
- * 點餐只用熟食家常料；甜點是「多多愛吃糖」彩蛋，芥末只會讓多多噗一朵白雲，兩者都不進訂單。
+ * 點餐只用家常料，搭配照真實的壽司店（recipes.ts）。芥末是彩蛋，不進訂單。
+ * 2026-11-08 起草莓、布丁下架（ToppingId 不再有它們）；已收集的甜點貼紙由 stickers.ts 另外保留。
  */
 
 export type BaseId = "nigiri" | "gunkan" | "temaki";
@@ -15,10 +16,12 @@ export type ToppingId =
   | "floss"
   | "salmon"
   | "avocado"
-  | "strawberry"
-  | "pudding"
+  | "ikura"
+  | "unagi"
+  | "scallop"
   | "wasabi";
 
+/** sweet 只留給下架的甜點貼紙與舊反應型別；托盤上已經沒有甜點。 */
 export type ToppingKind = "savory" | "sweet" | "wasabi";
 
 export type BaseMeta = { id: BaseId; label: string };
@@ -31,7 +34,10 @@ export const BASES: readonly BaseMeta[] = [
   { id: "temaki", label: "手捲" },
 ];
 
-/** 同色系的料靠形狀區分（玉子方塊／玉米粒、蝦彎／鮭魚條紋／蟹肉棒圓柱、小黃瓜圓片／酪梨月牙）。 */
+/**
+ * 同色系的料靠形狀區分（玉子方塊／玉米粒、蝦彎／鮭魚條紋／蟹肉棒圓柱、小黃瓜圓片／酪梨月牙、
+ * 鮭魚卵亮珠／玉米霧面粒、鰻魚深醬長片、干貝白圓片）。順序也是貼紙書的順序。
+ */
 export const TOPPINGS: readonly ToppingMeta[] = [
   { id: "tamago", label: "玉子", kind: "savory" },
   { id: "shrimp", label: "蝦", kind: "savory" },
@@ -42,13 +48,13 @@ export const TOPPINGS: readonly ToppingMeta[] = [
   { id: "floss", label: "肉鬆", kind: "savory" },
   { id: "salmon", label: "鮭魚", kind: "savory" },
   { id: "avocado", label: "酪梨", kind: "savory" },
-  { id: "strawberry", label: "草莓", kind: "sweet" },
-  { id: "pudding", label: "布丁", kind: "sweet" },
+  { id: "ikura", label: "鮭魚卵", kind: "savory" },
+  { id: "unagi", label: "鰻魚", kind: "savory" },
+  { id: "scallop", label: "干貝", kind: "savory" },
   { id: "wasabi", label: "芥末", kind: "wasabi" },
 ];
 
 export const SAVORY_TOPPINGS: readonly ToppingMeta[] = TOPPINGS.filter((t) => t.kind === "savory");
-export const SWEET_TOPPINGS: readonly ToppingMeta[] = TOPPINGS.filter((t) => t.kind === "sweet");
 
 const TOPPING_BY_ID = new Map(TOPPINGS.map((t) => [t.id, t]));
 const BASE_BY_ID = new Map(BASES.map((b) => [b.id, b]));

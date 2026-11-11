@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { DINO_SUSHI_STICKERS, UNAVAILABLE_STICKER_IDS } from "@/lib/games/dino-sushi/stickers";
+import { DINO_SUSHI_STICKERS, RETIRED_STICKER_IDS } from "@/lib/games/dino-sushi/stickers";
 import { DinoSushiStickerBook } from "./DinoSushiStickerBook";
 
 afterEach(cleanup);
@@ -27,7 +27,7 @@ describe("貼紙書", () => {
     expect(lockedFriend.textContent).toContain("？");
     expect(lockedFriend.querySelector("img")?.getAttribute("src")).toBe("/games/v2/dino-sushi/customers/sm/anan.webp");
     expect(screen.getAllByRole("button").filter((button) => button.getAttribute("data-locked") === "true")).toHaveLength(
-      DINO_SUSHI_STICKERS.length - UNAVAILABLE_STICKER_IDS.size - 2,
+      DINO_SUSHI_STICKERS.length - RETIRED_STICKER_IDS.size - 2,
     );
     expect(screen.queryByRole("button", { name: /草莓|布丁/ })).toBeNull();
     const got = screen.getByRole("button", { name: "玉子" });
