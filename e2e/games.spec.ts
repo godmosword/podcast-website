@@ -69,10 +69,10 @@ test.describe("遊戲頁：兒童主路徑優先", () => {
 });
 
 test.describe("遊樂園 hub", () => {
-  test("390×844 完整首圖後可捲動到三個遊戲入口", async ({ page }) => {
+  test("390×844 完整首圖後可捲動到四個遊戲入口", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/games");
-    for (const name of ["繪本塗塗鴉", "車車消消樂", "多多壽司屋"]) {
+    for (const name of ["繪本塗塗鴉", "車車消消樂", "多多壽司屋", "小橘特快車"]) {
       const title = page.getByText(name, { exact: true });
       await title.scrollIntoViewIfNeeded();
       await expect(title).toBeInViewport();
@@ -112,14 +112,14 @@ test.describe("遊樂園 hub", () => {
     }
   });
 
-  test("320 與 390 第一屏看得到三款標題", async ({ page }) => {
+  test("320 與 390 第一屏看得到四款標題", async ({ page }) => {
     for (const viewport of [
       { width: 320, height: 568 },
       { width: 390, height: 844 },
     ]) {
       await page.setViewportSize(viewport);
       await page.goto("/games");
-      for (const name of ["繪本塗塗鴉", "車車消消樂", "多多壽司屋"]) {
+      for (const name of ["繪本塗塗鴉", "車車消消樂", "多多壽司屋", "小橘特快車"]) {
         await expect(page.getByText(name, { exact: true }), `${viewport.width} ${name}`).toBeInViewport();
       }
     }
@@ -129,7 +129,7 @@ test.describe("遊樂園 hub", () => {
     for (const width of [320, 375, 390, 430]) {
       await page.setViewportSize({ width, height: 844 });
       await page.goto("/games");
-      for (const name of ["繪本塗塗鴉", "車車消消樂", "多多壽司屋"]) {
+      for (const name of ["繪本塗塗鴉", "車車消消樂", "多多壽司屋", "小橘特快車"]) {
         const title = page.getByText(name, { exact: true });
         await expect(title, `${width} ${name}`).toBeVisible();
         const clipped = await title.evaluate((el) => el.scrollWidth > el.clientWidth + 1);

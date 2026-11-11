@@ -9,7 +9,7 @@ import { getSiteUrl } from "@/lib/site-url";
 export const metadata: Metadata = {
   title: "多多壽司屋",
   description:
-    "幫恐龍車多多做壽司：選飯、放料、送上迴轉帶，看多多吃得好開心！沒有倒數、沒有失敗，做錯了也能補。適合 3–7 歲。",
+    "幫恐龍車多多開壽司店：選飯、放料，用輸送帶送給點餐的朋友吃！沒有倒數、沒有失敗，做錯了也能補。適合 3–7 歲。",
   alternates: { canonical: "/games/dino-sushi" },
   openGraph: {
     title: "多多壽司屋 · 車車遊樂園",

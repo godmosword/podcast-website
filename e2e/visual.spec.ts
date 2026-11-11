@@ -521,7 +521,7 @@ async function openDinoSushi(
   if (classic) await pinClassicSushiDay(page);
   await page.goto("/games/dino-sushi");
   await stabilizeVisualPage(page, { theme });
-  await expect(page.getByRole("heading", { name: "多多肚子餓了！" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "幫多多招待客人！" })).toBeVisible();
 }
 
 /** 照第 n 單的泡泡選飯、放料；serve 時順便送出並等多多吃完。 */

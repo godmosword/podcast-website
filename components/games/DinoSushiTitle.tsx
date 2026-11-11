@@ -64,7 +64,7 @@ export function DinoSushiTitle({
       </TapButton>
       <div className={styles.titlePanel}>
         {/* 頁面唯一 h1 屬 GamePageShell */}
-        <h2 className={styles.titleHeading}>多多肚子餓了！</h2>
+        <h2 className={styles.titleHeading}>幫多多招待客人！</h2>
         <div className={styles.dayScroll}>
           <ul className={styles.dayRow}>
             {days.map((day) => {

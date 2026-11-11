@@ -494,6 +494,49 @@ test.describe("小橘特快車", () => {
     await expect(page.getByTestId("orange-express-notice")).toHaveAttribute("data-kind", "passing");
   });
 
+  test("標題封面也能開始：跟「開始開車」走同一條路、用同一個難度；封面不搶鍵盤焦點", async ({ page }) => {
+    await page.addInitScript(() => {
+      window.__orangeExpress = { freeze: true, driver: "big" };
+    });
+    const courseAfter = async (start: "cover" | "button") => {
+      await page.goto("/games/orange-express");
+      await page.getByRole("radio", { name: /小站長/ }).click();
+      if (start === "cover") await page.getByTestId("orange-express-title-hero").click();
+      else await page.getByRole("button", { name: "開始開車" }).click();
+      const drive = page.getByTestId("orange-express-drive");
+      await expect(drive).toBeVisible();
+      return drive.getAttribute("data-course");
+    };
+    const viaButton = await courseAfter("button");
+    const viaCover = await courseAfter("cover");
+    expect(viaCover).toBe(viaButton);
+
+    // 第一次來、還沒手動選難度：直接點封面也能出發，跟主鈕用同一個預設難度
+    const firstTime = async (start: "cover" | "button") => {
+      await page.evaluate(() => localStorage.clear());
+      await page.goto("/games/orange-express");
+      if (start === "cover") await page.getByTestId("orange-express-title-hero").click();
+      else await page.getByRole("button", { name: "開始開車" }).click();
+      const drive = page.getByTestId("orange-express-drive");
+      await expect(drive).toBeVisible();
+      return drive.getAttribute("data-course");
+    };
+    expect(await firstTime("cover")).toBe(await firstTime("button"));
+
+    await page.goto("/games/orange-express");
+    const cover = page.getByTestId("orange-express-title-hero");
+    await expect(cover).toHaveAttribute("aria-hidden", "true");
+    await expect(cover).toHaveAttribute("tabindex", "-1");
+    // 重複入口藏給讀屏、移出 Tab 順序：axe 的 aria-hidden-focus 不能報錯
+    const axe = await new AxeBuilder({ page }).include('[data-testid="orange-express-title"]').analyze();
+    expect(axe.violations.map((v) => v.id)).toEqual([]);
+    // 鍵盤：難度 radio 與主鈕照舊操作得到
+    await expect(page.getByRole("radio", { name: /小站長/ })).toBeEnabled();
+    await page.getByRole("button", { name: "開始開車" }).focus();
+    await page.keyboard.press("Enter");
+    await expect(page.getByTestId("orange-express-drive")).toBeVisible();
+  });
+
   test("指差確認：按一下記一次，按鈕收起來", async ({ page }) => {
     await page.addInitScript(() => {
       window.__orangeExpress = { freeze: true, driver: "big" };
@@ -507,13 +550,16 @@ test.describe("小橘特快車", () => {
     await expect(point).toHaveCount(0);
   });
 
-  test("手機煞車格每格至少 48px；底部提示在標題面，開車時收起讓給前窗", async ({ page }) => {
+  test("手機煞車格每格至少 48px；底部提示在標題面與開車時都收起（標題面跟其他三款一樣）", async ({ page }) => {
     // 六格煞車最密的是小站長的桿面。
     await page.addInitScript(() => {
       window.__orangeExpress = { driver: "big" };
     });
     await page.goto("/games/orange-express");
-    const hints = page.getByRole("list", { name: "操作提示" }).getByRole("listitem");
+    await expect(page.getByTestId("orange-express-title")).toHaveAttribute("data-play-hints", "off");
+    await expect(page.getByRole("list", { name: "操作提示" })).toBeHidden();
+    // 提示內容還在（收起不是刪掉），圖示對得上
+    const hints = page.getByRole("list", { name: "操作提示", includeHidden: true }).getByRole("listitem", { includeHidden: true });
     await expect(hints.filter({ hasText: "左邊推，車會走" }).locator("svg")).toHaveCount(2);
     await expect(hints.filter({ hasText: "右邊拉，車會停" }).locator("svg")).toHaveCount(2);
     await expect(hints.filter({ hasText: "門亮了就按" }).locator("svg")).toHaveCount(1);

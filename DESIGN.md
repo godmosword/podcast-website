@@ -345,7 +345,7 @@ Token 階梯（`globals.css`）：`--space-2: 8px`、`--space-3: 12px`、`--spac
   - **甜點**：草莓、布丁不再上托盤，刷牙不再出現。這四張貼紙（草莓、布丁、甜甜、刷牙）退役：已收集的照留在貼紙書、說明改「這家店現在不賣甜點」，沒拿過的不出現；總數 29 張、全收集只算現役的。
   - **真實配方（2026-11-10，PR-C）**：每一單都從 `lib/games/dino-sushi/recipes.ts` 挑真的壽司店會有的搭配：握壽司一片料（最多兩樣，像蝦＋酪梨），散的料（玉米、鮭魚卵、肉鬆、鮪魚沙拉）只上軍艦或手捲，手捲常見「主料＋小黃瓜」與加州捲。托盤反過來由這輪的訂單決定，空格補放得上當天飯型的料，所以每輪的托盤都不太一樣。家常料 12 種（新增鮭魚卵、鰻魚、干貝）。第 1 天握壽司每單一樣料；第 2 天握壽司＋軍艦，最後一單是兩樣料的軍艦；第 3 天手捲登場（第 2、4 單），最多兩樣料；第 4 天三種飯、料數 1、1、2、2、3。主題日只是偏好。托盤上鮪魚沙拉排最前、肉鬆排最後（顏色接近，不相鄰）。
   - **結算**：點餐的標題是「朋友都吃飽飽！」（自由做仍是「多多吃飽了！」）。
-- Game Kit 只保留單一 `lib/gamekit/` 樹，分為 `react/`、`runtime/`、`progress/`、`games/` 與 `types.ts`（方塊轉轉、消消樂、壽司屋三款；id 唯一來源是 `GAMEKIT_GAME_IDS`）。
+- Game Kit 只保留單一 `lib/gamekit/` 樹，分為 `react/`、`runtime/`、`progress/`、`games/` 與 `types.ts`（方塊轉轉（已下架，存檔 id 保留）、消消樂、壽司屋、小橘特快車；id 唯一來源是 `GAMEKIT_GAME_IDS`）。
 - Consumer 必須匯入明確 leaf path，例如 `@/lib/gamekit/react/useGameAudio`；不使用 `@/lib/gamekit` 根目錄或 barrel。
 - 詳細邊界、import policy 與新增遊戲流程見 [GAMEKIT-ARCHITECTURE.md](./docs/GAMEKIT-ARCHITECTURE.md)。
 - 遊戲進度、最佳分數、獎牌、星星與貼紙屬相容性契約，不因 UI 或文件整理而變更。
