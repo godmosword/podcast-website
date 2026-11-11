@@ -97,9 +97,20 @@ import styles from "./orange-express.module.css";
 /** 標題主視覺：封面還是暫代的 SVG 時，用向量小橘站在山坡上頂著（B20）。 */
 const TITLE_COVER_SRC = gameBySlug("orange-express").art.cover;
 
-function TitleHero() {
+/**
+ * 封面也是開始的入口（小孩會直接點圖）：跟「開始開車」同一個 onStart、同一個難度。
+ * 它是重複的入口，所以 aria-hidden＋tabIndex -1，讀屏與鍵盤只走難度 radio 和主鈕。
+ */
+function TitleHero({ onStart }: { onStart: () => void }) {
   return (
-    <div className={styles.titleHero} data-testid="orange-express-title-hero" aria-hidden>
+    <button
+      type="button"
+      className={styles.titleHero}
+      data-testid="orange-express-title-hero"
+      aria-hidden
+      tabIndex={-1}
+      onClick={onStart}
+    >
       {TITLE_COVER_SRC.endsWith(".svg") ? (
         <span className={styles.titleHeroStandIn}>
           <XiaojuFace className={styles.titleHeroFace} />
@@ -115,7 +126,7 @@ function TitleHero() {
           className={styles.titleHeroImage}
         />
       )}
-    </div>
+    </button>
   );
 }
 
@@ -939,8 +950,14 @@ export function OrangeExpressView({
 
   if (screen === "title" || !run) {
     return (
-      <div className={styles.screen} data-screen="title" data-testid="orange-express-title">
-        <TitleHero />
+      <div
+        className={styles.screen}
+        data-screen="title"
+        data-testid="orange-express-title"
+        /* 標題面不出底部操作提示（跟壽司屋、消消樂一樣），開車時也收起讓給前窗 */
+        data-play-hints="off"
+      >
+        <TitleHero onStart={onStart} />
         <div className={styles.routeRow}>
           <p className={styles.route}>{COPY.routeName}</p>
           <OrangeExpressJournalRow

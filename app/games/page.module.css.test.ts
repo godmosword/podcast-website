@@ -24,7 +24,7 @@ describe("games hub 四張卡的網格", () => {
     expect(css).not.toMatch(/\.lead\b/);
   });
 
-  it("手機海報改 3/2，第一屏才看得到三款標題", () => {
+  it("手機海報改 16/9（cover 裁切），第一屏才看得到四款標題", () => {
     expect(css).toMatch(
       /@media \(max-width: 640px\)\s*\{[\s\S]*?\.hero\s*\{[^}]*aspect-ratio:\s*16\s*\/\s*9/,
     );

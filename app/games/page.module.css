@@ -214,7 +214,7 @@
     padding-top: calc(14px + var(--safe-top));
   }
 
-  /* 手機海報改矮，第一屏才看得到三款標題。cover 裁掉直式海報上下緣。 */
+  /* 手機海報改矮（16:9），第一屏才看得到四款標題。cover 裁掉直式海報上下緣。 */
   .hero {
     aspect-ratio: 16 / 9;
     margin-bottom: 12px;

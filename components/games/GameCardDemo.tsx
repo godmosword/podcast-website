@@ -10,7 +10,7 @@ import styles from "./GameCardDemo.module.css";
 
 /** 一段示範的長度；CSS 的 --demo-ms 由這裡寫進去，只有這一個地方定義。 */
 const GAME_CARD_DEMO_MS = 2100;
-/** 兩段示範之間至少隔多久：桌機三張卡同時進畫面時依序播，同一時間只有一段在動。 */
+/** 兩段示範之間至少隔多久：桌機四張卡同時進畫面時依序播，同一時間只有一段在動。 */
 const DEMO_GAP_MS = 300;
 /** 卡片進到畫面多少才播（避免捲過去的瞬間就播完）。 */
 const VISIBLE_RATIO = 0.6;

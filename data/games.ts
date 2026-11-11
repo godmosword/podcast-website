@@ -73,7 +73,7 @@ export const GAMES: GameMeta[] = [
   {
     slug: "dino-sushi",
     title: "多多壽司屋",
-    desc: "幫恐龍車多多做壽司：選飯、放料、送上迴轉帶，看多多吃得好開心！沒有倒數，做錯了也能補。",
+    desc: "幫恐龍車多多開壽司店：選飯、放料，用輸送帶送給點餐的朋友吃！沒有倒數，做錯了也能補。",
     teaser: "做壽司",
     href: "/games/dino-sushi",
     emoji: "🍣",
@@ -93,7 +93,7 @@ export const GAMES: GameMeta[] = [
     tutorial: [
       { text: "先選一種飯", gesture: "tap" },
       { text: "點料放到飯上", gesture: "tap" },
-      { text: "按「給多多吃」", gesture: "tap" },
+      { text: "做好了，送給點餐的朋友", gesture: "tap" },
     ],
   },
   {

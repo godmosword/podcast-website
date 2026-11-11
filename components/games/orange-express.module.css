@@ -26,12 +26,19 @@
 /* 標題主視覺（B20）：跟消消樂、壽司屋一樣，標題最上面一張有框的圖。封面生好前用向量小橘站在山坡上。 */
 .titleHero {
   position: relative;
+  display: block;
   flex: 0 0 auto;
+  width: 100%;
   height: clamp(96px, 22svh, 200px);
+  padding: 0;
   overflow: hidden;
   border: 2px solid var(--ink);
   border-radius: var(--radius-md);
   background: var(--card);
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .titleHeroImage {

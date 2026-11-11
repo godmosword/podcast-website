@@ -520,7 +520,7 @@ test("多多壽司屋：照點餐做一盤，多多吃完疊盤", async ({ page 
   });
   await pinClassicSushiDay(page);
   await page.goto("/games/dino-sushi");
-  await expect(page.getByRole("heading", { name: "多多肚子餓了！" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "幫多多招待客人！" })).toBeVisible();
   await page.getByRole("button", { name: "開始幫多多做壽司" }).click();
   const label = await page.getByRole("img", { name: /^第 1 單/ }).getAttribute("aria-label");
   const [base, ...toppings] = label!.split("想吃：")[1]!.split("、");

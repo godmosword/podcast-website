@@ -52,7 +52,7 @@ for (const vp of [
   test(`${vp.width}×${vp.height}：四張臉至少 48px，間距至少 8px`, async ({ page }) => {
     await page.setViewportSize(vp);
     await page.goto("/games/dino-sushi");
-    await expect(page.getByRole("heading", { name: "多多肚子餓了！" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "幫多多招待客人！" })).toBeVisible();
     await expectDayTargets(page);
   });
 }
@@ -69,7 +69,7 @@ test("沒解開的天有鎖、讀屏說未解鎖，點了不會開始", async ({
     await expect(button).toHaveAccessibleName(/（未解鎖）/);
     await expect(button.locator("[data-lock]")).toBeVisible();
     await button.click({ force: true });
-    await expect(page.getByRole("heading", { name: "多多肚子餓了！" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "幫多多招待客人！" })).toBeVisible();
     await expect(page.getByRole("img", { name: /^第 1 單/ })).toHaveCount(0);
   }
 });
