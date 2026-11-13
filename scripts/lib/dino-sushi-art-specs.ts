@@ -67,9 +67,10 @@ const FOOD_SPECS: readonly ArtSpec[] = [
     "The nori is a single thin sheet: matte deep green-black with a faint sheen and visible paper-like fibres, with one straight vertical seam slightly right of the front. Not thick, not fabric, not a box, no second step or tier, no lid.",
     "Top opening: a wide oval about 80% of the outer width, so we look down into it; the rice surface sits about 10-15% below the nori rim, with rice grains like the reference rice, leaving room for a topping.",
   ].join(" ")),
+  /* 2026-11-11 Kaiyi 決定不重畫，以現圖為準：近直立錐形，畫布 709×1327，不透明寬高比約 0.53。 */
   food("temaki", "手捲（飯底）", 1, "1024x1536", ["nigiri.webp", "cucumber.webp"], [
     "Subject: an EMPTY temaki (hand roll) base, no filling yet, as it looks in a real sushi shop.",
-    "A cone of ONE nori sheet rolled diagonally, roughly 1 : 1.5 width to height, tilted at most 15 degrees. One diagonal seam where the sheet overlaps across the front; the back of the cone rises about 15% higher than the front edge.",
+    "A nearly upright cone of ONE nori sheet rolled diagonally, on a 709×1327 canvas, with an opaque (non-transparent) width-to-height ratio of about 0.53. One diagonal seam where the sheet overlaps across the front; the back of the cone rises about 15% higher than the front edge.",
     "The nori is matte deep green-black with a faint sheen and paper-like fibres; thin, not fabric, not velvet, not a perfectly symmetric ice-cream cone.",
     "The open top is wide (about 90% of the image width of the cone) and tips slightly toward the camera; it is filled with white sushi rice with a gently domed surface, like the reference rice — NO hole or ring in the rice, leaving room on top for fillings.",
   ].join(" ")),
