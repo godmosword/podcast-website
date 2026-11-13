@@ -1,8 +1,16 @@
-Use your image generation tool (image_gen) to create ONE landscape image (widest landscape size available, e.g. 1536x1024). Use the attached images as references: image 1 is the existing park hero (match its claymation style, palette, lighting and the same archway/park setting); image 2 is the character 恐龍車多多 (green dinosaur car); image 3 is the character 小紅賽車 (red race car with number 2). Keep those two characters exactly on-model.
+# 遊樂園大海報（桌機）提示詞紀錄
 
-Prompt to render:
-Children's picture-book illustration in soft claymation / plasticine stop-motion style. Rounded friendly clay shapes, smooth matte surfaces, soft studio lighting, gentle shadows. Pastel palette (blush pink #f7a8c4, warm yellow #ffd866, fresh mint #b7df9b, sky blue #8fcde8, teal #79c8c1, lilac #c5b3e6) on a clean off-white sky. Cute anthropomorphic vehicles with simple dot eyes and warm smiles, toddler-safe and cozy.
-Scene: the same clay amusement-park entrance archway and ferris wheel as the reference hero, seen from the road. In the foreground stand THREE wooden clay signposts spread left / center / right, each with a round pastel sign that shows ONLY a picture, no letters: left sign = a chunky pink crayon drawing on an open coloring book; center sign = three identical little yellow cars in a row with two curved arrows swapping the first two; right sign = one purple block falling down (with a small down arrow) onto a neat row of colorful blocks. A wide winding clay road runs from the archway toward the viewer and exits at the bottom center of the frame, inviting the viewer to drive in. The green dinosaur car 恐龍車多多 and the red race car 小紅賽車 sit on the road near the bottom, facing the viewer, happy. Simple uncluttered composition, plenty of soft sky at the top so the image can be cropped shorter.
-No text, no words, no letters, no numbers except the "2" on the red race car, no captions, no logos, no watermark. No realistic humans. No photorealism.
+現行版本 2026-11-13 上線：四塊招牌（著色本、車車消消樂、多多壽司屋、小橘特快車），拿掉已下架的堆方塊。
+由 `npm run generate:games-hub-hero -- --only desktop` 產生（OpenAI images.edit，gpt-image-2），提示詞的正本在 `scripts/generate-games-hub-hero.ts`。
+生好先進 `public/.games-staging/games-hub-hero/<run>/`，看過對照表再 `--approve --run <run> --only desktop` 寫進 `public/games/v2/hub/`。
 
-After the image is generated, copy the PNG file to exactly this path using a shell command: <OUTPUT_PATH>  — then reply with the final path only.
+本次 run：2026-11-13T13-09-04-541Z
+
+參考圖（依序）：
+- image 1: public/games/v2/hub/hero-desktop.webp（生圖當時的舊版、三塊招牌）
+- image 2: public/characters/恐龍車多多.jpg
+- image 3: public/characters/小紅賽車.jpg
+- image 4: public/characters/小橘高鐵.jpg
+
+實際送出的提示詞：
+Children's picture-book illustration in soft claymation / plasticine stop-motion style, matching image 1 exactly: rounded friendly clay shapes, smooth matte surfaces, soft studio lighting, gentle shadows, pastel palette (blush pink, warm yellow, fresh mint, sky blue, teal, lilac) under a clean off-white sky with small clay clouds and stars. Image 1 is the existing park hero: keep the same rainbow entrance archway with the star, the ferris wheel, the carousel, the clay bushes, flowers and the winding clay road, the same light and camera. Image 2 is the green dinosaur car 恐龍車多多 and image 3 is the red race car 小紅賽車 with the number 2: keep both exactly on-model, sitting on the road near the bottom, facing the viewer, happy, the same size and place as in image 1. Change ONLY the signposts: instead of three, place FOUR wooden clay signposts with round pastel signs, spread evenly left to right across the scene at the same height, each showing only a picture: 1) pink sign: a chunky pink crayon drawing on an open coloring book; 2) yellow sign: three identical little yellow cars in a row with two curved arrows swapping the first two; 3) mint sign: one salmon nigiri sushi on a small round plate, as a simple clay icon; 4) sky-blue sign: a small cream-white bullet train with one orange stripe (the train character from image 4, as a tiny clay icon) on a short piece of track. The final image is cropped to 16:9: keep all four signs, the arch and both cars inside the central band; the top and bottom 8% may be cut off. Exactly FOUR signposts; no falling blocks, no tetris-like blocks anywhere. No text, no words, no letters, no numbers except the "2" on the red race car, no captions, no logos, no watermark. No realistic humans. No photorealism.

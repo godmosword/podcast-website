@@ -42,7 +42,7 @@
 | 消消樂棋子、親子遊樂地圖情境 | 向量黏土 SVG | `CandyMatchPieceArt.tsx`、`components/for-parents/scene-art/` |
 | 方塊轉轉（隱藏） | CSS 圓角色塊，`borderRadius: 7`，不是像素風 | `BlockDropWell.tsx`、`blockDropTheme.ts`。路由轉回 `/games`，這輪不改它的程式 |
 
-公開遊樂園是三款：著色本、車車消消樂、多多壽司屋。桌面三欄。方塊轉轉不是第四張公開卡。
+公開遊樂園是四款：著色本、車車消消樂、多多壽司屋、小橘特快車，卡片 2×2 排。頂端大海報的四塊招牌照同一個順序，框色依序是粉、黃、綠、藍（生圖紀錄見 `docs/art-prompts/games-hub-hero-*.txt`）。方塊轉轉不是公開卡。
 
 方塊轉轉的 adapter 沒有 `fixedUpdate`。`GameHost` 的 `image-rendering: pixelated` 畫布只在有 `fixedUpdate` 時出現，所以上線畫面不會走那條路。`lib/gamekit/runtime/palette.ts` 與 `procedural-sheets.ts` 仍在程式裡，沒有上線遊戲在用。像素規格的適用範圍寫在 Game Kit 美術聖經開頭。
 
