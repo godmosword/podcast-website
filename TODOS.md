@@ -27,7 +27,7 @@
 - ✅ **其他遊戲存檔滿了也可能跳錯誤頁**（2026-11-07）：三款共用 `SessionOutbox`（`lib/gamekit/progress/session-outbox.ts`），寫不進去就排著、不丟例外；消消樂、小橘結算出「再存一次」（`SaveRetryNotice`），存得進去時補同一筆、不重複發獎。`e2e/game-save-failure.spec.ts` 守。
 - ✅ **結算焦點落在「+N」**（2026-11-07）：`GameEndStation` 開啟時明確聚焦主鈕，不再交給 `useFocusTrap` 的「第一顆」。
 - ✅ **齒輪操作一致、著色完成面減法、小橘卡片示範**（2026-11-07 外部評估）：家長工具齒輪抽成 `AdultHoldGate`，短按顯示「大人請按住」、右下加小鎖；著色完成面把存圖／分享／列印／開新稿／看故事收進「給大人」；小橘卡片補「滑進停車條、停在綠區」示範。真機與試玩項目見 `GAME_PHYSICAL_DEVICE_QA.md`（同時拿掉已下架的 Block Drop、補小橘專項與四款短時試玩）。
-- **遊樂園大海報仍畫著堆方塊**（2026-11-07）：`public/games/v2/hub/hero-*` 右邊牌子是已下架的堆方塊，壽司屋與小橘沒有出現。要用 `docs/art-prompts/games-hub-hero-*.txt` 的參考圖流程重生（付費生圖，L3，待 Kaiyi 決定）。`art · M`
+- ✅ **遊樂園大海報仍畫著堆方塊**（2026-11-07 → 11-13）：桌機、手機各生 1 張（`scripts/generate-games-hub-hero.ts`，images.edit＋定裝照參考，使用者在審圖台核可），招牌換成著色本、消消樂、壽司屋、小橘四塊，堆方塊拿掉。桌機版第 3、4 塊招牌擋住拱門中央與星星，使用者看過照收。手機只露出中段，星星與兩台車照舊在畫面外。提示詞紀錄在 `docs/art-prompts/games-hub-hero-*.txt`。設計審（Opus）Approve，留著的小地方：手機露出那條底部還有一小截多多（`object-position` 從 42% 調到 36–38% 可清掉，招牌仍完整）；小橘卡片的小圖示像膠囊，之後可換成車頭臉。`art · S`
 - ✅ **遊戲頁夜間 token 沒跟著鎖奶油**（2026-11-08）：`GamePageShell` 夜間區塊照 `:root` 的式子重宣告衍生 token（`--surface-elevated`、`--hairline`／`--line`、`--accent-ink`→`--cta-quiet-fg`、`--cta-soft-*`、`--focus-ring`），結算「回遊樂園」連結與按鈕邊線晚上看得清楚；粉彩、陰影也指回日間，同一組 token 套到 body（portal 的家長工具面板夜間深底深字一併修好），夜間灰紫外框不套在這四款；`GamePageShell.module.css.test.ts` 守。著色完成面遮罩提到 94%。
 - **四款短時試玩後再決定**：壽司屋後期玩法（客人喜好、多種可接受配方、主題創作）、小橘新路線／目的地、消消樂第一關長度與任務辨識、小橘城市窗景美術（景深、材質、地標），都等 `GAME_PHYSICAL_DEVICE_QA.md`「四款短時試玩」的記錄。`game · L · 需試玩`
 - **多多壽司屋短螢幕舞台：工程完成，真機與兒童體驗待驗**（2026-11-07；計畫 `docs/plans/2026-11-07-dino-sushi-stage-focus.md`）：舞台 ≤240px 多多放大到 100–116px、排隊站到右邊，吃的時候字卡改短句、捲回多多的臉，短手機抬頭單列，結算主鈕帶著下一位朋友、一屏放得下。試玩項目見 `GAME_PHYSICAL_DEVICE_QA.md`。

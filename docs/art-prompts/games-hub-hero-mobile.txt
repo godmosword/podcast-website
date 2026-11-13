@@ -1,6 +1,16 @@
-Use your image generation tool (image_gen) to create ONE portrait image (portrait size, e.g. 1024x1536). Image 1 is the approved desktop version of this scene: reuse exactly its claymation style, palette, characters and elements, but recompose them for a tall phone frame.
+# 遊樂園大海報（手機）提示詞紀錄
 
-Composition for portrait: soft pastel sky in the top 15%. Then the rainbow archway with the star on top and the ferris wheel behind it. Directly under / in front of the arch, the THREE round picture signposts sit in one horizontal row across the width (left: pink sign with crayon on open coloring book; center: yellow sign with three identical little yellow cars and two curved swap arrows; right: lilac sign with a purple block falling down onto a row of colorful blocks). Below the signs, the wide clay road comes toward the viewer and exits at the bottom center; the green dinosaur car (closed friendly smile, orange back spikes, blue side window) and the red race car with the number 2 sit on the road side by side facing the viewer. Clay bushes and flowers at the sides. Keep everything readable at small size: signs large and clear.
-No letters or words anywhere; the only number allowed is the "2" on the red race car. No captions, no logos, no watermark, no realistic humans, no photorealism.
+現行版本 2026-11-13 上線：四塊招牌（著色本、車車消消樂、多多壽司屋、小橘特快車），拿掉已下架的堆方塊。
+由 `npm run generate:games-hub-hero -- --only mobile` 產生（OpenAI images.edit，gpt-image-2），提示詞的正本在 `scripts/generate-games-hub-hero.ts`。
+生好先進 `public/.games-staging/games-hub-hero/<run>/`，看過對照表再 `--approve --run <run> --only mobile` 寫進 `public/games/v2/hub/`。
+手機版必須等桌機版核可後才生（它拿新的桌機版當第 1 張參考）。手機只露出 16:9、中心在 42% 高度的一條，拱門與招牌要落在 23–61% 高度。
 
-After generating, copy the PNG to exactly: <OUTPUT_PATH> and reply with the final path only.
+本次 run：2026-11-13T13-17-44-947Z
+
+參考圖（依序）：
+- image 1: public/games/v2/hub/hero-desktop.webp（剛核可的新桌機版）
+- image 2: public/games/v2/hub/hero-mobile.webp（生圖當時的舊版、三塊招牌）
+- image 3: public/characters/小橘高鐵.jpg
+
+實際送出的提示詞：
+Children's picture-book illustration in soft claymation / plasticine stop-motion style, matching image 1 exactly: rounded friendly clay shapes, smooth matte surfaces, soft studio lighting, gentle shadows, pastel palette (blush pink, warm yellow, fresh mint, sky blue, teal, lilac) under a clean off-white sky with small clay clouds and stars. Image 1 is the approved desktop version of this scene (with four picture signs): reuse exactly its claymation style, palette, characters, signs and park elements, but recompose them for a tall phone frame like image 2. Composition: soft pastel sky in the top 15%; then the rainbow archway with the star and the ferris wheel behind it. Directly in front of the arch, the FOUR round picture signs in ONE horizontal row across the full width, large and clear: 1) pink sign: a chunky pink crayon drawing on an open coloring book; 2) yellow sign: three identical little yellow cars in a row with two curved arrows swapping the first two; 3) mint sign: one salmon nigiri sushi on a small round plate, as a simple clay icon; 4) sky-blue sign: a small cream-white bullet train with one orange stripe (the train character from image 3, as a tiny clay icon) on a short piece of track. Phones crop this image to a 16:9 band centred at 42% of its height, so the arch and the four signs must sit between 23% and 61% of the height. Below the signs the wide clay road comes toward the viewer and exits at the bottom centre; the green dinosaur car and the red race car with the number 2 sit on the road side by side facing the viewer, as in image 2. Clay bushes and flowers at the sides. Exactly FOUR signposts; no falling blocks, no tetris-like blocks anywhere. No text, no words, no letters, no numbers except the "2" on the red race car, no captions, no logos, no watermark. No realistic humans. No photorealism.
