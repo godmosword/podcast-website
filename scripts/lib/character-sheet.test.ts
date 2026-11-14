@@ -25,8 +25,9 @@ function descOf(name: string): string {
 
 describe("小紅賽車角色設定書 SSOT", () => {
   it("canon 臉部配置鎖住擋風玻璃眼與分離大燈", () => {
-    // 2026-09-09 裁決：以定裝照為準。眼睛在擋風玻璃，黃大燈另外分離並存。
+    // 2026-11-14 定裝照：眼睛在擋風玻璃，藍色圓大燈另外分離並存。
     expect(XIAO_HONG_FACE_LAYOUT).toContain("ON THE WINDSHIELD panel");
+    expect(XIAO_HONG_FACE_LAYOUT).toContain("blue headlights");
     expect(XIAO_HONG_FACE_LAYOUT).toContain("are NOT the eyes");
     expect(XIAO_HONG_FACE_LAYOUT).toContain("both must be present at once");
     // 嘴在下保險桿，不在水箱罩格柵
@@ -36,6 +37,8 @@ describe("小紅賽車角色設定書 SSOT", () => {
   it("Do-NOT 清單同時擋 canon 漂移與版權區隔項", () => {
     // 偏離 canon 的三種漂移
     expect(XIAO_HONG_DO_NOT).toContain("headlights used as eyes");
+    expect(XIAO_HONG_DO_NOT).toContain("yellow headlights");
+    expect(XIAO_HONG_DO_NOT).toContain("white racing stripe");
     expect(XIAO_HONG_DO_NOT).toContain("roof antenna");
     expect(XIAO_HONG_DO_NOT).toContain("yellow racing stripe");
     // 規格 §2.4 版權區隔項
@@ -47,9 +50,10 @@ describe("小紅賽車角色設定書 SSOT", () => {
     expect(XIAO_HONG_SILHOUETTE_TEST).toContain("silhouette");
   });
 
-  it("正向特徵與定裝照一致：白條紋、號碼 2、單一尾翼、無天線", () => {
+  it("正向特徵與定裝照一致：車門號碼 2、無條紋、單一尾翼、無天線", () => {
     expect(XIAO_HONG_IDENTITY).toContain("the number 2 in a white circle");
-    expect(XIAO_HONG_IDENTITY).toContain("a white racing stripe");
+    expect(XIAO_HONG_IDENTITY).toContain("no racing stripe");
+    expect(XIAO_HONG_IDENTITY).toContain("blue tires with white hubcaps");
     expect(XIAO_HONG_IDENTITY).toContain("a single rear spoiler");
     expect(XIAO_HONG_IDENTITY).toContain("no roof antenna");
     // 定裝照沒有黃條紋與天線，正向敘述不得偷渡進來
@@ -66,11 +70,9 @@ describe("小紅賽車角色設定書 SSOT", () => {
     expect(desc.endsWith(xiaoHongDescSuffix())).toBe(true);
   });
 
-  it("三個對 ep-23／ep-24 已出圖的連貫性鎖沒有被動到", () => {
-    // 這三個條目明文寫死臉部配置以對齊已出圖的畫面；canon 裁決後更不得改動。
+  it("紅爸與小小紅的眼睛仍鎖在擋風玻璃", () => {
     expect(descOf("紅爸")).toContain("eyes ONLY on the windshield");
     expect(descOf("小紅賽車年幼版")).toContain("eyes are NOT headlights on the bumper");
-    expect(descOf("小紅賽車的爸爸年輕版")).toContain("copy reference dad 1:1");
   });
 
   it("roamer prompt：front 掛臉部配置，rear 不掛（背面看不到臉）", () => {

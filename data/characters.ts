@@ -58,7 +58,6 @@ const ID_BY_CANONICAL_NAME: Record<string, string> = {
   自動駕駛計程車知知: "zhi-zhi",
   紅爸: "xiao-hong-dad",
   小紅賽車年幼版: "xiao-hong-baby",
-  小紅賽車的爸爸年輕版: "xiao-hong-dad-young",
   大黃: "da-huang",
 };
 
@@ -68,7 +67,6 @@ const VEHICLE_ZH: Record<string, string> = {
   ambulance: "救護車",
   "race car": "賽車",
   "baby race car": "Baby 賽車",
-  "young race car": "年輕賽車",
   minibus: "巴士",
   taxi: "計程車",
   "monster truck": "怪獸卡車",
@@ -134,7 +132,6 @@ const PERSONALITY_BY_ID: Record<string, string> = {
   "zhi-zhi": "溫柔提醒、陪大家平安到達想去的地方",
   "xiao-hong-dad": "溫柔耐心、陪小紅安全完成第一次穿越大山",
   "xiao-hong-baby": "小小軟軟、愛吸香草奶嘴、需要爸爸陪伴",
-  "xiao-hong-dad-young": "年輕溫暖、陪 Baby 小紅慢慢練習長大",
   "da-huang": "認真送貨、學會不用一次裝完",
 };
 

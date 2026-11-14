@@ -153,7 +153,7 @@ describe("getCharactersForStory", () => {
     expect(ids).toContain("xiao-hong-dad");
     expect(ids).toContain("xiao-hong");
     expect(ids).toContain("xiao-hong-baby");
-    expect(ids).toContain("xiao-hong-dad-young");
+    expect(ids).not.toContain("xiao-hong-dad-young");
   });
 });
 
@@ -197,7 +197,7 @@ describe("getCharacterName", () => {
     expect(getCharacterName("xiao-hong-dad")).toBe("紅爸");
     expect(getCharacters().find((c) => c.id === "xiao-hong-dad")?.name).toBe("紅爸");
     expect(getCharacterName("xiao-hong-baby")).toBe("小紅賽車年幼版");
-    expect(getCharacterName("xiao-hong-dad-young")).toBe("小紅賽車的爸爸年輕版");
+    expect(getCharacterName("xiao-hong-dad-young")).toBeNull();
     expect(getCharacterName("diao-che")).toBe("吊車阿公");
     expect(getCharacters().find((c) => c.id === "diao-che")?.name).toBe("吊車阿公");
     expect(getCharacterName("da-huang")).toBe("大黃");

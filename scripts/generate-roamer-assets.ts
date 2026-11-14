@@ -113,8 +113,9 @@ const ROAMER_SPECS: RoamerSpec[] = [
         "A cute super-deformed chibi clay toy race car, short chunky stubby proportions, a " +
         "rounded chubby body, small chunky wheels with all four wheels clearly visible and " +
         "separable. The car is a bright red race car with the number 2 inside a white circle " +
-        "on the side, a white racing stripe down the middle, blue and yellow accents, and a " +
-        "friendly face with two big round eyes and a cheerful smile on the front. Shown in a " +
+        "on the side door only, a solid red hood with no racing stripe, blue headlights, blue side mirrors, " +
+        "blue tires with white hubcaps, and a friendly face with two big round blue-iris eyes and a cheerful " +
+        "closed smile on the white windshield. Shown in a " +
         "three-quarter side view facing screen-left in a gentle driving pose, upright and level " +
         "on flat ground, viewed from a slight high angle about 30 degrees to match a tabletop " +
         "diorama. Handmade matte polymer clay, soft rounded pressed edges, subtle thumbprint " +
@@ -132,9 +133,9 @@ const ROAMER_SPECS: RoamerSpec[] = [
     rear: {
       positive:
         "A cute super-deformed chibi clay toy race car, short chunky stubby proportions, a " +
-        "rounded chubby body, small chunky wheels. The car is a bright red race car with a white " +
-        "racing stripe down the middle and blue and yellow accents, the number 2 inside a white " +
-        "circle on the side. Shown from a three-quarter REAR view from behind, the car driving " +
+        "rounded chubby body, small chunky wheels. The car is a bright red race car with a solid " +
+        "red hood, no racing stripe, blue tires with white hubcaps, the number 2 inside a white " +
+        "circle on the side door only. Shown from a three-quarter REAR view from behind, the car driving " +
         "away from the camera toward screen-left, clearly showing the back of the car, its two " +
         "rear wheels and a small rounded rear bumper; the face is turned away and not visible. " +
         "Upright and level on flat ground, viewed from a slight high angle about 30 degrees to " +

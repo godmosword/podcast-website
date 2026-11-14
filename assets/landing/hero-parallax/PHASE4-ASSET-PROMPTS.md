@@ -238,28 +238,17 @@ Redraw this exact same clay toy race car larger and at higher resolution, keepin
 every feature identical to the reference. Do not redesign it.
 
 Mirror the pose so the car faces screen-RIGHT in a gentle driving pose (it currently
-faces screen-left). The number 2 on the door, the number 2 on the hood and the white
-hood stripes must stay the correct way round and readable — do NOT mirror the
-numbers themselves.
+faces screen-left). The number 2 on the door must stay the correct way round and
+readable — do NOT mirror the number itself. There is no hood number and no hood stripe.
 
-FACE LAYOUT (canonical, match the reference exactly): big round eyes with black
-pupils and a highlight sit ON THE WINDSHIELD panel; small round yellow headlights sit
-separately on the front nose and are NOT the eyes — both must be present at once; a
-soft smile line runs low across the front bumper, below the headlights.
+FACE LAYOUT (canonical, match the reference portrait): big round eyes with blue irises, black pupils and a highlight sit ON THE WINDSHIELD panel; round blue headlights with pale centers sit separately on the front fenders and are NOT the eyes — both must be present at once; a soft closed smile line runs low across the front bumper, below the headlights.
 
-Self-identifying features that must all be present: a rounded, tall, chubby
-super-deformed toy-car silhouette (NOT a low-slung streamlined sports car); the
-number 2 in a white circle on the side door; a white racing stripe down the middle of
-the hood; a single rear spoiler; blue accents on the bumper and trim; no roof antenna.
+Self-identifying features that must all be present: a rounded, tall, chubby super-deformed toy-car silhouette (NOT a low-slung streamlined sports car); the number 2 in a white circle on the side door only, with no number on the hood; a solid red hood with no racing stripe; a single rear spoiler; blue round side mirrors; a white side window; blue tires with white hubcaps; no roof antenna.
 
 All four wheels sit level on flat ground, and the bottom of the tyres must touch the
 very bottom edge of the image (the roamer positioning system anchors on this).
 
-DO NOT DRAW: eyes on the headlights, headlights used as eyes, missing headlights,
-roof antenna, star antenna, yellow racing stripe, the number 95, lightning bolt
-decal, sponsor decals, low-slung streamlined sports car body, wide flat rally or
-off-road stance, oversized wheels, mouth built into the radiator grille, Pixar Cars,
-Lightning McQueen, any car that reads at a glance as a Disney/Pixar Cars character.
+DO NOT DRAW: eyes on the headlights, headlights used as eyes, missing headlights, yellow headlights, white racing stripe, hood racing number, roof antenna, star antenna, yellow racing stripe, the number 95, lightning bolt decal, sponsor decals, low-slung streamlined sports car body, wide flat rally or off-road stance, oversized wheels, mouth built into the radiator grille, open mouth with a tongue, Pixar Cars, Lightning McQueen, any car that reads at a glance as a Disney/Pixar Cars character.
 
 The silhouette alone must read as this original character and clearly not as
 Lightning McQueen.
