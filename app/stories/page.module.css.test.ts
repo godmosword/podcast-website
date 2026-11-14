@@ -19,6 +19,7 @@ describe("stories/page.module.css 桌機欄寬", () => {
     expect(css).not.toMatch(/minmax\(220px,\s*300px\)/);
   });
 
+  // 實際畫面順序由 e2e/smoke.spec.ts「全部故事頁第一屏是最新一集」驗；這裡只是快速的原始碼守門。
   it("頁面順序：標題 → 最新一集與列表 → 品牌大圖（deferred）→ 頁尾，且最新一集封面優先下載", () => {
     const tsx = readFileSync(join(import.meta.dirname, "page.tsx"), "utf8");
     const order = ["<StoriesIndexHeader", "<HomeSectionList", "<SiteHeader deferred", "<SiteFooter"].map(
