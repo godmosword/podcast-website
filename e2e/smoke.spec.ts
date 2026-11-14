@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { storiesByNewest } from "../data/content";
+import { EPISODE_THEMES } from "../data/episode-themes";
 import { representativeParentStories } from "../lib/for-parents";
 import { PROGRESS_STORAGE_KEY } from "../lib/progress-store";
 import sharp from "sharp";
@@ -106,8 +107,8 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
   ).toHaveAttribute("href", "/stories");
   await expect(page.getByRole("link", { name: "看小紅開進遊樂園" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: /聽最新一集/ })).toHaveCount(0);
-  await expect(page.getByRole("heading", { name: /數綿羊/ })).toBeAttached();
-  await expect(page.getByRole("heading", { name: /捏黏土/ })).toBeAttached();
+  await expect(page.getByRole("heading", { name: /數綿羊/ })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: /捏黏土/ })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: /陪孩子建立好習慣/ })).toBeAttached();
   const moreSkip = page
     .locator("#segment-stories")
@@ -138,7 +139,7 @@ test("Landing 滑鼠往下滾用與圓鈕相同的換段", async ({ page }) => {
   await expect
     .poll(
       async () =>
-        (await page.locator("#segment-bedtime").boundingBox())?.y ?? Infinity,
+        (await page.locator("#segment-health").boundingBox())?.y ?? Infinity,
       { timeout: 5_000 },
     )
     .toBeLessThan(200);
@@ -245,20 +246,61 @@ async function expectStoriesFromLanding(page: import("@playwright/test").Page) {
   await expect(page.getByRole("heading", { name: "找故事" })).toBeVisible();
 }
 
-test("Landing 四段 CTA href", async ({ page }) => {
+test("Landing 兩段 CTA href", async ({ page }) => {
   await page.goto("/");
   const expected = [
     { label: "車車遊樂園的故事", href: "/stories" },
-    { label: "數綿羊123．睡前故事", href: "/topic/睡前" },
-    { label: "好好玩的捏黏土（另開視窗）", href: /youtube\.com/ },
-    { label: "好習慣故事", href: "/topic/安全" },
+    { label: "好習慣故事", href: "/stories?tag=生活好習慣" },
   ] as const;
+  await expect(page.getByRole("link", { name: "數綿羊123．睡前故事" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: /捏黏土/ })).toHaveCount(0);
   for (const { label, href } of expected) {
     const link = page.getByRole("link", { name: label }).first();
     await link.scrollIntoViewIfNeeded();
     await expect(link).toBeVisible();
     await expect(link).toHaveAttribute("href", href);
   }
+});
+
+test("好習慣故事連到全部生活好習慣（390）", async ({ page }) => {
+  const habitEpisodes = EPISODE_THEMES.filter((row) => row.theme === "生活好習慣");
+  expect(habitEpisodes.length).toBeGreaterThan(0);
+  const expectedHrefs = [...habitEpisodes]
+    .sort((a, b) => b.ep - a.ep)
+    .map((row) => `/story/${row.slug}`);
+  const other = EPISODE_THEMES.find((row) => row.theme !== "生活好習慣");
+  expect(other, "要有一集不是生活好習慣，才能確認清單有篩過").toBeTruthy();
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  const link = page.locator("#segment-health").getByRole("link", { name: "好習慣故事" });
+  await link.scrollIntoViewIfNeeded();
+  await expect(link).toBeVisible();
+  const href = await link.getAttribute("href");
+  const target = new URL(href ?? "", "http://127.0.0.1");
+  expect(target.pathname).toBe("/stories");
+  expect(target.searchParams.get("tag")).toBe("生活好習慣");
+
+  await link.click();
+  await expect
+    .poll(() => {
+      const url = new URL(page.url());
+      return url.pathname === "/stories" && url.searchParams.get("tag") === "生活好習慣";
+    })
+    .toBe(true);
+
+  await expect(page.getByRole("button", { name: "選擇主題" })).toContainText("生活好習慣");
+  const finder = page.getByRole("region", { name: "找故事" });
+  await expect(finder.getByText(`${habitEpisodes.length} 則故事`, { exact: true })).toBeVisible();
+  const cards = finder.locator('a[href^="/story/"]');
+  await expect(cards).toHaveCount(expectedHrefs.length);
+  expect(await cards.evaluateAll((nodes) => nodes.map((node) => node.getAttribute("href")))).toEqual(
+    expectedHrefs,
+  );
+  for (const row of habitEpisodes) {
+    await expect(finder.getByRole("heading", { name: row.title, exact: true })).toBeVisible();
+  }
+  await expect(finder.getByRole("heading", { name: other!.title, exact: true })).toHaveCount(0);
 });
 
 test("Landing 分區 CTA 進全部故事（390）", async ({ page }) => {
@@ -593,7 +635,7 @@ test.describe("頂欄回到 Landing 第一屏", () => {
     await expect
       .poll(
         async () =>
-          (await page.locator("#segment-bedtime").boundingBox())?.y ?? Infinity,
+          (await page.locator("#segment-health").boundingBox())?.y ?? Infinity,
         { timeout: 5_000 },
       )
       .toBeLessThan(200);
@@ -643,7 +685,7 @@ test.describe("頂欄回到 Landing 第一屏", () => {
 });
 
 test.describe("首頁沒有頁尾 snap pane", () => {
-  test("四段之後不再接 landing-foot", async ({ page }) => {
+  test("兩段之後不再接 landing-foot", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto("/");
     await expect(page.locator("#landing-foot")).toHaveCount(0);
@@ -906,10 +948,13 @@ test.describe("首頁手機換段出口", () => {
       await expectHitTestable(page, skip, `${width}px 往下鍵`);
 
       await skip.click();
+      // 第二段是好習慣。睡前段已移除，不能再等名稱含「睡前」的 region。
       await expect
-        .poll(async () => (await page.getByRole("region", { name: /睡前/ }).first().boundingBox())?.y ?? Infinity, {
-          timeout: 5_000,
-        })
+        .poll(
+          async () =>
+            (await page.locator("#segment-health").boundingBox())?.y ?? Infinity,
+          { timeout: 5_000 },
+        )
         .toBeLessThan(760);
     });
   }

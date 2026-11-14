@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { allTags, getStoriesByTag } from "@/data/content";
+import { publicTopicTags, getStoriesByTag } from "@/data/content";
 import { storyCoverPath } from "@/lib/story-utils";
 import { topicVisualFor } from "@/lib/topic-visuals";
 import { GeoSrOnlyLede } from "@/lib/geo-sr-only-lede";
@@ -13,7 +13,7 @@ import Icon from "@/components/ui/Icon";
 import styles from "./page.module.css";
 
 export function generateMetadata(): Metadata {
-  const themes = allTags().map((tag) => ({
+  const themes = publicTopicTags().map((tag) => ({
     tag,
     count: getStoriesByTag(tag).length,
   }));
@@ -32,7 +32,7 @@ export function generateMetadata(): Metadata {
 }
 
 export default function TopicIndexPage() {
-  const themes = allTags().map((tag) => {
+  const themes = publicTopicTags().map((tag) => {
     const stories = getStoriesByTag(tag);
     return { tag, count: stories.length, coverSlug: stories[0]?.slug ?? null };
   });

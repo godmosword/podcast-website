@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { allTags, allVehicles, getStories } from "@/data/content";
+import { allVehicles, getStories, publicTopicTags } from "@/data/content";
 import { storyDateModified } from "@/data/story-dates";
 import { listPlaygrounds } from "@/data/playgrounds";
 import { universe } from "@/data/universe";
@@ -190,7 +190,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
-  const topicPages: MetadataRoute.Sitemap = allTags().map((tag) => ({
+  const topicPages: MetadataRoute.Sitemap = publicTopicTags().map((tag) => ({
     url: `${baseUrl}/topic/${encodeURIComponent(tag)}`,
     lastModified: collectionModified,
     changeFrequency: "monthly" as const,

@@ -22,6 +22,7 @@ import {
   getStories,
   getStoriesByTag,
   getStoriesByVehicle,
+  publicTopicTags,
   type Story,
 } from "../data/content";
 import { storyDateModified } from "../data/story-dates";
@@ -828,7 +829,7 @@ async function main(): Promise<void> {
     checkStoryPage(story, sitemapByStory);
   }
 
-  const tags = allTags();
+  const tags = publicTopicTags();
   coverage.topicPagesTotal = tags.length;
   for (const tag of tags) {
     const encoded = encodeURIComponent(tag);

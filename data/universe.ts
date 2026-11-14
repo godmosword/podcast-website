@@ -236,7 +236,7 @@ const raw = {
       coordPortrait: { x: 360, y: 980 },
       landmark: "🎡",
       sprite: "/adventures/zones/car-park.png",
-      tagline: "故事 · 睡前 · 黏土 · 安全",
+      tagline: "故事 · 安全",
       subSegmentIds: [...LANDING_SEGMENT_IDS],
       links: [],
       hotspots: [
@@ -255,24 +255,9 @@ const raw = {
           action: { type: "link", href: "/stories" },
         },
         {
-          id: "bedtime-nook",
-          name: "睡前小窩",
-          featured: true,
-          pos: { x: 0.72, y: 0.48 },
-          action: { type: "link", href: "/topic/睡前" },
-        },
-        {
-          id: "clay-table",
-          name: "黏土桌",
-          pos: { x: 0.35, y: 0.72 },
-          action: {
-            type: "link",
-            href: "https://www.youtube.com/playlist?list=PLVbyl20K8lOeuJ2ky6dEsmpew7xAxZDhF",
-          },
-        },
-        {
           id: "safety-corner",
           name: "安全角",
+          featured: true,
           pos: { x: 0.68, y: 0.7 },
           action: { type: "link", href: "/topic/安全" },
         },

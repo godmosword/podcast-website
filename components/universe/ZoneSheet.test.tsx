@@ -189,7 +189,7 @@ describe("ZoneSheet", () => {
     expect(ctaIndex).toBeGreaterThan(storiesIndex);
   });
 
-  it("car-park 四段內容支柱收在「看看這座島有什麼」次層，首屏不出現", () => {
+  it("car-park 車庫連結收在「看看這座島有什麼」次層，首屏不出現", () => {
     const zone = ZONES.find((item) => item.id === "car-park")!;
     const html = renderToStaticMarkup(
       <ZoneSheet zone={zone} {...sheetProps} />,
@@ -203,7 +203,7 @@ describe("ZoneSheet", () => {
     expect(html).not.toContain("想留一句話");
   });
 
-  it("car-park 黏土外連展開後 aria-label 告知另開 YouTube，內部連結不含", () => {
+  it("車庫沒有睡前與捏黏土", () => {
     const zone = ZONES.find((item) => item.id === "car-park")!;
     render(<ZoneSheet zone={zone} {...sheetProps} />);
 
@@ -211,19 +211,10 @@ describe("ZoneSheet", () => {
       screen.getByRole("button", { name: "看看這座島有什麼" }),
     );
 
-    const clayLink = screen.getByRole("link", {
-      name: "捏黏土（另開 YouTube）",
-    });
-    expect(clayLink).toBeTruthy();
-    expect(clayLink.textContent).toContain("捏黏土");
-
-    for (const link of getCarParkLinks()) {
-      if (link.external) continue;
-      const internalLink = screen.getByRole("link", { name: link.label });
-      expect(internalLink.getAttribute("aria-label") ?? "").not.toMatch(
-        /另開 YouTube/,
-      );
-    }
+    expect(screen.queryByRole("link", { name: "睡前" })).toBeNull();
+    expect(screen.queryByRole("link", { name: /捏黏土/ })).toBeNull();
+    expect(screen.getByRole("link", { name: "車車故事" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "好習慣" })).toBeTruthy();
   });
 
   it("展開「看看這座島有什麼」後列出全部地點，且精選地標優先排列", () => {

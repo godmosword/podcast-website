@@ -32,8 +32,6 @@ export const DUDU_EMOTION_LABEL: Record<DuduEmotion, string> = {
 /** 捲到各 segment 時的基本表情。 */
 export const DUDU_EMOTION_BY_SEGMENT: Record<LandingSegmentId, DuduEmotion> = {
   stories: "star",
-  bedtime: "happy",
-  clay: "laugh",
   health: "surprised",
 };
 

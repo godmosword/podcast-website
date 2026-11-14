@@ -5,8 +5,7 @@ import {
   storiesByNewest,
 } from "@/data/content";
 import {
-  LANDING_CLAY_EXTERNAL,
-  LANDING_SEGMENT_IDS,
+  LANDING_PAGE_SEGMENT_IDS,
   type LandingSegmentDef,
   LANDING_SEGMENTS,
 } from "@/data/landing-segments";
@@ -58,29 +57,6 @@ function storiesForSegment(id: LandingSegmentDef["id"]): LandingCarouselItem[] {
       return storiesByNewest()
         .slice(0, 8)
         .map((story) => ({ kind: "story" as const, story }));
-    case "bedtime":
-      return uniqueStories([
-        getStoriesByTag("睡前"),
-        getStoriesByTag("好習慣"),
-      ]).map((story) => ({ kind: "story" as const, story }));
-    case "clay":
-      return [
-        {
-          kind: "external" as const,
-          title: LANDING_CLAY_EXTERNAL.title,
-          subtitle: LANDING_CLAY_EXTERNAL.subtitle,
-          href: LANDING_CLAY_EXTERNAL.href,
-          image: LANDING_CLAY_EXTERNAL.image,
-          external: true,
-        },
-        {
-          kind: "game" as const,
-          title: "去遊樂園玩小遊戲",
-          subtitle: "免下載 · 練手眼協調",
-          href: "/games",
-          image: "/mascot.png",
-        },
-      ];
     case "health":
       return uniqueStories([
         getStoriesByTag("安全"),
@@ -118,7 +94,7 @@ function playForSegment(
 }
 
 export function resolveLandingSegments(): ResolvedLandingSegment[] {
-  return LANDING_SEGMENT_IDS.map((id) => {
+  return LANDING_PAGE_SEGMENT_IDS.map((id) => {
     const def = LANDING_SEGMENTS.find((s) => s.id === id)!;
     return { ...def, items: storiesForSegment(id), play: playForSegment(def) };
   });
