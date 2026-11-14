@@ -38,6 +38,11 @@ export type BrandMarkSpec = {
   interim?: true;
   /** 自有圖示，不受第三方規範 */
   own?: true;
+  /**
+   * 標誌本身就是夠大、讀得出名稱的字標；和文字並排時，旁邊不再重複同一個名稱。
+   * KKBOX 雖然也是字標，但站內只畫 38×8px，單獨放在一列裡像空的，所以不標。
+   */
+  wordmark?: true;
 };
 
 /** 全站視覺尺寸：Instagram 最小 29px，取 30。 */
@@ -83,6 +88,7 @@ export const BRAND_MARKS: Record<BrandMarkId, BrandMarkSpec> = {
   youtube: {
     // 完整字標（高 24px，規範最小 20px）。不使用裁切後的圖示檔。
     sizing: { aspect: 492 / 110, fixedWidth: 108 },
+    wordmark: true,
     art: {
       white: image("/brand/youtube-logo.svg"),
       light: image("/brand/youtube-logo.svg"),
@@ -104,6 +110,15 @@ export const BRAND_MARKS: Record<BrandMarkId, BrandMarkSpec> = {
   facebook: { sizing: "square", art: same(image("/brand/facebook-logo-primary.png")) },
   email: { sizing: "square", own: true, art: same(email) },
 };
+
+/**
+ * YouTube 的完整字標（108×24）已經寫出名稱。「標誌＋文字」的列裡再放一次同名文字
+ * 會變成「YouTube YouTube」，文字也落進標誌的淨空範圍；這種列把可見文字收起來
+ * （保留在 DOM 給讀屏與連結名稱）。
+ */
+export function isBrandWordmark(id: BrandMarkId): boolean {
+  return BRAND_MARKS[id].wordmark === true;
+}
 
 /** 視覺尺寸 s 換算成實際寬高（依官方檔比例，不變形）。 */
 export function brandMarkBox(id: BrandMarkId, s: number = BRAND_MARK_SIZE): { width: number; height: number } {

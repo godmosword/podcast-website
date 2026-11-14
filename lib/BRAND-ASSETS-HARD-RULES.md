@@ -23,6 +23,8 @@
 | 純圖示格線 | `ConnectHub`（頁尾） | 60px 白章（日 `--card` 純白、夜 `--card-2`），`BrandMark surface="chip"` |
 | 標誌＋文字同一個可點容器 | `SubscribeMenu`、`SubscribeForm`、`PlatformStudioCard` | 不加章；38px 寬槽位、與文字間距 ≥ 12px（30px 標誌與文字實距 ≥ 16px），`BrandMark surface="row"` |
 
+「標誌＋文字」的列裡，YouTube 完整字標（108×24）旁不再顯示同名文字（`isBrandWordmark`；文字留在 DOM 給讀屏）：原本文字離字標 12px，落在淨空範圍內。KKBOX 字標站內只畫 38×8px，單獨一列認不出來，文字照留。頁尾格線（`ConnectHub`）每顆章下方都有名稱、文字在章外，不在此限。
+
 色版規則（`lib/brand-marks.tsx` 的 `art`）：
 
 - 純白章與其他日間淺色底（`--card` 為 `#ffffff`）→ Spotify 官方綠標、KKBOX 在白章用標準青、其他淺色底的 KKBOX／Threads 用黑色版。
