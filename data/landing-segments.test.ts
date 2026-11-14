@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { EPISODE_THEMES } from "./episode-themes";
 import { LANDING_SEGMENTS } from "./landing-segments";
 import { resolveLandingSegments } from "@/lib/landing-query";
 
@@ -84,9 +85,14 @@ describe("landing-segments", () => {
       }),
       expect.objectContaining({
         id: "health",
-        cta: { label: "好習慣故事", href: "/topic/安全" },
+        cta: { label: "好習慣故事", href: "/stories?tag=生活好習慣" },
         navLabel: "好習慣",
       }),
     ]);
+
+    const health = LANDING_SEGMENTS.find((segment) => segment.id === "health");
+    const tag = new URL(health!.cta.href, "https://chechecar.tw").searchParams.get("tag");
+    expect(tag).toBe("生活好習慣");
+    expect(EPISODE_THEMES.some((row) => row.theme === tag)).toBe(true);
   });
 });

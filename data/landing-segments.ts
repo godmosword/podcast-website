@@ -52,7 +52,8 @@ export const LANDING_SEGMENTS: LandingSegmentDef[] = [
     title: "陪孩子建立好習慣",
     heroImage: "/landing/segment-health.jpg",
     heroImagePortrait: "/landing/segment-health-portrait.jpg",
-    cta: { label: "好習慣故事", href: "/topic/安全" },
+    // 故事搜尋器的主題「生活好習慣」（見 data/episode-themes.ts），一次列出全部這類故事。
+    cta: { label: "好習慣故事", href: "/stories?tag=生活好習慣" },
     navLabel: "好習慣",
     bedtimeVeil: "warm-bottom",
   },

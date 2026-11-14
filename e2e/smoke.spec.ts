@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { storiesByNewest } from "../data/content";
+import { EPISODE_THEMES } from "../data/episode-themes";
 import { representativeParentStories } from "../lib/for-parents";
 import { PROGRESS_STORAGE_KEY } from "../lib/progress-store";
 import sharp from "sharp";
@@ -249,7 +250,7 @@ test("Landing 兩段 CTA href", async ({ page }) => {
   await page.goto("/");
   const expected = [
     { label: "車車遊樂園的故事", href: "/stories" },
-    { label: "好習慣故事", href: "/topic/安全" },
+    { label: "好習慣故事", href: "/stories?tag=生活好習慣" },
   ] as const;
   await expect(page.getByRole("link", { name: "數綿羊123．睡前故事" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: /捏黏土/ })).toHaveCount(0);
@@ -259,6 +260,47 @@ test("Landing 兩段 CTA href", async ({ page }) => {
     await expect(link).toBeVisible();
     await expect(link).toHaveAttribute("href", href);
   }
+});
+
+test("好習慣故事連到全部生活好習慣（390）", async ({ page }) => {
+  const habitEpisodes = EPISODE_THEMES.filter((row) => row.theme === "生活好習慣");
+  expect(habitEpisodes.length).toBeGreaterThan(0);
+  const expectedHrefs = [...habitEpisodes]
+    .sort((a, b) => b.ep - a.ep)
+    .map((row) => `/story/${row.slug}`);
+  const other = EPISODE_THEMES.find((row) => row.theme !== "生活好習慣");
+  expect(other, "要有一集不是生活好習慣，才能確認清單有篩過").toBeTruthy();
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  const link = page.locator("#segment-health").getByRole("link", { name: "好習慣故事" });
+  await link.scrollIntoViewIfNeeded();
+  await expect(link).toBeVisible();
+  const href = await link.getAttribute("href");
+  const target = new URL(href ?? "", "http://127.0.0.1");
+  expect(target.pathname).toBe("/stories");
+  expect(target.searchParams.get("tag")).toBe("生活好習慣");
+
+  await link.click();
+  await expect
+    .poll(() => {
+      const url = new URL(page.url());
+      return url.pathname === "/stories" && url.searchParams.get("tag") === "生活好習慣";
+    })
+    .toBe(true);
+
+  await expect(page.getByRole("button", { name: "選擇主題" })).toContainText("生活好習慣");
+  const finder = page.getByRole("region", { name: "找故事" });
+  await expect(finder.getByText(`${habitEpisodes.length} 則故事`, { exact: true })).toBeVisible();
+  const cards = finder.locator('a[href^="/story/"]');
+  await expect(cards).toHaveCount(expectedHrefs.length);
+  expect(await cards.evaluateAll((nodes) => nodes.map((node) => node.getAttribute("href")))).toEqual(
+    expectedHrefs,
+  );
+  for (const row of habitEpisodes) {
+    await expect(finder.getByRole("heading", { name: row.title, exact: true })).toBeVisible();
+  }
+  await expect(finder.getByRole("heading", { name: other!.title, exact: true })).toHaveCount(0);
 });
 
 test("Landing 分區 CTA 進全部故事（390）", async ({ page }) => {
