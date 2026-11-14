@@ -205,7 +205,7 @@ test.describe("遊樂園 hub", () => {
     await expect(page.locator('main a[href^="/games/"]')).toHaveCount(4);
   });
 
-  test("手機與桌面都是兩欄，站序著色 → 消消樂 → 壽司 → 小橘", async ({ page }) => {
+  test("手機兩欄、桌面一排四張，站序著色 → 消消樂 → 壽司 → 小橘", async ({ page }) => {
     const order = [
       "/games/coloring-book",
       "/games/candy-match",
@@ -214,7 +214,9 @@ test.describe("遊樂園 hub", () => {
     ];
     for (const [viewport, cols] of [
       [{ width: 390, height: 844 }, 2],
-      [{ width: 1280, height: 800 }, 2],
+      [{ width: 979, height: 800 }, 2],
+      [{ width: 980, height: 800 }, 4],
+      [{ width: 1280, height: 800 }, 4],
     ] as const) {
       await page.setViewportSize(viewport);
       await page.goto("/games");
@@ -222,6 +224,15 @@ test.describe("遊樂園 hub", () => {
       expect(await cards.evaluateAll((nodes) => nodes.map((n) => n.getAttribute("href")))).toEqual(order);
       const tops = await cards.evaluateAll((nodes) => nodes.map((n) => Math.round(n.getBoundingClientRect().top)));
       expect(new Set(tops).size, `${viewport.width}`).toBe(Math.ceil(order.length / cols));
+    }
+
+    // 桌面一排四張的目的：1440×900 第一屏看得到四款名稱
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto("/games");
+    for (const href of order) {
+      const title = page.locator(`main a[href="${href}"] [class*="cardTitle"]`).first();
+      const box = (await title.boundingBox())!;
+      expect(box.y + box.height, href).toBeLessThanOrEqual(900);
     }
   });
 });

@@ -73,8 +73,8 @@ function GameCard({ game, eager }: { game: GameMeta; eager: boolean }) {
               src={game.art.thumbnail ?? game.art.cover}
               alt={game.art.alt}
               fill
-              /* 每張卡同寬（兩欄），sizes 必須貼齊實際渲染寬度，否則會下載到過小的檔再放大。 */
-              sizes="(max-width: 979px) calc(50vw - 24px), 480px"
+              /* 每張卡同寬（<980 兩欄、≥980 一排四張），sizes 必須貼齊實際渲染寬度，否則會下載到過小的檔再放大。 */
+              sizes="(max-width: 979px) calc(50vw - 24px), 240px"
               className={styles.thumbImage}
               style={{ objectPosition: game.art.position ?? "50% 50%" }}
               /* 首張 preload（LCP），其餘 eager 但不佔 preload 預算。
@@ -103,7 +103,7 @@ function GameCard({ game, eager }: { game: GameMeta; eager: boolean }) {
   );
 }
 
-/** 著色本第一站，接著消消樂、壽司屋、小橘特快車。桌面也維持兩欄。 */
+/** 著色本第一站，接著消消樂、壽司屋、小橘特快車。手機兩欄兩列，桌面一排四張。 */
 const HUB_STATION_ORDER: readonly GameMeta["slug"][] = [
   "coloring-book",
   "candy-match",

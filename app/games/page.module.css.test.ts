@@ -15,9 +15,11 @@ describe("games hub 四張卡的網格", () => {
     );
   });
 
-  it("≥980 仍是兩欄，不改成三欄或四欄", () => {
+  it("≥980 一排四張（四款剛好一排、沒有落單），不出現三欄", () => {
+    expect(css).toMatch(
+      /@media \(min-width: 980px\)\s*\{\s*\.cardGrid\s*\{[^}]*grid-template-columns:\s*repeat\(4, minmax\(0, 1fr\)\)/,
+    );
     expect(css).not.toMatch(/\.cardGrid\s*\{[^}]*repeat\(3,/);
-    expect(css).not.toMatch(/\.cardGrid\s*\{[^}]*repeat\(4,/);
   });
 
   it("不再有手機置頂全寬大卡", () => {
