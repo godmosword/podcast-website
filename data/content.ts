@@ -175,6 +175,17 @@ export function allTags(): string[] {
   );
 }
 
+/** 不再單獨開主題頁的標籤。故事卡仍可顯示，只是沒有 /topic 頁。 */
+const RETIRED_TOPIC_TAGS = new Set(["睡前"]);
+
+export function isRetiredTopicTag(tag: string): boolean {
+  return RETIRED_TOPIC_TAGS.has(tag);
+}
+
+export function publicTopicTags(): string[] {
+  return allTags().filter((tag) => !isRetiredTopicTag(tag));
+}
+
 export function getStoriesByTag(tag: string): Story[] {
   return storiesByNewest().filter((s) => (s.tags ?? []).includes(tag));
 }

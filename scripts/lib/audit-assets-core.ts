@@ -7,10 +7,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import charactersJson from "../../data/characters.json";
 import { getStories } from "../../data/content";
-import {
-  LANDING_CLAY_EXTERNAL,
-  LANDING_SEGMENTS,
-} from "../../data/landing-segments";
+import { LANDING_SEGMENTS } from "../../data/landing-segments";
 import { DUDU_EMOTIONS, emotionSrc } from "../../data/dudu-emotions";
 import { CANDY_MATCH_LEVELS } from "../../lib/games/candy-match/levels";
 import { MAP_ROAMERS } from "../../data/universe-roamers";
@@ -190,7 +187,6 @@ export function collectDynamicReferencePaths(): string[] {
       refs.add(modern.avif);
     }
   }
-  refs.add(LANDING_CLAY_EXTERNAL.image);
 
   for (const emotion of DUDU_EMOTIONS) {
     refs.add(emotionSrc(emotion));
