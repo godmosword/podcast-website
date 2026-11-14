@@ -5,19 +5,14 @@ import { LANDING_SEGMENTS } from "./landing-segments";
 import { resolveLandingSegments } from "@/lib/landing-query";
 
 describe("landing-segments", () => {
-  it("定義四段 segment", () => {
-    expect(LANDING_SEGMENTS).toHaveLength(4);
-    expect(LANDING_SEGMENTS.map((s) => s.id)).toEqual([
-      "stories",
-      "bedtime",
-      "clay",
-      "health",
-    ]);
+  it("定義兩段 segment", () => {
+    expect(LANDING_SEGMENTS).toHaveLength(2);
+    expect(LANDING_SEGMENTS.map((s) => s.id)).toEqual(["stories", "health"]);
   });
 
-  it("resolve 後每段至少有項目", () => {
+  it("resolve 後首頁只剩故事與好習慣", () => {
     const resolved = resolveLandingSegments();
-    expect(resolved).toHaveLength(4);
+    expect(resolved.map((s) => s.id)).toEqual(["stories", "health"]);
     for (const seg of resolved) {
       expect(seg.items.length).toBeGreaterThan(0);
     }
@@ -71,7 +66,7 @@ describe("landing-segments", () => {
     }
   });
 
-  it("四段都不掛播放直達鈕（hero 只留分區 CTA）", () => {
+  it("首頁兩段都不掛播放直達鈕（hero 只留分區 CTA）", () => {
     for (const seg of LANDING_SEGMENTS) {
       expect(seg.playCta).toBeUndefined();
     }
@@ -80,34 +75,18 @@ describe("landing-segments", () => {
     }
   });
 
-  it("四段 CTA label、href、external 與 navLabel", () => {
-    expect(LANDING_SEGMENTS).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          id: "stories",
-          cta: { label: "車車遊樂園的故事", href: "/stories" },
-          navLabel: "車車故事",
-        }),
-        expect.objectContaining({
-          id: "bedtime",
-          cta: { label: "數綿羊123．睡前故事", href: "/topic/睡前" },
-          navLabel: "睡前",
-        }),
-        expect.objectContaining({
-          id: "clay",
-          cta: {
-            label: "好好玩的捏黏土",
-            href: "https://www.youtube.com/playlist?list=PLVbyl20K8lOeuJ2ky6dEsmpew7xAxZDhF",
-            external: true,
-          },
-          navLabel: "捏黏土",
-        }),
-        expect.objectContaining({
-          id: "health",
-          cta: { label: "好習慣故事", href: "/topic/安全" },
-          navLabel: "好習慣",
-        }),
-      ]),
-    );
+  it("首頁兩段 CTA label、href 與 navLabel", () => {
+    expect(LANDING_SEGMENTS).toEqual([
+      expect.objectContaining({
+        id: "stories",
+        cta: { label: "車車遊樂園的故事", href: "/stories" },
+        navLabel: "車車故事",
+      }),
+      expect.objectContaining({
+        id: "health",
+        cta: { label: "好習慣故事", href: "/topic/安全" },
+        navLabel: "好習慣",
+      }),
+    ]);
   });
 });

@@ -83,7 +83,7 @@ describe("LandingSegment", () => {
     expect(html).not.toContain('data-testid="replay-intro"');
   });
 
-  test("四段都不渲染播放直達，保留段標題語意且無可見編號", async () => {
+  test("首頁兩段都不渲染播放直達，保留段標題語意且無可見編號", async () => {
     const { default: LandingSegment } = await import("./LandingSegment");
     const segments = resolveLandingSegments();
     for (const [index, segment] of segments.entries()) {
@@ -124,19 +124,5 @@ describe("LandingSegment", () => {
     expect(html).not.toContain("捲動到下一個專區");
     expect(html).not.toContain("捲動到頁尾");
     expect(html).not.toContain("landing-foot");
-  });
-
-  test("外連捏黏土 CTA 含另開視窗 aria-label", async () => {
-    const { default: LandingSegment } = await import("./LandingSegment");
-    const segment = resolveLandingSegments().find((s) => s.id === "clay")!;
-    const html = renderToStaticMarkup(
-      <LandingSegment
-        segment={segment}
-        index={2}
-        nextAnchorId="segment-health"
-      />,
-    );
-    expect(html).toContain('aria-label="好好玩的捏黏土（另開視窗）"');
-    expect(html).toContain("好好玩的捏黏土");
   });
 });

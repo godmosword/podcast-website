@@ -67,9 +67,17 @@ describe("static page metadata canonical", () => {
 describe("dynamic page metadata canonical", () => {
   it("主題頁 encode 中文 tag", async () => {
     const meta = await generateTopicMetadata({
+      params: Promise.resolve({ tag: encodeURIComponent("安全") }),
+    });
+    expect(meta.alternates?.canonical).toBe(`/topic/${encodeURIComponent("安全")}`);
+  });
+
+  it("睡前主題頁已下架", async () => {
+    const meta = await generateTopicMetadata({
       params: Promise.resolve({ tag: encodeURIComponent("睡前") }),
     });
-    expect(meta.alternates?.canonical).toBe(`/topic/${encodeURIComponent("睡前")}`);
+    expect(meta.title).toBe("找不到主題");
+    expect(meta.alternates?.canonical).toBeUndefined();
   });
 
   it("車種頁 encode 中文 vehicle", async () => {

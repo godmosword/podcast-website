@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { allTags, getStoriesByTag } from "@/data/content";
+import { isRetiredTopicTag, publicTopicTags, getStoriesByTag } from "@/data/content";
 import { breadcrumbListJsonLd, faqPageJsonLd } from "@/lib/json-ld";
 import { collectionModifiedDate } from "@/lib/page-freshness";
 import { GeoSrOnlyLede } from "@/lib/geo-sr-only-lede";
@@ -13,7 +13,7 @@ import Icon from "@/components/ui/Icon";
 import styles from "./page.module.css";
 
 export function generateStaticParams() {
-  return allTags().map((tag) => ({ tag }));
+  return publicTopicTags().map((tag) => ({ tag }));
 }
 
 export async function generateMetadata({
@@ -24,7 +24,7 @@ export async function generateMetadata({
   const { tag: encoded } = await params;
   const tag = decodeURIComponent(encoded);
   const stories = getStoriesByTag(tag);
-  if (stories.length === 0) {
+  if (isRetiredTopicTag(tag) || stories.length === 0) {
     return { title: "找不到主題" };
   }
 
@@ -52,7 +52,7 @@ export default async function TopicPage({
   const tag = decodeURIComponent(encoded);
   const stories = getStoriesByTag(tag);
 
-  if (stories.length === 0) {
+  if (isRetiredTopicTag(tag) || stories.length === 0) {
     notFound();
   }
 

@@ -106,8 +106,8 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
   ).toHaveAttribute("href", "/stories");
   await expect(page.getByRole("link", { name: "看小紅開進遊樂園" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: /聽最新一集/ })).toHaveCount(0);
-  await expect(page.getByRole("heading", { name: /數綿羊/ })).toBeAttached();
-  await expect(page.getByRole("heading", { name: /捏黏土/ })).toBeAttached();
+  await expect(page.getByRole("heading", { name: /數綿羊/ })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: /捏黏土/ })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: /陪孩子建立好習慣/ })).toBeAttached();
   const moreSkip = page
     .locator("#segment-stories")
@@ -138,7 +138,7 @@ test("Landing 滑鼠往下滾用與圓鈕相同的換段", async ({ page }) => {
   await expect
     .poll(
       async () =>
-        (await page.locator("#segment-bedtime").boundingBox())?.y ?? Infinity,
+        (await page.locator("#segment-health").boundingBox())?.y ?? Infinity,
       { timeout: 5_000 },
     )
     .toBeLessThan(200);
@@ -245,14 +245,14 @@ async function expectStoriesFromLanding(page: import("@playwright/test").Page) {
   await expect(page.getByRole("heading", { name: "找故事" })).toBeVisible();
 }
 
-test("Landing 四段 CTA href", async ({ page }) => {
+test("Landing 兩段 CTA href", async ({ page }) => {
   await page.goto("/");
   const expected = [
     { label: "車車遊樂園的故事", href: "/stories" },
-    { label: "數綿羊123．睡前故事", href: "/topic/睡前" },
-    { label: "好好玩的捏黏土（另開視窗）", href: /youtube\.com/ },
     { label: "好習慣故事", href: "/topic/安全" },
   ] as const;
+  await expect(page.getByRole("link", { name: "數綿羊123．睡前故事" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: /捏黏土/ })).toHaveCount(0);
   for (const { label, href } of expected) {
     const link = page.getByRole("link", { name: label }).first();
     await link.scrollIntoViewIfNeeded();
@@ -564,7 +564,7 @@ test.describe("頂欄回到 Landing 第一屏", () => {
     await expect
       .poll(
         async () =>
-          (await page.locator("#segment-bedtime").boundingBox())?.y ?? Infinity,
+          (await page.locator("#segment-health").boundingBox())?.y ?? Infinity,
         { timeout: 5_000 },
       )
       .toBeLessThan(200);
@@ -614,7 +614,7 @@ test.describe("頂欄回到 Landing 第一屏", () => {
 });
 
 test.describe("首頁沒有頁尾 snap pane", () => {
-  test("四段之後不再接 landing-foot", async ({ page }) => {
+  test("兩段之後不再接 landing-foot", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto("/");
     await expect(page.locator("#landing-foot")).toHaveCount(0);

@@ -44,11 +44,9 @@ type ZoneSheetProps = {
   inert?: boolean;
 };
 
-/** 四段內容支柱的線條圖示（純呈現；href 仍由 getCarParkLinks 單一資料源）。 */
+/** 車庫連結的線條圖示（純呈現；href 仍由 getCarParkLinks 單一資料源）。 */
 const SEGMENT_ICON: Record<LandingSegmentId, IconName> = {
   stories: "book",
-  bedtime: "moon",
-  clay: "palette",
   health: "shield-plus",
 };
 

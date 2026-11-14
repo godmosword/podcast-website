@@ -1,6 +1,6 @@
-/** Landing Hub 四段 segment 定義（Storyline 式 IA）。 */
+/** Landing Hub segment 定義（Storyline 式 IA）。首頁只渲染 LANDING_PAGE_SEGMENT_IDS。 */
 
-export type LandingSegmentId = "stories" | "bedtime" | "clay" | "health";
+export type LandingSegmentId = "stories" | "health";
 
 export type LandingSegmentDef = {
   id: LandingSegmentId;
@@ -30,12 +30,11 @@ export type LandingSegmentDef = {
   bedtimeVeil?: "warm-bottom";
 };
 
-export const LANDING_SEGMENT_IDS: LandingSegmentId[] = [
-  "stories",
-  "bedtime",
-  "clay",
-  "health",
-];
+export const LANDING_SEGMENT_IDS: LandingSegmentId[] = ["stories", "health"];
+
+/** 首頁直向分段，與車庫連結同一份名單。 */
+export const LANDING_PAGE_SEGMENT_IDS: readonly LandingSegmentId[] =
+  LANDING_SEGMENT_IDS;
 
 export const LANDING_SEGMENTS: LandingSegmentDef[] = [
   {
@@ -48,30 +47,6 @@ export const LANDING_SEGMENTS: LandingSegmentDef[] = [
     navLabel: "車車故事",
   },
   {
-    id: "bedtime",
-    anchorId: "segment-bedtime",
-    title: "數綿羊 ·\n睡前收聽好好睡",
-    heroImage: "/landing/segment-bedtime.jpg",
-    heroImagePortrait: "/landing/segment-bedtime-portrait.jpg",
-    cta: { label: "數綿羊123．睡前故事", href: "/topic/睡前" },
-    navLabel: "睡前",
-    hideBedtimeMoon: true,
-  },
-  {
-    id: "clay",
-    anchorId: "segment-clay",
-    title: "捏黏土 ·\n練習精細動作",
-    heroImage: "/landing/segment-clay.jpg",
-    heroImagePortrait: "/landing/segment-clay-portrait.jpg",
-    cta: {
-      label: "好好玩的捏黏土",
-      href: "https://www.youtube.com/playlist?list=PLVbyl20K8lOeuJ2ky6dEsmpew7xAxZDhF",
-      external: true,
-    },
-    navLabel: "捏黏土",
-    hideBedtimeMoon: true,
-  },
-  {
     id: "health",
     anchorId: "segment-health",
     title: "陪孩子建立好習慣",
@@ -82,11 +57,3 @@ export const LANDING_SEGMENTS: LandingSegmentDef[] = [
     bedtimeVeil: "warm-bottom",
   },
 ];
-
-/** 捏黏土 segment 外連卡片（URL 可後續替換為專屬影片）。 */
-export const LANDING_CLAY_EXTERNAL = {
-  title: "跟 Bonbon & 馬米捏車車",
-  subtitle: "YouTube 親子手作",
-  href: "https://www.youtube.com/playlist?list=PLVbyl20K8lOeuJ2ky6dEsmpew7xAxZDhF",
-  image: "/mascot.png",
-} as const;

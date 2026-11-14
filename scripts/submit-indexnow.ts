@@ -15,7 +15,7 @@
  *   npx tsx scripts/submit-indexnow.ts --dry-run  只印 payload，不發送
  */
 import { appendFileSync, existsSync, readFileSync } from "node:fs";
-import { getStories } from "../data/content";
+import { getStories, isRetiredTopicTag } from "../data/content";
 import { getSiteUrl } from "../lib/site-url";
 import type { SyncRunReport } from "./lib/sync-report";
 
@@ -86,6 +86,7 @@ function buildUrlList(slugs: string[], siteUrl: string): string[] {
       urls.add(`${siteUrl}/vehicles/${encodeURIComponent(story.vehicle)}`);
     }
     for (const tag of story.tags ?? []) {
+      if (isRetiredTopicTag(tag)) continue;
       urls.add(`${siteUrl}/topic/${encodeURIComponent(tag)}`);
     }
   }

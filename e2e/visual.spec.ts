@@ -104,8 +104,6 @@ const NAV_BREAKPOINT_VIEWPORTS = [
 const THEMES: VisualTheme[] = ["light", "night"];
 const LANDING_SEGMENTS = [
   { id: "stories", anchorId: "segment-stories" },
-  { id: "bedtime", anchorId: "segment-bedtime" },
-  { id: "clay", anchorId: "segment-clay" },
   { id: "health", anchorId: "segment-health" },
 ] as const;
 
@@ -1186,12 +1184,12 @@ for (const shot of COMPONENT_SHOTS) {
   }
 }
 
-// Landing 專用全覽：四段都各自留 390/1280 × light/night baseline，
+// Landing 專用全覽：首頁兩段各自留 390/1280 × light/night baseline。
 // 避免全頁截圖只覆蓋第一個內部 scroll-snap panel。
 for (const viewportId of Object.keys(VIEWPORTS) as VisualViewportId[]) {
   for (const theme of THEMES) {
     const viewport = VIEWPORTS[viewportId];
-    test(`visual：Landing 四段 ${viewport.label} ${theme}`, async ({ page }) => {
+    test(`visual：Landing 兩段 ${viewport.label} ${theme}`, async ({ page }) => {
       await page.setViewportSize({
         width: viewport.width,
         height: viewport.height,
