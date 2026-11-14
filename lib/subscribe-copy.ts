@@ -11,11 +11,19 @@ export const SUBSCRIBE_PAGE_DESCRIPTION =
 export const SUBSCRIBE_PAGE_LEDE =
   "先留下家長 Email。目前只收名單，不寄新集上線信或電子報。";
 
+/** 登記關閉時的頁面標題與導言：不請人留 Email，直接帶去收聽平台。 */
+export const SUBSCRIBE_CLOSED_PAGE_TITLE = "在常用的平台訂閱";
+
+export const SUBSCRIBE_CLOSED_PAGE_LEDE =
+  "新集每次都會上架到這些平台，訂閱後就不會漏接。";
+
 export const SUBSCRIBE_LOADING_LABEL = "正在準備名單表單…";
 
-/** 登記關閉時的說明（美術審 M8：關閉狀態把收聽平台拉成主內容，不再只剩一句提示）。 */
-export const SUBSCRIBE_UNAVAILABLE_NOTE =
-  "線上登記暫時關閉。新集照常上架，先在慣用的平台訂閱節目，就不會漏接。";
+/**
+ * 登記關閉時表單區的說明（美術審 M8：關閉狀態把收聽平台拉成主內容）。
+ * 只說狀態：「去平台訂閱」已經寫在頁面導言（SUBSCRIBE_CLOSED_PAGE_LEDE），這裡不再重說一次。
+ */
+export const SUBSCRIBE_UNAVAILABLE_NOTE = "線上登記暫時關閉。";
 
 export const SUBSCRIBE_UNAVAILABLE_PLATFORMS_LABEL = "收聽平台";
 

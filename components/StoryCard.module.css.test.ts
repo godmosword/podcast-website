@@ -24,4 +24,9 @@ describe("StoryCard.module.css 目錄縮圖", () => {
   it("目錄縮圖不覆寫手機 summary clamp", () => {
     expect(css.slice(desktopIdx, mobileIdx)).not.toContain(".summary");
   });
+
+  it("播放小圓鈕固定靠右：沒有主題標籤（.tags 不渲染）的卡片也在同一個位置", () => {
+    const start = css.indexOf(".arrow {");
+    expect(css.slice(start, css.indexOf("}", start))).toMatch(/margin-left:\s*auto/);
+  });
 });

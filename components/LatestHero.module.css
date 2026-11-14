@@ -123,6 +123,9 @@
     grid-template-columns: minmax(0, 1.2fr) minmax(200px, 0.8fr);
     align-items: center;
     gap: var(--space-6);
+    /* 標籤和標題是同一組：列距收到 --space-3，並讓標籤貼第一列底、文字貼第二列頂，
+       整組才會一起落在封面的中線兩側。原本文字在第二列裡又置中一次，標籤離標題 120px。 */
+    row-gap: var(--space-3);
   }
 
   .topRow {
@@ -141,6 +144,7 @@
   .info {
     grid-column: 2;
     grid-row: 2;
+    align-self: start;
     display: flex;
     flex-direction: column;
     align-items: flex-start;

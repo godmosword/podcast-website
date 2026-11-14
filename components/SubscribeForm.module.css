@@ -147,9 +147,10 @@
   gap: var(--space-4);
 }
 
+/* 狀態註記，不是主文案：主線是頁面標題 → 導言 → 平台按鈕，這句不能比導言重。 */
 .unavailable {
-  color: var(--ink);
-  font-weight: 600;
+  color: var(--ink-soft);
+  font-size: var(--fs-label);
 }
 
 .platformList {
