@@ -9,7 +9,7 @@ import {
   useState,
 } from "react";
 import BrandMark from "@/components/BrandMark";
-import type { BrandMarkId } from "@/lib/brand-marks";
+import { isBrandWordmark, type BrandMarkId } from "@/lib/brand-marks";
 import { trackPlatformClick } from "@/lib/analytics";
 import { appendPlatformUtm } from "@/lib/platform-utm";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
@@ -146,7 +146,9 @@ export default function ConnectMenu({
                   <span className={styles.badge}>
                     <BrandMark id={item.mark} surface="row" />
                   </span>
-                  <span className={styles.label}>{item.label}</span>
+                  <span className={isBrandWordmark(item.mark) ? "sr-only" : styles.label}>
+                    {item.label}
+                  </span>
                 </a>
               </li>
             );

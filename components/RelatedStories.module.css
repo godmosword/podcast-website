@@ -18,7 +18,14 @@
 }
 
 .nextCard {
-  margin: 0 0 var(--space-4);
+  margin: 0 0 var(--space-6);
+}
+
+.relatedLabel {
+  margin: 0 0 var(--space-3);
+  font-size: var(--fs-label);
+  font-weight: 700;
+  color: var(--ink-soft);
 }
 
 .list {

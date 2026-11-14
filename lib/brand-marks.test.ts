@@ -5,6 +5,7 @@ import {
   BRAND_MARKS,
   BRAND_MARK_SIZE,
   brandMarkBox,
+  isBrandWordmark,
   type BrandMarkId,
   type BrandMarkSurface,
 } from "./brand-marks";
@@ -104,5 +105,12 @@ describe("brandMarkBox 尺寸下限", () => {
     const threads = box("threads");
     expect(threads.width).toBe(27);
     expect(threads.width / threads.height).toBeCloseTo(977 / 1082, 2);
+  });
+
+  it("只有 YouTube 收起旁邊的同名文字；KKBOX 字標只有 38×8px，要留著文字才認得出來", () => {
+    const wordmarks = (Object.keys(BRAND_MARKS) as BrandMarkId[]).filter(isBrandWordmark);
+    expect(wordmarks).toEqual(["youtube"]);
+    // 收起文字的字標至少要有 20px 高，否則單獨一列像空的。
+    for (const id of wordmarks) expect(brandMarkBox(id).height).toBeGreaterThanOrEqual(20);
   });
 });
