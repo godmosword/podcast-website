@@ -877,10 +877,13 @@ test.describe("首頁手機換段出口", () => {
       await expectHitTestable(page, skip, `${width}px 往下鍵`);
 
       await skip.click();
+      // 第二段是好習慣。睡前段已移除，不能再等名稱含「睡前」的 region。
       await expect
-        .poll(async () => (await page.getByRole("region", { name: /睡前/ }).first().boundingBox())?.y ?? Infinity, {
-          timeout: 5_000,
-        })
+        .poll(
+          async () =>
+            (await page.locator("#segment-health").boundingBox())?.y ?? Infinity,
+          { timeout: 5_000 },
+        )
         .toBeLessThan(760);
     });
   }
