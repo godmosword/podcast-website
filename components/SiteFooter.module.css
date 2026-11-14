@@ -62,11 +62,11 @@
 
 .home .copyright {
   margin-top: 2px;
-  font-size: 0.76rem;
+  font-size: var(--fs-meta);
 }
 
 .home .redistribution {
-  font-size: 0.68rem;
+  font-size: var(--fs-meta);
   line-height: 1.45;
 }
 
@@ -166,7 +166,7 @@
 .redistribution {
   margin: 0;
   max-width: 420px;
-  font-size: 0.72rem;
+  font-size: var(--fs-meta);
   line-height: 1.55;
   color: var(--ink-soft);
 }

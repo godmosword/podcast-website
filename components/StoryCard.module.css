@@ -104,6 +104,8 @@
 
 .arrow {
   flex: 0 0 auto;
+  /* 沒有主題標籤的卡片（.tags 不渲染）也要靠右，和其他卡同一個位置。 */
+  margin-left: auto;
   width: 28px;
   height: 28px;
   display: flex;

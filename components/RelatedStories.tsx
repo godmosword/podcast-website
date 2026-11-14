@@ -12,6 +12,7 @@ type RelatedStoriesProps = {
 };
 
 const NEXT_HEADING_ID = "story-next-heading";
+const RELATED_HEADING_ID = "story-related-heading";
 
 export default function RelatedStories({
   stories,
@@ -44,8 +45,21 @@ export default function RelatedStories({
         </div>
       ) : null}
 
+      {stories.length > 0 && nextStory ? (
+        // 有「接著聽」那張卡時才需要：沒有這行，下面三張看起來像同一串播放清單。
+        <h3 id={RELATED_HEADING_ID} className={styles.relatedLabel}>
+          相關故事
+        </h3>
+      ) : null}
+
       {stories.length > 0 ? (
-        <ul className={styles.list} aria-label="相關故事">
+        <ul
+          className={styles.list}
+          // 有可見小標就用它命名，讀屏不會把「相關故事」念兩次。
+          {...(nextStory
+            ? { "aria-labelledby": RELATED_HEADING_ID }
+            : { "aria-label": "相關故事" })}
+        >
           {stories.map((story, i) => (
             <li key={story.slug}>
               <StoryCard story={story} index={i} hideMeta />

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useId, useState, type FormEvent } from "react";
 import { trackPlatformClick, trackSubscribeSubmit } from "@/lib/analytics";
 import BrandMark from "@/components/BrandMark";
+import { isBrandWordmark } from "@/lib/brand-marks";
 import { appendPlatformUtm } from "@/lib/platform-utm";
 import { visiblePlatforms } from "@/lib/platforms";
 import {
@@ -124,7 +125,11 @@ export default function SubscribeForm({ source = "subscribe_page" }: Props) {
               <span className={styles.platformBadge}>
                 <BrandMark id={p.icon} surface="row" />
               </span>
-              <span className={styles.platformLabel}>{p.label}</span>
+              <span
+                className={isBrandWordmark(p.icon) ? "sr-only" : styles.platformLabel}
+              >
+                {p.label}
+              </span>
             </a>
           ))}
         </nav>
