@@ -98,7 +98,8 @@
 }
 
 .name {
-  max-width: 4.5em;
+  /* 島名最長 5 個字（英雄救援隊、未來夢想島）；4.5em 會截成「英雄救…」。 */
+  max-width: 5.5em;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

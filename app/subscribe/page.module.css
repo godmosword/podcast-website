@@ -31,6 +31,8 @@
   font-size: var(--fs-body);
   line-height: 1.7;
   color: var(--ink-soft);
+  /* 390 寬會斷成最後一行只剩「接。」 */
+  text-wrap: pretty;
 }
 
 .lede a {
@@ -56,27 +58,33 @@
     align-items: start;
   }
 
-  .main > :global([class*="SiteHeader-module"]) {
+  /* 這裡不能用 [class*="SiteHeader-module"] 這類子字串選擇器：dev 的 class 是
+     `SiteHeader-module__hash__header`，production 是 `hash_header`，選不到，
+     結果正式站桌機版表單掉到左下、頁尾擠進右欄。改用標籤與本檔自己的 class。 */
+
+  /* SiteHeader（品牌大圖）：main 底下不是本頁 .header 的那個 <header>。 */
+  .main > header:not(.header) {
     grid-column: 1;
     grid-row: 1 / span 3;
     margin: var(--space-6) 0 0;
   }
 
-  .main > :global([class*="SiteHeader-module"]) :global([class*="__scene"]) {
+  /* 大圖外框是 SiteHeader 的第一個子元素。 */
+  .main > header:not(.header) > :first-child {
     max-width: 100%;
     margin: 0;
   }
 
-  .main > :global([class*="page-module"]) {
+  .header {
     grid-column: 2;
-    margin: var(--space-6) 0 var(--space-5);
+    margin: var(--space-6) 0 var(--space-6);
   }
 
-  .main > :global([class*="__formSection"]) {
+  .formSection {
     grid-column: 2;
   }
 
-  .main > :global([class*="SiteFooter-module"]) {
+  .main > footer {
     grid-column: 1 / -1;
   }
 }
