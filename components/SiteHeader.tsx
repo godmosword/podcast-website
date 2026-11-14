@@ -31,7 +31,15 @@ function visibleActions() {
   });
 }
 
-export default function SiteHeader() {
+type SiteHeaderProps = {
+  /**
+   * 大圖不在第一屏時設 true（/stories 把它排到列表之後）：
+   * 不搶 LCP 的下載優先權，捲到附近才載入。
+   */
+  deferred?: boolean;
+};
+
+export default function SiteHeader({ deferred = false }: SiteHeaderProps) {
   const actions = visibleActions();
 
   return (
@@ -51,7 +59,9 @@ export default function SiteHeader() {
             className={styles.heroImage}
             width={1135}
             height={1386}
-            fetchPriority="high"
+            {...(deferred
+              ? { loading: "lazy" as const }
+              : { fetchPriority: "high" as const })}
             decoding="async"
             sizes="(max-width: 640px) 100vw, 640px"
           />

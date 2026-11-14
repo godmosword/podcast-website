@@ -43,11 +43,17 @@ const story: Story = {
 };
 
 describe("LatestHero", () => {
-  test("封面不設 priority，避免與 SiteHeader hero 搶 preload", async () => {
+  test("預設封面不優先下載（同一頁只能有一張優先的大圖）", async () => {
     const { default: LatestHero } = await import("./LatestHero");
     const html = renderToStaticMarkup(<LatestHero story={story} />);
     expect(html).toContain('data-priority="auto"');
     expect(html).not.toContain('data-priority="high"');
+  });
+
+  test("priority：封面是第一屏最大的圖時優先下載（/stories）", async () => {
+    const { default: LatestHero } = await import("./LatestHero");
+    const html = renderToStaticMarkup(<LatestHero story={story} priority />);
+    expect(html).toContain('data-priority="high"');
   });
 });
 

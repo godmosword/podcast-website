@@ -21,4 +21,18 @@ describe("SiteHeader", () => {
     expect(html).toContain('class="sr-only"');
     expect(html).not.toMatch(/<h1/);
   });
+
+  test("預設大圖在第一屏：優先下載、不 lazy", async () => {
+    const { default: SiteHeader } = await import("./SiteHeader");
+    const html = renderToStaticMarkup(<SiteHeader />);
+    expect(html).toMatch(/fetchPriority="high"/i);
+    expect(html).not.toContain('loading="lazy"');
+  });
+
+  test("deferred：大圖不在第一屏時改 lazy，不搶優先權", async () => {
+    const { default: SiteHeader } = await import("./SiteHeader");
+    const html = renderToStaticMarkup(<SiteHeader deferred />);
+    expect(html).toContain('loading="lazy"');
+    expect(html).not.toMatch(/fetchPriority="high"/i);
+  });
 });
