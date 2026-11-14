@@ -71,6 +71,22 @@ describe("getRelated", () => {
   it("未知 slug 回傳空陣列", () => {
     expect(getRelated("missing")).toEqual([]);
   });
+
+  it("排除指定的集數（單集頁已經把它放在「接著聽」），數量仍補滿", () => {
+    // 每一集都驗：只要有一集的相關故事會重複「接著聽」那一集，頁面就會出現兩張同樣的卡。
+    for (const story of getStories()) {
+      const next = getNextStory(story.slug);
+      if (!next) continue;
+      const related = getRelated(story.slug, 3, [next.slug]);
+      expect(related.map((s) => s.slug)).not.toContain(next.slug);
+      expect(related.map((s) => s.slug)).not.toContain(story.slug);
+      expect(related.length).toBe(3);
+    }
+  });
+
+  it("不給排除清單時行為不變", () => {
+    expect(getRelated("ep-6", 3)).toEqual(getRelated("ep-6", 3, []));
+  });
 });
 
 describe("getNextStory", () => {

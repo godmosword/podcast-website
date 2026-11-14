@@ -28,4 +28,15 @@ describe("StoryFilter.module.css 桌機目錄網格", () => {
     );
     expect(wide).toMatch(/repeat\(3,\s*minmax\(0,\s*1fr\)\)/);
   });
+
+  it("li 的內距把卡片陰影包進來，並用等量負外距抵銷（content-visibility 會裁掉超出 li 的陰影）", () => {
+    const start = css.indexOf(".listItem {");
+    const block = css.slice(start, css.indexOf("}", start));
+    expect(block).toMatch(/content-visibility:\s*auto/);
+    const padding = block.match(/padding:\s*([^;]+);/)?.[1].trim().split(/\s+/) ?? [];
+    const margin = block.match(/margin:\s*([^;]+);/)?.[1].trim().replace(/\s+/g, " ");
+    expect(padding).toEqual(["var(--space-4)", "var(--space-4)", "var(--space-8)"]);
+    // 外距必須逐邊等於內距的負值，卡片才留在原位。
+    expect(margin).toBe(padding.map((p) => `calc(-1 * ${p})`).join(" "));
+  });
 });

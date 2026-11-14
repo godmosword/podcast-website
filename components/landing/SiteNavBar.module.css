@@ -507,14 +507,14 @@
     /* padding-right 與下方 .panel right 必須同一數字，漢堡才不掉出圓角 */
     padding: 0 16px 0 16px;
     justify-content: flex-start;
-    background: color-mix(in srgb, var(--landing-nav-cta-bg) 92%, transparent);
+    background: var(--landing-nav-cta-bg);
     border: 1px solid rgba(255, 255, 255, 0.65);
     border-radius: var(--radius-pill);
     box-shadow: 0 8px 28px rgba(120, 70, 25, 0.14),
       inset 0 1px 0 rgba(255, 255, 255, 0.8);
   }
 
-  /* 膠囊同樣不用毛玻璃（見 .bar 上方說明）。膠囊不貼畫面頂端，可以略透；
+  /* 膠囊同樣不用毛玻璃（見 .bar 上方說明），底色不透明：略透時捲過去的卡片標題會從膠囊後面透出來、和導覽字疊在一起；
    * 外層透明的 .bar 仍是頂端那個 sticky 盒子，Safari 分頁照樣改用色條、不加模糊 */
 
   /* 漢堡在最右：面板右錨膠囊，勿再 left:8px（會假綠「在膠囊內」） */
@@ -523,10 +523,29 @@
     left: auto;
     right: 16px;
     width: min(360px, calc(100vw - 40px));
-    max-height: min(70dvh, 560px);
+    /* 跟著視窗高度走：抽屜有 11 列加主題切換（約 716px），寫死 560 會把最後兩項切在面板外。
+       視窗夠高（約 815px 以上）就整個顯示，矮視窗才在面板內捲動。
+       8px 是上面的 top 間距，--space-6 是面板底到視窗底的留白。 */
+    max-height: calc(100dvh - var(--nav-h) - 8px - var(--space-6));
     border-radius: var(--radius-lg);
     border-top: none;
     border: 1px solid var(--line);
+  }
+
+  /* 矮視窗（多數筆電的瀏覽器視窗不到 815px 高）面板要捲動，而 macOS 的捲軸平常是藏起來的：
+     切口若剛好落在兩列之間，面板看起來就像到底了。日夜切換只在這裡有，所以把它黏在面板底：
+     一直看得到，上緣那條線也讓人知道上面的清單還能捲。
+     負外距吃掉面板自己的底內距，底色接面板（日夜各自的面板色），捲過去的列才不會透出來。 */
+  .themeSlot {
+    position: sticky;
+    /* 黏的基準是面板的內容框（不含底內距），所以要往下讓出同一段，才會貼到面板底；
+       寫 0 會懸在底內距上方，清單從它下面露出來。 */
+    bottom: calc(-24px - var(--safe-bottom));
+    margin-top: var(--space-3);
+    margin-bottom: calc(-24px - var(--safe-bottom));
+    padding: var(--space-3) 0 calc(24px + var(--safe-bottom));
+    background: inherit;
+    border-top: 1px solid var(--hairline);
   }
 
   /* 首頁 hero 滿版時，透明外層不攔截 hero 頂部點擊；互動全在膠囊本體 */

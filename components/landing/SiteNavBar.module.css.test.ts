@@ -16,6 +16,36 @@ describe("SiteNavBar.module.css 漢堡與抽屜", () => {
     expect(css).toMatch(/\.menuBtn\s*\{[\s\S]*?appearance:\s*none/);
   });
 
+  it("≥980 膠囊底色不透明（略透時捲過去的標題會透過來和導覽字疊在一起）", () => {
+    // 膠囊那一條 .inner 規則：靠膠囊圓角認（基本的 .inner 也有 max-width: 960px，檔內又有好幾段 980 媒體查詢）。
+    const inner =
+      css.match(/\.inner\s*\{[^}]*border-radius:\s*var\(--radius-pill\)[^}]*\}/)?.[0] ?? "";
+    expect(inner).not.toBe("");
+    expect(inner).toMatch(/background:\s*var\(--landing-nav-cta-bg\);/);
+    expect(inner).not.toMatch(/transparent|color-mix/);
+  });
+
+  it("≥980 抽屜高度跟著視窗走，不寫死像素上限（11 列加主題切換約 716px）", () => {
+    // 桌面那一條 .panel 規則：靠 360px 寬認。
+    const panel = css.match(/\.panel\s*\{[^}]*width:\s*min\(360px[^}]*\}/)?.[0] ?? "";
+    expect(panel).not.toBe("");
+    expect(panel).toMatch(
+      /max-height:\s*calc\(100dvh - var\(--nav-h\) - 8px - var\(--space-6\)\);/,
+    );
+    expect(panel).not.toMatch(/max-height:[^;]*\d{3}px/);
+  });
+
+  it("≥980 日夜切換黏在抽屜底（矮視窗要捲動時仍看得到，底色接面板）", () => {
+    const slot = css.match(/\.themeSlot\s*\{[^}]*position:\s*sticky[^}]*\}/)?.[0] ?? "";
+    expect(slot).not.toBe("");
+    // 黏的基準不含面板底內距，bottom 要讓出同一段才會貼底（寫 0 清單會從下面露出來）。
+    expect(slot).toMatch(/[^-]bottom:\s*calc\(-24px - var\(--safe-bottom\)\);/);
+    expect(slot).toMatch(/background:\s*inherit;/);
+    // 負外距要等於面板的底內距（24px + safe-bottom），否則面板底會多出或少掉一截。
+    expect(slot).toMatch(/margin-bottom:\s*calc\(-24px - var\(--safe-bottom\)\);/);
+    expect(css).toMatch(/\.panel\s*\{[^}]*calc\(24px \+ var\(--safe-bottom\)\)/);
+  });
+
   it("桌面不得再隱藏漢堡或抽屜（家長項只在抽屜，隱藏＝入口消失）", () => {
     const desktopBlock = css.slice(css.indexOf("@media (min-width: 980px)"));
     expect(desktopBlock).not.toMatch(/\.menuBtn\s*\{[^}]*display:\s*none/);

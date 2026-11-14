@@ -179,15 +179,21 @@ export function getStoriesByTag(tag: string): Story[] {
   return storiesByNewest().filter((s) => (s.tags ?? []).includes(tag));
 }
 
-export function getRelated(slug: string, limit = 3): Story[] {
+export function getRelated(
+  slug: string,
+  limit = 3,
+  /** 頁面上已經另外顯示的集數（例如「接著聽」那一集），不要再列一次。 */
+  excludeSlugs: readonly string[] = [],
+): Story[] {
   const current = getStory(slug);
   if (!current) return [];
 
   const canonical = canonicalStorySlug(slug);
   const currentTags = new Set(current.tags ?? []);
+  const excluded = new Set([canonical, ...excludeSlugs.map(canonicalStorySlug)]);
 
   return storyList
-    .filter((s) => s.slug !== canonical)
+    .filter((s) => !excluded.has(s.slug))
     .map((s) => {
       const sharedTags = (s.tags ?? []).filter((t) => currentTags.has(t)).length;
       const sameVehicle = s.vehicle === current.vehicle ? 1 : 0;
