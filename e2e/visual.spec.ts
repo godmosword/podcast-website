@@ -1118,7 +1118,7 @@ for (const viewportId of Object.keys(VIEWPORTS) as VisualViewportId[]) {
 
 /**
  * 播放完成（DESIGN.md §播放器狀態 第 3 態）：唯一有自己版面、三顆按鈕的狀態，主次與 390 寬換行只能靠截圖守。
- * 從最後 0.2 秒靜音播到結束，等「再聽一次」出現；下一集在凍結資料下固定是 ep-1。
+ * 從最後 0.2 秒靜音播到結束，等「再聽一次」出現；「接著聽」在凍結資料下固定是 ep-1。
  */
 for (const viewportId of Object.keys(VIEWPORTS) as VisualViewportId[]) {
   const viewport = VIEWPORTS[viewportId];
@@ -1151,7 +1151,7 @@ for (const viewportId of Object.keys(VIEWPORTS) as VisualViewportId[]) {
       });
     });
     await expect(page.getByRole("button", { name: "再聽一次" })).toBeVisible();
-    await expect(page.getByText(/^下一集：/)).toBeVisible();
+    await expect(page.getByText(/^接著聽：/)).toBeVisible();
     await expect(page).toHaveScreenshot(`story-player-ended-${viewport.label}-light.png`, {
       maxDiffPixelRatio: 0.02,
       animations: "disabled",

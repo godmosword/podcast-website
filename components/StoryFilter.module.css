@@ -110,6 +110,11 @@
      實際高度，捲回去不會跳。 */
   content-visibility: auto;
   contain-intrinsic-size: auto 200px;
+  /* content-visibility 會把超出 li 的繪製裁掉，卡片的柔陰影（--elev-1 往下約 32px、
+     兩側約 24px）原本被切成一塊直角色帶。用內距把陰影包進 li，再用等量負外距抵銷，
+     卡片位置與間距不變。左右只到 --space-4（16px，＝手機頁面邊距），再寬手機會橫向溢出。 */
+  padding: var(--space-4) var(--space-4) var(--space-8);
+  margin: calc(-1 * var(--space-4)) calc(-1 * var(--space-4)) calc(-1 * var(--space-8));
 }
 
 /* 桌機縮圖網格／完整限寬：只吃找故事目錄清單，且只在 ≥768。 */

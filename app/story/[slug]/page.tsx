@@ -62,8 +62,9 @@ export default async function StoryDetailPage({
     notFound();
   }
 
-  const related = getRelated(slug, 3);
   const nextStory = getNextStory(slug);
+  // 「接著聽」那一集已經有自己的封面卡，相關故事不再重複它。
+  const related = getRelated(slug, 3, nextStory ? [nextStory.slug] : []);
   const definitionSummary = storyDefinitionSummary(story);
   const sceneCaptions = (story.captions ?? []).filter((line) => line.trim().length > 0);
   const characters = getCharactersForStory(story.slug);

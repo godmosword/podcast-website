@@ -16,6 +16,23 @@ describe("SiteNavBar.module.css 漢堡與抽屜", () => {
     expect(css).toMatch(/\.menuBtn\s*\{[\s\S]*?appearance:\s*none/);
   });
 
+  it("≥980 膠囊底色不透明（略透時捲過去的標題會透過來和導覽字疊在一起）", () => {
+    // 膠囊那一條 .inner 規則：靠膠囊圓角認（基本的 .inner 也有 max-width: 960px，檔內又有好幾段 980 媒體查詢）。
+    const inner =
+      css.match(/\.inner\s*\{[^}]*border-radius:\s*var\(--radius-pill\)[^}]*\}/)?.[0] ?? "";
+    expect(inner).not.toBe("");
+    expect(inner).toMatch(/background:\s*var\(--landing-nav-cta-bg\);/);
+    expect(inner).not.toMatch(/transparent|color-mix/);
+  });
+
+  it("≥980 抽屜高度跟著視窗走，不寫死像素上限（11 列加主題切換約 716px）", () => {
+    // 桌面那一條 .panel 規則：靠 360px 寬認。
+    const panel = css.match(/\.panel\s*\{[^}]*width:\s*min\(360px[^}]*\}/)?.[0] ?? "";
+    expect(panel).not.toBe("");
+    expect(panel).toMatch(/max-height:\s*calc\(100dvh - var\(--nav-h\) - 32px\);/);
+    expect(panel).not.toMatch(/max-height:[^;]*\d{3}px/);
+  });
+
   it("桌面不得再隱藏漢堡或抽屜（家長項只在抽屜，隱藏＝入口消失）", () => {
     const desktopBlock = css.slice(css.indexOf("@media (min-width: 980px)"));
     expect(desktopBlock).not.toMatch(/\.menuBtn\s*\{[^}]*display:\s*none/);

@@ -5,9 +5,9 @@ import styles from "./RelatedStories.module.css";
 
 type RelatedStoriesProps = {
   stories: Story[];
-  /** 下一集，顯示為可點的封面卡 */
+  /** 接著聽的那一集（由新到舊的下一筆，也就是較舊的一集），顯示為可點的封面卡 */
   nextStory?: Story | null;
-  /** 頁尾與「下一集」同一列的島嶼連結 */
+  /** 頁尾與「接著聽」同一列的島嶼連結 */
   zone?: ReactNode;
 };
 
@@ -22,7 +22,7 @@ export default function RelatedStories({
     <section className={styles.section} aria-label="接著看">
       {nextStory || zone ? (
         <div className={styles.nextHead}>
-          {nextStory ? <h2 className={styles.nextLabel}>下一集</h2> : null}
+          {nextStory ? <h2 className={styles.nextLabel}>接著聽</h2> : null}
           {zone}
         </div>
       ) : null}

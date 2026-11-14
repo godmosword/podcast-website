@@ -90,7 +90,7 @@ export default function StoryEndScreen({
             href={`/story/${nextStorySlug}/play`}
             className={styles.endBtnSecondary}
           >
-            下一集：{nextStoryTitle}
+            接著聽：{nextStoryTitle}
           </Link>
         )}
       </div>

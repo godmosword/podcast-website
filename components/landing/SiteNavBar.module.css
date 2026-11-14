@@ -507,14 +507,14 @@
     /* padding-right 與下方 .panel right 必須同一數字，漢堡才不掉出圓角 */
     padding: 0 16px 0 16px;
     justify-content: flex-start;
-    background: color-mix(in srgb, var(--landing-nav-cta-bg) 92%, transparent);
+    background: var(--landing-nav-cta-bg);
     border: 1px solid rgba(255, 255, 255, 0.65);
     border-radius: var(--radius-pill);
     box-shadow: 0 8px 28px rgba(120, 70, 25, 0.14),
       inset 0 1px 0 rgba(255, 255, 255, 0.8);
   }
 
-  /* 膠囊同樣不用毛玻璃（見 .bar 上方說明）。膠囊不貼畫面頂端，可以略透；
+  /* 膠囊同樣不用毛玻璃（見 .bar 上方說明），底色不透明：略透時捲過去的卡片標題會從膠囊後面透出來、和導覽字疊在一起；
    * 外層透明的 .bar 仍是頂端那個 sticky 盒子，Safari 分頁照樣改用色條、不加模糊 */
 
   /* 漢堡在最右：面板右錨膠囊，勿再 left:8px（會假綠「在膠囊內」） */
@@ -523,7 +523,9 @@
     left: auto;
     right: 16px;
     width: min(360px, calc(100vw - 40px));
-    max-height: min(70dvh, 560px);
+    /* 跟著視窗高度走：抽屜有 11 列加主題切換（約 716px），寫死 560 會把最後兩項切在面板外。
+       視窗夠高就整個顯示，矮視窗才在面板內捲動。 */
+    max-height: calc(100dvh - var(--nav-h) - 32px);
     border-radius: var(--radius-lg);
     border-top: none;
     border: 1px solid var(--line);
