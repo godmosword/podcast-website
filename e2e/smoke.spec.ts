@@ -313,6 +313,35 @@ test("Landing 分區 CTA 進全部故事（桌面）", async ({ page }) => {
   await expectStoriesFromLanding(page);
 });
 
+test("全部故事頁第一屏是最新一集，品牌大圖在列表之後、延後載入", async ({ page }) => {
+  for (const viewport of [
+    { width: 390, height: 844 },
+    { width: 1440, height: 900 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto("/stories");
+    const main = page.locator("main");
+    const watch = main.getByText("立即看故事", { exact: true });
+    const filter = main.getByRole("heading", { name: "找故事" });
+    const brand = main.getByRole("img", { name: /陪孩子，成長的路上/ });
+    const footer = page.locator("footer").last();
+
+    // 「立即看故事」在第一屏，不用先捲過品牌大圖
+    const watchBox = (await watch.boundingBox())!;
+    expect(watchBox.y + watchBox.height, `${viewport.width}`).toBeLessThanOrEqual(viewport.height);
+
+    // 畫面上的實際順序：最新一集 → 找故事 → 品牌大圖 → 頁尾
+    const tops = await Promise.all(
+      [watch, filter, brand, footer].map(async (l) => (await l.boundingBox())!.y + (await page.evaluate(() => window.scrollY))),
+    );
+    expect([...tops].sort((a, b) => a - b), `${viewport.width}`).toEqual(tops);
+
+    // 同一頁只有一張優先下載的大圖：品牌大圖不搶
+    await expect(brand).toHaveAttribute("loading", "lazy");
+    await expect(brand).not.toHaveAttribute("fetchpriority", "high");
+  }
+});
+
 test("全部故事頁 → 詳情 → 播放頁 smoke", async ({ page }) => {
   await page.goto("/stories");
   await expect(page.getByRole("heading", { name: "找故事" })).toBeVisible();

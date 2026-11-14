@@ -54,3 +54,8 @@
   color: var(--ink-soft);
   font-weight: 600;
 }
+
+/* 品牌大圖排在列表之後、頁尾之前。 */
+.brandHero {
+  margin-top: var(--space-8);
+}

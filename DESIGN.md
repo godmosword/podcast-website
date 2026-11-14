@@ -384,12 +384,14 @@ Hero 圖走 `images.edit` + `public/characters/` 定裝照參考圖，與單集�
 
 ### 全部故事（`/stories`）
 
-1. **SiteHeader** 大 Hero 黏土插畫（置中、`max-width: 420px`；標題在圖下方。M3 桌機並排頁首列已還原）
-2. **LatestHero** 最新一集（elevated surface，`--elev-2` resting；無盒子描邊／1px 色環）。≥768 封面在左、文字在右：標籤（NEW · EP）與標題是同一組，相距 `--space-3`，整組對齊封面中線
+順序（2026-11-15 起）：**標題「全部故事」→ 最新一集 → 精選 → 找故事 → 品牌大圖 → 頁尾**。回訪的家長與孩子第一屏就看到最新一集與「立即看故事」，不用先捲過看過的品牌大圖。同一頁只有一張優先下載的大圖：最新一集封面 `priority`（`latestPriority`），品牌大圖 `SiteHeader deferred`（`loading="lazy"`、不設 `fetchPriority`）。其他頁的 `SiteHeader` 預設仍在第一屏、優先下載。
+
+1. **LatestHero** 最新一集（elevated surface，`--elev-2` resting；無盒子描邊／1px 色環）。≥768 封面在左、文字在右：標籤（NEW · EP）與標題是同一組，相距 `--space-3`，整組對齊封面中線
    LatestHero 說明最多 3 行（`StoryCard` 一律 2 行）；來源摘要於 Apple／SoundOn ingest 階段即截斷至約 68 字（CJK），clamp 為保險層。
-3. **FavoritesSection** 精選
-4. **StoryFilter** 找故事（車種／主題下拉，不另放「車車」「主題」欄位副標；觸發鈕 `aria-label` 已足夠）；`filterBar` 用 `--surface-elevated` + `--hairline` + `--elev-1`。目錄每個 `li` 有 `content-visibility: auto`，會裁掉超出 `li` 的繪製，所以 `li` 用 `--space-4`／`--space-8` 內距把卡片陰影包進來、再用等量負外距抵銷（卡片位置不變）；拿掉其中一邊，陰影就會被切成直角色帶
-5. **桌機列表顯示（僅 ≥768）**：預設「縮圖」——≥768 兩欄、≥1280 三欄直式卡（封面在上、標題最多 2 行、tag 靠底）。「完整」維持橫式一列，列表 `max-width: 56rem` 置中。切換鈕文案「縮圖／完整」，群組 `aria-label="故事列表顯示方式"`，`<768` `display: none`。旗標掛 `<html data-stories-view="list">`（有＝完整，沒有＝縮圖）；偏好 `localStorage` key `cheche:stories-view`。卡片 markup 共用，**不**用 React `variant` 切換。1280 只決定目錄欄數，不是新的全站 viewport 層。
+2. **FavoritesSection** 精選
+3. **StoryFilter** 找故事（車種／主題下拉，不另放「車車」「主題」欄位副標；觸發鈕 `aria-label` 已足夠）；`filterBar` 用 `--surface-elevated` + `--hairline` + `--elev-1`。目錄每個 `li` 有 `content-visibility: auto`，會裁掉超出 `li` 的繪製，所以 `li` 用 `--space-4`／`--space-8` 內距把卡片陰影包進來、再用等量負外距抵銷（卡片位置不變）；拿掉其中一邊，陰影就會被切成直角色帶
+4. **桌機列表顯示（僅 ≥768）**：預設「縮圖」——≥768 兩欄、≥1280 三欄直式卡（封面在上、標題最多 2 行、tag 靠底）。「完整」維持橫式一列，列表 `max-width: 56rem` 置中。切換鈕文案「縮圖／完整」，群組 `aria-label="故事列表顯示方式"`，`<768` `display: none`。旗標掛 `<html data-stories-view="list">`（有＝完整，沒有＝縮圖）；偏好 `localStorage` key `cheche:stories-view`。卡片 markup 共用，**不**用 React `variant` 切換。1280 只決定目錄欄數，不是新的全站 viewport 層。
+5. **SiteHeader** 品牌大圖（置中、`max-width: 420px`，`deferred`），在列表之後、頁尾之前
 
 Landing segment hero 生圖：`npm run generate:landing-art -- --dry-run`（橫版）；直版 `--portrait`；approve 後覆蓋 `public/landing/`。
 

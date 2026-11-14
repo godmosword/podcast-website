@@ -11,9 +11,11 @@ import styles from "./LatestHero.module.css";
 
 type LatestHeroProps = {
   story: Story;
+  /** 這張封面是頁面第一屏最大的圖（/stories）時設 true，讓它優先下載。 */
+  priority?: boolean;
 };
 
-export default function LatestHero({ story }: LatestHeroProps) {
+export default function LatestHero({ story, priority = false }: LatestHeroProps) {
   return (
     <Link
       href={`/story/${story.slug}`}
@@ -24,8 +26,9 @@ export default function LatestHero({ story }: LatestHeroProps) {
       </div>
 
       <div className={styles.coverWrap}>
-        {/* /stories LCP 是 SiteHeader hero-home；這裡不再 priority，避免雙 hero preload。 */}
+        {/* 同一頁只能有一張優先下載的大圖：由頁面決定是這張還是 SiteHeader 的品牌大圖。 */}
         <StoryImage
+          priority={priority}
           src={storyCoverPath(story.slug)}
           alt={`${storyDisplayTitle(story)} 封面`}
           fill
