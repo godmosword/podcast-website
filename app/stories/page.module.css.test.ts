@@ -18,4 +18,14 @@ describe("stories/page.module.css 桌機欄寬", () => {
     expect(css).not.toContain("headerBand");
     expect(css).not.toMatch(/minmax\(220px,\s*300px\)/);
   });
+
+  it("頁面順序：標題 → 最新一集與列表 → 品牌大圖（deferred）→ 頁尾，且最新一集封面優先下載", () => {
+    const tsx = readFileSync(join(import.meta.dirname, "page.tsx"), "utf8");
+    const order = ["<StoriesIndexHeader", "<HomeSectionList", "<SiteHeader deferred", "<SiteFooter"].map(
+      (needle) => tsx.indexOf(needle),
+    );
+    expect(order.every((i) => i > -1)).toBe(true);
+    expect([...order].sort((a, b) => a - b)).toEqual(order);
+    expect(tsx).toMatch(/latestPriority:\s*true/);
+  });
 });

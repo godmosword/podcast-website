@@ -13,6 +13,8 @@ export type HomeSectionProps = {
   featuredStorySlug: string | null;
   vehicles: string[];
   tags: string[];
+  /** 最新一集排在第一屏時，封面優先下載（此時品牌大圖要設 deferred）。 */
+  latestPriority?: boolean;
 };
 
 function storyFilterProps(props: HomeSectionProps) {
@@ -27,7 +29,7 @@ function storyFilterProps(props: HomeSectionProps) {
 function renderSection(id: HomeSectionId, props: HomeSectionProps) {
   switch (id) {
     case "latestHero":
-      return props.latest ? <LatestHero story={props.latest} /> : null;
+      return props.latest ? <LatestHero story={props.latest} priority={props.latestPriority} /> : null;
     case "favorites":
       return <FavoritesSection />;
     case "storyFilter": {

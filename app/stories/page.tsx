@@ -45,15 +45,20 @@ export default function StoriesPage() {
     featuredStorySlug: latest?.slug ?? null,
     vehicles,
     tags,
+    latestPriority: true,
   };
 
   return (
     <div className={styles.page}>
       <main className={styles.main} data-deferred-brand-font="stories">
         <JsonLd data={podcastSeriesJsonLd()} />
-        <SiteHeader />
+        {/* 最新一集在第一屏：回訪的家長與孩子不用先捲過看過的品牌大圖。
+            大圖移到列表之後，改成捲到才載入。 */}
         <StoriesIndexHeader lede={lede} titleClassName={styles.title} />
         <HomeSectionList props={sectionProps} />
+        <div className={styles.brandHero}>
+          <SiteHeader deferred />
+        </div>
         <SiteFooter layout="home" />
       </main>
     </div>
