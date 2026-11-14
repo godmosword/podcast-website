@@ -11,6 +11,8 @@ type RelatedStoriesProps = {
   zone?: ReactNode;
 };
 
+const NEXT_HEADING_ID = "story-next-heading";
+
 export default function RelatedStories({
   stories,
   nextStory = null,
@@ -19,10 +21,18 @@ export default function RelatedStories({
   if (stories.length === 0 && !nextStory && !zone) return null;
 
   return (
-    <section className={styles.section} aria-label="接著看">
+    <section
+      className={styles.section}
+      // 有「接著聽」標題時用它命名這一區，讀屏不會先後念出兩個不同的名字。
+      {...(nextStory ? { "aria-labelledby": NEXT_HEADING_ID } : { "aria-label": "相關故事" })}
+    >
       {nextStory || zone ? (
         <div className={styles.nextHead}>
-          {nextStory ? <h2 className={styles.nextLabel}>接著聽</h2> : null}
+          {nextStory ? (
+            <h2 id={NEXT_HEADING_ID} className={styles.nextLabel}>
+              接著聽
+            </h2>
+          ) : null}
           {zone}
         </div>
       ) : null}

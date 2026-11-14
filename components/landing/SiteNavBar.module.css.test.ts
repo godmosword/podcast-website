@@ -29,8 +29,21 @@ describe("SiteNavBar.module.css 漢堡與抽屜", () => {
     // 桌面那一條 .panel 規則：靠 360px 寬認。
     const panel = css.match(/\.panel\s*\{[^}]*width:\s*min\(360px[^}]*\}/)?.[0] ?? "";
     expect(panel).not.toBe("");
-    expect(panel).toMatch(/max-height:\s*calc\(100dvh - var\(--nav-h\) - 32px\);/);
+    expect(panel).toMatch(
+      /max-height:\s*calc\(100dvh - var\(--nav-h\) - 8px - var\(--space-6\)\);/,
+    );
     expect(panel).not.toMatch(/max-height:[^;]*\d{3}px/);
+  });
+
+  it("≥980 日夜切換黏在抽屜底（矮視窗要捲動時仍看得到，底色接面板）", () => {
+    const slot = css.match(/\.themeSlot\s*\{[^}]*position:\s*sticky[^}]*\}/)?.[0] ?? "";
+    expect(slot).not.toBe("");
+    // 黏的基準不含面板底內距，bottom 要讓出同一段才會貼底（寫 0 清單會從下面露出來）。
+    expect(slot).toMatch(/[^-]bottom:\s*calc\(-24px - var\(--safe-bottom\)\);/);
+    expect(slot).toMatch(/background:\s*inherit;/);
+    // 負外距要等於面板的底內距（24px + safe-bottom），否則面板底會多出或少掉一截。
+    expect(slot).toMatch(/margin-bottom:\s*calc\(-24px - var\(--safe-bottom\)\);/);
+    expect(css).toMatch(/\.panel\s*\{[^}]*calc\(24px \+ var\(--safe-bottom\)\)/);
   });
 
   it("桌面不得再隱藏漢堡或抽屜（家長項只在抽屜，隱藏＝入口消失）", () => {
