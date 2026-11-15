@@ -327,4 +327,22 @@ describe("SiteNavBar.tsx 結構契約", () => {
     expect(actions).toContain('kind="socials"');
     expect(actions).not.toContain("SubscribeMenu");
   });
+
+});
+
+describe("SiteNavBar.module.css 版面審查第三批", () => {
+  const css = readFileSync(join(import.meta.dirname, "SiteNavBar.module.css"), "utf8");
+
+  it("沒有失效的 .bar[data-nav-solid] .inner 規則（只有首頁會標 nav-solid，首頁另有權重更高的規則）", () => {
+    expect(css).not.toMatch(/(^|\n)\s*\.bar\[data-nav-solid="true"\] \.inner\s*\{/);
+  });
+
+  it("≥980 清單還能往下捲時：日夜切換上方淡出＋向下箭頭；夜間軌道底色不套到箭頭", () => {
+    const desktop = css.slice(css.indexOf("@media (min-width: 980px)"));
+    expect(desktop).toMatch(/\.panel\[data-more-below="true"\] \.themeSlot::before\s*\{[^}]*opacity:\s*1/);
+    expect(desktop).toMatch(/\.panel\[data-more-below="true"\] \.moreHint\s*\{[^}]*opacity:\s*1/);
+    expect(css).toMatch(/html\[data-theme="night"\]\) \.themeSlot > :not\(\.moreHint\)/);
+    // 淡出層不能蓋掉日夜切換上緣的分隔線
+    expect(desktop).toMatch(/\.themeSlot::before\s*\{[^}]*bottom:\s*calc\(100% \+ 1px\)/);
+  });
 });

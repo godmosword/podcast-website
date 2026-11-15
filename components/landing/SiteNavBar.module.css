@@ -292,6 +292,18 @@
   outline-offset: -3px;
 }
 
+/* 「還能往下捲」箭頭只在 ≥980（日夜切換黏在面板底）時有作用，其餘寬度不顯示 */
+.moreHint {
+  display: none;
+}
+
+/* 清單結尾的偵測點（給 useMoreBelow 用），本身不佔高度 */
+.listEnd {
+  display: block;
+  height: 1px;
+  margin-top: -1px;
+}
+
 .themeSlot {
   display: flex;
   justify-content: center;
@@ -367,8 +379,9 @@
  * 以 `.themeSlot > *` 定位，**不要**用 `[class*="compact"]` 之類的 class 子字串比對：
  * 那既過寬（面板內任何日後含該字串的元件都會被改底），又脆——ThemeToggle 的
  * icon-only 變體用 `.toggle`、compact 變體用 `.group .compact`，猜哪個會中是碰運氣。
- * `.themeSlot` 是本檔自有的 class，直接子元素就是 ThemeToggle 的根節點。 */
-:global(html[data-theme="night"]) .themeSlot > * {
+ * `.themeSlot` 是本檔自有的 class，直接子元素就是 ThemeToggle 的根節點
+ * （另一個子元素是「還能往下捲」箭頭 `.moreHint`，要排除，否則箭頭後面多一塊底）。 */
+:global(html[data-theme="night"]) .themeSlot > :not(.moreHint) {
   background: color-mix(in srgb, #ffffff 8%, var(--nav-panel-bg));
 }
 
@@ -479,7 +492,9 @@
   .bar,
   .menuBtn,
   .menuLink,
-  .navLink {
+  .navLink,
+  .themeSlot::before,
+  .moreHint {
     transition: none;
   }
 
@@ -548,6 +563,44 @@
     border-top: 1px solid var(--hairline);
   }
 
+  /* 清單還沒捲到底：日夜切換上方蓋一層往上淡出的面板色，最後看得到的那一列淡掉，
+     看得出下面還有。用面板色（日夜各自的 --landing-nav-cta-bg）而不是陰影：深色面板上陰影看不見。 */
+  .themeSlot::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    /* 多 1px：絕對定位以 padding box 為準，bottom: 100% 會蓋掉上緣那條分隔線 */
+    bottom: calc(100% + 1px);
+    height: var(--space-8);
+    background: linear-gradient(to bottom, transparent, var(--landing-nav-cta-bg));
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--motion-press);
+  }
+
+  .panel[data-more-below="true"] .themeSlot::before {
+    opacity: 1;
+  }
+
+  /* 向下箭頭貼在分隔線正上方、淡出層之上 */
+  .moreHint {
+    display: block;
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 3px);
+    z-index: 1;
+    color: var(--ink-soft);
+    transform: translateX(-50%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--motion-press);
+  }
+
+  .panel[data-more-below="true"] .moreHint {
+    opacity: 1;
+  }
+
   /* 首頁 hero 滿版時，透明外層不攔截 hero 頂部點擊；互動全在膠囊本體 */
   :global(html:has([data-landing-root])) .bar {
     pointer-events: none;
@@ -566,10 +619,6 @@
   :global(html:has([data-landing-root])) .bar[data-nav-solid="true"] .inner {
     background: color-mix(in srgb, var(--landing-nav-cta-bg) 96%, transparent);
     border-color: rgba(255, 255, 255, 0.85);
-  }
-
-  .bar[data-nav-solid="true"] .inner {
-    background: color-mix(in srgb, var(--landing-nav-cta-bg) 96%, transparent);
   }
 }
 

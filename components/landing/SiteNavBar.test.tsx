@@ -400,6 +400,42 @@ describe("SiteNavBar", () => {
     expect(header?.hasAttribute("data-menu-open")).toBe(false);
   });
 
+  test("抽屜清單最後一列不在可視範圍時標 data-more-below，捲進來就拿掉", async () => {
+    const { act } = await import("@testing-library/react");
+    type Callback = (entries: Array<{ isIntersecting: boolean }>) => void;
+    const observers: Array<{ callback: Callback; options?: IntersectionObserverInit }> = [];
+    vi.stubGlobal(
+      "IntersectionObserver",
+      class {
+        constructor(callback: Callback, options?: IntersectionObserverInit) {
+          observers.push({ callback, options });
+        }
+        observe() {}
+        disconnect() {}
+      },
+    );
+    try {
+      const view = await renderNavBar();
+      const panel = view.getByRole("navigation", { name: "網站選單", hidden: true });
+      expect(panel.hasAttribute("data-more-below")).toBe(false);
+
+      fireEvent.click(view.getByRole("button", { name: "選單" }));
+      const observer = observers.at(-1)!;
+      // 以面板為捲動範圍，並扣掉黏在底部的日夜切換
+      expect(observer.options?.root).toBe(panel);
+      expect(observer.options?.rootMargin).toMatch(/^0px 0px -\d+px 0px$/);
+
+      act(() => observer.callback([{ isIntersecting: false }]));
+      expect(panel.getAttribute("data-more-below")).toBe("true");
+
+      act(() => observer.callback([{ isIntersecting: true }]));
+      expect(panel.hasAttribute("data-more-below")).toBe(false);
+    } finally {
+      vi.unstubAllGlobals();
+      vi.stubGlobal("React", React);
+    }
+  });
+
   test("首頁預設不標 data-nav-solid（無 #landing-foot 時）", async () => {
     const view = await renderNavBar();
     const header = view.container.querySelector("header");
