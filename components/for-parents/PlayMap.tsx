@@ -217,6 +217,21 @@ export default function PlayMap({
     });
   }, [cancelPendingScroll]);
   useEffect(() => cancelPendingScroll, [cancelPendingScroll]);
+  /**
+   * 打開選縣市面板。≥980 面板貼在觸發鈕下方：位置列還在頁面中段（沒黏住）時，面板只剩約 380px，
+   * 南部縣市與「尚未收錄」被切掉、要在面板裡捲。先把位置列捲到導覽列下方再開，面板就有整個視窗的高度。
+   * 已經黏住（家長捲到名單中間）就不捲，免得把名單位置捲走。手機是底部 sheet，不捲。
+   */
+  const handleOpenLocation = useCallback(() => {
+    const anchor = locationAnchorRef.current;
+    const stuck =
+      anchor?.querySelector("[data-location-bar]")?.getAttribute("data-stuck") === "true";
+    if (!stuck && window.matchMedia?.("(min-width: 980px)").matches) {
+      cancelPendingScroll();
+      anchor?.scrollIntoView?.({ block: "start" });
+    }
+    setLocationOpen(true);
+  }, [cancelPendingScroll]);
   const handlePickCity = useCallback(
     (nextCity: string | null) => {
       handleSelectCity(nextCity);
@@ -282,7 +297,7 @@ export default function PlayMap({
           <PlayMapLocationBar
             locationLabel={map.city ?? "全台"}
             locationTriggerRef={locationTriggerRef}
-            onOpenLocation={() => setLocationOpen(true)}
+            onOpenLocation={handleOpenLocation}
             locationOpen={locationOpen}
             nearMeActive={map.userLatLng !== null}
             geoStatus={map.geoStatus}

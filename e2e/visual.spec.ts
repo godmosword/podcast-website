@@ -306,6 +306,18 @@ const COMPONENT_SHOTS: {
     locator: (page) => page.getByRole("dialog", { name: "去哪裡玩？" }),
   },
   {
+    id: "play-map-location-panel-desktop",
+    name: "選縣市面板（桌機，從頁首打開）",
+    path: "/for-parents/play-map",
+    viewport: { width: 1440, height: 900 },
+    // 從頁首打開時先把位置列捲到導覽列下方，面板整個放得下。以前面板接在頁面中段的觸發鈕下方，
+    // 只剩約 380px，南部縣市與「尚未收錄」被切掉（元素截圖會只拍到被切的那一截）。
+    prepare: async (page) => {
+      await page.getByRole("button", { name: /^選擇地點，目前：/ }).click();
+    },
+    locator: (page) => page.getByRole("dialog", { name: "去哪裡玩？" }),
+  },
+  {
     id: "play-map-card",
     name: "景點卡（錨定固定 slug）",
     path: "/for-parents/play-map",
