@@ -20,6 +20,7 @@ import {
 } from "@/lib/playground-detail";
 import { DEFAULT_OG_IMAGE, getSiteUrl } from "@/lib/site-url";
 import { storyDescription } from "@/lib/story-metadata";
+import { storyDisplayTitle } from "@/lib/story-title";
 import { storyAudioUrl, storyCoverPath } from "@/lib/story-utils";
 import { hasVtt } from "@/lib/transcript";
 
@@ -168,6 +169,27 @@ export function podcastSeriesJsonLd(): Record<string, unknown> {
       "@id": `${siteUrl}/#organization`,
     },
     sameAs: platformShowUrls(),
+  };
+}
+
+/** 繪本列表的 ItemList。順序就是頁面上的順序（阿尼在第一則）。 */
+export function pictureBookListJsonLd(
+  stories: readonly Story[],
+): Record<string, unknown> {
+  const siteUrl = getSiteUrl();
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "繪本故事",
+    description: "車車遊樂園可以左右翻頁的繪本故事",
+    url: `${siteUrl}/picture-books`,
+    numberOfItems: stories.length,
+    itemListElement: stories.map((story, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: storyDisplayTitle(story),
+      url: `${siteUrl}/story/${story.slug}`,
+    })),
   };
 }
 

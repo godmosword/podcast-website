@@ -33,6 +33,7 @@ export const DUDU_EMOTION_LABEL: Record<DuduEmotion, string> = {
 export const DUDU_EMOTION_BY_SEGMENT: Record<LandingSegmentId, DuduEmotion> = {
   stories: "star",
   health: "surprised",
+  "picture-books": "happy",
 };
 
 /** 點一下時切到下一個表情，循環走完全部六款。 */

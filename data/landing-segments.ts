@@ -1,6 +1,6 @@
 /** Landing Hub segment 定義（Storyline 式 IA）。首頁只渲染 LANDING_PAGE_SEGMENT_IDS。 */
 
-export type LandingSegmentId = "stories" | "health";
+export type LandingSegmentId = "stories" | "health" | "picture-books";
 
 export type LandingSegmentDef = {
   id: LandingSegmentId;
@@ -30,7 +30,11 @@ export type LandingSegmentDef = {
   bedtimeVeil?: "warm-bottom";
 };
 
-export const LANDING_SEGMENT_IDS: LandingSegmentId[] = ["stories", "health"];
+export const LANDING_SEGMENT_IDS: LandingSegmentId[] = [
+  "stories",
+  "health",
+  "picture-books",
+];
 
 /** 首頁直向分段，與車庫連結同一份名單。 */
 export const LANDING_PAGE_SEGMENT_IDS: readonly LandingSegmentId[] =
@@ -56,5 +60,15 @@ export const LANDING_SEGMENTS: LandingSegmentDef[] = [
     cta: { label: "好習慣故事", href: "/stories?tag=生活好習慣" },
     navLabel: "好習慣",
     bedtimeVeil: "warm-bottom",
+  },
+  {
+    id: "picture-books",
+    anchorId: "segment-picture-books",
+    title: "繪本故事",
+    subtitle: "一邊聽、一邊看圖",
+    heroImage: "/landing/segment-picture-books.jpg",
+    heroImagePortrait: "/landing/segment-picture-books-portrait.jpg",
+    cta: { label: "看繪本故事", href: "/picture-books" },
+    navLabel: "繪本故事",
   },
 ];

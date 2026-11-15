@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { storiesByNewest } from "../data/content";
 import { EPISODE_THEMES } from "../data/episode-themes";
+import { pictureBookStories } from "../lib/picture-books";
 import { representativeParentStories } from "../lib/for-parents";
 import { PROGRESS_STORAGE_KEY } from "../lib/progress-store";
 import sharp from "sharp";
@@ -110,6 +111,7 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
   await expect(page.getByRole("heading", { name: /數綿羊/ })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: /捏黏土/ })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: /陪孩子建立好習慣/ })).toBeAttached();
+  await expect(page.getByRole("heading", { name: "繪本故事" })).toBeAttached();
   const moreSkip = page
     .locator("#segment-stories")
     .getByRole("link", { name: "捲動到下一個專區" });
@@ -237,6 +239,7 @@ test("Landing Hub 在手機尺寸維持四段可見", async ({ page }) => {
   await expect(drawerNav.getByRole("link", { name: "留言" })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: /車車與\s?遊樂園的故事/ })).toBeAttached();
   await expect(page.getByRole("heading", { name: /陪孩子建立好習慣/ })).toBeAttached();
+  await expect(page.getByRole("heading", { name: "繪本故事" })).toBeAttached();
 });
 
 async function expectStoriesFromLanding(page: import("@playwright/test").Page) {
@@ -246,11 +249,42 @@ async function expectStoriesFromLanding(page: import("@playwright/test").Page) {
   await expect(page.getByRole("heading", { name: "找故事" })).toBeVisible();
 }
 
-test("Landing 兩段 CTA href", async ({ page }) => {
+test("繪本故事連到列表且阿尼排第一", async ({ page }) => {
+  const books = pictureBookStories();
+  expect(books[0]?.slug).toBe("ep-20");
+  expect(books.length).toBeGreaterThan(1);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  const link = page
+    .locator("#segment-picture-books")
+    .getByRole("link", { name: "看繪本故事" });
+  await link.scrollIntoViewIfNeeded();
+  await expect(link).toBeVisible();
+  await expect(link).toHaveAttribute("href", "/picture-books");
+  await expect(
+    page.locator("#segment-picture-books").getByText("一邊聽、一邊看圖"),
+  ).toBeVisible();
+
+  await link.click();
+  await expect(page).toHaveURL(/\/picture-books$/);
+  await expect(page.getByRole("heading", { name: "繪本故事", level: 1 })).toBeVisible();
+
+  const finder = page.getByRole("region", { name: "找故事" });
+  await expect(finder.getByText(`${books.length} 則故事`, { exact: true })).toBeVisible();
+  const cards = finder.locator('a[href^="/story/"]');
+  await expect(cards).toHaveCount(books.length);
+  expect(await cards.evaluateAll((nodes) => nodes.map((node) => node.getAttribute("href")))).toEqual(
+    books.map((story) => `/story/${story.slug}`),
+  );
+});
+
+test("Landing 三段 CTA href", async ({ page }) => {
   await page.goto("/");
   const expected = [
     { label: "車車遊樂園的故事", href: "/stories" },
     { label: "好習慣故事", href: "/stories?tag=生活好習慣" },
+    { label: "看繪本故事", href: "/picture-books" },
   ] as const;
   await expect(page.getByRole("link", { name: "數綿羊123．睡前故事" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: /捏黏土/ })).toHaveCount(0);
@@ -685,7 +719,7 @@ test.describe("頂欄回到 Landing 第一屏", () => {
 });
 
 test.describe("首頁沒有頁尾 snap pane", () => {
-  test("兩段之後不再接 landing-foot", async ({ page }) => {
+  test("三段之後不再接 landing-foot", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto("/");
     await expect(page.locator("#landing-foot")).toHaveCount(0);
@@ -694,7 +728,7 @@ test.describe("首頁沒有頁尾 snap pane", () => {
       page.getByRole("link", { name: "捲動到頁尾" }),
     ).toHaveCount(0);
     await expect(
-      page.locator("#segment-health").getByRole("link", { name: "捲動回第一個專區" }),
+      page.locator("#segment-picture-books").getByRole("link", { name: "捲動回第一個專區" }),
     ).toBeVisible();
   });
 });
@@ -962,7 +996,7 @@ test.describe("首頁手機換段出口", () => {
   test("最後一段往上鍵捲回第一屏", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 760 });
     await page.goto("/");
-    await page.locator("#segment-health").evaluate((el) => {
+    await page.locator("#segment-picture-books").evaluate((el) => {
       const root = document.querySelector<HTMLElement>("[data-landing-scroll]");
       if (!root) return;
       root.scrollTo({
@@ -974,7 +1008,7 @@ test.describe("首頁手機換段出口", () => {
       });
     });
     const skip = page
-      .locator("#segment-health")
+      .locator("#segment-picture-books")
       .getByRole("link", { name: "捲動回第一個專區" });
     await expect(skip).toBeVisible();
     const skipBox = await skip.boundingBox();

@@ -215,6 +215,7 @@ describe("ZoneSheet", () => {
     expect(screen.queryByRole("link", { name: /捏黏土/ })).toBeNull();
     expect(screen.getByRole("link", { name: "車車故事" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "好習慣" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "繪本故事" })).toBeTruthy();
   });
 
   it("展開「看看這座島有什麼」後列出全部地點，且精選地標優先排列", () => {

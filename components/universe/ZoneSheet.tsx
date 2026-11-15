@@ -48,6 +48,7 @@ type ZoneSheetProps = {
 const SEGMENT_ICON: Record<LandingSegmentId, IconName> = {
   stories: "book",
   health: "shield-plus",
+  "picture-books": "palette",
 };
 
 export default function ZoneSheet({

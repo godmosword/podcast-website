@@ -9,6 +9,7 @@ import {
   type LandingSegmentDef,
   LANDING_SEGMENTS,
 } from "@/data/landing-segments";
+import { pictureBookStories } from "@/lib/picture-books";
 
 type LandingStoryItem = { kind: "story"; story: Story };
 type LandingExternalItem = {
@@ -63,6 +64,8 @@ function storiesForSegment(id: LandingSegmentDef["id"]): LandingCarouselItem[] {
         getStoriesByTag("好習慣"),
         getStoriesByTag("解決問題"),
       ]).map((story) => ({ kind: "story" as const, story }));
+    case "picture-books":
+      return pictureBookStories().map((story) => ({ kind: "story" as const, story }));
     default:
       return [];
   }
