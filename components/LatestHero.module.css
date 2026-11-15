@@ -103,6 +103,12 @@
   box-shadow: var(--elev-1);
 }
 
+/* 夜間深墨主鈕壓在深色卡／頁面上，按鈕和底只差約 1.1:1，看不出按鈕的形狀。
+   加一圈淺描邊（inset，不改尺寸）；字本來就是白的，日間不變。 */
+:global([data-theme="night"]) .cta {
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--on-dark) 40%, transparent), var(--elev-1);
+}
+
 @media (max-width: 480px) {
   .hero {
     padding: var(--space-4);
@@ -120,7 +126,9 @@
 @media (min-width: 768px) {
   .hero {
     display: grid;
-    grid-template-columns: minmax(0, 1.2fr) minmax(200px, 0.8fr);
+    /* 768–979 先對半：右欄 1.2:0.8 時只有約 275px，標題被 balance 對切成兩行、常斷在詞中間
+      （「收割機後面的小／鳥在做什麼？」）。對半後約 340px，多數標題一行放得下。 */
+    grid-template-columns: minmax(0, 1fr) minmax(200px, 1fr);
     align-items: center;
     gap: var(--space-6);
     /* 標籤和標題是同一組：列距收到 --space-3，並讓標籤貼第一列底、文字貼第二列頂，
@@ -148,6 +156,13 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+  }
+}
+
+/* ≥980 欄寬夠了，回到封面較大的比例。 */
+@media (min-width: 980px) {
+  .hero {
+    grid-template-columns: minmax(0, 1.2fr) minmax(200px, 0.8fr);
   }
 }
 
