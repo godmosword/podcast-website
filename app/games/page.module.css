@@ -64,8 +64,8 @@
 }
 
 /*
- * 四張卡：手機與桌面都排兩欄兩列。固定欄數而非 auto-fit：auto-fit 會摺疊空軌道，
- * 單卡分類時那張卡會撐成整條寬，跟同頁其他卡差好幾倍。
+ * 四張卡：<980 兩欄兩列，≥980 一排四張（見下方 980 媒體查詢）。固定欄數而非 auto-fit：
+ * auto-fit 會摺疊空軌道，單卡分類時那張卡會撐成整條寬，跟同頁其他卡差好幾倍。
  * 不再做手機置頂全寬大卡。
  */
 .cardGrid {
@@ -207,6 +207,14 @@
   font-size: var(--fs-h3-compact);
   font-weight: 900;
   line-height: 1.3;
+}
+
+/* 桌面一排四張：四款剛好一排、沒有落單。兩欄時 1440×900 第一屏只看得到卡片上緣，
+   看不到遊戲名稱；一排四張後海報下方就是四款的封面與名稱。 */
+@media (min-width: 980px) {
+  .cardGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 640px) {
