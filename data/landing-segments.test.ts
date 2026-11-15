@@ -6,17 +6,35 @@ import { LANDING_SEGMENTS } from "./landing-segments";
 import { resolveLandingSegments } from "@/lib/landing-query";
 
 describe("landing-segments", () => {
-  it("定義兩段 segment", () => {
-    expect(LANDING_SEGMENTS).toHaveLength(2);
-    expect(LANDING_SEGMENTS.map((s) => s.id)).toEqual(["stories", "health"]);
+  it("定義三段 segment", () => {
+    expect(LANDING_SEGMENTS).toHaveLength(3);
+    expect(LANDING_SEGMENTS.map((s) => s.id)).toEqual([
+      "stories",
+      "health",
+      "picture-books",
+    ]);
   });
 
-  it("resolve 後首頁只剩故事與好習慣", () => {
+  it("resolve 後首頁是故事、好習慣、繪本", () => {
     const resolved = resolveLandingSegments();
-    expect(resolved.map((s) => s.id)).toEqual(["stories", "health"]);
+    expect(resolved.map((s) => s.id)).toEqual([
+      "stories",
+      "health",
+      "picture-books",
+    ]);
     for (const seg of resolved) {
       expect(seg.items.length).toBeGreaterThan(0);
     }
+    const books = resolved.find((segment) => segment.id === "picture-books")!;
+    expect(books.items[0]).toMatchObject({
+      kind: "story",
+      story: { slug: "ep-20" },
+    });
+    expect(
+      books.items.every(
+        (item) => item.kind === "story" && item.story.pageCount > 1,
+      ),
+    ).toBe(true);
   });
 
   it("stories segment 最多 8 則", () => {
@@ -67,7 +85,14 @@ describe("landing-segments", () => {
     }
   });
 
-  it("首頁兩段都不掛播放直達鈕（hero 只留分區 CTA）", () => {
+  it("有副標的段落不超過 18 字", () => {
+    for (const seg of LANDING_SEGMENTS) {
+      if (!seg.subtitle) continue;
+      expect([...seg.subtitle].length).toBeLessThanOrEqual(18);
+    }
+  });
+
+  it("首頁三段都不掛播放直達鈕（hero 只留分區 CTA）", () => {
     for (const seg of LANDING_SEGMENTS) {
       expect(seg.playCta).toBeUndefined();
     }
@@ -76,7 +101,7 @@ describe("landing-segments", () => {
     }
   });
 
-  it("首頁兩段 CTA label、href 與 navLabel", () => {
+  it("首頁三段 CTA label、href 與 navLabel", () => {
     expect(LANDING_SEGMENTS).toEqual([
       expect.objectContaining({
         id: "stories",
@@ -87,6 +112,13 @@ describe("landing-segments", () => {
         id: "health",
         cta: { label: "好習慣故事", href: "/stories?tag=生活好習慣" },
         navLabel: "好習慣",
+      }),
+      expect.objectContaining({
+        id: "picture-books",
+        title: "繪本故事",
+        subtitle: "一邊聽、一邊看圖",
+        cta: { label: "看繪本故事", href: "/picture-books" },
+        navLabel: "繪本故事",
       }),
     ]);
 

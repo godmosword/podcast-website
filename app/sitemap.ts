@@ -23,6 +23,7 @@ import {
   travelAbroadIndexPath,
 } from "@/lib/parent-travel-abroad";
 import { listNewsletters, newsletterPath } from "@/lib/newsletters";
+import { pictureBookStories } from "@/lib/picture-books";
 import { getSiteUrl } from "@/lib/site-url";
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -43,6 +44,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: collectionModified,
       changeFrequency: "weekly",
       priority: 0.95,
+    },
+    {
+      url: `${baseUrl}/picture-books`,
+      lastModified: collectionModifiedDate(pictureBookStories()),
+      changeFrequency: "weekly",
+      priority: 0.9,
     },
     {
       url: `${baseUrl}/topic`,

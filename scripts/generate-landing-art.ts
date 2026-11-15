@@ -131,6 +131,21 @@ const LANDING_ART_SPECS: LandingArtSpec[] = [
         "Vertical toddler health-education scene (衛教宣導): the provided ambulance friend actively demonstrating tooth-brushing — tiny clay toothbrush raised in a natural, gentle brushing motion toward its friendly windshield smile, body slightly tilted forward as if mid-lesson; the provided police car friend paused calmly at a zebra crosswalk beside a small clay traffic light, modeling safe crossing with a relaxed attentive pose angled slightly toward the ambulance. A simple clay health poster board between them shows cute icons (tooth, soap, apple, bandage). Warm soft daylight, friendly neighborhood health-talk mood — lifelike relaxed poses and subtle interaction, not stiff parked side-by-side. Clear health-education storytelling in the upper frame.",
     },
   },
+  {
+    id: "picture-books",
+    cast: ["水泥車阿尼"],
+    landscape: {
+      file: "segment-picture-books.jpg",
+      scene:
+        "Sunny outdoor clay construction site under a bright blue sky with two chubby white clouds. The provided yellow cement mixer is the only hero, three-quarter front view facing the camera, placed center-right with every wheel fully visible. Left background: one simple yellow tower crane with a plain window and NO face, plus a grey clay building frame with orange rails. Right background: a tall stacked pastel clay tower in the shape of Taipei 101 (lilac, pink, orange, yellow, mint, sky blue tiers, a small yellow star on top, an arched door) with NO digits and NO letters. Green clay grass in front, a few orange-white cones and small brick piles. The lower-left grass is simpler and a little darker, empty of the truck, for a button. Bottom-right stays uncluttered. Do not use a blank off-white studio background. " +
+        VEHICLE_FACE_RULE,
+    },
+    portrait: {
+      file: "segment-picture-books-portrait.jpg",
+      scene:
+        "Vertical sunny clay construction site. Bright blue sky and chubby white clouds at the top. A faceless yellow tower crane stands upper-left. A tall stacked pastel clay tower (lilac, pink, orange, yellow, mint, sky blue, yellow star, arched door, NO digits, NO letters) stands upper-right. The provided yellow cement mixer sits in the middle band, fully visible, facing the camera. The bottom 35 percent is only simpler, slightly darker green grass with no truck and no props, for a button. Do not use a blank off-white studio background.",
+    },
+  },
 ];
 
 function usage(): never {
@@ -355,13 +370,21 @@ function parseOnlyIds(args: string[]): string[] | null {
   return raw.split(",").map((s) => s.trim()).filter(Boolean);
 }
 
-function runApprove(orientation: Orientation): void {
+function runApprove(orientation: Orientation, onlyIds: string[] | null): void {
   if (!existsSync(STAGING)) {
     throw new Error(
       "找不到 staging 目錄。請先成功執行 npm run generate:landing-art 再 --approve。",
     );
   }
-  const specs = LANDING_ART_SPECS.map((s) =>
+  const selected = onlyIds
+    ? LANDING_ART_SPECS.filter((s) => onlyIds.includes(s.id))
+    : [...LANDING_ART_SPECS];
+  if (selected.length === 0) {
+    throw new Error(
+      `無效的 --only。可選：${LANDING_ART_SPECS.map((s) => s.id).join(", ")}`,
+    );
+  }
+  const specs = selected.map((s) =>
     orientation === "portrait" ? s.portrait : s.landscape,
   );
   const missing = specs.filter(
@@ -420,7 +443,7 @@ async function main(): Promise<void> {
     return;
   }
   if (args.includes("--approve")) {
-    runApprove(orientation);
+    runApprove(orientation, onlyIds);
     return;
   }
   await runGenerate(onlyIds, orientation);

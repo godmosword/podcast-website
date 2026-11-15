@@ -32,6 +32,7 @@ describe("sitemap freshness", () => {
     expect(urls).not.toContain(
       "https://example.com/for-parents/articles/vocus-6ae34027fd897800012f3e51",
     );
+    expect(urls).toContain("https://example.com/picture-books");
     expect(urls).toContain("https://example.com/subscribe");
     expect(urls).toContain("https://example.com/feedback");
     expect(urls).not.toContain("https://example.com/studio/feedback");

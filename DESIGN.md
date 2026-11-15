@@ -375,10 +375,10 @@ Storyline 式**全螢幕分段捲動**：每段一張滿版黏土 hero（桌面 
    - **著色本頁 active 態**：抽屜用完整 `internalHrefs` 做**最長匹配獨佔**。`/games/coloring-book` 歸「遊樂園」（不再獨立列）。不含搜尋列（故事搜尋仍在 `/stories`）。「親子景點」連 `/for-parents/play-map`，是家長組主列剩下的一項。小字分別連 `/for-parents/articles`、`/for-parents/overseas-travel`、`/for-parents/travel-taiwan`、`/for-parents/story-making`；這些路徑以最長匹配獨佔 active，不得同時點亮其他家長項。不列「主題分類」。`/for-parents/play-map` 僅「親子景點」高亮。
    - **KidsPlayDock 已刪（2026-09-05）**：內頁左下不再掛「去玩」三連；兒童三入口（全部故事／遊樂園／宇宙地圖）只由漢堡抽屜承接。不再有 `--kids-dock-h` 底距、`data-kids-dock`／`data-kids-dock-flush`／`data-lift="picker"`。
    - 關於我們在漢堡抽屜；聯絡走內頁 `SiteFooter`「聯絡我們」。頂欄「社群」不含 Email。**未改** Apple sync workflow、ThemeProvider API。
-2. 兩段 **LandingSegment** 全螢幕面板（`LANDING_PAGE_SEGMENT_IDS`：故事、好習慣）；可見 CTA：`車車遊樂園的故事`／`好習慣故事`。睡前主題頁、捏黏土 YouTube 清單，以及宇宙地圖車庫的睡前、捏黏土連結已移除。首段不放重回開場鈕。
+2. 三段 **LandingSegment** 全螢幕面板（`LANDING_PAGE_SEGMENT_IDS`：故事、好習慣、繪本）；可見 CTA：`車車遊樂園的故事`／`好習慣故事`／`看繪本故事`。睡前主題頁、捏黏土 YouTube 清單，以及宇宙地圖車庫的睡前、捏黏土連結已移除。首段不放重回開場鈕。
 3. **段落切換**：首頁沒有獨立的分段導覽列。桌面右側垂直進度點與 ≤768px 貼底短標列（SegmentNav）已於 ADR-0004 移除——3D 開場接手了首頁的第一印象，底列在四段內容上方再疊一層水平導覽只是重複。換段靠各段底列黏土圓鈕 `moreSkip`（可點、≥44×44、與 CTA／嘟嘟同一底列；最後一段朝上捲回第一屏）以及捲動容器的 snap、觸控滑、方向鍵。點圓鈕、滑鼠滾輪或頂欄回家時先短淡出、`auto` 對齊、再 280ms 淡入＋微縮放（只動 `opacity`／`transform`）；手指滑與方向鍵仍只靠 snap，避免和 mandatory snap 打架。`prefers-reduced-motion` 立刻到位、指引改靜止。≤768 左下 CTA 不抬高，右欄 `--landing-dudu-slot` 仍留給 Dudu。`moreSkip` 聚焦時適用上方 Depth 條款：焦點環用 `var(--on-dark)`。document scroll-snap
 4. Segment 1 CTA「車車遊樂園的故事」→ **`/stories`**（完整 Podcast 主頁）
-5. **Landing 沒有頁尾 snap pane**：`#landing-foot` 已刪。頻道／社群改由頂欄下拉承擔；版權與條款留在內頁 `SiteFooter`。最後一段（好習慣）是最後一屏。
+5. **Landing 沒有頁尾 snap pane**：`#landing-foot` 已刪。頻道／社群改由頂欄下拉承擔；版權與條款留在內頁 `SiteFooter`。最後一段（繪本故事）是最後一屏。
 
 Hero 圖走 `images.edit` + `public/characters/` 定裝照參考圖，與單集插畫同流程以維持 on-model。
 

@@ -39,7 +39,9 @@ export function StoryFilter({
 }: StoryFilterProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const filterBase = pathname === "/stories" ? "/stories" : "/";
+  // 列表頁的篩選要留在自己的路徑。首頁若再掛這塊，仍回到 /。
+  const filterBase =
+    pathname === "/stories" || pathname === "/picture-books" ? pathname : "/";
   const completedStories = useCompletedStories();
 
   function pushFilters(

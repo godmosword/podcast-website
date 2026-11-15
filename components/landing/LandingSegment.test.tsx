@@ -83,7 +83,7 @@ describe("LandingSegment", () => {
     expect(html).not.toContain('data-testid="replay-intro"');
   });
 
-  test("首頁兩段都不渲染播放直達，保留段標題語意且無可見編號", async () => {
+  test("首頁三段都不渲染播放直達，保留段標題語意且無可見編號", async () => {
     const { default: LandingSegment } = await import("./LandingSegment");
     const segments = resolveLandingSegments();
     for (const [index, segment] of segments.entries()) {
