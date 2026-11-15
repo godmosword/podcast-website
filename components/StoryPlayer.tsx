@@ -252,6 +252,8 @@ export default function StoryPlayer({
 
   const total = images.length;
   const hasSubtitles = Array.isArray(subtitles) && subtitles.length > 0;
+  /** 有任何字幕可顯示（逐句字幕或場景字幕）；都沒有時不讓出字幕帶，免得留一條空的。 */
+  const hasCaptionContent = hasSubtitles || (captions?.some((line) => line.trim().length > 0) ?? false);
   const hasCueTimes =
     Array.isArray(captionTimes) && captionTimes.length === total;
   // 有側車字幕時逐句顯示；無字幕時用 captions（每幕一句摘要）＋ captionTimes 換頁。
@@ -855,6 +857,8 @@ export default function StoryPlayer({
     <div
       className={`${styles.player} ${theme === NIGHT_THEME ? styles.playerNight : ""}`}
       style={{ ["--ambient" as string]: color }}
+      // 桌機橫向用來讓出字幕帶（見 StoryPlayer.module.css「字幕帶」）；字幕關掉時插圖拿回整個舞台。
+      data-captions={subtitlesOn && !hasEnded && hasCaptionContent ? captionSize : "off"}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >

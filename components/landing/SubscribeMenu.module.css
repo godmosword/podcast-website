@@ -84,7 +84,7 @@
 .option {
   display: flex;
   align-items: center;
-  /* 槽位 38px、30px 標誌兩側各留 4px，加 12px 間距＝與文字距 16px，
+  /* 槽位 38px、30px 標誌靠左（右側留 8px），加 12px 間距＝與文字距 20px，
      過 Spotify／Instagram 的半個標誌淨空（15px）。 */
   gap: 12px;
   min-height: 44px;
@@ -109,7 +109,9 @@
   height: 30px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  /* 靠左：方形標誌（30px）置中會比 KKBOX／YouTube 字標內縮 4px，四列左緣對不齊。
+     與文字的實距從 16 變 20，仍符合品牌規則（≥16）。 */
+  justify-content: flex-start;
 }
 
 .badge:has([data-brand-mark="youtube"]) {

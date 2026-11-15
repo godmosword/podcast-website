@@ -68,6 +68,13 @@
   font-weight: 700;
 }
 
+/* 夜間：全域 .marker::before 有 opacity 0.55，淡紫底再透出深色卡底，配深字只剩約 2:1。
+   夜間改不透明，底色往亮處混 20%，深字約 5:1（AA），仍看得出是淡紫。 */
+:global([data-theme="night"]) .ep::before {
+  opacity: 1;
+  background: color-mix(in srgb, var(--c-lilac) 80%, var(--on-dark));
+}
+
 .title {
   font-size: var(--fs-h3);
   font-weight: 700;

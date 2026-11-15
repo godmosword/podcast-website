@@ -617,6 +617,26 @@ test.describe("親子遊樂地圖", () => {
     expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(1000);
   });
 
+  test("桌面從頁首附近打開面板：先把位置列捲到導覽列下方，面板整個放得下、不用在裡面捲", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto("/for-parents/play-map");
+    await waitForPlayMapReady(page);
+    expect(await page.evaluate(() => window.scrollY)).toBe(0);
+
+    await page.getByRole("button", { name: /^選擇地點，目前：/ }).click();
+    const dialog = page.getByRole("dialog", { name: "去哪裡玩？" });
+    await expect(dialog).toBeVisible();
+    // 原本面板接在頁面中段的觸發鈕下方，只剩約 380px，南部縣市被切掉
+    expect(
+      await dialog.evaluate((el) => el.scrollHeight <= el.clientHeight + 1),
+      "面板內容要整個放得下",
+    ).toBe(true);
+    await expect(dialog.getByText(/^尚未收錄/)).toBeInViewport();
+    await expect(dialog.getByRole("button", { name: /^高雄市，/ })).toBeInViewport();
+  });
+
   test("網址同時帶多個情境：不亮卡，結果列下方列出每個條件", async ({ page }) => {
     await page.goto("/for-parents/play-map?free=1&rain=1");
     await waitForPlayMapReady(page);

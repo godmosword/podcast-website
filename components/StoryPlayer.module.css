@@ -75,6 +75,38 @@
   bottom: calc(var(--controls-block, 156px) + var(--safe-bottom));
 }
 
+/*
+ * 字幕帶：桌機橫向的插圖會填滿整個舞台高度，字幕原本壓在插圖下緣（兩側黑邊空著）。
+ * 字幕開著時舞台往上讓出一條字幕帶，字幕落在插圖下方的黑底上。帶高對應各字級一行字幕
+ * 的最大高度（字級 clamp 上限 × 行高 1.5 ＋ 上下內距 0.7em ＋ 邊框），換頁時不會跳。
+ * 只在夠高的橫向視窗（≥700px）：手機橫放或很矮的筆電視窗讓出字幕帶，插圖會小到看不清。
+ * 帶高只算一行：每集都有逐句字幕，最長 26 字（中位數 7），1024 寬以上 md 字級一行放得下；
+ * 極少數長句在大字級會換行、略壓到插圖下緣，可接受。
+ */
+@media (min-width: 768px) and (min-height: 700px) and (orientation: landscape) {
+  .player[data-captions="sm"] {
+    --caption-band: 80px;
+  }
+
+  .player[data-captions="md"] {
+    --caption-band: 104px;
+  }
+
+  .player[data-captions="lg"] {
+    --caption-band: 136px;
+  }
+
+  .stage {
+    bottom: calc(var(--controls-block, 156px) + var(--safe-bottom) + var(--caption-band, 0px));
+  }
+
+  /* 字幕框往下移 10px：帶高剛好等於一行字幕框，不移的話離插圖只有約 7px、離控制列約 25px。
+     控制列上方 20px 是透明內距，碰不到按鈕。 */
+  .player:not([data-captions="off"]) .captionWrap {
+    bottom: calc(var(--controls-block, 156px) + var(--safe-bottom) - 10px);
+  }
+}
+
 .playerNight {
   --ken-burns-scale: 1.04;
   --ken-burns-shift: 0.8%;

@@ -31,6 +31,18 @@
   }
 }
 
+/* 夜間深墨主鈕壓在深色卡／頁面上，按鈕和底只差約 1.1:1，看不出按鈕的形狀。
+   加一圈淺描邊（inset，不改尺寸）；字本來就是白的，日間不變。 */
+:global([data-theme="night"]) .button {
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--on-dark) 40%, transparent), var(--elev-1);
+}
+
+@media (hover: hover) {
+  :global([data-theme="night"]) .button:hover {
+    box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--on-dark) 40%, transparent), var(--elev-3);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .button,
   .button:active {
