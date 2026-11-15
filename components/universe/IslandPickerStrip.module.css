@@ -52,7 +52,8 @@
   align-items: center;
   justify-content: center;
   gap: 2px;
-  min-width: 72px;
+  /* 84：島名 12.5px 後最長的五個字約 82px，一排卡片同寬 */
+  min-width: 84px;
   height: var(--map-picker-height, 72px);
   padding: 6px 8px 4px;
   border: 2px solid var(--map-chip-line);
@@ -103,7 +104,8 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 11px;
+  /* 原本 11px，是全站最小的字；改成最小註記階。max-width 用 em，卡片會跟著變寬一點。 */
+  font-size: var(--fs-meta);
   font-weight: 800;
   line-height: 1.15;
 }

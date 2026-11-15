@@ -60,7 +60,8 @@
   width: 100%;
   max-width: 420px;
   aspect-ratio: 1 / 1;
-  margin: 0 auto var(--space-6);
+  /* 靠左：和標題、表單同一條左緣（桌機欄寬 600 時置中會變成兩條對齊線）。手機照片本來就滿寬。 */
+  margin: 0 0 var(--space-6);
   border-radius: var(--radius-xl);
   overflow: hidden;
   box-shadow: var(--shadow-card);

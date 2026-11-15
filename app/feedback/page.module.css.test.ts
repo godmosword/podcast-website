@@ -23,4 +23,11 @@ describe("feedback page.module.css", () => {
     expect(css).not.toContain("formSection::before");
     expect(css).not.toMatch(/\.formSection\s*\{[\s\S]*?background:\s*var\(--warm-surface\)/);
   });
+
+  it("照片靠左，和標題、表單同一條左緣（不置中）", () => {
+    const start = css.indexOf(".coverWrap {");
+    const block = css.slice(start, css.indexOf("}", start));
+    expect(block).toMatch(/margin:\s*0 0 var\(--space-6\)/);
+    expect(block).not.toMatch(/margin:[^;]*auto/);
+  });
 });

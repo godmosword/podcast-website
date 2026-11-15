@@ -151,6 +151,52 @@ function renderFeedbackLink(
 /** 同時只允許一個浮層開著——兩個 focus trap 同時 active 會互搶 Tab。 */
 type OpenMenu = "none" | "channels" | "socials" | "nav";
 
+
+/**
+ * 抽屜清單的最後一列是否還在可視範圍外（被黏在底部的日夜切換擋住或還沒捲到）。
+ * 視窗較矮時面板要捲動，macOS 的捲軸平常藏著；切口剛好落在兩列之間時看不出還能捲。
+ */
+function useMoreBelow(
+  open: boolean,
+  panelRef: { current: HTMLElement | null },
+  listEndRef: { current: HTMLElement | null },
+  themeSlotRef: { current: HTMLElement | null },
+): boolean {
+  const [moreBelow, setMoreBelow] = useState(false);
+  // 日夜切換的高度會隨字級縮放、safe-area 改變；變了就重建下面的 IntersectionObserver。
+  const [slotHeight, setSlotHeight] = useState<number | null>(null);
+
+  useEffect(() => {
+    const slot = themeSlotRef.current;
+    if (!open || !slot || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(([entry]) => {
+      setSlotHeight(Math.round(entry.borderBoxSize?.[0]?.blockSize ?? slot.offsetHeight));
+    });
+    observer.observe(slot);
+    return () => observer.disconnect();
+  }, [open, themeSlotRef]);
+
+  useEffect(() => {
+    const root = panelRef.current;
+    const end = listEndRef.current;
+    if (!open || !root || !end || typeof IntersectionObserver === "undefined") return;
+    // 日夜切換黏在面板底、蓋住最下面那一段，可視範圍要扣掉它的高度。
+    const covered = slotHeight ?? themeSlotRef.current?.offsetHeight ?? 0;
+    const observer = new IntersectionObserver(
+      ([entry]) => setMoreBelow(!entry.isIntersecting),
+      { root, rootMargin: `0px 0px -${covered}px 0px` },
+    );
+    observer.observe(end);
+    return () => {
+      observer.disconnect();
+      // 關閉後不留舊狀態：下次打開、觀察結果回來之前不會先閃一下提示
+      setMoreBelow(false);
+    };
+  }, [open, slotHeight, panelRef, listEndRef, themeSlotRef]);
+
+  return moreBelow;
+}
+
 export default function SiteNavBar() {
   const pathname = usePathname();
   const playMode = isImmersiveRoute(pathname);
@@ -161,7 +207,10 @@ export default function SiteNavBar() {
   const barRef = useRef<HTMLElement>(null);
   const menuBtnRef = useRef<HTMLButtonElement>(null);
   const scrimRef = useRef<HTMLDivElement>(null);
+  const listEndRef = useRef<HTMLSpanElement>(null);
+  const themeSlotRef = useRef<HTMLDivElement>(null);
   const open = openMenu === "nav";
+  const moreBelow = useMoreBelow(open, panelRef, listEndRef, themeSlotRef);
 
   const items = navItems();
   const byId = new Map(items.map((item) => [item.id, item]));
@@ -428,6 +477,7 @@ export default function SiteNavBar() {
           className={styles.panel}
           aria-label="網站選單"
           data-open={open ? "true" : "false"}
+          {...(open && moreBelow ? { "data-more-below": "true" } : {})}
           {...(open ? {} : { inert: true })}
         >
           {/* 兩個 list：`list-style: none` 在 Safari/VoiceOver 會移除清單語意，
@@ -451,7 +501,12 @@ export default function SiteNavBar() {
           </ul>
         </div>
 
-        <div className={styles.themeSlot}>
+        {/* 清單最後一列的下緣：還沒捲進可視範圍時，日夜切換上方淡出，提示還能往下捲 */}
+        <span ref={listEndRef} className={styles.listEnd} aria-hidden />
+
+        <div ref={themeSlotRef} className={styles.themeSlot}>
+            {/* 還能往下捲時才顯示（CSS 依 data-more-below 切換）；切口落在兩列之間時淡出看不出來，靠這個箭頭 */}
+            <Icon name="chevron-down" size={18} className={styles.moreHint} />
             <ThemeToggle compact />
           </div>
         </nav>
