@@ -22,7 +22,7 @@ env:
 
 jobs:
   transcribe:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # 覆蓋不足時會重跑（-mc 0）再補開頭，CPU 上一輪約 20 分鐘。
     timeout-minutes: 75
     steps:
