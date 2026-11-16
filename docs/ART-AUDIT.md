@@ -26,7 +26,7 @@
 | 角色 | 實際色 | 出處 |
 |------|--------|------|
 | 頁底 | `#ffffff` | `--bg`，`app/globals.css` 78 |
-| 字 | `#34302b`／次要 `#7a7268` | 81–82 |
+| 字 | `#34302b`／次要 `#797167` | 81–82 |
 | 頂欄 | 桃色底 `#fff8f2`，字 `#7a4012` 這一系 | `--landing-nav-cta-bg` 214、`--landing-cta-fg` 212；`.bar` 在 `components/landing/SiteNavBar.module.css` 6 |
 | 品牌橘 | `#ff8c2b` | `--landing-brand` 198。聖經寫它用在頂欄；畫面上頂欄是桃色底，橘是品牌色票，不是整條填色 |
 | 主按鈕墨 | `#3a2410` 白字 | `--cta-solid-bg` 247，等於 `--landing-brand-ink` |

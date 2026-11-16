@@ -9,7 +9,7 @@ import {
 export const GAME_OG_COLORS = {
   bg: "#ffffff",
   ink: "#34302b",
-  inkSoft: "#7a7268",
+  inkSoft: "#797167",
   yellow: "#ffd866",
   mint: "#b7df9b",
   sky: "#8fcde8",
