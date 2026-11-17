@@ -48,6 +48,11 @@
   object-position: center 40%;
 }
 
+/* 繪本電腦版主圖是 21:9。55% 對準水泥車與彩色高塔的中心（compose-wide-hero.py）。 */
+.panel[data-segment="picture-books"] .bg {
+  object-position: center 55%;
+}
+
 .bgFallback {
   background: linear-gradient(160deg, var(--sky-2), var(--c-lilac));
 }
@@ -463,7 +468,8 @@
 }
 
 @media (max-width: 768px) {
-  .bg {
+  .bg,
+  .panel[data-segment="picture-books"] .bg {
     object-position: center 35%;
   }
 
