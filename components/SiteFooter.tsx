@@ -1,6 +1,7 @@
 import Link from "next/link";
 import ConnectHub from "@/components/ConnectHub";
 import { contactHref, isContactExternal } from "@/lib/contact";
+import { isOfficialEdition } from "@/lib/site-edition";
 import Doodle from "@/components/decor/Doodle";
 import decor from "@/components/decor/decor.module.css";
 import Icon from "@/components/ui/Icon";
@@ -90,12 +91,16 @@ export default function SiteFooter({
           >
             聯絡我們
           </a>
-          <span className={styles.metaSep} aria-hidden>
-            ·
-          </span>
-          <Link href="/studio" className={styles.metaLink}>
-            節目數據
-          </Link>
+          {isOfficialEdition() ? null : (
+            <>
+              <span className={styles.metaSep} aria-hidden>
+                ·
+              </span>
+              <Link href="/studio" className={styles.metaLink}>
+                節目數據
+              </Link>
+            </>
+          )}
           {/* 美術審 L1：法律連結獨立一段，≤480 自成一行（不再讓「·」孤懸在行尾）；
               >480 的分隔點由 CSS ::before 掛在它自己身上，不會被換行拆開。 */}
           <Link href="/legal" className={`${styles.metaLink} ${styles.metaLegal}`}>

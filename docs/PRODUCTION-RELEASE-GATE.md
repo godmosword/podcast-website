@@ -122,9 +122,17 @@ npm run verify:release-content   # 目前無未校對字幕；有新集未 --mar
 npm run build
 PW_REUSE_SERVER=1 npm run test:e2e:public
 PW_REUSE_SERVER=1 npm run test:e2e:ci   # 兒童主路徑；非 ruleset required check
-NEXT_PUBLIC_SITE_URL=https://podcast-website-mu.vercel.app \
-  npm run verify:geo-live -- --base-url=https://podcast-website-mu.vercel.app --production
+NEXT_PUBLIC_SITE_URL=https://carcarplayground.com \
+  npm run verify:geo-live -- --base-url=https://carcarplayground.com --production
 ```
+
+## 官網網域
+
+這次沒有把 `carcarplayground.com` 改掛到新專案。網域移走之前，現有 Vercel 專案繼續留著正式資料庫與寄信，也不要設 `SITE_EDITION`。
+
+官網是同一個 repo 的 `release` 分支，接到另一個 Vercel 專案。Production Branch 設為 `release`，build command 用 `npm run build:official`，環境變數是 `SITE_EDITION=official` 與 `NEXT_PUBLIC_SITE_URL=https://carcarplayground.com`。ruleset `official-release` 已經生效，只讓管理員建立或更新 `release`；每 15 分鐘的 sync 只更新 `main`。這個分支與第二個 Vercel 專案要等這次變更提交之後才建，否則官網會部署到還沒有發行程式的 commit。
+
+暫時網址先不要加 `--production`。播放、字幕、既有 GUID、表單、留言核准、舊的 Service Worker 快取與回滾都通過之後，才把網域指過去。指過去之後，把舊專案改成 lab 變數（自己的網址、不再使用正式庫與正式寄信），並立刻重新部署。
 
 `verify:episodes` 的 warning 不等於 release blocker：Apple sync 可保留已知的
 `illustrate-pending` MVP warning；正式內容發布前則用 `verify:release-content` 分類，

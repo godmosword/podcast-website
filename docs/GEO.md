@@ -31,7 +31,7 @@
 | [`scripts/verify-geo-live.ts`](../scripts/verify-geo-live.ts) + `npm run verify:geo-live` | **部署後**對 live base URL 煙霧測試（robots／sitemap／feed／llms、重點頁 200、最新集 FAQ）。逐字稿：有 `data/subtitles` 側車才要求 VTT 200／RSS `podcast:transcript`／JSON-LD MediaObject；MVP 無側車則確認**未**宣告。**不在** `npm run check` 內 |
 | [`docs/GEO-BASELINE.md`](./GEO-BASELINE.md) | 每週人工 baseline 記錄表（AI 五題 + GSC／Bing／Vercel 指標）；勿捏造引用結果 |
 | [`scripts/generate-indexnow-key.ts`](../scripts/generate-indexnow-key.ts) | prebuild 依 `INDEXNOW_KEY` env 產生 `public/<key>.txt`（IndexNow key file）；未設定時安靜略過 |
-| [`scripts/submit-indexnow.ts`](../scripts/submit-indexnow.ts) + `npm run submit:indexnow` | sync 後 best-effort 通知 IndexNow（Bing 等），fail-soft（見 §4）；支援 `--dry-run` |
+| [`scripts/submit-indexnow.ts`](../scripts/submit-indexnow.ts) + `npm run submit:indexnow` | 只通知 `https://carcarplayground.com`。由 `indexnow-official.yml` 在官網 `release` 正式部署成功後提交；Apple sync 與實驗站不提交。非官網網址會略過。支援 `--dry-run` |
 
 ---
 
@@ -86,7 +86,7 @@
 
 1. **產生 key**：8–128 字元，僅 `a-zA-Z0-9-`（`scripts/generate-indexnow-key.ts` 的 `KEY_PATTERN`）。可用 `openssl rand -hex 16` 或任意符合格式的隨機字串。
 2. **設定 GitHub Secret**：repo → Settings → Secrets and variables → Actions → 新增 `INDEXNOW_KEY`（值＝步驟 1 產生的 key）。
-3. **設定 Vercel env**：專案 → Settings → Environment Variables → 新增 `INDEXNOW_KEY`（Production，值需與步驟 2 **完全相同**）。
+3. **設定官網 Vercel env**：官網專案 → Settings → Environment Variables → 新增 `INDEXNOW_KEY`（Production，值需與步驟 2 **完全相同**）。實驗站不要提交 IndexNow。
 
 > **漂移風險**：GitHub Secret 與 Vercel env 的 `INDEXNOW_KEY` 必須同值。若不一致，CI 提交時用的 key 與線上 `public/<key>.txt` 內容不符（`keyLocation` 指向的檔案內容與提交 payload 的 `key` 欄位對不上），IndexNow 端會判定驗證失敗，長期回 4xx，且不易察覺（fail-soft 設計下 CI 仍綠燈，只在 Job Summary 留警示）。**兩邊改動 key 時務必同步更新，並跑一次下方驗證**。
 
@@ -107,9 +107,9 @@ npm run submit:indexnow -- --dry-run
 
 - **不保證索引**：IndexNow 只是「通知引擎有新內容」，不保證被索引或被 AI 引用。
 - **Google 不支援 IndexNow**：Google 索引靠 `sitemap.xml` 新鮮度（`lastModified`）+ Google Search Console 手動 Request Indexing；`submit:indexnow` 對 Google 無效。
-- **提交時機是 best-effort**：`sync-apple-podcast.yml` 的 IndexNow 步驟在 push 後 `sleep 120` 才提交，**不保證** Vercel 部署已完成——引擎收到通知時，線上內容可能還沒更新完畢。
+- **提交時機**：`indexnow-official.yml` 只在官網網域上的 `release` 正式部署成功後提交。實驗站部署與每 15 分鐘的 Apple sync 都不提交。網域還沒指到該次產物時，不要手動對暫時網址提交。
 - **無可見 breadcrumb**：`breadcrumbListJsonLd` 只寫入 JSON-LD，頁面上無對應可見 UI 元件，因此**不承諾** breadcrumb rich result 一定顯示於搜尋結果（依各引擎樣式規則而定，本站只保證結構化資料本身合法可解析）。
-- **fail-soft 邊界**：`submit-indexnow.ts` 任何錯誤（無 key、API 失敗、逾時）一律 catch 並 exit 0，不擋 sync workflow；代表 CI 綠燈**不等於** IndexNow 真的提交成功，需另外看 Job Summary 或手動 `--dry-run` 排查。
+- **fail-soft 邊界**：`submit-indexnow.ts` 任何錯誤（無 key、API 失敗、逾時）一律 catch 並 exit 0。官網那支 workflow 變綠，不代表 IndexNow 真的提交成功，要看 Job Summary，或在本機用 `--dry-run` 排查。
 
 ---
 

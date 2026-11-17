@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "id": "2026-11-17-live-catalog",
+  "sourceCommit": "2b999bf161179245e6b993b5e878b0e9dc8a53de",
+  "humanApproved": true,
+  "approvedAt": "2026-11-17",
+  "qualityCheck": {
+    "status": "not-run",
+    "command": "npm run verify:release-content",
+    "note": "第一份清單是目前已公開的目錄，不是 verify:release-content 的結果。那個指令仍只做品質檢查，單圖 MVP 可以是 accepted warning。"
+  },
+  "previousId": null,
+  "stories": [
+    "ep-1",
+    "ep-2",
+    "ep-3",
+    "ep-4",
+    "ep-5",
+    "ep-6",
+    "ep-7",
+    "ep-8",
+    "ep-9",
+    "ep-10",
+    "ep-11",
+    "ep-12",
+    "ep-13",
+    "ep-14",
+    "ep-15",
+    "ep-16",
+    "ep-17",
+    "ep-18",
+    "ep-19",
+    "ep-20",
+    "ep-21",
+    "ep-22",
+    "ep-23",
+    "ep-24",
+    "ep-25",
+    "ep-26",
+    "ep-27",
+    "ep-28",
+    "ep-29",
+    "ep-30",
+    "ep-31",
+    "ep-32",
+    "ep-33",
+    "ep-34",
+    "ep-35",
+    "ep-36",
+    "ep-37"
+  ],
+  "parentArticles": [
+    "vision-care-1",
+    "vision-care-2",
+    "vision-care-3",
+    "vocus-6ad06360fd89780001c70f77"
+  ],
+  "newsletters": [
+    "2026-10-09",
+    "2026-10-13",
+    "2026-10-16",
+    "2026-10-20",
+    "2026-10-23",
+    "2026-10-28",
+    "2026-10-30",
+    "2026-11-03",
+    "2026-11-06"
+  ],
+  "travelAbroad": [
+    "vocus-6ae34027fd897800012f3e51"
+  ],
+  "revokedStorySlugs": []
+}

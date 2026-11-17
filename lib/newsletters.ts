@@ -1,4 +1,5 @@
 import { NEWSLETTERS, type Newsletter } from "@/data/newsletters";
+import { filterReleased } from "@/lib/official-release";
 import { newsletterVisibleText } from "@/lib/newsletter-markdown";
 
 const INDEX_HREF = "/newsletter";
@@ -10,13 +11,17 @@ function visibleCharCount(text: string): number {
   return [...text.replace(/\s/g, "")].length;
 }
 
-/** 閱讀順序與 `NEWSLETTERS` 陣列相同。 */
+function releasedNewsletters(): readonly Newsletter[] {
+  return filterReleased(NEWSLETTERS, "newsletters");
+}
+
+/** 閱讀順序與 `NEWSLETTERS` 陣列相同。官網再依發行清單篩。 */
 export function listNewsletters(): readonly Newsletter[] {
-  return NEWSLETTERS;
+  return releasedNewsletters();
 }
 
 export function getNewsletter(slug: string): Newsletter | undefined {
-  return NEWSLETTERS.find((issue) => issue.slug === slug);
+  return releasedNewsletters().find((issue) => issue.slug === slug);
 }
 
 export function newsletterPath(slug: string): string {
@@ -31,11 +36,12 @@ export function newsletterNeighbors(slug: string): {
   previous: Newsletter | null;
   next: Newsletter | null;
 } {
-  const index = NEWSLETTERS.findIndex((issue) => issue.slug === slug);
+  const issues = releasedNewsletters();
+  const index = issues.findIndex((issue) => issue.slug === slug);
   if (index < 0) return { previous: null, next: null };
   return {
-    previous: NEWSLETTERS[index - 1] ?? null,
-    next: NEWSLETTERS[index + 1] ?? null,
+    previous: issues[index - 1] ?? null,
+    next: issues[index + 1] ?? null,
   };
 }
 
@@ -68,7 +74,7 @@ function toCard(issue: Newsletter): NewsletterCard {
  * 電子報目前沒有系列，系列區留空。
  */
 export function newslettersLayout(
-  issues: readonly Newsletter[] = NEWSLETTERS,
+  issues: readonly Newsletter[] = releasedNewsletters(),
 ): {
   readonly latest: NewsletterCard | null;
   readonly series: readonly [];

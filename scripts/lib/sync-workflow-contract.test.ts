@@ -3,7 +3,6 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { load as parseYaml } from "js-yaml";
 import { describe, expect, it } from "vitest";
-import { CANONICAL_SITE_URL } from "../../lib/site-url";
 import { isSyncOutputPath } from "./sync-outputs";
 
 const ROOT = process.cwd();
@@ -420,16 +419,13 @@ describe("sync workflow contract", () => {
     expect(dates).toContain("storyModifiedDates");
   });
 
-  it("sync workflow 不跑 Production build，因此不會在驗證前寫出 IndexNow key file", () => {
+  it("sync workflow 不跑 Production build，也不再提交 IndexNow", () => {
     const yaml = readWorkflow("sync-apple-podcast.yml");
     expect(yaml).not.toContain("npm run build");
     expect(yaml).not.toMatch(/generate:indexnow-key/);
-    const indexNowBlock = yaml.match(
-      /- name: Submit IndexNow[\s\S]*?(?=\n      - name:)/,
-    )?.[0];
-    expect(indexNowBlock, "找不到 Submit IndexNow step").toBeDefined();
-    expect(indexNowBlock).toContain("INDEXNOW_KEY:");
-    expect(indexNowBlock).toContain(CANONICAL_SITE_URL);
+    expect(yaml).not.toContain("Submit IndexNow");
+    expect(yaml).not.toContain("submit-indexnow.sh");
+    expect(yaml).not.toContain("podcast-website-mu.vercel.app");
   });
 
   it("sync workflow 失敗必須即時開去重告警，且告警步驟不得掩蓋原始失敗", () => {
@@ -449,26 +445,20 @@ describe("sync workflow contract", () => {
     expect(alert).toContain("ALERT_AFTER_CONSECUTIVE");
   });
 
-  it("IndexNow 提交必須在 push 之後、main-only、注入 env，且 fail-soft 由 script 保證", () => {
-    const yaml = readWorkflow("sync-apple-podcast.yml");
+  it("IndexNow 只跟官網 release 部署，fail-soft 仍由 script 保證", () => {
+    const yaml = readWorkflow("indexnow-official.yml");
+    const sync = readWorkflow("sync-apple-podcast.yml");
     const script = readFileSync(join(ROOT, "scripts/ci/submit-indexnow.sh"), "utf8");
+    const submit = readFileSync(join(ROOT, "scripts/submit-indexnow.ts"), "utf8");
 
-    const pushIndex = yaml.indexOf("- name: Commit and push");
-    const indexNowIndex = yaml.indexOf("- name: Submit IndexNow");
-    expect(pushIndex, "找不到 Commit and push 步驟").toBeGreaterThan(-1);
-    expect(indexNowIndex, "找不到 Submit IndexNow 步驟").toBeGreaterThan(
-      pushIndex,
-    );
-
-    const indexNowBlock = yaml.match(
-      /- name: Submit IndexNow[\s\S]*?(?=\n      - name:)/,
-    )?.[0];
-    expect(indexNowBlock, "找不到 Submit IndexNow step").toBeDefined();
+    expect(sync).not.toContain("indexnow-official.yml");
+    expect(yaml).toContain("deployment_status:");
+    expect(yaml).toContain("refs/heads/release");
+    expect(yaml).toContain("https://carcarplayground.com");
+    expect(yaml).not.toContain("continue-on-error");
+    expect(yaml).not.toContain("schedule:");
     expect(script).toContain("scripts/submit-indexnow.ts");
-    expect(indexNowBlock).toContain("github.ref == 'refs/heads/main'");
-    expect(indexNowBlock).toContain("INDEXNOW_KEY:");
-    expect(indexNowBlock).toContain("NEXT_PUBLIC_SITE_URL:");
-    expect(indexNowBlock).not.toContain("continue-on-error");
+    expect(submit).toContain("OFFICIAL_SITE_ORIGIN");
   });
 
   it("sync-watchdog.yml 必須保留 RSS 新鮮度檢查", () => {

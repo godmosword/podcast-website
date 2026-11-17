@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import FeedbackModerationPanel from "@/components/studio/FeedbackModerationPanel";
 import { isFeedbackModerationConfigured } from "@/lib/studio-feedback-auth";
+import { isOfficialEdition } from "@/lib/site-edition";
 import Icon from "@/components/ui/Icon";
 import styles from "./page.module.css";
 
@@ -19,11 +20,13 @@ export const dynamic = "force-dynamic";
 
 export default function StudioFeedbackPage() {
   const configured = isFeedbackModerationConfigured();
+  const official = isOfficialEdition();
 
   return (
     <main className={styles.main}>
-      <Link href="/studio" className={styles.back}>
-        <Icon name="arrow-left" size={16} className="icon-lead" />回節目數據中心
+      <Link href={official ? "/feedback" : "/studio"} className={styles.back}>
+        <Icon name="arrow-left" size={16} className="icon-lead" />
+        {official ? "回留言牆" : "回節目數據中心"}
       </Link>
 
       <h1 className={styles.title}>留言審核</h1>

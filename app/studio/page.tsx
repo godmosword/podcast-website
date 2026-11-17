@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
+import { getSiteEdition } from "@/lib/site-edition";
 import EngagementMetricsPanel from "@/components/studio/EngagementMetricsPanel";
 import IllustrationQueuePanel from "@/components/studio/IllustrationQueuePanel";
 import PlatformStudioCard from "@/components/studio/PlatformStudioCard";
@@ -17,6 +19,7 @@ export const metadata: Metadata = {
 };
 
 export default function StudioPage() {
+  if (getSiteEdition() === "official") notFound();
   const platforms = studioPlatforms();
 
   return (

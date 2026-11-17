@@ -1,12 +1,13 @@
 /**
- * IndexNow 提交（best-effort）：sync 上站後通知 Bing 等支援 IndexNow 的引擎。
+ * IndexNow 提交（best-effort）：只通知官網網域。
+ * Apple sync 不再呼叫這支，避免把實驗站網址送去收錄。
  *
  * 設計契約（勿破壞）：
  * - fail-soft **唯一**由本 script 保證：任何錯誤（無 key、API 失敗、逾時）
  *   一律 catch、寫 Job Summary 警示後 exit 0——workflow 端**不得**用
  *   continue-on-error 頂替（見 scripts/lib/sync-workflow-contract.test.ts）。
- * - 提交為 best-effort：push 後 Vercel 部署未必完成，不保證引擎已可抓到
- *   新內容，也不保證索引（Google 不支援 IndexNow）；限制詳見 docs/GEO.md。
+ * - 官網 workflow 在 deployment 成功後才跑，所以不再為了等部署而 sleep。
+ *   不保證索引（Google 不支援 IndexNow）；限制詳見 docs/GEO.md。
  * - URL 變更集來源：$SYNC_REPORT_PATH（sync-run-report.json）；缺檔時仍提交
  *   基本集（首頁、/stories、sitemap.xml）。
  *
@@ -16,6 +17,7 @@
  */
 import { appendFileSync, existsSync, readFileSync } from "node:fs";
 import { getStories, isRetiredTopicTag } from "../data/content";
+import { OFFICIAL_SITE_ORIGIN } from "../lib/site-edition";
 import { getSiteUrl } from "../lib/site-url";
 import type { SyncRunReport } from "./lib/sync-report";
 
@@ -131,6 +133,10 @@ async function main(): Promise<void> {
   const siteUrl = getSiteUrl();
   if (siteUrl.includes("localhost") && !dryRun) {
     report("IndexNow: skipped（site URL 為 localhost，非正式環境）");
+    return;
+  }
+  if (!dryRun && new URL(siteUrl).origin !== OFFICIAL_SITE_ORIGIN) {
+    report(`IndexNow: skipped（只提交 ${OFFICIAL_SITE_ORIGIN}，實際為 ${siteUrl}）`);
     return;
   }
 

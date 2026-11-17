@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 import { adventuresZoneQueryRedirects } from "./lib/adventures-redirects";
+import { assertOfficialReleaseReady } from "./lib/official-release";
+import { assertOfficialEditionConfigured } from "./lib/site-edition";
 import { retiredGameRedirects } from "./lib/retired-game-redirects";
 import { retiredPageRedirects } from "./lib/retired-page-redirects";
 import { legacyStoryRedirects } from "./lib/story-slug-aliases";
@@ -19,13 +21,22 @@ if (process.env.VISUAL_FIXTURE_BUILD !== undefined) {
   throw new Error("不要直接設 VISUAL_FIXTURE_BUILD；視覺回歸請用 VISUAL_FIXTURE=1（npm run test:visual:trusted）。");
 }
 
+assertOfficialEditionConfigured();
+assertOfficialReleaseReady();
+
+const siteEdition = process.env.SITE_EDITION?.trim();
+const publicSiteEdition = siteEdition === "official" || siteEdition === "lab" ? siteEdition : "current";
+
 const nextConfig: NextConfig = {
   // 全站靜態預渲染 (SSG)，零後端、零外部依賴。
   // Vercel 會自動辨識 Next.js，無需額外設定。
   reactStrictMode: true,
   ...(visualFixture ? { distDir: ".next-visual" } : {}),
   // build 時寫死進 server 與 client 兩邊；用另一個名字，prebuild 的 tsx 腳本讀不到，照樣產全集。
-  env: { VISUAL_FIXTURE_BUILD: visualFixture ? "1" : "0" },
+  env: {
+    VISUAL_FIXTURE_BUILD: visualFixture ? "1" : "0",
+    NEXT_PUBLIC_SITE_EDITION: publicSiteEdition,
+  },
   turbopack: {
     resolveAlias: {
       // 官方套件含動態 worker URL，Turbopack 無法打包。執行期改載 public/vendor。

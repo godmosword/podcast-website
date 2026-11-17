@@ -1,0 +1,35 @@
+# 只在官網網域的正式部署成功時通知 IndexNow。
+# Apple sync 不再提交，實驗站網址也不提交。
+name: IndexNow official
+
+on:
+  deployment_status:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  submit:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.deployment_status.state == 'success' &&
+      github.event.deployment_status.environment == 'production' &&
+      (github.event.deployment.ref == 'release' || github.event.deployment.ref == 'refs/heads/release') &&
+      startsWith(github.event.deployment_status.environment_url, 'https://carcarplayground.com'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version-file: .nvmrc
+          check-latest: true
+          cache: npm
+      - run: npm ci
+      - name: Submit IndexNow
+        env:
+          INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
+          INDEXNOW_WAIT_SECONDS: "0"
+          NEXT_PUBLIC_SITE_URL: https://carcarplayground.com
+        run: bash scripts/ci/submit-indexnow.sh

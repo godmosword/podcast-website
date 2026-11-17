@@ -53,6 +53,29 @@ describe("VISUAL_FIXTURE build（視覺回歸用的凍結資料）", () => {
     await expect(loadConfig({ VISUAL_FIXTURE: "1", ...env })).rejects.toThrow(/VISUAL_FIXTURE/);
   });
 
+  it("官網缺 NEXT_PUBLIC_SITE_URL 時拒絕建置", async () => {
+    await expect(
+      loadConfig({
+        VISUAL_FIXTURE: "",
+        CI: "",
+        VERCEL: "",
+        SITE_EDITION: "official",
+        NEXT_PUBLIC_SITE_URL: "",
+      }),
+    ).rejects.toThrow(/NEXT_PUBLIC_SITE_URL/);
+  });
+
+  it("官網有網址時把 edition 寫進 bundle", async () => {
+    const config = await loadConfig({
+      VISUAL_FIXTURE: "",
+      CI: "",
+      VERCEL: "",
+      SITE_EDITION: "official",
+      NEXT_PUBLIC_SITE_URL: "https://carcarplayground.com",
+    });
+    expect(config.env?.NEXT_PUBLIC_SITE_EDITION).toBe("official");
+  });
+
   it("環境裡直接設 VISUAL_FIXTURE_BUILD（繞過 VISUAL_FIXTURE）也拒絕", async () => {
     await expect(loadConfig({ VISUAL_FIXTURE: "", CI: "", VERCEL: "", VISUAL_FIXTURE_BUILD: "1" })).rejects.toThrow(
       /VISUAL_FIXTURE_BUILD/,
