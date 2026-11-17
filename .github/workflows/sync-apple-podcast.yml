@@ -23,7 +23,7 @@ env:
 
 jobs:
   fetch-and-generate:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     outputs:
       changed: ${{ steps.changes.outputs.changed }}
@@ -81,7 +81,7 @@ jobs:
   validate:
     needs: fetch-and-generate
     if: needs.fetch-and-generate.result == 'success'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     outputs:
       failure_excerpt: ${{ steps.capture.outputs.excerpt }}
@@ -122,7 +122,7 @@ jobs:
   commit:
     needs: [fetch-and-generate, validate]
     if: needs.fetch-and-generate.outputs.changed == 'true' && needs.validate.result == 'success'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     # push sync/apple、開 PR 設 auto-merge、補跑 CI（workflow_dispatch）、開待生圖 issue。
     permissions:
@@ -193,7 +193,7 @@ jobs:
   alert:
     needs: [fetch-and-generate, validate, commit]
     if: always() && needs.fetch-and-generate.result != 'cancelled'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     # 開／關 sync-failure issue；讀這次 run 的失敗 step。
     permissions:
