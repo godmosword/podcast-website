@@ -73,14 +73,13 @@ describe("landing-segments", () => {
     }
   });
 
-  it("繪本電腦版是約 21:9、至少 2560 寬，WebP／AVIF 同尺寸", async () => {
+  it("繪本電腦版沿用補畫原檔 2560×1440，WebP／AVIF 同尺寸", async () => {
     const base = join(process.cwd(), "public/landing/segment-picture-books");
     const jpg = await sharp(`${base}.jpg`).metadata();
     const webp = await sharp(`${base}.webp`).metadata();
     const avif = await sharp(`${base}.avif`).metadata();
-    expect(jpg.width).toBeGreaterThanOrEqual(2560);
-    expect(jpg.width! / jpg.height!).toBeGreaterThan(2.2);
-    expect(jpg.width! / jpg.height!).toBeLessThan(2.45);
+    expect(jpg.width).toBe(2560);
+    expect(jpg.height).toBe(1440);
     expect(webp.width).toBe(jpg.width);
     expect(webp.height).toBe(jpg.height);
     expect(avif.width).toBe(jpg.width);
