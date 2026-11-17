@@ -6,7 +6,7 @@
  *
  * 不在 npm run check 內；需網路。
  *
- *   npm run verify:geo-live -- --base-url=https://podcast-website-mu.vercel.app
+ *   npm run verify:geo-live -- --base-url=https://carcarplayground.com
  *   npm run verify:geo-live -- --help
  */
 

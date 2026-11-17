@@ -178,7 +178,7 @@ async function startProductionServer() {
   const child = spawn("npm", ["run", "start", "--", "-p", String(port)], {
     env: {
       ...process.env,
-      NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL ?? "https://podcast-website-mu.vercel.app",
+      NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL ?? "https://carcarplayground.com",
     },
     stdio: ["ignore", "pipe", "pipe"],
   });

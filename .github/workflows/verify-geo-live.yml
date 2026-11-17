@@ -8,7 +8,7 @@ on:
       base_url:
         description: "部署站點根 URL（含 https://，不含尾斜線）"
         required: true
-        default: "https://podcast-website-mu.vercel.app"
+        default: "https://carcarplayground.com"
 
 permissions:
   contents: read
@@ -31,6 +31,6 @@ jobs:
       - run: npm ci
       - name: verify:geo-live
         env:
-          BASE_URL: ${{ inputs.base_url || vars.PRODUCTION_URL || 'https://podcast-website-mu.vercel.app' }}
-          NEXT_PUBLIC_SITE_URL: ${{ vars.PRODUCTION_URL || 'https://podcast-website-mu.vercel.app' }}
+          BASE_URL: ${{ inputs.base_url || vars.PRODUCTION_URL || 'https://carcarplayground.com' }}
+          NEXT_PUBLIC_SITE_URL: ${{ vars.PRODUCTION_URL || 'https://carcarplayground.com' }}
         run: npm run verify:geo-live -- --base-url="$BASE_URL" --production

@@ -20,7 +20,7 @@ permissions:
   contents: read
 
 env:
-  NEXT_PUBLIC_SITE_URL: https://podcast-website-mu.vercel.app
+  NEXT_PUBLIC_SITE_URL: https://carcarplayground.com
   HUSKY: "0"
 
 jobs:

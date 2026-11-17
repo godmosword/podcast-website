@@ -8,7 +8,7 @@ export const DEFAULT_OG_IMAGE = "/mascot.png";
  * 正式站網域。Production 未設 NEXT_PUBLIC_SITE_URL 時用此值，
  * 確保 OG／分享連結永不指向每次部署的臨時 Vercel 網域。
  */
-export const CANONICAL_SITE_URL = "https://podcast-website-mu.vercel.app";
+export const CANONICAL_SITE_URL = "https://carcarplayground.com";
 
 function stripTrailingSlash(url: string): string {
   return url.replace(/\/+$/, "");
