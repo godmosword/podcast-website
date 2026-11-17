@@ -60,10 +60,12 @@
 ### SEO／GEO：程式項目完成，正式網域與營運檢查待辦保留（2026-11-07）
 
 > 2026-11-06 曾以 https://podcast-website-mu.vercel.app 和 main 原始碼覆核。網域仍未決，因此本次只完成不依賴網域選擇的程式項目；正式網域上線後仍須用新網址重查 canonical、sitemap、OG、robots、`llms.txt`、Search Console，以及各平台與 Linktree 的外連。
+>
+> 2026-11-17：自訂網域已上線為 https://carcarplayground.com（www 會 308 轉到主網域）。下面 Search Console、平台與 Linktree 等人工作業仍未做，維持未勾。
 
 **必做**
 
-- **平台與 Linktree 補上本站：** 2026-11-06 覆核，Apple、Spotify 的單集文案與 https://linktr.ee/bonboncarstory 都還沒連到這個網站。正式網址上線後再補。屬營運。`ops · S · 依賴正式網址`
+- **平台與 Linktree 補上本站：** 2026-11-06 覆核，Apple、Spotify 的單集文案與 https://linktr.ee/bonboncarstory 都還沒連到這個網站。正式網址已定為 https://carcarplayground.com（2026-11-17 上線），這項仍待補。屬營運。`ops · S · 依賴正式網址`
 - ✅ **PodcastSeries 的 YouTube sameAs 修正：** `platformShowUrls()` 保留 YouTube 播放清單的 `list`，只剔除追蹤參數；`verify:geo` 允許並驗證 YouTube playlist ID 與 Facebook profile ID 這兩種必要參數。播放清單要不要改連頻道仍見 [品牌標誌合規後續](#品牌標誌合規後續2026-10-12) 的「YouTube 連結」；目前保留原播放清單連結。
 - ✅ **子頁 OG 與 Twitter metadata：** `/stories`、育兒文章、國外旅遊、電子報、關於與主題都明確輸出 og:image 和各頁標題、說明、分享圖；國外旅遊列表與有封面的文章使用封面，其他頁使用預設吉祥物圖。
 - ✅ **家長文、旅遊文、電子報的 BlogPosting：** 三類文章頁輸出 BlogPosting JSON-LD，並在內文標出作者馬米；作者名稱與個人頁連結來自共用作者資料。
@@ -74,18 +76,18 @@
 - ✅ **國外旅遊列表說明：** 導言改為目前實際收錄的名古屋、北陸與小松之杜親子旅遊內容。
 - ✅ **主題數口徑：** `/stories` 明確稱 7 個「精選成長主題」；`/topic` 稱 16 個「主題標籤」，不再把兩種篩選分類說成同一組成長主題。
 - **部分文章 slug 仍是 `vocus-<id>`：** 手寫篇用英文短名，同步篇是 `vocus-<方格子 contentId>`（`data/parent-articles.ts` 註解，`scripts/lib/vocus-articles.ts`）。可以之後再改；改的話保留舊網址轉址。`content · S · 可後做`
-- **自訂網域上線後重跑搜尋設定：** 網域選哪個見 [路線圖待決策 ①](#路線圖單一優先序總表)（`chechepark.tw`／`checheland.tw`／其他；`NEXT_PUBLIC_SITE_URL` 與 `CANONICAL_SITE_URL` 已就緒）與 [M0a](#修正版執行順序)。部署後用新網址重查 canonical、sitemap、OG、Search Console。`ops · S · 依賴正式網址`
+- **自訂網域上線後重跑搜尋設定：** 網域已定為 https://carcarplayground.com（2026-11-17 上線；`NEXT_PUBLIC_SITE_URL` 與 `CANONICAL_SITE_URL` 已就緒）。部署後仍須用這個網址重查 canonical、sitemap、OG、Search Console。見 [M0a](#修正版執行順序)。`ops · S · 依賴正式網址`
 
 **應該做 · GEO**
 
 - ✅ **`public/llms.txt` 路由地圖：** 移除不存在的 dashboard，加入育兒文章、國外旅遊與電子報索引及單篇路由。
 - ✅ **Organization sameAs：** 加入 Instagram、Threads、Facebook、Linktree 與各收聽平台；Facebook 的 profile ID 和 YouTube playlist ID 均保留。創作者個人實體的 sameAs 仍依 [待議：主持人／創作者實體強化](#待議主持人創作者實體強化) 決策。
-- **正式網址上線後的 GEO 營運沿用原條：** `INDEXNOW_KEY`、Google Search Console／Bing Webmaster、每週量測已寫在 [GEO 營運基礎](#geo-營運基礎crawler-政策indexnow逐字稿verifygeo) 的「剩餘（使用者手動）」，手冊是 `docs/GEO.md` 與 `docs/GEO-BASELINE.md`。網域換了之後照那一段做。`ops · S · 依賴正式網址`
+- **正式網址上線後的 GEO 營運沿用原條：** `INDEXNOW_KEY`、Google Search Console／Bing Webmaster、每週量測已寫在 [GEO 營運基礎](#geo-營運基礎crawler-政策indexnow逐字稿verifygeo) 的「剩餘（使用者手動）」，手冊是 `docs/GEO.md` 與 `docs/GEO-BASELINE.md`。網域已定為 https://carcarplayground.com（2026-11-17 上線），Search Console 等仍照那一段手動做。`ops · S · 依賴正式網址`
 
 **以後再確認**
 
-- **索引涵蓋還沒核實：** 2026-11-06 覆核時 `site:` 搜尋看不出收錄範圍。正式網址上線後用 Search Console 再查。`ops · S · 依賴正式網址`
-- **http 轉 https 在一個環境不確定：** 2026-11-06 覆核時，有一個環境得到 Pingora 500。正式網址上線後再測。`ops · S · 依賴正式網址`
+- **索引涵蓋還沒核實：** 2026-11-06 覆核時 `site:` 搜尋看不出收錄範圍。正式網址已定為 https://carcarplayground.com（2026-11-17 上線），仍須用 Search Console 再查。`ops · S · 依賴正式網址`
+- **http 轉 https 在一個環境不確定：** 2026-11-06 覆核時，有一個環境得到 Pingora 500。正式網址已定為 https://carcarplayground.com（2026-11-17 上線），仍須再測。`ops · S · 依賴正式網址`
 
 ### pending
 
@@ -1797,7 +1799,7 @@ PDF printables 作加值；低成本高感知。會員可全解鎖（P4）。
 
 #### 修正版執行順序
 
-1. **M0a（1 週）：** 自訂網域、Resend、公開 R2、R2 manifest、build／RSS／sync CI 改造與 smoke test。
+1. **M0a（1 週）：** 自訂網域（已定 https://carcarplayground.com，2026-11-17 上線）、Resend、公開 R2、R2 manifest、build／RSS／sync CI 改造與 smoke test。
 2. **M0b（並行 14 天）：** 收集 `story_play_start → story_completed → return_visit → subscribe_submit` 基線；先定事件資料匯出方式與最小樣本／決策門檻。
 3. **M1：** parent session、server-side gate、guest localStorage 保留、進度同步與隱私／條款更新；不把付款混入身份層。
 4. **M2：** 單一 provider 的 hosted checkout、簽章 webhook、會員狀態／對帳、取消／退款與一種私有內容；完成一筆測試付款到失效的完整循環後才開放真實收款。
@@ -1860,7 +1862,7 @@ PDF printables 作加值；低成本高感知。會員可全解鎖（P4）。
 
 **已備齊（勿重做）：** 全部故事頁、全螢幕播放器、每集落地頁 + **每集 OG 圖**（`lib/story-metadata.ts`）、**每集分享鈕**（`ShareButton`）、`/topic` 與車種 SEO 頁、RSS `/feed.xml`、`ageRange`、PWA／收藏／繼續收聽、ConnectHub（Spotify／Apple 優先 + 訂閱文案）、相關推薦、**`/games` 遊樂園**（繽紛消消樂／車車大冒險／繽紛樂園／繽紛卡丁車）、`/legal#privacy` 與版權合規、Vercel Analytics + 平台點擊事件、逐字字幕管線、角色定裝照名冊、`/characters` 公開角色頁、Apple 15 分鐘同步 + GitHub Issue 通知、**viewport 開放縮放**。
 
-**待決策（實作前定）：** ① 自訂網域最終選擇（`chechepark.tw` / `checheland.tw` / 其他）— **基建已就緒**（`NEXT_PUBLIC_SITE_URL` + `CANONICAL_SITE_URL` fallback，P0 ✅）；② ~~`parentGuide` 與 `familyActivity` 邊界~~ → 已決（[GEO-CONTENT-CONTRACT](./docs/GEO-CONTENT-CONTRACT.md)）；擴充見 UX-P1-3；③ ~~縮放（鎖 vs 家長大字模式）~~ → **已決：開放縮放**（`app/layout.tsx`，P2 ✅）；④ **現有 4 款遊樂園遊戲與 STEM 原則** — 見下方「產品決策」；⑤ **兒童拍照分享** — 是否做、如何去識別化；跨裝置圖鑑是否需帳號與家長同意（見 [RESEARCH.md](./RESEARCH.md) 風險段）。
+**待決策（實作前定）：** ① ~~自訂網域最終選擇（`chechepark.tw` / `checheland.tw` / 其他）~~ → **已決：https://carcarplayground.com（2026-11-17 上線）**（`NEXT_PUBLIC_SITE_URL` + `CANONICAL_SITE_URL` fallback，P0 ✅）；② ~~`parentGuide` 與 `familyActivity` 邊界~~ → 已決（[GEO-CONTENT-CONTRACT](./docs/GEO-CONTENT-CONTRACT.md)）；擴充見 UX-P1-3；③ ~~縮放（鎖 vs 家長大字模式）~~ → **已決：開放縮放**（`app/layout.tsx`，P2 ✅）；④ **現有 4 款遊樂園遊戲與 STEM 原則** — 見下方「產品決策」；⑤ **兒童拍照分享** — 是否做、如何去識別化；跨裝置圖鑑是否需帳號與家長同意（見 [RESEARCH.md](./RESEARCH.md) 風險段）。
 
 ### 產品決策：現有遊樂園 vs STEM「不計時、不競爭」
 

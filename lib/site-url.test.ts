@@ -6,6 +6,10 @@ describe("getSiteUrl", () => {
     vi.unstubAllEnvs();
   });
 
+  it("正式站網域是 carcarplayground.com", () => {
+    expect(CANONICAL_SITE_URL).toBe("https://carcarplayground.com");
+  });
+
   it("優先使用 NEXT_PUBLIC_SITE_URL，並去掉尾斜線", () => {
     vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://chechepark.tw/");
     vi.stubEnv("VERCEL_ENV", "production");

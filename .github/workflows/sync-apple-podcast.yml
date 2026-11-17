@@ -182,7 +182,7 @@ jobs:
         if: success() && steps.push.outputs.landed_on_main == 'true' && github.ref == 'refs/heads/main'
         env:
           INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
-          NEXT_PUBLIC_SITE_URL: https://podcast-website-mu.vercel.app
+          NEXT_PUBLIC_SITE_URL: https://carcarplayground.com
         run: bash scripts/ci/submit-indexnow.sh
 
       - name: Capture failure excerpt
