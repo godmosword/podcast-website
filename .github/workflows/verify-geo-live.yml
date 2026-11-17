@@ -20,7 +20,7 @@ jobs:
       (github.event.deployment_status.state == 'success' &&
       github.event.deployment_status.environment == 'production' &&
       startsWith(github.event.deployment_status.environment_url, 'https://carcarplayground.com'))
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
@@ -36,7 +36,7 @@ jobs:
           NEXT_PUBLIC_SITE_URL: ${{ inputs.base_url || 'https://carcarplayground.com' }}
         run: |
           case "$BASE_URL" in
-            https://carcarplayground.com|https://podcast-website-mu.vercel.app)
+            https://carcarplayground.com)
               npm run verify:geo-live -- --base-url="$BASE_URL" --production
               ;;
             *)

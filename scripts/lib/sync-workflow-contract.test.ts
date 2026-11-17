@@ -230,16 +230,21 @@ describe("sync workflow contract", () => {
     expect(pkg.overrides?.browserslist).toBe("^4.28.7");
   });
 
-  it("next 與 eslint-config-next 必須釘 16.4.3（修補 GHSA-2464-fhr4-w9xw、GHSA-673q-mjm6-r5xr、GHSA-p3m5-59mp-jv5r）", () => {
+  it("next 與 eslint-config-next 必須釘 16.4.6（含 16.4.5 修補的 GHSA-mfr8-8qww-v76h、GHSA-vc7v-qv4w-wrv8、GHSA-rhh4-g77r-r9qj、GHSA-vvgp-ww4w-46vf、GHSA-pc58-hwjq-p385、GHSA-f3mh-rxg3-f5g2、GHSA-7qx7-33qx-rqx2，以及 16.4.1 的 GHSA-2464-fhr4-w9xw、GHSA-673q-mjm6-r5xr、GHSA-p3m5-59mp-jv5r）", () => {
     const pkg = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")) as {
       dependencies?: Record<string, string>;
       devDependencies?: Record<string, string>;
     };
     const lock = readFileSync(join(ROOT, "package-lock.json"), "utf8");
 
-    expect(pkg.dependencies?.next).toBe("16.4.3");
-    expect(pkg.devDependencies?.["eslint-config-next"]).toBe("16.4.3");
-    expect(lock).toContain("next-16.4.3.tgz");
+    expect(pkg.dependencies?.next).toBe("16.4.6");
+    expect(pkg.devDependencies?.["eslint-config-next"]).toBe("16.4.6");
+    expect(lock).toContain("next-16.4.6.tgz");
+    expect(lock).toContain("eslint-config-next-16.4.6.tgz");
+    expect(lock).toContain("@next/env/-/env-16.4.6.tgz");
+    expect(lock).toContain("@next/eslint-plugin-next/-/eslint-plugin-next-16.4.6.tgz");
+    expect(lock).not.toContain("next-16.4.4.tgz");
+    expect(lock).not.toContain("next-16.4.3.tgz");
     expect(lock).not.toContain("next-16.3.8.tgz");
   });
 

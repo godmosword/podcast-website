@@ -20,12 +20,12 @@ permissions:
   contents: read
 
 env:
-  NEXT_PUBLIC_SITE_URL: https://podcast-website-mu.vercel.app
+  NEXT_PUBLIC_SITE_URL: https://carcarplayground.com
   HUSKY: "0"
 
 jobs:
   quality:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
@@ -124,7 +124,7 @@ jobs:
   # ruleset 候選 required check。名字必須是 sync-validate。
   # required_only 也要跑，不能套 e2e-child-path 那個 if。
   sync-validate:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
@@ -146,7 +146,7 @@ jobs:
   mirror-sync-status:
     needs: [quality, build-and-public-e2e, sync-validate]
     if: ${{ always() && github.event_name == 'workflow_dispatch' && (github.ref_name == 'sync/apple' || startsWith(github.ref_name, 'sync/apple-')) }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:
       contents: read

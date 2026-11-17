@@ -12,11 +12,15 @@ describe("official release manifest", () => {
     vi.unstubAllEnvs();
   });
 
-  it("第一份清單核准目前目錄，而且不是品質檢查的代替品", () => {
+  it("清單是已核准的子集，同步進來的新集要另外核准才上官網", () => {
     const manifest = officialReleaseManifest();
+    const catalog = getCatalogStories().map((story) => story.slug);
     expect(manifest.humanApproved).toBe(true);
     expect(manifest.qualityCheck.status).toBe("not-run");
-    expect(manifest.stories).toHaveLength(getCatalogStories().length);
+    expect(manifest.stories.every((slug) => catalog.includes(slug))).toBe(true);
+    expect(getStories().map((story) => story.slug).sort()).toEqual([...catalog].sort());
+
+    vi.stubEnv("NEXT_PUBLIC_SITE_EDITION", "official");
     expect(getStories().map((story) => story.slug).sort()).toEqual(
       [...manifest.stories].sort(),
     );

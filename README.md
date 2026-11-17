@@ -6,7 +6,7 @@ Bonbon & 馬米親子 Podcast《車車遊樂園》的官方 **看圖聽故事** 
 
 | | |
 |---|---|
-| **正式站** | [carcarplayground.com](https://carcarplayground.com/) |
+| **正式站** | [carcarplayground.com](https://carcarplayground.com) |
 | **實驗站** | [podcast-website-mu.vercel.app](https://podcast-website-mu.vercel.app) |
 | **版本** | [1.3.0](./CHANGELOG.md) |
 | **待辦** | [TODOS.md](./TODOS.md) |

@@ -1,9 +1,26 @@
+import { statSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import sharp from "sharp";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { CANONICAL_SITE_URL, getSiteUrl, isTrackedProductionOrigin } from "./site-url";
+import {
+  CANONICAL_SITE_URL,
+  DEFAULT_OG_IMAGE,
+  DEFAULT_OG_IMAGE_HEIGHT,
+  DEFAULT_OG_IMAGE_WIDTH,
+  getSiteUrl,
+  isTrackedProductionOrigin,
+} from "./site-url";
+
+const PUBLIC_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "public");
 
 describe("getSiteUrl", () => {
   afterEach(() => {
     vi.unstubAllEnvs();
+  });
+
+  it("正式站網域是 carcarplayground.com", () => {
+    expect(CANONICAL_SITE_URL).toBe("https://carcarplayground.com");
   });
 
   it("優先使用 NEXT_PUBLIC_SITE_URL，並去掉尾斜線", () => {
@@ -55,5 +72,16 @@ describe("getSiteUrl", () => {
   it("回傳值一律不含尾斜線", () => {
     vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com///");
     expect(getSiteUrl()).toBe("https://example.com");
+  });
+});
+
+describe("default OG image", () => {
+  it("檔案是 1200×630，而且小於 300KB", async () => {
+    const file = join(PUBLIC_DIR, DEFAULT_OG_IMAGE.slice(1));
+    expect(statSync(file).size).toBeLessThan(300 * 1024);
+    const meta = await sharp(file).metadata();
+    expect(meta.format).toBe("jpeg");
+    expect(meta.width).toBe(DEFAULT_OG_IMAGE_WIDTH);
+    expect(meta.height).toBe(DEFAULT_OG_IMAGE_HEIGHT);
   });
 });

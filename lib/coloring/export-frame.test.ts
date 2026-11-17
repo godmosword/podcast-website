@@ -26,6 +26,6 @@ describe("K-10 著色作品品牌邊框版面", () => {
 
   it("品牌字樣＝站名＋不含協定的網址，沒有任何遊戲化文案", () => {
     expect(FRAME_SITE_NAME).toBe("車車遊樂園");
-    expect(FRAME_SITE_URL).toBe("podcast-website-mu.vercel.app");
+    expect(FRAME_SITE_URL).toBe("carcarplayground.com");
   });
 });

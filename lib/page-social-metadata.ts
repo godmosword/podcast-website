@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
-import { DEFAULT_OG_IMAGE } from "@/lib/site-url";
+import {
+  DEFAULT_OG_IMAGE,
+  DEFAULT_OG_IMAGE_ALT,
+  defaultOgImage,
+} from "@/lib/site-url";
 
 type PageSocialMetadataInput = {
   title: string;
@@ -18,10 +22,15 @@ export function pageSocialMetadata({
   url,
   type,
   image = DEFAULT_OG_IMAGE,
-  imageAlt = "車車遊樂園吉祥物",
+  imageAlt,
   publishedTime,
 }: PageSocialMetadataInput): Pick<Metadata, "openGraph" | "twitter"> {
-  const images = [{ url: image, alt: imageAlt }];
+  const alt =
+    imageAlt ?? (image === DEFAULT_OG_IMAGE ? DEFAULT_OG_IMAGE_ALT : title);
+  const images =
+    image === DEFAULT_OG_IMAGE
+      ? [{ ...defaultOgImage(), alt }]
+      : [{ url: image, alt }];
   const openGraph =
     type === "article"
       ? { title, description, url, type, publishedTime, images }

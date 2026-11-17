@@ -3,14 +3,32 @@ import { getSiteEdition } from "./site-edition";
 /** 站名。metadata、JSON-LD 與 Media Session 共用同一個字面值。 */
 export const SITE_NAME = "車車遊樂園";
 
-/** 全站預設 Open Graph 圖（public 路徑）。 */
-export const DEFAULT_OG_IMAGE = "/mascot.png";
+/**
+ * 全站預設 Open Graph 圖（public 路徑）。
+ * 日間首頁第一屏截圖；故事、遊戲、地圖等專屬圖不走這張。
+ */
+export const DEFAULT_OG_IMAGE = "/og-home.jpg";
+export const DEFAULT_OG_IMAGE_WIDTH = 1200;
+export const DEFAULT_OG_IMAGE_HEIGHT = 630;
+export const DEFAULT_OG_IMAGE_ALT = "車車遊樂園首頁";
+export const DEFAULT_OG_IMAGE_TYPE = "image/jpeg";
+
+/** 首頁與沒有專屬分享圖的頁面共用的 og:image／twitter:image。 */
+export function defaultOgImage() {
+  return {
+    url: DEFAULT_OG_IMAGE,
+    width: DEFAULT_OG_IMAGE_WIDTH,
+    height: DEFAULT_OG_IMAGE_HEIGHT,
+    alt: DEFAULT_OG_IMAGE_ALT,
+    type: DEFAULT_OG_IMAGE_TYPE,
+  };
+}
 
 /**
  * 正式站網域。Production 未設 NEXT_PUBLIC_SITE_URL 時用此值，
  * 確保 OG／分享連結永不指向每次部署的臨時 Vercel 網域。
  */
-export const CANONICAL_SITE_URL = "https://podcast-website-mu.vercel.app";
+export const CANONICAL_SITE_URL = "https://carcarplayground.com";
 
 function stripTrailingSlash(url: string): string {
   return url.replace(/\/+$/, "");

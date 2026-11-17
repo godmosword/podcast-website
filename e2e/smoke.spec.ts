@@ -28,7 +28,11 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
   await expect(page.locator("h1")).toHaveText("車車遊樂園：親子故事與手作");
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     "href",
-    /podcast-website-mu\.vercel\.app\/?$/,
+    /carcarplayground\.com\/?$/,
+  );
+  await expect(page.locator('meta[property="og:url"]')).toHaveAttribute(
+    "content",
+    /carcarplayground\.com\/?$/,
   );
   // 品牌在 sticky 頂欄；漢堡**所有寬度都在**；兒童三入口改在左下 dock／抽屜
   await expect(
@@ -111,7 +115,7 @@ test("Landing Hub 全螢幕分段與導覽", async ({ page }) => {
   await expect(page.getByRole("heading", { name: /數綿羊/ })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: /捏黏土/ })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: /陪孩子建立好習慣/ })).toBeAttached();
-  await expect(page.getByRole("heading", { name: "繪本故事" })).toBeAttached();
+  await expect(page.getByRole("heading", { name: "聽聽看繪本" })).toBeAttached();
   const moreSkip = page
     .locator("#segment-stories")
     .getByRole("link", { name: "捲動到下一個專區" });
@@ -239,7 +243,7 @@ test("Landing Hub 在手機尺寸維持四段可見", async ({ page }) => {
   await expect(drawerNav.getByRole("link", { name: "留言" })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: /車車與\s?遊樂園的故事/ })).toBeAttached();
   await expect(page.getByRole("heading", { name: /陪孩子建立好習慣/ })).toBeAttached();
-  await expect(page.getByRole("heading", { name: "繪本故事" })).toBeAttached();
+  await expect(page.getByRole("heading", { name: "聽聽看繪本" })).toBeAttached();
 });
 
 async function expectStoriesFromLanding(page: import("@playwright/test").Page) {
