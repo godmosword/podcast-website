@@ -115,7 +115,7 @@ describe("landing-segments", () => {
       }),
       expect.objectContaining({
         id: "picture-books",
-        title: "繪本故事",
+        title: "聽聽看繪本",
         subtitle: "一邊聽、一邊看圖",
         cta: { label: "看繪本故事", href: "/picture-books" },
         navLabel: "繪本故事",
