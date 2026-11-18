@@ -9,6 +9,7 @@ import {
   DEFAULT_OG_IMAGE_HEIGHT,
   DEFAULT_OG_IMAGE_WIDTH,
   getSiteUrl,
+  isTrackedProductionOrigin,
 } from "./site-url";
 
 const PUBLIC_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "public");
@@ -49,6 +50,23 @@ describe("getSiteUrl", () => {
     vi.stubEnv("VERCEL_ENV", "");
     vi.stubEnv("VERCEL_URL", "");
     expect(getSiteUrl()).toBe("http://localhost:3000");
+  });
+
+  it("官網缺 NEXT_PUBLIC_SITE_URL 時失敗，不退回實驗站", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_EDITION", "official");
+    vi.stubEnv("SITE_EDITION", "official");
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "");
+    vi.stubEnv("VERCEL_ENV", "production");
+    expect(() => getSiteUrl()).toThrow(/NEXT_PUBLIC_SITE_URL/);
+  });
+
+  it("官網與實驗站都能當 --production 的目標，預覽網址不行", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://carcarplayground.com");
+    expect(isTrackedProductionOrigin("https://carcarplayground.com")).toBe(true);
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", CANONICAL_SITE_URL);
+    expect(isTrackedProductionOrigin(CANONICAL_SITE_URL)).toBe(true);
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://preview.vercel.app");
+    expect(isTrackedProductionOrigin("https://preview.vercel.app")).toBe(false);
   });
 
   it("回傳值一律不含尾斜線", () => {

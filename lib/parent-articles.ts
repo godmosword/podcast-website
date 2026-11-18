@@ -6,16 +6,21 @@ import {
   PARENT_ARTICLES,
   type ParentArticle,
 } from "@/data/parent-articles";
+import { filterReleased } from "@/lib/official-release";
 
 const ARTICLES_HREF = "/for-parents/articles";
 
-/** 閱讀順序與 `PARENT_ARTICLES` 陣列相同。 */
+function releasedParentArticles(): readonly ParentArticle[] {
+  return filterReleased(PARENT_ARTICLES, "parentArticles");
+}
+
+/** 閱讀順序與 `PARENT_ARTICLES` 陣列相同。官網再依發行清單篩。 */
 export function listParentArticles(): readonly ParentArticle[] {
-  return PARENT_ARTICLES;
+  return releasedParentArticles();
 }
 
 export function getParentArticle(slug: string): ParentArticle | undefined {
-  return PARENT_ARTICLES.find((article) => article.slug === slug);
+  return releasedParentArticles().find((article) => article.slug === slug);
 }
 
 export function parentArticlePath(slug: string): string {
@@ -30,11 +35,12 @@ export function parentArticleNeighbors(slug: string): {
   previous: ParentArticle | null;
   next: ParentArticle | null;
 } {
-  const index = PARENT_ARTICLES.findIndex((article) => article.slug === slug);
+  const articles = releasedParentArticles();
+  const index = articles.findIndex((article) => article.slug === slug);
   if (index < 0) return { previous: null, next: null };
   return {
-    previous: PARENT_ARTICLES[index - 1] ?? null,
-    next: PARENT_ARTICLES[index + 1] ?? null,
+    previous: articles[index - 1] ?? null,
+    next: articles[index + 1] ?? null,
   };
 }
 
@@ -130,7 +136,7 @@ function groupByMonth(articles: readonly ParentArticle[]): ParentArticleMonth[] 
  * 系列保持完整，所以最新一篇若剛好屬於某系列，會同時出現在兩區。
  */
 export function parentArticlesLayout(
-  articles: readonly ParentArticle[] = PARENT_ARTICLES,
+  articles: readonly ParentArticle[] = releasedParentArticles(),
   seriesList: readonly ParentArticleSeries[] = PARENT_ARTICLE_SERIES,
 ): ParentArticlesLayout {
   const chronological = byPublishedThenIndex(articles);

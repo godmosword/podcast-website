@@ -21,7 +21,7 @@ import {
   parseJsonLdBlocks,
 } from "../lib/geo-live-html";
 import { validateRobotsTxtPolicy } from "../lib/robots-policy";
-import { CANONICAL_SITE_URL, getSiteUrl } from "../lib/site-url";
+import { CANONICAL_SITE_URL, isTrackedProductionOrigin } from "../lib/site-url";
 import { storyAudioPath, storyCoverPath } from "../lib/story-utils";
 import {
   associatedMediaHasVtt,
@@ -94,15 +94,7 @@ function parseOptions(argv: string[]): CliOptions | null {
 }
 
 function isConfiguredProductionOrigin(baseUrl: string): boolean {
-  try {
-    const canonicalOrigin = new URL(CANONICAL_SITE_URL).origin;
-    return (
-      new URL(baseUrl).origin === canonicalOrigin &&
-      new URL(getSiteUrl()).origin === canonicalOrigin
-    );
-  } catch {
-    return false;
-  }
+  return isTrackedProductionOrigin(baseUrl);
 }
 
 function assertFinalUrlOrigin(baseUrl: string, finalUrl: string, label: string): boolean {
@@ -320,7 +312,7 @@ async function main(): Promise<void> {
   const { baseUrl, productionOnly } = options;
   if (productionOnly && !isConfiguredProductionOrigin(baseUrl)) {
     console.error(
-      `錯誤：--production 只能驗證 canonical production origin ${CANONICAL_SITE_URL}，實際為 ${baseUrl}`,
+      `錯誤：--production 只能驗證 https://carcarplayground.com 或 ${CANONICAL_SITE_URL}，且必須與 NEXT_PUBLIC_SITE_URL 相同。實際為 ${baseUrl}`,
     );
     process.exit(1);
   }

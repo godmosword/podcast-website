@@ -156,11 +156,36 @@ self.addEventListener("install", (event) => {
   self.skipWaiting();
 });
 
+async function dropRevokedStoryAssets(cache) {
+  let revoked = [];
+  try {
+    const response = await fetch(new URL("/sw-revocations.json", self.location.origin).href);
+    if (!response.ok) return;
+    const body = await response.json();
+    revoked = Array.isArray(body.storySlugs) ? body.storySlugs : [];
+  } catch {
+    return;
+  }
+  if (revoked.length === 0) return;
+  const keys = await cache.keys();
+  await Promise.all(
+    keys.map((request) => {
+      const path = new URL(request.url).pathname;
+      const drop = revoked.some((slug) => path.startsWith(`/stories/${slug}/`));
+      return drop ? cache.delete(request) : Promise.resolve(false);
+    }),
+  );
+}
+
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))),
-    ),
+    caches
+      .keys()
+      .then((keys) =>
+        Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))),
+      )
+      .then(() => caches.open(CACHE_NAME))
+      .then((cache) => dropRevokedStoryAssets(cache)),
   );
   self.clients.claim();
 });

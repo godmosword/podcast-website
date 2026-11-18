@@ -65,4 +65,14 @@ describe("SiteFooter", () => {
     expect(html).toContain("utm_campaign=ep-20");
     expect(html).toContain("utm_medium=footer");
   });
+
+  test("官網頁尾不連到節目數據", async () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_EDITION", "official");
+    vi.resetModules();
+    const { default: SiteFooter } = await import("./SiteFooter");
+    const html = renderToStaticMarkup(<SiteFooter />);
+    expect(html).not.toContain('href="/studio"');
+    expect(html).not.toContain("節目數據");
+    expect(html).toContain('href="/legal"');
+  });
 });

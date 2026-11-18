@@ -56,6 +56,9 @@ describe("buildRssFeed", () => {
     expect(xml).toContain(
       '<podcast:transcript url="https://example.com/story/ep-1/transcript.vtt" type="text/vtt" language="zh-TW"/>',
     );
+    expect(xml).toContain(
+      '<guid isPermaLink="true">https://carcarplayground.com/story/ep-1</guid>',
+    );
     vi.unstubAllEnvs();
   });
 

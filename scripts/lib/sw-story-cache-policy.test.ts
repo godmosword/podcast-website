@@ -13,6 +13,12 @@ describe("service worker story asset cache policy", () => {
     expect(sw).toContain('const CACHE_NAME = "chechecar-v6"');
   });
 
+  it("下架只刪名單裡的故事 URL，不升 cache 版本", () => {
+    expect(sw).toContain("/sw-revocations.json");
+    expect(sw).toContain("dropRevokedStoryAssets");
+    expect(sw).toContain('const CACHE_NAME = "chechecar-v6"');
+  });
+
   it("故事音檔／插圖只快取完整 200，不把 206 Partial 寫進 Cache Storage", () => {
     expect(sw).toMatch(/cached && cached\.status === 200/);
     expect(sw).toMatch(/response\.status === 200/);

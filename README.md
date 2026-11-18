@@ -7,6 +7,7 @@ Bonbon & 馬米親子 Podcast《車車遊樂園》的官方 **看圖聽故事** 
 | | |
 |---|---|
 | **正式站** | [carcarplayground.com](https://carcarplayground.com) |
+| **實驗站** | [podcast-website-mu.vercel.app](https://podcast-website-mu.vercel.app) |
 | **版本** | [1.3.0](./CHANGELOG.md) |
 | **待辦** | [TODOS.md](./TODOS.md) |
 | **設計** | [DESIGN.md](./DESIGN.md) · [RESEARCH.md](./RESEARCH.md) |
@@ -130,6 +131,28 @@ npm run dev
 | [docs/AGENT-WORKFLOW.md](./docs/AGENT-WORKFLOW.md) | Meta：模型分工、L0–L3、Plan 模板 |
 | [docs/AGENT-DOMAIN.md](./docs/AGENT-DOMAIN.md) | Domain：紅線、驗證矩陣、Protected paths |
 | [docs/AGENT-FAILURES.md](./docs/AGENT-FAILURES.md) | 目前模型呼叫協議與未解除記錄；歷史案例見 [`docs/archive/AGENT-FAILURES-2026.md`](./docs/archive/AGENT-FAILURES-2026.md) |
+
+## 官網與實驗站
+
+同一個公開 repo。`main` 是實驗站，包含每 15 分鐘的 Apple sync。官網是另一個 Vercel 專案，Production Branch 設為 `release`，build command 用 `npm run build:official`。
+
+未設定 `SITE_EDITION` 時，行為與現在這個同時服務兩個網域的部署相同：全功能、可索引。不要在網域移轉前把現有專案改成 `lab` 或 `official`。
+
+| 變數 | 官網專案 | 現有專案（網域移走之後才改） |
+|------|----------|------------------------------|
+| `SITE_EDITION` | `official` | `lab` |
+| `NEXT_PUBLIC_SITE_URL` | `https://carcarplayground.com` | `https://podcast-website-mu.vercel.app` |
+| 正式資料庫與寄信 | 有 | 拿掉後立刻重新部署 |
+
+`SITE_EDITION=official` 卻沒有 `NEXT_PUBLIC_SITE_URL` 時，build 會失敗。官網 build 會依 [data/official-release.json](./data/official-release.json) 刪掉節目數據頁和未核准的故事素材；留言審核頁留著。實驗站的 `npm run build` 不刪檔。
+
+新集上架：`npm run release:approve -- ep-N`，提交後由管理員把該 commit 推進 `release`。GitHub ruleset `official-release` 只讓管理員建立或更新這個分支，sync 用的 `GITHUB_TOKEN` 不能推。下架用 `npm run release:revoke -- ep-N`，只把該集寫進 Service Worker 的刪除名單，不升 cache 版本。
+
+單集 RSS GUID 固定為 `https://carcarplayground.com/story/ep-N`。頻道 `podcast:guid` 維持既有 UUID。
+
+網域 `carcarplayground.com` 仍掛在現有專案，這次沒有改綁。新專案先用暫時網址驗過播放、字幕、表單、留言核准與回滾，才把網域移過去。移走之前，現有專案要留著正式資料庫和寄信設定。
+
+IndexNow 不再由 Apple sync 對實驗站提交。只有官網網域上的 `release` 正式部署會提交。`verify:geo-live` 的正式檢查打 `https://carcarplayground.com`。
 
 ## 部署與環境變數
 

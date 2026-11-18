@@ -1,5 +1,6 @@
 import { PARENT_ARTICLES, type ParentArticle } from "../data/parent-articles";
 import { PARENT_TRAVEL_ABROAD_ARTICLES } from "../data/parent-travel-abroad-articles";
+import { filterReleased } from "./official-release";
 
 // `next.config.ts` 會載入轉址。設定檔編譯不會套 `@/`，所以這個檔用相對路徑。
 
@@ -22,9 +23,13 @@ function assertDistinctFromParentArticles(): void {
 
 assertDistinctFromParentArticles();
 
-/** 閱讀順序與陣列相同（同步由舊到新附加）。 */
+function releasedTravelArticles(): readonly ParentArticle[] {
+  return filterReleased(PARENT_TRAVEL_ABROAD_ARTICLES, "travelAbroad");
+}
+
+/** 閱讀順序與陣列相同（同步由舊到新附加）。官網再依發行清單篩。 */
 export function listTravelAbroadArticles(): readonly ParentArticle[] {
-  return PARENT_TRAVEL_ABROAD_ARTICLES;
+  return releasedTravelArticles();
 }
 
 /** 發布日新的在前；同一天陣列裡較後面的在前。 */
@@ -43,11 +48,11 @@ export function travelAbroadArticlesByRecency(
 
 /** 列表頁用正式資料，依發布日新到舊。 */
 export function listTravelAbroadArticlesByRecency(): readonly ParentArticle[] {
-  return travelAbroadArticlesByRecency(PARENT_TRAVEL_ABROAD_ARTICLES);
+  return travelAbroadArticlesByRecency(releasedTravelArticles());
 }
 
 export function getTravelAbroadArticle(slug: string): ParentArticle | undefined {
-  return PARENT_TRAVEL_ABROAD_ARTICLES.find((article) => article.slug === slug);
+  return releasedTravelArticles().find((article) => article.slug === slug);
 }
 
 export function travelAbroadIndexPath(): string {
@@ -62,11 +67,12 @@ export function travelAbroadNeighbors(slug: string): {
   previous: ParentArticle | null;
   next: ParentArticle | null;
 } {
-  const index = PARENT_TRAVEL_ABROAD_ARTICLES.findIndex((article) => article.slug === slug);
+  const articles = releasedTravelArticles();
+  const index = articles.findIndex((article) => article.slug === slug);
   if (index < 0) return { previous: null, next: null };
   return {
-    previous: PARENT_TRAVEL_ABROAD_ARTICLES[index - 1] ?? null,
-    next: PARENT_TRAVEL_ABROAD_ARTICLES[index + 1] ?? null,
+    previous: articles[index - 1] ?? null,
+    next: articles[index + 1] ?? null,
   };
 }
 

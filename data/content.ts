@@ -9,6 +9,7 @@ import { getParentGuide } from "./parent-guides";
 import { getReflectionPrompt } from "./reflection-prompts";
 import { getStoryZoneId } from "./story-zones";
 import { manualStories, type ManualStory } from "./stories";
+import { filterReleased } from "@/lib/official-release";
 import { canonicalStorySlug } from "@/lib/story-slug-aliases";
 import { storyCoverPath } from "@/lib/story-utils";
 import { isVisualFixtureBuild, pickVisualFixture, VISUAL_FIXTURE_STORY_SLUGS } from "@/lib/visual-fixture";
@@ -135,13 +136,23 @@ const storyList: Story[] = isVisualFixtureBuild()
   ? pickVisualFixture(allStories, VISUAL_FIXTURE_STORY_SLUGS, (story) => story.slug)
   : allStories;
 
-export function getStories(): Story[] {
+/** 未套官網發行清單的目錄。發行腳本用來確認 slug 真的存在。 */
+export function getCatalogStories(): Story[] {
   return storyList;
+}
+
+/** 官網只留下發行清單裡的集數。current 與 lab 維持全集。 */
+function publishedStories(): readonly Story[] {
+  return filterReleased(storyList, "stories");
+}
+
+export function getStories(): Story[] {
+  return [...publishedStories()];
 }
 
 export function getStory(slug: string): Story | undefined {
   const canonical = canonicalStorySlug(slug);
-  return storyList.find((story) => story.slug === canonical);
+  return publishedStories().find((story) => story.slug === canonical);
 }
 
 export function getNextStory(slug: string): Story | undefined {
@@ -157,20 +168,20 @@ export function getStoriesByVehicle(vehicle: string): Story[] {
 }
 
 export function storiesByNewest(): Story[] {
-  return [...storyList].sort((a, b) => b.ep - a.ep);
+  return [...publishedStories()].sort((a, b) => b.ep - a.ep);
 }
 
 export function allVehicles(): string[] {
-  return Array.from(new Set(storyList.map((s) => s.vehicle)));
+  return Array.from(new Set(publishedStories().map((s) => s.vehicle)));
 }
 
 export function getVehicleCoverPath(vehicle: string): string | null {
-  const slug = storyList.find((s) => s.vehicle === vehicle)?.slug;
+  const slug = publishedStories().find((s) => s.vehicle === vehicle)?.slug;
   return slug ? storyCoverPath(slug) : null;
 }
 
 export function allTags(): string[] {
-  return Array.from(new Set(storyList.flatMap((s) => s.tags ?? []))).sort((a, b) =>
+  return Array.from(new Set(publishedStories().flatMap((s) => s.tags ?? []))).sort((a, b) =>
     a.localeCompare(b, "zh-Hant"),
   );
 }
@@ -203,7 +214,7 @@ export function getRelated(
   const currentTags = new Set(current.tags ?? []);
   const excluded = new Set([canonical, ...excludeSlugs.map(canonicalStorySlug)]);
 
-  return storyList
+  return publishedStories()
     .filter((s) => !excluded.has(s.slug))
     .map((s) => {
       const sharedTags = (s.tags ?? []).filter((t) => currentTags.has(t)).length;

@@ -8,6 +8,7 @@ import {
 } from "@/lib/feed-constants";
 import { familyActivityShowNote, storyZoneMapShowNote } from "@/lib/story-geo";
 import { storyDescription } from "@/lib/story-metadata";
+import { frozenEpisodeGuid } from "@/lib/official-release";
 import { getSiteUrl } from "@/lib/site-url";
 import { storyAudioUrl, storyCoverPath } from "@/lib/story-utils";
 import { hasVtt } from "@/lib/transcript";
@@ -82,7 +83,7 @@ export function buildRssFeed(
       return `    <item>
       <title>${escapeXml(story.title)}</title>
       <link>${escapeXml(pageUrl)}</link>
-      <guid isPermaLink="true">${escapeXml(pageUrl)}</guid>
+      <guid isPermaLink="true">${escapeXml(frozenEpisodeGuid(story.slug))}</guid>
       <pubDate>${toRssPubDate(story.date)}</pubDate>
       <description>${cdata(description)}</description>
       <enclosure url="${escapeXml(audioUrl)}" length="${audioLength}" type="audio/mpeg"/>

@@ -12,6 +12,7 @@ import SiteNavBar from "@/components/landing/SiteNavBar";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { INTRO_GATE_INIT_SCRIPT, INTRO_PORTAL_ENABLED } from "@/lib/intro-gate";
 import { siteIdentityJsonLd } from "@/lib/json-ld";
+import { editionRobots } from "@/lib/site-edition";
 import { defaultOgImage, getSiteUrl } from "@/lib/site-url";
 import { STORIES_VIEW_INIT_SCRIPT } from "@/lib/stories-view";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
@@ -62,6 +63,7 @@ export const metadata: Metadata = {
     template: "%s · 車車遊樂園",
   },
   description: "給孩子看圖聽故事的小天地，左右翻頁、聽聽聲音。",
+  robots: editionRobots(),
   manifest: "/manifest.json",
   openGraph: {
     title: "車車遊樂園",

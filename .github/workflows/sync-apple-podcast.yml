@@ -178,13 +178,6 @@ jobs:
           NOTIFY_SITE_URL: ${{ secrets.NOTIFY_SITE_URL }}
         run: npx tsx scripts/sync-alert.ts notify-live
 
-      - name: Submit IndexNow (best-effort)
-        if: success() && steps.push.outputs.landed_on_main == 'true' && github.ref == 'refs/heads/main'
-        env:
-          INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
-          NEXT_PUBLIC_SITE_URL: https://carcarplayground.com
-        run: bash scripts/ci/submit-indexnow.sh
-
       - name: Capture failure excerpt
         if: failure()
         id: capture
