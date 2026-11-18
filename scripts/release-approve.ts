@@ -63,7 +63,7 @@ function main(): void {
   assets.files = [
     ...assets.files.filter((file) => !file.path.startsWith(prefix)),
     ...hashTree(ROOT, `public/stories/${slug}`),
-  ].sort((left, right) => left.path.localeCompare(right.path));
+  ].sort((left, right) => left.path.localeCompare(right.path, undefined, { numeric: true }));
   assets.sourceCommit = manifest.sourceCommit;
 
   writeJson("data/official-release.json", manifest);

@@ -1,5 +1,5 @@
 {
-  "sourceCommit": "2b999bf161179245e6b993b5e878b0e9dc8a53de",
+  "sourceCommit": "9f0197f00fcdb18429be7f1a60d081906dfe19a2",
   "files": [
     {
       "path": "public/stories/ep-1/01.avif",
@@ -5992,6 +5992,38 @@
     {
       "path": "public/stories/ep-37/audio.mp3",
       "sha256": "1c65446afab3e2c57eea03f16ab8d128b32e17d94cbf0a7081743d4cc9aaf9ac"
+    },
+    {
+      "path": "public/stories/ep-38/01.avif",
+      "sha256": "6eec63206b47d236a55e30b695a96bf26ba64bb8194aa9504c63cf329ba87e4c"
+    },
+    {
+      "path": "public/stories/ep-38/01.jpg",
+      "sha256": "8d2bfed4c04c431156df18f8791a1021f3e9beb610987095824e32dfd478aada"
+    },
+    {
+      "path": "public/stories/ep-38/01.webp",
+      "sha256": "af7081c370ef03a60f13ec0795286c660f5e00780ea2dd554a1613704a5c8e51"
+    },
+    {
+      "path": "public/stories/ep-38/audio.mp3",
+      "sha256": "4ed3e730b48e56bca3f8687d5720fd82db9dfbaf1b41b67c4b80a644756c097a"
+    },
+    {
+      "path": "public/stories/ep-39/01.avif",
+      "sha256": "5262582443356c3e0af56dcf31679382262372b8a39fcd02b543cae2c8e88bbd"
+    },
+    {
+      "path": "public/stories/ep-39/01.jpg",
+      "sha256": "88970627f4633bb0a978e91ce471dbaf37fb4df66aa1249831a4a82fb12a243d"
+    },
+    {
+      "path": "public/stories/ep-39/01.webp",
+      "sha256": "0a820b2ee5d18d36c2c34ed5fdb195d323bd01010b288838d177a2b41c5e6c86"
+    },
+    {
+      "path": "public/stories/ep-39/audio.mp3",
+      "sha256": "3e02168849ef461bf5d7e3c0df2b34187dc875a1a5f305f8bc7c705fadc4a362"
     }
   ]
 }

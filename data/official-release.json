@@ -1,13 +1,13 @@
 {
   "version": 1,
   "id": "2026-11-17-live-catalog",
-  "sourceCommit": "2b999bf161179245e6b993b5e878b0e9dc8a53de",
+  "sourceCommit": "9f0197f00fcdb18429be7f1a60d081906dfe19a2",
   "humanApproved": true,
-  "approvedAt": "2026-11-17",
+  "approvedAt": "2026-11-18",
   "qualityCheck": {
     "status": "not-run",
     "command": "npm run verify:release-content",
-    "note": "第一份清單是目前已公開的目錄，不是 verify:release-content 的結果。那個指令仍只做品質檢查，單圖 MVP 可以是 accepted warning。"
+    "note": "這次只核准單集。品質檢查要另外跑，結果不會自動寫進清單。"
   },
   "previousId": null,
   "stories": [
@@ -47,7 +47,9 @@
     "ep-34",
     "ep-35",
     "ep-36",
-    "ep-37"
+    "ep-37",
+    "ep-38",
+    "ep-39"
   ],
   "parentArticles": [
     "vision-care-1",
