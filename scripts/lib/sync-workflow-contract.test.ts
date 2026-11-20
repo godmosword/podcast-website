@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { load as parseYaml } from "js-yaml";
 import { describe, expect, it } from "vitest";
@@ -119,6 +119,7 @@ describe("workflow YAML 可解析性（語法閘門）", () => {
         "sync-apple-podcast.yml",
         "sync-watchdog.yml",
         "verify-geo-live.yml",
+        "live-domain.yml",
       ]),
     );
   });
@@ -450,16 +451,34 @@ describe("sync workflow contract", () => {
     expect(alert).toContain("ALERT_AFTER_CONSECUTIVE");
   });
 
-  it("IndexNow 只跟官網 release 部署，fail-soft 仍由 script 保證", () => {
-    const yaml = readWorkflow("indexnow-official.yml");
+  it("IndexNow 與上線檢查等正式網域換上這次的 commit 才跑，fail-soft 仍由 script 保證", () => {
+    const yaml = readWorkflow("live-domain.yml");
     const sync = readWorkflow("sync-apple-podcast.yml");
     const script = readFileSync(join(ROOT, "scripts/ci/submit-indexnow.sh"), "utf8");
     const submit = readFileSync(join(ROOT, "scripts/submit-indexnow.ts"), "utf8");
 
-    expect(sync).not.toContain("indexnow-official.yml");
-    expect(yaml).toContain("deployment_status:");
-    expect(yaml).toContain("refs/heads/release");
+    // Vercel 的 deployment_status：ref 是 commit SHA、environment_url 是單次部署網址，
+    // 官網專案也不一定建 GitHub deployment。用它判斷正式網域會永遠不觸發。
+    expect(yaml).not.toContain("deployment_status");
+    expect(yaml).not.toContain("environment_url");
+    expect(readWorkflow("verify-geo-live.yml")).not.toContain("deployment_status");
+    expect(existsSync(join(ROOT, ".github/workflows/indexnow-official.yml"))).toBe(false);
+
+    const doc = parseYaml(yaml) as Record<string, unknown> & { true?: unknown };
+    const triggers = (doc.on ?? doc[true as unknown as keyof typeof doc]) as {
+      push?: { branches?: string[] };
+    };
+    expect(triggers.push?.branches?.slice().sort()).toEqual(["main", "release"]);
+    expect(yaml).toContain("cancel-in-progress: true");
     expect(yaml).toContain("https://carcarplayground.com");
+
+    const waitIndex = yaml.indexOf("scripts/wait-for-live-build.ts");
+    expect(waitIndex, "找不到等待正式網域的步驟").toBeGreaterThan(-1);
+    expect(yaml.indexOf("submit-indexnow.sh")).toBeGreaterThan(waitIndex);
+    expect(yaml.indexOf("verify:geo-live")).toBeGreaterThan(waitIndex);
+    expect(yaml).toContain("steps.wait.outputs.ready == 'true'");
+
+    expect(sync).not.toContain("live-domain.yml");
     expect(yaml).not.toContain("continue-on-error");
     expect(yaml).not.toContain("schedule:");
     expect(script).toContain("scripts/submit-indexnow.ts");

@@ -152,7 +152,7 @@ npm run dev
 
 網域 `carcarplayground.com` 仍掛在現有專案，這次沒有改綁。新專案先用暫時網址驗過播放、字幕、表單、留言核准與回滾，才把網域移過去。移走之前，現有專案要留著正式資料庫和寄信設定。
 
-IndexNow 不再由 Apple sync 對實驗站提交。只有官網網域上的 `release` 正式部署會提交。`verify:geo-live` 的正式檢查打 `https://carcarplayground.com`。
+IndexNow 與 `verify:geo-live` 的正式檢查都在 [live-domain.yml](./.github/workflows/live-domain.yml)：push 到 `main` 或 `release` 後，輪詢 `https://carcarplayground.com/build-info.json`，等正式網域換上該次 commit 才跑。不負責網域的分支會直接略過：移網域前是 `release`，移網域後是 `main`。Apple sync 本身不提交 IndexNow。
 
 ## 部署與環境變數
 

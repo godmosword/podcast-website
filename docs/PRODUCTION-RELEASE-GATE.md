@@ -61,9 +61,14 @@ deployment protection／Ignored Build Step 不在 repository 內，仍需由 Ver
 
 ## Post-deploy health
 
-`.github/workflows/verify-geo-live.yml` 只在 GitHub `deployment_status` 回報
-`environment=production` 且 `state=success` 時自動執行；手動執行也必須明確提供
-base URL。`--production` 會拒絕 preview origin。它檢查：
+`.github/workflows/live-domain.yml` 在 push 到 `main` 或 `release` 後輪詢
+`https://carcarplayground.com/build-info.json`，等正式網域換上該次 commit，才跑
+`verify:geo-live --production` 與 IndexNow。不靠 Vercel 回報給 GitHub 的部署事件：
+那邊的 ref 是 commit SHA、網址是單次部署的 `*.vercel.app`，官網專案也不一定建立
+GitHub deployment（#338 合併後實測整個被跳過）。負責網域的分支 25 分鐘內沒換上就
+失敗，通常是部署失敗，或 Vercel 回滾後關掉了正式網域的自動指派。
+`.github/workflows/verify-geo-live.yml` 只剩手動入口，必須明確提供 base URL。
+`--production` 會拒絕 preview origin。它檢查：
 
 - robots、sitemap、RSS、llms、最新 transcript
 - 首頁與最新故事 JSON-LD、canonical、FAQ
@@ -132,7 +137,9 @@ NEXT_PUBLIC_SITE_URL=https://carcarplayground.com \
 
 官網是同一個 repo 的 `release` 分支，接到另一個 Vercel 專案。Production Branch 設為 `release`，build command 用 `npm run build:official`，環境變數是 `SITE_EDITION=official` 與 `NEXT_PUBLIC_SITE_URL=https://carcarplayground.com`。ruleset `official-release` 已經生效，只讓管理員建立或更新 `release`；每 15 分鐘的 sync 只更新 `main`。這個分支與第二個 Vercel 專案要等這次變更提交之後才建，否則官網會部署到還沒有發行程式的 commit。
 
-暫時網址先不要加 `--production`。播放、字幕、既有 GUID、表單、留言核准、舊的 Service Worker 快取與回滾都通過之後，才把網域指過去。指過去之後，把舊專案改成 lab 變數（自己的網址、不再使用正式庫與正式寄信），並立刻重新部署。
+移網域前還要確認三件事：`release` 已經包含 `live-domain.yml` 與 `/build-info.json` 的 commit（否則移過去後網域讀不到 build-info，每次 push 都會等到逾時）；官網專案的 Production 有 `INDEXNOW_KEY`，而且與 GitHub Secret 同值；官網專案沒有停在 Instant Rollback 狀態（回滾後 Vercel 不會把新部署自動指到正式網域，要 Undo Rollback 或手動 promote）。
+
+暫時網址先不要加 `--production`。播放、字幕、既有 GUID、表單、留言核准、舊的 Service Worker 快取與回滾都通過之後，才把網域指過去。指過去之後，到 Actions 對 `release` 手動跑一次 `live-domain`：移網域不會產生 push，最後那次 `release` push 當時網域還不歸它管，已經被略過，要補一次上線檢查和 IndexNow。接著把舊專案改成 lab 變數（自己的網址、不再使用正式庫與正式寄信），並立刻重新部署。
 
 `verify:episodes` 的 warning 不等於 release blocker：Apple sync 可保留已知的
 `illustrate-pending` MVP warning；正式內容發布前則用 `verify:release-content` 分類，

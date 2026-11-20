@@ -1,0 +1,65 @@
+# 正式網域換上這次 push 的 build 之後，才跑 GEO 上線檢查與 IndexNow。
+#
+# 不靠 Vercel 回報給 GitHub 的部署事件：那邊的 ref 是 commit SHA，網址是單次部署的
+# *.vercel.app，官網專案也不一定建立 GitHub deployment，用來比對正式網域永遠不成立
+# （#338 合併後的正式部署實測）。改成 push 後輪詢正式網域的 /build-info.json：
+# - 移網域前由 main（current）負責正式網域；移網域後由 release（official）負責。
+# - 不負責的分支第一次查就略過，不會空等。
+# - 同一分支新的 push 會取消舊的等待。
+name: live-domain
+
+on:
+  push:
+    branches: [main, release]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: live-domain-${{ github.ref_name }}
+  cancel-in-progress: true
+
+env:
+  LIVE_BASE_URL: https://carcarplayground.com
+  HUSKY: "0"
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          # IndexNow 要比對 push 前後的發行清單與故事素材，只抓 tree，不抓舊 blob。
+          fetch-depth: 0
+          filter: blob:none
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version-file: .nvmrc
+          check-latest: true
+          cache: npm
+      - run: npm ci
+      - name: Wait for live domain
+        id: wait
+        run: >-
+          npx tsx scripts/wait-for-live-build.ts
+          --base-url="$LIVE_BASE_URL"
+          --sha="$GITHUB_SHA"
+          --branch="$GITHUB_REF_NAME"
+          --timeout-seconds=1500
+      - name: verify:geo-live
+        if: steps.wait.outputs.ready == 'true'
+        env:
+          NEXT_PUBLIC_SITE_URL: ${{ env.LIVE_BASE_URL }}
+        run: npm run verify:geo-live -- --base-url="$LIVE_BASE_URL" --production
+      - name: Submit IndexNow
+        if: steps.wait.outputs.ready == 'true'
+        env:
+          INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
+          INDEXNOW_WAIT_SECONDS: "0"
+          NEXT_PUBLIC_SITE_URL: ${{ env.LIVE_BASE_URL }}
+          INDEXNOW_BEFORE: ${{ github.event.before }}
+          INDEXNOW_AFTER: ${{ github.sha }}
+          INDEXNOW_EDITION: ${{ github.ref_name == 'release' && 'official' || 'current' }}
+        run: bash scripts/ci/submit-indexnow.sh
