@@ -85,7 +85,7 @@ npm run proofread:subtitles -- ep-N --mark
 
 ## Agent 路由
 
-中文字幕校對任務請用 **Sonnet 4.6**（見 [AGENT-WORKFLOW.md](./AGENT-WORKFLOW.md)），完成後執行 `--mark`。
+中文字幕校對任務請用 **Codex**（Cursor：`gpt-5.6-luna-max-fast`；Claude Code：`gpt-6-luna`，見 [AGENT-WORKFLOW.md](./AGENT-WORKFLOW.md) 模型路由），不要用 Grok。完成後執行 `--mark`。
 
 ## 相關文件
 

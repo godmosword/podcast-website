@@ -111,7 +111,8 @@ Skill／Agent 發現只掃描 repository 受版本控制的檔案；排除 `node
 | `scripts/sync-apple-podcast.ts`、`scripts/lib/sync-catalog-sidecars.ts`、`scripts/lib/story-cover-blur.ts` | 新集必須 `upsertCatalogSidecars`。commit 只 stage 白名單 `scripts/ci/sync-output-paths.txt`（四 sidecar、`audio-lengths.json`、`story-image-blurs.json`、`data/subtitles/`、`public/stories/` 等；手寫的 `data/*.ts` 不得列入），寫到白名單外就失敗，禁止 `git add -A`。字幕側車檔一律經 `scripts/lib/subtitle-file.ts` 寫（同一格式、沒變不寫）。衍生資產在 `sync:validate` 之前產生。契約見 `sync-workflow-contract.test.ts` |
 | `data/story-zones.ts`、`data/reflection-prompts.ts`、`data/story-dates.ts`、`data/episode-faqs.ts` | 完備測試以 `getStories()` 全集覆蓋；勿從 sync `git add` 拿掉；人工 refinement 可覆寫 stub |
 | `package.json` `prebuild` | 新增腳本必先登錄 `PREBUILD_OUTPUT_REGISTRY`（`sync-workflow-contract.test.ts`），並依 disposition 補白名單或 gitignore；sync Production build **不得**設 `INDEXNOW_KEY` |
-| `data/subtitles/`、`data/scenes/`、`data/characters.json` | 中文校對／切場景 → Sonnet 4.6，**不要** Grok |
+| `data/subtitles/` | 中文字幕校對 → Codex（Cursor `gpt-5.6-luna-max-fast`，Claude Code `gpt-6-luna`），**不要** Grok |
+| `data/scenes/`、`data/characters.json` | 切場景 → Sonnet 4.6 |
 | `public/stories/`、`public/characters/` | 素材上線須人工審圖；禁止自動 bulk approve |
 | `app/legal/`、`DISCLAIMER.md` | Leader；法律文案不可 LLM 臆造 |
 

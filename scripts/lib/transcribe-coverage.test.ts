@@ -25,7 +25,13 @@ describe("subtitleCoverageProblem", () => {
     expect(subtitleCoverageProblem(sparse, 500)).toContain("句數");
   });
 
-  it("現有字幕掃一次都過得了門檻", () => {
+  /**
+   * 用 `npm run transcribe -- <slug> --allow-gaps` 寫出的字幕：人確認過音檔真的大半是音樂或靜音，
+   * 句數或空白本來就過不了門檻。只放確認過的集數，並寫下原因。
+   */
+  const HUMAN_CONFIRMED_GAPS: Record<string, string> = {};
+
+  it("現有字幕掃一次都過得了門檻（人工確認過的 --allow-gaps 例外除外）", () => {
     const lengths = JSON.parse(readFileSync(join(ROOT, "data/audio-lengths.json"), "utf8")) as Record<string, number>;
     const dir = join(ROOT, "data/subtitles");
     const flagged: string[] = [];
@@ -37,7 +43,20 @@ describe("subtitleCoverageProblem", () => {
       // 音檔都是 128 kbps：位元組 ÷ 16000 ≈ 秒。
       if (subtitleCoverageProblem(segments, bytes / 16000)) flagged.push(slug);
     }
-    expect(flagged).toEqual([]);
+    expect(flagged.filter((slug) => !(slug in HUMAN_CONFIRMED_GAPS))).toEqual([]);
+  });
+
+  it("例外名單裡的集數都有字幕檔，而且真的還需要例外", () => {
+    const lengths = JSON.parse(readFileSync(join(ROOT, "data/audio-lengths.json"), "utf8")) as Record<string, number>;
+    for (const slug of Object.keys(HUMAN_CONFIRMED_GAPS)) {
+      const file = join(ROOT, "data/subtitles", `${slug}.json`);
+      expect(existsSync(file), `${slug} 沒有字幕檔，從例外名單拿掉`).toBe(true);
+      const segments = JSON.parse(readFileSync(file, "utf8")) as { t: number; text: string }[];
+      expect(
+        subtitleCoverageProblem(segments, lengths[slug] / 16000),
+        `${slug} 已經過門檻，從例外名單拿掉`,
+      ).not.toBeNull();
+    }
   });
 });
 

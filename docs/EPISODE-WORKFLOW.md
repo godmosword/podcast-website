@@ -39,7 +39,7 @@ gh pr view sync/apple --json state,mergeable   # 第 1、3 步：OPEN 又 CONFLI
 
 片頭音樂會讓 Whisper 陷入重複幻覺（「请不吝点赞…」一路重複到後面），這些句子被過濾後字幕少一大段甚至全空。`transcribeWithRetries` 會自救：照常轉 → 覆蓋不足就加 `-mc 0` 重跑 → 第一句在 15～90 秒之間就把前面切成每段 9 秒補轉 → 還是不足就失敗（第一句 ≤ 25 秒、最大空白 ≤ 60 秒、離結尾 ≤ 60 秒、每分鐘至少 5 句才算夠）。
 
-收到「字幕轉錄失敗」的 Issue 時，本機跑 `npm run transcribe -- <slug>`（音檔不外送）。照樣失敗就聽一下音檔：真的有長音樂或長靜音，加 `--allow-gaps` 寫出最好的一份；開頭幾分鐘都轉不出來，先用 `-mc 0` 轉整集、前段切成每段 9 秒分開轉（`whisper-cli -m models/ggml-large-v3.bin -f <wav> -l zh -mc 0 -oj -of <輸出>`），合併成 `data/subtitles/<slug>.json` 後跑 `npm run transcribe -- --convert <slug>` 與 `npm run proofread:subtitles -- <slug> --fix`（`--convert` 只給 Whisper 原始輸出用，已轉過或人工改過的字幕不要再跑）。補好後先確認 `sync/apple` 沒有開著的 PR，再把 `data/apple-sync-state.json` 該集的 `subtitles` 改成 `ok`。轉出來仍是草稿，接第 4 步歸主題、第 5 步校對。
+收到「字幕轉錄失敗」的 Issue 時，本機跑 `npm run transcribe -- <slug>`（音檔不外送）。照樣失敗就聽一下音檔：真的有長音樂或長靜音，加 `--allow-gaps` 寫出最好的一份，並把該集加進 `scripts/lib/transcribe-coverage.test.ts` 的 `HUMAN_CONFIRMED_GAPS`（附上原因）；開頭幾分鐘都轉不出來，先用 `-mc 0` 轉整集、前段切成每段 9 秒分開轉（`whisper-cli -m models/ggml-large-v3.bin -f <wav> -l zh -mc 0 -oj -of <輸出>`），合併成 `data/subtitles/<slug>.json` 後跑 `npm run transcribe -- --convert <slug>` 與 `npm run proofread:subtitles -- <slug> --fix`（`--convert` 只給 Whisper 原始輸出用，已轉過或人工改過的字幕不要再跑）。補好後先確認 `sync/apple` 沒有開著的 PR，再把 `data/apple-sync-state.json` 該集的 `subtitles` 改成 `ok`。轉出來仍是草稿，接第 4 步歸主題、第 5 步校對。
 
 ### 歸主題
 
