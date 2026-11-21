@@ -7,6 +7,7 @@ import {
   useId,
   useRef,
   useState,
+  type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
 import BrandMark from "@/components/BrandMark";
 import { isBrandWordmark, type BrandMarkId } from "@/lib/brand-marks";
@@ -99,6 +100,21 @@ export default function ConnectMenu({
     };
   }, [open, setOpen]);
 
+  function handleMenuKeyDown(event: ReactKeyboardEvent<HTMLUListElement>) {
+    if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
+
+    const menuItems = Array.from(
+      event.currentTarget.querySelectorAll<HTMLAnchorElement>('[role="menuitem"]'),
+    );
+    const index = menuItems.findIndex((item) => item === event.target);
+    if (index === -1) return;
+
+    event.preventDefault();
+    const direction = event.key === "ArrowDown" ? 1 : -1;
+    const nextIndex = (index + direction + menuItems.length) % menuItems.length;
+    menuItems[nextIndex].focus();
+  }
+
   if (items.length === 0) {
     // 頻道是版面契約，清單空時不得整顆消失，退為站內 /subscribe。
     // 社群沒有對等的站內頁，空清單就不渲染。
@@ -124,7 +140,13 @@ export default function ConnectMenu({
         <Icon name="chevron-down" size={14} className={styles.chevron} />
       </button>
       {open ? (
-        <ul id={menuId} ref={dropdownRef} className={styles.dropdown} role="menu">
+        <ul
+          id={menuId}
+          ref={dropdownRef}
+          className={styles.dropdown}
+          role="menu"
+          onKeyDown={handleMenuKeyDown}
+        >
           {items.map((item) => {
             const opensNewTab =
               item.href.startsWith("http://") || item.href.startsWith("https://");

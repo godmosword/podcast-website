@@ -6,7 +6,7 @@
 export const SUBSCRIBE_PAGE_TITLE = "加入新集通知名單";
 
 export const SUBSCRIBE_PAGE_DESCRIPTION =
-  "留下 Email 加入新集通知名單。目前只收名單、不寄新集上線信；完整收聽請在 Podcast App 訂閱。";
+  "在常用的 Podcast 或影音平台訂閱車車遊樂園，收聽最新的親子故事。";
 
 export const SUBSCRIBE_PAGE_LEDE =
   "先留下家長 Email。目前只收名單，不寄新集上線信或電子報。";

@@ -133,6 +133,33 @@ test.describe("頂欄頻道下拉：幾何", () => {
 });
 
 test.describe("頂欄連接下拉：互動契約不得回歸", () => {
+  for (const viewport of [
+    { width: 412, height: 915 },
+    { width: 1440, height: 900 },
+  ]) {
+    test(`${viewport.width}px：頻道與社群可以用方向鍵循環移動焦點`, async ({ page }) => {
+      await page.setViewportSize(viewport);
+      await page.goto("/stories");
+
+      for (const trigger of [channelsTrigger(page), socialsTrigger(page)]) {
+        await trigger.press("Enter");
+        const items = page.getByRole("menu").getByRole("menuitem");
+        await expect(items.first()).toBeFocused();
+        await page.keyboard.press("ArrowDown");
+        await expect(items.nth(1)).toBeFocused();
+        await page.keyboard.press("ArrowUp");
+        await expect(items.first()).toBeFocused();
+        await page.keyboard.press("ArrowUp");
+        await expect(items.last()).toBeFocused();
+        await page.keyboard.press("ArrowDown");
+        await expect(items.first()).toBeFocused();
+        await page.keyboard.press("Escape");
+        await expect(page.getByRole("menu")).toHaveCount(0);
+        await expect(trigger).toBeFocused();
+      }
+    });
+  }
+
   test("Esc 關閉並把焦點還給觸發鍵", async ({ page }) => {
     const trigger = await openChannels(page, 360, 800);
     await page.keyboard.press("Escape");
