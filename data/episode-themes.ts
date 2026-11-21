@@ -63,6 +63,9 @@ export const EPISODE_THEMES: readonly EpisodeThemeRow[] = [
   { ep: 34, slug: "ep-34", title: "小紅賽車好想生氣怎麼辦？", theme: "情緒管理" },
   { ep: 35, slug: "ep-35", title: "恐龍車多多問為什麼不能一直吃糖果？", theme: "生活好習慣" },
   { ep: 36, slug: "ep-36", title: "電動車與機器人的尋找任務", theme: "思考與創造" },
+  { ep: 37, slug: "ep-37", title: "收割機後面的小鳥在做什麼？", theme: "思考與創造" },
+  { ep: 38, slug: "ep-38", title: "【音樂篇】Bonbon 與小鳥的啾啾歌", theme: "思考與創造" },
+  { ep: 39, slug: "ep-39", title: "雙胞胎消防車吵架後的救援任務", theme: "交友與合作助人" },
 ];
 
 const themeSet = new Set<string>(STORY_FINDER_THEMES);
