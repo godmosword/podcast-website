@@ -13,6 +13,7 @@ import { PARENT_TRAVEL_ABROAD_ARTICLES } from "../data/parent-travel-abroad-arti
 import type { OfficialReleaseManifest } from "../lib/official-release";
 import { officialReleaseManifest } from "../lib/official-release";
 import { hashTree, type ReleaseAsset } from "./lib/official-release-files";
+import { prepareSwRevocations } from "./lib/sw-revocations";
 
 const ROOT = process.cwd();
 const force = process.argv.includes("--force");
@@ -58,12 +59,13 @@ function main(): void {
   };
 
   const assets: ReleaseAsset[] = stories.flatMap((slug) => hashTree(ROOT, `public/stories/${slug}`));
+  const writeSw = prepareSwRevocations(ROOT, []);
   writeFileSync(join(ROOT, "data/official-release.json"), `${JSON.stringify(manifest, null, 2)}\n`);
   writeFileSync(
     join(ROOT, "data/official-release-assets.json"),
     `${JSON.stringify({ sourceCommit, files: assets }, null, 2)}\n`,
   );
-  writeFileSync(join(ROOT, "public/sw-revocations.json"), `${JSON.stringify({ storySlugs: [] }, null, 2)}\n`);
+  writeSw();
   console.log(`已寫入 ${stories.length} 集、${assets.length} 個素材雜湊。來源 commit ${sourceCommit}。`);
 }
 

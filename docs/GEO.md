@@ -31,7 +31,7 @@
 | [`scripts/verify-geo-live.ts`](../scripts/verify-geo-live.ts) + `npm run verify:geo-live` | **部署後**對 live base URL 煙霧測試（robots／sitemap／feed／llms、重點頁 200、最新集 FAQ）。逐字稿：有 `data/subtitles` 側車才要求 VTT 200／RSS `podcast:transcript`／JSON-LD MediaObject；MVP 無側車則確認**未**宣告。**不在** `npm run check` 內 |
 | [`docs/GEO-BASELINE.md`](./GEO-BASELINE.md) | 每週人工 baseline 記錄表（AI 五題 + GSC／Bing／Vercel 指標）；勿捏造引用結果 |
 | [`scripts/generate-indexnow-key.ts`](../scripts/generate-indexnow-key.ts) | prebuild 依 `INDEXNOW_KEY` env 產生 `public/<key>.txt`（IndexNow key file）；未設定時安靜略過 |
-| [`scripts/submit-indexnow.ts`](../scripts/submit-indexnow.ts) + `npm run submit:indexnow` | 只通知 `https://carcarplayground.com`。由 `indexnow-official.yml` 在官網 `release` 正式部署成功後提交；Apple sync 與實驗站不提交。非官網網址會略過。支援 `--dry-run` |
+| [`scripts/submit-indexnow.ts`](../scripts/submit-indexnow.ts) + `npm run submit:indexnow` | 只通知 `https://carcarplayground.com`。由 `live-domain.yml` 在正式網域換上 `release` 的該次 commit 後提交；Apple sync 與實驗站不提交。非官網網址會略過。支援 `--dry-run` |
 
 ---
 
@@ -107,9 +107,9 @@ npm run submit:indexnow -- --dry-run
 
 - **不保證索引**：IndexNow 只是「通知引擎有新內容」，不保證被索引或被 AI 引用。
 - **Google 不支援 IndexNow**：Google 索引靠 `sitemap.xml` 新鮮度（`lastModified`）+ Google Search Console 手動 Request Indexing；`submit:indexnow` 對 Google 無效。
-- **提交時機**：`indexnow-official.yml` 只在官網網域上的 `release` 正式部署成功後提交。實驗站部署與每 15 分鐘的 Apple sync 都不提交。網域還沒指到該次產物時，不要手動對暫時網址提交。
+- **提交時機**：`live-domain.yml` 在 push 到 `main` 或 `release` 後，等 `https://carcarplayground.com/build-info.json` 回報的 commit 等於該次 push 才提交；網域不歸該分支管時直接略過。提交的集數來自 push 範圍：`release` 比對發行清單的新增與下架，`main` 比對 `public/stories/ep-N/` 的變更。不要手動對暫時網址提交。
 - **無可見 breadcrumb**：`breadcrumbListJsonLd` 只寫入 JSON-LD，頁面上無對應可見 UI 元件，因此**不承諾** breadcrumb rich result 一定顯示於搜尋結果（依各引擎樣式規則而定，本站只保證結構化資料本身合法可解析）。
-- **fail-soft 邊界**：`submit-indexnow.ts` 任何錯誤（無 key、API 失敗、逾時）一律 catch 並 exit 0。官網那支 workflow 變綠，不代表 IndexNow 真的提交成功，要看 Job Summary，或在本機用 `--dry-run` 排查。
+- **fail-soft 邊界**：`submit-indexnow.ts` 任何錯誤（無 key、API 失敗、逾時）一律 catch 並 exit 0。`live-domain.yml` 變綠，不代表 IndexNow 真的提交成功，要看 Job Summary，或在本機用 `--dry-run` 排查。
 
 ---
 

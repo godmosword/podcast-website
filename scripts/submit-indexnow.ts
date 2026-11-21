@@ -6,19 +6,22 @@
  * - fail-soft **唯一**由本 script 保證：任何錯誤（無 key、API 失敗、逾時）
  *   一律 catch、寫 Job Summary 警示後 exit 0——workflow 端**不得**用
  *   continue-on-error 頂替（見 scripts/lib/sync-workflow-contract.test.ts）。
- * - 官網 workflow 在 deployment 成功後才跑，所以不再為了等部署而 sleep。
+ * - live-domain workflow 等正式網域換上該次 build 才跑，所以不再為了等部署而 sleep。
  *   不保證索引（Google 不支援 IndexNow）；限制詳見 docs/GEO.md。
- * - URL 變更集來源：$SYNC_REPORT_PATH（sync-run-report.json）；缺檔時仍提交
- *   基本集（首頁、/stories、sitemap.xml）。
+ * - URL 變更集來源：$SYNC_REPORT_PATH（sync-run-report.json），加上 push 範圍
+ *   （INDEXNOW_BEFORE／INDEXNOW_AFTER／INDEXNOW_EDITION）。official 比對發行清單，
+ *   其他比對 public/stories 的變更。都沒有時仍提交基本集（首頁、/stories、sitemap.xml）。
  *
  * 用法：
  *   npx tsx scripts/submit-indexnow.ts            實際提交（需 INDEXNOW_KEY）
  *   npx tsx scripts/submit-indexnow.ts --dry-run  只印 payload，不發送
  */
+import { execFileSync } from "node:child_process";
 import { appendFileSync, existsSync, readFileSync } from "node:fs";
 import { getStories, isRetiredTopicTag } from "../data/content";
 import { OFFICIAL_SITE_ORIGIN } from "../lib/site-edition";
 import { getSiteUrl } from "../lib/site-url";
+import { storySlugChanges, storySlugsFromChangedPaths } from "./lib/live-build";
 import type { SyncRunReport } from "./lib/sync-report";
 
 const INDEXNOW_ENDPOINT = "https://api.indexnow.org/indexnow";
@@ -67,6 +70,40 @@ function changedSlugs(syncReport: SyncRunReport | null): string[] {
       ...syncReport.vehicleBackfill,
     ]),
   ];
+}
+
+function git(args: string[]): string {
+  return execFileSync("git", args, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+}
+
+function releasedStoriesAt(ref: string): string[] {
+  const body = JSON.parse(git(["show", `${ref}:data/official-release.json`])) as {
+    stories?: unknown;
+  };
+  return Array.isArray(body.stories)
+    ? body.stories.filter((slug): slug is string => typeof slug === "string")
+    : [];
+}
+
+/**
+ * push 範圍內有變的集數。讀不到（新分支、舊 commit 沒有發行清單、淺 clone）
+ * 就只送基本集，不讓整次提交失敗。
+ */
+function pushRangeSlugs(): string[] {
+  const before = process.env.INDEXNOW_BEFORE?.trim();
+  const after = process.env.INDEXNOW_AFTER?.trim();
+  if (!before || !after || /^0+$/.test(before)) return [];
+  try {
+    if (process.env.INDEXNOW_EDITION?.trim() === "official") {
+      return storySlugChanges(releasedStoriesAt(before), releasedStoriesAt(after));
+    }
+    const paths = git(["diff", "--name-only", before, after, "--", "public/stories"]);
+    return storySlugsFromChangedPaths(paths.split("\n"));
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    report(`IndexNow: 讀不到 push 範圍的集數變更，只送基本集（${message.split("\n")[0]}）`);
+    return [];
+  }
 }
 
 /**
@@ -141,7 +178,7 @@ async function main(): Promise<void> {
   }
 
   const effectiveKey = key ?? "dry-run-key";
-  const slugs = changedSlugs(readSyncReport());
+  const slugs = [...new Set([...changedSlugs(readSyncReport()), ...pushRangeSlugs()])];
   const urlList = buildUrlList(slugs, siteUrl);
   const host = new URL(siteUrl).host;
   const keyLocation = `${siteUrl}/${effectiveKey}.txt`;

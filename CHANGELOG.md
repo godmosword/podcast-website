@@ -14,6 +14,7 @@
 
 ### Fixed
 
+- **部署後檢查**：#338 之後正式網域的上線檢查和 IndexNow 都不會自動跑，因為 Vercel 回報的部署事件對不上正式網域。改成 push 到 `main` 或 `release` 後，等 `carcarplayground.com/build-info.json` 換上該次 commit 再跑。網域不歸該分支管時直接略過。IndexNow 會帶上這次新增或下架的集數。
 - **播放器**：電腦版字幕不再壓在插圖下緣，移到插圖下方的黑底上。
 - **夜間**：「開始看故事」「立即看故事」深色按鈕多一圈淺色描邊，看得出按鈕在哪；故事卡的 EP 標籤改成不透明的淡紫底，字看得清楚。
 - **電腦版選單**：視窗較矮、清單還能往下捲時，底部會淡出並出現向下箭頭。
@@ -55,6 +56,8 @@
 - **字幕用字**：「就是只有」「但是只要」不會再被轉成「隻」；同步不再對還沒校對的字幕重做簡轉繁，人工改的字不會被蓋掉。
 
 ### Changed
+
+- **官網切站**：2026-11-21 起 carcarplayground.com 由官網專案（`release`）服務，舊專案改成不收錄的實驗站 podcast-website-mu.vercel.app。RSS 每集 GUID 不變。
 
 - **分享預覽**：貼到 LINE 時，首頁和沒有專屬圖的頁面改用日間首頁第一屏（`public/og-home.jpg`，1200×630），不再用吉祥物。故事、遊戲、宇宙地圖若已有自己的分享圖，維持原樣。導覽列、錯誤頁、著色存圖、RSS 與節目圖仍用 `mascot.png`。
 - **正式網址**：站內 canonical、分享與 RSS 的正式網域改為 https://carcarplayground.com。著色本存圖、分享時，圖框上的網址文字改成 carcarplayground.com。舊的 vercel.app 網址先留著，不轉址。

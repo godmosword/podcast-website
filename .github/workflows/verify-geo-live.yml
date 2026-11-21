@@ -1,8 +1,8 @@
-# 部署後 GEO live 煙霧測試；production deployment 成功後自動觸發，也保留手動入口。
+# GEO live 煙霧測試的手動入口（可指定任一網址，例如官網暫時網址）。
+# 正式網域的自動檢查在 live-domain.yml：等網域換上該次 push 的 build 才跑。
 name: verify-geo-live
 
 on:
-  deployment_status:
   workflow_dispatch:
     inputs:
       base_url:
@@ -15,11 +15,6 @@ permissions:
 
 jobs:
   smoke:
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      (github.event.deployment_status.state == 'success' &&
-      github.event.deployment_status.environment == 'production' &&
-      startsWith(github.event.deployment_status.environment_url, 'https://carcarplayground.com'))
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:

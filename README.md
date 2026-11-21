@@ -134,25 +134,32 @@ npm run dev
 
 ## 官網與實驗站
 
-同一個公開 repo。`main` 是實驗站，包含每 15 分鐘的 Apple sync。官網是另一個 Vercel 專案，Production Branch 設為 `release`，build command 用 `npm run build:official`。
+同一個公開 repo，接兩個 Vercel 專案。2026-11-21 起正式網域在官網專案。
 
-未設定 `SITE_EDITION` 時，行為與現在這個同時服務兩個網域的部署相同：全功能、可索引。不要在網域移轉前把現有專案改成 `lab` 或 `official`。
-
-| 變數 | 官網專案 | 現有專案（網域移走之後才改） |
-|------|----------|------------------------------|
+| | 官網 | 實驗站 |
+|---|---|---|
+| 網址 | [carcarplayground.com](https://carcarplayground.com)（www 308 轉主網域） | [podcast-website-mu.vercel.app](https://podcast-website-mu.vercel.app) |
+| Vercel 專案 | `podcast-website-official` | `podcast-website` |
+| Production Branch | `release` | `main`（含 Apple sync） |
+| Build command | `npm run build:official` | `npm run build` |
 | `SITE_EDITION` | `official` | `lab` |
 | `NEXT_PUBLIC_SITE_URL` | `https://carcarplayground.com` | `https://podcast-website-mu.vercel.app` |
-| 正式資料庫與寄信 | 有 | 拿掉後立刻重新部署 |
+| 搜尋引擎 | 可索引 | `noindex, follow` |
+| `/studio` 節目數據 | 404 | 有 |
+
+實驗站一定要明確設定 `NEXT_PUBLIC_SITE_URL`。Production 沒設時預設是正式網域，實驗站的 canonical 和 RSS 會指到官網，還沒核准的集數就會變成 404。本機與 CI 不設 `SITE_EDITION`，就是全功能、可索引的 `current`。
 
 `SITE_EDITION=official` 卻沒有 `NEXT_PUBLIC_SITE_URL` 時，build 會失敗。官網 build 會依 [data/official-release.json](./data/official-release.json) 刪掉節目數據頁和未核准的故事素材；留言審核頁留著。實驗站的 `npm run build` 不刪檔。
 
-新集上架：`npm run release:approve -- ep-N`，提交後由管理員把該 commit 推進 `release`。GitHub ruleset `official-release` 只讓管理員建立或更新這個分支，sync 用的 `GITHUB_TOKEN` 不能推。下架用 `npm run release:revoke -- ep-N`，只把該集寫進 Service Worker 的刪除名單，不升 cache 版本。
+新集上官網：`npm run release:approve -- ep-N`，commit 到 `main`，再由管理員把 `release` 快轉到那個 commit。`release` 只放 `main` 上有的 commit；直接在 `release` 上做的 commit 要馬上讓 `main` 快轉跟上，否則下次沒辦法快轉。GitHub ruleset `official-release` 只讓管理員建立或更新這個分支，sync 用的 `GITHUB_TOKEN` 不能推。
 
-單集 RSS GUID 固定為 `https://carcarplayground.com/story/ep-N`。頻道 `podcast:guid` 維持既有 UUID。
+下架用 `npm run release:revoke -- ep-N`：官網下次 build 會刪掉該集素材，並把它寫進 `public/sw.js` 的 `REVOKED_STORY_SLUGS`。名單一變 `sw.js` 就跟著變，回訪者的瀏覽器下次檢查到新的 `sw.js` 時重裝，只清這幾集的快取，之後這幾集也不會再寫回快取，`CACHE_NAME` 不升，其他離線故事留著。重新核准同一集時，`release:approve` 會把它從名單拿掉。
 
-網域 `carcarplayground.com` 仍掛在現有專案，這次沒有改綁。新專案先用暫時網址驗過播放、字幕、表單、留言核准與回滾，才把網域移過去。移走之前，現有專案要留著正式資料庫和寄信設定。
+單集 RSS GUID 固定為 `https://carcarplayground.com/story/ep-N`，官網和實驗站的 feed 都一樣，同一集在 App 裡不會重複。頻道 `podcast:guid` 維持既有 UUID。
 
-IndexNow 不再由 Apple sync 對實驗站提交。只有官網網域上的 `release` 正式部署會提交。`verify:geo-live` 的正式檢查打 `https://carcarplayground.com`。
+訂閱、許願、留言兩邊目前都沒有正式資料庫與寄信，API 回 `available:false`，介面改走 mailto。要開放時，先決定接在哪個專案，再另外驗證。
+
+IndexNow 與 `verify:geo-live` 的正式檢查都在 [live-domain.yml](./.github/workflows/live-domain.yml)：push 到 `main` 或 `release` 後，輪詢 `https://carcarplayground.com/build-info.json`，等正式網域換上該次 commit 才跑。正式網域現在由 `release` 負責，`main` 的 push 會直接略過。Apple sync 本身不提交 IndexNow。
 
 ## 部署與環境變數
 
