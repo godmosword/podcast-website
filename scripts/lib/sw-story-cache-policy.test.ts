@@ -14,9 +14,26 @@ describe("service worker story asset cache policy", () => {
   });
 
   it("下架只刪名單裡的故事 URL，不升 cache 版本", () => {
-    expect(sw).toContain("/sw-revocations.json");
-    expect(sw).toContain("dropRevokedStoryAssets");
+    // 名單寫在 sw.js 本身：名單一變檔案就變，瀏覽器才會重裝並跑 activate。
+    // 放在另一個 JSON 檔時 sw.js 不變，回訪者永遠不會清掉下架集數的快取。
+    expect(sw).not.toContain("sw-revocations.json");
+    expect(sw).toMatch(/^const REVOKED_STORY_SLUGS = \[.*\];$/m);
     expect(sw).toContain('const CACHE_NAME = "chechecar-v6"');
+    const drop = sw.match(/async function dropRevokedStoryAssets[\s\S]*?\n}\n/)?.[0] ?? "";
+    expect(drop).toContain("REVOKED_STORY_SLUGS");
+    expect(drop).toContain("dropCachedStoryAsset");
+    const dropOne = sw.match(/async function dropCachedStoryAsset[\s\S]*?\n}\n/)?.[0] ?? "";
+    expect(dropOne, "刪快取也要刪大小紀錄，否則容量一直算到已刪的檔").toContain("deleteAssetMeta");
+    expect(sw).toMatch(/activate[\s\S]{0,400}dropRevokedStoryAssets/);
+  });
+
+  it("下架集數不會被寫回快取，也不從快取拿", () => {
+    const cacheFn = sw.match(/async function cacheStoryAsset[\s\S]*?\n}\n/)?.[0] ?? "";
+    expect(cacheFn, "背景佇列與 fetch 都經過 cacheStoryAsset").toContain("isRevokedStoryPath");
+    const fetchHandler = sw.match(/addEventListener\("fetch"[\s\S]*?\n}\);\n/)?.[0] ?? "";
+    const revokedBranch = fetchHandler.indexOf("isRevokedStoryPath(url.pathname)");
+    expect(revokedBranch, "fetch 要先判斷下架集數").toBeGreaterThan(-1);
+    expect(revokedBranch).toBeLessThan(fetchHandler.indexOf("cache.match(request)"));
   });
 
   it("故事音檔／插圖只快取完整 200，不把 206 Partial 寫進 Cache Storage", () => {

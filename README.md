@@ -153,7 +153,7 @@ npm run dev
 
 新集上官網：`npm run release:approve -- ep-N`，commit 到 `main`，再由管理員把 `release` 快轉到那個 commit。`release` 只放 `main` 上有的 commit；直接在 `release` 上做的 commit 要馬上讓 `main` 快轉跟上，否則下次沒辦法快轉。GitHub ruleset `official-release` 只讓管理員建立或更新這個分支，sync 用的 `GITHUB_TOKEN` 不能推。
 
-下架用 `npm run release:revoke -- ep-N`：官網下次 build 會刪掉該集素材，並把它寫進 Service Worker 的刪除名單。目前名單只在 `sw.js` 本身有變動時才會清掉回訪者手機裡的快取，下架前要先處理。
+下架用 `npm run release:revoke -- ep-N`：官網下次 build 會刪掉該集素材，並把它寫進 `public/sw.js` 的 `REVOKED_STORY_SLUGS`。名單一變 `sw.js` 就跟著變，回訪者的瀏覽器下次檢查到新的 `sw.js` 時重裝，只清這幾集的快取，之後這幾集也不會再寫回快取，`CACHE_NAME` 不升，其他離線故事留著。重新核准同一集時，`release:approve` 會把它從名單拿掉。
 
 單集 RSS GUID 固定為 `https://carcarplayground.com/story/ep-N`，官網和實驗站的 feed 都一樣，同一集在 App 裡不會重複。頻道 `podcast:guid` 維持既有 UUID。
 

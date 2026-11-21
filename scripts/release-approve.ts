@@ -11,6 +11,7 @@ import {
   type OfficialReleaseManifest,
 } from "../lib/official-release";
 import { hashTree, type ReleaseAsset } from "./lib/official-release-files";
+import { prepareSwRevocations } from "./lib/sw-revocations";
 
 const ROOT = process.cwd();
 const slug = process.argv.slice(2).find((arg) => !arg.startsWith("--"));
@@ -66,9 +67,11 @@ function main(): void {
   ].sort((left, right) => left.path.localeCompare(right.path, undefined, { numeric: true }));
   assets.sourceCommit = manifest.sourceCommit;
 
+  // 重新核准曾下架的集數時名單會變；只是核准新集時 sw.js 不會變。
+  const writeSw = prepareSwRevocations(ROOT, manifest.revokedStorySlugs);
   writeJson("data/official-release.json", manifest);
   writeJson("data/official-release-assets.json", assets);
-  writeJson("public/sw-revocations.json", { storySlugs: manifest.revokedStorySlugs });
+  writeSw();
   console.log(`${slug} 已寫進發行清單。請提交後，由負責人把這個 commit 推進 release。`);
   console.log("15 分鐘的 Apple sync 只更新 main，不會更新官網。");
 }

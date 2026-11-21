@@ -111,6 +111,21 @@ async function deleteAssetMeta(url) {
   }
 }
 
+// 官網下架的集數。由 npm run release:revoke／release:approve 改寫這一行，不要手改。
+// 名單一變 sw.js 就有 byte 差異，瀏覽器下次檢查到新的 sw.js 時重裝，activate 只刪這幾集的快取，
+// 不升 CACHE_NAME。實驗站也用同一支 sw.js：那邊這幾集改成每次從網路播放，不留離線快取。
+const REVOKED_STORY_SLUGS = [];
+
+function isRevokedStoryPath(pathname) {
+  return REVOKED_STORY_SLUGS.some((slug) => pathname.startsWith(`/stories/${slug}/`));
+}
+
+async function dropCachedStoryAsset(cache, request) {
+  await cache.delete(request);
+  // 大小紀錄也要刪，否則容量一直算到已刪的檔，會提早擠掉其他集數。
+  await deleteAssetMeta(request.url);
+}
+
 async function trimStoryCache(cache) {
   const records = (await listAssetMeta()).sort((a, b) => a.lastUsed - b.lastUsed);
   let totalBytes = records.reduce((sum, record) => sum + (record.size || 0), 0);
@@ -135,6 +150,8 @@ async function trimStoryCache(cache) {
 async function cacheStoryAsset(cache, request, response) {
   // Cache API rejects opaque/partial (206) bodies. Never let that fail playback.
   if (response.status !== 200) return;
+  // 下架的集數不再寫回快取（播放頁背景佇列、或 activate 期間才回來的請求）。
+  if (isRevokedStoryPath(new URL(request.url).pathname)) return;
   try {
     await cache.put(request, response.clone());
     await putAssetMeta(request.url, response);
@@ -157,24 +174,17 @@ self.addEventListener("install", (event) => {
 });
 
 async function dropRevokedStoryAssets(cache) {
-  let revoked = [];
+  if (REVOKED_STORY_SLUGS.length === 0) return;
   try {
-    const response = await fetch(new URL("/sw-revocations.json", self.location.origin).href);
-    if (!response.ok) return;
-    const body = await response.json();
-    revoked = Array.isArray(body.storySlugs) ? body.storySlugs : [];
+    const keys = await cache.keys();
+    await Promise.all(
+      keys
+        .filter((request) => isRevokedStoryPath(new URL(request.url).pathname))
+        .map((request) => dropCachedStoryAsset(cache, request)),
+    );
   } catch {
-    return;
+    // 這裡漏刪的項目，在 fetch 時碰到也會被刪掉，不會再被拿出來用。
   }
-  if (revoked.length === 0) return;
-  const keys = await cache.keys();
-  await Promise.all(
-    keys.map((request) => {
-      const path = new URL(request.url).pathname;
-      const drop = revoked.some((slug) => path.startsWith(`/stories/${slug}/`));
-      return drop ? cache.delete(request) : Promise.resolve(false);
-    }),
-  );
 }
 
 self.addEventListener("activate", (event) => {
@@ -203,6 +213,17 @@ self.addEventListener("fetch", (event) => {
       url.pathname.endsWith(".mp3") ||
       url.pathname.endsWith(".avif") ||
       url.pathname.endsWith(".webp"));
+
+  if (isStoryAsset && isRevokedStoryPath(url.pathname)) {
+    // 下架的集數不從快取拿；activate 漏刪的殘留在這裡順手清掉。
+    event.waitUntil(
+      caches
+        .open(CACHE_NAME)
+        .then((cache) => dropCachedStoryAsset(cache, request))
+        .catch(() => undefined),
+    );
+    return;
+  }
 
   if (isStoryAsset) {
     event.respondWith(

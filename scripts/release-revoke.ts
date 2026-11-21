@@ -10,6 +10,7 @@ import {
   type OfficialReleaseManifest,
 } from "../lib/official-release";
 import type { ReleaseAsset } from "./lib/official-release-files";
+import { prepareSwRevocations } from "./lib/sw-revocations";
 
 const ROOT = process.cwd();
 const slug = process.argv.slice(2).find((arg) => !arg.startsWith("--"));
@@ -54,10 +55,11 @@ function main(): void {
   assets.files = assets.files.filter((file) => !file.path.startsWith(prefix));
   assets.sourceCommit = manifest.sourceCommit;
 
+  const writeSw = prepareSwRevocations(ROOT, manifest.revokedStorySlugs);
   writeJson("data/official-release.json", manifest);
   writeJson("data/official-release-assets.json", assets);
-  writeJson("public/sw-revocations.json", { storySlugs: manifest.revokedStorySlugs });
-  console.log(`${slug} 已從發行清單拿下。官網下次 build 會刪素材，並只清該集的 Service Worker 快取。`);
+  writeSw();
+  console.log(`${slug} 已從發行清單拿下。官網下次 build 會刪素材，並換上新的 sw.js；回訪者的瀏覽器重裝後只清該集快取。`);
 }
 
 main();
