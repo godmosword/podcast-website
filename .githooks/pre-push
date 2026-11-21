@@ -18,8 +18,22 @@ while read -r _local_ref local_sha _remote_ref remote_sha; do
   [ "$local_sha" = "$ZERO" ] && continue
 
   if [ "$remote_sha" = "$ZERO" ]; then
-    first=$(git rev-list --max-count=50 "$local_sha" | tail -1)
-    range="$first..$local_sha"
+    # 新分支：只看從 main 分出來之後的 commit。
+    # 以前取「最近 50 個 commit」，main 上別人重錄過 baseline 就會一起算進來，
+    # 這次 push 只改 UI、零 baseline 也會被放行（2026-10-29 #271 第一次推送就這樣過了）。
+    base=""
+    for ref in origin/main origin/HEAD main; do
+      base=$(git merge-base "$ref" "$local_sha" 2>/dev/null) && [ -n "$base" ] && break
+      base=""
+    done
+    if [ "$base" = "$local_sha" ]; then
+      continue
+    elif [ -n "$base" ]; then
+      range="$base..$local_sha"
+    else
+      first=$(git rev-list --max-count=50 "$local_sha" | tail -1)
+      range="$first..$local_sha"
+    fi
   else
     range="$remote_sha..$local_sha"
   fi
