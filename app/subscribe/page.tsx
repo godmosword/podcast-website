@@ -3,21 +3,23 @@ import SubscribeForm from "@/components/SubscribeForm";
 import SubscribePageIntro from "@/components/SubscribePageIntro";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
+import { pageSocialMetadata } from "@/lib/page-social-metadata";
+import { SITE_NAME } from "@/lib/site-url";
 import { isSubscribeDbConfigured } from "@/lib/subscribe-db";
 import { isSubscribeEmailConfigured } from "@/lib/subscribe-email";
-import { SUBSCRIBE_PAGE_DESCRIPTION, SUBSCRIBE_PAGE_TITLE } from "@/lib/subscribe-copy";
+import { SUBSCRIBE_CLOSED_PAGE_TITLE, SUBSCRIBE_PAGE_DESCRIPTION } from "@/lib/subscribe-copy";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
-  title: SUBSCRIBE_PAGE_TITLE,
+  title: SUBSCRIBE_CLOSED_PAGE_TITLE,
   description: SUBSCRIBE_PAGE_DESCRIPTION,
   alternates: { canonical: "/subscribe" },
-  openGraph: {
-    title: `${SUBSCRIBE_PAGE_TITLE} · 車車遊樂園`,
+  ...pageSocialMetadata({
+    title: `${SUBSCRIBE_CLOSED_PAGE_TITLE} · ${SITE_NAME}`,
     description: SUBSCRIBE_PAGE_DESCRIPTION,
     url: "/subscribe",
     type: "website",
-  },
+  }),
 };
 
 export default function SubscribePage() {

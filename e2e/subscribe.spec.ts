@@ -3,6 +3,7 @@ import {
   SUBSCRIBE_CLOSED_PAGE_LEDE,
   SUBSCRIBE_CLOSED_PAGE_TITLE,
   SUBSCRIBE_EMAIL_LABEL,
+  SUBSCRIBE_PAGE_DESCRIPTION,
   SUBSCRIBE_PAGE_TITLE,
   SUBSCRIBE_PRIVACY_NOTE,
   SUBSCRIBE_SUBMIT_LABEL,
@@ -41,6 +42,17 @@ test.describe("SubscribeForm LIST-2", () => {
     await page.goto("/subscribe");
     await expect(page.getByRole("heading", { name: SUBSCRIBE_CLOSED_PAGE_TITLE })).toBeVisible();
     await expect(page.getByText(SUBSCRIBE_CLOSED_PAGE_LEDE)).toBeVisible();
+    const title = `${SUBSCRIBE_CLOSED_PAGE_TITLE} · 車車遊樂園`;
+    await expect(page).toHaveTitle(title);
+    await expect(page.locator('meta[property="og:title"]')).toHaveAttribute("content", title);
+    await expect(page.locator('meta[name="twitter:title"]')).toHaveAttribute("content", title);
+    for (const selector of [
+      'meta[name="description"]',
+      'meta[property="og:description"]',
+      'meta[name="twitter:description"]',
+    ]) {
+      await expect(page.locator(selector)).toHaveAttribute("content", SUBSCRIBE_PAGE_DESCRIPTION);
+    }
     // 關閉時不收 Email，頁面不該一邊說「先留下家長 Email」一邊說登記關閉。
     await expect(page.getByText("先留下家長 Email", { exact: false })).toHaveCount(0);
     // M8：關閉時四個平台按鈕就在首屏（不只頁尾）
