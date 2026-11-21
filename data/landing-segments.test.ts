@@ -1,5 +1,6 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
+import sharp from "sharp";
 import { describe, expect, it } from "vitest";
 import { EPISODE_THEMES } from "./episode-themes";
 import { LANDING_SEGMENTS } from "./landing-segments";
@@ -25,6 +26,9 @@ describe("landing-segments", () => {
     for (const seg of resolved) {
       expect(seg.items.length).toBeGreaterThan(0);
     }
+    const booksSegment = LANDING_SEGMENTS.find((segment) => segment.id === "picture-books");
+    expect(booksSegment?.subtitle).toBeUndefined();
+
     const books = resolved.find((segment) => segment.id === "picture-books")!;
     expect(books.items[0]).toMatchObject({
       kind: "story",
@@ -67,6 +71,19 @@ describe("landing-segments", () => {
       expect(existsSync(webpPath), `缺 WebP：${webpPath}`).toBe(true);
       expect(existsSync(avifPath), `缺 AVIF：${avifPath}`).toBe(true);
     }
+  });
+
+  it("繪本電腦版沿用補畫原檔 2560×1440，WebP／AVIF 同尺寸", async () => {
+    const base = join(process.cwd(), "public/landing/segment-picture-books");
+    const jpg = await sharp(`${base}.jpg`).metadata();
+    const webp = await sharp(`${base}.webp`).metadata();
+    const avif = await sharp(`${base}.avif`).metadata();
+    expect(jpg.width).toBe(2560);
+    expect(jpg.height).toBe(1440);
+    expect(webp.width).toBe(jpg.width);
+    expect(webp.height).toBe(jpg.height);
+    expect(avif.width).toBe(jpg.width);
+    expect(avif.height).toBe(jpg.height);
   });
 
   it("每段 heroImagePortrait 指向 /landing 直版路徑", () => {
@@ -116,7 +133,6 @@ describe("landing-segments", () => {
       expect.objectContaining({
         id: "picture-books",
         title: "聽聽看繪本",
-        subtitle: "一邊聽、一邊看圖",
         cta: { label: "看繪本故事", href: "/picture-books" },
         navLabel: "繪本故事",
       }),
