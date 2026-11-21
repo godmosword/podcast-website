@@ -31,7 +31,7 @@
 | [`scripts/verify-geo-live.ts`](../scripts/verify-geo-live.ts) + `npm run verify:geo-live` | **部署後**對 live base URL 煙霧測試（robots／sitemap／feed／llms、重點頁 200、最新集 FAQ）。逐字稿：有 `data/subtitles` 側車才要求 VTT 200／RSS `podcast:transcript`／JSON-LD MediaObject；MVP 無側車則確認**未**宣告。**不在** `npm run check` 內 |
 | [`docs/GEO-BASELINE.md`](./GEO-BASELINE.md) | 每週人工 baseline 記錄表（AI 五題 + GSC／Bing／Vercel 指標）；勿捏造引用結果 |
 | [`scripts/generate-indexnow-key.ts`](../scripts/generate-indexnow-key.ts) | prebuild 依 `INDEXNOW_KEY` env 產生 `public/<key>.txt`（IndexNow key file）；未設定時安靜略過 |
-| [`scripts/submit-indexnow.ts`](../scripts/submit-indexnow.ts) + `npm run submit:indexnow` | 只通知 `https://carcarplayground.com`。由 `indexnow-official.yml` 在官網 `release` 正式部署成功後提交；Apple sync 與實驗站不提交。非官網網址會略過。支援 `--dry-run` |
+| [`scripts/submit-indexnow.ts`](../scripts/submit-indexnow.ts) + `npm run submit:indexnow` | 只通知 `https://carcarplayground.com`。由 `live-domain.yml` 在正式網域換上 `release` 的該次 commit 後提交；Apple sync 與實驗站不提交。非官網網址會略過。支援 `--dry-run` |
 
 ---
 

@@ -57,6 +57,8 @@
 
 ### Changed
 
+- **官網切站**：2026-11-21 起 carcarplayground.com 由官網專案（`release`）服務，舊專案改成不收錄的實驗站 podcast-website-mu.vercel.app。RSS 每集 GUID 不變。
+
 - **分享預覽**：貼到 LINE 時，首頁和沒有專屬圖的頁面改用日間首頁第一屏（`public/og-home.jpg`，1200×630），不再用吉祥物。故事、遊戲、宇宙地圖若已有自己的分享圖，維持原樣。導覽列、錯誤頁、著色存圖、RSS 與節目圖仍用 `mascot.png`。
 - **正式網址**：站內 canonical、分享與 RSS 的正式網域改為 https://carcarplayground.com。著色本存圖、分享時，圖框上的網址文字改成 carcarplayground.com。舊的 vercel.app 網址先留著，不轉址。
 - **全部故事**：最新一集與「立即看故事」移到最上面，打開就看得到；「陪孩子，成長的路上」大圖移到故事列表之後。
