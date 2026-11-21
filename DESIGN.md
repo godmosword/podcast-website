@@ -83,7 +83,7 @@ Bonbon & 馬米親子 Podcast「看圖聽故事」網站的視覺與互動規範
 | `--bg-2` | `#fbfbfd` | 次背景 / 卡片漸層 |
 | `--bg-dot` | `#eef1f6` | 極淡灰藍底紋 |
 | `--ink` | `#34302b` | 主文字（中性深灰） |
-| `--ink-soft` | `#7a7268` | 次要文字 |
+| `--ink-soft` | `#797167` | 次要文字（夜間仍為 `#bdb6a4`） |
 | `--card` | `#ffffff` | 卡片背景 |
 | `--surface-elevated` | `var(--card)` | 抬升表面（卡片／區塊） |
 | `--surface-glass` | 半透明 card mix | 導覽／次 CTA 玻璃層 |
