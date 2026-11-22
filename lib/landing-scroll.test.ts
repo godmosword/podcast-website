@@ -76,6 +76,7 @@ describe("transitionLandingToAnchor", () => {
     resetLandingScrollTransition();
     vi.useRealTimers();
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   function mountTwoSegments() {
@@ -98,14 +99,18 @@ describe("transitionLandingToAnchor", () => {
 
   it("reduced-motion 立刻 auto 捲、不寫 phase", async () => {
     const { first, next, scrollTo } = mountTwoSegments();
-    vi.spyOn(window, "matchMedia").mockImplementation(
-      (query) =>
-        ({
-          matches: String(query).includes("prefers-reduced-motion"),
-          media: String(query),
-          addEventListener: vi.fn(),
-          removeEventListener: vi.fn(),
-        }) as unknown as MediaQueryList,
+    // jsdom 沒有 matchMedia；vitest 4 的 spyOn 不能監看不存在的屬性，改用 stubGlobal。
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn(
+        (query: string) =>
+          ({
+            matches: String(query).includes("prefers-reduced-motion"),
+            media: String(query),
+            addEventListener: vi.fn(),
+            removeEventListener: vi.fn(),
+          }) as unknown as MediaQueryList,
+      ),
     );
 
     await expect(transitionLandingToAnchor(next.id)).resolves.toBe(true);

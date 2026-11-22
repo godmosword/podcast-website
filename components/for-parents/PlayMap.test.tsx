@@ -8,7 +8,7 @@ import {
   screen,
   within,
 } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from "vitest";
 import { listPlaygrounds, PLAYGROUND_TYPES, getPlayground } from "@/data/playgrounds";
 import { filterPlaygrounds } from "@/lib/playgrounds-query";
 import { coverageHeadline } from "@/lib/playground-coverage";
@@ -43,7 +43,7 @@ function expectResultScopeCount(
   expect(label).toMatch(new RegExp(`共 ${count} (個地方|處)$`));
 }
 
-let replaceStateSpy!: ReturnType<typeof vi.spyOn>;
+let replaceStateSpy!: MockInstance<History["replaceState"]>;
 
 type MockLeafletProps = {
   places: readonly unknown[];
