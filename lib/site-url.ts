@@ -1,4 +1,4 @@
-import { getSiteEdition } from "./site-edition";
+import { OFFICIAL_SITE_ORIGIN, getSiteEdition } from "./site-edition";
 
 /** 站名。metadata、JSON-LD 與 Media Session 共用同一個字面值。 */
 export const SITE_NAME = "車車遊樂園";
@@ -25,10 +25,10 @@ export function defaultOgImage() {
 }
 
 /**
- * 正式站網域。Production 未設 NEXT_PUBLIC_SITE_URL 時用此值，
- * 確保 OG／分享連結永不指向每次部署的臨時 Vercel 網域。
+ * 正式站網域，與 `OFFICIAL_SITE_ORIGIN` 同一個值。Production 未設 NEXT_PUBLIC_SITE_URL 時用此值，
+ * 確保 OG／分享連結永不指向每次部署的臨時 Vercel 網域（lab 的 production 會在 build 前被擋下）。
  */
-export const CANONICAL_SITE_URL = "https://carcarplayground.com";
+export const CANONICAL_SITE_URL = OFFICIAL_SITE_ORIGIN;
 
 function stripTrailingSlash(url: string): string {
   return url.replace(/\/+$/, "");
@@ -60,16 +60,11 @@ export function getSiteUrl(): string {
   return "http://localhost:3000";
 }
 
-/** --production 可驗官網網域，也可驗實驗站 fallback 網域。兩邊的 site URL 必須與 base URL 相同。 */
+/** --production 只驗正式網域，而且 site URL 必須與 base URL 同源。實驗站不進索引，不走這條。 */
 export function isTrackedProductionOrigin(baseUrl: string, siteUrl = getSiteUrl()): boolean {
   try {
     const origin = new URL(baseUrl).origin;
-    const siteOrigin = new URL(siteUrl).origin;
-    if (origin !== siteOrigin) return false;
-    return (
-      origin === new URL(CANONICAL_SITE_URL).origin ||
-      origin === "https://carcarplayground.com"
-    );
+    return origin === new URL(siteUrl).origin && origin === OFFICIAL_SITE_ORIGIN;
   } catch {
     return false;
   }

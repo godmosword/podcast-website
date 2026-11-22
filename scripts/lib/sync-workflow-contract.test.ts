@@ -468,7 +468,9 @@ describe("sync workflow contract", () => {
     const triggers = (doc.on ?? doc[true as unknown as keyof typeof doc]) as {
       push?: { branches?: string[] };
     };
-    expect(triggers.push?.branches?.slice().sort()).toEqual(["main", "release"]);
+    // 切站後 main 只部署實驗站；手動執行仍可選 main（網域搬回時用）。
+    expect(triggers.push?.branches).toEqual(["release"]);
+    expect(yaml).toContain("workflow_dispatch:");
     expect(yaml).toContain("cancel-in-progress: true");
     expect(yaml).toContain("https://carcarplayground.com");
 

@@ -1,9 +1,11 @@
 /**
  * 實驗站與官網的建置身份。
  *
- * 未設定時是 `current`：維持現有 Vercel 專案的全功能、可索引行為。
- * 不要在網域移轉前把現有專案設成 `lab` 或 `official`。
- * `official` 且沒有 `NEXT_PUBLIC_SITE_URL` 時，建置必須失敗。
+ * - `official`：Vercel 專案 `podcast-website-official`（追 `release`），服務正式網域。
+ * - `lab`：Vercel 專案 `podcast-website`（追 `main`），只用 vercel.app 網址，不進索引。
+ * - `current`：未設定時的預設，給本機與 CI 的 build 用；全部內容、可索引、保留 /studio。
+ *
+ * `official` 缺網址、或 `lab` 的 production 缺網址時，建置必須失敗。
  */
 
 export const OFFICIAL_SITE_ORIGIN = "https://carcarplayground.com";
@@ -30,15 +32,24 @@ export function isOfficialEdition(): boolean {
 }
 
 /**
- * `official` 缺網址就丟錯。lab 與 current 不在這裡改 fallback。
- * 實驗站 production 未設網址時仍走 `CANONICAL_SITE_URL`（vercel.app）。
+ * 建置前檢查網址有沒有設。
+ * - `official` 缺網址：canonical、sitemap 與 RSS 沒有可信的來源。
+ * - `lab` 的 production 缺網址：`getSiteUrl()` 會退回正式網域，實驗站變成官網的重複內容。
+ *   lab 的預覽部署不在此限，它們走 `VERCEL_URL`。
  */
-export function assertOfficialEditionConfigured(): void {
-  if (process.env.SITE_EDITION?.trim() !== "official") return;
+export function assertSiteEditionConfigured(): void {
   if (process.env.NEXT_PUBLIC_SITE_URL?.trim()) return;
-  throw new Error(
-    "SITE_EDITION=official 時必須設定 NEXT_PUBLIC_SITE_URL，否則 canonical、sitemap 與 RSS 會退回實驗站。",
-  );
+  const edition = process.env.SITE_EDITION?.trim();
+  if (edition === "official") {
+    throw new Error(
+      "SITE_EDITION=official 時必須設定 NEXT_PUBLIC_SITE_URL，否則 canonical、sitemap 與 RSS 會退回實驗站。",
+    );
+  }
+  if (edition === "lab" && process.env.VERCEL_ENV === "production") {
+    throw new Error(
+      "SITE_EDITION=lab 的 production 必須設定 NEXT_PUBLIC_SITE_URL（實驗站的 vercel.app 網址），否則 canonical、sitemap 與 RSS 會指到正式網域。",
+    );
+  }
 }
 
 /** 預覽部署與明確的 lab 不進索引。不要對一般爬蟲加全站 Disallow。 */
