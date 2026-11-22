@@ -1,5 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { editionRobots, getSiteEdition, OFFICIAL_SITE_ORIGIN } from "./site-edition";
+import {
+  assertSiteEditionConfigured,
+  editionRobots,
+  getSiteEdition,
+  OFFICIAL_SITE_ORIGIN,
+} from "./site-edition";
 
 describe("site edition", () => {
   afterEach(() => {
@@ -30,5 +35,44 @@ describe("site edition", () => {
     vi.stubEnv("VERCEL_ENV", "production");
     expect(editionRobots()).toBeUndefined();
     expect(OFFICIAL_SITE_ORIGIN).toBe("https://carcarplayground.com");
+  });
+});
+
+describe("assertSiteEditionConfigured", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  function stub(edition: string, vercelEnv: string, siteUrl = ""): void {
+    vi.stubEnv("SITE_EDITION", edition);
+    vi.stubEnv("VERCEL_ENV", vercelEnv);
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", siteUrl);
+  }
+
+  it("official 缺網址，不論環境都擋", () => {
+    stub("official", "preview");
+    expect(() => assertSiteEditionConfigured()).toThrow("SITE_EDITION=official");
+  });
+
+  it("lab 的 production 缺網址要擋，免得 canonical 指到正式網域", () => {
+    stub("lab", "production");
+    expect(() => assertSiteEditionConfigured()).toThrow("SITE_EDITION=lab");
+  });
+
+  it("lab 的預覽部署走 VERCEL_URL，不必設網址", () => {
+    stub("lab", "preview");
+    expect(() => assertSiteEditionConfigured()).not.toThrow();
+  });
+
+  it("設了網址就放行", () => {
+    stub("lab", "production", "https://podcast-website-mu.vercel.app");
+    expect(() => assertSiteEditionConfigured()).not.toThrow();
+    stub("official", "production", OFFICIAL_SITE_ORIGIN);
+    expect(() => assertSiteEditionConfigured()).not.toThrow();
+  });
+
+  it("未設版別（本機、CI）不檢查", () => {
+    stub("", "production");
+    expect(() => assertSiteEditionConfigured()).not.toThrow();
   });
 });

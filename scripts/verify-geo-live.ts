@@ -312,7 +312,7 @@ async function main(): Promise<void> {
   const { baseUrl, productionOnly } = options;
   if (productionOnly && !isConfiguredProductionOrigin(baseUrl)) {
     console.error(
-      `錯誤：--production 只能驗證 https://carcarplayground.com 或 ${CANONICAL_SITE_URL}，且必須與 NEXT_PUBLIC_SITE_URL 相同。實際為 ${baseUrl}`,
+      `錯誤：--production 只能驗證 ${CANONICAL_SITE_URL}，且必須與 NEXT_PUBLIC_SITE_URL 相同。實際為 ${baseUrl}`,
     );
     process.exit(1);
   }

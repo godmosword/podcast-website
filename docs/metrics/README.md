@@ -27,7 +27,7 @@
 - `utm_medium=story_page | footer | subscribe_cta`
 - `utm_campaign=<slug|site>`
 
-實作：`lib/platform-utm.ts`、`TrackedPlatformLink`。
+實作：`lib/platform-utm.ts`（`SubscribeForm`、`ConnectHub`、`SubscribeMenu` 直接呼叫）。
 
 ## SoundOn show notes 回鏈（Growth-Measure-1）
 

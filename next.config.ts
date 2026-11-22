@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 import { adventuresZoneQueryRedirects } from "./lib/adventures-redirects";
 import { assertOfficialReleaseReady } from "./lib/official-release";
-import { assertOfficialEditionConfigured } from "./lib/site-edition";
+import { assertSiteEditionConfigured } from "./lib/site-edition";
 import { retiredGameRedirects } from "./lib/retired-game-redirects";
 import { retiredPageRedirects } from "./lib/retired-page-redirects";
 import { legacyStoryRedirects } from "./lib/story-slug-aliases";
@@ -21,7 +21,7 @@ if (process.env.VISUAL_FIXTURE_BUILD !== undefined) {
   throw new Error("不要直接設 VISUAL_FIXTURE_BUILD；視覺回歸請用 VISUAL_FIXTURE=1（npm run test:visual:trusted）。");
 }
 
-assertOfficialEditionConfigured();
+assertSiteEditionConfigured();
 assertOfficialReleaseReady();
 
 const siteEdition = process.env.SITE_EDITION?.trim();

@@ -60,13 +60,19 @@ describe("getSiteUrl", () => {
     expect(() => getSiteUrl()).toThrow(/NEXT_PUBLIC_SITE_URL/);
   });
 
-  it("官網與實驗站都能當 --production 的目標，預覽網址不行", () => {
-    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://carcarplayground.com");
-    expect(isTrackedProductionOrigin("https://carcarplayground.com")).toBe(true);
+  it("只有正式網域能當 --production 的目標，實驗站與預覽網址不行", () => {
     vi.stubEnv("NEXT_PUBLIC_SITE_URL", CANONICAL_SITE_URL);
-    expect(isTrackedProductionOrigin(CANONICAL_SITE_URL)).toBe(true);
+    expect(isTrackedProductionOrigin("https://carcarplayground.com")).toBe(true);
+    expect(isTrackedProductionOrigin("https://carcarplayground.com/")).toBe(true);
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://podcast-website-mu.vercel.app");
+    expect(isTrackedProductionOrigin("https://podcast-website-mu.vercel.app")).toBe(false);
     vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://preview.vercel.app");
     expect(isTrackedProductionOrigin("https://preview.vercel.app")).toBe(false);
+  });
+
+  it("base URL 與 site URL 不同源時不行", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://podcast-website-mu.vercel.app");
+    expect(isTrackedProductionOrigin(CANONICAL_SITE_URL)).toBe(false);
   });
 
   it("回傳值一律不含尾斜線", () => {

@@ -3,14 +3,17 @@
 # 不靠 Vercel 回報給 GitHub 的部署事件：那邊的 ref 是 commit SHA，網址是單次部署的
 # *.vercel.app，官網專案也不一定建立 GitHub deployment，用來比對正式網域永遠不成立
 # （#338 合併後的正式部署實測）。改成 push 後輪詢正式網域的 /build-info.json：
-# - 移網域前由 main（current）負責正式網域；移網域後由 release（official）負責。
+# - 2026-11-21 切站後正式網域由 release（official）負責，只在 push release 時自動跑。
+#   main 只部署實驗站，自動跑只會裝完套件就略過。
+# - 手動執行仍可選 main：萬一網域搬回 main 的專案（版別要改回 current，lab 不進索引），
+#   對 main 跑一次即可；版別對不上會被當成不負責而略過。
 # - 不負責的分支第一次查就略過，不會空等。
 # - 同一分支新的 push 會取消舊的等待。
 name: live-domain
 
 on:
   push:
-    branches: [main, release]
+    branches: [release]
   workflow_dispatch:
 
 permissions:

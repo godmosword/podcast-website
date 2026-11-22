@@ -61,7 +61,7 @@ deployment protection／Ignored Build Step 不在 repository 內，仍需由 Ver
 
 ## Post-deploy health
 
-`.github/workflows/live-domain.yml` 在 push 到 `main` 或 `release` 後輪詢
+`.github/workflows/live-domain.yml` 在 push 到 `release` 後輪詢（`main` 只部署實驗站，要時手動執行）
 `https://carcarplayground.com/build-info.json`，等正式網域換上該次 commit，才跑
 `verify:geo-live --production` 與 IndexNow。不靠 Vercel 回報給 GitHub 的部署事件：
 那邊的 ref 是 commit SHA、網址是單次部署的 `*.vercel.app`，官網專案也不一定建立
