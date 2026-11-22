@@ -72,18 +72,20 @@ describe("INTRO_GATE_INIT_SCRIPT 與純函式一致", () => {
     document.documentElement.removeAttribute(INTRO_GATE_ATTRIBUTE);
     sessionStorage.clear();
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   const run = (input: Omit<IntroGateInput, "heroDisabled">) => {
     history.replaceState(null, "", `${input.pathname}${input.search}`);
     if (input.seen) sessionStorage.setItem(INTRO_GATE_STORAGE_KEY, "1");
-    vi.spyOn(window, "matchMedia").mockImplementation((query: string) => ({
+    // jsdom 沒有 matchMedia；vitest 4 的 spyOn 不能監看不存在的屬性，改用 stubGlobal。
+    vi.stubGlobal("matchMedia", vi.fn((query: string) => ({
       matches: query.includes("reduced-motion") ? input.reducedMotion : false,
       media: query, onchange: null,
       addListener: () => {}, removeListener: () => {},
       addEventListener: () => {}, removeEventListener: () => {},
       dispatchEvent: () => false,
-    }) as MediaQueryList);
+    }) as MediaQueryList));
     Object.defineProperty(navigator, "connection", {
       configurable: true,
       value: { saveData: input.saveData, effectiveType: input.effectiveType },
@@ -111,12 +113,12 @@ describe("INTRO_GATE_INIT_SCRIPT 與純函式一致", () => {
 
   it("storage 讀取丟例外時 fail-safe：不打開、也不讓首頁壞掉", () => {
     history.replaceState(null, "", "/");
-    vi.spyOn(window, "matchMedia").mockImplementation((query: string) => ({
+    vi.stubGlobal("matchMedia", vi.fn((query: string) => ({
       matches: false, media: query, onchange: null,
       addListener: () => {}, removeListener: () => {},
       addEventListener: () => {}, removeEventListener: () => {},
       dispatchEvent: () => false,
-    }) as MediaQueryList);
+    }) as MediaQueryList));
     // 真實情況（Safari 無痕、封鎖 cookie）是「存取 sessionStorage 本身就丟」，
     // 不是某個方法丟，所以測試也要在同一層模擬。
     const original = Object.getOwnPropertyDescriptor(window, "sessionStorage");

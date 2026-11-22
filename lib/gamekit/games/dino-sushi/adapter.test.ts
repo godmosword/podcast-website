@@ -1,12 +1,17 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi, type Mock } from "vitest";
 import {
   DinoSushiInstance,
   dinoSushiAdapter,
   type DinoSushiController,
 } from "@/lib/gamekit/games/dino-sushi/adapter";
 
-function controller(): DinoSushiController & Record<keyof DinoSushiController, ReturnType<typeof vi.fn>> {
-  return { startOrder: vi.fn(), startFree: vi.fn(), restart: vi.fn(), goToTitle: vi.fn() };
+function controller(): DinoSushiController & Record<keyof DinoSushiController, Mock<() => void>> {
+  return {
+    startOrder: vi.fn<() => void>(),
+    startFree: vi.fn<() => void>(),
+    restart: vi.fn<() => void>(),
+    goToTitle: vi.fn<() => void>(),
+  };
 }
 
 describe("dinoSushiAdapter", () => {
