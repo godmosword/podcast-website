@@ -84,11 +84,12 @@
 
 - ✅ **`public/llms.txt` 路由地圖：** 移除不存在的 dashboard，加入育兒文章、國外旅遊與電子報索引及單篇路由。
 - ✅ **Organization sameAs：** 加入 Instagram、Threads、Facebook、Linktree 與各收聽平台；Facebook 的 profile ID 和 YouTube playlist ID 均保留。創作者個人實體的 sameAs 仍依 [待議：主持人／創作者實體強化](#待議主持人創作者實體強化) 決策。
-- **正式網址上線後的 GEO 營運沿用原條：** `INDEXNOW_KEY` 已在 2026-11-20 設好，push `release` 後由 `live-domain` 自動送出。還沒做的是 Google Search Console／Bing Webmaster 驗證網域並提交 `https://carcarplayground.com/sitemap.xml`，以及每週量測；寫在 [GEO 營運基礎](#geo-營運基礎crawler-政策indexnow逐字稿verifygeo) 的「剩餘（使用者手動）」，手冊是 `docs/GEO.md` §6 與 `docs/GEO-BASELINE.md`。`ops · S · 使用者手動`
+- ✅ **Search Console／Bing Webmaster 提交：** 2026-11-23 使用者完成驗證並提交 `https://carcarplayground.com/sitemap.xml`；Google 用網域 DNS TXT 驗證（`dig TXT carcarplayground.com` 看得到 `google-site-verification`）。`INDEXNOW_KEY` 2026-11-20 已設好，push `release` 後由 `live-domain` 自動送出。
+- **GEO 每週量測：** GSC／Bing Webmaster／Vercel logs／AI prompt baseline 五題，見 [GEO 營運基礎](#geo-營運基礎crawler-政策indexnow逐字稿verifygeo) 與 `docs/GEO-BASELINE.md`。`ops · S · 使用者手動`
 
 **以後再確認**
 
-- **索引涵蓋還沒核實：** 2026-11-06 覆核時 `site:` 搜尋看不出收錄範圍。要等上面 Search Console 驗證、提交 sitemap 後，才看得到收錄範圍。`ops · S · 使用者手動，依賴 Search Console`
+- **索引涵蓋還沒核實：** 2026-11-06 覆核時 `site:` 搜尋看不出收錄範圍。Search Console 已在 2026-11-23 提交 sitemap，約一週後到 GSC 的「網頁」報表看已收錄與未收錄原因。`ops · S · 使用者手動，約 2026-11-30 後查`
 - ✅ **http 轉 https 在一個環境不確定：** 2026-11-22 重測正式網域：`http://carcarplayground.com/`、`http://www.carcarplayground.com/` 都 308 轉到 https，`https://www.` 再 308 轉到主網域，沒有再出現 Pingora 500（官網 build `c0af2130`）。
 
 ### pending
@@ -1965,8 +1966,8 @@ EP1–7 已用 `large-v3` 轉錄 + 自動簡轉繁（`data/subtitles/*.json`）�
 
 ### GEO 營運基礎（crawler 政策／IndexNow／逐字稿／verify:geo）　`P2 · M · 無`　〔eng+growth〕　de2774b／165b44e
 本輪已實作：`app/robots.ts` AI 檢索型 crawler（`OAI-SearchBot`／`ChatGPT-User`／`Claude-SearchBot`／`Claude-User`／`PerplexityBot`／`Perplexity-User`）放行、訓練型（`GPTBot`／`ClaudeBot`／`Google-Extended`／`Applebot-Extended`／`CCBot`／`Bytespider`／`meta-externalagent`）拒絕；`lib/json-ld.ts` 補 `PodcastSeries.sameAs`、`breadcrumbListJsonLd`（純 JSON-LD，無可見 UI）、`PodcastEpisode.associatedMedia` 逐字稿 MediaObject；`lib/feed.ts`／`app/feed.xml/route.ts` 補 RSS enclosure length（建置時 `generate:audio-lengths` → `data/audio-lengths.json`，route 禁止 runtime 掃 public/）；新增 `scripts/generate-indexnow-key.ts`（prebuild）＋ `scripts/submit-indexnow.ts`（sync 後 best-effort、fail-soft、`--dry-run`）＋ `.github/workflows/sync-apple-podcast.yml` 新步驟；新增 `scripts/verify-geo.ts`（`npm run verify:geo`，已入 `npm run check` 尾端）。完整營運手冊見 [docs/GEO.md](./docs/GEO.md)。
-**剩餘（使用者手動）：** Google Search Console／Bing Webmaster 提交（見 docs/GEO.md §6）；每週量測記錄（GSC／Bing Webmaster／Vercel logs／AI prompt baseline 五題，見 [docs/GEO-BASELINE.md](./docs/GEO-BASELINE.md)）。
-**已完成：** `INDEXNOW_KEY`（GitHub Secret＋兩個 Vercel 專案同值，2026-11-20 設定）；`verify:geo-live` 與 IndexNow 由 `.github/workflows/live-domain.yml` 在 push `release` 後自動跑，2026-11-21 `c0af2130` 全綠。
+**剩餘（使用者手動）：** 每週量測記錄（GSC／Bing Webmaster／Vercel logs／AI prompt baseline 五題，見 [docs/GEO-BASELINE.md](./docs/GEO-BASELINE.md)）。
+**已完成：** Google Search Console／Bing Webmaster 驗證與 sitemap 提交（2026-11-23）；`INDEXNOW_KEY`（GitHub Secret＋兩個 Vercel 專案同值，2026-11-20 設定）；`verify:geo-live` 與 IndexNow 由 `.github/workflows/live-domain.yml` 在 push `release` 後自動跑，2026-11-21 `c0af2130` 全綠。
 
 ### 壓縮 Podcast 音檔　`P2 · S · 無`　〔content〕
 ffmpeg 將每集 `audio.mp3` 壓到 mono 128kbps、目標 < 5MB（現每集 5–10MB，總 50MB+）。睡前=手機弱網，載入慢。指令見 README；壓後本機聽確認音質再覆蓋。
