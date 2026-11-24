@@ -96,6 +96,14 @@
 - **索引涵蓋還沒核實：** 2026-11-06 覆核時 `site:` 搜尋看不出收錄範圍。Search Console 已在 2026-11-23 提交 sitemap，約一週後到 GSC 的「網頁」報表看收錄了多少頁；把數字或截圖給 agent，一起看未收錄的原因。sitemap 目前 227 筆，可當對照。`ops · S · 使用者手動，約 2026-11-30 後查`
 - ✅ **http 轉 https 在一個環境不確定：** 2026-11-22 重測正式網域：`http://carcarplayground.com/`、`http://www.carcarplayground.com/` 都 308 轉到 https，`https://www.` 再 308 轉到主網域，沒有再出現 Pingora 500（官網 build `c0af2130`）。只從一個網路環境測過；再有人回報 500 就重開這條。
 
+### 切站後的技術收尾（2026-11-24）
+
+> 三項都不急，現在不影響官網。
+
+- **Sentry 升 11：** `@sentry/nextjs`／`browser`／`core` 三個一起升（目前 10.76.2，2026-11-24 最新 11.17.0）。`npm audit` 剩的 5 項 moderate 都來自它的建置外掛（`@sentry/bundler-plugins` → `glob` → `minimatch`，影響到 11.10.0）；`npm audit fix` 修不掉，另外複製一份 lockfile 升到 11.17.0 試算是 0 項。`next.config.ts` 沒有接 `withSentryConfig`，這段程式不會執行，所以不急。主版本升級會動到正式站的錯誤回報：照官方遷移文件改 `lib/sentry-options.ts`、`lib/sentry-client.ts`、`instrumentation*.ts`、`sentry.*.config.ts`，上官網前確認前端與伺服器各收得到一筆錯誤。`eng · M · 無`
+- **`vitest.config.ts` 改成 `.mts`：** Vite 8 每次跑測試都警告這個設定檔不支援 `configLoader: 'native'`（未來主版本的預設）。只改副檔名不夠，`__dirname` 也要換成 `import.meta.dirname`（2026-11-24 用暫存檔試過，改名後剩這個警告）。一起改 `scripts/lib/vitest-scope.test.ts` 寫死的檔名，以及 `tsconfig.json` 的 `include`（目前只有 `.ts`／`.tsx`）。`eng · S · 無`
+- **`podcast-website-official.vercel.app` 可被收錄：** 2026-11-24 查，首頁回 200，沒有 `noindex`，canonical 與 robots 的 Sitemap 都已指回 https://carcarplayground.com，風險低。先看 Vercel 網域設定能不能把這個網址轉到主網域；不行再用 host 條件加 `X-Robots-Tag: noindex`，條件要寫死這個 host，不能影響 carcarplayground.com。索引涵蓋報表若看到它被收錄，就提前做。`ops · S · 無`
+
 ### pending
 
 - ✅ **補 darwin 視覺基準（小橘特快車第一版與第三輪）**：2026-10-27 在 Mac 以審查修正後的駕駛台補 23 張（`e2e/visual.spec.ts` 的「小橘特快車」）：標題選「自己開」390／1280 日間與夜間；開車中整個視窗：加速 P3（390 日間與夜間、1280 日間）、進站停車目標條（390 日間與夜間、1280 日間、844×390 橫式）、速限牌、隧道（390 日間與夜間，另一張減少動態）、鐵橋喇叭提示、對向列車、海邊（390 與 1280 日間）、停好開門乘客上完車；家長開「速度表數字」的儀表特寫；結算兩張（大司機三站綠區含指差確認與鐵橋打招呼，390 日間；慢慢看開過頭提示說原因，390 夜間）。前窗一律定格並關掉輕晃（晃動跟時間走，定格時也還在晃）。開車中的 19 張連錄兩次位元組相同，標題 4 張只有背景漸層 ≤37 像素、色差 ≤4 的雜訊。整套 112 passed／2 skipped。遊戲設定對話框沒錄，見下一條。見本 commit。
