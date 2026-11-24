@@ -63,11 +63,13 @@
 >
 > 2026-11-17：自訂網域已上線為 https://carcarplayground.com（www 會 308 轉到主網域）。下面 Search Console、平台與 Linktree 等人工作業仍未做，維持未勾。
 >
-> 2026-11-22：用正式網址重查過（官網 build `c0af2130`）。canonical、og:url／og:image、robots 的 Sitemap 行、sitemap.xml 的 226 筆、feed.xml 的 41 筆連結都指向 carcarplayground.com；`llms.txt` 用相對路徑；http 和 www 都 308 轉到 https 主網域。同一個 commit 的 `live-domain`（verify:geo-live＋IndexNow）也全綠。剩下的都要使用者登入各平台手動做，條目標「使用者手動」。
+> 2026-11-22：用正式網址重查過（官網 build `c0af2130`）。canonical、og:url／og:image、robots 的 Sitemap 行、sitemap.xml 的 227 筆、feed.xml 的 41 筆連結都指向 carcarplayground.com；`llms.txt` 用相對路徑；http 和 www 都 308 轉到 https 主網域。同一個 commit 的 `live-domain`（verify:geo-live＋IndexNow）也全綠。剩下的都要使用者登入各平台手動做，條目標「使用者手動」。
+>
+> 2026-11-23：使用者回報 Search Console／Bing 的驗證與 sitemap 提交已完成。後續手動項目見「必做」的平台與 Linktree、「應該做 · GEO」的要求建立索引與 Bing IndexNow 紀錄、「以後再確認」的索引涵蓋。
 
 **必做**
 
-- **平台與 Linktree 補上本站：** 2026-11-06 覆核，Apple、Spotify 的單集文案與 https://linktr.ee/bonboncarstory 都還沒連到這個網站。正式網址已定為 https://carcarplayground.com（2026-11-17 上線），這項仍待補。屬營運，使用者手動。`ops · S · 使用者手動`
+- **平台與 Linktree 補上本站：** 2026-11-06 覆核，Apple、Spotify 的單集文案與 https://linktr.ee/bonboncarstory 都還沒連到這個網站。正式網址已定為 https://carcarplayground.com（2026-11-17 上線），這項仍待補：在 Apple、Spotify 的單集說明和 Linktree 加上 `https://carcarplayground.com`。2026-11-24 重看，Linktree 頁面仍沒有這個網址。屬營運，使用者手動。`ops · S · 使用者手動`
 - ✅ **PodcastSeries 的 YouTube sameAs 修正：** `platformShowUrls()` 保留 YouTube 播放清單的 `list`，只剔除追蹤參數；`verify:geo` 允許並驗證 YouTube playlist ID 與 Facebook profile ID 這兩種必要參數。播放清單要不要改連頻道仍見 [品牌標誌合規後續](#品牌標誌合規後續2026-10-12) 的「YouTube 連結」；目前保留原播放清單連結。
 - ✅ **子頁 OG 與 Twitter metadata：** `/stories`、育兒文章、國外旅遊、電子報、關於與主題都明確輸出 og:image 和各頁標題、說明、分享圖；國外旅遊列表與有封面的文章使用封面，其他頁使用預設吉祥物圖。
 - ✅ **家長文、旅遊文、電子報的 BlogPosting：** 三類文章頁輸出 BlogPosting JSON-LD，並在內文標出作者馬米；作者名稱與個人頁連結來自共用作者資料。
@@ -78,19 +80,21 @@
 - ✅ **國外旅遊列表說明：** 導言改為目前實際收錄的名古屋、北陸與小松之杜親子旅遊內容。
 - ✅ **主題數口徑：** `/stories` 明確稱 7 個「精選成長主題」；`/topic` 稱 16 個「主題標籤」，不再把兩種篩選分類說成同一組成長主題。
 - **部分文章 slug 仍是 `vocus-<id>`：** 手寫篇用英文短名，同步篇是 `vocus-<方格子 contentId>`（`data/parent-articles.ts` 註解，`scripts/lib/vocus-articles.ts`）。可以之後再改；改的話保留舊網址轉址。`content · S · 可後做`
-- ✅ **自訂網域上線後重跑搜尋設定：** 2026-11-22 用 https://carcarplayground.com 重查，canonical、sitemap、OG、robots、RSS 都指向正式網域（官網 build `c0af2130`）。Search Console 併到下面「GEO 營運」那條，由使用者手動做。見 [M0a](#修正版執行順序)。
+- ✅ **自訂網域上線後重跑搜尋設定：** 2026-11-22 用 https://carcarplayground.com 重查，canonical、sitemap、OG、robots、RSS 都指向正式網域（官網 build `c0af2130`）。Search Console 見下面「Search Console／Bing Webmaster 提交」那條。見 [M0a](#修正版執行順序)。
 
 **應該做 · GEO**
 
 - ✅ **`public/llms.txt` 路由地圖：** 移除不存在的 dashboard，加入育兒文章、國外旅遊與電子報索引及單篇路由。
 - ✅ **Organization sameAs：** 加入 Instagram、Threads、Facebook、Linktree 與各收聽平台；Facebook 的 profile ID 和 YouTube playlist ID 均保留。創作者個人實體的 sameAs 仍依 [待議：主持人／創作者實體強化](#待議主持人創作者實體強化) 決策。
-- ✅ **Search Console／Bing Webmaster 提交：** 2026-11-23 使用者完成驗證並提交 `https://carcarplayground.com/sitemap.xml`；Google 用網域 DNS TXT 驗證（`dig TXT carcarplayground.com` 看得到 `google-site-verification`）。`INDEXNOW_KEY` 2026-11-20 已設好，push `release` 後由 `live-domain` 自動送出。
+- ✅ **Search Console／Bing Webmaster 提交：** 2026-11-23 使用者回報完成驗證並提交 `https://carcarplayground.com/sitemap.xml`（`d3f2bceb`）。從外面只查得到 DNS 的 `google-site-verification` 紀錄；sitemap 有沒有被接受、Bing 的狀態要登入後台看。`INDEXNOW_KEY` 2026-11-20 已設好，push `release` 後由 `live-domain` 自動送出。
+- **Google 要求建立索引：** 在 Search Console「網址審查」貼上首頁、`/for-parents`、`/story/ep-39`，各按一次「要求建立索引」；之後每次新集上官網，對新的 `/story/<slug>` 做一次。步驟見 `docs/GEO.md` §6。`ops · S · 使用者手動`
+- **Bing 看 IndexNow 紀錄：** 到 Bing Webmaster 的 IndexNow 頁籤，看有沒有自動送出的紀錄。CI 端 2026-11-21（`c0af2130`）送出 3 個網址、回 HTTP 200。步驟見 `docs/GEO.md` §6。`ops · S · 使用者手動`
 - **GEO 每週量測：** GSC／Bing Webmaster／Vercel logs／AI prompt baseline 五題，見 [GEO 營運基礎](#geo-營運基礎crawler-政策indexnow逐字稿verifygeo) 與 `docs/GEO-BASELINE.md`。`ops · S · 使用者手動`
 
 **以後再確認**
 
-- **索引涵蓋還沒核實：** 2026-11-06 覆核時 `site:` 搜尋看不出收錄範圍。Search Console 已在 2026-11-23 提交 sitemap，約一週後到 GSC 的「網頁」報表看已收錄與未收錄原因。`ops · S · 使用者手動，約 2026-11-30 後查`
-- ✅ **http 轉 https 在一個環境不確定：** 2026-11-22 重測正式網域：`http://carcarplayground.com/`、`http://www.carcarplayground.com/` 都 308 轉到 https，`https://www.` 再 308 轉到主網域，沒有再出現 Pingora 500（官網 build `c0af2130`）。
+- **索引涵蓋還沒核實：** 2026-11-06 覆核時 `site:` 搜尋看不出收錄範圍。Search Console 已在 2026-11-23 提交 sitemap，約一週後到 GSC 的「網頁」報表看收錄了多少頁；把數字或截圖給 agent，一起看未收錄的原因。sitemap 目前 227 筆，可當對照。`ops · S · 使用者手動，約 2026-11-30 後查`
+- ✅ **http 轉 https 在一個環境不確定：** 2026-11-22 重測正式網域：`http://carcarplayground.com/`、`http://www.carcarplayground.com/` 都 308 轉到 https，`https://www.` 再 308 轉到主網域，沒有再出現 Pingora 500（官網 build `c0af2130`）。只從一個網路環境測過；再有人回報 500 就重開這條。
 
 ### pending
 
