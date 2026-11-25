@@ -38,9 +38,10 @@
     "5dd55d90-f529-45ae-8236-b65a4da786dd",
     "0714cf56-fbc4-45bc-ba31-2ca7ff2d026b",
     "34803f40-4f72-47fd-81db-57c401c40609",
-    "a9898b0a-6020-4d70-8de5-e23a7ae3a0c6"
+    "a9898b0a-6020-4d70-8de5-e23a7ae3a0c6",
+    "8f8e6cc0-f768-44c5-9396-92187a286b1c"
   ],
-  "lastRun": "2026-11-18T08:42:10.155Z",
+  "lastRun": "2026-11-25T09:20:53.982Z",
   "guidBySlug": {
     "ep-10": "3ccfc2c9-c8e3-4a44-b0b5-e20644b8fbbe",
     "ep-11": "42c09026-1f99-4fe9-aa4d-a97ce5161d2a",
@@ -72,6 +73,7 @@
     "ep-37": "0714cf56-fbc4-45bc-ba31-2ca7ff2d026b",
     "ep-38": "34803f40-4f72-47fd-81db-57c401c40609",
     "ep-39": "a9898b0a-6020-4d70-8de5-e23a7ae3a0c6",
+    "ep-40": "8f8e6cc0-f768-44c5-9396-92187a286b1c",
     "ep-7": "1cdd1d5b-f42e-4e6d-a68c-4fa059785576",
     "ep-8": "a26a07c2-a311-4237-be8e-931cb4a043e0",
     "ep-9": "c0213111-6d31-48a5-a584-9ca72156382f"
@@ -235,6 +237,14 @@
       "cover": "ok",
       "blur": "ok",
       "subtitles": "ok",
+      "subtitleAttempts": 0
+    },
+    "8f8e6cc0-f768-44c5-9396-92187a286b1c": {
+      "slug": "ep-40",
+      "metadata": "ok",
+      "cover": "ok",
+      "blur": "ok",
+      "subtitles": "pending",
       "subtitleAttempts": 0
     },
     "9bb4c056-068d-45b7-8b67-695072be13c9": {
