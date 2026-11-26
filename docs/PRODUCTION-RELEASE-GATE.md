@@ -135,7 +135,7 @@ NEXT_PUBLIC_SITE_URL=https://carcarplayground.com \
 
 2026-11-21 起，`carcarplayground.com`（含 www）掛在官網專案 `podcast-website-official`，追 `release`。舊專案 `podcast-website` 追 `main`，是 `SITE_EDITION=lab` 的實驗站，只用 `podcast-website-mu.vercel.app`。
 
-官網專案：Production Branch `release`，build command `npm run build:official`，環境變數 `SITE_EDITION=official`、`NEXT_PUBLIC_SITE_URL=https://carcarplayground.com`、`INDEXNOW_KEY`（與 GitHub Secret 同值）。實驗站：`SITE_EDITION=lab`、`NEXT_PUBLIC_SITE_URL=https://podcast-website-mu.vercel.app`。ruleset `official-release` 只讓管理員建立或更新 `release`；每 15 分鐘的 sync 只更新 `main`。
+官網專案：Production Branch `release`，build command `npm run build:official`，環境變數 `SITE_EDITION=official`、`NEXT_PUBLIC_SITE_URL=https://carcarplayground.com`、`INDEXNOW_KEY`（與 GitHub Secret 同值）。實驗站：`SITE_EDITION=lab`、`NEXT_PUBLIC_SITE_URL=https://podcast-website-mu.vercel.app`。官網專案固定的 `podcast-website-official.vercel.app` 整站 308 轉到正式網域（`lib/official-alias-redirects.ts`，避免被收錄成重複內容）；要繞過正式網域檢查，改用單次部署網址。308 會被瀏覽器長期快取：就算回滾這條規則，去過的瀏覽器仍會被帶到正式網域，檢查時改用無痕視窗或單次部署網址。ruleset `official-release` 只讓管理員建立或更新 `release`；每 15 分鐘的 sync 只更新 `main`。
 
 發行時只把 `release` 快轉到 `main` 上已經驗過的 commit。推 `release` 之後，`live-domain` 會等網域換上該次 commit，再跑 `verify:geo-live --production` 與 IndexNow；25 分鐘內沒換上就失敗。
 

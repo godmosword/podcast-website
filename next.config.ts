@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import { adventuresZoneQueryRedirects } from "./lib/adventures-redirects";
+import { officialAliasRedirects } from "./lib/official-alias-redirects";
 import { assertOfficialReleaseReady } from "./lib/official-release";
 import { assertSiteEditionConfigured } from "./lib/site-edition";
 import { retiredGameRedirects } from "./lib/retired-game-redirects";
@@ -64,6 +65,8 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // 放第一條：先換到正式網域，再由正式網域處理其他轉址。
+      ...officialAliasRedirects(),
       ...legacyStoryRedirects(),
       ...adventuresZoneQueryRedirects(),
       ...retiredGameRedirects(),
