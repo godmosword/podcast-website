@@ -90,9 +90,9 @@
   "dependencies": {
     "@maplibre/maplibre-gl-leaflet": "^0.1.4",
     "@neondatabase/serverless": "^1.1.0",
-    "@sentry/browser": "^10.70.0",
-    "@sentry/core": "^10.70.0",
-    "@sentry/nextjs": "^10.70.0",
+    "@sentry/browser": "^11.14.0",
+    "@sentry/core": "^11.14.0",
+    "@sentry/nextjs": "^11.14.0",
     "@vercel/analytics": "^2.0.1",
     "@vercel/functions": "^3.9.5",
     "leaflet": "^1.9.4",

@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
-import type { ErrorEvent } from "@sentry/core";
-import { sanitizeSentryEvent, sentryEnvironment } from "./sentry-options";
+import type { ErrorEvent, StreamedSpanJSON } from "@sentry/core";
+import {
+  createServerSentryOptions,
+  sanitizeSentryEvent,
+  sanitizeSentrySpan,
+  SENTRY_DATA_COLLECTION,
+  sentryEnvironment,
+} from "./sentry-options";
 
 function asErrorEvent(event: object): ErrorEvent {
   return event as unknown as ErrorEvent;
@@ -33,6 +39,97 @@ describe("sanitizeSentryEvent", () => {
       request: { url: "not a url" },
     }));
     expect(sanitized.request?.url).toBe("(redacted)");
+  });
+});
+
+describe("SENTRY_DATA_COLLECTION", () => {
+  // Sentry 11 拿掉 sendDefaultPii，不設 dataCollection 就預設全收。
+  it("不收使用者、cookie、標頭、內文、網址參數與區域變數", () => {
+    expect(SENTRY_DATA_COLLECTION).toMatchObject({
+      userInfo: false,
+      cookies: false,
+      httpHeaders: { request: false, response: false },
+      httpBodies: [],
+      urlQueryParams: false,
+      databaseQueryData: false,
+      stackFrameVariables: false,
+    });
+  });
+
+  it("除了程式碼前後文，每一類都關掉", () => {
+    const { frameContextLines, ...collected } = SENTRY_DATA_COLLECTION;
+    expect(frameContextLines).toBeGreaterThan(0);
+    expect(JSON.stringify(collected)).not.toContain("true");
+  });
+});
+
+describe("sanitizeSentrySpan", () => {
+  const span: StreamedSpanJSON = {
+    trace_id: "t",
+    span_id: "s",
+    name: "GET /api/x?email=a@b.c",
+    start_timestamp: 1,
+    status: "ok",
+    is_segment: true,
+    attributes: {
+      // Next 自己的 OpenTelemetry span 會帶，dataCollection 管不到。
+      "http.target": "/api/x?email=a@b.c",
+      "url.full": "https://carcarplayground.com/story/ep-1?token=abc#frag",
+      "url.query": "token=abc",
+      "url.fragment": "frag",
+      "http.method": "GET",
+      "http.status_code": 200,
+      "next.span_name": "GET /api/x?email=a@b.c",
+    },
+  };
+
+  it("名稱與網址類屬性去掉 ? 與 # 之後，其餘照舊", () => {
+    expect(sanitizeSentrySpan(span)).toEqual({
+      ...span,
+      name: "GET /api/x",
+      attributes: {
+        "http.target": "/api/x",
+        "url.full": "https://carcarplayground.com/story/ep-1",
+        "http.method": "GET",
+        "http.status_code": 200,
+        "next.span_name": "GET /api/x",
+      },
+    });
+  });
+
+  it("字串陣列逐項清理，數字陣列照舊", () => {
+    const cleaned = sanitizeSentrySpan({
+      ...span,
+      attributes: { "http.links": ["/a?email=a@b.c", "/b#x"], "x.sizes": [1, 2] },
+    });
+    expect(cleaned.attributes).toEqual({ "http.links": ["/a", "/b"], "x.sizes": [1, 2] });
+  });
+
+  it("不改到傳進來的 span", () => {
+    const before = structuredClone(span);
+    sanitizeSentrySpan(span);
+    expect(span).toEqual(before);
+  });
+});
+
+describe("createServerSentryOptions", () => {
+  it("node 與 edge 共用：帶 dataCollection、清理函式，沒有 DSN 就不啟用", () => {
+    const dsn = process.env.SENTRY_DSN;
+    delete process.env.SENTRY_DSN;
+    expect(createServerSentryOptions()).toMatchObject({
+      enabled: false,
+      tracesSampleRate: 0.1,
+      dataCollection: SENTRY_DATA_COLLECTION,
+      beforeSend: sanitizeSentryEvent,
+      beforeSendSpan: sanitizeSentrySpan,
+    });
+    process.env.SENTRY_DSN = "https://public@127.0.0.1/1";
+    expect(createServerSentryOptions().enabled).toBe(true);
+    if (dsn === undefined) {
+      delete process.env.SENTRY_DSN;
+    } else {
+      process.env.SENTRY_DSN = dsn;
+    }
   });
 });
 

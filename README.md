@@ -182,7 +182,7 @@ NEXT_PUBLIC_SITE_URL=https://你的網域
 | `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | 公開表單與審核登入的分散式節流；production 未設時 POST／登入 fail-closed 503，GET 牆仍可空狀態 |
 | `RESEND_API_KEY` / `SUBSCRIBE_FROM_EMAIL` | 名單確認信（只用來驗證信箱；目前不寄新集上線信）；任一未設時訂閱 API 安全降級為不可用 |
 | `OPENAI_API_KEY` | 僅本機 `illustrate`／地圖資產生成；**CI 不放** |
-| `SENTRY_DSN` / `NEXT_PUBLIC_SENTRY_DSN` | 可選錯誤上報。瀏覽器走 `@sentry/browser`（無 BrowserTracing）；未設則不上報 |
+| `SENTRY_DSN` / `NEXT_PUBLIC_SENTRY_DSN` | 可選錯誤上報。不收使用者資料（`SENTRY_DATA_COLLECTION`）；瀏覽器走 `@sentry/browser`（無 BrowserTracing）；未設則不上報 |
 | `SYNC_ISSUE_*` | GHA 同步後 GitHub Issue 通知（見 `.env.example`） |
 | `NOTION_TOKEN` / `NOTION_NEWSLETTER_DB_ID` | 電子報頁的訂閱表單寫入 Notion。**不要設進 Vercel production。** 未設時表單仍在，送出後顯示「暫時沒有開放」。資料庫欄位：`Email`（email）、`訂閱時間`（date）、`來源`（rich text） |
 
