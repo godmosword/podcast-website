@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Security
+
+- **Sentry**：升到 11.14.0，`npm audit` 0 項。錯誤回報不收使用者、cookie、標頭、內文、網址參數與區域變數；效能資料的網址參數也拿掉。之前的版本會把 cookie、Authorization 與網址參數放進伺服器效能資料。
+
 ### Added
 
 - **官網發行**：同一個 repo 用 `release` 分支與 `SITE_EDITION` 分開實驗站和官網。未設定時站的行為不變。官網 build 會依發行清單拿掉節目數據頁和未核准素材，留言審核留著。單集 RSS GUID 固定指向 carcarplayground.com。網域還沒改掛。
@@ -14,6 +18,7 @@
 
 ### Fixed
 
+- **官網重複網址**：`podcast-website-official.vercel.app` 整站 308 轉到 carcarplayground.com，避免被搜尋引擎收錄成重複內容。
 - **部署後檢查**：#338 之後正式網域的上線檢查和 IndexNow 都不會自動跑，因為 Vercel 回報的部署事件對不上正式網域。改成 push 到 `main` 或 `release` 後，等 `carcarplayground.com/build-info.json` 換上該次 commit 再跑。網域不歸該分支管時直接略過。IndexNow 會帶上這次新增或下架的集數。
 - **播放器**：電腦版字幕不再壓在插圖下緣，移到插圖下方的黑底上。
 - **夜間**：「開始看故事」「立即看故事」深色按鈕多一圈淺色描邊，看得出按鈕在哪；故事卡的 EP 標籤改成不透明的淡紫底，字看得清楚。

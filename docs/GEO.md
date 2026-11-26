@@ -167,7 +167,7 @@ npm run submit:indexnow -- --dry-run
 
 1. 確認網域已驗證（Domain 或 URL-prefix property）。
 2. Sitemaps → 新增 `https://<domain>/sitemap.xml` → Submit。
-3. URL Inspection → 貼上首頁、`/for-parents`、最新單集 `/story/<slug>` → Request Indexing（單集新上線時優先做這步）。
+3. URL Inspection → 貼上首頁、`/about`（舊 `/for-parents` 已 308 轉到這裡）、最新單集 `/story/<slug>` → Request Indexing（單集新上線時優先做這步）。
 4. 定期查 Coverage / Indexing 報表，對照 §5 指標記錄。
 
 ### Bing Webmaster Tools

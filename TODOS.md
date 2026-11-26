@@ -87,7 +87,7 @@
 - ✅ **`public/llms.txt` 路由地圖：** 移除不存在的 dashboard，加入育兒文章、國外旅遊與電子報索引及單篇路由。
 - ✅ **Organization sameAs：** 加入 Instagram、Threads、Facebook、Linktree 與各收聽平台；Facebook 的 profile ID 和 YouTube playlist ID 均保留。創作者個人實體的 sameAs 仍依 [待議：主持人／創作者實體強化](#待議主持人創作者實體強化) 決策。
 - ✅ **Search Console／Bing Webmaster 提交：** 2026-11-23 使用者回報完成驗證並提交 `https://carcarplayground.com/sitemap.xml`（`d3f2bceb`）。從外面只查得到 DNS 的 `google-site-verification` 紀錄；sitemap 有沒有被接受、Bing 的狀態要登入後台看。`INDEXNOW_KEY` 2026-11-20 已設好，push `release` 後由 `live-domain` 自動送出。
-- **Google 要求建立索引：** 在 Search Console「網址審查」貼上首頁、`/for-parents`、`/story/ep-39`，各按一次「要求建立索引」；之後每次新集上官網，對新的 `/story/<slug>` 做一次。步驟見 `docs/GEO.md` §6。`ops · S · 使用者手動`
+- **Google 要求建立索引：** 在 Search Console「網址審查」貼上首頁、`/about`、`/story/ep-39`（`/for-parents` 已 308 轉到 `/about`，不用送），各按一次「要求建立索引」；之後每次新集上官網，對新的 `/story/<slug>` 做一次。步驟見 `docs/GEO.md` §6。`ops · S · 使用者手動`
 - **Bing 看 IndexNow 紀錄：** 到 Bing Webmaster 的 IndexNow 頁籤，看有沒有自動送出的紀錄。CI 端 2026-11-21（`c0af2130`）送出 3 個網址、回 HTTP 200。步驟見 `docs/GEO.md` §6。`ops · S · 使用者手動`
 - **GEO 每週量測：** GSC／Bing Webmaster／Vercel logs／AI prompt baseline 五題，見 [GEO 營運基礎](#geo-營運基礎crawler-政策indexnow逐字稿verifygeo) 與 `docs/GEO-BASELINE.md`。`ops · S · 使用者手動`
 
@@ -98,11 +98,13 @@
 
 ### 切站後的技術收尾（2026-11-24）
 
-> 三項都不急，現在不影響官網。
+> 2026-11-26 三項都做完，上了 main。官網追 `release`，要等下次快轉 `release` 才生效。
 
-- **Sentry 升 11：** `@sentry/nextjs`／`browser`／`core` 三個一起升（目前 10.76.2，2026-11-24 最新 11.17.0）。`npm audit` 剩的 5 項 moderate 都來自它的建置外掛（`@sentry/bundler-plugins` → `glob` → `minimatch`，影響到 11.10.0）；`npm audit fix` 修不掉，另外複製一份 lockfile 升到 11.17.0 試算是 0 項。`next.config.ts` 沒有接 `withSentryConfig`，這段程式不會執行，所以不急。主版本升級會動到正式站的錯誤回報：照官方遷移文件改 `lib/sentry-options.ts`、`lib/sentry-client.ts`、`instrumentation*.ts`、`sentry.*.config.ts`，上官網前確認前端與伺服器各收得到一筆錯誤。`eng · M · 無`
-- **`vitest.config.ts` 改成 `.mts`：** Vite 8 每次跑測試都警告這個設定檔不支援 `configLoader: 'native'`（未來主版本的預設）。只改副檔名不夠，`__dirname` 也要換成 `import.meta.dirname`（2026-11-24 用暫存檔試過，改名後剩這個警告）。一起改 `scripts/lib/vitest-scope.test.ts` 寫死的檔名，以及 `tsconfig.json` 的 `include`（目前只有 `.ts`／`.tsx`）。`eng · S · 無`
-- **`podcast-website-official.vercel.app` 可被收錄：** 2026-11-24 查，首頁回 200，沒有 `noindex`，canonical 與 robots 的 Sitemap 都已指回 https://carcarplayground.com，風險低。先看 Vercel 網域設定能不能把這個網址轉到主網域；不行再用 host 條件加 `X-Robots-Tag: noindex`，條件要寫死這個 host，不能影響 carcarplayground.com。索引涵蓋報表若看到它被收錄，就提前做。`ops · S · 無`
+- ✅ **Sentry 升 11：** 升到 11.14.0（11.17.0 才發布一天，中間沒有安全修正），`npm audit` 0 項。11 拿掉 `sendDefaultPii`，不設就預設全收，新增 `SENTRY_DATA_COLLECTION` 全部關掉；效能 span 另過 `sanitizeSentrySpan` 拿掉網址參數。用本機假收件端比對正式 build：v10 會把 query、cookie、標頭、UA、Authorization 放進效能資料送出，v11 這版都沒有，前後端錯誤照樣收得到。`a4e1956f`
+- ✅ **`vitest.config.ts` 改成 `.mts`：** `__dirname` 換成 `import.meta.dirname`，`tsconfig.json` 補 `**/*.mts`，Vite 的 native loader 警告消失。`42ccc916`
+- ✅ **`podcast-website-official.vercel.app` 可被收錄：** Vercel 文件沒寫網域設定能轉 vercel.app，改在 `next.config.ts` 用完整 host 比對整站 308 轉到正式網域（`lib/official-alias-redirects.ts`）。單次部署、分支網址、實驗站都不轉。快轉 `release` 後用 `curl -I https://podcast-website-official.vercel.app/` 確認回 308。`413c0c94`
+- **Sentry 沒有 DSN：** 2026-11-24 查，官網前端 bundle 沒有 `NEXT_PUBLIC_SENTRY_DSN`，目前不回報前端錯誤；伺服器端的 `SENTRY_DSN` 從外面看不到。要開就在官網專案設兩個 DSN（build 時要有 `NEXT_PUBLIC_SENTRY_DSN`），再到 Sentry 確認前端與伺服器各收得到一筆錯誤。`ops · S · 使用者手動`
+- **Sentry 送出前再收緊（v10 就有，不是升級造成）：** 審查列出的四項：瀏覽器 console／DOM breadcrumbs 沒清（可用 `beforeBreadcrumb` 拿掉 console）、錯誤訊息與 `contexts`／`tags` 沒清、伺服器沒設 `tracePropagationTargets`（對外請求會帶 `sentry-trace`，不含使用者資料）、瀏覽器 session（沒有 release 時不會送出）。另可把假收件端比對做成 CI 測試。設 DSN 前做。`eng · S · 無`
 
 ### pending
 
