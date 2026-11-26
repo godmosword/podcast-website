@@ -61,7 +61,6 @@ describe("StoryFilter", () => {
         stories={stories}
         vehicles={["警車", "賽車"]}
         tags={["合作", "勇氣"]}
-        featuredStorySlug="ep-12"
         vehicle="警車"
         tag={null}
         query=""
@@ -78,7 +77,6 @@ describe("StoryFilter", () => {
         stories={stories}
         vehicles={["警車", "賽車"]}
         tags={["合作", "勇氣"]}
-        featuredStorySlug="ep-12"
         vehicle={null}
         tag={null}
         query="賽車"
@@ -94,7 +92,6 @@ describe("StoryFilter", () => {
         stories={stories}
         vehicles={["警車", "賽車"]}
         tags={["合作", "勇氣"]}
-        featuredStorySlug="ep-12"
         vehicle={null}
         tag={null}
         query=""
@@ -114,7 +111,6 @@ describe("StoryFilter", () => {
         stories={stories}
         vehicles={["警車", "賽車"]}
         tags={["合作", "勇氣"]}
-        featuredStorySlug="ep-12"
         vehicle={null}
         tag={null}
         query=""
@@ -124,6 +120,8 @@ describe("StoryFilter", () => {
     expect(html).toContain("縮圖");
     expect(html).toContain("完整");
     expect(html).toContain('aria-pressed="true"');
+    expect(html).toContain("/story/ep-12");
     expect(html).toContain("/story/ep-11");
+    expect(html).toContain("2 則故事");
   });
 });

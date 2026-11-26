@@ -22,6 +22,15 @@ describe("story content", () => {
     expect(sorted[0].ep).toBeGreaterThanOrEqual(sorted[1]?.ep ?? 0);
   });
 
+  it("簡介沒有錯字「這時侯」", () => {
+    const ep39 = getStory("ep-39");
+    expect(ep39?.summary).toContain("這時候");
+    expect(ep39?.summary).not.toContain("這時侯");
+    for (const story of getStories()) {
+      expect(story.summary ?? "", story.slug).not.toContain("這時侯");
+    }
+  });
+
   it("每集 enrich 後皆有 ageRange", () => {
     for (const story of getStories()) {
       expect(story.ageRange, story.slug).toBeTruthy();

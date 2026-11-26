@@ -10,7 +10,6 @@ import {
 export type HomeSectionProps = {
   latest: Story | undefined;
   listStories: Story[];
-  featuredStorySlug: string | null;
   vehicles: string[];
   tags: string[];
   /** 最新一集排在第一屏時，封面優先下載（此時品牌大圖要設 deferred）。 */
@@ -22,7 +21,6 @@ function storyFilterProps(props: HomeSectionProps) {
     stories: props.listStories,
     vehicles: props.vehicles,
     tags: props.tags,
-    featuredStorySlug: props.featuredStorySlug,
   };
 }
 

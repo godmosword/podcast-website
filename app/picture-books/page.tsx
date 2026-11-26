@@ -47,7 +47,6 @@ export default function PictureBooksPage() {
           stories={stories}
           vehicles={pictureBookVehicles(stories)}
           tags={[...STORY_FINDER_THEMES]}
-          featuredStorySlug={null}
         />
         <div className={styles.brandHero}>
           <SiteHeader deferred />

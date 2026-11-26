@@ -37,31 +37,23 @@ describe("filterStories", () => {
     story("ep-10", "其他", ["成長"]),
   ];
 
-  it("hides the featured latest story when no filter is selected", () => {
+  it("未篩選時仍保留最新一集", () => {
     expect(
-      filterStories(stories, { vehicle: null, tag: null, featuredStorySlug: "ep-12" }).map(
-        (s) => s.slug,
-      ),
-    ).toEqual(["ep-11", "ep-10"]);
+      filterStories(stories, { vehicle: null, tag: null }).map((s) => s.slug),
+    ).toEqual(["ep-12", "ep-11", "ep-10"]);
   });
 
-  it("filters by vehicle and keeps featured when it matches", () => {
+  it("filters by vehicle", () => {
     expect(
-      filterStories(stories, { vehicle: "警車", tag: null, featuredStorySlug: "ep-12" }).map(
-        (s) => s.slug,
-      ),
+      filterStories(stories, { vehicle: "警車", tag: null }).map((s) => s.slug),
     ).toEqual(["ep-12"]);
   });
 
   it("filters by the episode theme map, not the old tags", () => {
     expect(
-      filterStories(stories, { vehicle: null, tag: "成長勇氣", featuredStorySlug: "ep-12" }).map(
-        (s) => s.slug,
-      ),
+      filterStories(stories, { vehicle: null, tag: "成長勇氣" }).map((s) => s.slug),
     ).toEqual(["ep-11"]);
-    expect(
-      filterStories(stories, { vehicle: null, tag: "勇氣", featuredStorySlug: "ep-12" }),
-    ).toEqual([]);
+    expect(filterStories(stories, { vehicle: null, tag: "勇氣" })).toEqual([]);
   });
 
   it("filters by free-text query", () => {
@@ -70,7 +62,6 @@ describe("filterStories", () => {
         vehicle: null,
         tag: null,
         query: "警車",
-        featuredStorySlug: "ep-12",
       }).map((s) => s.slug),
     ).toEqual(["ep-12"]);
   });
@@ -80,7 +71,6 @@ describe("filterStories", () => {
       filterStories(stories, {
         vehicle: "警車",
         tag: "交友與合作助人",
-        featuredStorySlug: "ep-12",
       }).map((s) => s.slug),
     ).toEqual(["ep-12"]);
   });

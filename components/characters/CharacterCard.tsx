@@ -1,6 +1,7 @@
 import Image from "next/image";
 import type { Character } from "@/data/characters";
 import { catalogEpisodesFor } from "@/lib/character-catalog";
+import { getCharacterBlurDataUrl } from "@/lib/character-image-blur";
 import CharacterEpisodeSelect from "./CharacterEpisodeSelect";
 import CharacterPortraitTilt from "./CharacterPortraitTilt";
 import styles from "./CharacterCard.module.css";
@@ -28,6 +29,8 @@ export default function CharacterCard({
   const articleLabel = recognized
     ? `${identityLabel(character)}，已認識`
     : identityLabel(character);
+  const portraitSrc = character.ref ? `/${character.ref}` : null;
+  const blurDataURL = portraitSrc ? getCharacterBlurDataUrl(portraitSrc) : undefined;
 
   return (
     <article
@@ -44,6 +47,9 @@ export default function CharacterCard({
               fill
               sizes="(max-width: 720px) 44vw, (max-width: 1100px) 28vw, 220px"
               className={styles.portrait}
+              {...(blurDataURL
+                ? { placeholder: "blur" as const, blurDataURL }
+                : {})}
             />
           </CharacterPortraitTilt>
           {recognized && (
