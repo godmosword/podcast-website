@@ -1,4 +1,3 @@
-import path from "node:path";
 import { defineConfig } from "vitest/config";
 
 const playMapOnly = process.env.VITEST_PLAY_MAP === "1";
@@ -33,7 +32,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./"),
+      "@": import.meta.dirname,
     },
   },
 });
