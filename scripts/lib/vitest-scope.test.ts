@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -6,12 +6,20 @@ import { describe, expect, it } from "vitest";
 describe("vitest scope", () => {
   it("僅 include 專案 *.test.ts(x)，排除 whisper .cache 的 *.spec.js", () => {
     const config = readFileSync(
-      resolve(__dirname, "../../vitest.config.ts"),
+      resolve(__dirname, "../../vitest.config.mts"),
       "utf8",
     );
     expect(config).toMatch(/include:\s*\[/);
     expect(config).toContain("**/*.test.ts");
     expect(config).toContain("**/.cache/**");
+  });
+
+  // Vite 之後會改用 Node 原生載入設定檔，.ts（CommonJS）與 __dirname 都不能用。
+  it("設定檔是 ESM，Vite 的 native config loader 載得起來", () => {
+    const root = resolve(__dirname, "../..");
+    expect(existsSync(resolve(root, "vitest.config.ts"))).toBe(false);
+    const config = readFileSync(resolve(root, "vitest.config.mts"), "utf8");
+    expect(config).not.toMatch(/\b__dirname\b|\brequire\(/);
   });
 
   // Wave B 曾把 RTL peer 當 knip 死依賴刪掉。.npmrc 設 legacy-peer-deps=true，

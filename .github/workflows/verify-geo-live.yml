@@ -1,4 +1,4 @@
-# GEO live 煙霧測試的手動入口（可指定任一網址，例如官網暫時網址）。
+# GEO live 煙霧測試的手動入口（可指定任一網址，例如單次部署網址；官網的 vercel.app 固定網址會轉到正式網域）。
 # 正式網域的自動檢查在 live-domain.yml：等網域換上該次 push 的 build 才跑。
 name: verify-geo-live
 
