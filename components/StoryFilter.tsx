@@ -20,7 +20,6 @@ export type StoryFilterDataProps = {
   stories: Story[];
   vehicles: string[];
   tags: string[];
-  featuredStorySlug?: string | null;
 };
 
 type StoryFilterProps = StoryFilterDataProps & {
@@ -32,7 +31,6 @@ type StoryFilterProps = StoryFilterDataProps & {
 export function StoryFilter({
   stories,
   vehicles,
-  featuredStorySlug = null,
   vehicle,
   tag,
   query,
@@ -67,8 +65,8 @@ export function StoryFilter({
   }
 
   const filtered = useMemo(
-    () => filterStories(stories, { vehicle, tag, query, featuredStorySlug }),
-    [stories, vehicle, tag, query, featuredStorySlug],
+    () => filterStories(stories, { vehicle, tag, query }),
+    [stories, vehicle, tag, query],
   );
 
   const hasFilter = Boolean(vehicle || tag || query.trim());

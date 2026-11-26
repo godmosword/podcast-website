@@ -42,7 +42,6 @@ export default function StoriesPage() {
   const sectionProps: HomeSectionProps = {
     latest,
     listStories: stories,
-    featuredStorySlug: latest?.slug ?? null,
     vehicles,
     tags,
     latestPriority: true,

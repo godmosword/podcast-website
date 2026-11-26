@@ -76,6 +76,7 @@
     "measure:mobile": "node scripts/measure-mobile-performance.mjs",
     "optimize:lcp-images": "tsx scripts/optimize-lcp-images.ts",
     "generate:story-blurs": "tsx scripts/generate-story-blurs.ts",
+    "generate:character-blurs": "tsx scripts/generate-character-blurs.ts",
     "generate:story-covers": "tsx scripts/generate-story-covers.ts",
     "generate:coloring-lineart": "tsx scripts/generate-coloring-lineart.ts",
     "generate:coloring-reference": "tsx scripts/generate-coloring-reference.ts",

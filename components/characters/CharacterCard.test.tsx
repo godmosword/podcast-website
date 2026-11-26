@@ -19,9 +19,21 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("next/image", () => ({
-  default: ({ alt }: { alt: string }) => (
+  default: ({
+    alt,
+    placeholder,
+    blurDataURL,
+  }: {
+    alt: string;
+    placeholder?: string;
+    blurDataURL?: string;
+  }) => (
     // eslint-disable-next-line @next/next/no-img-element -- 測試 mock
-    <img alt={alt} />
+    <img
+      alt={alt}
+      data-placeholder={placeholder ?? ""}
+      data-has-blur={blurDataURL?.startsWith("data:image/") ? "yes" : "no"}
+    />
   ),
 }));
 
@@ -68,6 +80,9 @@ describe("CharacterCard", () => {
     expect(screen.getByRole("article").getAttribute("aria-label")).toBe(
       "鈴鈴，清潔車",
     );
+    const portrait = screen.getByRole("img", { name: "鈴鈴 角色圖" });
+    expect(portrait.getAttribute("data-placeholder")).toBe("blur");
+    expect(portrait.getAttribute("data-has-blur")).toBe("yes");
   });
 
   it("已認識才顯示貼紙", () => {
