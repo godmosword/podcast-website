@@ -36,8 +36,8 @@ Apple Podcasts、Spotify、YouTube、Instagram、Threads、Facebook 的畫面上
 | 套件 | 版本 | 套件宣告授權 |
 |------|------|--------------|
 | `@neondatabase/serverless` | 1.1.0 | MIT |
-| `@sentry/browser` | 10.70.0 | MIT |
-| `@sentry/nextjs` | 10.70.0 | MIT |
+| `@sentry/browser` | 11.14.0 | MIT |
+| `@sentry/nextjs` | 11.14.0 | MIT |
 | `@vercel/analytics` | 2.0.1 | MIT |
 | `@vercel/functions` | 3.9.5 | Apache-2.0 |
 | `@maplibre/maplibre-gl-leaflet` | 0.1.4 | ISC |

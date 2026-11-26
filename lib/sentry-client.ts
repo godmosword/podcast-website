@@ -1,6 +1,10 @@
 import { captureException, init, type BrowserOptions } from "@sentry/browser";
 import type { ErrorEvent, EventHint } from "@sentry/core";
-import { sanitizeSentryEvent, sentryEnvironment } from "./sentry-options";
+import {
+  sanitizeSentryEvent,
+  SENTRY_DATA_COLLECTION,
+  sentryEnvironment,
+} from "./sentry-options";
 
 /**
  * Client init uses `@sentry/browser` instead of `@sentry/nextjs`.
@@ -35,7 +39,7 @@ export function createClientSentryOptions(): BrowserOptions {
     dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
     enabled: Boolean(process.env.NEXT_PUBLIC_SENTRY_DSN),
     environment: sentryEnvironment(),
-    sendDefaultPii: false,
+    dataCollection: SENTRY_DATA_COLLECTION,
     beforeSend: beforeSendClientEvent,
   };
 }

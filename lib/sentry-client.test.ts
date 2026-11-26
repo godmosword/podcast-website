@@ -5,6 +5,7 @@ import {
   createClientSentryOptions,
   isNextRedirectError,
 } from "./sentry-client";
+import { SENTRY_DATA_COLLECTION } from "./sentry-options";
 
 function asErrorEvent(event: object): ErrorEvent {
   return event as unknown as ErrorEvent;
@@ -27,7 +28,7 @@ describe("createClientSentryOptions", () => {
     expect(options).not.toHaveProperty("replaysSessionSampleRate");
     expect(options).not.toHaveProperty("integrations");
     expect(options).not.toHaveProperty("defaultIntegrations");
-    expect(options.sendDefaultPii).toBe(false);
+    expect(options.dataCollection).toBe(SENTRY_DATA_COLLECTION);
     expect(options.beforeSend).toBe(beforeSendClientEvent);
   });
 
