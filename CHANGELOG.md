@@ -18,6 +18,7 @@
 
 ### Fixed
 
+- **官網上線檢查**：推 `release` 後的 `verify:geo-live` 改用官網版別，只驗發行清單裡的集數。之前會拿 main 上還沒發行的集數去官網找，報假失敗，IndexNow 也跟著被跳過。
 - **官網重複網址**：`podcast-website-official.vercel.app` 整站 308 轉到 carcarplayground.com，避免被搜尋引擎收錄成重複內容。
 - **部署後檢查**：#338 之後正式網域的上線檢查和 IndexNow 都不會自動跑，因為 Vercel 回報的部署事件對不上正式網域。改成 push 到 `main` 或 `release` 後，等 `carcarplayground.com/build-info.json` 換上該次 commit 再跑。網域不歸該分支管時直接略過。IndexNow 會帶上這次新增或下架的集數。
 - **播放器**：電腦版字幕不再壓在插圖下緣，移到插圖下方的黑底上。

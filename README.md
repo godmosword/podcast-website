@@ -159,7 +159,7 @@ npm run dev
 
 訂閱、許願、留言兩邊目前都沒有正式資料庫與寄信，API 回 `available:false`，介面改走 mailto。要開放時，先決定接在哪個專案，再另外驗證。
 
-IndexNow 與 `verify:geo-live` 的正式檢查都在 [live-domain.yml](./.github/workflows/live-domain.yml)：push 到 `release` 後，輪詢 `https://carcarplayground.com/build-info.json`，等正式網域換上該次 commit 才跑。`main` 只部署實驗站，不會自動觸發；網域若搬回 `main` 的專案（`SITE_EDITION` 要改回 `current`，否則會被當成不負責而略過），再到 Actions 對 `main` 手動跑。Apple sync 本身不提交 IndexNow。
+IndexNow 與 `verify:geo-live` 的正式檢查都在 [live-domain.yml](./.github/workflows/live-domain.yml)：push 到 `release` 後，輪詢 `https://carcarplayground.com/build-info.json`，等正式網域換上該次 commit 才跑；`release` 上的檢查帶 `SITE_EDITION=official`，只驗發行清單裡的集數。`main` 只部署實驗站，不會自動觸發；網域若搬回 `main` 的專案（`SITE_EDITION` 要改回 `current`，否則會被當成不負責而略過），再到 Actions 對 `main` 手動跑。Apple sync 本身不提交 IndexNow。
 
 ## 部署與環境變數
 

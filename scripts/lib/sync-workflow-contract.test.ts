@@ -487,6 +487,20 @@ describe("sync workflow contract", () => {
     expect(submit).toContain("OFFICIAL_SITE_ORIGIN");
   });
 
+  // 2026-11-27：verify 沒帶版別，用 main 的完整集數去找官網沒發行的 ep-40，8 項假失敗、IndexNow 被跳過。
+  it("上線檢查跟 IndexNow 用同一個版別：release 是 official，其他是 current", () => {
+    type Step = { name?: string; env?: Record<string, string> };
+    const doc = parseYaml(readWorkflow("live-domain.yml")) as {
+      jobs: Record<string, { steps: Step[] }>;
+    };
+    const steps = Object.values(doc.jobs).flatMap((job) => job.steps);
+    const verify = steps.find((step) => step.name === "verify:geo-live");
+    const indexNow = steps.find((step) => step.name === "Submit IndexNow");
+    const edition = "${{ github.ref_name == 'release' && 'official' || 'current' }}";
+    expect(indexNow?.env?.INDEXNOW_EDITION).toBe(edition);
+    expect(verify?.env?.SITE_EDITION).toBe(edition);
+  });
+
   it("sync-watchdog.yml 必須保留 RSS 新鮮度檢查", () => {
     const yaml = readWorkflow("sync-watchdog.yml");
 
