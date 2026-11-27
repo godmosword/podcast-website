@@ -55,6 +55,8 @@ jobs:
         if: steps.wait.outputs.ready == 'true'
         env:
           NEXT_PUBLIC_SITE_URL: ${{ env.LIVE_BASE_URL }}
+          # 官網只有發行清單裡的集數；沒帶版別會拿 main 的完整集數去找還沒發行的那集。
+          SITE_EDITION: ${{ github.ref_name == 'release' && 'official' || 'current' }}
         run: npm run verify:geo-live -- --base-url="$LIVE_BASE_URL" --production
       - name: Submit IndexNow
         if: steps.wait.outputs.ready == 'true'
