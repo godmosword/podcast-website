@@ -116,11 +116,13 @@ describe("landing-segments", () => {
       expect.objectContaining({
         id: "picture-books",
         title: "聽聽看繪本",
-        subtitle: "一邊聽、一邊看圖",
         cta: { label: "看繪本故事", href: "/picture-books" },
         navLabel: "繪本故事",
       }),
     ]);
+
+    // 繪本段的副標「一邊聽、一邊看圖」2026-11-28 拿掉，三段都只留標題。
+    expect(LANDING_SEGMENTS.every((segment) => segment.subtitle === undefined)).toBe(true);
 
     const health = LANDING_SEGMENTS.find((segment) => segment.id === "health");
     const tag = new URL(health!.cta.href, "https://chechecar.tw").searchParams.get("tag");

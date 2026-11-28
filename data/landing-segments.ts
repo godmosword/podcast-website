@@ -65,7 +65,6 @@ export const LANDING_SEGMENTS: LandingSegmentDef[] = [
     id: "picture-books",
     anchorId: "segment-picture-books",
     title: "聽聽看繪本",
-    subtitle: "一邊聽、一邊看圖",
     heroImage: "/landing/segment-picture-books.jpg",
     heroImagePortrait: "/landing/segment-picture-books-portrait.jpg",
     cta: { label: "看繪本故事", href: "/picture-books" },
