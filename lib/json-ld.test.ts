@@ -59,8 +59,8 @@ describe("siteIdentityJsonLd", () => {
     );
     expect(organization?.sameAs).toEqual(
       expect.arrayContaining([
-        "https://www.instagram.com/s32183218",
-        "https://www.threads.com/@bonboncarstory",
+        "https://www.instagram.com/carcarplayground",
+        "https://www.threads.com/@carcarplayground",
         "https://www.facebook.com/profile.php?id=61590533437349",
         "https://linktr.ee/bonboncarstory",
         "https://www.youtube.com/playlist?list=PLVbyl20K8lOeuJ2ky6dEsmpew7xAxZDhF",
