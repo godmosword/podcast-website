@@ -48,6 +48,12 @@
   object-position: center 40%;
 }
 
+/* 繪本電腦版是 Kaiyi 的 16:9 補畫（2560×1440）。置中才看得到整張：
+   1280×720、1920×1080、2560×1440 不裁；1440×900 只修掉左右外側的樹叢。 */
+.panel[data-segment="picture-books"] .bg {
+  object-position: center center;
+}
+
 .bgFallback {
   background: linear-gradient(160deg, var(--sky-2), var(--c-lilac));
 }
@@ -463,7 +469,8 @@
 }
 
 @media (max-width: 768px) {
-  .bg {
+  .bg,
+  .panel[data-segment="picture-books"] .bg {
     object-position: center 35%;
   }
 

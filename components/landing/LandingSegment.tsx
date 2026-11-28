@@ -60,6 +60,7 @@ export default function LandingSegment({
     <section
       id={segment.anchorId}
       className={styles.panel}
+      data-segment={segment.id}
       aria-labelledby={`${segment.anchorId}-title`}
     >
       <div className={styles.visual} aria-hidden={!!segment.heroImage}>
