@@ -23,9 +23,11 @@ describe("visibleSocials", () => {
     expect(visibleSocials().some((social) => social.icon === "email")).toBe(true);
   });
 
-  it("points the Threads / 育兒小筆記 link at the brand handle", () => {
+  it("points Threads and Instagram at the brand handles", () => {
     const threads = visibleSocials().find((social) => social.icon === "threads");
+    const instagram = visibleSocials().find((social) => social.icon === "instagram");
 
-    expect(threads?.url).toBe("https://www.threads.com/@bonboncarstory");
+    expect(threads?.url).toBe("https://www.threads.com/@carcarplayground");
+    expect(instagram?.url).toBe("https://www.instagram.com/carcarplayground");
   });
 });

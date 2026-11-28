@@ -24,12 +24,12 @@ export const LINKTREE_URL = "https://linktr.ee/bonboncarstory";
 const SOCIALS: Social[] = [
   {
     label: "Instagram",
-    url: "https://www.instagram.com/s32183218",
+    url: "https://www.instagram.com/carcarplayground",
     icon: "instagram",
   },
   {
     label: "Threads",
-    url: "https://www.threads.com/@bonboncarstory",
+    url: "https://www.threads.com/@carcarplayground",
     icon: "threads",
   },
   {
