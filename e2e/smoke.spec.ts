@@ -268,7 +268,7 @@ test("繪本故事連到列表且阿尼排第一", async ({ page }) => {
   await expect(link).toHaveAttribute("href", "/picture-books");
   await expect(
     page.locator("#segment-picture-books").getByText("一邊聽、一邊看圖"),
-  ).toBeVisible();
+  ).toHaveCount(0);
 
   await link.click();
   await expect(page).toHaveURL(/\/picture-books$/);

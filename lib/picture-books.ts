@@ -31,5 +31,5 @@ export function pictureBookVehicles(stories: readonly Story[]): string[] {
 export function pictureBookCatalogSummary(stories: readonly Story[]): string {
   const first = stories[0];
   const lead = first ? `排第一的是「${storyDisplayTitle(first)}」。` : "";
-  return `這頁是車車遊樂園可以左右翻頁的繪本故事，共 ${stories.length} 則。${lead}適合約 3–7 歲的孩子一邊聽、一邊看圖。`;
+  return `這頁是車車遊樂園可以左右翻頁的繪本故事，共 ${stories.length} 則。${lead}適合約 3–7 歲親子共聽。`;
 }

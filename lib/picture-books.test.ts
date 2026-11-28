@@ -34,7 +34,8 @@ describe("pictureBookStories", () => {
     const summary = pictureBookCatalogSummary(books);
     expect(summary).toContain(`共 ${books.length} 則`);
     expect(summary).toContain("水泥車阿尼的101任務");
-    expect(summary).toContain("一邊聽、一邊看圖");
+    expect(summary).toContain("適合約 3–7 歲親子共聽");
+    expect(summary).not.toContain("一邊聽、一邊看圖");
   });
 
   it("JSON-LD 第一則連到阿尼", () => {
