@@ -121,7 +121,7 @@
 
 .fingerStem {
   fill: none;
-  stroke: var(--ink-soft, #7a7268);
+  stroke: var(--ink-soft, #797167);
   stroke-width: 3;
   stroke-linecap: round;
 }
@@ -136,7 +136,7 @@
 
 .swipeTrack {
   fill: none;
-  stroke: color-mix(in srgb, var(--ink-soft, #7a7268) 35%, transparent);
+  stroke: color-mix(in srgb, var(--ink-soft, #797167) 35%, transparent);
   stroke-width: 3;
   stroke-dasharray: 3 6;
   stroke-linecap: round;

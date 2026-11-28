@@ -79,7 +79,7 @@ details[open] > summary .icon-disclosure {
   --bg-2: #fbfbfd;
   --bg-dot: #eef1f6;
   --ink: #34302b;
-  --ink-soft: #7a7268;
+  --ink-soft: #797167; /* 次要文字。#7a7268 各通道 -1、色相不變。對 --surface-game 4.525:1（原 4.460），對 --page-warm-mid 4.514:1（原 4.450）。夜間 #bdb6a4 不變。 */
   --card: #ffffff;
   --card-2: #fcfdff;
   /*
@@ -273,7 +273,7 @@ details[open] > summary .icon-disclosure {
   --surface-game-warm: #fff9ee;
   /* 遊戲路由夜間鎖奶油頁底時指回這組。夜間區塊不覆寫。 */
   --game-day-ink: #34302b;
-  --game-day-ink-soft: #7a7268;
+  --game-day-ink-soft: #797167;
   --game-day-paper: #ffffff;
   --game-day-paper-2: #fcfdff;
   --game-day-cta: #3a2410;

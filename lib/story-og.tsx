@@ -12,7 +12,7 @@ export const storyOgImageSize = { width: 1200, height: 630 };
 export const storyOgContentType = "image/png";
 
 const INK = "#34302b";
-const INK_SOFT = "#7a7268";
+const INK_SOFT = "#797167";
 const BG = "#fffdf8";
 
 /**
