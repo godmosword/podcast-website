@@ -109,15 +109,9 @@
   height: 30px;
   display: flex;
   align-items: center;
-  /* 靠左：方形標誌（30px）置中會比 KKBOX／YouTube 字標內縮 4px，四列左緣對不齊。
+  /* 靠左：方形標誌（30px）置中會比 KKBOX 字標（38px）內縮 4px，四列左緣對不齊。
      與文字的實距從 16 變 20，仍符合品牌規則（≥16）。 */
   justify-content: flex-start;
-}
-
-.badge:has([data-brand-mark="youtube"]) {
-  width: auto;
-  height: auto;
-  min-height: 30px;
 }
 
 .label {

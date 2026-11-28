@@ -1,6 +1,6 @@
 # 平台／社群品牌標誌 — HARD RULES
 
-> **查證日：2026-10-12**（每次更換官方檔或重查規範時更新）
+> **查證日：2026-10-12；YouTube 2026-11-28 重查**（每次更換官方檔或重查規範時更新）
 > **效力：** `public/brand/` 的官方檔、`lib/brand-marks.tsx` 的登記與 `components/BrandMark.tsx` 是站內平台與社群標誌唯一的來源。PR 若違反下列任一條，視為合規缺陷，必須還原。
 > **守門：** `lib/brand-assets.test.ts`、`lib/brand-marks.test.ts`、`components/BrandMark.test.tsx`。
 
@@ -23,14 +23,14 @@
 | 純圖示格線 | `ConnectHub`（頁尾） | 60px 白章（日 `--card` 純白、夜 `--card-2`），`BrandMark surface="chip"` |
 | 標誌＋文字同一個可點容器 | `SubscribeMenu`、`SubscribeForm`、`PlatformStudioCard` | 不加章；38px 寬槽位、與文字間距 ≥ 12px（30px 標誌與文字實距 ≥ 16px），`BrandMark surface="row"` |
 
-「標誌＋文字」的列裡，YouTube 完整字標（108×24）旁不再顯示同名文字（`isBrandWordmark`；文字留在 DOM 給讀屏）：原本文字離字標 12px，落在淨空範圍內。KKBOX 字標站內只畫 38×8px，單獨一列認不出來，文字照留。頁尾格線（`ConnectHub`）每顆章下方都有名稱、文字在章外，不在此限。
+「標誌＋文字」的列裡，每個標誌都放進 38×30 槽位、靠左，文字對齊同一條線，四個平台都顯示名稱。KKBOX 字標站內只畫 38×8px，旁邊的名稱不可拿掉，否則單獨一列認不出來。頁尾格線（`ConnectHub`）每顆章下方都有名稱、文字在章外。
 
 色版規則（`lib/brand-marks.tsx` 的 `art`）：
 
 - 純白章與其他日間淺色底（`--card` 為 `#ffffff`）→ Spotify 官方綠標、KKBOX 在白章用標準青、其他淺色底的 KKBOX／Threads 用黑色版。
-- 深色底（夜間章 `#312e2a`／`#272422`，不是純黑）→ 白色版（Spotify、KKBOX、Threads、YouTube 白字字標）。純黑底才可改放 Spotify 綠標。
-- Apple Podcasts 彩色圖示、Instagram 漸層圖示、Facebook 主標誌，日夜不變。
-- YouTube 用完整字標，不使用裁切後的 `youtube-icon.svg`。字標比 60px 章寬，頁尾章改成膠囊，窄螢幕該格跨兩欄。
+- 深色底（夜間章 `#312e2a`／`#272422`，不是純黑）→ 白色版（Spotify、KKBOX、Threads）。純黑底才可改放 Spotify 綠標。
+- Apple Podcasts 彩色圖示、Instagram 漸層圖示、Facebook 主標誌、YouTube 全彩圖示，日夜不變。
+- YouTube 用官方 YouTube Icon（`youtube-icon-red.png`），和其他標誌一樣放進 60px 圓章與 38px 槽位；不用完整字標，也不用從字標裁出的舊 `youtube-icon.svg`。
 
 淨空解讀：標誌所在的底（章、按鈕、列）邊緣不算侵入淨空；淨空範圍內不得有其他文字或圖形。
 
@@ -57,10 +57,15 @@
 - 只有字標，沒有圖示；不可變形、改字距、改色、加陰影；淨空為一個 K 的寬與高。
 - 待確認（TODOS）：向 KKBOX 索取正式檔、數位最小尺寸、淺底用青或黑。
 
-### YouTube（[Brand Resources](https://brand.youtube/)，部分依搜尋摘要）
+### YouTube（[Brand Resources](https://brand.youtube/)，2026-11-28 讀頁面原文）
 
-- **檔案：** `youtube-logo.svg`（日間）、`youtube-logo-dark.svg`（夜間白字）。完整字標，不裁成圖示。
-- 顯示高 24px（規範最小 20px），寬依 492×110 原比例。淨空不小於播放鍵高度；頁尾膠囊左右留白，不把字標塞進 60px 圓章。
+- **檔案：** `youtube-icon-red.png`（[YouTube Icon](https://brand.youtube/youtube-icon) 頁的 `youtube-icon.zip`，`Digital/01 Red`）。只去掉官方 PNG 四周的透明淨空邊，圖示本體逐像素不變；淨空由版面保證。
+- **並排用圖示：** [Promoting your channel](https://brand.youtube/promoting-your-channel)「Website footers and email signatures」：*When using YouTube inline with other social media icons, you should use the YouTube icon rather than the YouTube logo.* 同頁 Don't：*Don't use the full YouTube logo to promote your channel.*
+- **色版：** 全彩（紅 `#FF0033`，三角一律白）、單色 Almost Black、單色白（三角鏤空）。全彩在某個底上看不清時才換單色。站內白底與夜間深底都看得清楚，日夜同用全彩。
+- **淨空：** 圖示裡三角形的大小，其他元素不得侵入。站內寬 34px 時三角約 9px；文字列實距 ≥ 16px，章或列的邊緣不算侵入。
+- **最小尺寸：** 規範寫數位「高度不小於 100px」。頂欄、頁尾、訂閱按鈕都放不下（之前的完整字標 24px 也一樣低於），站內維持高約 24px，列在 TODOS 待確認。
+- **Misuse：** 不描邊、不自訂顏色、不加陰影、不旋轉或歪斜、不壓扁、不拉長。
+- **推廣頻道格式：** 圖示 + @handle，前後可加純文字 CTA（例如「Find us on YouTube」）。站內「標誌＋文字」列用純文字「YouTube」當名稱，和其他平台一致。
 - 待確認（TODOS）：規範寫只有連到頻道時才能把標誌做成連結，現在連的是播放清單。
 
 ### Instagram、Threads、Facebook（[Meta Brand Resources](https://www.meta.com/brand/resources/)）

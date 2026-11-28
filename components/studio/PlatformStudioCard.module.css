@@ -16,22 +16,19 @@
   gap: var(--space-3);
 }
 
+/* 品牌標誌靠左，和頂欄頻道、訂閱頁一致（lib/BRAND-ASSETS-HARD-RULES.md §2）；
+   沒有官方標誌的中性章（SoundOn 等）才置中。 */
 .badge {
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   width: 38px;
   height: 30px;
 }
 
-.badge:has([data-brand-mark="youtube"]) {
-  width: auto;
-  height: auto;
-  min-height: 30px;
-}
-
 .badgeNeutral {
+  justify-content: center;
   border-radius: var(--radius-sm);
   background: var(--bg-2);
   border: 1px solid var(--hairline);

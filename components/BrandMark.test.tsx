@@ -39,6 +39,15 @@ describe("BrandMark", () => {
     expect(imgs(html)[0]).toMatch(/height="7\.9\d*"/);
   });
 
+  it("YouTube 用官方紅色圖示，日夜同一張，寬 34px、依原比例算高", () => {
+    const html = renderToStaticMarkup(<BrandMark id="youtube" surface="row" />);
+    expect(imgs(html)).toHaveLength(1);
+    expect(imgs(html)[0]).toContain('src="/brand/youtube-icon-red.png"');
+    expect(imgs(html)[0]).toContain('width="34"');
+    expect(imgs(html)[0]).toMatch(/height="23\.8\d*"/);
+    expect(html).not.toContain("youtube-logo");
+  });
+
   it("Instagram 用官方漸層圖示，日夜同一張", () => {
     const html = renderToStaticMarkup(<BrandMark id="instagram" surface="chip" />);
     expect(imgs(html)).toHaveLength(1);
