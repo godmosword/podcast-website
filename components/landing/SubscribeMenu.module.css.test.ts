@@ -69,7 +69,7 @@ describe("SubscribeMenu.module.css trigger 去框", () => {
     expect(css).toMatch(/\.dropdown\s*\{[\s\S]*?border:\s*1\.5px solid var\(--line\)/);
   });
 
-  it("標誌槽位靠左：方形標誌與 KKBOX／YouTube 字標左緣對齊", () => {
+  it("標誌槽位靠左：方形標誌、YouTube 圖示與 KKBOX 字標左緣對齊", () => {
     const start = css.indexOf(".badge {");
     expect(css.slice(start, css.indexOf("}", start))).toMatch(/justify-content:\s*flex-start/);
   });

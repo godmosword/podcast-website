@@ -5,7 +5,6 @@ import {
   BRAND_MARKS,
   BRAND_MARK_SIZE,
   brandMarkBox,
-  isBrandWordmark,
   type BrandMarkId,
   type BrandMarkSurface,
 } from "./brand-marks";
@@ -57,13 +56,14 @@ describe("BRAND_MARKS 色版", () => {
     expect(imageSrc("kkbox", "dark")).toBe("/brand/kkbox-logo-white.svg");
   });
 
-  it("Apple 三種底都用官方圖示；YouTube 用完整字標，深色底換白字檔", () => {
+  it("Apple 三種底都用官方圖示；YouTube 三種底都用官方紅色圖示，不用完整字標", () => {
     for (const surface of SURFACES) {
       expect(imageSrc("apple", surface)).toBe("/brand/apple-podcasts-icon.png");
+      // brand.youtube：和其他平台圖示並排時要用 YouTube Icon，不用完整 logo。
+      expect(imageSrc("youtube", surface)).toBe("/brand/youtube-icon-red.png");
     }
-    expect(imageSrc("youtube", "white")).toBe("/brand/youtube-logo.svg");
-    expect(imageSrc("youtube", "light")).toBe("/brand/youtube-logo.svg");
-    expect(imageSrc("youtube", "dark")).toBe("/brand/youtube-logo-dark.svg");
+    expect(existsSync(join(PUBLIC, "brand", "youtube-logo.svg"))).toBe(false);
+    expect(existsSync(join(PUBLIC, "brand", "youtube-logo-dark.svg"))).toBe(false);
   });
 
   it("Instagram、Facebook 用官方檔；Threads 淺色黑、深色白", () => {
@@ -87,7 +87,8 @@ describe("brandMarkBox 尺寸下限", () => {
     }
   });
 
-  it("各家最小尺寸：Spotify 21、Instagram 29、YouTube 高 20、Facebook 寬 16", () => {
+  // YouTube 官方寫數位最小高 100px，頂欄與頁尾放不下，列在 TODOS 待確認；這裡只守站內下限 20px，不代表符合官方尺寸。
+  it("各家最小尺寸：Spotify 21、Instagram 29、Facebook 寬 16；YouTube 守站內下限 20", () => {
     expect(box("spotify").height).toBeGreaterThanOrEqual(21);
     expect(box("instagram").height).toBeGreaterThanOrEqual(29);
     expect(box("youtube").height).toBeGreaterThanOrEqual(20);
@@ -96,9 +97,9 @@ describe("brandMarkBox 尺寸下限", () => {
 
   it("YouTube、KKBOX、Threads 依官方檔比例換算，不變形", () => {
     const yt = box("youtube");
-    expect(yt.width).toBe(108);
+    expect(yt.width).toBe(34);
     expect(yt.height).toBeGreaterThanOrEqual(20);
-    expect(yt.width / yt.height).toBeCloseTo(492 / 110, 2);
+    expect(yt.width / yt.height).toBeCloseTo(827 / 579, 2);
     const kk = box("kkbox");
     expect(kk.width).toBe(38);
     expect(kk.width / kk.height).toBeCloseTo(786 / 164, 2);
@@ -107,10 +108,11 @@ describe("brandMarkBox 尺寸下限", () => {
     expect(threads.width / threads.height).toBeCloseTo(977 / 1082, 2);
   });
 
-  it("只有 YouTube 收起旁邊的同名文字；KKBOX 字標只有 38×8px，要留著文字才認得出來", () => {
-    const wordmarks = (Object.keys(BRAND_MARKS) as BrandMarkId[]).filter(isBrandWordmark);
-    expect(wordmarks).toEqual(["youtube"]);
-    // 收起文字的字標至少要有 20px 高，否則單獨一列像空的。
-    for (const id of wordmarks) expect(brandMarkBox(id).height).toBeGreaterThanOrEqual(20);
+  it("每個標誌都放得進 38×30 的槽位，「標誌＋文字」列的文字才對得齊同一條線", () => {
+    for (const id of Object.keys(BRAND_MARKS) as BrandMarkId[]) {
+      const { width, height } = box(id);
+      expect(width, id).toBeLessThanOrEqual(38);
+      expect(height, id).toBeLessThanOrEqual(30);
+    }
   });
 });

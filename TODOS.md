@@ -203,8 +203,10 @@ Plan：`~/.claude/plans/play-map-simplify.md`（D1=A 北中南分組、D2=A 純�
 主體已落地（官方檔＋同一顆章，見 `lib/BRAND-ASSETS-HARD-RULES.md`），剩下要使用者本人處理或決定的：
 
 - ✅ **Meta 官方檔**：改接公開品牌頁的 `instagram-glyph-gradient.png`、`facebook-logo-primary.png`、`threads-logo-black.svg`、`threads-logo-white.svg`，拿掉過渡 inline 圖。沒有另建 Meta 帳號。見本 merge。
-- **KKBOX 正式檔**：官網沒有下載連結、有機器人驗證；向 KKBOX 索取正式字標，並確認數位最小尺寸、淺底用標準青還是黑。`ops · S · 使用者`
+- **KKBOX 正式檔**：官網有機器人驗證，agent 抓不到；向 KKBOX 索取正式字標，並確認數位最小尺寸、淺底用標準青還是黑。KKBOX 另有官方 App 圖示（圓角方形裡六角形的 K，依搜尋摘要）：使用者用瀏覽器從 [品牌標誌頁](https://www.kkbox.com/about/tw/zh-tw/logo) 下載後，可以換成圖示＋文字，四個平台就完全一致（2026-11-28 YouTube 已改圖示）。`ops · S · 使用者`
 - **YouTube 連結**：規範寫只有連到頻道時才能把標誌做成連結，`lib/platforms.ts` 現在連播放清單（也影響 JSON-LD `sameAs`）。要改連頻道首頁請提供網址。`product · S · 使用者決定`
+- ✅ **YouTube 改用官方圖示**：brand.youtube 規定和其他平台圖示並排時用 YouTube Icon、不用完整字標。頂欄頻道、頁尾、訂閱頁、/studio 都換成 `youtube-icon-red.png`（寬 34px），旁邊顯示「YouTube」，頁尾膠囊改回圓章。見本 merge。
+- **YouTube 最小尺寸**：brand.youtube 寫數位「高度不小於 100px」，站內圖示高約 24px（之前的字標也是 24px）。導覽與頁尾放不下 100px；要不要向 YouTube 確認這條是否適用於並排小圖示。`design · S · 使用者決定`
 - **/studio 卡片左緣色條**：與 DESIGN「容器不做左緣色條」衝突（既有問題，noindex 頁）。`design · S · 無`
 
 ### 多多壽司屋後續（2026-10-14）

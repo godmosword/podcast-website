@@ -17,16 +17,17 @@ describe("ConnectMenu", () => {
     expect(html).not.toContain("訂閱收聽");
   });
 
-  test("YouTube 那一列不再顯示同名文字（名稱留給讀屏）；KKBOX 字標太小，文字照留", async () => {
+  test("四個平台都是「標誌＋看得到的名稱」，YouTube 用圖示、不再用完整字標", async () => {
     const { default: ConnectMenu } = await import("./SubscribeMenu");
     const html = renderToStaticMarkup(
       <ConnectMenu kind="channels" open onOpenChange={() => {}} />,
     );
-    expect(html).toMatch(/<span class="sr-only">\s*YouTube\s*<\/span>/);
-    expect(html).not.toMatch(/<span class="sr-only">\s*KKBOX\s*<\/span>/);
-    // 圖示型標誌的名稱仍然看得到。
-    expect(html).not.toMatch(/<span class="sr-only">\s*Spotify\s*<\/span>/);
-    expect(html).not.toMatch(/<span class="sr-only">\s*Apple Podcasts\s*<\/span>/);
+    expect(html).not.toContain("sr-only");
+    for (const name of ["Apple Podcasts", "Spotify", "KKBOX", "YouTube"]) {
+      expect(html).toMatch(new RegExp(`<span class="[^"]*label[^"]*">${name}</span>`));
+    }
+    expect(html).toContain('src="/brand/youtube-icon-red.png"');
+    expect(html).not.toContain("youtube-logo");
   });
 
   test("社群觸發器帶下拉，只有 IG／Threads／Facebook", async () => {

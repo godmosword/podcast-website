@@ -10,6 +10,7 @@
 
 ### Changed
 
+- **平台標誌**：YouTube 改用官方 YouTube Icon（紅底白三角），頂欄「頻道」、頁尾、訂閱頁和 /studio 一致，旁邊顯示「YouTube」，跟 Apple Podcasts、Spotify、KKBOX 同一套排法；頁尾的 YouTube 膠囊改回圓章。YouTube 品牌規範要求和其他平台並排時用圖示、不用完整字標。
 - **繪本**：首頁「聽聽看繪本」拿掉副標「一邊聽、一邊看圖」，只留標題與「看繪本故事」。`/picture-books` 導言與搜尋摘要改成「適合約 3–7 歲親子共聽」，`llms.txt` 的繪本說明改成「可以左右翻頁的全幕繪本」。
 
 ### Added
